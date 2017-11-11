@@ -54,6 +54,13 @@ pre {
     background-color: #ccccff;
 }
 
+.code_piece {
+    background-color: #ccccff;
+    font-family: monospace;
+    padding-left: 2pt;
+    padding-right: 2pt;
+}
+
 form {
     margin: 0 0 0 0;
     padding-top: 12pt;
@@ -113,7 +120,7 @@ So you think you know C?
 A lot of programmers claim they know C. Well, it has the most famous syntax, it has been there for 44 years, and it’s not cluttered with obscure features. It’s easy!
     </p>
     <p>
-I mean, it’s easy to claim that you know C. You probably learned it in college or on the go, you probably had some experience with it, you probably think that you know it through and through, because there’s not much to know. Well, there is. C is not that simple.
+I mean, it’s easy to <em>claim</em> that you know C. You probably learned it in college or on the go, you probably had some experience with it, you probably think that you know it through and through, because there’s not much to know. Well, there is. C is not that simple.
     </p>
     <p>
 If you think it is — take this test. It only has 5 questions. Every question is basically the same: what the return value would be? And each question has a choice of four answers, of which one and only one is right.
@@ -233,6 +240,51 @@ So, the right answers are:
         <td>5</td><td></td><td></td><td></td><td>&#10004;</td>
         </tr>
         </table>
+        <p>
+Yes, the right answer to every question is “I don’t know”.
+        </p>
+        <p>
+Let’s untangle them one by one now.    
+        </p>
+        <p>
+<strong>First one</strong> is actually about structure padding. C compiler knows that storing unaligned data in RAM may be costly, so it pads your data for you. If you have 5 bytes of data in a structure, it will probably make it 8. Or 16. Or 6. Or whatever it wants. There are extensions like GCC attributes aligned and packed that let you get some control over this process, but they are non-standard. C itself does not define padding attributes, so the right answer is: “I don’t know”.    
+        </p>
+        <p>
+The <strong>second one</strong> is about integer promotion. It’s only reasonable that the type of short int and an expression with the largest integer being short int would be the same. But the reasonable doesn’t mean right for C. There is the rule that every integer expression gets promoted to int. Actually, it’s much more complicated than that. Take a peek in the standard, you’ll enjoy it.    
+        </p>
+        <p>
+But even so, we don’t compare types, we compare sizes. And the only guarantee the standard gives about short int and int sizes is that the former should not be greater than the latter. They may very well be equal. So the right answer is: “I don’t know”.    
+        </p>
+        <p>
+The <strong>third one</strong> is all about dark corners. Starting from that neither integer overflows, nor char type sign are defined by the standard. First one is undefined behavior, the second is implementation specific. But even more, the size of the char type itself is not specified in bits either. There were platforms where it was 6 bits (remember trigraphs?), and there are platforms where all five integer types are 32 bits. Without all these details specified, every speculation about the result is invalid, so the answer is: “I don’t know”.    
+        </p>
+        <p>
+The <strong>fourth one</strong> looks tricky, but it’s not that hard in retrospective, since you already know that int size is not directly specified in the standard. It can easily be 16 bits, then the very first operation will cause the over-shift and that’s plain undefined behavior. It’s not C fault, on some platforms, it is even undefined in assembly, so the compiler simply can’t give you valid guarantees without eating up a lot of performance.
+        </p>
+        <p>
+So once again “I don’t know” is the right answer.    
+        </p>
+        <p>
+And the <strong>last one</strong> is classic. Neither order of operand evaluation for <span class="code_space">+</span>, nor even the order of precedence between increment operators are specified, so basically every nontrivial operation that involves <span class="code_space">i++</span> and <span class="code_space">++i</span> is a pitfall since they alter their operand. It might work just like you expect on one platform and might fail easily on the other. Or not. That’s the problem with unspecified things. When you meet one, the right answer is always: “I don’t know”.    
+        </p>
+        <h2>
+P. S.
+        </h2>
+        <p>
+And at this point, I only have to apologize. The test is clearly provocative and may even be a little offensive. I’m sorry if it causes any aggravation.        
+        </p>
+        <p>
+The thing is, I learned C in roughly 1998, and for the whole 15 years thought that I’m good at it. It was my language of choice in college, and I’ve done some successful projects in C on my first full-time job, and even then, when I was mostly working with C++, I thought of it as over-bloated C.
+        </p>
+        <p>
+The pivoting moment came in 2013, when I’ve got myself involved with some safety-critical PLC programming. It was a research project in nuclear power plant automation, where absolutely no underspecification was tolerable. I had to learn that, while I did knew a lot about C programming, the absolute majority of what I knew was false. And I had to learn it the hard way too.
+        </p>
+        <p>
+Eventually, I had to learn to rely on the standard instead of folklore; to trust measurements and not presumptions; to take “things that simply work” skeptically, — I had to learn an engineering attitude. This is what matters the most, not some particular WAT anecdotes.
+        </p>
+        <p>
+I only hope this little test would help someone like myself from the past to learn this attitude in some 15 minutes and not 15 years.        
+        </p>
     </div>
 
 
