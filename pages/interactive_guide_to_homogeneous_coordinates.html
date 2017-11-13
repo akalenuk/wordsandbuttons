@@ -466,6 +466,142 @@ function scale_draw(client_x, client_y){
 	// grid
 	draw_grid_on(scale_context);
 }
+
+function init_affine(){
+    affine = document.getElementById("affine");
+    affine_draw(256, 256);
+    
+    affine.addEventListener('mousemove', function(e){
+    	affine_draw(e.clientX, e.clientY);
+    }, false);
+    
+    affine.addEventListener('mousedown', function(e){
+        var canvas_rect = affine.getBoundingClientRect();
+        client_x = e.clientX - canvas_rect.left;
+        client_y = e.clientY - canvas_rect.top;
+       	var x = client_to_x(client_x);
+       	var y = client_to_y(client_y);
+       	affine_xs[affine_i] = x;
+       	affine_ys[affine_i] = y;
+       	affine_xs[3] = affine_xs[0] + affine_xs[2] - affine_xs[1];
+       	affine_ys[3] = affine_ys[0] + affine_ys[2] - affine_ys[1];
+       	affine_i = (affine_i + 1) % 3;
+       	affine_draw(e.clientX, e.clientY);
+   	}, false);
+}
+
+var affine_xs = [1., 2., 2., 1.];
+var affine_ys = [1., 1., 2., 2.];
+var affine_i = 0;
+
+function affine_draw(client_x, client_y){
+    // coordiantes correction
+    var canvas_rect = affine.getBoundingClientRect();
+    client_x -= canvas_rect.left;
+    client_y -= canvas_rect.top;
+   	var x = client_to_x(client_x);
+   	var y = client_to_y(client_y);
+    
+    var affine_context = affine.getContext("2d"); 
+    affine_context.font = "16px sans-serif";
+    // background
+    affine_context.fillStyle="#eeeeee";
+	affine_context.fillRect(0,0,512,512);
+	
+	var xs = [1., 2., 2., 1.];
+	var ys = [1., 1., 2., 2.];
+    
+	// original cube
+	draw_original_cube_on(affine_context);  
+    
+	// affine
+	affine_context.beginPath();	
+	affine_context.moveTo(x_to_client(affine_xs[3]), y_to_client(affine_ys[3]));
+	for(var i = 0; i < 4; i++){
+    	affine_context.lineTo(x_to_client(affine_xs[i]), y_to_client(affine_ys[i]));
+	}
+	affine_context.strokeStyle="#dd6644";
+    affine_context.stroke();
+    affine_context.closePath();    
+     
+    // link
+  	affine_context.beginPath();	
+  	affine_context.moveTo(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]));
+  	affine_context.lineTo(x_to_client(x), y_to_client(y));
+	affine_context.strokeStyle="#dd6644";
+    affine_context.stroke();
+    affine_context.closePath();    
+
+	// grid
+	draw_grid_on(affine_context);
+}
+
+function init_projective(){
+    projective = document.getElementById("projective");
+    projective_draw(256, 256);
+    
+    projective.addEventListener('mousemove', function(e){
+    	projective_draw(e.clientX, e.clientY);
+    }, false);
+    
+    projective.addEventListener('mousedown', function(e){
+        var canvas_rect = projective.getBoundingClientRect();
+        client_x = e.clientX - canvas_rect.left;
+        client_y = e.clientY - canvas_rect.top;
+       	var x = client_to_x(client_x);
+       	var y = client_to_y(client_y);
+       	projective_xs[projective_i] = x;
+       	projective_ys[projective_i] = y;
+       	projective_i = (projective_i + 1) % 4;
+       	projective_draw(e.clientX, e.clientY);
+   	}, false);
+}
+
+var projective_xs = [1., 2., 2., 1.];
+var projective_ys = [1., 1., 2., 2.];
+var projective_i = 0;
+
+function projective_draw(client_x, client_y){
+    // coordiantes correction
+    var canvas_rect = projective.getBoundingClientRect();
+    client_x -= canvas_rect.left;
+    client_y -= canvas_rect.top;
+   	var x = client_to_x(client_x);
+   	var y = client_to_y(client_y);
+    
+    var projective_context = projective.getContext("2d"); 
+    projective_context.font = "16px sans-serif";
+    // background
+    projective_context.fillStyle="#eeeeee";
+	projective_context.fillRect(0,0,512,512);
+	
+	var xs = [1., 2., 2., 1.];
+	var ys = [1., 1., 2., 2.];
+    
+	// original cube
+	draw_original_cube_on(projective_context);  
+    
+	// projective
+	projective_context.beginPath();	
+	projective_context.moveTo(x_to_client(projective_xs[3]), y_to_client(projective_ys[3]));
+	for(var i = 0; i < 4; i++){
+    	projective_context.lineTo(x_to_client(projective_xs[i]), y_to_client(projective_ys[i]));
+	}
+	projective_context.strokeStyle="#dd6644";
+    projective_context.stroke();
+    projective_context.closePath();    
+     
+    // link
+  	projective_context.beginPath();	
+  	projective_context.moveTo(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]));
+  	projective_context.lineTo(x_to_client(x), y_to_client(y));
+	projective_context.strokeStyle="#dd6644";
+    projective_context.stroke();
+    projective_context.closePath();    
+
+	// grid
+	draw_grid_on(projective_context);
+}
     </script>
   </head>
   <body>
@@ -614,7 +750,21 @@ and scale.
         <canvas id="scale" width=512 height=512></canvas> 
         <script language="JavaScript">
         init_scale();
-        </script>        
+        </script>
+        <p>
+These can be generalized by the affine transformation that can do a translation, and a rotation, and a scale simultaneously:
+        </p>
+        <canvas id="affine" width=512 height=512></canvas> 
+        <script language="JavaScript">
+        init_affine();
+        </script>
+        <p>
+As you can see, affine transformation is quite powerful, but it has to preserve parallelism. This limits it in a way. If you want to do something like perspective or projection, you would have to go for projective transformation that looks like this:
+        </p>
+        <canvas id="projective" width=512 height=512></canvas> 
+        <script language="JavaScript">
+        init_projective();
+        </script>
     </div>
     
     <p class="footer">
