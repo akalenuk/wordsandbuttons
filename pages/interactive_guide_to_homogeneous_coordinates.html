@@ -122,6 +122,8 @@ var point_x = 0;
 var point_y = 0;
 
 var pick_a_point = null;
+var slide_a_w = null;
+var translation = null;
 
 function init_pick_a_point(){
     pick_a_point = document.getElementById("pick_a_point");
@@ -276,6 +278,89 @@ function slide_a_w_draw(client_x){
 	slide_a_w_context.strokeStyle="#000000";
     slide_a_w_context.stroke();
 }
+
+function init_translation(){
+    translation = document.getElementById("translation");
+    translation_draw(256, 256);
+    
+    translation.addEventListener('mousemove', function(e){
+    	translation_draw(e.clientX, e.clientY);
+    }, false);
+}
+
+function translation_draw(client_x, client_y){
+    // coordiantes correction
+    var canvas_rect = translation.getBoundingClientRect();
+    client_x -= canvas_rect.left;
+    client_y -= canvas_rect.top;
+   	var x = client_to_x(client_x);
+	var y = client_to_y(client_y);
+    
+    var translation_context = translation.getContext("2d"); 
+    translation_context.font = "16px sans-serif";
+    // background
+    translation_context.fillStyle="#eeeeee";
+	translation_context.fillRect(0,0,512,512);
+	
+	// the connection
+	translation_context.moveTo(x_to_client(0), y_to_client(0));
+	translation_context.lineTo(x_to_client(x), y_to_client(y));
+    translation_context.moveTo(x_to_client(0 + 1), y_to_client(0));
+	translation_context.lineTo(x_to_client(x + 1), y_to_client(y));
+	translation_context.moveTo(x_to_client(0 + 1), y_to_client(0 + 1));
+	translation_context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
+	translation_context.moveTo(x_to_client(0), y_to_client(0 + 1));
+	translation_context.lineTo(x_to_client(x), y_to_client(y + 1));
+	translation_context.strokeStyle="#eebb99";
+    translation_context.stroke();
+    
+	// original cube
+	translation_context.moveTo(x_to_client(0), y_to_client(0));
+	translation_context.lineTo(x_to_client(0 + 1), y_to_client(0));
+	translation_context.lineTo(x_to_client(0 + 1), y_to_client(0 + 1));
+	translation_context.lineTo(x_to_client(0), y_to_client(0 + 1));
+	translation_context.lineTo(x_to_client(0), y_to_client(0));
+	translation_context.strokeStyle="#999999";
+    translation_context.stroke();
+    
+	// translation
+	translation_context.moveTo(x_to_client(x), y_to_client(y));
+	translation_context.lineTo(x_to_client(x + 1), y_to_client(y));
+	translation_context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
+	translation_context.lineTo(x_to_client(x), y_to_client(y + 1));
+	translation_context.lineTo(x_to_client(x), y_to_client(y));
+	translation_context.strokeStyle="#dd6644";
+    translation_context.stroke();
+    translation_context.fillStyle="#dd6644";
+    translation_context.fillText("x' = x + a, where a = " + x.toFixed(1), 32, 460);
+    translation_context.fillText("y' = y + b, where b = " + y.toFixed(1), 32, 480);
+    
+    
+	// grid
+ 	translation_context.beginPath();
+	translation_context.moveTo(0, 256);
+	translation_context.lineTo(512, 256);
+	translation_context.lineTo(500, 251);
+	translation_context.moveTo(512, 256);
+	translation_context.lineTo(500, 261);
+	translation_context.moveTo(256, 512);
+	translation_context.lineTo(256, 0);
+	translation_context.lineTo(251, 12);
+	translation_context.moveTo(256, 0);
+	translation_context.lineTo(261, 12);
+    translation_context.fillStyle="#000000";
+	for(var i = -7; i <= 7; i++){
+	    translation_context.moveTo(256 + i*32, 256);
+		translation_context.lineTo(256 + i*32, 251);
+		translation_context.fillText(i, 256 + i*32 + 4, 256 + 16);
+	    translation_context.moveTo(256, 256 - i*32);
+		translation_context.lineTo(261, 256 - i*32);
+		translation_context.fillText(i, 261, 256 - i*32 + 16);
+	}
+	
+	translation_context.strokeStyle="#000000";
+    translation_context.stroke();
+}
     </script>
   </head>
   <body>
@@ -398,6 +483,19 @@ And this means only one drawing with one formula to be drawn and thrown away and
         <h2>
 3. All projective transformations are a matrix (yes, singular)
         </h2>
+        <p>
+Geometric transformations are something that happens to a point. They are basically functions (x', y') = f(x, y). If you want to apply the transofmrmation to some object, most of the time you would have to represent it with points and then apply the transformation to each of them.
+        </p>
+        <p>
+Sometime this gets computationally heavy. For instance, transforming 3 000 x 4 000 pixels image would require 12 000 000 transformations. So looking for the fastest way to apply a transformation does make sense pragmatically.
+        </p>
+        <p>
+Some of the most common transformations are: transtlation;
+        </p>
+        <canvas id="translation" width=512 height=512></canvas> 
+        <script language="JavaScript">
+        init_translation();
+        </script>
     </div>
     
     <p class="footer">
