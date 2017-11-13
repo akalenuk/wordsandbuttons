@@ -108,6 +108,14 @@ button {
     font-size: 16pt;
 }
 
+.final{
+    width: 300pt;
+    height: 84pt;
+    margin-left:4pt;
+    margin-right:4pt;
+    font-size: 24pt;
+}
+
     </style>
     <script language="JavaScript">
 function check_and_show1(){
@@ -182,6 +190,51 @@ function give_up_and_show5(){
     document.getElementById("no_5").style.display = "none";
 }
 
+function check_and_show6(){
+    document.getElementById("question_6").style.display = "none";
+    if(document.getElementById("a6").value == "6"){
+        document.getElementById("yes_6").style.display = "block";
+        document.getElementById("right_6").style.display = "block";
+        document.getElementById("no_6").style.display = "none";
+    }else{
+        document.getElementById("no_6").style.display = "block";
+    }
+}
+
+function try_again6(){
+    document.getElementById("question_6").style.display = "block";
+    document.getElementById("no_6").style.display = "none";
+}
+
+function give_up_and_show6(){
+    document.getElementById("right_6").style.display = "block";
+    document.getElementById("no_6").style.display = "none";
+}
+
+function check_and_show7(){
+    document.getElementById("question_7").style.display = "none";
+    if(document.getElementById("a7").value == "1 2 3 4 5"){
+        document.getElementById("yes_7").style.display = "block";
+        document.getElementById("right_7").style.display = "block";
+        document.getElementById("no_7").style.display = "none";
+    }else if(document.getElementById("a7").value == "5 4 3 2 1"){
+        document.getElementById("almost_7").style.display = "block";
+        document.getElementById("right_7").style.display = "block";
+        document.getElementById("no_7").style.display = "none";
+    }else{
+        document.getElementById("no_7").style.display = "block";
+    }
+}
+
+function try_again7(){
+    document.getElementById("question_7").style.display = "block";
+    document.getElementById("no_7").style.display = "none";
+}
+
+function give_up_and_show7(){
+    document.getElementById("right_7").style.display = "block";
+    document.getElementById("no_7").style.display = "none";
+}
     </script>
   </head>
   <body>
@@ -348,7 +401,90 @@ Absolutely!
     <div id="right_5" style="display:none;">
 Function <span class="code_piece">dbl</span> is defined here to double the argument. Then it’s called with 2 as an argument, so the answer is 4.
     </div>
-    </form>    
+    </form>
+    
+    <h2>
+6 What number will this result to?
+    </h2>
+    <pre class="code">
+(define (fact x)
+  (if (<= x 1)
+      1
+      (* x (fact (- x 1)))))
+(fact 3)
+    </pre>
+    <form>
+    <div id="question_6" style="display:block;">
+Please enter your answer:
+        <input type="text" name="q6" id="a6" value="">
+        <button type="button" name="bq6" onclick="check_and_show6()">Check it</button>
+    </div>
+    <div id="no_6" style="display:none;">
+Sorry, but no. You can try again or give up. 
+        <br>
+        <br>
+        <button type="button" name="bt6" onclick="try_again6()">Try again</button>
+        <button type="button" name="bg6" onclick="give_up_and_show6()">Give up</button>
+    </div>
+    <div id="yes_6" style="display:none;">
+Of course!
+    </div>
+    <div id="right_6" style="display:none;">
+We declare a function that returns 1 for anything less or equal to 1. For all the other numbers it multiplies an argument to whatever it returns for decremented argument.
+        <br>
+<span class="code_piece">fact(3) = 3*fact(2)</span>
+        <br>
+<span class="code_piece">fact(2) = 2*fact(1)</span>
+        <br>
+<span class="code_piece">fact(1) = 1</span>
+        <br>
+So <span class="code_piece">fact(3) = 3*2 = 6</span>
+        <br>
+It is a factorial of 3 also known as "3!".
+    </div>
+    </form>
+    
+    <h2>
+7 What would this function do to the list?
+    </h2>
+    <pre class="code" style="font-size: 14pt;">
+(define (qs xs)
+  (if (empty? xs)
+      (list )
+      (let (
+        (middle (first xs))
+        (others (rest xs)))
+        (let (
+          (left (filter (lambda (x) (<= x middle)) others))
+          (right (filter (lambda (x) (> x middle)) others)))
+            (append (qs left) (cons middle (qs right)))))))
+(qs (list 4 5 1 2 3))
+    </pre>
+    <form>
+    <div id="question_7" style="display:block;">
+Please enter your answer:
+        <input type="text" name="q7" id="a7" value="4 5 1 2 3">
+        <button type="button" name="bq7" onclick="check_and_show7()">Check it</button>
+    </div>
+    <div id="no_7" style="display:none;">
+Not really. You can try again or give up. 
+        <br>
+        <br>
+        <button type="button" name="bt7" onclick="try_again7()">Try again</button>
+        <button type="button" name="bg7" onclick="give_up_and_show7()">Give up</button>
+    </div>
+    <div id="yes_7" style="display:none;">
+Indeed!
+    </div>
+    <div id="almost_7" style="display:none;">
+Well, almost. It will indeed sort the list but another way around.
+    </div>
+    <div id="right_7" style="display:none;">
+This is a simple <a href="https://en.wikipedia.org/wiki/Quicksort">quicksort</a> implementation. The list gets split into pieces: some middle element, the “left” list with all the other elements lower than or equal to middle, and the “right” list with all the other elements greater than middle. “Left” and “right” get quicksorted recursively until they’re done and the function then returns sorted left + middle + sorted right.
+        <br> 
+So the list (4, 5, 1, 2, 3) becomes sorted: (1, 2, 3, 4, 5).
+    </div>
+    </form>
     
     
     <p class="footer">
