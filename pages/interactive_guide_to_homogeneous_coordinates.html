@@ -71,6 +71,26 @@ pre {
     padding-right: 2pt;
 }
 
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+}
+
+input[type="text"] {
+    width: 100pt;
+    height: 22pt;
+    margin: 8pt 8pt 8pt 8pt;
+    padding-left: 3pt;
+    font-size: 16pt;
+}
+
 button {
     width: 100pt;
     height: 22pt;
@@ -113,10 +133,18 @@ function init_pick_a_point(){
     }, false);
 
     pick_a_point.addEventListener('mousedown', function(e){
-        point_x = client_to_x(e.clientX);
-        point_y = client_to_y(e.clientY);
+        point_x = Math.round(client_to_x(e.clientX)*10)/10;
+        point_y = Math.round(client_to_y(e.clientY)*10)/10;
 	    pick_a_point_draw(e.clientX, e.clientY);
 	    document.getElementById("after_the_point_is_picked").style.display = "block";
+        document.getElementById("to_fill_with_numbers").innerHTML = 
+"Your point (" + point_x + ", " + point_y + ") is the same as " +
+"(" + point_x + ", " + point_y + ", 1). <br>" +
+"Or (" + point_x*2 + ", " + point_y*2 + ", 2).<br>" +
+"Or (" + point_x*0.5 + ", " + point_y*0.5 + ", 0.5). <br>" +
+"Or even (" + point_x*1000 + ", " + point_y*1000 + ", 1000). <br>" +
+"This is all the same point. ";
+       transform();
     }, false);
 }
 
@@ -168,6 +196,21 @@ function pick_a_point_draw(client_x, client_y){
     pick_a_point_context.stroke();
 }
 
+function transform(){
+    var w = Number(document.getElementById("proposed_w").value);
+    if(w == NaN)
+        w = 1;
+    if(w == 0){
+        document.getElementById("after_the_w_proposed").style.display = "block";
+        document.getElementById("transformed").innerHTML = "<br>No transformation available!"
+        document.getElementById("to_hide_on_transform").style.display = "none";
+    }else{
+        document.getElementById("transformed").innerHTML = 
+"<br>(" + point_x + ", " + point_y + ") = " + 
+"(" + point_x * w + ", " + point_y * w + ", " + w + ")";  
+    }
+}
+
     </script>
   </head>
   <body>
@@ -188,7 +231,7 @@ I think, learning this particular piece of geometry is a valuable experience in 
 The complication
     </h2>
     <p>
-In our usual Cartesian coordinate system, a point on a plane is set by a pair of numbers. Please pick a point to continue.
+In our usual Cartesian coordinate system, a point on a plane is set by a pair of numbers (x<sub>c</sub>, y<sub>c</sub>). Please pick a point to continue.
     </p>
     <canvas id="pick_a_point" width=512 height=512></canvas> 
     <script language="JavaScript">
@@ -196,10 +239,45 @@ In our usual Cartesian coordinate system, a point on a plane is set by a pair of
     </script>
     <div id="after_the_point_is_picked" style="display:none;">
         <p>
-Right!
+Right! 
+        </p>
+        <p>
+Now in homogeneous coordinates points on a plane are set by a tuple of 3 numbers (x<sub>h</sub>, y<sub>h</sub>, w<sub>h</sub>).
+        </p>
+        <p>
+That's a bit unusual, but if a point is taken from the cartesian space, you can transform a homogeneous tuple into cartesian pair as simple as this:
+        </p>
+        <p>
+x<sub>c</sub> = x<sub>h</sub> / w<sub>h</sub>
+            <br>
+y<sub>c</sub> = y<sub>h</sub> / w<sub>h</sub>
+        </p>
+        <p>
+Although, there is no one and only way to transform a point from cartesian to homogeneous coordinates. You can pick any (almost) value for w<sub>h</sub> and it would work. 
+        </p>
+        <p>
+        <span id="to_fill_with_numbers">
+        </span>
+        </p>
+        <p>
+Here is a coordinate transformer. It will transform your point into homogeneous coordinates for the (almost) every w<sub>h</sub> you propose.
+        </p>
+        <form>
+Please enter w<sub>h</sub>:
+        <input type="text" id="proposed_w" value="1">
+        <button type="button" onclick="transform()">Transform</button>
+        <span id="transformed">
+        </span>
+        </form>
+        <p id="to_hide_on_transform">
+But it wouldn't work for all the possible numbers. To continue, please propose the w<sub>h</sub> for which the point could not be transformed.
         </p>
     </div>
-    
+    <div id="after_the_w_proposed" style="display:none;">
+        <p>
+Exactly! 
+        </p>    
+    </div>
     
     <p class="footer">
     There are more words with buttons on <a href="">wordsandbuttons.com</a>.<br>
