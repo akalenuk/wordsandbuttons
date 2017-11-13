@@ -82,6 +82,92 @@ button {
     </style>
     <script language="JavaScript">
 
+function client_to_x(client_x){
+    return (client_x - 256.) / 32.;
+}
+
+function client_to_y(client_y){
+    return (256 - client_y) / 32.;
+}
+
+function x_to_client(x){
+    return x * 32. + 256;
+}
+
+function y_to_client(y){
+    return 256 - y * 32.;
+}
+
+var point_x = 0;
+var point_y = 0;
+
+var pick_a_point = null;
+
+function init_pick_a_point(){
+    pick_a_point = document.getElementById("pick_a_point");
+    pick_a_point_draw(256, 256);
+    
+    pick_a_point.addEventListener('mousemove', function(e){
+        if(point_x == 0 && point_y == 0)
+    	    pick_a_point_draw(e.clientX, e.clientY);
+    }, false);
+
+    pick_a_point.addEventListener('mousedown', function(e){
+        point_x = client_to_x(e.clientX);
+        point_y = client_to_y(e.clientY);
+	    pick_a_point_draw(e.clientX, e.clientY);
+	    document.getElementById("after_the_point_is_picked").style.display = "block";
+    }, false);
+}
+
+function pick_a_point_draw(client_x, client_y){
+    // coordiantes correction
+    var canvas_rect = pick_a_point.getBoundingClientRect();
+    client_x -= canvas_rect.left;
+    client_y -= canvas_rect.top;
+
+    var pick_a_point_context = pick_a_point.getContext("2d"); 
+    pick_a_point_context.font = "16px sans-serif";
+    // background
+    pick_a_point_context.fillStyle="#eeeeee";
+	pick_a_point_context.fillRect(0,0,512,512);
+	
+	// selection
+	pick_a_point_context.moveTo(client_x, 256);
+	pick_a_point_context.lineTo(client_x, client_y);
+	pick_a_point_context.moveTo(256, client_y);
+	pick_a_point_context.lineTo(client_x, client_y);
+	pick_a_point_context.strokeStyle="#dd6644";
+    pick_a_point_context.stroke();
+    pick_a_point_context.fillStyle="#dd6644";
+    pick_a_point_context.fillText(client_to_x(client_x).toFixed(1) + ", " + client_to_y(client_y).toFixed(1), client_x + 4, client_y + 16);
+    
+	// grid
+ 	pick_a_point_context.beginPath();
+	pick_a_point_context.moveTo(0, 256);
+	pick_a_point_context.lineTo(512, 256);
+	pick_a_point_context.lineTo(500, 251);
+	pick_a_point_context.moveTo(512, 256);
+	pick_a_point_context.lineTo(500, 261);
+	pick_a_point_context.moveTo(256, 512);
+	pick_a_point_context.lineTo(256, 0);
+	pick_a_point_context.lineTo(251, 12);
+	pick_a_point_context.moveTo(256, 0);
+	pick_a_point_context.lineTo(261, 12);
+    pick_a_point_context.fillStyle="#000000";
+	for(var i = -7; i <= 7; i++){
+	    pick_a_point_context.moveTo(256 + i*32, 256);
+		pick_a_point_context.lineTo(256 + i*32, 251);
+		pick_a_point_context.fillText(i, 256 + i*32 + 4, 256 + 16);
+	    pick_a_point_context.moveTo(256, 256 - i*32);
+		pick_a_point_context.lineTo(261, 256 - i*32);
+		pick_a_point_context.fillText(i, 261, 256 - i*32 + 16);
+	}
+	
+	pick_a_point_context.strokeStyle="#000000";
+    pick_a_point_context.stroke();
+}
+
     </script>
   </head>
   <body>
@@ -101,6 +187,19 @@ I think, learning this particular piece of geometry is a valuable experience in 
     <h2>
 The complication
     </h2>
+    <p>
+In our usual Cartesian coordinate system, a point on a plane is set by a pair of numbers. Please pick a point to continue.
+    </p>
+    <canvas id="pick_a_point" width=512 height=512></canvas> 
+    <script language="JavaScript">
+    init_pick_a_point();
+    </script>
+    <div id="after_the_point_is_picked" style="display:none;">
+        <p>
+Right!
+        </p>
+    </div>
+    
     
     <p class="footer">
     There are more words with buttons on <a href="">wordsandbuttons.com</a>.<br>
