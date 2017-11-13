@@ -125,6 +125,33 @@ var pick_a_point = null;
 var slide_a_w = null;
 var translation = null;
 
+function draw_grid_on(context){
+	// grid
+ 	context.beginPath();
+	context.moveTo(0, 256);
+	context.lineTo(512, 256);
+	context.lineTo(500, 251);
+	context.moveTo(512, 256);
+	context.lineTo(500, 261);
+	context.moveTo(256, 512);
+	context.lineTo(256, 0);
+	context.lineTo(251, 12);
+	context.moveTo(256, 0);
+	context.lineTo(261, 12);
+    context.fillStyle="#000000";
+	for(var i = -7; i <= 7; i++){
+	    context.moveTo(256 + i*32, 256);
+		context.lineTo(256 + i*32, 251);
+		context.fillText(i, 256 + i*32 + 4, 256 + 16);
+	    context.moveTo(256, 256 - i*32);
+		context.lineTo(261, 256 - i*32);
+		context.fillText(i, 261, 256 - i*32 + 16);
+	}
+	context.strokeStyle="#000000";
+    context.stroke();
+    context.closePath();
+}
+
 function init_pick_a_point(){
     pick_a_point = document.getElementById("pick_a_point");
     pick_a_point_draw(256, 256);
@@ -176,30 +203,7 @@ function pick_a_point_draw(client_x, client_y){
     pick_a_point_context.closePath();
     
 	// grid
- 	pick_a_point_context.beginPath();
-	pick_a_point_context.moveTo(0, 256);
-	pick_a_point_context.lineTo(512, 256);
-	pick_a_point_context.lineTo(500, 251);
-	pick_a_point_context.moveTo(512, 256);
-	pick_a_point_context.lineTo(500, 261);
-	pick_a_point_context.moveTo(256, 512);
-	pick_a_point_context.lineTo(256, 0);
-	pick_a_point_context.lineTo(251, 12);
-	pick_a_point_context.moveTo(256, 0);
-	pick_a_point_context.lineTo(261, 12);
-    pick_a_point_context.fillStyle="#000000";
-	for(var i = -7; i <= 7; i++){
-	    pick_a_point_context.moveTo(256 + i*32, 256);
-		pick_a_point_context.lineTo(256 + i*32, 251);
-		pick_a_point_context.fillText(i, 256 + i*32 + 4, 256 + 16);
-	    pick_a_point_context.moveTo(256, 256 - i*32);
-		pick_a_point_context.lineTo(261, 256 - i*32);
-		pick_a_point_context.fillText(i, 261, 256 - i*32 + 16);
-	}
-	
-	pick_a_point_context.strokeStyle="#000000";
-    pick_a_point_context.stroke();
-    pick_a_point_context.closePath();
+	draw_grid_on(pick_a_point_context);
 }
 
 function transform(){
@@ -257,32 +261,21 @@ function slide_a_w_draw(client_x){
     slide_a_w_context.fillText("w = " + w.toFixed(3), 32, 480); 
     slide_a_w_context.closePath();
     
-    
 	// grid
- 	slide_a_w_context.beginPath();
-	slide_a_w_context.moveTo(0, 256);
-	slide_a_w_context.lineTo(512, 256);
-	slide_a_w_context.lineTo(500, 251);
-	slide_a_w_context.moveTo(512, 256);
-	slide_a_w_context.lineTo(500, 261);
-	slide_a_w_context.moveTo(256, 512);
-	slide_a_w_context.lineTo(256, 0);
-	slide_a_w_context.lineTo(251, 12);
-	slide_a_w_context.moveTo(256, 0);
-	slide_a_w_context.lineTo(261, 12);
-    slide_a_w_context.fillStyle="#000000";
-	for(var i = -7; i <= 7; i++){
-	    slide_a_w_context.moveTo(256 + i*32, 256);
-		slide_a_w_context.lineTo(256 + i*32, 251);
-		slide_a_w_context.fillText(i, 256 + i*32 + 4, 256 + 16);
-	    slide_a_w_context.moveTo(256, 256 - i*32);
-		slide_a_w_context.lineTo(261, 256 - i*32);
-		slide_a_w_context.fillText(i, 261, 256 - i*32 + 16);
-	}
-	
-	slide_a_w_context.strokeStyle="#000000";
-    slide_a_w_context.stroke();
-    slide_a_w_context.closePath();
+	draw_grid_on(slide_a_w_context);
+}
+
+function draw_original_cube_on(context){
+	// original cube
+	context.beginPath();
+	context.moveTo(x_to_client(1), y_to_client(1));
+	context.lineTo(x_to_client(1 + 1), y_to_client(1));
+	context.lineTo(x_to_client(1 + 1), y_to_client(1 + 1));
+	context.lineTo(x_to_client(1), y_to_client(1 + 1));
+	context.lineTo(x_to_client(1), y_to_client(1));
+	context.strokeStyle="#999999";
+    context.stroke();
+    context.closePath();  
 }
 
 function init_translation(){
@@ -323,15 +316,7 @@ function translation_draw(client_x, client_y){
     translation_context.closePath();
     
 	// original cube
-	translation_context.beginPath();
-	translation_context.moveTo(x_to_client(1), y_to_client(1));
-	translation_context.lineTo(x_to_client(1 + 1), y_to_client(1));
-	translation_context.lineTo(x_to_client(1 + 1), y_to_client(1 + 1));
-	translation_context.lineTo(x_to_client(1), y_to_client(1 + 1));
-	translation_context.lineTo(x_to_client(1), y_to_client(1));
-	translation_context.strokeStyle="#999999";
-    translation_context.stroke();
-    translation_context.closePath();    
+	draw_original_cube_on(translation_context);  
     
 	// translation
 	translation_context.beginPath();
@@ -348,30 +333,138 @@ function translation_draw(client_x, client_y){
     translation_context.fillText("y' = y + b, where b = " + y.toFixed(1), 32, 480);
      
 	// grid
- 	translation_context.beginPath();
-	translation_context.moveTo(0, 256);
-	translation_context.lineTo(512, 256);
-	translation_context.lineTo(500, 251);
-	translation_context.moveTo(512, 256);
-	translation_context.lineTo(500, 261);
-	translation_context.moveTo(256, 512);
-	translation_context.lineTo(256, 0);
-	translation_context.lineTo(251, 12);
-	translation_context.moveTo(256, 0);
-	translation_context.lineTo(261, 12);
-    translation_context.fillStyle="#000000";
-	for(var i = -7; i <= 7; i++){
-	    translation_context.moveTo(256 + i*32, 256);
-		translation_context.lineTo(256 + i*32, 251);
-		translation_context.fillText(i, 256 + i*32 + 4, 256 + 16);
-	    translation_context.moveTo(256, 256 - i*32);
-		translation_context.lineTo(261, 256 - i*32);
-		translation_context.fillText(i, 261, 256 - i*32 + 16);
+	draw_grid_on(translation_context);
+}
+
+function rotated_x(a, x, y){
+    return Math.sin(a) * x + Math.cos(a) * y;
+}
+
+function rotated_y(a, x, y){
+    return Math.cos(a) * x - Math.sin(a) * y;
+}
+
+function init_rotation(){
+    rotation = document.getElementById("rotation");
+    rotation_draw(256, 256);
+    
+    rotation.addEventListener('mousemove', function(e){
+    	rotation_draw(e.clientX, e.clientY);
+    }, false);
+}
+
+function rotation_draw(client_x, client_y){
+    // coordiantes correction
+    var canvas_rect = rotation.getBoundingClientRect();
+    client_x -= canvas_rect.left;
+   	var a = client_to_x(client_x) / 2;
+    
+    var rotation_context = rotation.getContext("2d"); 
+    rotation_context.font = "16px sans-serif";
+    // background
+    rotation_context.fillStyle="#eeeeee";
+	rotation_context.fillRect(0,0,512,512);
+	
+	var xs = [1., 2., 2., 1.];
+	var ys = [1., 1., 2., 2.];
+	var new_xs = [0, 0, 0, 0];
+	var new_ys = [0, 0, 0, 0];
+	for(var i = 0; i < 4; i++){
+	  new_xs[i] = rotated_x(a, xs[i], ys[i]);
+	  new_ys[i] = rotated_y(a, xs[i], ys[i]);
 	}
 	
-	translation_context.strokeStyle="#000000";
-    translation_context.stroke();
-    translation_context.closePath();
+	// the connection
+	rotation_context.beginPath();
+	for(var i = 0; i < 4; i++){
+		rotation_context.moveTo(x_to_client(xs[i]), y_to_client(ys[i]));
+    	rotation_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+	}
+	rotation_context.strokeStyle="#eeaa88";
+    rotation_context.stroke();
+    rotation_context.closePath();
+    
+	// original cube
+	draw_original_cube_on(rotation_context);  
+    
+	// rotation
+	rotation_context.beginPath();	
+	rotation_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
+	for(var i = 0; i < 4; i++){
+    	rotation_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+	}
+	rotation_context.strokeStyle="#dd6644";
+    rotation_context.stroke();
+    rotation_context.closePath();    
+    rotation_context.fillStyle="#dd6644";
+    rotation_context.fillText("x' = sin(a) * x + cos(a) * y", 32, 440);
+    rotation_context.fillText("y' = cos(a) * x - sin(a) * y", 32, 460);
+    rotation_context.fillText("where a = " + a.toFixed(2), 32, 480);
+     
+	// grid
+	draw_grid_on(rotation_context);
+}
+
+function init_scale(){
+    scale = document.getElementById("scale");
+    scale_draw(256, 256);
+    
+    scale.addEventListener('mousemove', function(e){
+    	scale_draw(e.clientX, e.clientY);
+    }, false);
+}
+
+function scale_draw(client_x, client_y){
+    // coordiantes correction
+    var canvas_rect = scale.getBoundingClientRect();
+    client_x -= canvas_rect.left;
+    client_y -= canvas_rect.top;
+   	var a = client_to_x(client_x);
+   	var b = client_to_y(client_y);
+    
+    var scale_context = scale.getContext("2d"); 
+    scale_context.font = "16px sans-serif";
+    // background
+    scale_context.fillStyle="#eeeeee";
+	scale_context.fillRect(0,0,512,512);
+	
+	var xs = [1., 2., 2., 1.];
+	var ys = [1., 1., 2., 2.];
+	var new_xs = [0, 0, 0, 0];
+	var new_ys = [0, 0, 0, 0];
+	for(var i = 0; i < 4; i++){
+	  new_xs[i] = a * xs[i];
+	  new_ys[i] = b * ys[i];
+	}
+	
+	// the connection
+	scale_context.beginPath();
+	for(var i = 0; i < 4; i++){
+		scale_context.moveTo(x_to_client(xs[i]), y_to_client(ys[i]));
+    	scale_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+	}
+	scale_context.strokeStyle="#eeaa88";
+    scale_context.stroke();
+    scale_context.closePath();
+    
+	// original cube
+	draw_original_cube_on(scale_context);  
+    
+	// scale
+	scale_context.beginPath();	
+	scale_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
+	for(var i = 0; i < 4; i++){
+    	scale_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+	}
+	scale_context.strokeStyle="#dd6644";
+    scale_context.stroke();
+    scale_context.closePath();    
+    scale_context.fillStyle="#dd6644";
+    scale_context.fillText("x' = a * x, where a = " + a.toFixed(2), 32, 460);
+    scale_context.fillText("y' = b * y, where b = " + b.toFixed(2), 32, 480);
+     
+	// grid
+	draw_grid_on(scale_context);
 }
     </script>
   </head>
@@ -490,7 +583,7 @@ I remember on my first year in college we were studying quadric surfaces and one
 Now in projective space this excercise would have been much more environmental friendly. That’s because in homogenous coordinates all the algebraic surfaces are homogenous too. This means every piece of a polynomial that defines the surface has the same degree. It may contain different variables with different degrees of their own, but they all magically add up to the very same degree for every element in the sum.
         </p>
         <p>
-And this means only one drawing with one formula to be drawn and thrown away and not seventeen. That should sum up to a couple of dead trees through the years.
+And this means only one drawing with one formula to be drawn and thrown away and not seventeen. That should sum up to a couple of dead trees over the years.
         </p>
         <h2>
 3. All projective transformations are a matrix (yes, singular)
@@ -508,6 +601,20 @@ Some of the most common transformations are: transtlation;
         <script language="JavaScript">
         init_translation();
         </script>
+        <p>
+rotation;
+        </p>
+        <canvas id="rotation" width=512 height=512></canvas> 
+        <script language="JavaScript">
+        init_rotation();
+        </script>
+        <p>
+and scale.
+        </p>
+        <canvas id="scale" width=512 height=512></canvas> 
+        <script language="JavaScript">
+        init_scale();
+        </script>        
     </div>
     
     <p class="footer">
