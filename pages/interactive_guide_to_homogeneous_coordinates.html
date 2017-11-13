@@ -136,7 +136,6 @@ function init_pick_a_point(){
         var canvas_rect = pick_a_point.getBoundingClientRect();
         point_x = Math.round(client_to_x(e.clientX - canvas_rect.left)*10)/10;
         point_y = Math.round(client_to_y(e.clientY - canvas_rect.top)*10)/10;
-        alert(point_x);
 	    pick_a_point_draw(e.clientX, e.clientY);
 	    document.getElementById("after_the_point_is_picked").style.display = "block";
         document.getElementById("to_fill_with_numbers").innerHTML = 
@@ -211,6 +210,12 @@ function transform(){
 "<br>(" + point_x + ", " + point_y + ") = " + 
 "(" + point_x * w + ", " + point_y * w + ", " + w + ")";  
     }
+}
+
+function skip_transform(){
+        document.getElementById("after_the_w_proposed").style.display = "block";
+        document.getElementById("transformed").innerHTML = "<br>When it's 0, then there is no transformation available!"
+        document.getElementById("to_hide_on_transform").style.display = "none";
 }
 
 function init_slide_a_w(){
@@ -326,6 +331,7 @@ Here is a coordinate transformer. It will transform your point into homogeneous 
 Please enter w<sub>h</sub>:
         <input type="text" id="proposed_w" value="1">
         <button type="button" onclick="transform()">Transform</button>
+        <button type="button" onclick="skip_transform()">No, skip it</button>
         <span id="transformed">
         </span>
         </form>
@@ -346,6 +352,24 @@ Cartesian coordinates are just the first two numbers of homogeneous coordinates 
         </script>
         <p>
 That’s all rather simple until one moment. What if the fourth coordinate is 0?
+        </p>
+        <p>
+Intuition tells, that it should be further from the 0 than every other point. Every other point in Euclidean space that is. Homogeneous coordinates indeed denote points not only in Euclidean or, more general, affine space, but in projective space that includes and expands affine one.
+        <p>
+        <p>      
+Points from the projective space may lie in the Euclidean space or may be infinitely far from any point of it. If w<sub>h</sub> is 0 then it's the latter. If not, then whatever w<sub>h</sub> is, it's the former.
+        </p>
+        <p>
+From the pragmatic point of view, this lets us, for instance, compose a 3D-scene in a manner that every object that can be reached would fit in affine space with the coordinates (x, y, z, 1), and all the objects that can never be reached will belong to its projective extension (x, y, z, 0).
+        </p>
+        <p>
+So if you do work with 3D graphics, you might notice that it is quite common to write 3D points as a tuple of 4 numbers. The usual question here is: “what does that fourth coordinate stand for?” And the usual answer is: “Just set it to 1 and hope you wouldn’t screw anything!” Well, now you know what the fourth coordinate actually stands for.
+        </p>
+        <p>
+It is also common to refer points from projective extension as a general direction and not a specific point in Euclidean space. A ray that starts at null and has no length has no end, only the direction. You might even have heard about it being called a vector as opposed to a point. This is not technically correct as, of course, any point is a vector in a corresponding vector space. But this still might be a useful naming convention if you are not into the real vector algebra.
+        </p>
+        <p>
+Living in a projective space gives you more options. You can denote points that are unheard of in the Euclidean one. But that’s not all it is good for. In fact, we are only starting to get into the benefits.
         </p>
     </div>
     
