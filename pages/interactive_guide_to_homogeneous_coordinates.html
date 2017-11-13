@@ -133,8 +133,10 @@ function init_pick_a_point(){
     }, false);
 
     pick_a_point.addEventListener('mousedown', function(e){
-        point_x = Math.round(client_to_x(e.clientX)*10)/10;
-        point_y = Math.round(client_to_y(e.clientY)*10)/10;
+        var canvas_rect = pick_a_point.getBoundingClientRect();
+        point_x = Math.round(client_to_x(e.clientX - canvas_rect.left)*10)/10;
+        point_y = Math.round(client_to_y(e.clientY - canvas_rect.top)*10)/10;
+        alert(point_x);
 	    pick_a_point_draw(e.clientX, e.clientY);
 	    document.getElementById("after_the_point_is_picked").style.display = "block";
         document.getElementById("to_fill_with_numbers").innerHTML = 
@@ -211,6 +213,64 @@ function transform(){
     }
 }
 
+function init_slide_a_w(){
+    slide_a_w = document.getElementById("slide_a_w");
+    slide_a_w_draw(256);
+    
+    slide_a_w.addEventListener('mousemove', function(e){
+    	slide_a_w_draw(e.clientX);
+    }, false);
+}
+
+function slide_a_w_draw(client_x){
+    // coordiantes correction
+    var canvas_rect = slide_a_w.getBoundingClientRect();
+    client_x -= canvas_rect.left;
+
+    var slide_a_w_context = slide_a_w.getContext("2d"); 
+    slide_a_w_context.font = "16px sans-serif";
+    // background
+    slide_a_w_context.fillStyle="#eeeeee";
+	slide_a_w_context.fillRect(0,0,512,512);
+	
+	// selection
+	var w = (client_x - 256) / 32;
+	var canvas_x = x_to_client(point_x / w);
+	var canvas_y = y_to_client(point_y / w);
+	slide_a_w_context.moveTo(x_to_client(point_x * 100), y_to_client(point_y * 100));
+	slide_a_w_context.lineTo(x_to_client(point_x * -100), y_to_client(point_y * -100));
+	slide_a_w_context.strokeStyle="#dd6644";
+    slide_a_w_context.stroke();
+    slide_a_w_context.fillStyle="#dd6644";
+    slide_a_w_context.fillText(point_x.toFixed(1) + ", " + point_y.toFixed(1) + ", " + w.toFixed(3), x_to_client(point_x / w) + 4, y_to_client(point_y / w) + 16);
+    slide_a_w_context.fillText("w = " + w.toFixed(3), 32, 480); 
+    
+    
+	// grid
+ 	slide_a_w_context.beginPath();
+	slide_a_w_context.moveTo(0, 256);
+	slide_a_w_context.lineTo(512, 256);
+	slide_a_w_context.lineTo(500, 251);
+	slide_a_w_context.moveTo(512, 256);
+	slide_a_w_context.lineTo(500, 261);
+	slide_a_w_context.moveTo(256, 512);
+	slide_a_w_context.lineTo(256, 0);
+	slide_a_w_context.lineTo(251, 12);
+	slide_a_w_context.moveTo(256, 0);
+	slide_a_w_context.lineTo(261, 12);
+    slide_a_w_context.fillStyle="#000000";
+	for(var i = -7; i <= 7; i++){
+	    slide_a_w_context.moveTo(256 + i*32, 256);
+		slide_a_w_context.lineTo(256 + i*32, 251);
+		slide_a_w_context.fillText(i, 256 + i*32 + 4, 256 + 16);
+	    slide_a_w_context.moveTo(256, 256 - i*32);
+		slide_a_w_context.lineTo(261, 256 - i*32);
+		slide_a_w_context.fillText(i, 261, 256 - i*32 + 16);
+	}
+	
+	slide_a_w_context.strokeStyle="#000000";
+    slide_a_w_context.stroke();
+}
     </script>
   </head>
   <body>
@@ -276,7 +336,17 @@ But it wouldn't work for all the possible numbers. To continue, please propose t
     <div id="after_the_w_proposed" style="display:none;">
         <p>
 Exactly! 
-        </p>    
+        </p>
+        <p>
+Cartesian coordinates are just the first two numbers of homogeneous coordinates divided by the third. So if it is 1, then homogeneous coordinates are basically the same thing as Cartesian. But the smaller w<sub>h</sub> gets, the further the point in Cartesian coordinates travels from the null. 
+        </p>
+        <canvas id="slide_a_w" width=512 height=512></canvas> 
+        <script language="JavaScript">
+        init_slide_a_w();
+        </script>
+        <p>
+That’s all rather simple until one moment. What if the fourth coordinate is 0?
+        </p>
     </div>
     
     <p class="footer">
