@@ -68,7 +68,6 @@ table {
     padding-bottom: 12pt;
     font-size: 16pt;
     text-align: center;
-    background-color: #bbbbff;
 }
 
 .code {
@@ -631,7 +630,8 @@ function projective_draw(client_x, client_y){
 
 function init_composable(){
     composable = document.getElementById("composable");
-    composable_draw(256, 256);
+    var canvas_rect = composable.getBoundingClientRect();
+    composable_draw(256+32 + canvas_rect.left, 256-32 + canvas_rect.top);
     
     composable.addEventListener('mousemove', function(e){
     	composable_draw(e.clientX, e.clientY);
@@ -677,6 +677,26 @@ function init_composable(){
        	}
        	
        	composable_draw(e.clientX, e.clientY);
+       	// calculate a matrix
+       	x0 = new_xs[0];     y0 = new_ys[0];
+       	x1 = new_xs[1];     y1 = new_ys[1];
+       	x2 = new_xs[2];     y2 = new_ys[2];
+       	x3 = new_xs[3];     y3 = new_ys[3];
+       	var A = (-x0*x2*y1 + x0*x2*y3 + x0*x3*y1 - x0*x3*y2 + x1*x2*y0 - x1*x2*y3 - x1*x3*y0 + x1*x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+       	var B = (x0*x1*y2 - x0*x1*y3 - x0*x2*y1 + x0*x2*y3 + x1*x3*y0 - x1*x3*y2 - x2*x3*y0 + x2*x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+       	var C = (-2*x0*x1*y2 + 2*x0*x1*y3 + 3*x0*x2*y1 - 3*x0*x2*y3 - 2*x0*x3*y1 + 2*x0*x3*y2 - x1*x2*y0 + x1*x2*y3 + x2*x3*y0 - x2*x3*y1)/
+       	    (x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+       	var D = (-x0*y1*y2 + x0*y1*y3 + x1*y0*y2 - x1*y0*y3 + x2*y0*y3 - x2*y1*y3 - x3*y0*y2 + x3*y1*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+       	var E = (-x0*y1*y3 + x0*y2*y3 + x1*y0*y2 - x1*y2*y3 - x2*y0*y1 + x2*y1*y3 + x3*y0*y1 - x3*y0*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+       	var F = (x0*y1*y2 - x0*y2*y3 - 3*x1*y0*y2 + 2*x1*y0*y3 + x1*y2*y3 + 2*x2*y0*y1 - 2*x2*y0*y3 - 2*x3*y0*y1 + 3*x3*y0*y2 - x3*y1*y2)/
+       	    (x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+       	var a = (-x0*y2 + x0*y3 + x1*y2 - x1*y3 + x2*y0 - x2*y1 - x3*y0 + x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+       	var b = (-x0*y1 + x0*y2 + x1*y0 - x1*y3 - x2*y0 + x2*y3 + x3*y1 - x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+       	var c = 1.;
+       	document.getElementById("matrix").innerHTML = "Matrix:\n" + 
+       	    A.toFixed(3) + " " + D.toFixed(3) + " " + a.toFixed(3) + "\n" +
+       	    B.toFixed(3) + " " + E.toFixed(3) + " " + b.toFixed(3) + "\n" +
+       	    C.toFixed(3) + " " + F.toFixed(3) + " " + c.toFixed(3);
    	}, false);
 }
 
@@ -751,6 +771,14 @@ function composable_draw(client_x, client_y){
 
 	// grid
 	draw_grid_on(composable_context);
+}
+
+function revert_composable(){
+    composable_xs = [1., 2., 2., 1.];
+	composable_ys = [1., 1., 2., 2.];
+	document.getElementById("matrix").innerHTML = "Matrix:\n1 0 0\n0 1 0\n0 0 1"
+    var canvas_rect = composable.getBoundingClientRect();
+    composable_draw(256+32 + canvas_rect.left, 256-32 + canvas_rect.top);
 }
     </script>
   </head>
@@ -851,13 +879,13 @@ Living in a projective space gives you more options. You can denote points that 
 1. In projective space central and parallel projections are the same
         </h2>
         <p>
-There are two kinds of projection in Euclidean space: central and parallel. Central projection is what makes the perspective, so the closer things seem bigger, and that’s what we use in video games to render a 3D scene into a flat picture on a screen. The parallel projection preserves proportions so that’s what we usually use in CAD systems to show bolts and nuts on drawings.        
+There are two kinds of projection in Euclidean space: central and parallel. Central projection is what makes the perspective, so the closer things seem bigger, and that’s what we use in video games to render a 3D scene into a flat picture on a screen. The parallel projection preserves proportions, so that’s what we usually use in CAD systems to show bolts and nuts on drawings.        
         </p>
         <p>
-In projective space they are the same. You see, in affine space you can set a center for a central projection very-very far away from the scene you want to render. This will make disproportion very small. But in projective space you can hurl a center infinitely far — further away than any point in affine space at all — and the disproportion will disappear completely.
+In projective space they are the same. You see, in affine space, you can set a center for a central projection very-very far away from the scene you want to render. This will make disproportion very small. But in projective space you can hurl a center infinitely far — further away than any point in affine space at all — and the disproportion will disappear completely.
         </p>
         <p>
-So bear in mind, if you want to make a game about zombies who happen to be CAD engineers, you don’t have to implement both kinds of projections. Just set the projection central point to (x, y, z, 0) and this will automatically turn it into parallel.
+So bear in mind, if you want to make a game about zombies who happen to be CAD engineers, you don’t have to implement both kinds of projections. Just set the projection central point to (x, y, z, 0), and this will automatically turn it into parallel.
         </p>
         <h2>
 2. All the surfaces described as an equation on degree n are the same
@@ -866,7 +894,7 @@ So bear in mind, if you want to make a game about zombies who happen to be CAD e
 I remember on my first year in college we were studying quadric surfaces and one of the exercises allegedly made up to help us learn their classification was to make an album. It was 17 sheets of paper with different graphics and formulas sewed together only to be briefly examined by the professor and thrown away a day after. You might imagine we were not fond of this activity.
         </p>
         <p>
-Now in projective space this excercise would have been much more environmental friendly. That’s because in homogenous coordinates all the algebraic surfaces are homogenous too. This means every piece of a polynomial that defines the surface has the same degree. It may contain different variables with different degrees of their own, but they all magically add up to the very same degree for every element in the sum.
+Now in projective space, this exercise would have been much more environmentally friendly. That’s because in homogeneous coordinates all the algebraic surfaces are homogenous too. This means every piece of a polynomial that defines the surface has the same degree. It may contain different variables with different degrees of their own, but they all magically add up to the very same degree for every element in the sum.
         </p>
         <p>
 And this means only one drawing with one formula to be drawn and thrown away and not seventeen. That should sum up to a couple of dead trees over the years.
@@ -875,10 +903,10 @@ And this means only one drawing with one formula to be drawn and thrown away and
 3. All projective transformations are a matrix (yes, singular)
         </h2>
         <p>
-Geometric transformations are something that happens to a point. They are basically functions (x', y') = f(x, y). If you want to apply the transofmrmation to some object, most of the time you would have to represent it with points and then apply the transformation to each of them.
+Geometric transformations are something that happens to a point. They are basically functions (x', y') = f(x, y). If you want to apply the transformation to some object, most of the time you would have to represent it with points and then apply the transformation to each of them.
         </p>
         <p>
-Sometime this gets computationally heavy. For instance, transforming 3 000 x 4 000 pixels image would require 12 000 000 transformations. So looking for the fastest way to apply a transformation does make sense pragmatically.
+Sometimes this gets computationally heavy. For instance, transforming 3 000 x 4 000 pixels image would require 12 000 000 transformations. So looking for the fastest way to apply a transformation does make sense pragmatically.
         </p>
         <p>
 Some of the most common transformations are: transtlation;
@@ -926,7 +954,7 @@ x' = (Ax + By + C) / (ax + by +c)
 y' = (Dx + Ey + F) / (ax + by +c)
         </pre>
         <p>
-It is a simple geometric transformation just like all we have seen before. It also works on one point at a time. It preserves the degree of curves and surfaces so every straight line will get transfromed into the straight line and each plane also into plane. Since all the 2-nd degree surfaces are the same surface, it will also preserve the degree, but not a class in affine space so that ellipsoid may become parabaloid or hyperboloid. 
+It is a simple geometric transformation just like all we have seen before. It also works on one point at a time. It preserves the degree of curves and surfaces so every straight line will get transformed into the straight line and each plane also into a plane. Since all the 2-nd degree surfaces are the same surface, it will also preserve the degree, but not a class in affine space so that ellipsoid may become parabaloid or hyperboloid. 
         </p>
         <p>
 It also generalizes affine transformation that has simple formula:
@@ -971,7 +999,7 @@ Matrix in homogeneous coordinates
         <p>
 What's going to happen if we multiply a point in homogeneous coordinates on a square matrix? Well, for the ease of notation let's multiply matrix on a point.
         </p>
-        <table>
+        <table class="code">
         <tr>
         <td rowspan=3 style="font-size:84pt;">[</td>
         <td>A</td><td>D</td><td>a</td>
@@ -988,7 +1016,7 @@ What's going to happen if we multiply a point in homogeneous coordinates on a sq
         </tr>
         </table>
         <p>
-Now let's pretend the point we took came from Cartesian coordinates and it has w<sub>h</sub> = 1. Now we see that:
+Let's pretend the point we took came from Cartesian coordinates and it has w<sub>h</sub> = 1. Now we see that:
         </p>
         <pre class="code">
 x' = Ax + By + C 
@@ -1004,27 +1032,36 @@ y' = (Dx + Ey + F) / (ax + by + c)
 w' = 1
         </pre>
         <p>
-Now doesn't it look familliar? Well, of course it does! It's the projective transformation. Or the affine. Or it could be the translation, or rotation, or scale. They all can be denoted as a single matric multiplication.
+Doesn't it look familiar? Well, of course, it does! It's the projective transformation. Or the affine. Or it could be the translation, or rotation, or scale. They all can be denoted as a single matrix multiplication.
         </p>
         <p>
-But that's not yet all. Matrices are composable. You can compose your own translation + rotation + another translation + scale + projection — and it all will still fit in a single matrix!
+But that's not yet all. Matrices are composable. You can compose your own translation + rotation + another translation + scale + projection — and it all will still fit into a single matrix!
         </p>
-        <canvas id="composable" width=512 height=512></canvas>
         <form>
         <input type="radio" name="transformation_type" id="radio_t">Translation<br>
         <input type="radio" name="transformation_type" id="radio_r">Rotation<br>
         <input type="radio" name="transformation_type" id="radio_s">Scale<br>
         <input type="radio" name="transformation_type" id="radio_p" checked=true>Projection<br>
         </form>
-        <pre class="code">
+        <canvas id="composable" width=512 height=512></canvas>
+        <pre class="code" id="matrix">
 Matrix:
 1 0 0        
 0 1 0
-0 0 1
-        </pre>
+0 0 1   </pre>          
+        <button class="button" id="revert_composable" onclick="revert_composable()">Revert to E</button>
         <script language="JavaScript">
         init_composable();
         </script>        
+        <h2>
+Conclusion
+        </h2>
+        <p>
+As you can see, you can save quite a lot of time processing millions of points with one single matrix instead of applying all the transformations separately. And you can also save lines of code by unifying all the transformations. But this is not the whole point. Usually, we lose performance, not because of some small computational inefficiency, but because of needless layering. And the layering occurs because people don’t understand and don’t trust the beauty of the plain mathematics.
+        </p>
+        <p>
+I hope this page reveals a bit of it. I hope it makes it a little more trustworthy.
+        </p>
     </div>
     
     <p class="footer">
