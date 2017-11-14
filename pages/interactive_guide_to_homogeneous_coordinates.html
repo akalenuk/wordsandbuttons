@@ -110,6 +110,11 @@ button {
     font-size: 16pt;
 }
 
+input[type="radio"]{
+    width: 22pt;
+    height: 22pt;
+    margin: 8pt 8pt 8pt 8pt;
+}
     </style>
     <script language="JavaScript">
 
@@ -595,9 +600,6 @@ function projective_draw(client_x, client_y){
     // background
     projective_context.fillStyle="#eeeeee";
 	projective_context.fillRect(0,0,512,512);
-	
-	var xs = [1., 2., 2., 1.];
-	var ys = [1., 1., 2., 2.];
     
 	// original cube
 	draw_original_cube_on(projective_context);  
@@ -624,6 +626,131 @@ function projective_draw(client_x, client_y){
 
 	// grid
 	draw_grid_on(projective_context);
+}
+
+
+function init_composable(){
+    composable = document.getElementById("composable");
+    composable_draw(256, 256);
+    
+    composable.addEventListener('mousemove', function(e){
+    	composable_draw(e.clientX, e.clientY);
+    }, false);
+    
+    composable.addEventListener('mousedown', function(e){
+        var canvas_rect = composable.getBoundingClientRect();
+        client_x = e.clientX - canvas_rect.left;
+        client_y = e.clientY - canvas_rect.top;
+       	var x = client_to_x(client_x);
+       	var y = client_to_y(client_y);
+       	      	
+       	// new cube
+        var new_xs = [1., 2., 2., 1.];
+	    var new_ys = [1., 1., 2., 2.];
+	    if(document.getElementById("radio_p").checked){
+        	for(var i = 0; i < 4; i++){
+        	    new_xs[i] = composable_xs[i];
+        	    new_ys[i] = composable_ys[i];
+        	}
+	        new_xs[composable_i] = x;
+	        new_ys[composable_i] = y;
+	        composable_i = (composable_i + 1) % 4;
+	    }else if(document.getElementById("radio_t").checked){
+	        for(var i = 0; i < 4; i++){
+	            new_xs[i] = composable_xs[i] + x;
+        	    new_ys[i] = composable_ys[i] + y;
+	        }
+	    }else if(document.getElementById("radio_r").checked){
+	        for(var i = 0; i < 4; i++){
+	            new_xs[i] = rotated_x(x/2, composable_xs[i], composable_ys[i]);
+        	    new_ys[i] = rotated_y(x/2, composable_xs[i], composable_ys[i]);
+	        }
+	    }else if(document.getElementById("radio_s").checked){
+	        for(var i = 0; i < 4; i++){
+	            new_xs[i] = composable_xs[i] * x;
+        	    new_ys[i] = composable_ys[i] * y;
+	        }
+	    }
+	    for(var i = 0; i < 4; i++){     	
+           	composable_xs[i] = new_xs[i];
+           	composable_ys[i] = new_ys[i];
+       	}
+       	
+       	composable_draw(e.clientX, e.clientY);
+   	}, false);
+}
+
+var composable_xs = [1., 2., 2., 1.];
+var composable_ys = [1., 1., 2., 2.];
+var composable_i = 0;
+
+function composable_draw(client_x, client_y){
+    // coordiantes correction
+    var canvas_rect = composable.getBoundingClientRect();
+    client_x -= canvas_rect.left;
+    client_y -= canvas_rect.top;
+   	var x = client_to_x(client_x);
+   	var y = client_to_y(client_y);
+    
+    var composable_context = composable.getContext("2d"); 
+    composable_context.font = "16px sans-serif";
+    // background
+    composable_context.fillStyle="#eeeeee";
+	composable_context.fillRect(0,0,512,512);
+    
+	// original cube
+	draw_original_cube_on(composable_context);  
+    
+	// composable
+	composable_context.beginPath();	
+	composable_context.moveTo(x_to_client(composable_xs[3]), y_to_client(composable_ys[3]));
+	for(var i = 0; i < 4; i++){
+    	composable_context.lineTo(x_to_client(composable_xs[i]), y_to_client(composable_ys[i]));
+	}
+	composable_context.strokeStyle="#dd6644";
+    composable_context.stroke();
+    composable_context.closePath();    
+     
+    // new cube
+    var new_xs = [1., 2., 2., 1.];
+	var new_ys = [1., 1., 2., 2.];
+	if(document.getElementById("radio_p").checked){
+    	for(var i = 0; i < 4; i++){
+    	    new_xs[i] = composable_xs[i];
+    	    new_ys[i] = composable_ys[i];
+    	}
+	    new_xs[composable_i] = x;
+	    new_ys[composable_i] = y;
+	}else if(document.getElementById("radio_t").checked){
+	    for(var i = 0; i < 4; i++){
+	        new_xs[i] = composable_xs[i] + x;
+    	    new_ys[i] = composable_ys[i] + y;
+	    }
+	}else if(document.getElementById("radio_r").checked){
+	    for(var i = 0; i < 4; i++){
+	        new_xs[i] = rotated_x(x/2, composable_xs[i], composable_ys[i]);
+    	    new_ys[i] = rotated_y(x/2, composable_xs[i], composable_ys[i]);
+	    }
+	}else if(document.getElementById("radio_s").checked){
+	    for(var i = 0; i < 4; i++){
+	        new_xs[i] = composable_xs[i] * x;
+    	    new_ys[i] = composable_ys[i] * y;
+	    }
+	}
+	
+  	composable_context.beginPath();
+  	composable_context.setLineDash([2, 2]);
+	composable_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
+	for(var i = 0; i < 4; i++){
+    	composable_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+	}
+	composable_context.strokeStyle="#dd6644";
+    composable_context.stroke();
+    composable_context.setLineDash([]);
+    composable_context.closePath();    
+
+	// grid
+	draw_grid_on(composable_context);
 }
     </script>
   </head>
@@ -868,7 +995,9 @@ x' = Ax + By + C
 y' = Dx + Ey + F 
 w' = ax + by + c
         </pre>
+        <p>
 And let's say we want to get back to Cartesian coordinates with this as well. So let's make our w' = 1. We can do this by dividing everything to the current w'.
+        </p>
         <pre class="code">
 x' = (Ax + By + C) / (ax + by + c)
 y' = (Dx + Ey + F) / (ax + by + c)
@@ -878,8 +1007,18 @@ w' = 1
 Now doesn't it look familliar? Well, of course it does! It's the projective transformation. Or the affine. Or it could be the translation, or rotation, or scale. They all can be denoted as a single matric multiplication.
         </p>
         <p>
-But that's not it. Matrices are composable. You can compose your own translation + rotation + another translation + scale + projection — and it all will still fit in a single matrix!
+But that's not yet all. Matrices are composable. You can compose your own translation + rotation + another translation + scale + projection — and it all will still fit in a single matrix!
         </p>
+        <canvas id="composable" width=512 height=512></canvas>
+        <form>
+        <input type="radio" name="transformation_type" id="radio_t">Translation<br>
+        <input type="radio" name="transformation_type" id="radio_r">Rotation<br>
+        <input type="radio" name="transformation_type" id="radio_s">Scale<br>
+        <input type="radio" name="transformation_type" id="radio_p" checked=true>Projection<br>
+        </form>
+        <script language="JavaScript">
+        init_composable();
+        </script>        
     </div>
     
     <p class="footer">
