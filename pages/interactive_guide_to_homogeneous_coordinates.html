@@ -312,14 +312,20 @@ function draw_original_cube_on(context){
 
 function init_translation(){
     translation = document.getElementById("translation");
-    translation_draw(256, 256);
+    var canvas_rect = translation.getBoundingClientRect();
+    translation_draw(canvas_rect.left + 256+ 64, canvas_rect.top + 256 - 64, false);
     
     translation.addEventListener('mousemove', function(e){
     	translation_draw(e.clientX, e.clientY);
     }, false);
+    
+    translation.addEventListener('mouseleave', function(e){
+        var canvas_rect = translation.getBoundingClientRect();
+        translation_draw(canvas_rect.left + 256+ 64, canvas_rect.top + 256 - 64, false);
+    }, false);
 }
 
-function translation_draw(client_x, client_y){
+function translation_draw(client_x, client_y, do_new = true){
     // coordiantes correction
     var canvas_rect = translation.getBoundingClientRect();
     client_x -= canvas_rect.left;
@@ -333,39 +339,41 @@ function translation_draw(client_x, client_y){
     translation_context.fillStyle="#eeeeee";
 	translation_context.fillRect(0,0,512,512);
 	
-	// the connection
-	translation_context.beginPath();
-	translation_context.setLineDash([2, 2]);
-	translation_context.moveTo(x_to_client(1), y_to_client(1));
-	translation_context.lineTo(x_to_client(x), y_to_client(y));
-    translation_context.moveTo(x_to_client(1 + 1), y_to_client(1));
-	translation_context.lineTo(x_to_client(x + 1), y_to_client(y));
-	translation_context.moveTo(x_to_client(1 + 1), y_to_client(1 + 1));
-	translation_context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
-	translation_context.moveTo(x_to_client(1), y_to_client(1 + 1));
-	translation_context.lineTo(x_to_client(x), y_to_client(y + 1));
-	translation_context.strokeStyle="#eeaa88";
-    translation_context.stroke();
-    translation_context.setLineDash([]);
-    translation_context.closePath();
+	if(do_new){
+	    // the connection
+	    translation_context.beginPath();
+	    translation_context.setLineDash([2, 2]);
+	    translation_context.moveTo(x_to_client(1), y_to_client(1));
+	    translation_context.lineTo(x_to_client(x), y_to_client(y));
+        translation_context.moveTo(x_to_client(1 + 1), y_to_client(1));
+	    translation_context.lineTo(x_to_client(x + 1), y_to_client(y));
+	    translation_context.moveTo(x_to_client(1 + 1), y_to_client(1 + 1));
+	    translation_context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
+	    translation_context.moveTo(x_to_client(1), y_to_client(1 + 1));
+	    translation_context.lineTo(x_to_client(x), y_to_client(y + 1));
+	    translation_context.strokeStyle="#eeaa88";
+        translation_context.stroke();
+        translation_context.setLineDash([]);
+        translation_context.closePath();
+    }
     
 	// original cube
 	draw_original_cube_on(translation_context);  
     
-	// translation
-	translation_context.beginPath();
-	translation_context.moveTo(x_to_client(x), y_to_client(y));
-	translation_context.lineTo(x_to_client(x + 1), y_to_client(y));
-	translation_context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
-	translation_context.lineTo(x_to_client(x), y_to_client(y + 1));
-	translation_context.lineTo(x_to_client(x), y_to_client(y));
-	translation_context.strokeStyle="#dd6644";
+    // translation
+    translation_context.beginPath();
+    translation_context.moveTo(x_to_client(x), y_to_client(y));
+    translation_context.lineTo(x_to_client(x + 1), y_to_client(y));
+    translation_context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
+    translation_context.lineTo(x_to_client(x), y_to_client(y + 1));
+    translation_context.lineTo(x_to_client(x), y_to_client(y));
+    translation_context.strokeStyle="#dd6644";
     translation_context.stroke();
     translation_context.closePath();    
     translation_context.fillStyle="#dd6644";
     translation_context.fillText("x' = x + a, where a = " + x.toFixed(1), 32, 460);
     translation_context.fillText("y' = y + b, where b = " + y.toFixed(1), 32, 480);
-     
+
 	// grid
 	draw_grid_on(translation_context);
 }
@@ -380,14 +388,20 @@ function rotated_y(a, x, y){
 
 function init_rotation(){
     rotation = document.getElementById("rotation");
-    rotation_draw(256, 256);
+    var canvas_rect = translation.getBoundingClientRect();
+    rotation_draw(canvas_rect.left + 256 + 20, 0, false);
     
     rotation.addEventListener('mousemove', function(e){
     	rotation_draw(e.clientX, e.clientY);
     }, false);
+    
+    rotation.addEventListener('mouseleave', function(e){
+        var canvas_rect = translation.getBoundingClientRect();
+        rotation_draw(canvas_rect.left + 256 + 20, 0, false);
+    }, false);
 }
 
-function rotation_draw(client_x, client_y){
+function rotation_draw(client_x, client_y, do_new = true){
     // coordiantes correction
     var canvas_rect = rotation.getBoundingClientRect();
     client_x -= canvas_rect.left;
@@ -408,49 +422,57 @@ function rotation_draw(client_x, client_y){
 	  new_ys[i] = rotated_y(a, xs[i], ys[i]);
 	}
 	
-	// the connection
-	rotation_context.beginPath();
-	rotation_context.setLineDash([2, 2]);
-	for(var i = 0; i < 4; i++){
-		rotation_context.moveTo(x_to_client(xs[i]), y_to_client(ys[i]));
-    	rotation_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
-	}
-	rotation_context.strokeStyle="#eeaa88";
-    rotation_context.stroke();
-    rotation_context.setLineDash([]);
-    rotation_context.closePath();
-    
+	if(do_new){
+	    // the connection
+	    rotation_context.beginPath();
+	    rotation_context.setLineDash([2, 2]);
+	    for(var i = 0; i < 4; i++){
+		    rotation_context.moveTo(x_to_client(xs[i]), y_to_client(ys[i]));
+        	rotation_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+	    }
+	    rotation_context.strokeStyle="#eeaa88";
+        rotation_context.stroke();
+        rotation_context.setLineDash([]);
+        rotation_context.closePath();
+    }
+        
 	// original cube
 	draw_original_cube_on(rotation_context);  
     
-	// rotation
-	rotation_context.beginPath();	
-	rotation_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
-	for(var i = 0; i < 4; i++){
+    // rotation
+    rotation_context.beginPath();	
+    rotation_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
+    for(var i = 0; i < 4; i++){
     	rotation_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
-	}
-	rotation_context.strokeStyle="#dd6644";
+    }
+    rotation_context.strokeStyle="#dd6644";
     rotation_context.stroke();
     rotation_context.closePath();    
     rotation_context.fillStyle="#dd6644";
     rotation_context.fillText("x' = sin(a) * x + cos(a) * y", 32, 440);
     rotation_context.fillText("y' = cos(a) * x - sin(a) * y", 32, 460);
     rotation_context.fillText("where a = " + a.toFixed(2), 32, 480);
-     
+    
 	// grid
 	draw_grid_on(rotation_context);
 }
 
 function init_scale(){
     scale = document.getElementById("scale");
-    scale_draw(256, 256);
+    var canvas_rect = scale.getBoundingClientRect();
+    scale_draw(canvas_rect.left + 256 + 96, canvas_rect.top + 256 - 64, false);
     
     scale.addEventListener('mousemove', function(e){
     	scale_draw(e.clientX, e.clientY);
     }, false);
+    
+    scale.addEventListener('mouseleave', function(e){
+        var canvas_rect = scale.getBoundingClientRect();
+        scale_draw(canvas_rect.left + 256 + 96, canvas_rect.top + 256 - 64, false);
+    }, false);
 }
 
-function scale_draw(client_x, client_y){
+function scale_draw(client_x, client_y, do_new = true){
     // coordiantes correction
     var canvas_rect = scale.getBoundingClientRect();
     client_x -= canvas_rect.left;
@@ -473,41 +495,43 @@ function scale_draw(client_x, client_y){
 	  new_ys[i] = b * ys[i];
 	}
 	
-	// the connection
-	scale_context.beginPath();
-	scale_context.setLineDash([2, 2]);
-	for(var i = 0; i < 4; i++){
-		scale_context.moveTo(x_to_client(xs[i]), y_to_client(ys[i]));
-    	scale_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
-	}
-	scale_context.strokeStyle="#eeaa88";
-    scale_context.stroke();
-    scale_context.setLineDash([]);
-    scale_context.closePath();
-    
+	if(do_new){
+	    // the connection
+	    scale_context.beginPath();
+	    scale_context.setLineDash([2, 2]);
+	    for(var i = 0; i < 4; i++){
+		    scale_context.moveTo(x_to_client(xs[i]), y_to_client(ys[i]));
+        	scale_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+	    }
+	    scale_context.strokeStyle="#eeaa88";
+        scale_context.stroke();
+        scale_context.setLineDash([]);
+        scale_context.closePath();
+    }
+        
 	// original cube
 	draw_original_cube_on(scale_context);  
     
-	// scale
-	scale_context.beginPath();	
-	scale_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
-	for(var i = 0; i < 4; i++){
+    // scale
+    scale_context.beginPath();	
+    scale_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
+    for(var i = 0; i < 4; i++){
     	scale_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
-	}
-	scale_context.strokeStyle="#dd6644";
+    }
+    scale_context.strokeStyle="#dd6644";
     scale_context.stroke();
     scale_context.closePath();    
     scale_context.fillStyle="#dd6644";
     scale_context.fillText("x' = a * x, where a = " + a.toFixed(2), 32, 460);
     scale_context.fillText("y' = b * y, where b = " + b.toFixed(2), 32, 480);
-     
+    
 	// grid
 	draw_grid_on(scale_context);
 }
 
 function init_affine(){
     affine = document.getElementById("affine");
-    affine_draw(256, 256);
+    affine_draw(0, 0, false);
     
     affine.addEventListener('mousemove', function(e){
     	affine_draw(e.clientX, e.clientY);
@@ -526,13 +550,17 @@ function init_affine(){
        	affine_i = (affine_i + 1) % 3;
        	affine_draw(e.clientX, e.clientY);
    	}, false);
+   	
+    affine.addEventListener('mouseleave', function(e){
+    	affine_draw(0, 0, false);
+    }, false);
 }
 
-var affine_xs = [1., 2., 2., 1.];
-var affine_ys = [1., 1., 2., 2.];
+var affine_xs = [0., 4., 5., 1.];
+var affine_ys = [0., 1., 5., 4.];
 var affine_i = 0;
 
-function affine_draw(client_x, client_y){
+function affine_draw(client_x, client_y, do_new = true){
     // coordiantes correction
     var canvas_rect = affine.getBoundingClientRect();
     client_x -= canvas_rect.left;
@@ -545,9 +573,6 @@ function affine_draw(client_x, client_y){
     // background
     affine_context.fillStyle="#eeeeee";
 	affine_context.fillRect(0,0,512,512);
-	
-	var xs = [1., 2., 2., 1.];
-	var ys = [1., 1., 2., 2.];
     
 	// original cube
 	draw_original_cube_on(affine_context);  
@@ -561,16 +586,18 @@ function affine_draw(client_x, client_y){
 	affine_context.strokeStyle="#dd6644";
     affine_context.stroke();
     affine_context.closePath();    
-     
-    // link
-  	affine_context.beginPath();
-  	affine_context.setLineDash([2, 2]);
-  	affine_context.moveTo(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]));
-  	affine_context.lineTo(x_to_client(x), y_to_client(y));
-	affine_context.strokeStyle="#dd6644";
-    affine_context.stroke();
-    affine_context.setLineDash([]);
-    affine_context.closePath();    
+    
+    if(do_new){
+        // link
+      	affine_context.beginPath();
+      	affine_context.setLineDash([2, 2]);
+      	affine_context.moveTo(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]));
+      	affine_context.lineTo(x_to_client(x), y_to_client(y));
+	    affine_context.strokeStyle="#dd6644";
+        affine_context.stroke();
+        affine_context.setLineDash([]);
+        affine_context.closePath();    
+    }
 
 	// grid
 	draw_grid_on(affine_context);
@@ -578,7 +605,7 @@ function affine_draw(client_x, client_y){
 
 function init_projective(){
     projective = document.getElementById("projective");
-    projective_draw(256, 256);
+    projective_draw(0, 0, false);
     
     projective.addEventListener('mousemove', function(e){
     	projective_draw(e.clientX, e.clientY);
@@ -595,13 +622,17 @@ function init_projective(){
        	projective_i = (projective_i + 1) % 4;
        	projective_draw(e.clientX, e.clientY);
    	}, false);
+   	   	
+    projective.addEventListener('mouseleave', function(e){
+    	projective_draw(0, 0, false);
+    }, false);      	
 }
 
-var projective_xs = [1., 2., 2., 1.];
-var projective_ys = [1., 1., 2., 2.];
+var projective_xs = [1., 6., 5., 1.];
+var projective_ys = [1., 1., 6., 3.];
 var projective_i = 0;
 
-function projective_draw(client_x, client_y){
+function projective_draw(client_x, client_y, do_new = true){
     // coordiantes correction
     var canvas_rect = projective.getBoundingClientRect();
     client_x -= canvas_rect.left;
@@ -628,16 +659,18 @@ function projective_draw(client_x, client_y){
     projective_context.stroke();
     projective_context.closePath();    
      
-    // link
-  	projective_context.beginPath();
-  	projective_context.setLineDash([2, 2]);
-  	projective_context.moveTo(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]));
-  	projective_context.lineTo(x_to_client(x), y_to_client(y));
-	projective_context.strokeStyle="#dd6644";
-    projective_context.stroke();
-    projective_context.setLineDash([]);
-    projective_context.closePath();    
-
+    if(do_new){
+        // link
+      	projective_context.beginPath();
+      	projective_context.setLineDash([2, 2]);
+      	projective_context.moveTo(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]));
+      	projective_context.lineTo(x_to_client(x), y_to_client(y));
+	    projective_context.strokeStyle="#dd6644";
+        projective_context.stroke();
+        projective_context.setLineDash([]);
+        projective_context.closePath();    
+    }
+    
 	// grid
 	draw_grid_on(projective_context);
 }
@@ -645,8 +678,7 @@ function projective_draw(client_x, client_y){
 
 function init_composable(){
     composable = document.getElementById("composable");
-    var canvas_rect = composable.getBoundingClientRect();
-    composable_draw(256+32 + canvas_rect.left, 256-32 + canvas_rect.top);
+    composable_draw(0, 0, false);
     
     composable.addEventListener('mousemove', function(e){
     	composable_draw(e.clientX, e.clientY);
@@ -712,13 +744,17 @@ function init_composable(){
        	document.getElementById("matrix_col2").innerHTML = D.toFixed(3) + "<br>" + E.toFixed(3) + "<br>" + F.toFixed(3);
        	document.getElementById("matrix_col3").innerHTML = a.toFixed(3) + "<br>" + b.toFixed(3) + "<br>" + c.toFixed(3);
    	}, false);
+   	
+    composable.addEventListener('mouseleave', function(e){
+    	composable_draw(0, 0, false);
+    }, false);   	
 }
 
 var composable_xs = [1., 2., 2., 1.];
 var composable_ys = [1., 1., 2., 2.];
 var composable_i = 0;
 
-function composable_draw(client_x, client_y){
+function composable_draw(client_x, client_y, do_new = true){
     // coordiantes correction
     var canvas_rect = composable.getBoundingClientRect();
     client_x -= canvas_rect.left;
@@ -745,44 +781,45 @@ function composable_draw(client_x, client_y){
     composable_context.stroke();
     composable_context.closePath();    
      
-    // new cube
-    var new_xs = [1., 2., 2., 1.];
-	var new_ys = [1., 1., 2., 2.];
-	if(document.getElementById("radio_p").checked){
-    	for(var i = 0; i < 4; i++){
-    	    new_xs[i] = composable_xs[i];
-    	    new_ys[i] = composable_ys[i];
-    	}
-	    new_xs[composable_i] = x;
-	    new_ys[composable_i] = y;
-	}else if(document.getElementById("radio_t").checked){
-	    for(var i = 0; i < 4; i++){
-	        new_xs[i] = composable_xs[i] + x;
-    	    new_ys[i] = composable_ys[i] + y;
+    if(do_new){
+        // new cube
+        var new_xs = [1., 2., 2., 1.];
+	    var new_ys = [1., 1., 2., 2.];
+	    if(document.getElementById("radio_p").checked){
+        	for(var i = 0; i < 4; i++){
+        	    new_xs[i] = composable_xs[i];
+        	    new_ys[i] = composable_ys[i];
+        	}
+	        new_xs[composable_i] = x;
+	        new_ys[composable_i] = y;
+	    }else if(document.getElementById("radio_t").checked){
+	        for(var i = 0; i < 4; i++){
+	            new_xs[i] = composable_xs[i] + x;
+        	    new_ys[i] = composable_ys[i] + y;
+	        }
+	    }else if(document.getElementById("radio_r").checked){
+	        for(var i = 0; i < 4; i++){
+	            new_xs[i] = rotated_x(x/2, composable_xs[i], composable_ys[i]);
+        	    new_ys[i] = rotated_y(x/2, composable_xs[i], composable_ys[i]);
+	        }
+	    }else if(document.getElementById("radio_s").checked){
+	        for(var i = 0; i < 4; i++){
+	            new_xs[i] = composable_xs[i] * x;
+        	    new_ys[i] = composable_ys[i] * y;
+	        }
 	    }
-	}else if(document.getElementById("radio_r").checked){
-	    for(var i = 0; i < 4; i++){
-	        new_xs[i] = rotated_x(x/2, composable_xs[i], composable_ys[i]);
-    	    new_ys[i] = rotated_y(x/2, composable_xs[i], composable_ys[i]);
-	    }
-	}else if(document.getElementById("radio_s").checked){
-	    for(var i = 0; i < 4; i++){
-	        new_xs[i] = composable_xs[i] * x;
-    	    new_ys[i] = composable_ys[i] * y;
-	    }
-	}
 	
-  	composable_context.beginPath();
-  	composable_context.setLineDash([2, 2]);
-	composable_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
-	for(var i = 0; i < 4; i++){
-    	composable_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
-	}
-	composable_context.strokeStyle="#dd6644";
-    composable_context.stroke();
-    composable_context.setLineDash([]);
-    composable_context.closePath();    
-
+      	composable_context.beginPath();
+      	composable_context.setLineDash([2, 2]);
+	    composable_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
+	    for(var i = 0; i < 4; i++){
+        	composable_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+	    }
+	    composable_context.strokeStyle="#dd6644";
+        composable_context.stroke();
+        composable_context.setLineDash([]);
+        composable_context.closePath();    
+    }
 	// grid
 	draw_grid_on(composable_context);
 }
@@ -793,8 +830,7 @@ function revert_composable(){
 	document.getElementById("matrix_col1").innerHTML = "1<br>0<br>0";
 	document.getElementById("matrix_col2").innerHTML = "0<br>1<br>0";
 	document.getElementById("matrix_col3").innerHTML = "0<br>0<br>1";
-    var canvas_rect = composable.getBoundingClientRect();
-    composable_draw(256+32 + canvas_rect.left, 256-32 + canvas_rect.top);
+    composable_draw(0, 0, false);
 }
     </script>
   </head>
