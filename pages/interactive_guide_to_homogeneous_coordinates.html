@@ -61,13 +61,27 @@ pre {
 }
 
 table {
-    border: 0 0 0 0;
+    border-width: 0pt;
     padding-top: 12pt;
     padding-left: 12pt;
     padding-right: 12pt;
     padding-bottom: 12pt;
     font-size: 16pt;
+    font-family: monospace;
     text-align: center;
+}
+
+table td {
+    padding: 0pt 4pt 0pt 4pt;
+    margin: 0 0 0 0;
+    border-width: 0pt;
+}
+
+.brackets {
+    font-size:48pt; 
+    padding-bottom:8pt; 
+    font-family: sans-serif; 
+    font-weight: 100;
 }
 
 .code {
@@ -133,8 +147,8 @@ function y_to_client(y){
     return 256 - y * 32.;
 }
 
-var point_x = 0;
-var point_y = 0;
+var point_x = 5;
+var point_y = 4;
 
 var pick_a_point = null;
 var slide_a_w = null;
@@ -167,9 +181,22 @@ function draw_grid_on(context){
     context.closePath();
 }
 
+function write_the_point_value(){
+    document.getElementById("to_fill_with_numbers").innerHTML = 
+    "The point (" + point_x + ", " + point_y + ") is the same as " +
+    "(" + point_x + ", " + point_y + ", 1). <br>" +
+    "Or (" + point_x*2 + ", " + point_y*2 + ", 2).<br>" +
+    "Or (" + point_x*0.5 + ", " + point_y*0.5 + ", 0.5). <br>" +
+    "Or even (" + point_x*1000 + ", " + point_y*1000 + ", 1000). <br>" +
+    "This is all the same point. ";
+}
+
 function init_pick_a_point(){
     pick_a_point = document.getElementById("pick_a_point");
-    pick_a_point_draw(256, 256);
+    var canvas_rect = pick_a_point.getBoundingClientRect();
+    client_x = canvas_rect.left + point_x * 32 + 256;
+    client_y = canvas_rect.top + 256 - point_y * 32;
+    pick_a_point_draw(client_x, client_y);
     
     pick_a_point.addEventListener('mousemove', function(e){
         if(point_x == 0 && point_y == 0)
@@ -180,16 +207,10 @@ function init_pick_a_point(){
         var canvas_rect = pick_a_point.getBoundingClientRect();
         point_x = Math.round(client_to_x(e.clientX - canvas_rect.left)*10)/10;
         point_y = Math.round(client_to_y(e.clientY - canvas_rect.top)*10)/10;
-	    pick_a_point_draw(e.clientX, e.clientY);
-	    document.getElementById("after_the_point_is_picked").style.display = "block";
-        document.getElementById("to_fill_with_numbers").innerHTML = 
-"Your point (" + point_x + ", " + point_y + ") is the same as " +
-"(" + point_x + ", " + point_y + ", 1). <br>" +
-"Or (" + point_x*2 + ", " + point_y*2 + ", 2).<br>" +
-"Or (" + point_x*0.5 + ", " + point_y*0.5 + ", 0.5). <br>" +
-"Or even (" + point_x*1000 + ", " + point_y*1000 + ", 1000). <br>" +
-"This is all the same point. ";
-       transform();
+	    pick_a_point_draw(e.clientX, e.clientY);        
+	    write_the_point_value();
+        transform();
+        slide_a_w_draw(e.clientX);
     }, false);
 }
 
@@ -236,12 +257,6 @@ function transform(){
 "<br>(" + point_x + ", " + point_y + ") = " + 
 "(" + point_x * w + ", " + point_y * w + ", " + w + ")";  
     }
-}
-
-function skip_transform(){
-        document.getElementById("after_the_w_proposed").style.display = "block";
-        document.getElementById("transformed").innerHTML = "<br>When it's 0, then there is no transformation available!"
-        document.getElementById("to_hide_on_transform").style.display = "none";
 }
 
 function init_slide_a_w(){
@@ -693,10 +708,9 @@ function init_composable(){
        	var a = (-x0*y2 + x0*y3 + x1*y2 - x1*y3 + x2*y0 - x2*y1 - x3*y0 + x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
        	var b = (-x0*y1 + x0*y2 + x1*y0 - x1*y3 - x2*y0 + x2*y3 + x3*y1 - x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
        	var c = 1.;
-       	document.getElementById("matrix").innerHTML = "Matrix:\n" + 
-       	    A.toFixed(3) + " " + D.toFixed(3) + " " + a.toFixed(3) + "\n" +
-       	    B.toFixed(3) + " " + E.toFixed(3) + " " + b.toFixed(3) + "\n" +
-       	    C.toFixed(3) + " " + F.toFixed(3) + " " + c.toFixed(3);
+       	document.getElementById("matrix_col1").innerHTML = A.toFixed(3) + "<br>" + B.toFixed(3) + "<br>" + C.toFixed(3);
+       	document.getElementById("matrix_col2").innerHTML = D.toFixed(3) + "<br>" + E.toFixed(3) + "<br>" + F.toFixed(3);
+       	document.getElementById("matrix_col3").innerHTML = a.toFixed(3) + "<br>" + b.toFixed(3) + "<br>" + c.toFixed(3);
    	}, false);
 }
 
@@ -776,7 +790,9 @@ function composable_draw(client_x, client_y){
 function revert_composable(){
     composable_xs = [1., 2., 2., 1.];
 	composable_ys = [1., 1., 2., 2.];
-	document.getElementById("matrix").innerHTML = "Matrix:\n1 0 0\n0 1 0\n0 0 1"
+	document.getElementById("matrix_col1").innerHTML = "1<br>0<br>0";
+	document.getElementById("matrix_col2").innerHTML = "0<br>1<br>0";
+	document.getElementById("matrix_col3").innerHTML = "0<br>0<br>1";
     var canvas_rect = composable.getBoundingClientRect();
     composable_draw(256+32 + canvas_rect.left, 256-32 + canvas_rect.top);
 }
@@ -800,269 +816,275 @@ I think, learning this particular piece of geometry is a valuable experience in 
 The complication
     </h2>
     <p>
-In our usual Cartesian coordinate system, a point on a plane is set by a pair of numbers (x<sub>c</sub>, y<sub>c</sub>). Please pick a point to continue.
+In our usual Cartesian coordinate system, a point on a plane is set by a pair of numbers (x<sub>c</sub>, y<sub>c</sub>). Feel free to pick any point. Just click anywhere on the plot.
     </p>
     <canvas id="pick_a_point" width=512 height=512></canvas> 
     <script language="JavaScript">
     init_pick_a_point();
     </script>
-    <div id="after_the_point_is_picked" style="display:none;">
-        <p>
-Right! 
-        </p>
-        <p>
+    <p>
 Now in homogeneous coordinates points on a plane are set by a tuple of 3 numbers (x<sub>h</sub>, y<sub>h</sub>, w<sub>h</sub>).
-        </p>
-        <p>
+    </p>
+    <p>
 That's a bit unusual, but if a point is taken from the cartesian space, you can transform a homogeneous tuple into cartesian pair as simple as this:
-        </p>
-        <p>
+    </p>
+    <p>
 x<sub>c</sub> = x<sub>h</sub> / w<sub>h</sub>
-            <br>
+        <br>
 y<sub>c</sub> = y<sub>h</sub> / w<sub>h</sub>
-        </p>
-        <p>
+    </p>
+    <p>
 Although, there is no one and only way to transform a point from cartesian to homogeneous coordinates. You can pick any (almost) value for w<sub>h</sub> and it would work. 
-        </p>
-        <p>
-        <span id="to_fill_with_numbers">
-        </span>
-        </p>
-        <p>
+    </p>
+    <p>
+    <span id="to_fill_with_numbers">
+    </span>
+    <script language="JavaScript">
+    write_the_point_value();
+    </script>    
+    </p>
+    <p>
 Here is a coordinate transformer. It will transform your point into homogeneous coordinates for the (almost) every w<sub>h</sub> you propose.
-        </p>
-        <form>
+    </p>
+    <form>
 Please enter w<sub>h</sub>:
-        <input type="text" id="proposed_w" value="1">
-        <button type="button" onclick="transform()">Transform</button>
-        <button type="button" onclick="skip_transform()">No, thanks</button>
-        <span id="transformed">
-        </span>
-        </form>
-        <p id="to_hide_on_transform">
-But it wouldn't work for all the possible numbers. To continue, please propose the w<sub>h</sub> for which the point could not be transformed.
-        </p>
-    </div>
+    <input type="text" id="proposed_w" value="1">
+    <button type="button" onclick="transform()">Transform</button>
+    <span id="transformed">
+    </span>
+    </form>
+    <p id="to_hide_on_transform">
+But it wouldn't work for all the possible numbers. There is one exception.
+    </p>
     <div id="after_the_w_proposed" style="display:none;">
         <p>
-Exactly! 
+Exactly! There is no tranformation between affine and Cartesian coordinates when w<sub>h</sub> is 0. Kudos for finding this yourself!
         </p>
-        <p>
-Cartesian coordinates are just the first two numbers of homogeneous coordinates divided by the third. So if it is 1, then homogeneous coordinates are basically the same thing as Cartesian. But the smaller w<sub>h</sub> gets, the further the point in Cartesian coordinates travels from the null. 
-        </p>
-        <canvas id="slide_a_w" width=512 height=512></canvas> 
-        <script language="JavaScript">
-        init_slide_a_w();
-        </script>
-        <p>
+     </div>
+    <p>
+Usually Cartesian coordinates are just the first two numbers of homogeneous coordinates divided by the third. So if it is 1, then homogeneous coordinates are basically the same thing as Cartesian. But the smaller w<sub>h</sub> gets, the further the point in Cartesian coordinates travels from the null. 
+    </p>
+    <canvas id="slide_a_w" width=512 height=512></canvas> 
+    <script language="JavaScript">
+    init_slide_a_w();
+    </script>
+    <p>
 That’s all rather simple until one moment. What if the fourth coordinate is 0?
-        </p>
-        <p>
+    </p>
+    <p>
 Intuition tells, that it should be further from the 0 than every other point. Every other point in Euclidean space that is. Homogeneous coordinates indeed denote points not only in Euclidean or, more general, affine space, but in projective space that includes and expands affine one.
-        <p>
-        <p>      
+    <p>
+    <p>      
 Points from the projective space may lie in the Euclidean space or may be infinitely far from any point of it. If w<sub>h</sub> is 0 then it's the latter. If not, then whatever w<sub>h</sub> is, it's the former.
-        </p>
-        <p>
+    </p>
+    <p>
 From the pragmatic point of view, this lets us, for instance, compose a 3D-scene in a manner that every object that can be reached would fit in affine space with the coordinates (x, y, z, 1), and all the objects that can never be reached will belong to its projective extension (x, y, z, 0).
-        </p>
-        <p>
+    </p>
+    <p>
 So if you do work with 3D graphics, you might notice that it is quite common to write 3D points as a tuple of 4 numbers. The usual question here is: “what does that fourth coordinate stand for?” And the usual answer is: “Just set it to 1 and hope you wouldn’t screw anything!” Well, now you know what the fourth coordinate actually stands for.
-        </p>
-        <p>
+    </p>
+    <p>
 It is also common to refer points from projective extension as a general direction and not a specific point in Euclidean space. A ray that starts at null and has no length has no end, only the direction. You might even have heard about it being called a vector as opposed to a point. This is not technically correct as, of course, any point is a vector in a corresponding vector space. But this still might be a useful naming convention if you are not into the real vector algebra.
-        </p>
-        <p>
+    </p>
+    <p>
 Living in a projective space gives you more options. You can denote points that are unheard of in the Euclidean one. But that’s not all it is good for. In fact, we are only starting to get into the benefits.
-        </p>
-        <h2>
+    </p>
+    <h2>
 1. In projective space central and parallel projections are the same
-        </h2>
-        <p>
+    </h2>
+    <p>
 There are two kinds of projection in Euclidean space: central and parallel. Central projection is what makes the perspective, so the closer things seem bigger, and that’s what we use in video games to render a 3D scene into a flat picture on a screen. The parallel projection preserves proportions, so that’s what we usually use in CAD systems to show bolts and nuts on drawings.        
-        </p>
-        <p>
+    </p>
+    <p>
 In projective space they are the same. You see, in affine space, you can set a center for a central projection very-very far away from the scene you want to render. This will make disproportion very small. But in projective space you can hurl a center infinitely far — further away than any point in affine space at all — and the disproportion will disappear completely.
-        </p>
-        <p>
+    </p>
+    <p>
 So bear in mind, if you want to make a game about zombies who happen to be CAD engineers, you don’t have to implement both kinds of projections. Just set the projection central point to (x, y, z, 0), and this will automatically turn it into parallel.
-        </p>
-        <h2>
+    </p>
+    <h2>
 2. All the surfaces described as an equation on degree n are the same
-        </h2>
-        <p>
+    </h2>
+    <p>
 I remember on my first year in college we were studying quadric surfaces and one of the exercises allegedly made up to help us learn their classification was to make an album. It was 17 sheets of paper with different graphics and formulas sewed together only to be briefly examined by the professor and thrown away a day after. You might imagine we were not fond of this activity.
-        </p>
-        <p>
+    </p>
+    <p>
 Now in projective space, this exercise would have been much more environmentally friendly. That’s because in homogeneous coordinates all the algebraic surfaces are homogenous too. This means every piece of a polynomial that defines the surface has the same degree. It may contain different variables with different degrees of their own, but they all magically add up to the very same degree for every element in the sum.
-        </p>
-        <p>
+    </p>
+    <p>
 And this means only one drawing with one formula to be drawn and thrown away and not seventeen. That should sum up to a couple of dead trees over the years.
-        </p>
-        <h2>
+    </p>
+    <h2>
 3. All projective transformations are a matrix (yes, singular)
-        </h2>
-        <p>
+    </h2>
+    <p>
 Geometric transformations are something that happens to a point. They are basically functions (x', y') = f(x, y). If you want to apply the transformation to some object, most of the time you would have to represent it with points and then apply the transformation to each of them.
-        </p>
-        <p>
+    </p>
+    <p>
 Sometimes this gets computationally heavy. For instance, transforming 3 000 x 4 000 pixels image would require 12 000 000 transformations. So looking for the fastest way to apply a transformation does make sense pragmatically.
-        </p>
-        <p>
+    </p>
+    <p>
 Some of the most common transformations are: transtlation;
-        </p>
-        <canvas id="translation" width=512 height=512></canvas> 
-        <script language="JavaScript">
-        init_translation();
-        </script>
-        <p>
+    </p>
+    <canvas id="translation" width=512 height=512></canvas> 
+    <script language="JavaScript">
+    init_translation();
+    </script>
+    <p>
 rotation;
-        </p>
-        <canvas id="rotation" width=512 height=512></canvas> 
-        <script language="JavaScript">
-        init_rotation();
-        </script>
-        <p>
+    </p>
+    <canvas id="rotation" width=512 height=512></canvas> 
+    <script language="JavaScript">
+    init_rotation();
+    </script>
+    <p>
 and scale.
-        </p>
-        <canvas id="scale" width=512 height=512></canvas> 
-        <script language="JavaScript">
-        init_scale();
-        </script>
-        <p>
+    </p>
+    <canvas id="scale" width=512 height=512></canvas> 
+    <script language="JavaScript">
+    init_scale();
+    </script>
+    <p>
 These can be generalized by the affine transformation that can do a translation, and a rotation, and a scale simultaneously:
-        </p>
-        <canvas id="affine" width=512 height=512></canvas> 
-        <script language="JavaScript">
-        init_affine();
-        </script>
-        <p>
+    </p>
+    <canvas id="affine" width=512 height=512></canvas> 
+    <script language="JavaScript">
+    init_affine();
+    </script>
+    <p>
 As you can see, affine transformation is quite powerful, but it has to preserve parallelism. This limits it in a way. If you want to do something like perspective or projection, you would have to go for projective transformation that looks like this:
-        </p>
-        <canvas id="projective" width=512 height=512></canvas> 
-        <script language="JavaScript">
-        init_projective();
-        </script>
-        <h2>
+    </p>
+    <canvas id="projective" width=512 height=512></canvas> 
+    <script language="JavaScript">
+    init_projective();
+    </script>
+    <h2>
 Formulas in Cartesian coordinates
-        </h1>
-        <p>
+    </h1>
+    <p>
 The formula for projective transformations in Cartesian coordinates looks like this:
-        </p>
-        <pre class="code">
+    </p>
+    <pre class="code">
 x' = (Ax + By + C) / (ax + by +c)
 y' = (Dx + Ey + F) / (ax + by +c)
-        </pre>
-        <p>
+    </pre>
+    <p>
 It is a simple geometric transformation just like all we have seen before. It also works on one point at a time. It preserves the degree of curves and surfaces so every straight line will get transformed into the straight line and each plane also into a plane. Since all the 2-nd degree surfaces are the same surface, it will also preserve the degree, but not a class in affine space so that ellipsoid may become parabaloid or hyperboloid. 
-        </p>
-        <p>
+    </p>
+    <p>
 It also generalizes affine transformation that has simple formula:
-        </p>
-        <pre class="code">
+    </p>
+    <pre class="code">
 x' = (Ax + By + C) 
 y' = (Dx + Ey + F) 
-        </pre>
-        <p>
+    </pre>
+    <p>
 As you can see, it's just a special case of projective transformation when a = 0, b = 0, and c = 1.
-        </p>
-        <p>
+    </p>
+    <p>
 And the affine transformation in its turn generalizes translation, rotation and scale. Translation is:
-        </p>
-        <pre class="code">
+    </p>
+    <pre class="code">
 x' = x + C   (A = 1, B = 0)
 y' = x + F   (D = 0, E = 1)
-        </pre>
-        <p>
+    </pre>
+    <p>
 Rotation:
-        </p>
-        <pre class="code" style="font-size:14pt;">
+    </p>
+    <pre class="code" style="font-size:14pt;">
 x' = sin(r) x + cos(r) y   (A = sin(r), B = cos(r), C = 0)
 y' = cos(r) x - sin(r) y   (D = cos(r), E = -sin(r), F = 0)
-        </pre>
-        <p>
+    </pre>
+    <p>
 And scale:
-        </p>
-        <pre class="code">
+    </p>
+    <pre class="code">
 x' = Ax   (B = 0, C = 0)
 y' = Ey   (D = 0, F = 0)
-        </pre>
-        <p>
+    </pre>
+    <p>
 They are all just special cases of projective transformations.
-        </p>
-        <p>
+    </p>
+    <p>
 Now please bear with me, we are entering the matrix territory.        
-        </p>
-        <h2>
+    </p>
+    <h2>
 Matrix in homogeneous coordinates
-        </h2>
-        <p>
-What's going to happen if we multiply a point in homogeneous coordinates on a square matrix? Well, for the ease of notation let's multiply matrix on a point.
-        </p>
-        <table class="code">
-        <tr>
-        <td rowspan=3 style="font-size:84pt;">[</td>
-        <td>A</td><td>D</td><td>a</td>
-        <td rowspan=3 style="font-size:84pt;">]</td><td rowspan=3 style="font-size:84pt;">[</td>
-        <td>x</td>
-        <td rowspan=3 style="font-size:84pt;">]</td>
-        <td rowspan=3 style="font-size:84pt;">=</td><td rowspan=3 style="font-size:84pt;">[</td>
-        <td>Ax + By +Cw</td>
-        <td rowspan=3 style="font-size:84pt;">]</td>
-        </tr><tr>
-        <td>B</td><td>E</td><td>b</td><td>y</td><td>Dx + Ey +Fw</td>
-        </tr><tr>
-        <td>C</td><td>F</td><td>c</td><td>w</td><td>ax + by +cw</td>
-        </tr>
-        </table>
-        <p>
-Let's pretend the point we took came from Cartesian coordinates and it has w<sub>h</sub> = 1. Now we see that:
-        </p>
-        <pre class="code">
+    </h2>
+    <p>
+What's going to happen if we multiply a square matrix on a point in homogeneous coordinates?
+    </p>
+    <table class="code">
+    <tr>
+    <td class="brackets">[</td>
+    <td>A D a<br>B E b<br>C F c</td>
+    <td class="brackets">][</td>
+    <td>x<br>y<br>w</td>
+    <td class="brackets">]</td>
+    <td> = </td>
+    <td class="brackets">[</td>
+    <td>Ax + By + Cw<br>Dx + Ey + Fw<br>ax + by + cw</td>
+    <td class="brackets">]</td>
+    </tr>
+    </table>
+    <p>
+Let's pretend the point we took came from Cartesian coordinates so w<sub>h</sub> = 1. Now we see that:
+    </p>
+    <pre class="code">
 x' = Ax + By + C 
 y' = Dx + Ey + F 
 w' = ax + by + c
-        </pre>
-        <p>
+    </pre>
+    <p>
 And let's say we want to get back to Cartesian coordinates with this as well. So let's make our w' = 1. We can do this by dividing everything to the current w'.
-        </p>
-        <pre class="code">
+    </p>
+    <pre class="code">
 x' = (Ax + By + C) / (ax + by + c)
 y' = (Dx + Ey + F) / (ax + by + c)
 w' = 1
-        </pre>
-        <p>
-Doesn't it look familiar? Well, of course, it does! It's the projective transformation. Or the affine. Or it could be the translation, or rotation, or scale. They all can be denoted as a single matrix multiplication.
-        </p>
-        <p>
+    </pre>
+    <p>
+Doesn't it look familiar? Well, of course, it does! It's the projective transformation. Or the affine. Or it could be the translation, or rotation, or scale. They all can be written as a single matrix multiplication.
+    </p>
+    <p>
 But that's not yet all. Matrices are composable. You can compose your own translation + rotation + another translation + scale + projection — and it all will still fit into a single matrix!
-        </p>
-        <form>
-        <input type="radio" name="transformation_type" id="radio_t">Translation<br>
-        <input type="radio" name="transformation_type" id="radio_r">Rotation<br>
-        <input type="radio" name="transformation_type" id="radio_s">Scale<br>
-        <input type="radio" name="transformation_type" id="radio_p" checked=true>Projection<br>
-        </form>
-        <canvas id="composable" width=512 height=512></canvas>
-        <pre class="code" id="matrix">
+    </p>
+    <form>
+    <input type="radio" name="transformation_type" id="radio_t">Translation<br>
+    <input type="radio" name="transformation_type" id="radio_r">Rotation<br>
+    <input type="radio" name="transformation_type" id="radio_s">Scale<br>
+    <input type="radio" name="transformation_type" id="radio_p" checked=true>Projection<br>
+    </form>
+    <canvas id="composable" width=512 height=512></canvas>
+    <table class="code">
+    <tr><td>
 Matrix:
-1 0 0        
-0 1 0
-0 0 1   </pre>          
-        <button class="button" id="revert_composable" onclick="revert_composable()">Revert to E</button>
-        <script language="JavaScript">
-        init_composable();
-        </script>        
-        <h2>
+    </td>
+    <td class="brackets">[</td>
+    <td id="matrix_col1">
+1<br>0<br>0
+    </td><td id="matrix_col2">
+0<br>1<br>0
+    </td><td id="matrix_col3">
+0<br>0<br>1
+    </td>
+    <td class="brackets">]</td>
+    </tr>
+    </table>
+          
+    <button class="button" id="revert_composable" onclick="revert_composable()">Revert to E</button>
+    <script language="JavaScript">
+    init_composable();
+    </script>        
+    <h2>
 Conclusion
-        </h2>
-        <p>
+    </h2>
+    <p>
 As you can see, you can save quite a lot of time processing millions of points with one single matrix instead of applying all the transformations separately. And you can also save lines of code by unifying all the transformations. But this is not the whole point. Usually, we lose performance, not because of some small computational inefficiency, but because of needless layering. And the layering occurs because people don’t understand and don’t trust the beauty of the plain mathematics.
-        </p>
-        <p>
+    </p>
+    <p>
 I hope this page reveals a bit of it. I hope it makes it a little more trustworthy.
-        </p>
-    </div>
+    </p>
+
     
     <p class="footer">
     There are more words with buttons on <a href="index.html">wordsandbuttons.online</a>.<br>
