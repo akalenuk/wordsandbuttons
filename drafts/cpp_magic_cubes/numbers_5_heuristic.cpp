@@ -22,10 +22,6 @@ bool check_if_magic(const std::string& square)
   {
   if(square[4] != '5')
     return false;
-  /*if (((square[0] & 1) != 0) || ((square[1] & 1) == 0) || ((square[2] & 1) == 1)
-    || ((square[3] & 1) == 0) || ((square[4] & 1) == 0) || ((square[5] & 1) == 0)
-    || ((square[6] & 1) != 0) || ((square[7] & 1) == 0) || ((square[8] & 1) == 1))
-    return false;*/
 
   if ((square[0] + square[1] + square[2] != magic_number)
     || (square[3] + square[5] != not_so_magic_number)
@@ -35,8 +31,8 @@ bool check_if_magic(const std::string& square)
     || (square[1] + square[7] != not_so_magic_number)
     || (square[2] + square[5] + square[8] != magic_number)
 
-    /*|| (square[0] + square[8] != not_so_magic_number)
-    || (square[2] + square[6] != not_so_magic_number)*/)
+    || (square[0] + square[8] != not_so_magic_number)
+    || (square[2] + square[6] != not_so_magic_number))
     return false;
 
   auto char_map = ideal_char_map;
