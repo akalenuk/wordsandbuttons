@@ -261,10 +261,16 @@ function transform(){
 
 function init_slide_a_w(){
     slide_a_w = document.getElementById("slide_a_w");
-    slide_a_w_draw(256);
+    var canvas_rect = slide_a_w.getBoundingClientRect();
+    slide_a_w_draw(canvas_rect.left + 32 + 256);
     
     slide_a_w.addEventListener('mousemove', function(e){
     	slide_a_w_draw(e.clientX);
+    }, false);
+    
+    slide_a_w.addEventListener('mouseleave', function(e){
+        var canvas_rect = slide_a_w.getBoundingClientRect();
+        slide_a_w_draw(canvas_rect.left + 32 + 256);
     }, false);
 }
 
@@ -286,6 +292,10 @@ function slide_a_w_draw(client_x){
     slide_a_w_context.beginPath();
 	slide_a_w_context.moveTo(x_to_client(point_x * 100), y_to_client(point_y * 100));
 	slide_a_w_context.lineTo(x_to_client(point_x * -100), y_to_client(point_y * -100));
+	slide_a_w_context.moveTo(x_to_client(point_x / w) - 10, y_to_client(point_y / w));
+	slide_a_w_context.lineTo(x_to_client(point_x / w) + 10, y_to_client(point_y / w));
+	slide_a_w_context.moveTo(x_to_client(point_x / w), y_to_client(point_y / w) - 10);
+	slide_a_w_context.lineTo(x_to_client(point_x / w), y_to_client(point_y / w) + 10);
 	slide_a_w_context.strokeStyle="#dd6644";
     slide_a_w_context.stroke();
     slide_a_w_context.fillStyle="#dd6644";
@@ -313,7 +323,7 @@ function draw_original_cube_on(context){
 function init_translation(){
     translation = document.getElementById("translation");
     var canvas_rect = translation.getBoundingClientRect();
-    translation_draw(canvas_rect.left + 256+ 64, canvas_rect.top + 256 - 64, false);
+    translation_draw(canvas_rect.left + 256+ 96, canvas_rect.top + 256 - 64, false);
     
     translation.addEventListener('mousemove', function(e){
     	translation_draw(e.clientX, e.clientY);
@@ -321,7 +331,7 @@ function init_translation(){
     
     translation.addEventListener('mouseleave', function(e){
         var canvas_rect = translation.getBoundingClientRect();
-        translation_draw(canvas_rect.left + 256+ 64, canvas_rect.top + 256 - 64, false);
+        translation_draw(canvas_rect.left + 256 + 96, canvas_rect.top + 256 - 64, false);
     }, false);
 }
 
@@ -371,8 +381,8 @@ function translation_draw(client_x, client_y, do_new = true){
     translation_context.stroke();
     translation_context.closePath();    
     translation_context.fillStyle="#dd6644";
-    translation_context.fillText("x' = x + a, where a = " + x.toFixed(1), 32, 460);
-    translation_context.fillText("y' = y + b, where b = " + y.toFixed(1), 32, 480);
+    translation_context.fillText("x' = x + a, where a = " + (x-1).toFixed(1), 32, 460);
+    translation_context.fillText("y' = y + b, where b = " + (y-1).toFixed(1), 32, 480);
 
 	// grid
 	draw_grid_on(translation_context);
