@@ -1,7 +1,7 @@
+#include <array>
 #include <chrono>
 #include <iostream>
 #include <string>
-#include <vector>
 
 using namespace std;
 
@@ -13,23 +13,19 @@ using namespace std;
 //                4 9 2    square
 //
 auto magic_number = '5' * 3;
-auto not_so_magic_number = '5' * 2;
 uint64_t ideal_char_map = static_cast<uint64_t>(0x1FF) << 49;
 bool check_if_magic(const std::string& square)
   {
-  if(square[4] != '5')
-    return false;
-
   if ((square[0] + square[1] + square[2] != magic_number)
-    || (square[3] + square[5] != not_so_magic_number)
+    || (square[3] + square[4] + square[5] != magic_number)
     || (square[6] + square[7] + square[8] != magic_number)
 
     || (square[0] + square[3] + square[6] != magic_number)
-    || (square[1] + square[7] != not_so_magic_number)
+    || (square[1] + square[4] + square[7] != magic_number)
     || (square[2] + square[5] + square[8] != magic_number)
 
-    || (square[0] + square[8] != not_so_magic_number)
-    || (square[2] + square[6] != not_so_magic_number))
+    || (square[0] + square[4] + square[8] != magic_number)
+    || (square[2] + square[4] + square[6] != magic_number))
     return false;
 
   auto char_map = ideal_char_map;
