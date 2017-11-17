@@ -14,7 +14,8 @@ using namespace std;
 //
 auto magic_number = '5' * 3;
 auto not_so_magic_number = '5' * 2;
-uint64_t ideal_char_map = static_cast<uint64_t>(0x1FF) << 49;
+uint_fast64_t ideal_char_map = static_cast<uint_fast64_t>(0x1FF) << 49;
+uint_fast64_t char_map_one = 1u;
 bool check_if_magic(const std::string& square)
   {
   if(square[4] != '5')
@@ -34,7 +35,7 @@ bool check_if_magic(const std::string& square)
 
   auto char_map = ideal_char_map;
   for(auto i = 0u; i < 9; ++i)
-    char_map ^= static_cast<uint64_t>(1u) << square[i]; 
+    char_map ^= char_map_one << square[i]; 
   if (char_map != 0)
     return false;
 

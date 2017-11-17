@@ -2,9 +2,6 @@
 #include <chrono>
 #include <iostream>
 #include <string>
-#include <set>
-#include <unordered_set>
-#include <vector>
 
 using namespace std;
 
@@ -17,7 +14,7 @@ using namespace std;
 //
 auto magic_number = '5' * 3;
 auto not_so_magic_number = '5' * 2;
-std::array<uint16_t, 58> bit_shifts_for_characters {
+const std::array<uint16_t, 58> bit_shifts_for_characters {
   0, 0, 0, 0,   0, 0, 0, 0,
   0, 0, 0, 0,   0, 0, 0, 0,
   0, 0, 0, 0,   0, 0, 0, 0,
@@ -31,16 +28,16 @@ std::array<uint16_t, 58> bit_shifts_for_characters {
 
 bool check_if_magic(const std::string& square)
   {
-  if(square[4] != '5')
-    return false;
-
   if ((square[0] + square[1] + square[2] != magic_number)
     || (square[3] + square[5] != not_so_magic_number)
     || (square[6] + square[7] + square[8] != magic_number)
 
     || (square[0] + square[3] + square[6] != magic_number)
     || (square[1] + square[7] != not_so_magic_number)
-    || (square[2] + square[5] + square[8] != magic_number))
+    || (square[2] + square[5] + square[8] != magic_number)
+    
+    || (square[0] + square[4] + square[8] != magic_number)
+    || (square[2] + square[4] + square[6] != magic_number))
     return false;
 
   auto char_map = 0u;

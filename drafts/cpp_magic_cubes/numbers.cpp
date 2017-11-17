@@ -1,4 +1,3 @@
-#include <array>
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -13,7 +12,8 @@ using namespace std;
 //                4 9 2    square
 //
 auto magic_number = '5' * 3;
-uint64_t ideal_char_map = static_cast<uint64_t>(0x1FF) << 49;
+uint_fast64_t ideal_char_map = static_cast<uint_fast64_t>(0x1FF) << 49;
+uint_fast64_t char_map_one = 1u;
 bool check_if_magic(const std::string& square)
   {
   if ((square[0] + square[1] + square[2] != magic_number)
@@ -30,7 +30,7 @@ bool check_if_magic(const std::string& square)
 
   auto char_map = ideal_char_map;
   for(auto i = 0u; i < 9; ++i)
-    char_map ^= static_cast<uint64_t>(1u) << square[i]; 
+    char_map ^= char_map_one << square[i]; 
   if (char_map != 0)
     return false;
 
