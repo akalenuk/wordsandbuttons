@@ -13,14 +13,10 @@ using namespace std;
 //
 const std::array<uint64_t, 8> magic_numbers
 {
-3545515123101087289,
-3690191062107239479,
-3544956562637535289,
-3978984379655991859,
-3689073941180135479,
-4123101758198592049,
-3977867258728887859,
-4122543197735040049
+3545515123101087289, 3690191062107239479,
+3544956562637535289, 3978984379655991859,
+3689073941180135479, 4123101758198592049,
+3977867258728887859, 4122543197735040049
 };
 bool check_if_magic(const std::string& square)
 {
@@ -43,7 +39,7 @@ static string buffer = "000000000";
 void generate_or_check(int index_or_check = 8){
   if(index_or_check == -1){
     if(check_if_magic(buffer))
-      cout << buffer << "\n";
+      cout << buffer << " ";
     return;
   }
 
@@ -60,6 +56,6 @@ int main()
   generate_or_check();
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> difference = end - start;
-  std::cout << difference.count() << "\n";
+  std::cout << difference.count() << "\n\n";
   }
 

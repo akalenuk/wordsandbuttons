@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <array>
 
 using namespace std;
 
@@ -10,24 +11,16 @@ using namespace std;
 // "816357492" =  3 5 7    a magic
 //                4 9 2    square
 //
+const std::array<std::string, 8> all_magic_squares = {
+  "816357492", "492357816", "618753294", "294753618",
+  "834159672", "672159834", "438951276", "276951438"
+};
+
 bool check_if_magic(const std::string& square)
 {
-  if(square == "816357492")
-    return true;
-  if(square == "492357816")
-    return true;
-  if(square == "618753294")
-    return true;
-  if(square == "294753618")
-    return true;
-  if(square == "834159672")
-    return true;
-  if(square == "672159834")
-    return true;
-  if(square == "438951276")
-    return true;
-  if(square == "276951438")
-    return true;
+  for(auto i = 0u; i < 8; ++i)
+    if(square == all_magic_squares[i])
+      return true;
 
   return false;
 }
@@ -38,7 +31,7 @@ static string buffer = "000000000";
 void generate_or_check(int index_or_check = 8){
   if(index_or_check == -1){
     if(check_if_magic(buffer))
-      cout << buffer << "\n";
+      cout << buffer << " ";
     return;
   }
 
@@ -55,6 +48,6 @@ int main()
   generate_or_check();
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> difference = end - start;
-  std::cout << difference.count() << "\n";
+  std::cout << difference.count() << "\n\n";
   }
 

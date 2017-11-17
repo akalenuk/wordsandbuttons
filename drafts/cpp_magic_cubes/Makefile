@@ -21,7 +21,6 @@ all:
 	./64bits
 	./64bits_in_set
 	./64bits_in_unordered_set
-clean:
 	rm ./numbers
 	rm ./numbers_5_heuristic
 	rm ./numbers_oddity_heuristic

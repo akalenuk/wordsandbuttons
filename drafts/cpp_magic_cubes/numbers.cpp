@@ -43,7 +43,7 @@ static string buffer = "         ";
 void generate_or_check(int index_or_check = 8){
   if (index_or_check == -1){
     if (check_if_magic(buffer))
-      cout << buffer << "\n";
+      cout << buffer << " ";
     return;
     }
 
@@ -61,6 +61,6 @@ int main()
   generate_or_check();
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> difference = end - start;
-  std::cout << difference.count() << "\n";
+  std::cout << difference.count() << "\n\n";
   }
 
