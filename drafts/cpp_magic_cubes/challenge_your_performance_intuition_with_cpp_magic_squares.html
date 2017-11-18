@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Challenge your performance intuition with C++ magic squares</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.comment {
+    font-size: 14pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
+
+.footer {
+    margin-top: 64pt;
+    padding-bottom: 32pt;
+    font-family: sans-serif;
+    font-size: 14pt;
+}
+
+pre {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 12pt;
+    text-align: left;
+    width: 360pt;
+}
+
+.code {
+    background-color: #ccccff;
+}
+
+.code_piece {
+    background-color: #ccccff;
+    font-family: monospace;
+    padding-left: 4pt;
+    padding-right: 4pt;
+}
+
+
+table {
+    text-align: center;
+    border-width: 0pt;
+}
+
+td {
+    padding: 6pt 12pt 6pt 12pt;
+    font-size: 16pt;
+    border: 1px solid black;
+}
+
+button{
+    width: 300pt;
+    height: 84pt;
+    margin-left:4pt;
+    margin-right:4pt;
+    font-size: 24pt;
+}
+
+    </style>
+    <script language="JavaScript">
+    /if(document.getElementById("a1d").checked)*/
+  
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+Challenge your performance intuition with C++ magic squares
+    </h1>
+    <p>
+This was supposed to be a five minute interview question. I came up with it, then spent a night looking for an answer. Then the other night. Then the Saturday morning. Then it finally occured to me that it might not work terribly well on an interview.
+    </p>
+    <p>
+But it's still a great problem to fiddle with. And it goes like this.
+    </p>
+    <p>
+This is a magic square:
+    </p>
+    <table><tr>
+    <td>8</td><td>3</td><td>4</td>
+    </tr><tr>
+    <td>1</td><td>5</td><td>9</td>
+    </tr><tr>
+    <td>6</td><td>7</td><td>2</td>
+    </tr></table>
+    <p>
+It has all the numbers from 1 to 9 each exactly once. The sum in every row is 15. The sum in every collon is 15. And the sum in both diagonals is, of course, also 15. We can write it as a 9-character string like this: <span class="code">"834159672"</span>.
+    </p>
+    <p>
+The problem: propose a function that tells if a 3x3 square written as a string of digits is magic or not. Do it in the most effective manner.
+    </p>
+    <p>
+I came up with this simple testing code. It has no dependencies, and it's C++11 standard compiant, so it runs in basically every environment.
+    </p>
+    <pre style="background-color: #bbbbff;">
+#include &lt;iostream&gt;
+#include &lt;chrono&gt;
+
+using namespace std;
+
+// Here you should implement your 
+// magic checker. It should return 
+// true if the square is magic, 
+// false otherwise.
+//
+//                8 1 6    this is
+// "816357492" =  3 5 7    a magic
+//                4 9 2    square
+//
+bool check_if_magic(const std::string& square)
+{
+  // add your code here 
+  // (or above if you need global stuff)
+  
+  
+  
+  
+  return false;
+}
+
+// this generates all possible combinations 
+// of 1-9 digits that may or may not 
+// form a magic square
+static string buffer = "000000000";
+void generate_or_check(int index_or_check = 8)
+{
+  if(index_or_check == -1){
+    if(check_if_magic(buffer))
+      cout &lt;&lt; buffer &lt;&lt; " ";
+    return;
+  }
+
+  for(auto i = 1u; i &lt; 10; ++i){
+    buffer[index_or_check] = '0' + i;
+    generate_or_check(index_or_check-1);
+  }
+}
+
+// this runs the generator and measures time
+int main()
+{
+  auto start = std::chrono::system_clock::now();
+  generate_or_check();
+  auto end = std::chrono::system_clock::now();
+  chrono::duration&lt;double&gt; 
+    difference = end - start;
+  cout &lt;&lt; difference.count() &lt;&lt; "\n\n";
+}    
+    </pre>
+    <p>
+I propose a game. There will be ten rounds, each round is a match between two solutions. Or rather between their execution times. Using your intuition and best judgement, please estimate their relative effectiveness. 
+    </p>
+    <p class="comment">
+Times measured on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz. <br>All the code compiled with g++ 5.4.0.
+    </p>
+    <h2>
+Round 1. Direct solution vs. the oddity heuristic
+    </h1>
+    <p>
+The direct solution would be to literally chech every row, collumn, and diagonal sum and then assert that all the numbers are there. We don't have to parse actual numbers, we can go with ASCII codes just fine. Also the simplest way to check is the string is a permutation of digits is to make a simple binary map and check if it can be properly filled with the imput. Since we are here for the performance, we would use a single <span class="code_piece">uint_fast64_t</span> instead of a real map.
+    </p>
+    <p>
+The heuristic proposed is meant to end the function as early as possible. It is based on a fact that in a magic square the corner values are always even and the rest is odd. If one of the numbers fails to pass the oddity test, then there is no point in the fair check at all. Also, as you can see, this heuritic is rather effective. On random numbers if narrows down our cases with a pretty good 2<sup>9</sup> to 1 ratio. So only one string in 512 will get to the actual check. Well, technically our numbers are not entirely random, we have more odds than evens, but still. 
+    </p>
+    <p>
+Now place your bets!
+    </p>
+    
+    
+
+
+
+    <p class="footer">
+    There are more words and buttons on <a href="index.html">wordsandbuttons.online</a>.<br>
+    Also please follow us on <a href="https://twitter.com/wordsandbuttons">Twitter</a>.
+    </p>
+    </center>
+  </body>
+</html>
