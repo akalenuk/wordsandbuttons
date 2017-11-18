@@ -82,30 +82,36 @@ td {
 }
 
 button{
-    width: 300pt;
-    height: 84pt;
+    width: 304pt;
+    height: 42pt;
     margin-left:4pt;
     margin-right:4pt;
-    font-size: 24pt;
+    font-size: 18pt;
 }
 
     </style>
     <script language="JavaScript">
-var slider_xs = [255, 255, 255, 255, 255, 255, 255, 255, 255, 255];
+var slider_set = [false, false, false, false,  false, false, false, false,  false, false];
+var slider_true_xs = [
+    1.0 / (1.0 + 0.9) * 512, 
+    0, 
+    0, 
+    0,  
+    0, 
+    0, 
+    0, 
+    0,  
+    0, 
+    0];
+var slider_user_xs = [255, 255, 255, 255,  255, 255, 255, 255,  255, 255];
+var slider_xs = [255, 255, 255, 255,  255, 255, 255, 255,  255, 255];
+
 var slider_down = false;
 
-function position_slider(no, client_x){
-    var slider = document.getElementById("slider_" + (no + 1));    
-    var canvas_rect = slider.getBoundingClientRect();
-    var x = client_x - canvas_rect.left - 48;
-    if(x < 16)
-        x = 16;
-    if(x > 511 - 16)
-        x = 511 - 16;
-    slider_xs[no] = x;
-                    
+function comment_on_slider(no){
     var left = document.getElementById("left_" + (no + 1));
     var right = document.getElementById("right_" + (no + 1));
+    var x = slider_xs[no]
     var xl = x;
     var xr = 511 - x;
     if(x < 255){
@@ -163,6 +169,21 @@ function position_slider(no, client_x){
     }
 }
 
+function position_slider(no, client_x){
+    if(!slider_set[no]){
+        var slider = document.getElementById("slider_" + (no + 1));    
+        var canvas_rect = slider.getBoundingClientRect();
+        var x = client_x - canvas_rect.left - 48;
+        if(x < 16)
+            x = 16;
+        if(x > 511 - 16)
+            x = 511 - 16;
+        slider_xs[no] = x;
+                        
+        comment_on_slider(no);
+    }
+}
+
 function init_slider(no){
     draw_slider(no);
     var slider = document.getElementById("slider_" + (no + 1));
@@ -196,6 +217,18 @@ function draw_slider(no){
     ctx.fillStyle="#aaaaaa";
 	ctx.fillRect(0, 0, 608, 512);
 	
+	if(slider_set[no]){
+    	x_red = slider_user_xs[no] + 48;
+	    ctx.beginPath();
+	    ctx.moveTo(x_red, 0);
+	    ctx.lineTo(x_red - 64, 128);
+	    ctx.lineTo(x_red + 64, 128);
+	    ctx.lineTo(x_red, 0);
+	    ctx.strokeStyle="#660000";
+        ctx.stroke();
+        ctx.closePath();
+    }
+	
   	ctx.beginPath();
 	ctx.moveTo(x, 0);
 	ctx.lineTo(x - 64, 128);
@@ -204,6 +237,16 @@ function draw_slider(no){
 	ctx.strokeStyle="#000000";
     ctx.stroke();
     ctx.closePath(); 
+}
+
+function reveal(no){
+    slider_set[no] = true;
+    slider_user_xs[no] = slider_xs[no];
+    slider_xs[no] = slider_true_xs[no];
+    draw_slider(no);
+    comment_on_slider(no);
+    document.getElementById("the_truth_" + (no + 1)).style.display = "block";
+    document.getElementById("button_" + (no + 1)).style.display = "none";   
 }
     </script>
   </head>
@@ -383,6 +426,10 @@ bool check_if_magic(const std::string& sq)
     <canvas id="slider_1" width=608 height=128></canvas> 
     <p class="comment" id="comment_1">
 They are equally fast.
+    </p>
+    <button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
+    <p id="the_truth_1" style="display:none;">
+The right is only slightly more than 10% faster. The thing is, although this heuristic is great in narrowing, it is rather heavy by itself. We gained some, we lost some.
     </p>
     <script language="JavaScript">
     init_slider(0);
