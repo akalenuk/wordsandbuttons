@@ -91,8 +91,120 @@ button{
 
     </style>
     <script language="JavaScript">
-    /if(document.getElementById("a1d").checked)*/
-  
+var slider_xs = [255, 255, 255, 255, 255, 255, 255, 255, 255, 255];
+var slider_down = false;
+
+function position_slider(no, client_x){
+    var slider = document.getElementById("slider_" + (no + 1));    
+    var canvas_rect = slider.getBoundingClientRect();
+    var x = client_x - canvas_rect.left - 48;
+    if(x < 16)
+        x = 16;
+    if(x > 511 - 16)
+        x = 511 - 16;
+    slider_xs[no] = x;
+                    
+    var left = document.getElementById("left_" + (no + 1));
+    var right = document.getElementById("right_" + (no + 1));
+    var xl = x;
+    var xr = 511 - x;
+    if(x < 255){
+        left.style.backgroundColor = "#" + (Math.round(xl)).toString(16) + "ff" + (Math.round(xl)).toString(16);
+        right.style.backgroundColor = "#ff" + (Math.round(xl)).toString(16) + (Math.round(xl)).toString(16);
+    }else{
+        right.style.backgroundColor = "#" + (Math.round(xr)).toString(16) + "ff" + (Math.round(xr)).toString(16);
+        left.style.backgroundColor = "#ff" + (Math.round(xr)).toString(16) + (Math.round(xr)).toString(16);
+    }
+    
+    var comment = document.getElementById("comment_" + (no + 1));
+    if(xl > xr){
+        if(xl > 20*xr){
+            comment.innerHTML = "Right is more than 20 times faster!";
+        }else if(xl > 10*xr){
+            comment.innerHTML = "Right is more than 10 times faster!";
+        }else if(xl > 5*xr){
+            comment.innerHTML = "Right is more than 5 times faster!";
+        }else if(xl > 3*xr){
+            comment.innerHTML = "Right is more than 3 times faster!";
+        }else if(xl > 2*xr){
+            comment.innerHTML = "Right is more than 2 times faster!";
+        }else if(xl > 1.5*xr){
+            comment.innerHTML = "Right is more than 50% faster.";
+        }else if(xl > 1.25*xr){
+            comment.innerHTML = "Right is more than 25% faster.";
+        }else if(xl > 1.1*xr){
+            comment.innerHTML = "Right is more than 10% faster.";
+        }else{
+            comment.innerHTML = "Right is slightly faster.";
+        }
+    }else if(xr > xl){
+        if(xr > 20*xl){
+            comment.innerHTML = "Left is more than 20 times faster!";
+        }else if(xr > 10*xl){
+            comment.innerHTML = "Left is more than 10 times faster!";
+        }else if(xr > 5*xl){
+            comment.innerHTML = "Left is more than 5 times faster!";
+        }else if(xr > 3*xl){
+            comment.innerHTML = "Left is more than 3 times faster!";
+        }else if(xr > 2*xl){
+            comment.innerHTML = "Left is more than 2 times faster!";
+        }else if(xr > 1.5*xl){
+            comment.innerHTML = "Left is more than 50% faster.";
+        }else if(xr > 1.25*xl){
+            comment.innerHTML = "Left is more than 25% faster.";
+        }else if(xr > 1.1*xl){
+            comment.innerHTML = "Left is more than 10% faster.";
+        }else{
+            comment.innerHTML = "Left is slightly faster.";
+        }  
+            
+    }else if(xl == xr){
+        comment.innerHTML = "They are equally fast.";
+    }
+}
+
+function init_slider(no){
+    draw_slider(no);
+    var slider = document.getElementById("slider_" + (no + 1));
+    
+    slider.addEventListener('mouseleave', function(e){
+        slider_down = false;
+    }, false);
+    
+    slider.addEventListener('mouseup', function(e){
+        slider_down = false;
+    }, false);
+    
+    slider.addEventListener('mousedown', function(e){
+        slider_down = true;
+        position_slider(no, e.clientX);
+        draw_slider(no);
+    }, false);
+    
+    slider.addEventListener('mousemove', function(e){
+        if(slider_down){
+            position_slider(no, e.clientX);
+            draw_slider(no);
+        }
+    }, false);
+}
+
+function draw_slider(no){
+    ctx = document.getElementById("slider_" + (no + 1)).getContext("2d");
+    x = slider_xs[no] + 48;
+    
+    ctx.fillStyle="#aaaaaa";
+	ctx.fillRect(0, 0, 608, 512);
+	
+  	ctx.beginPath();
+	ctx.moveTo(x, 0);
+	ctx.lineTo(x - 64, 128);
+	ctx.lineTo(x + 64, 128);
+	ctx.lineTo(x, 0);
+	ctx.strokeStyle="#000000";
+    ctx.stroke();
+    ctx.closePath(); 
+}
     </script>
   </head>
   <body>
@@ -198,6 +310,83 @@ The heuristic proposed is meant to end the function as early as possible. It is 
     <p>
 Now place your bets!
     </p>
+    <table><tr>
+    <td id="left_1">
+    <pre>
+auto c15 = '5' * 3;
+uint_fast64_t ideal_char_map = 
+    static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
+uint_fast64_t char_map_one = 1u;
+
+bool check_if_magic(const std::string& sq)
+  {
+  if ((sq[0] + sq[1] + sq[2] != c15)
+    || (sq[3] + sq[4] + sq[5] != c15)
+    || (sq[6] + sq[7] + sq[8] != c15)
+
+    || (sq[0] + sq[3] + sq[6] != c15)
+    || (sq[1] + sq[4] + sq[7] != c15)
+    || (sq[2] + sq[5] + sq[8] != c15)
+
+    || (sq[0] + sq[4] + sq[8] != c15)
+    || (sq[2] + sq[4] + sq[6] != c15))
+    return false;
+
+  auto char_map = ideal_char_map;
+  for(auto i = 0u; i &lt; 9; ++i)
+    char_map ^= char_map_one &lt;&lt; sq[i]; 
+  if (char_map != 0)
+    return false;
+
+  return true;
+  }
+    </pre>
+    </td>
+    <td id="right_1">
+    <pre>
+auto c15 = '5' * 3;
+uint_fast64_t ideal_char_map = 
+    static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
+uint_fast64_t char_map_one = 1u;
+
+bool check_if_magic(const std::string& sq)
+  {
+  <b>if ( (sq[0] & 1) != 0 || (sq[1] & 1) == 0 
+    || (sq[2] & 1) != 0 || (sq[3] & 1) == 0
+    || (sq[4] & 1) == 0 
+    || (sq[5] & 1) == 0 || (sq[6] & 1) != 0 
+    || (sq[7] & 1) == 0 || (sq[8] & 1) != 0)
+    return false;</b>
+  
+  if ((sq[0] + sq[1] + sq[2] != c15)
+    || (sq[3] + sq[4] + sq[5] != c15)
+    || (sq[6] + sq[7] + sq[8] != c15)
+
+    || (sq[0] + sq[3] + sq[6] != c15)
+    || (sq[1] + sq[4] + sq[7] != c15)
+    || (sq[2] + sq[5] + sq[8] != c15)
+
+    || (sq[0] + sq[4] + sq[8] != c15)
+    || (sq[2] + sq[4] + sq[6] != c15))
+    return false;
+
+  auto char_map = ideal_char_map;
+  for(auto i = 0u; i &lt; 9; ++i)
+    char_map ^= char_map_one &lt;&lt; sq[i]; 
+  if (char_map != 0)
+    return false;
+
+  return true;
+  }           
+    </pre>
+    </td></tr></table>
+    <canvas id="slider_1" width=608 height=128></canvas> 
+    <p class="comment" id="comment_1">
+They are equally fast.
+    </p>
+    <script language="JavaScript">
+    init_slider(0);
+    </script>
     
     
 
