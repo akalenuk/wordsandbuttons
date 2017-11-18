@@ -1,4 +1,5 @@
 all:
+	g++ -O2 -std=c++11 empty_run.cpp -o empty_run
 	g++ -O2 -std=c++11 numbers.cpp -o numbers
 	g++ -O2 -std=c++11 numbers_5_heuristic.cpp -o numbers_5_heuristic
 	g++ -O2 -std=c++11 numbers_oddity_heuristic.cpp -o numbers_oddity_heuristic
@@ -10,6 +11,7 @@ all:
 	g++ -O2 -std=c++11 64bits.cpp -o 64bits
 	g++ -O2 -std=c++11 64bits_in_set.cpp -o 64bits_in_set
 	g++ -O2 -std=c++11 64bits_in_unordered_set.cpp -o 64bits_in_unordered_set
+	./empty_run
 	./numbers
 	./numbers_5_heuristic
 	./numbers_oddity_heuristic
@@ -21,6 +23,7 @@ all:
 	./64bits
 	./64bits_in_set
 	./64bits_in_unordered_set
+	rm ./empty_run	
 	rm ./numbers
 	rm ./numbers_5_heuristic
 	rm ./numbers_oddity_heuristic
