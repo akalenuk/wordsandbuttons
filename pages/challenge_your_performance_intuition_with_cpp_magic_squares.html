@@ -96,9 +96,9 @@ var slider_true_xs = [
     1.0 / (1.0 + 0.9) * 512, 
     1.0 / (1.0 + 0.6) * 512, 
     1.0 / (1.0 + 0.7) * 512, 
-    0,  
-    0, 
-    0, 
+    1.0 / (1.0 + 17.8) * 512,  
+    17.8 / (17.8 + 8.7) * 512,  
+    8.7 / (8.7 + 12.7) * 512, 
     0, 
     0,  
     0, 
@@ -631,6 +631,193 @@ The right is less than 50% faster, but still considerably better then the left.
     </script>  
 
 
+    <h2>
+Round 4. Fair magic test vs. precached answers
+    </h1>
+    <p>
+The thing is, there are only 8 3x3 magic squares in existence. So do we have really have to test the string against the magic definition? Why couldn't we precache the values and simply compare with that?
+    </p>
+    <table><tr>
+    <td id="left_4">
+    <pre>
+auto c15 = '5' * 3;
+uint_fast64_t ideal_char_map = 
+    static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
+uint_fast64_t char_map_one = 1u;
+
+bool check_if_magic(const std::string& sq)
+  {
+  if ((sq[0] + sq[1] + sq[2] != c15)
+    || (sq[3] + sq[4] + sq[5] != c15)
+    || (sq[6] + sq[7] + sq[8] != c15)
+
+    || (sq[0] + sq[3] + sq[6] != c15)
+    || (sq[1] + sq[4] + sq[7] != c15)
+    || (sq[2] + sq[5] + sq[8] != c15)
+
+    || (sq[0] + sq[4] + sq[8] != c15)
+    || (sq[2] + sq[4] + sq[6] != c15))
+    return false;
+
+  auto char_map = ideal_char_map;
+  for(auto i = 0u; i &lt; 9; ++i)
+    char_map ^= char_map_one &lt;&lt; sq[i]; 
+  if (char_map != 0)
+    return false;
+
+  return true;
+  }
+    </pre>
+    </td>
+    <td id="right_4">
+    <pre>
+const std::array&lt;std::string, 8&gt; 
+  all_magic_squares = {
+  "816357492", "492357816", 
+  "618753294", "294753618",
+  "834159672", "672159834", 
+  "438951276", "276951438"
+};
+
+bool check_if_magic(const std::string& sq)
+{
+  for(auto i = 0u; i &lt; 8; ++i)
+    if(sq == all_magic_squares[i])
+      return true;
+
+  return false;
+}
+    </pre>
+    </td></tr></table>
+    <canvas id="slider_4" width=608 height=128></canvas> 
+    <p class="comment" id="comment_4">
+They are equally fast.
+    </p>
+    <button type="button" onclick="reveal(3)" id="button_4">Reveal the truth</button>
+    <p id="the_truth_4" style="display:none;">
+The right is more than 10 times slower. Apparently, eight string comparisons are way heavier than the whole testing thing.
+    </p>
+    <script language="JavaScript">
+    init_slider(3);
+    </script>  
+    
+    
+    <h2>
+Round 5. String array vs. string map
+    </h1>
+    <p>
+Well, strings comparisons are relatively slow. But we don't have to do eight comparisons simply every time. If we organize our comparison work-flow as a tree-like structure, we could minimize the number of comparisons to somewhere form 1 to 3 per string.
+    </p>
+    <p>
+Luckily we don't have to invent the tree, we can take the standard set instead. Technically, it might not necessary be a tree, but its performance guarantees are declared by the standard, so it will work for us any way.
+    </p>
+    <table><tr>
+    <td id="left_5">
+    <pre>
+const std::array&lt;std::string, 8&gt;  
+  all_magic_squares = {
+  "816357492", "492357816", 
+  "618753294", "294753618",
+  "834159672", "672159834", 
+  "438951276", "276951438"
+};
+
+bool check_if_magic(const std::string& sq)
+{
+  for(auto i = 0u; i < 8; ++i)
+    if(sq == all_magic_squares[i])
+      return true;
+
+  return false;
+}
+    </pre>
+    </td>
+    <td id="right_5">
+    <pre>
+const std::set&lt;std::string&gt;  
+  all_magic_squares = {
+  "816357492", "492357816", 
+  "618753294", "294753618",
+  "834159672", "672159834", 
+  "438951276", "276951438"
+};
+
+bool check_if_magic(const std::string& sq)
+{
+  return all_magic_squares.find(sq) != 
+    all_magic_squares.end());
+}
+    </pre>
+    </td></tr></table>
+    <canvas id="slider_5" width=608 height=128></canvas> 
+    <p class="comment" id="comment_5">
+They are equally fast.
+    </p>
+    <button type="button" onclick="reveal(4)" id="button_5">Reveal the truth</button>
+    <p id="the_truth_5" style="display:none;">
+The right is considerably better. Maybe, not as good as any of the numerical solutions, but better than the string array.
+    </p>
+    <script language="JavaScript">
+    init_slider(4);
+    </script>      
+    
+
+    <h2>
+Round 6. String set vs. string unordered set
+    </h1>
+    <p>
+We have another structure that seems promising in terms of performance. The unordered set is known to have constant complexity for the cases with no collisions. Since our data is small, it is unlikely to cause collisions in a hash map. Let's try that.
+    </p>
+    <table><tr>
+    <td id="left_6">
+    <pre>
+const std::array&lt;std::string, 8&gt;  
+  all_magic_squares = {
+  "816357492", "492357816", 
+  "618753294", "294753618",
+  "834159672", "672159834", 
+  "438951276", "276951438"
+};
+
+bool check_if_magic(const std::string& sq)
+{
+  return all_magic_squares.find(sq) != 
+    all_magic_squares.end());
+}
+    </pre>
+    </td>
+    <td id="right_6">
+    <pre>
+const std::unordered_set&lt;std::string&gt; 
+  all_magic_squares = {
+  "816357492", "492357816", 
+  "618753294", "294753618",
+  "834159672", "672159834", 
+  "438951276", "276951438"
+};
+
+bool check_if_magic(const std::string& sq)
+{
+  return all_magic_squares.find(sq) != 
+    all_magic_squares.end());
+}
+    </pre>
+    </td></tr></table>
+    <canvas id="slider_6" width=608 height=128></canvas> 
+    <p class="comment" id="comment_6">
+They are equally fast.
+    </p>
+    <button type="button" onclick="reveal(5)" id="button_6">Reveal the truth</button>
+    <p id="the_truth_6" style="display:none;">
+The usual set works better here. Yes, we saved on comparisons, but the hash function for a string turns out to be rather heavy itself.
+    </p>
+    <script language="JavaScript">
+    init_slider(5);
+    </script>
+    
+    
+    
+    
 
     <p class="footer">
     There are more words and buttons on <a href="index.html">wordsandbuttons.online</a>.<br>
