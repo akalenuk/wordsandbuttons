@@ -262,7 +262,23 @@ function reveal(no){
     draw_slider(no);
     comment_on_slider(no);
     document.getElementById("the_truth_" + (no + 1)).style.display = "block";
-    document.getElementById("button_" + (no + 1)).style.display = "none";   
+    document.getElementById("button_" + (no + 1)).style.display = "none";
+    
+    for(var i = 0; i < 10; i++){
+        if(slider_set[i] == false)
+            return;
+    }
+    
+    document.getElementById("show_in_the_end").style.display = "block";
+    var score = 0;
+    var default_score = 0;
+    for(var i = 0; i < 10; i++){
+        score += Math.abs(slider_user_xs[i] - slider_xs[i]);
+        default_score += Math.abs(255 - slider_xs[i]);
+    }
+    
+    document.getElementById("score").innerHTML = "<b>" + score.toFixed(0) + "</b>";
+    document.getElementById("default_score").innerHTML = "<b>" + default_score.toFixed(0) + "</b>";
 }
     </script>
   </head>
@@ -291,12 +307,12 @@ Here is a magic square:
 It has all the numbers from 1 to 9 each exactly once. The sum in every row is 15. The sum in every column is 15. And the sum in both diagonals is, of course, also 15. We can write it as a 9-character string like this: <span class="code">"834159672"</span>.
     </p>
     <p>
-The problem: propose a function that tells if a 3x3 square written as a string of digits is magic or not. And (sic!) does it in the most effective manner.
+<b>The problem:</b> propose a function that tells if a 3x3 square written as a string of digits is magic or not <i>in the most effective manner</i>.
     </p>
     <p>
-I also came up with this simple measuring code. It has no dependencies, and it's C++11 standard compliant, so it runs in basically every environment.
+Here is some simple measuring code. It has no dependencies, and it's C++11 standard compliant, so it runs in basically every environment.
     </p>
-    <pre style="background-color: #bbbbff;">
+    <pre style="background-color: #bbbbff; width: 505pt;">
 #include &lt;iostream&gt;
 #include &lt;chrono&gt;
 
@@ -966,7 +982,7 @@ In fact, it is as fast as our best choice from the earlier.
     
     
     <h2>
-Round 9. Array on uin664_t vs. set of uint64_t.
+Round 9. Array on uint64_t vs. set of uint64_t.
     </h1>
     <p>
 Let's now use set instead of array here. There should be less comparisons anyway, but would it help?
@@ -1034,7 +1050,7 @@ They are equally fast.
     </p>
     <button type="button" onclick="reveal(8)" id="button_9">Reveal the truth</button>
     <p id="the_truth_9" style="display:none;">
-Well, on this data simple traverse works better. Perhaps it's because we only need to go through 64 bytes and it fits into a single cahce line.
+Well, on this data simple loop works better. Perhaps it's because we only need to go through 64 bytes and it fits into a single cache line.
     </p>
     <script language="JavaScript">
     init_slider(8);
@@ -1110,12 +1126,31 @@ They are equally fast.
     </p>
     <button type="button" onclick="reveal(9)" id="button_10">Reveal the truth</button>
     <p id="the_truth_10" style="display:none;">
-Apparently not. Unordered set may work wonders for large and unimorphly distributed set of data. But we simply have our loop too effective to beat.
+Apparently not. Unordered set may work wonders for large and uniformly distributed set of data. But we simply have our loop too effective to beat.
     </p>
     <script language="JavaScript">
     init_slider(9);
     </script>
-        
+
+    <div id="show_in_the_end" style="display:none;">
+    <h2>
+Congratulations!
+    </h2>
+    <p>
+You scored <span id="score"></span> pixels of error. I'm not sure if it's good or bad, but if you had left every answer as “exactly equal”, there would be <span id="default_score"></span> pixels.
+    </p>
+    </div>
+    
+    <h2>
+Conclusion
+    </h2> 
+    <p>
+Probably, I shouldn't talk for everyone but in my case the conclusion would have been: <i>“bad measurements beat good intuition eight times out of ten”</i>. Even though I do have a long history of making things run faster, this extreme case — small data, cheap body — neglected my experience to naught. String operations seemed to be cheaper, heuristics — more effective and there were also high hopes for the standard containers. Well, at least slightly higher hopes.
+    </p>
+    <p>
+I learned something from this experience. Hope you did too. If so, then no matter what your score is, you are still the winner.
+    </p>
+    
     
 
     <p class="footer">
