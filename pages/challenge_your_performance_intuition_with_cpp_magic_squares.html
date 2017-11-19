@@ -736,7 +736,7 @@ bool check_if_magic(const std::string& sq)
     </td>
     <td id="right_5">
     <pre>
-const std::set&lt;std::string&gt;  
+const <b>std::set</b>&lt;std::string&gt;  
   all_magic_squares = {
   "816357492", "492357816", 
   "618753294", "294753618",
@@ -819,7 +819,7 @@ The usual set works better here. Yes, we saved on comparisons, but the hash func
     
     
     <h2>
-Round 7. String array vs. string array plus oddity heuristic
+Round 7. String array vs. string array plus the oddity heuristic
     </h1>
     <p>
 Now, when we have heavier body, maybe we can gain more from the heuristic. Let's try our oddity one here. 
@@ -857,13 +857,12 @@ const std::array&lt;std::string, 8&gt;
 
 bool check_if_magic(const std::string& sq)
 {
-
-  if ( (sq[0] & 1) != 0 || (sq[1] & 1) == 0 
+  <b>if ( (sq[0] & 1) != 0 || (sq[1] & 1) == 0 
     || (sq[2] & 1) != 0 || (sq[3] & 1) == 0
     || (sq[4] & 1) == 0 
     || (sq[5] & 1) == 0 || (sq[6] & 1) != 0 
     || (sq[7] & 1) == 0 || (sq[8] & 1) != 0)
-    return false; 
+    return false;</b>
     
   for(auto i = 0u; i < 8; ++i)
     if(sq == all_magic_squares[i])
@@ -928,10 +927,10 @@ bool check_if_magic(const std::string& sq)
     <pre>
 const std::array&lt;uint64_t, 8&gt; magic_numbers
 {
-3545515123101087289, 3690191062107239479,
-3544956562637535289, 3978984379655991859,
-3689073941180135479, 4123101758198592049,
-3977867258728887859, 4122543197735040049
+  3545515123101087289, 3690191062107239479,
+  3544956562637535289, 3978984379655991859,
+  3689073941180135479, 4123101758198592049,
+  3977867258728887859, 4122543197735040049
 };
 bool check_if_magic(const std::string& sq)
 {
@@ -977,23 +976,23 @@ Let's now use set instead of array here. There should be less comparisons anyway
     <pre>
 const std::array&lt;uint64_t, 8&gt; magic_numbers
 {
-3545515123101087289, 3690191062107239479,
-3544956562637535289, 3978984379655991859,
-3689073941180135479, 4123101758198592049,
-3977867258728887859, 4122543197735040049
+  3545515123101087289, 3690191062107239479,
+  3544956562637535289, 3978984379655991859,
+  3689073941180135479, 4123101758198592049,
+  3977867258728887859, 4122543197735040049
 };
 bool check_if_magic(const std::string& sq)
 {
   if(sq[4] != '5')
     return false;
 
-  <b>uint64_t magic_number = 
+  uint64_t magic_number = 
     *(reinterpret_cast&lt;const uint32_t*&gt;
       (sq.data()));
   magic_number <<= 32;
   magic_number += 
     *(reinterpret_cast&lt;const uint32_t*&gt;
-      (sq.data()+5));</b>
+      (sq.data()+5));
 
   for(auto i = 0u; i &lt; 8; ++i)
     if(magic_number == magic_numbers[i])
@@ -1004,25 +1003,25 @@ bool check_if_magic(const std::string& sq)
     </td>
     <td id="right_9">
     <pre>
-const std::set&lt;uint64_t&gt; magic_numbers
+const <b>std::set</b>&lt;uint64_t&gt; magic_numbers
 {
-3545515123101087289, 3690191062107239479,
-3544956562637535289, 3978984379655991859,
-3689073941180135479, 4123101758198592049,
-3977867258728887859, 4122543197735040049
+  3545515123101087289, 3690191062107239479,
+  3544956562637535289, 3978984379655991859,
+  3689073941180135479, 4123101758198592049,
+  3977867258728887859, 4122543197735040049
 };
 bool check_if_magic(const std::string& sq)
 {
   if(sq[4] != '5')
     return false;
 
-  <b>uint64_t magic_number = 
+  uint64_t magic_number = 
     *(reinterpret_cast&lt;const uint32_t*&gt;
       (sq.data()));
   magic_number <<= 32;
   magic_number += 
     *(reinterpret_cast&lt;const uint32_t*&gt;
-      (sq.data()+5));</b>
+      (sq.data()+5));
 
   return magic_numbers.find(magic_number) 
     != magic_numbers.end();
@@ -1053,23 +1052,23 @@ Could we gain some speed from using unordered set?
     <pre>
 const std::array&lt;uint64_t, 8&gt; magic_numbers
 {
-3545515123101087289, 3690191062107239479,
-3544956562637535289, 3978984379655991859,
-3689073941180135479, 4123101758198592049,
-3977867258728887859, 4122543197735040049
+  3545515123101087289, 3690191062107239479,
+  3544956562637535289, 3978984379655991859,
+  3689073941180135479, 4123101758198592049,
+  3977867258728887859, 4122543197735040049
 };
 bool check_if_magic(const std::string& sq)
 {
   if(sq[4] != '5')
     return false;
 
-  <b>uint64_t magic_number = 
+  uint64_t magic_number = 
     *(reinterpret_cast&lt;const uint32_t*&gt;
       (sq.data()));
   magic_number <<= 32;
   magic_number += 
     *(reinterpret_cast&lt;const uint32_t*&gt;
-      (sq.data()+5));</b>
+      (sq.data()+5));
 
   for(auto i = 0u; i &lt; 8; ++i)
     if(magic_number == magic_numbers[i])
@@ -1080,25 +1079,25 @@ bool check_if_magic(const std::string& sq)
     </td>
     <td id="right_10">
     <pre>
-const std::unordered_set&lt;uint64_t&gt; magic_numbers
+const <b>std::unordered_set</b>&lt;uint64_t&gt; magic_numbers
 {
-3545515123101087289, 3690191062107239479,
-3544956562637535289, 3978984379655991859,
-3689073941180135479, 4123101758198592049,
-3977867258728887859, 4122543197735040049
+  3545515123101087289, 3690191062107239479,
+  3544956562637535289, 3978984379655991859,
+  3689073941180135479, 4123101758198592049,
+  3977867258728887859, 4122543197735040049
 };
 bool check_if_magic(const std::string& sq)
 {
   if(sq[4] != '5')
     return false;
 
-  <b>uint64_t magic_number = 
+  uint64_t magic_number = 
     *(reinterpret_cast&lt;const uint32_t*&gt;
       (sq.data()));
   magic_number <<= 32;
   magic_number += 
     *(reinterpret_cast&lt;const uint32_t*&gt;
-      (sq.data()+5));</b>
+      (sq.data()+5));
 
   return magic_numbers.find(magic_number) 
     != magic_numbers.end();
