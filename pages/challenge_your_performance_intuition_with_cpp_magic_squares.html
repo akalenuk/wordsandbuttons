@@ -215,7 +215,18 @@ function draw_slider(no){
     x = slider_xs[no] + 48 + 0.5;
     
     ctx.clearRect(0, 0, 608, 128);
-	
+	ctx.beginPath();
+	ctx.moveTo(64.5-16, 32.5);
+	ctx.lineTo(0.5 + 16, 127.5 - 32);
+	ctx.lineTo(607.5 - 16, 127.5 - 32);
+	ctx.lineTo(607.5 - 64 + 16, 32.5);
+    ctx.lineTo(64.5-16, 32.5);
+	ctx.strokeStyle="#000000";
+    ctx.stroke();
+    ctx.closePath(); 
+    ctx.fillStyle="#999999";
+  	ctx.fill();
+  	
 	if(slider_set[no]){
     	x_red = slider_user_xs[no] + 48 + 0.5;
 	    ctx.beginPath();
@@ -356,7 +367,7 @@ Round 1. Direct solution vs. the oddity heuristic
 The direct solution would be to literally check every row, column, and diagonal sum and then assert that all the numbers are there. We don't have to parse actual numbers, we can go with ASCII codes just fine. Also the simplest way to check is the string is a permutation of digits is to make a simple binary map and check if it can be properly filled with the input. Since we are here for the performance, we would use a single <span class="code_piece">uint_fast64_t</span> instead of a real map.
     </p>
     <p>
-The heuristic proposed is meant to end the function as early as possible. It is based on a fact that in a magic square the corner values are always even and the rest is odd. If one of the numbers fails to pass the oddity test, then there is no point in the fair check at all. Also, as you can see, this heuristic is rather effective. On random numbers if narrows down our cases with a pretty good 2<sup>9</sup> to 1 ratio. So only one string in 512 will get to the actual check. Well, technically our numbers are not entirely random, we have more odds than evens, but still. 
+The heuristic proposed is meant to end the function as early as possible. It is based on a fact that in a magic square the corner values are always even and the rest are odd. If one of the numbers fails to pass the oddity test, then there is no point in the full magicness check at all. Also, as you can see, this heuristic is rather effective. On random numbers it narrows down our cases with a pretty good 2<sup>9</sup> to 1 ratio. So only one string in 512 will get to the actual check. Well, technically our numbers are not entirely random, we have more odds than evens, but still. 
     </p>
     <p>
 Now place your bets!
@@ -437,7 +448,7 @@ They are equally fast.
     </p>
     <button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
     <p id="the_truth_1" style="display:none;">
-The right is only slightly more than 10% faster. The thing is, although this heuristic is great in narrowing, it is rather heavy by itself. We gained some, we lost some.
+The right is only slightly more than 10% faster. The thing is, although this heuristic is great in narrowing, it is rather heavy by itself. We gain some, we lose some.
     </p>
     <script language="JavaScript">
     init_slider(0);
