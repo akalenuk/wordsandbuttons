@@ -97,12 +97,14 @@ var slider_true_xs = [
     1.0 / (1.0 + 0.6) * 512, 
     1.0 / (1.0 + 0.7) * 512, 
     1.0 / (1.0 + 17.8) * 512,  
+    
     17.8 / (17.8 + 8.7) * 512,  
     8.7 / (8.7 + 12.7) * 512, 
-    0, 
-    0,  
-    0, 
-    0];
+    17.8 / (17.8 + 0.9) * 512, 
+    1.0 / (1.0 + 0.6) * 512,
+    
+    0.6 / (0.6 + 0.8) * 512, 
+    0.6 / (0.6 + 1.4) * 512];
 var slider_user_xs = [255, 255, 255, 255,  255, 255, 255, 255,  255, 255];
 var slider_xs = [255, 255, 255, 255,  255, 255, 255, 255,  255, 255];
 
@@ -703,7 +705,7 @@ The right is more than 10 times slower. Apparently, eight string comparisons are
     
     
     <h2>
-Round 5. String array vs. string map
+Round 5. String array vs. string set
     </h1>
     <p>
 Well, strings comparisons are relatively slow. But we don't have to do eight comparisons simply every time. If we organize our comparison work-flow as a tree-like structure, we could minimize the number of comparisons to somewhere form 1 to 3 per string.
@@ -771,7 +773,7 @@ We have another structure that seems promising in terms of performance. The unor
     <table><tr>
     <td id="left_6">
     <pre>
-const std::array&lt;std::string, 8&gt;  
+const std::set&lt;std::string&gt;  
   all_magic_squares = {
   "816357492", "492357816", 
   "618753294", "294753618",
@@ -788,7 +790,7 @@ bool check_if_magic(const std::string& sq)
     </td>
     <td id="right_6">
     <pre>
-const std::unordered_set&lt;std::string&gt; 
+const <b>std::unordered_set</b>&lt;std::string&gt; 
   all_magic_squares = {
   "816357492", "492357816", 
   "618753294", "294753618",
@@ -816,7 +818,305 @@ The usual set works better here. Yes, we saved on comparisons, but the hash func
     </script>
     
     
+    <h2>
+Round 7. String array vs. string array plus oddity heuristic
+    </h1>
+    <p>
+Now, when we have heavier body, maybe we can gain more from the heuristic. Let's try our oddity one here. 
+    </p>
+    <table><tr>
+    <td id="left_7">
+    <pre>
+const std::array&lt;std::string, 8&gt;  
+  all_magic_squares = {
+  "816357492", "492357816", 
+  "618753294", "294753618",
+  "834159672", "672159834", 
+  "438951276", "276951438"
+};
+
+bool check_if_magic(const std::string& sq)
+{
+  for(auto i = 0u; i < 8; ++i)
+    if(sq == all_magic_squares[i])
+      return true;
+
+  return false;
+}
+    </pre>
+    </td>
+    <td id="right_7">
+    <pre>
+const std::array&lt;std::string, 8&gt;  
+  all_magic_squares = {
+  "816357492", "492357816", 
+  "618753294", "294753618",
+  "834159672", "672159834", 
+  "438951276", "276951438"
+};
+
+bool check_if_magic(const std::string& sq)
+{
+
+  if ( (sq[0] & 1) != 0 || (sq[1] & 1) == 0 
+    || (sq[2] & 1) != 0 || (sq[3] & 1) == 0
+    || (sq[4] & 1) == 0 
+    || (sq[5] & 1) == 0 || (sq[6] & 1) != 0 
+    || (sq[7] & 1) == 0 || (sq[8] & 1) != 0)
+    return false; 
     
+  for(auto i = 0u; i < 8; ++i)
+    if(sq == all_magic_squares[i])
+      return true;
+    
+  return false;
+}
+    </pre>
+    </td></tr></table>
+    <canvas id="slider_7" width=608 height=128></canvas> 
+    <p class="comment" id="comment_7">
+They are equally fast.
+    </p>
+    <button type="button" onclick="reveal(6)" id="button_7">Reveal the truth</button>
+    <p id="the_truth_7" style="display:none;">
+And it works like a charm. Although, the whole thing is now only a little faster than the original direct solution and slower than every other numeric one. Looks like storing answers in strings is not such a good idea.
+    </p>
+    <script language="JavaScript">
+    init_slider(6);
+    </script>     
+    
+   
+    <h2>
+Round 8. Direct solution vs. answers in uint64_t.
+    </h1>
+    <p>
+Since we know that the center value is always five, we don't have to store it in our answers. This leaves us with 8 bytes per string that can be easily encoded as a single 64-bit value. Why don't we store them instead of strings?
+    </p>
+    <table><tr>
+    <td id="left_8">
+    <pre>
+auto c15 = '5' * 3;
+uint_fast64_t ideal_char_map = 
+    static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
+uint_fast64_t char_map_one = 1u;
+
+bool check_if_magic(const std::string& sq)
+  {
+  if ((sq[0] + sq[1] + sq[2] != c15)
+    || (sq[3] + sq[4] + sq[5] != c15)
+    || (sq[6] + sq[7] + sq[8] != c15)
+
+    || (sq[0] + sq[3] + sq[6] != c15)
+    || (sq[1] + sq[4] + sq[7] != c15)
+    || (sq[2] + sq[5] + sq[8] != c15)
+
+    || (sq[0] + sq[4] + sq[8] != c15)
+    || (sq[2] + sq[4] + sq[6] != c15))
+    return false;
+
+  auto char_map = ideal_char_map;
+  for(auto i = 0u; i &lt; 9; ++i)
+    char_map ^= char_map_one &lt;&lt; sq[i]; 
+  if (char_map != 0)
+    return false;
+
+  return true;
+  }
+    </pre>
+    </td>
+    <td id="right_8">
+    <pre>
+const std::array&lt;uint64_t, 8&gt; magic_numbers
+{
+3545515123101087289, 3690191062107239479,
+3544956562637535289, 3978984379655991859,
+3689073941180135479, 4123101758198592049,
+3977867258728887859, 4122543197735040049
+};
+bool check_if_magic(const std::string& sq)
+{
+  if(sq[4] != '5')
+    return false;
+
+  <b>uint64_t magic_number = 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()));
+  magic_number <<= 32;
+  magic_number += 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()+5));</b>
+
+  for(auto i = 0u; i &lt; 8; ++i)
+    if(magic_number == magic_numbers[i])
+      return true;
+  return false;
+}
+    </pre>
+    </td></tr></table>
+    <canvas id="slider_8" width=608 height=128></canvas> 
+    <p class="comment" id="comment_8">
+They are equally fast.
+    </p>
+    <button type="button" onclick="reveal(7)" id="button_8">Reveal the truth</button>
+    <p id="the_truth_8" style="display:none;">
+In fact, it is as fast as our best choice from the earlier.
+    </p>
+    <script language="JavaScript">
+    init_slider(7);
+    </script>
+    
+    
+    <h2>
+Round 9. Array on uin664_t vs. set of uint64_t.
+    </h1>
+    <p>
+Let's now use set instead of array here. There should be less comparisons anyway, but would it help?
+    </p>
+    <table><tr>
+    <td id="left_9">
+    <pre>
+const std::array&lt;uint64_t, 8&gt; magic_numbers
+{
+3545515123101087289, 3690191062107239479,
+3544956562637535289, 3978984379655991859,
+3689073941180135479, 4123101758198592049,
+3977867258728887859, 4122543197735040049
+};
+bool check_if_magic(const std::string& sq)
+{
+  if(sq[4] != '5')
+    return false;
+
+  <b>uint64_t magic_number = 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()));
+  magic_number <<= 32;
+  magic_number += 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()+5));</b>
+
+  for(auto i = 0u; i &lt; 8; ++i)
+    if(magic_number == magic_numbers[i])
+      return true;
+  return false;
+}
+    </pre>
+    </td>
+    <td id="right_9">
+    <pre>
+const std::set&lt;uint64_t&gt; magic_numbers
+{
+3545515123101087289, 3690191062107239479,
+3544956562637535289, 3978984379655991859,
+3689073941180135479, 4123101758198592049,
+3977867258728887859, 4122543197735040049
+};
+bool check_if_magic(const std::string& sq)
+{
+  if(sq[4] != '5')
+    return false;
+
+  <b>uint64_t magic_number = 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()));
+  magic_number <<= 32;
+  magic_number += 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()+5));</b>
+
+  return magic_numbers.find(magic_number) 
+    != magic_numbers.end();
+}
+    </pre>
+    </td></tr></table>
+    <canvas id="slider_9" width=608 height=128></canvas> 
+    <p class="comment" id="comment_9">
+They are equally fast.
+    </p>
+    <button type="button" onclick="reveal(8)" id="button_9">Reveal the truth</button>
+    <p id="the_truth_9" style="display:none;">
+Well, on this data simple traverse works better. Perhaps it's because we only need to go through 64 bytes and it fits into a single cahce line.
+    </p>
+    <script language="JavaScript">
+    init_slider(8);
+    </script>
+    
+    
+    <h2>
+Round 10. Array on uint64_t vs. unordered set of uint64_t.
+    </h1>
+    <p>
+Could we gain some speed from using unordered set?
+    </p>
+    <table><tr>
+    <td id="left_10">
+    <pre>
+const std::array&lt;uint64_t, 8&gt; magic_numbers
+{
+3545515123101087289, 3690191062107239479,
+3544956562637535289, 3978984379655991859,
+3689073941180135479, 4123101758198592049,
+3977867258728887859, 4122543197735040049
+};
+bool check_if_magic(const std::string& sq)
+{
+  if(sq[4] != '5')
+    return false;
+
+  <b>uint64_t magic_number = 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()));
+  magic_number <<= 32;
+  magic_number += 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()+5));</b>
+
+  for(auto i = 0u; i &lt; 8; ++i)
+    if(magic_number == magic_numbers[i])
+      return true;
+  return false;
+}
+    </pre>
+    </td>
+    <td id="right_10">
+    <pre>
+const std::unordered_set&lt;uint64_t&gt; magic_numbers
+{
+3545515123101087289, 3690191062107239479,
+3544956562637535289, 3978984379655991859,
+3689073941180135479, 4123101758198592049,
+3977867258728887859, 4122543197735040049
+};
+bool check_if_magic(const std::string& sq)
+{
+  if(sq[4] != '5')
+    return false;
+
+  <b>uint64_t magic_number = 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()));
+  magic_number <<= 32;
+  magic_number += 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()+5));</b>
+
+  return magic_numbers.find(magic_number) 
+    != magic_numbers.end();
+}
+    </pre>
+    </td></tr></table>
+    <canvas id="slider_10" width=608 height=128></canvas> 
+    <p class="comment" id="comment_10">
+They are equally fast.
+    </p>
+    <button type="button" onclick="reveal(9)" id="button_10">Reveal the truth</button>
+    <p id="the_truth_10" style="display:none;">
+Apparently not. Unordered set may work wonders for large and unimorphly distributed set of data. But we simply have our loop too effective to beat.
+    </p>
+    <script language="JavaScript">
+    init_slider(9);
+    </script>
+        
     
 
     <p class="footer">
