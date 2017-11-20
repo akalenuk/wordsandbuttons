@@ -288,7 +288,7 @@ function reveal(no){
 Challenge your performance intuition with C++ magic squares
     </h1>
     <p>
-This was supposed to be a five minute interview question. I came up with it on Thursday, then spent a night looking for a good answer. Then the other night. Then the Saturday morning. Then it finally occurred to me that it might not work terribly well on an interview.
+This was supposed to be a five minute interview question. I came up with it on Thursday, then spent a night looking for a good answer. Then the other night. Then the Saturday morning. Then it finally occurred to me that it might not work terribly well on an hour long interview.
     </p>
     <p>
 But it's still a great problem to fiddle with. And it goes like this.
@@ -307,7 +307,7 @@ Here is a magic square:
 It has all the numbers from 1 to 9 each exactly once. The sum in every row is 15. The sum in every column is 15. And the sum in both diagonals is, of course, also 15. We can write it as a 9-character string like this: <span class="code">"834159672"</span>.
     </p>
     <p>
-<b>The problem:</b> propose a function that tells if a 3x3 square written as a string of digits is magic or not <i>in the most effective manner</i>.
+<b>The problem:</b> propose a function that tells if a 3x3 square written as an ASCII string of digits is magic or not <i>in the most effective manner</i>.
     </p>
     <p>
 Here is some simple measuring code. It has no dependencies, and it's C++11 standard compliant, so it runs in basically every environment.
@@ -371,7 +371,7 @@ int main()
 I ran it with an empty checker to see how much time the generator takes. Then ran eleven different solutions three times each, and picked the best time for every solution. Now I know what works and what not.
     </p>
     <p>
-Let's play a game. There will be ten rounds, each round is a match between two solutions. Or rather between their execution times. Using your intuition and best judgment, please estimate their relative effectiveness. Use the slider below the code samples.
+Let's play a game. There will be ten rounds, each round is a match between two solutions. Or rather between their execution times. Using your intuition and best judgment, please estimate their <i>relative</i> effectiveness. Use the slider below the code samples.
     </p>
     <p class="comment">
 My times are measured on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz. <br>All the code compiled with g++ 5.4.0 -std=c++11 -O2.
@@ -382,10 +382,10 @@ My times are measured on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz. <br>All the 
 Round 1. Direct solution vs. the oddity heuristic
     </h1>
     <p>
-The direct solution would be to literally check every row, column, and diagonal sum and then assert that all the numbers are there. We don't have to parse actual numbers, we can go with ASCII codes just fine. Also the simplest way to check is the string is a permutation of digits is to make a simple binary map and check if it can be properly filled with the input. Since we are here for the performance, we would use a single <span class="code_piece">uint_fast64_t</span> instead of a real map.
+The direct solution would be to check every row, column, and diagonal sum and then assert that all the numbers are there. We don't have to parse actual numbers, we can go with ASCII codes just fine. Also the simplest way to check if the string is a permutation of digits is to make a simple binary map and assert it content after filling it with the input. Since we are here for the performance, we would use an <span class="code_piece">uint_fast64_t</span> instead of a real map.
     </p>
     <p>
-The heuristic proposed is meant to end the function as early as possible. It is based on a fact that in a magic square the corner values are always even and the rest are odd. If one of the numbers fails to pass the oddity test, then there is no point in the full magicness check at all. Also, as you can see, this heuristic is rather effective. On random numbers it narrows down our cases with a pretty good 2<sup>9</sup> to 1 ratio. So only one string in 512 will get to the actual check. Well, technically our numbers are not entirely random, we have more odds than evens, but still. 
+The heuristic proposed is meant to end the function as early as possible. It is based on a fact that in a magic square the corner values are always even and the rest are odd. If one of the numbers fails to pass the oddity test, then there is no point in the full magic check at all. Also, as you can see, this heuristic is rather effective. On random numbers it narrows down our cases with a pretty good 2<sup>9</sup> to 1 ratio. So only one string in 512 will get to the actual check. Well, technically our numbers are not entirely random, we have more odds than evens, but still. 
     </p>
     <p>
 Now place your bets!
@@ -477,7 +477,10 @@ The right is only slightly more than 10% faster. The thing is, although this heu
 Round 2. Direct solution vs. the central 5 heuristic
     </h1>
     <p>
-We can choose less effective but cheaper heuristic. For instance, we know that all the 3x3 magic squares have 5 in the center. Let's try and exploit that fact.
+We can choose less effective but cheaper heuristic. For instance, we know that all the 3x3 magic squares have 5 in the center. Let's try and exploit this fact.
+    </p>
+    <p>
+This also makes the main check a little bit cheaper as we now don't have to check for the central 5 in a sum.
     </p>
     <table><tr>
     <td id="left_2">
@@ -551,7 +554,7 @@ They are equally fast.
     </p>
     <button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
     <p id="the_truth_2" style="display:none;">
-The right is more than 50% faster. The heuristic filters out 8 out of 9 strings and it's cheap.
+The right is more than 50% faster. The heuristic filters out 8 out of 9 strings, and it's cheap.
     </p>
     <script language="JavaScript">
     init_slider(1);
@@ -653,7 +656,7 @@ The right is less than 50% faster, but still considerably better then the left.
 Round 4. Fair magic test vs. precached answers
     </h1>
     <p>
-The thing is, there are only 8 3x3 magic squares in existence. So do we have really have to test the string against the magic definition? Why couldn't we precache the values and simply compare with that?
+The thing is, there are only 8 3x3 magic squares in existence. So do we really have to test the string against the magic definition? Why couldn't we precache the magic values somewhere and simply compare with that?
     </p>
     <table><tr>
     <td id="left_4">
@@ -773,7 +776,7 @@ They are equally fast.
     </p>
     <button type="button" onclick="reveal(4)" id="button_5">Reveal the truth</button>
     <p id="the_truth_5" style="display:none;">
-The right is considerably better. Maybe, not as good as any of the numerical solutions, but better than the string array.
+The right is considerably better. Maybe, not as good as any of the numerical solutions, but better than the string array anyway.
     </p>
     <script language="JavaScript">
     init_slider(4);
@@ -905,7 +908,7 @@ And it works like a charm. Although, the whole thing is now only a little faster
 Round 8. Direct solution vs. answers in uint64_t.
     </h1>
     <p>
-Since we know that the center value is always five, we don't have to store it in our answers. This leaves us with 8 bytes per string that can be easily encoded as a single 64-bit value. Why don't we store them instead of strings?
+Since we know that the center value is always five, we don't have to store it in our answers either. This leaves us with exactly 8 bytes per string that can be cheaply encoded as a single 64-bit value. Why don't we store these values instead of strings?
     </p>
     <table><tr>
     <td id="left_8">
@@ -974,7 +977,7 @@ They are equally fast.
     </p>
     <button type="button" onclick="reveal(7)" id="button_8">Reveal the truth</button>
     <p id="the_truth_8" style="display:none;">
-In fact, it is as fast as our best choice from the earlier.
+It's fast! In fact, it is as fast as our best choice from the earlier.
     </p>
     <script language="JavaScript">
     init_slider(7);
@@ -1050,7 +1053,7 @@ They are equally fast.
     </p>
     <button type="button" onclick="reveal(8)" id="button_9">Reveal the truth</button>
     <p id="the_truth_9" style="display:none;">
-Well, on this data simple loop works better. Perhaps it's because we only need to go through 64 bytes and it fits into a single cache line.
+Well, on this data a simple loop works better. Perhaps, it's because we only need to go through 64 bytes and it fits into a single cache line. We loose this compactness with the set.
     </p>
     <script language="JavaScript">
     init_slider(8);
@@ -1137,7 +1140,7 @@ Apparently not. Unordered set may work wonders for large and uniformly distribut
 Congratulations!
     </h2>
     <p>
-You scored <span id="score"></span> pixels of error. I'm not sure if it's good or bad, but if you had left every answer as “exactly equal”, there would be <span id="default_score"></span> pixels.
+You scored <span id="score"></span> pixels of error. I'm not sure if it's good or bad, but if you leave every answer untouched as “exactly equal”, there is <span id="default_score"></span> pixels of error.
     </p>
     </div>
     
@@ -1145,7 +1148,7 @@ You scored <span id="score"></span> pixels of error. I'm not sure if it's good o
 Conclusion
     </h2> 
     <p>
-Probably, I shouldn't talk for everyone but in my case the conclusion would have been: <i>“bad measurements beat good intuition eight times out of ten”</i>. Even though I do have a long history of making things run faster, this extreme case — small data, cheap body — neglected my experience to naught. String operations seemed to be cheaper, heuristics — more effective and there were also high hopes for the standard containers. Well, at least slightly higher hopes.
+Probably, I shouldn't talk for everyone but in my case the conclusion would have been: <i>“bad measurements beat good intuition nine times out of ten”</i>. Even though I do have a long history of making things run faster, this extreme case — small data, cheap body — neglected my experience to naught. String operations seemed to be cheaper, heuristics — more effective and there were also high hopes for the standard containers. Well, at least slightly higher hopes.
     </p>
     <p>
 I learned something from this experience. Hope you did too. If so, then no matter what your score is, you are still the winner.
