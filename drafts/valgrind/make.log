@@ -1,0 +1,2948 @@
+g++ -O2 -std=c++11 empty_run.cpp -o empty_run
+./empty_run
+0.842865
+
+valgrind --tool=cachegrind ./empty_run 
+==5909== Cachegrind, a cache and branch-prediction profiler
+==5909== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==5909== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==5909== Command: ./empty_run
+==5909== 
+--5909-- warning: L3 cache found, using its data for the LL simulation.
+13.568
+
+==5909== 
+==5909== I   refs:      4,844,937,538
+==5909== I1  misses:            1,818
+==5909== LLi misses:            1,700
+==5909== I1  miss rate:          0.00%
+==5909== LLi miss rate:          0.00%
+==5909== 
+==5909== D   refs:      2,034,687,352  (1,017,514,712 rd   + 1,017,172,640 wr)
+==5909== D1  misses:           15,873  (       13,657 rd   +         2,216 wr)
+==5909== LLd misses:            9,152  (        7,757 rd   +         1,395 wr)
+==5909== D1  miss rate:           0.0% (          0.0%     +           0.0%  )
+==5909== LLd miss rate:           0.0% (          0.0%     +           0.0%  )
+==5909== 
+==5909== LL refs:              17,691  (       15,475 rd   +         2,216 wr)
+==5909== LL misses:            10,852  (        9,457 rd   +         1,395 wr)
+==5909== LL miss rate:            0.0% (          0.0%     +           0.0%  )
+g++ -O2 -std=c++11 empty_run.cpp -S
+cat empty_run.s
+	.file	"empty_run.cpp"
+	.section	.text.unlikely,"ax",@progbits
+.LCOLDB0:
+	.text
+.LHOTB0:
+	.p2align 4,,15
+	.globl	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.type	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1711:
+	.cfi_startproc
+	xorl	%eax, %eax
+	ret
+	.cfi_endproc
+.LFE1711:
+	.size	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE0:
+	.text
+.LHOTE0:
+	.section	.text.unlikely
+.LCOLDB1:
+	.text
+.LHOTB1:
+	.p2align 4,,15
+	.globl	_Z17generate_or_checki
+	.type	_Z17generate_or_checki, @function
+_Z17generate_or_checki:
+.LFB1712:
+	.cfi_startproc
+	cmpl	$-1, %edi
+	je	.L11
+	pushq	%r12
+	.cfi_def_cfa_offset 16
+	.cfi_offset 12, -16
+	pushq	%rbp
+	.cfi_def_cfa_offset 24
+	.cfi_offset 6, -24
+	leal	-1(%rdi), %ebp
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	.cfi_offset 3, -32
+	movslq	%edi, %r12
+	movl	$49, %ebx
+	.p2align 4,,10
+	.p2align 3
+.L5:
+	movq	_ZL6buffer(%rip), %rax
+	movl	%ebp, %edi
+	movb	%bl, (%rax,%r12)
+	addl	$1, %ebx
+	call	_Z17generate_or_checki
+	cmpb	$58, %bl
+	jne	.L5
+	popq	%rbx
+	.cfi_restore 3
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_restore 6
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_restore 12
+	.cfi_def_cfa_offset 8
+.L11:
+	rep ret
+	.cfi_endproc
+.LFE1712:
+	.size	_Z17generate_or_checki, .-_Z17generate_or_checki
+	.section	.text.unlikely
+.LCOLDE1:
+	.text
+.LHOTE1:
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.LC3:
+	.string	"\n\n"
+	.section	.text.unlikely
+.LCOLDB4:
+	.section	.text.startup,"ax",@progbits
+.LHOTB4:
+	.p2align 4,,15
+	.globl	main
+	.type	main, @function
+main:
+.LFB1713:
+	.cfi_startproc
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	.cfi_offset 3, -16
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	movl	$49, %edx
+	movq	%rax, %rbx
+	.p2align 4,,10
+	.p2align 3
+.L14:
+	movq	_ZL6buffer(%rip), %rax
+	movl	$7, %edi
+	movb	%dl, 8(%rax)
+	call	_Z17generate_or_checki
+	addl	$1, %edx
+	cmpb	$58, %dl
+	jne	.L14
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	pxor	%xmm0, %xmm0
+	subq	%rbx, %rax
+	movl	$_ZSt4cout, %edi
+	cvtsi2sdq	%rax, %xmm0
+	divsd	.LC2(%rip), %xmm0
+	call	_ZNSo9_M_insertIdEERSoT_
+	movl	$.LC3, %esi
+	movq	%rax, %rdi
+	call	_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc
+	xorl	%eax, %eax
+	popq	%rbx
+	.cfi_def_cfa_offset 8
+	ret
+	.cfi_endproc
+.LFE1713:
+	.size	main, .-main
+	.section	.text.unlikely
+.LCOLDE4:
+	.section	.text.startup
+.LHOTE4:
+	.section	.text.unlikely
+.LCOLDB5:
+	.section	.text.startup
+.LHOTB5:
+	.p2align 4,,15
+	.type	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1925:
+	.cfi_startproc
+	subq	$8, %rsp
+	.cfi_def_cfa_offset 16
+	movl	$_ZStL8__ioinit, %edi
+	call	_ZNSt8ios_base4InitC1Ev
+	movl	$__dso_handle, %edx
+	movl	$_ZStL8__ioinit, %esi
+	movl	$_ZNSt8ios_base4InitD1Ev, %edi
+	call	__cxa_atexit
+	movabsq	$2314885530818453536, %rax
+	movq	$_ZL6buffer+16, _ZL6buffer(%rip)
+	movb	$32, _ZL6buffer+24(%rip)
+	movq	%rax, _ZL6buffer+16(%rip)
+	movq	$9, _ZL6buffer+8(%rip)
+	movl	$__dso_handle, %edx
+	movb	$0, _ZL6buffer+25(%rip)
+	movl	$_ZL6buffer, %esi
+	movl	$_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEED1Ev, %edi
+	addq	$8, %rsp
+	.cfi_def_cfa_offset 8
+	jmp	__cxa_atexit
+	.cfi_endproc
+.LFE1925:
+	.size	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE5:
+	.section	.text.startup
+.LHOTE5:
+	.section	.init_array,"aw"
+	.align 8
+	.quad	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.local	_ZL6buffer
+	.comm	_ZL6buffer,32,32
+	.local	_ZStL8__ioinit
+	.comm	_ZStL8__ioinit,1,1
+	.section	.rodata.cst8,"aM",@progbits,8
+	.align 8
+.LC2:
+	.long	0
+	.long	1104006501
+	.hidden	__dso_handle
+	.ident	"GCC: (Ubuntu 5.4.1-2ubuntu1~16.04) 5.4.1 20160904"
+	.section	.note.GNU-stack,"",@progbits
+g++ -O2 -std=c++11 numbers.cpp -o numbers	
+./numbers
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 1.80903
+
+valgrind --tool=cachegrind ./numbers
+==5920== Cachegrind, a cache and branch-prediction profiler
+==5920== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==5920== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==5920== Command: ./numbers
+==5920== 
+--5920-- warning: L3 cache found, using its data for the LL simulation.
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 43.1593
+
+==5920== 
+==5920== I   refs:      13,099,624,571
+==5920== I1  misses:             1,846
+==5920== LLi misses:             1,705
+==5920== I1  miss rate:           0.00%
+==5920== LLi miss rate:           0.00%
+==5920== 
+==5920== D   refs:       7,435,891,049  (4,739,364,171 rd   + 2,696,526,878 wr)
+==5920== D1  misses:            15,886  (       13,670 rd   +         2,216 wr)
+==5920== LLd misses:             9,155  (        7,758 rd   +         1,397 wr)
+==5920== D1  miss rate:            0.0% (          0.0%     +           0.0%  )
+==5920== LLd miss rate:            0.0% (          0.0%     +           0.0%  )
+==5920== 
+==5920== LL refs:               17,732  (       15,516 rd   +         2,216 wr)
+==5920== LL misses:             10,860  (        9,463 rd   +         1,397 wr)
+==5920== LL miss rate:             0.0% (          0.0%     +           0.0%  )
+g++ -O2 -std=c++11 numbers.cpp -S
+cat numbers.s	
+	.file	"numbers.cpp"
+	.section	.text.unlikely,"ax",@progbits
+.LCOLDB0:
+	.text
+.LHOTB0:
+	.p2align 4,,15
+	.globl	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.type	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1711:
+	.cfi_startproc
+	movq	(%rdi), %rdx
+	xorl	%eax, %eax
+	movsbl	(%rdx), %esi
+	movsbl	1(%rdx), %edi
+	movsbl	2(%rdx), %r8d
+	leal	(%rsi,%rdi), %ecx
+	addl	%r8d, %ecx
+	cmpl	magic_number(%rip), %ecx
+	je	.L21
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L21:
+	pushq	%r13
+	.cfi_def_cfa_offset 16
+	.cfi_offset 13, -16
+	pushq	%r12
+	.cfi_def_cfa_offset 24
+	.cfi_offset 12, -24
+	pushq	%rbp
+	.cfi_def_cfa_offset 32
+	.cfi_offset 6, -32
+	pushq	%rbx
+	.cfi_def_cfa_offset 40
+	.cfi_offset 3, -40
+	movsbl	3(%rdx), %r10d
+	movsbl	4(%rdx), %r11d
+	movsbl	5(%rdx), %ebx
+	leal	(%r10,%r11), %r9d
+	addl	%ebx, %r9d
+	cmpl	%r9d, %ecx
+	je	.L22
+.L13:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_restore 3
+	.cfi_def_cfa_offset 32
+	popq	%rbp
+	.cfi_restore 6
+	.cfi_def_cfa_offset 24
+	popq	%r12
+	.cfi_restore 12
+	.cfi_def_cfa_offset 16
+	popq	%r13
+	.cfi_restore 13
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L22:
+	.cfi_restore_state
+	movsbl	6(%rdx), %ebp
+	movsbl	7(%rdx), %r13d
+	movsbl	8(%rdx), %r12d
+	leal	0(%rbp,%r13), %r9d
+	addl	%r12d, %r9d
+	cmpl	%r9d, %ecx
+	jne	.L13
+	leal	(%rsi,%r10), %r9d
+	addl	%ebp, %r9d
+	cmpl	%r9d, %ecx
+	jne	.L13
+	addl	%r11d, %edi
+	addl	%r13d, %edi
+	cmpl	%edi, %ecx
+	jne	.L13
+	leal	(%r8,%rbx), %edi
+	addl	%r12d, %edi
+	cmpl	%edi, %ecx
+	jne	.L13
+	addl	%r11d, %esi
+	addl	%r12d, %esi
+	cmpl	%esi, %ecx
+	jne	.L13
+	addl	%r11d, %r8d
+	addl	%ebp, %r8d
+	cmpl	%r8d, %ecx
+	jne	.L13
+	movq	ideal_char_map(%rip), %rsi
+	movq	char_map_one(%rip), %r8
+	leaq	9(%rdx), %rdi
+	movq	%rdx, %rax
+	.p2align 4,,10
+	.p2align 3
+.L4:
+	movsbl	(%rax), %ecx
+	movq	%r8, %rdx
+	addq	$1, %rax
+	salq	%cl, %rdx
+	xorq	%rdx, %rsi
+	cmpq	%rax, %rdi
+	jne	.L4
+	testq	%rsi, %rsi
+	sete	%al
+	jmp	.L13
+	.cfi_endproc
+.LFE1711:
+	.size	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE0:
+	.text
+.LHOTE0:
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.LC1:
+	.string	" "
+	.section	.text.unlikely
+.LCOLDB2:
+	.text
+.LHOTB2:
+	.p2align 4,,15
+	.globl	_Z17generate_or_checki
+	.type	_Z17generate_or_checki, @function
+_Z17generate_or_checki:
+.LFB1712:
+	.cfi_startproc
+	cmpl	$-1, %edi
+	pushq	%r12
+	.cfi_def_cfa_offset 16
+	.cfi_offset 12, -16
+	pushq	%rbp
+	.cfi_def_cfa_offset 24
+	.cfi_offset 6, -24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	.cfi_offset 3, -32
+	je	.L33
+	leal	-1(%rdi), %ebp
+	movslq	%edi, %r12
+	movl	$49, %ebx
+	.p2align 4,,10
+	.p2align 3
+.L28:
+	movq	_ZL6buffer(%rip), %rax
+	movl	%ebp, %edi
+	movb	%bl, (%rax,%r12)
+	addl	$1, %ebx
+	call	_Z17generate_or_checki
+	cmpb	$58, %bl
+	jne	.L28
+.L23:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L33:
+	.cfi_restore_state
+	movl	$_ZL6buffer, %edi
+	call	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	testb	%al, %al
+	je	.L23
+	movq	_ZL6buffer+8(%rip), %rdx
+	movq	_ZL6buffer(%rip), %rsi
+	movl	$_ZSt4cout, %edi
+	call	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	popq	%rbx
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	movl	$1, %edx
+	movl	$.LC1, %esi
+	movq	%rax, %rdi
+	jmp	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	.cfi_endproc
+.LFE1712:
+	.size	_Z17generate_or_checki, .-_Z17generate_or_checki
+	.section	.text.unlikely
+.LCOLDE2:
+	.text
+.LHOTE2:
+	.section	.rodata.str1.1
+.LC4:
+	.string	"\n\n"
+	.section	.text.unlikely
+.LCOLDB5:
+	.section	.text.startup,"ax",@progbits
+.LHOTB5:
+	.p2align 4,,15
+	.globl	main
+	.type	main, @function
+main:
+.LFB1713:
+	.cfi_startproc
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	.cfi_offset 3, -16
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	movl	$8, %edi
+	movq	%rax, %rbx
+	call	_Z17generate_or_checki
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	pxor	%xmm0, %xmm0
+	subq	%rbx, %rax
+	movl	$_ZSt4cout, %edi
+	cvtsi2sdq	%rax, %xmm0
+	divsd	.LC3(%rip), %xmm0
+	call	_ZNSo9_M_insertIdEERSoT_
+	movl	$.LC4, %esi
+	movq	%rax, %rdi
+	call	_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc
+	xorl	%eax, %eax
+	popq	%rbx
+	.cfi_def_cfa_offset 8
+	ret
+	.cfi_endproc
+.LFE1713:
+	.size	main, .-main
+	.section	.text.unlikely
+.LCOLDE5:
+	.section	.text.startup
+.LHOTE5:
+	.section	.text.unlikely
+.LCOLDB6:
+	.section	.text.startup
+.LHOTB6:
+	.p2align 4,,15
+	.type	_GLOBAL__sub_I_magic_number, @function
+_GLOBAL__sub_I_magic_number:
+.LFB1926:
+	.cfi_startproc
+	subq	$8, %rsp
+	.cfi_def_cfa_offset 16
+	movl	$_ZStL8__ioinit, %edi
+	call	_ZNSt8ios_base4InitC1Ev
+	movl	$__dso_handle, %edx
+	movl	$_ZStL8__ioinit, %esi
+	movl	$_ZNSt8ios_base4InitD1Ev, %edi
+	call	__cxa_atexit
+	movabsq	$2314885530818453536, %rax
+	movq	$_ZL6buffer+16, _ZL6buffer(%rip)
+	movb	$32, _ZL6buffer+24(%rip)
+	movq	%rax, _ZL6buffer+16(%rip)
+	movq	$9, _ZL6buffer+8(%rip)
+	movl	$__dso_handle, %edx
+	movb	$0, _ZL6buffer+25(%rip)
+	movl	$_ZL6buffer, %esi
+	movl	$_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEED1Ev, %edi
+	addq	$8, %rsp
+	.cfi_def_cfa_offset 8
+	jmp	__cxa_atexit
+	.cfi_endproc
+.LFE1926:
+	.size	_GLOBAL__sub_I_magic_number, .-_GLOBAL__sub_I_magic_number
+	.section	.text.unlikely
+.LCOLDE6:
+	.section	.text.startup
+.LHOTE6:
+	.section	.init_array,"aw"
+	.align 8
+	.quad	_GLOBAL__sub_I_magic_number
+	.local	_ZL6buffer
+	.comm	_ZL6buffer,32,32
+	.globl	char_map_one
+	.data
+	.align 8
+	.type	char_map_one, @object
+	.size	char_map_one, 8
+char_map_one:
+	.quad	1
+	.globl	ideal_char_map
+	.align 8
+	.type	ideal_char_map, @object
+	.size	ideal_char_map, 8
+ideal_char_map:
+	.quad	287667426198290432
+	.globl	magic_number
+	.align 4
+	.type	magic_number, @object
+	.size	magic_number, 4
+magic_number:
+	.long	159
+	.local	_ZStL8__ioinit
+	.comm	_ZStL8__ioinit,1,1
+	.section	.rodata.cst8,"aM",@progbits,8
+	.align 8
+.LC3:
+	.long	0
+	.long	1104006501
+	.hidden	__dso_handle
+	.ident	"GCC: (Ubuntu 5.4.1-2ubuntu1~16.04) 5.4.1 20160904"
+	.section	.note.GNU-stack,"",@progbits
+g++ -O2 -std=c++11 numbers_const.cpp -o numbers_const	
+./numbers_const
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 1.8117
+
+valgrind --tool=cachegrind ./numbers_const
+==5937== Cachegrind, a cache and branch-prediction profiler
+==5937== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==5937== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==5937== Command: ./numbers_const
+==5937== 
+--5937-- warning: L3 cache found, using its data for the LL simulation.
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 41.3046
+
+==5937== 
+==5937== I   refs:      12,856,556,965
+==5937== I1  misses:             1,843
+==5937== LLi misses:             1,703
+==5937== I1  miss rate:           0.00%
+==5937== LLi miss rate:           0.00%
+==5937== 
+==5937== D   refs:       6,805,402,908  (4,230,409,813 rd   + 2,574,993,095 wr)
+==5937== D1  misses:            15,882  (       13,665 rd   +         2,217 wr)
+==5937== LLd misses:             9,154  (        7,758 rd   +         1,396 wr)
+==5937== D1  miss rate:            0.0% (          0.0%     +           0.0%  )
+==5937== LLd miss rate:            0.0% (          0.0%     +           0.0%  )
+==5937== 
+==5937== LL refs:               17,725  (       15,508 rd   +         2,217 wr)
+==5937== LL misses:             10,857  (        9,461 rd   +         1,396 wr)
+==5937== LL miss rate:             0.0% (          0.0%     +           0.0%  )
+g++ -O2 -std=c++11 numbers_const.cpp -S
+cat numbers_const.s	
+	.file	"numbers_const.cpp"
+	.section	.text.unlikely,"ax",@progbits
+.LCOLDB0:
+	.text
+.LHOTB0:
+	.p2align 4,,15
+	.globl	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.type	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1711:
+	.cfi_startproc
+	movq	(%rdi), %rdx
+	xorl	%eax, %eax
+	movsbl	(%rdx), %esi
+	movsbl	1(%rdx), %edi
+	movsbl	2(%rdx), %r8d
+	leal	(%rsi,%rdi), %ecx
+	addl	%r8d, %ecx
+	cmpl	$159, %ecx
+	je	.L17
+.L15:
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L17:
+	movsbl	3(%rdx), %r9d
+	movsbl	4(%rdx), %r10d
+	movsbl	5(%rdx), %r11d
+	leal	(%r9,%r10), %ecx
+	addl	%r11d, %ecx
+	cmpl	$159, %ecx
+	jne	.L15
+	pushq	%r12
+	.cfi_def_cfa_offset 16
+	.cfi_offset 12, -16
+	pushq	%rbp
+	.cfi_def_cfa_offset 24
+	.cfi_offset 6, -24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	.cfi_offset 3, -32
+	movsbl	6(%rdx), %ebx
+	movsbl	7(%rdx), %r12d
+	movsbl	8(%rdx), %ebp
+	leal	(%rbx,%r12), %ecx
+	addl	%ebp, %ecx
+	cmpl	$159, %ecx
+	je	.L18
+.L2:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_restore 3
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_restore 6
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_restore 12
+	.cfi_def_cfa_offset 8
+	ret
+.L18:
+	.cfi_restore_state
+	leal	(%rsi,%r9), %ecx
+	addl	%ebx, %ecx
+	cmpl	$159, %ecx
+	jne	.L2
+	addl	%r10d, %edi
+	addl	%r12d, %edi
+	cmpl	$159, %edi
+	jne	.L2
+	leal	(%r8,%r11), %ecx
+	addl	%ebp, %ecx
+	cmpl	$159, %ecx
+	jne	.L2
+	addl	%r10d, %esi
+	addl	%ebp, %esi
+	cmpl	$159, %esi
+	jne	.L2
+	addl	%r10d, %r8d
+	addl	%ebx, %r8d
+	cmpl	$159, %r8d
+	jne	.L2
+	movq	%rdx, %rax
+	leaq	9(%rdx), %rdi
+	movl	$1, %esi
+	movabsq	$287667426198290432, %rdx
+	.p2align 4,,10
+	.p2align 3
+.L3:
+	movsbl	(%rax), %ecx
+	movq	%rsi, %rbx
+	addq	$1, %rax
+	salq	%cl, %rbx
+	xorq	%rbx, %rdx
+	cmpq	%rax, %rdi
+	jne	.L3
+	testq	%rdx, %rdx
+	sete	%al
+	jmp	.L2
+	.cfi_endproc
+.LFE1711:
+	.size	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE0:
+	.text
+.LHOTE0:
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.LC1:
+	.string	" "
+	.section	.text.unlikely
+.LCOLDB2:
+	.text
+.LHOTB2:
+	.p2align 4,,15
+	.globl	_Z17generate_or_checki
+	.type	_Z17generate_or_checki, @function
+_Z17generate_or_checki:
+.LFB1712:
+	.cfi_startproc
+	cmpl	$-1, %edi
+	pushq	%r12
+	.cfi_def_cfa_offset 16
+	.cfi_offset 12, -16
+	pushq	%rbp
+	.cfi_def_cfa_offset 24
+	.cfi_offset 6, -24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	.cfi_offset 3, -32
+	je	.L29
+	leal	-1(%rdi), %ebp
+	movslq	%edi, %r12
+	movl	$49, %ebx
+	.p2align 4,,10
+	.p2align 3
+.L24:
+	movq	_ZL6buffer(%rip), %rax
+	movl	%ebp, %edi
+	movb	%bl, (%rax,%r12)
+	addl	$1, %ebx
+	call	_Z17generate_or_checki
+	cmpb	$58, %bl
+	jne	.L24
+.L19:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L29:
+	.cfi_restore_state
+	movl	$_ZL6buffer, %edi
+	call	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	testb	%al, %al
+	je	.L19
+	movq	_ZL6buffer+8(%rip), %rdx
+	movq	_ZL6buffer(%rip), %rsi
+	movl	$_ZSt4cout, %edi
+	call	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	popq	%rbx
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	movl	$1, %edx
+	movl	$.LC1, %esi
+	movq	%rax, %rdi
+	jmp	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	.cfi_endproc
+.LFE1712:
+	.size	_Z17generate_or_checki, .-_Z17generate_or_checki
+	.section	.text.unlikely
+.LCOLDE2:
+	.text
+.LHOTE2:
+	.section	.rodata.str1.1
+.LC4:
+	.string	"\n\n"
+	.section	.text.unlikely
+.LCOLDB5:
+	.section	.text.startup,"ax",@progbits
+.LHOTB5:
+	.p2align 4,,15
+	.globl	main
+	.type	main, @function
+main:
+.LFB1713:
+	.cfi_startproc
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	.cfi_offset 3, -16
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	movl	$8, %edi
+	movq	%rax, %rbx
+	call	_Z17generate_or_checki
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	pxor	%xmm0, %xmm0
+	subq	%rbx, %rax
+	movl	$_ZSt4cout, %edi
+	cvtsi2sdq	%rax, %xmm0
+	divsd	.LC3(%rip), %xmm0
+	call	_ZNSo9_M_insertIdEERSoT_
+	movl	$.LC4, %esi
+	movq	%rax, %rdi
+	call	_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc
+	xorl	%eax, %eax
+	popq	%rbx
+	.cfi_def_cfa_offset 8
+	ret
+	.cfi_endproc
+.LFE1713:
+	.size	main, .-main
+	.section	.text.unlikely
+.LCOLDE5:
+	.section	.text.startup
+.LHOTE5:
+	.section	.text.unlikely
+.LCOLDB6:
+	.section	.text.startup
+.LHOTB6:
+	.p2align 4,,15
+	.type	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1926:
+	.cfi_startproc
+	subq	$8, %rsp
+	.cfi_def_cfa_offset 16
+	movl	$_ZStL8__ioinit, %edi
+	call	_ZNSt8ios_base4InitC1Ev
+	movl	$__dso_handle, %edx
+	movl	$_ZStL8__ioinit, %esi
+	movl	$_ZNSt8ios_base4InitD1Ev, %edi
+	call	__cxa_atexit
+	movabsq	$2314885530818453536, %rax
+	movq	$_ZL6buffer+16, _ZL6buffer(%rip)
+	movb	$32, _ZL6buffer+24(%rip)
+	movq	%rax, _ZL6buffer+16(%rip)
+	movq	$9, _ZL6buffer+8(%rip)
+	movl	$__dso_handle, %edx
+	movb	$0, _ZL6buffer+25(%rip)
+	movl	$_ZL6buffer, %esi
+	movl	$_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEED1Ev, %edi
+	addq	$8, %rsp
+	.cfi_def_cfa_offset 8
+	jmp	__cxa_atexit
+	.cfi_endproc
+.LFE1926:
+	.size	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE6:
+	.section	.text.startup
+.LHOTE6:
+	.section	.init_array,"aw"
+	.align 8
+	.quad	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.local	_ZL6buffer
+	.comm	_ZL6buffer,32,32
+	.local	_ZStL8__ioinit
+	.comm	_ZStL8__ioinit,1,1
+	.section	.rodata.cst8,"aM",@progbits,8
+	.align 8
+.LC3:
+	.long	0
+	.long	1104006501
+	.hidden	__dso_handle
+	.ident	"GCC: (Ubuntu 5.4.1-2ubuntu1~16.04) 5.4.1 20160904"
+	.section	.note.GNU-stack,"",@progbits
+g++ -O2 -std=c++11 numbers_permutation_shifts.cpp -o numbers_permutation_shifts		
+./numbers_permutation_shifts
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 1.56171
+
+valgrind --tool=cachegrind ./numbers_permutation_shifts
+==5953== Cachegrind, a cache and branch-prediction profiler
+==5953== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==5953== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==5953== Command: ./numbers_permutation_shifts
+==5953== 
+--5953-- warning: L3 cache found, using its data for the LL simulation.
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 53.4056
+
+==5953== 
+==5953== I   refs:      13,041,321,061
+==5953== I1  misses:             1,843
+==5953== LLi misses:             1,705
+==5953== I1  miss rate:           0.00%
+==5953== LLi miss rate:           0.00%
+==5953== 
+==5953== D   refs:       7,438,562,794  (4,742,035,917 rd   + 2,696,526,877 wr)
+==5953== D1  misses:            15,894  (       13,676 rd   +         2,218 wr)
+==5953== LLd misses:             9,156  (        7,761 rd   +         1,395 wr)
+==5953== D1  miss rate:            0.0% (          0.0%     +           0.0%  )
+==5953== LLd miss rate:            0.0% (          0.0%     +           0.0%  )
+==5953== 
+==5953== LL refs:               17,737  (       15,519 rd   +         2,218 wr)
+==5953== LL misses:             10,861  (        9,466 rd   +         1,395 wr)
+==5953== LL miss rate:             0.0% (          0.0%     +           0.0%  )
+g++ -O2 -std=c++11 numbers_permutation_shifts.cpp -S
+cat numbers_permutation_shifts.s    
+	.file	"numbers_permutation_shifts.cpp"
+	.section	.text.unlikely,"ax",@progbits
+.LCOLDB0:
+	.text
+.LHOTB0:
+	.p2align 4,,15
+	.globl	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.type	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1752:
+	.cfi_startproc
+	movq	(%rdi), %rdx
+	xorl	%eax, %eax
+	movsbl	(%rdx), %esi
+	movsbl	1(%rdx), %edi
+	movsbl	2(%rdx), %r8d
+	leal	(%rsi,%rdi), %ecx
+	addl	%r8d, %ecx
+	cmpl	magic_number(%rip), %ecx
+	je	.L17
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L17:
+	pushq	%r13
+	.cfi_def_cfa_offset 16
+	.cfi_offset 13, -16
+	pushq	%r12
+	.cfi_def_cfa_offset 24
+	.cfi_offset 12, -24
+	pushq	%rbp
+	.cfi_def_cfa_offset 32
+	.cfi_offset 6, -32
+	pushq	%rbx
+	.cfi_def_cfa_offset 40
+	.cfi_offset 3, -40
+	movsbl	3(%rdx), %r9d
+	movsbl	5(%rdx), %r10d
+	leal	(%r9,%r10), %ebp
+	cmpl	not_so_magic_number(%rip), %ebp
+	je	.L18
+.L2:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_restore 3
+	.cfi_def_cfa_offset 32
+	popq	%rbp
+	.cfi_restore 6
+	.cfi_def_cfa_offset 24
+	popq	%r12
+	.cfi_restore 12
+	.cfi_def_cfa_offset 16
+	popq	%r13
+	.cfi_restore 13
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L18:
+	.cfi_restore_state
+	movsbl	6(%rdx), %r11d
+	movsbl	7(%rdx), %r13d
+	movsbl	8(%rdx), %ebx
+	leal	(%r11,%r13), %r12d
+	addl	%ebx, %r12d
+	cmpl	%r12d, %ecx
+	jne	.L2
+	addl	%esi, %r9d
+	addl	%r11d, %r9d
+	cmpl	%r9d, %ecx
+	jne	.L2
+	addl	%r13d, %edi
+	cmpl	%edi, %ebp
+	jne	.L2
+	leal	(%r8,%r10), %edi
+	addl	%ebx, %edi
+	cmpl	%edi, %ecx
+	jne	.L2
+	movsbl	4(%rdx), %edi
+	addl	%edi, %esi
+	addl	%ebx, %esi
+	cmpl	%esi, %ecx
+	jne	.L2
+	addl	%r8d, %edi
+	addl	%edi, %r11d
+	cmpl	%r11d, %ecx
+	jne	.L2
+	movq	%rdx, %rax
+	leaq	9(%rdx), %rsi
+	xorl	%edx, %edx
+	.p2align 4,,10
+	.p2align 3
+.L3:
+	movsbq	(%rax), %rcx
+	addq	$1, %rax
+	movzwl	_ZL25bit_shifts_for_characters(%rcx,%rcx), %ecx
+	xorl	%ecx, %edx
+	cmpq	%rax, %rsi
+	jne	.L3
+	cmpl	$511, %edx
+	sete	%al
+	jmp	.L2
+	.cfi_endproc
+.LFE1752:
+	.size	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE0:
+	.text
+.LHOTE0:
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.LC1:
+	.string	" "
+	.section	.text.unlikely
+.LCOLDB2:
+	.text
+.LHOTB2:
+	.p2align 4,,15
+	.globl	_Z17generate_or_checki
+	.type	_Z17generate_or_checki, @function
+_Z17generate_or_checki:
+.LFB1755:
+	.cfi_startproc
+	cmpl	$-1, %edi
+	pushq	%r12
+	.cfi_def_cfa_offset 16
+	.cfi_offset 12, -16
+	pushq	%rbp
+	.cfi_def_cfa_offset 24
+	.cfi_offset 6, -24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	.cfi_offset 3, -32
+	je	.L29
+	leal	-1(%rdi), %ebp
+	movslq	%edi, %r12
+	movl	$49, %ebx
+	.p2align 4,,10
+	.p2align 3
+.L24:
+	movq	_ZL6buffer(%rip), %rax
+	movl	%ebp, %edi
+	movb	%bl, (%rax,%r12)
+	addl	$1, %ebx
+	call	_Z17generate_or_checki
+	cmpb	$58, %bl
+	jne	.L24
+.L19:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L29:
+	.cfi_restore_state
+	movl	$_ZL6buffer, %edi
+	call	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	testb	%al, %al
+	je	.L19
+	movq	_ZL6buffer+8(%rip), %rdx
+	movq	_ZL6buffer(%rip), %rsi
+	movl	$_ZSt4cout, %edi
+	call	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	popq	%rbx
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	movl	$1, %edx
+	movl	$.LC1, %esi
+	movq	%rax, %rdi
+	jmp	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	.cfi_endproc
+.LFE1755:
+	.size	_Z17generate_or_checki, .-_Z17generate_or_checki
+	.section	.text.unlikely
+.LCOLDE2:
+	.text
+.LHOTE2:
+	.section	.rodata.str1.1
+.LC4:
+	.string	"\n\n"
+	.section	.text.unlikely
+.LCOLDB5:
+	.section	.text.startup,"ax",@progbits
+.LHOTB5:
+	.p2align 4,,15
+	.globl	main
+	.type	main, @function
+main:
+.LFB1756:
+	.cfi_startproc
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	.cfi_offset 3, -16
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	movl	$8, %edi
+	movq	%rax, %rbx
+	call	_Z17generate_or_checki
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	pxor	%xmm0, %xmm0
+	subq	%rbx, %rax
+	movl	$_ZSt4cout, %edi
+	cvtsi2sdq	%rax, %xmm0
+	divsd	.LC3(%rip), %xmm0
+	call	_ZNSo9_M_insertIdEERSoT_
+	movl	$.LC4, %esi
+	movq	%rax, %rdi
+	call	_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc
+	xorl	%eax, %eax
+	popq	%rbx
+	.cfi_def_cfa_offset 8
+	ret
+	.cfi_endproc
+.LFE1756:
+	.size	main, .-main
+	.section	.text.unlikely
+.LCOLDE5:
+	.section	.text.startup
+.LHOTE5:
+	.section	.text.unlikely
+.LCOLDB6:
+	.section	.text.startup
+.LHOTB6:
+	.p2align 4,,15
+	.type	_GLOBAL__sub_I_magic_number, @function
+_GLOBAL__sub_I_magic_number:
+.LFB1969:
+	.cfi_startproc
+	subq	$8, %rsp
+	.cfi_def_cfa_offset 16
+	movl	$_ZStL8__ioinit, %edi
+	call	_ZNSt8ios_base4InitC1Ev
+	movl	$__dso_handle, %edx
+	movl	$_ZStL8__ioinit, %esi
+	movl	$_ZNSt8ios_base4InitD1Ev, %edi
+	call	__cxa_atexit
+	movabsq	$2314885530818453536, %rax
+	movq	$_ZL6buffer+16, _ZL6buffer(%rip)
+	movb	$32, _ZL6buffer+24(%rip)
+	movq	%rax, _ZL6buffer+16(%rip)
+	movq	$9, _ZL6buffer+8(%rip)
+	movl	$__dso_handle, %edx
+	movb	$0, _ZL6buffer+25(%rip)
+	movl	$_ZL6buffer, %esi
+	movl	$_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEED1Ev, %edi
+	addq	$8, %rsp
+	.cfi_def_cfa_offset 8
+	jmp	__cxa_atexit
+	.cfi_endproc
+.LFE1969:
+	.size	_GLOBAL__sub_I_magic_number, .-_GLOBAL__sub_I_magic_number
+	.section	.text.unlikely
+.LCOLDE6:
+	.section	.text.startup
+.LHOTE6:
+	.section	.init_array,"aw"
+	.align 8
+	.quad	_GLOBAL__sub_I_magic_number
+	.local	_ZL6buffer
+	.comm	_ZL6buffer,32,32
+	.section	.rodata
+	.align 32
+	.type	_ZL25bit_shifts_for_characters, @object
+	.size	_ZL25bit_shifts_for_characters, 116
+_ZL25bit_shifts_for_characters:
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	0
+	.value	1
+	.value	2
+	.value	4
+	.value	8
+	.value	16
+	.value	32
+	.value	64
+	.value	128
+	.value	256
+	.globl	not_so_magic_number
+	.data
+	.align 4
+	.type	not_so_magic_number, @object
+	.size	not_so_magic_number, 4
+not_so_magic_number:
+	.long	106
+	.globl	magic_number
+	.align 4
+	.type	magic_number, @object
+	.size	magic_number, 4
+magic_number:
+	.long	159
+	.local	_ZStL8__ioinit
+	.comm	_ZStL8__ioinit,1,1
+	.section	.rodata.cst8,"aM",@progbits,8
+	.align 8
+.LC3:
+	.long	0
+	.long	1104006501
+	.hidden	__dso_handle
+	.ident	"GCC: (Ubuntu 5.4.1-2ubuntu1~16.04) 5.4.1 20160904"
+	.section	.note.GNU-stack,"",@progbits
+g++ -O2 -std=c++11 64bits.cpp -o 64bits		
+./64bits
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 1.35745
+
+valgrind --tool=cachegrind ./64bits
+==5967== Cachegrind, a cache and branch-prediction profiler
+==5967== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==5967== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==5967== Command: ./64bits
+==5967== 
+--5967-- warning: L3 cache found, using its data for the LL simulation.
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 31.867
+
+==5967== 
+==5967== I   refs:      10,699,297,900
+==5967== I1  misses:             1,838
+==5967== LLi misses:             1,701
+==5967== I1  miss rate:           0.00%
+==5967== LLi miss rate:           0.00%
+==5967== 
+==5967== D   refs:       5,521,473,844  (3,342,039,069 rd   + 2,179,434,775 wr)
+==5967== D1  misses:            15,883  (       13,668 rd   +         2,215 wr)
+==5967== LLd misses:             9,154  (        7,758 rd   +         1,396 wr)
+==5967== D1  miss rate:            0.0% (          0.0%     +           0.0%  )
+==5967== LLd miss rate:            0.0% (          0.0%     +           0.0%  )
+==5967== 
+==5967== LL refs:               17,721  (       15,506 rd   +         2,215 wr)
+==5967== LL misses:             10,855  (        9,459 rd   +         1,396 wr)
+==5967== LL miss rate:             0.0% (          0.0%     +           0.0%  )
+g++ -O2 -std=c++11 64bits.cpp -S
+cat 64bits.s	
+	.file	"64bits.cpp"
+	.section	.text.unlikely,"ax",@progbits
+.LCOLDB0:
+	.text
+.LHOTB0:
+	.p2align 4,,15
+	.globl	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.type	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1752:
+	.cfi_startproc
+	movq	(%rdi), %rdx
+	xorl	%eax, %eax
+	cmpb	$53, 4(%rdx)
+	je	.L8
+	rep ret
+	.p2align 4,,10
+	.p2align 3
+.L8:
+	movl	(%rdx), %ecx
+	movl	5(%rdx), %eax
+	movabsq	$3545515123101087289, %rdx
+	salq	$32, %rcx
+	addq	%rax, %rcx
+	movl	$_ZL13magic_numbers+8, %eax
+	jmp	.L3
+	.p2align 4,,10
+	.p2align 3
+.L9:
+	movq	(%rax), %rdx
+	addq	$8, %rax
+.L3:
+	cmpq	%rdx, %rcx
+	je	.L5
+	cmpq	$_ZL13magic_numbers+64, %rax
+	jne	.L9
+	xorl	%eax, %eax
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L5:
+	movl	$1, %eax
+	ret
+	.cfi_endproc
+.LFE1752:
+	.size	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE0:
+	.text
+.LHOTE0:
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.LC1:
+	.string	" "
+	.section	.text.unlikely
+.LCOLDB2:
+	.text
+.LHOTB2:
+	.p2align 4,,15
+	.globl	_Z17generate_or_checki
+	.type	_Z17generate_or_checki, @function
+_Z17generate_or_checki:
+.LFB1755:
+	.cfi_startproc
+	cmpl	$-1, %edi
+	pushq	%r12
+	.cfi_def_cfa_offset 16
+	.cfi_offset 12, -16
+	pushq	%rbp
+	.cfi_def_cfa_offset 24
+	.cfi_offset 6, -24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	.cfi_offset 3, -32
+	je	.L24
+	leal	-1(%rdi), %ebp
+	movslq	%edi, %r12
+	movl	$49, %ebx
+	.p2align 4,,10
+	.p2align 3
+.L17:
+	movq	_ZL6buffer(%rip), %rax
+	movl	%ebp, %edi
+	movb	%bl, (%rax,%r12)
+	addl	$1, %ebx
+	call	_Z17generate_or_checki
+	cmpb	$58, %bl
+	jne	.L17
+.L10:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L24:
+	.cfi_restore_state
+	movq	_ZL6buffer(%rip), %rsi
+	cmpb	$53, 4(%rsi)
+	jne	.L10
+	movl	(%rsi), %ecx
+	movabsq	$3545515123101087289, %rdx
+	movq	%rcx, %rax
+	movl	5(%rsi), %ecx
+	salq	$32, %rax
+	addq	%rax, %rcx
+	movl	$_ZL13magic_numbers+8, %eax
+	jmp	.L16
+	.p2align 4,,10
+	.p2align 3
+.L25:
+	movq	(%rax), %rdx
+	addq	$8, %rax
+.L16:
+	cmpq	%rdx, %rcx
+	je	.L14
+	cmpq	$_ZL13magic_numbers+64, %rax
+	jne	.L25
+	jmp	.L10
+.L14:
+	movq	_ZL6buffer+8(%rip), %rdx
+	movl	$_ZSt4cout, %edi
+	call	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	popq	%rbx
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	movl	$1, %edx
+	movl	$.LC1, %esi
+	movq	%rax, %rdi
+	jmp	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	.cfi_endproc
+.LFE1755:
+	.size	_Z17generate_or_checki, .-_Z17generate_or_checki
+	.section	.text.unlikely
+.LCOLDE2:
+	.text
+.LHOTE2:
+	.section	.rodata.str1.1
+.LC4:
+	.string	"\n\n"
+	.section	.text.unlikely
+.LCOLDB5:
+	.section	.text.startup,"ax",@progbits
+.LHOTB5:
+	.p2align 4,,15
+	.globl	main
+	.type	main, @function
+main:
+.LFB1756:
+	.cfi_startproc
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	.cfi_offset 3, -16
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	movl	$8, %edi
+	movq	%rax, %rbx
+	call	_Z17generate_or_checki
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	pxor	%xmm0, %xmm0
+	subq	%rbx, %rax
+	movl	$_ZSt4cout, %edi
+	cvtsi2sdq	%rax, %xmm0
+	divsd	.LC3(%rip), %xmm0
+	call	_ZNSo9_M_insertIdEERSoT_
+	movl	$.LC4, %esi
+	movq	%rax, %rdi
+	call	_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc
+	xorl	%eax, %eax
+	popq	%rbx
+	.cfi_def_cfa_offset 8
+	ret
+	.cfi_endproc
+.LFE1756:
+	.size	main, .-main
+	.section	.text.unlikely
+.LCOLDE5:
+	.section	.text.startup
+.LHOTE5:
+	.section	.text.unlikely
+.LCOLDB6:
+	.section	.text.startup
+.LHOTB6:
+	.p2align 4,,15
+	.type	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1969:
+	.cfi_startproc
+	subq	$8, %rsp
+	.cfi_def_cfa_offset 16
+	movl	$_ZStL8__ioinit, %edi
+	call	_ZNSt8ios_base4InitC1Ev
+	movl	$__dso_handle, %edx
+	movl	$_ZStL8__ioinit, %esi
+	movl	$_ZNSt8ios_base4InitD1Ev, %edi
+	call	__cxa_atexit
+	movabsq	$3472328296227680304, %rax
+	movq	$_ZL6buffer+16, _ZL6buffer(%rip)
+	movb	$48, _ZL6buffer+24(%rip)
+	movq	%rax, _ZL6buffer+16(%rip)
+	movq	$9, _ZL6buffer+8(%rip)
+	movl	$__dso_handle, %edx
+	movb	$0, _ZL6buffer+25(%rip)
+	movl	$_ZL6buffer, %esi
+	movl	$_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEED1Ev, %edi
+	addq	$8, %rsp
+	.cfi_def_cfa_offset 8
+	jmp	__cxa_atexit
+	.cfi_endproc
+.LFE1969:
+	.size	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE6:
+	.section	.text.startup
+.LHOTE6:
+	.section	.init_array,"aw"
+	.align 8
+	.quad	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.local	_ZL6buffer
+	.comm	_ZL6buffer,32,32
+	.section	.rodata
+	.align 32
+	.type	_ZL13magic_numbers, @object
+	.size	_ZL13magic_numbers, 64
+_ZL13magic_numbers:
+	.quad	3545515123101087289
+	.quad	3690191062107239479
+	.quad	3544956562637535289
+	.quad	3978984379655991859
+	.quad	3689073941180135479
+	.quad	4123101758198592049
+	.quad	3977867258728887859
+	.quad	4122543197735040049
+	.local	_ZStL8__ioinit
+	.comm	_ZStL8__ioinit,1,1
+	.section	.rodata.cst8,"aM",@progbits,8
+	.align 8
+.LC3:
+	.long	0
+	.long	1104006501
+	.hidden	__dso_handle
+	.ident	"GCC: (Ubuntu 5.4.1-2ubuntu1~16.04) 5.4.1 20160904"
+	.section	.note.GNU-stack,"",@progbits
+g++ -O2 -std=c++11 64bits_local.cpp -o 64bits_local	
+./64bits_local
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 2.12418
+
+valgrind --tool=cachegrind ./64bits_local
+==5985== Cachegrind, a cache and branch-prediction profiler
+==5985== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==5985== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==5985== Command: ./64bits_local
+==5985== 
+--5985-- warning: L3 cache found, using its data for the LL simulation.
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 85.8557
+
+==5985== 
+==5985== I   refs:      22,364,958,244
+==5985== I1  misses:             1,837
+==5985== LLi misses:             1,709
+==5985== I1  miss rate:           0.00%
+==5985== LLi miss rate:           0.00%
+==5985== 
+==5985== D   refs:      10,945,360,826  (4,891,721,138 rd   + 6,053,639,688 wr)
+==5985== D1  misses:            15,895  (       13,681 rd   +         2,214 wr)
+==5985== LLd misses:             9,156  (        7,760 rd   +         1,396 wr)
+==5985== D1  miss rate:            0.0% (          0.0%     +           0.0%  )
+==5985== LLd miss rate:            0.0% (          0.0%     +           0.0%  )
+==5985== 
+==5985== LL refs:               17,732  (       15,518 rd   +         2,214 wr)
+==5985== LL misses:             10,865  (        9,469 rd   +         1,396 wr)
+==5985== LL miss rate:             0.0% (          0.0%     +           0.0%  )
+g++ -O2 -std=c++11 64bits_local.cpp -S
+cat 64bits_local.s	
+	.file	"64bits_local.cpp"
+	.section	.text.unlikely,"ax",@progbits
+.LCOLDB0:
+	.text
+.LHOTB0:
+	.p2align 4,,15
+	.globl	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.type	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1752:
+	.cfi_startproc
+	subq	$88, %rsp
+	.cfi_def_cfa_offset 96
+	movq	(%rdi), %rdx
+	movq	%fs:40, %rax
+	movq	%rax, 72(%rsp)
+	xorl	%eax, %eax
+	movabsq	$3545515123101087289, %rax
+	movq	%rax, (%rsp)
+	movabsq	$3690191062107239479, %rax
+	movq	%rax, 8(%rsp)
+	movabsq	$3544956562637535289, %rax
+	movq	%rax, 16(%rsp)
+	movabsq	$3978984379655991859, %rax
+	movq	%rax, 24(%rsp)
+	movabsq	$3689073941180135479, %rax
+	movq	%rax, 32(%rsp)
+	movabsq	$4123101758198592049, %rax
+	movq	%rax, 40(%rsp)
+	movabsq	$3977867258728887859, %rax
+	movq	%rax, 48(%rsp)
+	movabsq	$4122543197735040049, %rax
+	movq	%rax, 56(%rsp)
+	xorl	%eax, %eax
+	cmpb	$53, 4(%rdx)
+	je	.L10
+.L2:
+	movq	72(%rsp), %rsi
+	xorq	%fs:40, %rsi
+	jne	.L11
+	addq	$88, %rsp
+	.cfi_remember_state
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L10:
+	.cfi_restore_state
+	movl	(%rdx), %ecx
+	movl	5(%rdx), %eax
+	leaq	64(%rsp), %rsi
+	movabsq	$3545515123101087289, %rdx
+	salq	$32, %rcx
+	addq	%rax, %rcx
+	leaq	8(%rsp), %rax
+	jmp	.L3
+	.p2align 4,,10
+	.p2align 3
+.L12:
+	movq	(%rax), %rdx
+	addq	$8, %rax
+.L3:
+	cmpq	%rdx, %rcx
+	je	.L6
+	cmpq	%rsi, %rax
+	jne	.L12
+	xorl	%eax, %eax
+	jmp	.L2
+	.p2align 4,,10
+	.p2align 3
+.L6:
+	movl	$1, %eax
+	jmp	.L2
+.L11:
+	call	__stack_chk_fail
+	.cfi_endproc
+.LFE1752:
+	.size	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE0:
+	.text
+.LHOTE0:
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.LC1:
+	.string	" "
+	.section	.text.unlikely
+.LCOLDB2:
+	.text
+.LHOTB2:
+	.p2align 4,,15
+	.globl	_Z17generate_or_checki
+	.type	_Z17generate_or_checki, @function
+_Z17generate_or_checki:
+.LFB1755:
+	.cfi_startproc
+	cmpl	$-1, %edi
+	pushq	%r12
+	.cfi_def_cfa_offset 16
+	.cfi_offset 12, -16
+	pushq	%rbp
+	.cfi_def_cfa_offset 24
+	.cfi_offset 6, -24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	.cfi_offset 3, -32
+	je	.L23
+	leal	-1(%rdi), %ebp
+	movslq	%edi, %r12
+	movl	$49, %ebx
+	.p2align 4,,10
+	.p2align 3
+.L18:
+	movq	_ZL6buffer(%rip), %rax
+	movl	%ebp, %edi
+	movb	%bl, (%rax,%r12)
+	addl	$1, %ebx
+	call	_Z17generate_or_checki
+	cmpb	$58, %bl
+	jne	.L18
+.L13:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L23:
+	.cfi_restore_state
+	movl	$_ZL6buffer, %edi
+	call	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	testb	%al, %al
+	je	.L13
+	movq	_ZL6buffer+8(%rip), %rdx
+	movq	_ZL6buffer(%rip), %rsi
+	movl	$_ZSt4cout, %edi
+	call	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	popq	%rbx
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	movl	$1, %edx
+	movl	$.LC1, %esi
+	movq	%rax, %rdi
+	jmp	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	.cfi_endproc
+.LFE1755:
+	.size	_Z17generate_or_checki, .-_Z17generate_or_checki
+	.section	.text.unlikely
+.LCOLDE2:
+	.text
+.LHOTE2:
+	.section	.rodata.str1.1
+.LC4:
+	.string	"\n\n"
+	.section	.text.unlikely
+.LCOLDB5:
+	.section	.text.startup,"ax",@progbits
+.LHOTB5:
+	.p2align 4,,15
+	.globl	main
+	.type	main, @function
+main:
+.LFB1756:
+	.cfi_startproc
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	.cfi_offset 3, -16
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	movl	$8, %edi
+	movq	%rax, %rbx
+	call	_Z17generate_or_checki
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	pxor	%xmm0, %xmm0
+	subq	%rbx, %rax
+	movl	$_ZSt4cout, %edi
+	cvtsi2sdq	%rax, %xmm0
+	divsd	.LC3(%rip), %xmm0
+	call	_ZNSo9_M_insertIdEERSoT_
+	movl	$.LC4, %esi
+	movq	%rax, %rdi
+	call	_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc
+	xorl	%eax, %eax
+	popq	%rbx
+	.cfi_def_cfa_offset 8
+	ret
+	.cfi_endproc
+.LFE1756:
+	.size	main, .-main
+	.section	.text.unlikely
+.LCOLDE5:
+	.section	.text.startup
+.LHOTE5:
+	.section	.text.unlikely
+.LCOLDB6:
+	.section	.text.startup
+.LHOTB6:
+	.p2align 4,,15
+	.type	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1969:
+	.cfi_startproc
+	subq	$8, %rsp
+	.cfi_def_cfa_offset 16
+	movl	$_ZStL8__ioinit, %edi
+	call	_ZNSt8ios_base4InitC1Ev
+	movl	$__dso_handle, %edx
+	movl	$_ZStL8__ioinit, %esi
+	movl	$_ZNSt8ios_base4InitD1Ev, %edi
+	call	__cxa_atexit
+	movabsq	$3472328296227680304, %rax
+	movq	$_ZL6buffer+16, _ZL6buffer(%rip)
+	movb	$48, _ZL6buffer+24(%rip)
+	movq	%rax, _ZL6buffer+16(%rip)
+	movq	$9, _ZL6buffer+8(%rip)
+	movl	$__dso_handle, %edx
+	movb	$0, _ZL6buffer+25(%rip)
+	movl	$_ZL6buffer, %esi
+	movl	$_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEED1Ev, %edi
+	addq	$8, %rsp
+	.cfi_def_cfa_offset 8
+	jmp	__cxa_atexit
+	.cfi_endproc
+.LFE1969:
+	.size	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE6:
+	.section	.text.startup
+.LHOTE6:
+	.section	.init_array,"aw"
+	.align 8
+	.quad	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.local	_ZL6buffer
+	.comm	_ZL6buffer,32,32
+	.local	_ZStL8__ioinit
+	.comm	_ZStL8__ioinit,1,1
+	.section	.rodata.cst8,"aM",@progbits,8
+	.align 8
+.LC3:
+	.long	0
+	.long	1104006501
+	.hidden	__dso_handle
+	.ident	"GCC: (Ubuntu 5.4.1-2ubuntu1~16.04) 5.4.1 20160904"
+	.section	.note.GNU-stack,"",@progbits
+g++ -O2 -std=c++11 64bits_smart_index.cpp -o 64bits_smart_index	
+./64bits_smart_index
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 0.994052
+
+valgrind --tool=cachegrind ./64bits_smart_index
+==6005== Cachegrind, a cache and branch-prediction profiler
+==6005== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==6005== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==6005== Command: ./64bits_smart_index
+==6005== 
+--6005-- warning: L3 cache found, using its data for the LL simulation.
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 29.1626
+
+==6005== 
+==6005== I   refs:      8,977,429,337
+==6005== I1  misses:            1,842
+==6005== LLi misses:            1,704
+==6005== I1  miss rate:          0.00%
+==6005== LLi miss rate:          0.00%
+==6005== 
+==6005== D   refs:      5,349,287,013  (3,169,852,226 rd   + 2,179,434,787 wr)
+==6005== D1  misses:           15,885  (       13,668 rd   +         2,217 wr)
+==6005== LLd misses:            9,155  (        7,759 rd   +         1,396 wr)
+==6005== D1  miss rate:           0.0% (          0.0%     +           0.0%  )
+==6005== LLd miss rate:           0.0% (          0.0%     +           0.0%  )
+==6005== 
+==6005== LL refs:              17,727  (       15,510 rd   +         2,217 wr)
+==6005== LL misses:            10,859  (        9,463 rd   +         1,396 wr)
+==6005== LL miss rate:            0.0% (          0.0%     +           0.0%  )
+g++ -O2 -std=c++11 64bits_smart_index.cpp -S
+cat 64bits_smart_index.s	
+	.file	"64bits_smart_index.cpp"
+	.section	.text.unlikely,"ax",@progbits
+.LCOLDB0:
+	.text
+.LHOTB0:
+	.p2align 4,,15
+	.globl	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.type	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1780:
+	.cfi_startproc
+	movq	(%rdi), %rdx
+	xorl	%eax, %eax
+	cmpb	$53, 4(%rdx)
+	je	.L5
+	rep ret
+	.p2align 4,,10
+	.p2align 3
+.L5:
+	movsbl	1(%rdx), %eax
+	movzbl	(%rdx), %ecx
+	movl	(%rdx), %esi
+	sarl	%eax
+	andl	$7, %ecx
+	andl	$1, %eax
+	salq	$32, %rsi
+	orl	%ecx, %eax
+	movl	5(%rdx), %ecx
+	cltq
+	leaq	(%rsi,%rcx), %rdx
+	cmpq	%rdx, _ZL13magic_numbers(,%rax,8)
+	sete	%al
+	ret
+	.cfi_endproc
+.LFE1780:
+	.size	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE0:
+	.text
+.LHOTE0:
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.LC1:
+	.string	" "
+	.section	.text.unlikely
+.LCOLDB2:
+	.text
+.LHOTB2:
+	.p2align 4,,15
+	.globl	_Z17generate_or_checki
+	.type	_Z17generate_or_checki, @function
+_Z17generate_or_checki:
+.LFB1781:
+	.cfi_startproc
+	cmpl	$-1, %edi
+	pushq	%r12
+	.cfi_def_cfa_offset 16
+	.cfi_offset 12, -16
+	pushq	%rbp
+	.cfi_def_cfa_offset 24
+	.cfi_offset 6, -24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	.cfi_offset 3, -32
+	je	.L16
+	leal	-1(%rdi), %ebp
+	movslq	%edi, %r12
+	movl	$49, %ebx
+	.p2align 4,,10
+	.p2align 3
+.L11:
+	movq	_ZL6buffer(%rip), %rax
+	movl	%ebp, %edi
+	movb	%bl, (%rax,%r12)
+	addl	$1, %ebx
+	call	_Z17generate_or_checki
+	cmpb	$58, %bl
+	jne	.L11
+.L6:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L16:
+	.cfi_restore_state
+	movq	_ZL6buffer(%rip), %rsi
+	cmpb	$53, 4(%rsi)
+	jne	.L6
+	movsbl	1(%rsi), %eax
+	sarl	%eax
+	andl	$1, %eax
+	movl	%eax, %edx
+	movzbl	(%rsi), %eax
+	andl	$7, %eax
+	orl	%edx, %eax
+	movl	(%rsi), %edx
+	cltq
+	movq	%rdx, %rcx
+	movl	5(%rsi), %edx
+	salq	$32, %rcx
+	addq	%rcx, %rdx
+	cmpq	%rdx, _ZL13magic_numbers(,%rax,8)
+	jne	.L6
+	movq	_ZL6buffer+8(%rip), %rdx
+	movl	$_ZSt4cout, %edi
+	call	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	popq	%rbx
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	movl	$1, %edx
+	movl	$.LC1, %esi
+	movq	%rax, %rdi
+	jmp	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	.cfi_endproc
+.LFE1781:
+	.size	_Z17generate_or_checki, .-_Z17generate_or_checki
+	.section	.text.unlikely
+.LCOLDE2:
+	.text
+.LHOTE2:
+	.section	.rodata.str1.1
+.LC4:
+	.string	"\n\n"
+	.section	.text.unlikely
+.LCOLDB5:
+	.section	.text.startup,"ax",@progbits
+.LHOTB5:
+	.p2align 4,,15
+	.globl	main
+	.type	main, @function
+main:
+.LFB1782:
+	.cfi_startproc
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	.cfi_offset 3, -16
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	movl	$8, %edi
+	movq	%rax, %rbx
+	call	_Z17generate_or_checki
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	pxor	%xmm0, %xmm0
+	subq	%rbx, %rax
+	movl	$_ZSt4cout, %edi
+	cvtsi2sdq	%rax, %xmm0
+	divsd	.LC3(%rip), %xmm0
+	call	_ZNSo9_M_insertIdEERSoT_
+	movl	$.LC4, %esi
+	movq	%rax, %rdi
+	call	_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc
+	xorl	%eax, %eax
+	popq	%rbx
+	.cfi_def_cfa_offset 8
+	ret
+	.cfi_endproc
+.LFE1782:
+	.size	main, .-main
+	.section	.text.unlikely
+.LCOLDE5:
+	.section	.text.startup
+.LHOTE5:
+	.section	.text.unlikely
+.LCOLDB6:
+	.section	.text.startup
+.LHOTB6:
+	.p2align 4,,15
+	.type	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1994:
+	.cfi_startproc
+	subq	$8, %rsp
+	.cfi_def_cfa_offset 16
+	movl	$_ZStL8__ioinit, %edi
+	call	_ZNSt8ios_base4InitC1Ev
+	movl	$__dso_handle, %edx
+	movl	$_ZStL8__ioinit, %esi
+	movl	$_ZNSt8ios_base4InitD1Ev, %edi
+	call	__cxa_atexit
+	movabsq	$3472328296227680304, %rax
+	movq	$_ZL6buffer+16, _ZL6buffer(%rip)
+	movb	$48, _ZL6buffer+24(%rip)
+	movq	%rax, _ZL6buffer+16(%rip)
+	movq	$9, _ZL6buffer+8(%rip)
+	movl	$__dso_handle, %edx
+	movb	$0, _ZL6buffer+25(%rip)
+	movl	$_ZL6buffer, %esi
+	movl	$_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEED1Ev, %edi
+	addq	$8, %rsp
+	.cfi_def_cfa_offset 8
+	jmp	__cxa_atexit
+	.cfi_endproc
+.LFE1994:
+	.size	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE6:
+	.section	.text.startup
+.LHOTE6:
+	.section	.init_array,"aw"
+	.align 8
+	.quad	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.local	_ZL6buffer
+	.comm	_ZL6buffer,32,32
+	.section	.rodata
+	.align 32
+	.type	_ZL13magic_numbers, @object
+	.size	_ZL13magic_numbers, 64
+_ZL13magic_numbers:
+	.quad	3690191062107239479
+	.quad	3545515123101087289
+	.quad	3977867258728887859
+	.quad	4122543197735040049
+	.quad	3689073941180135479
+	.quad	4123101758198592049
+	.quad	3978984379655991859
+	.quad	3544956562637535289
+	.local	_ZStL8__ioinit
+	.comm	_ZStL8__ioinit,1,1
+	.section	.rodata.cst8,"aM",@progbits,8
+	.align 8
+.LC3:
+	.long	0
+	.long	1104006501
+	.hidden	__dso_handle
+	.ident	"GCC: (Ubuntu 5.4.1-2ubuntu1~16.04) 5.4.1 20160904"
+	.section	.note.GNU-stack,"",@progbits
+g++ -O2 -std=c++11 64bits_binary_search.cpp -o 64bits_binary_search	
+./64bits_binary_search
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 1.70836
+
+valgrind --tool=cachegrind ./64bits_binary_search
+==6019== Cachegrind, a cache and branch-prediction profiler
+==6019== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==6019== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==6019== Command: ./64bits_binary_search
+==6019== 
+--6019-- warning: L3 cache found, using its data for the LL simulation.
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 35.2261
+
+==6019== 
+==6019== I   refs:      11,323,056,252
+==6019== I1  misses:             1,845
+==6019== LLi misses:             1,705
+==6019== I1  miss rate:           0.00%
+==6019== LLi miss rate:           0.00%
+==6019== 
+==6019== D   refs:       5,994,987,820  (3,428,132,553 rd   + 2,566,855,267 wr)
+==6019== D1  misses:            15,883  (       13,666 rd   +         2,217 wr)
+==6019== LLd misses:             9,154  (        7,758 rd   +         1,396 wr)
+==6019== D1  miss rate:            0.0% (          0.0%     +           0.0%  )
+==6019== LLd miss rate:            0.0% (          0.0%     +           0.0%  )
+==6019== 
+==6019== LL refs:               17,728  (       15,511 rd   +         2,217 wr)
+==6019== LL misses:             10,859  (        9,463 rd   +         1,396 wr)
+==6019== LL miss rate:             0.0% (          0.0%     +           0.0%  )
+g++ -O2 -std=c++11 64bits_binary_search.cpp -S
+cat 64bits_binary_search.s	
+	.file	"64bits_binary_search.cpp"
+	.section	.text.unlikely,"ax",@progbits
+.LCOLDB0:
+	.text
+.LHOTB0:
+	.p2align 4,,15
+	.globl	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.type	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1752:
+	.cfi_startproc
+	movq	(%rdi), %rcx
+	xorl	%eax, %eax
+	cmpb	$53, 4(%rcx)
+	je	.L12
+.L2:
+	rep ret
+	.p2align 4,,10
+	.p2align 3
+.L12:
+	movl	(%rcx), %edx
+	movl	5(%rcx), %eax
+	movabsq	$3690191062107239479, %rcx
+	salq	$32, %rdx
+	addq	%rax, %rdx
+	cmpq	%rcx, %rdx
+	ja	.L3
+	movabsq	$3545515123101087289, %rax
+	cmpq	%rax, %rdx
+	movl	$1, %eax
+	ja	.L4
+	je	.L2
+	movabsq	$3544956562637535289, %rax
+	cmpq	%rax, %rdx
+	sete	%al
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L3:
+	movabsq	$3978984379655991859, %rax
+	cmpq	%rax, %rdx
+	ja	.L5
+	movl	$1, %eax
+	je	.L2
+	movabsq	$3977867258728887859, %rax
+	cmpq	%rax, %rdx
+	sete	%al
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L5:
+	movabsq	$4123101758198592048, %rax
+	cmpq	%rax, %rdx
+	jbe	.L13
+	movabsq	$4123101758198592049, %rax
+	cmpq	%rax, %rdx
+	sete	%al
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L4:
+	cmpq	%rcx, %rdx
+	je	.L2
+	movabsq	$3689073941180135479, %rax
+	cmpq	%rax, %rdx
+	sete	%al
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L13:
+	movabsq	$4122543197735040049, %rax
+	cmpq	%rax, %rdx
+	sete	%al
+	ret
+	.cfi_endproc
+.LFE1752:
+	.size	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE0:
+	.text
+.LHOTE0:
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.LC1:
+	.string	" "
+	.section	.text.unlikely
+.LCOLDB2:
+	.text
+.LHOTB2:
+	.p2align 4,,15
+	.globl	_Z17generate_or_checki
+	.type	_Z17generate_or_checki, @function
+_Z17generate_or_checki:
+.LFB1753:
+	.cfi_startproc
+	cmpl	$-1, %edi
+	pushq	%r12
+	.cfi_def_cfa_offset 16
+	.cfi_offset 12, -16
+	pushq	%rbp
+	.cfi_def_cfa_offset 24
+	.cfi_offset 6, -24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	.cfi_offset 3, -32
+	je	.L24
+	leal	-1(%rdi), %ebp
+	movslq	%edi, %r12
+	movl	$49, %ebx
+	.p2align 4,,10
+	.p2align 3
+.L19:
+	movq	_ZL6buffer(%rip), %rax
+	movl	%ebp, %edi
+	movb	%bl, (%rax,%r12)
+	addl	$1, %ebx
+	call	_Z17generate_or_checki
+	cmpb	$58, %bl
+	jne	.L19
+.L14:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L24:
+	.cfi_restore_state
+	movl	$_ZL6buffer, %edi
+	call	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	testb	%al, %al
+	je	.L14
+	movq	_ZL6buffer+8(%rip), %rdx
+	movq	_ZL6buffer(%rip), %rsi
+	movl	$_ZSt4cout, %edi
+	call	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	popq	%rbx
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	movl	$1, %edx
+	movl	$.LC1, %esi
+	movq	%rax, %rdi
+	jmp	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	.cfi_endproc
+.LFE1753:
+	.size	_Z17generate_or_checki, .-_Z17generate_or_checki
+	.section	.text.unlikely
+.LCOLDE2:
+	.text
+.LHOTE2:
+	.section	.rodata.str1.1
+.LC4:
+	.string	"\n\n"
+	.section	.text.unlikely
+.LCOLDB5:
+	.section	.text.startup,"ax",@progbits
+.LHOTB5:
+	.p2align 4,,15
+	.globl	main
+	.type	main, @function
+main:
+.LFB1754:
+	.cfi_startproc
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	.cfi_offset 3, -16
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	movl	$8, %edi
+	movq	%rax, %rbx
+	call	_Z17generate_or_checki
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	pxor	%xmm0, %xmm0
+	subq	%rbx, %rax
+	movl	$_ZSt4cout, %edi
+	cvtsi2sdq	%rax, %xmm0
+	divsd	.LC3(%rip), %xmm0
+	call	_ZNSo9_M_insertIdEERSoT_
+	movl	$.LC4, %esi
+	movq	%rax, %rdi
+	call	_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc
+	xorl	%eax, %eax
+	popq	%rbx
+	.cfi_def_cfa_offset 8
+	ret
+	.cfi_endproc
+.LFE1754:
+	.size	main, .-main
+	.section	.text.unlikely
+.LCOLDE5:
+	.section	.text.startup
+.LHOTE5:
+	.section	.text.unlikely
+.LCOLDB6:
+	.section	.text.startup
+.LHOTB6:
+	.p2align 4,,15
+	.type	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1967:
+	.cfi_startproc
+	subq	$8, %rsp
+	.cfi_def_cfa_offset 16
+	movl	$_ZStL8__ioinit, %edi
+	call	_ZNSt8ios_base4InitC1Ev
+	movl	$__dso_handle, %edx
+	movl	$_ZStL8__ioinit, %esi
+	movl	$_ZNSt8ios_base4InitD1Ev, %edi
+	call	__cxa_atexit
+	movabsq	$3472328296227680304, %rax
+	movq	$_ZL6buffer+16, _ZL6buffer(%rip)
+	movb	$48, _ZL6buffer+24(%rip)
+	movq	%rax, _ZL6buffer+16(%rip)
+	movq	$9, _ZL6buffer+8(%rip)
+	movl	$__dso_handle, %edx
+	movb	$0, _ZL6buffer+25(%rip)
+	movl	$_ZL6buffer, %esi
+	movl	$_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEED1Ev, %edi
+	addq	$8, %rsp
+	.cfi_def_cfa_offset 8
+	jmp	__cxa_atexit
+	.cfi_endproc
+.LFE1967:
+	.size	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE6:
+	.section	.text.startup
+.LHOTE6:
+	.section	.init_array,"aw"
+	.align 8
+	.quad	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.local	_ZL6buffer
+	.comm	_ZL6buffer,32,32
+	.local	_ZStL8__ioinit
+	.comm	_ZStL8__ioinit,1,1
+	.section	.rodata.cst8,"aM",@progbits,8
+	.align 8
+.LC3:
+	.long	0
+	.long	1104006501
+	.hidden	__dso_handle
+	.ident	"GCC: (Ubuntu 5.4.1-2ubuntu1~16.04) 5.4.1 20160904"
+	.section	.note.GNU-stack,"",@progbits
+g++ -O2 -std=c++11 words_smart_memcmp.cpp -o words_smart_memcmp
+./words_smart_memcmp
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 1.40133
+
+valgrind --tool=cachegrind ./words_smart_memcmp
+==6033== Cachegrind, a cache and branch-prediction profiler
+==6033== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==6033== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==6033== Command: ./words_smart_memcmp
+==6033== 
+--6033-- warning: L3 cache found, using its data for the LL simulation.
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 42.0372
+
+==6033== 
+==6033== I   refs:      13,024,766,652
+==6033== I1  misses:             1,852
+==6033== LLi misses:             1,716
+==6033== I1  miss rate:           0.00%
+==6033== LLi miss rate:           0.00%
+==6033== 
+==6033== D   refs:       6,956,365,015  (3,963,825,388 rd   + 2,992,539,627 wr)
+==6033== D1  misses:            15,890  (       13,673 rd   +         2,217 wr)
+==6033== LLd misses:             9,158  (        7,762 rd   +         1,396 wr)
+==6033== D1  miss rate:            0.0% (          0.0%     +           0.0%  )
+==6033== LLd miss rate:            0.0% (          0.0%     +           0.0%  )
+==6033== 
+==6033== LL refs:               17,742  (       15,525 rd   +         2,217 wr)
+==6033== LL misses:             10,874  (        9,478 rd   +         1,396 wr)
+==6033== LL miss rate:             0.0% (          0.0%     +           0.0%  )
+g++ -O2 -std=c++11 words_smart_memcmp.cpp -S
+cat words_smart_memcmp.s
+	.file	"words_smart_memcmp.cpp"
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.LC0:
+	.string	"816357492"
+.LC1:
+	.string	"834159672"
+.LC2:
+	.string	"618753294"
+.LC3:
+	.string	"672159834"
+.LC4:
+	.string	"438951276"
+.LC5:
+	.string	"492357816"
+.LC6:
+	.string	"276951438"
+.LC7:
+	.string	"294753618"
+	.section	.text.unlikely,"ax",@progbits
+.LCOLDB8:
+	.text
+.LHOTB8:
+	.p2align 4,,15
+	.globl	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.type	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1779:
+	.cfi_startproc
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	.cfi_offset 3, -16
+	movq	(%rdi), %rbx
+	xorl	%eax, %eax
+	cmpb	$53, 4(%rbx)
+	je	.L18
+.L2:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L18:
+	.cfi_restore_state
+	movzbl	8(%rbx), %edx
+	cmpb	$50, %dl
+	je	.L19
+	cmpb	$52, %dl
+	je	.L20
+	cmpb	$54, %dl
+	je	.L21
+	cmpb	$56, %dl
+	jne	.L2
+	movl	$8, %edx
+	movl	$.LC6, %esi
+	movq	%rbx, %rdi
+	call	memcmp
+	movl	%eax, %edx
+	movl	$1, %eax
+	testl	%edx, %edx
+	je	.L2
+	movq	%rbx, %rdi
+	movl	$8, %edx
+	movl	$.LC7, %esi
+	call	memcmp
+	testl	%eax, %eax
+	sete	%al
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L20:
+	.cfi_restore_state
+	movl	$8, %edx
+	movl	$.LC2, %esi
+	movq	%rbx, %rdi
+	call	memcmp
+	movl	%eax, %edx
+	movl	$1, %eax
+	testl	%edx, %edx
+	je	.L2
+	movq	%rbx, %rdi
+	movl	$8, %edx
+	movl	$.LC3, %esi
+	call	memcmp
+	testl	%eax, %eax
+	sete	%al
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L19:
+	.cfi_restore_state
+	movl	$8, %edx
+	movl	$.LC0, %esi
+	movq	%rbx, %rdi
+	call	memcmp
+	movl	%eax, %edx
+	movl	$1, %eax
+	testl	%edx, %edx
+	je	.L2
+	movq	%rbx, %rdi
+	movl	$8, %edx
+	movl	$.LC1, %esi
+	call	memcmp
+	testl	%eax, %eax
+	sete	%al
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L21:
+	.cfi_restore_state
+	movl	$8, %edx
+	movl	$.LC4, %esi
+	movq	%rbx, %rdi
+	call	memcmp
+	movl	%eax, %edx
+	movl	$1, %eax
+	testl	%edx, %edx
+	je	.L2
+	movq	%rbx, %rdi
+	movl	$8, %edx
+	movl	$.LC5, %esi
+	call	memcmp
+	testl	%eax, %eax
+	sete	%al
+	popq	%rbx
+	.cfi_def_cfa_offset 8
+	ret
+	.cfi_endproc
+.LFE1779:
+	.size	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE8:
+	.text
+.LHOTE8:
+	.section	.rodata.str1.1
+.LC9:
+	.string	" "
+	.section	.text.unlikely
+.LCOLDB10:
+	.text
+.LHOTB10:
+	.p2align 4,,15
+	.globl	_Z17generate_or_checki
+	.type	_Z17generate_or_checki, @function
+_Z17generate_or_checki:
+.LFB1780:
+	.cfi_startproc
+	cmpl	$-1, %edi
+	pushq	%r12
+	.cfi_def_cfa_offset 16
+	.cfi_offset 12, -16
+	pushq	%rbp
+	.cfi_def_cfa_offset 24
+	.cfi_offset 6, -24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	.cfi_offset 3, -32
+	je	.L32
+	leal	-1(%rdi), %ebp
+	movslq	%edi, %r12
+	movl	$49, %ebx
+	.p2align 4,,10
+	.p2align 3
+.L27:
+	movq	_ZL6buffer(%rip), %rax
+	movl	%ebp, %edi
+	movb	%bl, (%rax,%r12)
+	addl	$1, %ebx
+	call	_Z17generate_or_checki
+	cmpb	$58, %bl
+	jne	.L27
+.L22:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L32:
+	.cfi_restore_state
+	movl	$_ZL6buffer, %edi
+	call	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	testb	%al, %al
+	je	.L22
+	movq	_ZL6buffer+8(%rip), %rdx
+	movq	_ZL6buffer(%rip), %rsi
+	movl	$_ZSt4cout, %edi
+	call	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	popq	%rbx
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	movl	$1, %edx
+	movl	$.LC9, %esi
+	movq	%rax, %rdi
+	jmp	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	.cfi_endproc
+.LFE1780:
+	.size	_Z17generate_or_checki, .-_Z17generate_or_checki
+	.section	.text.unlikely
+.LCOLDE10:
+	.text
+.LHOTE10:
+	.section	.rodata.str1.1
+.LC12:
+	.string	"\n\n"
+	.section	.text.unlikely
+.LCOLDB13:
+	.section	.text.startup,"ax",@progbits
+.LHOTB13:
+	.p2align 4,,15
+	.globl	main
+	.type	main, @function
+main:
+.LFB1781:
+	.cfi_startproc
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	.cfi_offset 3, -16
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	movl	$8, %edi
+	movq	%rax, %rbx
+	call	_Z17generate_or_checki
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	pxor	%xmm0, %xmm0
+	subq	%rbx, %rax
+	movl	$_ZSt4cout, %edi
+	cvtsi2sdq	%rax, %xmm0
+	divsd	.LC11(%rip), %xmm0
+	call	_ZNSo9_M_insertIdEERSoT_
+	movl	$.LC12, %esi
+	movq	%rax, %rdi
+	call	_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc
+	xorl	%eax, %eax
+	popq	%rbx
+	.cfi_def_cfa_offset 8
+	ret
+	.cfi_endproc
+.LFE1781:
+	.size	main, .-main
+	.section	.text.unlikely
+.LCOLDE13:
+	.section	.text.startup
+.LHOTE13:
+	.section	.text.unlikely
+.LCOLDB14:
+	.section	.text.startup
+.LHOTB14:
+	.p2align 4,,15
+	.type	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1993:
+	.cfi_startproc
+	subq	$8, %rsp
+	.cfi_def_cfa_offset 16
+	movl	$_ZStL8__ioinit, %edi
+	call	_ZNSt8ios_base4InitC1Ev
+	movl	$__dso_handle, %edx
+	movl	$_ZStL8__ioinit, %esi
+	movl	$_ZNSt8ios_base4InitD1Ev, %edi
+	call	__cxa_atexit
+	movabsq	$3472328296227680304, %rax
+	movq	$_ZL6buffer+16, _ZL6buffer(%rip)
+	movb	$48, _ZL6buffer+24(%rip)
+	movq	%rax, _ZL6buffer+16(%rip)
+	movq	$9, _ZL6buffer+8(%rip)
+	movl	$__dso_handle, %edx
+	movb	$0, _ZL6buffer+25(%rip)
+	movl	$_ZL6buffer, %esi
+	movl	$_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEED1Ev, %edi
+	addq	$8, %rsp
+	.cfi_def_cfa_offset 8
+	jmp	__cxa_atexit
+	.cfi_endproc
+.LFE1993:
+	.size	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE14:
+	.section	.text.startup
+.LHOTE14:
+	.section	.init_array,"aw"
+	.align 8
+	.quad	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.local	_ZL6buffer
+	.comm	_ZL6buffer,32,32
+	.local	_ZStL8__ioinit
+	.comm	_ZStL8__ioinit,1,1
+	.section	.rodata.cst8,"aM",@progbits,8
+	.align 8
+.LC11:
+	.long	0
+	.long	1104006501
+	.hidden	__dso_handle
+	.ident	"GCC: (Ubuntu 5.4.1-2ubuntu1~16.04) 5.4.1 20160904"
+	.section	.note.GNU-stack,"",@progbits
+g++ -O2 -std=c++11 words_smart_index_and_memcmp.cpp -o words_smart_index_and_memcmp
+./words_smart_index_and_memcmp
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 1.72275
+
+valgrind --tool=cachegrind ./words_smart_index_and_memcmp
+==6051== Cachegrind, a cache and branch-prediction profiler
+==6051== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==6051== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==6051== Command: ./words_smart_index_and_memcmp
+==6051== 
+--6051-- warning: L3 cache found, using its data for the LL simulation.
+834159672 816357492 672159834 618753294 492357816 438951276 294753618 276951438 50.912
+
+==6051== 
+==6051== I   refs:      16,045,605,063
+==6051== I1  misses:             1,849
+==6051== LLi misses:             1,713
+==6051== I1  miss rate:           0.00%
+==6051== LLi miss rate:           0.00%
+==6051== 
+==6051== D   refs:       8,018,184,251  (4,590,394,457 rd   + 3,427,789,794 wr)
+==6051== D1  misses:            15,896  (       13,678 rd   +         2,218 wr)
+==6051== LLd misses:             9,159  (        7,764 rd   +         1,395 wr)
+==6051== D1  miss rate:            0.0% (          0.0%     +           0.0%  )
+==6051== LLd miss rate:            0.0% (          0.0%     +           0.0%  )
+==6051== 
+==6051== LL refs:               17,745  (       15,527 rd   +         2,218 wr)
+==6051== LL misses:             10,872  (        9,477 rd   +         1,395 wr)
+==6051== LL miss rate:             0.0% (          0.0%     +           0.0%  )
+g++ -O2 -std=c++11 words_smart_index_and_memcmp.cpp -S
+cat words_smart_index_and_memcmp.s
+	.file	"words_smart_index_and_memcmp.cpp"
+	.section	.text.unlikely,"ax",@progbits
+.LCOLDB0:
+	.text
+.LHOTB0:
+	.p2align 4,,15
+	.globl	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.type	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1779:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	pushq	%rbx
+	.cfi_def_cfa_offset 24
+	.cfi_offset 3, -24
+	xorl	%eax, %eax
+	subq	$8, %rsp
+	.cfi_def_cfa_offset 32
+	movq	(%rdi), %rbx
+	cmpb	$53, 4(%rbx)
+	je	.L8
+.L2:
+	addq	$8, %rsp
+	.cfi_remember_state
+	.cfi_def_cfa_offset 24
+	popq	%rbx
+	.cfi_def_cfa_offset 16
+	popq	%rbp
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L8:
+	.cfi_restore_state
+	movsbl	(%rbx), %eax
+	movl	$9, %edx
+	movq	%rbx, %rdi
+	leal	-441(%rax,%rax,8), %ebp
+	movslq	%ebp, %rsi
+	addq	$_ZL7squares, %rsi
+	call	memcmp
+	movl	%eax, %edx
+	movl	$1, %eax
+	testl	%edx, %edx
+	je	.L2
+	leal	9(%rbp), %esi
+	movq	%rbx, %rdi
+	movl	$9, %edx
+	movslq	%esi, %rsi
+	addq	$_ZL7squares, %rsi
+	call	memcmp
+	testl	%eax, %eax
+	sete	%al
+	addq	$8, %rsp
+	.cfi_def_cfa_offset 24
+	popq	%rbx
+	.cfi_def_cfa_offset 16
+	popq	%rbp
+	.cfi_def_cfa_offset 8
+	ret
+	.cfi_endproc
+.LFE1779:
+	.size	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE0:
+	.text
+.LHOTE0:
+	.section	.rodata.str1.1,"aMS",@progbits,1
+.LC1:
+	.string	" "
+	.section	.text.unlikely
+.LCOLDB2:
+	.text
+.LHOTB2:
+	.p2align 4,,15
+	.globl	_Z17generate_or_checki
+	.type	_Z17generate_or_checki, @function
+_Z17generate_or_checki:
+.LFB1780:
+	.cfi_startproc
+	cmpl	$-1, %edi
+	pushq	%r12
+	.cfi_def_cfa_offset 16
+	.cfi_offset 12, -16
+	pushq	%rbp
+	.cfi_def_cfa_offset 24
+	.cfi_offset 6, -24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	.cfi_offset 3, -32
+	je	.L19
+	leal	-1(%rdi), %ebp
+	movslq	%edi, %r12
+	movl	$49, %ebx
+	.p2align 4,,10
+	.p2align 3
+.L14:
+	movq	_ZL6buffer(%rip), %rax
+	movl	%ebp, %edi
+	movb	%bl, (%rax,%r12)
+	addl	$1, %ebx
+	call	_Z17generate_or_checki
+	cmpb	$58, %bl
+	jne	.L14
+.L9:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L19:
+	.cfi_restore_state
+	movl	$_ZL6buffer, %edi
+	call	_Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	testb	%al, %al
+	je	.L9
+	movq	_ZL6buffer+8(%rip), %rdx
+	movq	_ZL6buffer(%rip), %rsi
+	movl	$_ZSt4cout, %edi
+	call	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	popq	%rbx
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_def_cfa_offset 8
+	movl	$1, %edx
+	movl	$.LC1, %esi
+	movq	%rax, %rdi
+	jmp	_ZSt16__ostream_insertIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_PKS3_l
+	.cfi_endproc
+.LFE1780:
+	.size	_Z17generate_or_checki, .-_Z17generate_or_checki
+	.section	.text.unlikely
+.LCOLDE2:
+	.text
+.LHOTE2:
+	.section	.rodata.str1.1
+.LC4:
+	.string	"\n\n"
+	.section	.text.unlikely
+.LCOLDB5:
+	.section	.text.startup,"ax",@progbits
+.LHOTB5:
+	.p2align 4,,15
+	.globl	main
+	.type	main, @function
+main:
+.LFB1781:
+	.cfi_startproc
+	pushq	%rbx
+	.cfi_def_cfa_offset 16
+	.cfi_offset 3, -16
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	movl	$8, %edi
+	movq	%rax, %rbx
+	call	_Z17generate_or_checki
+	call	_ZNSt6chrono3_V212system_clock3nowEv
+	pxor	%xmm0, %xmm0
+	subq	%rbx, %rax
+	movl	$_ZSt4cout, %edi
+	cvtsi2sdq	%rax, %xmm0
+	divsd	.LC3(%rip), %xmm0
+	call	_ZNSo9_M_insertIdEERSoT_
+	movl	$.LC4, %esi
+	movq	%rax, %rdi
+	call	_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc
+	xorl	%eax, %eax
+	popq	%rbx
+	.cfi_def_cfa_offset 8
+	ret
+	.cfi_endproc
+.LFE1781:
+	.size	main, .-main
+	.section	.text.unlikely
+.LCOLDE5:
+	.section	.text.startup
+.LHOTE5:
+	.section	.text.unlikely
+.LCOLDB6:
+	.section	.text.startup
+.LHOTB6:
+	.p2align 4,,15
+	.type	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, @function
+_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
+.LFB1993:
+	.cfi_startproc
+	subq	$8, %rsp
+	.cfi_def_cfa_offset 16
+	movl	$_ZStL8__ioinit, %edi
+	call	_ZNSt8ios_base4InitC1Ev
+	movl	$__dso_handle, %edx
+	movl	$_ZStL8__ioinit, %esi
+	movl	$_ZNSt8ios_base4InitD1Ev, %edi
+	call	__cxa_atexit
+	movabsq	$3472328296227680304, %rax
+	movq	$_ZL6buffer+16, _ZL6buffer(%rip)
+	movb	$48, _ZL6buffer+24(%rip)
+	movq	%rax, _ZL6buffer+16(%rip)
+	movq	$9, _ZL6buffer+8(%rip)
+	movl	$__dso_handle, %edx
+	movb	$0, _ZL6buffer+25(%rip)
+	movl	$_ZL6buffer, %esi
+	movl	$_ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEED1Ev, %edi
+	addq	$8, %rsp
+	.cfi_def_cfa_offset 8
+	jmp	__cxa_atexit
+	.cfi_endproc
+.LFE1993:
+	.size	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE, .-_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.section	.text.unlikely
+.LCOLDE6:
+	.section	.text.startup
+.LHOTE6:
+	.section	.init_array,"aw"
+	.align 8
+	.quad	_GLOBAL__sub_I__Z14check_if_magicRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+	.local	_ZL6buffer
+	.comm	_ZL6buffer,32,32
+	.section	.rodata
+	.align 32
+	.type	_ZL7squares, @object
+	.size	_ZL7squares, 91
+_ZL7squares:
+	.string	"         276951438294753618438951276492357816618753294672159834816357492834159672         "
+	.local	_ZStL8__ioinit
+	.comm	_ZStL8__ioinit,1,1
+	.section	.rodata.cst8,"aM",@progbits,8
+	.align 8
+.LC3:
+	.long	0
+	.long	1104006501
+	.hidden	__dso_handle
+	.ident	"GCC: (Ubuntu 5.4.1-2ubuntu1~16.04) 5.4.1 20160904"
+	.section	.note.GNU-stack,"",@progbits
+rm ./empty_run	
+rm ./numbers
+rm ./numbers_const
+rm ./numbers_permutation_shifts
+rm ./64bits
+rm ./64bits_local
+rm ./64bits_smart_index
+rm ./64bits_binary_search
+rm ./words_smart_memcmp
+rm ./words_smart_index_and_memcmp
+rm ./*.s
