@@ -113,35 +113,896 @@ But just before we start, I want to remind you that it is all only a game and th
 Shifts vs. no shifts
     </h2>
     <p>
-
+<a href="https://www.reddit.com/user/ioquatix">ioquatix</a> from Reddit wonders how lookup can be faster than direct shifts. Honestly, for me this was also a mystery.
     </p>
     <table><tr>
-    <td id="left_1">
+    <td>
     <pre>
-left
+auto c15 = '5' * 3;
+uint_fast64_t ideal_char_map = 
+    static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
+uint_fast64_t char_map_one = 1u;
+
+bool check_if_magic(const std::string& sq)
+  {
+  if ((sq[0] + sq[1] + sq[2] != c15)
+    || (sq[3] + sq[4] + sq[5] != c15)
+    || (sq[6] + sq[7] + sq[8] != c15)
+
+    || (sq[0] + sq[3] + sq[6] != c15)
+    || (sq[1] + sq[4] + sq[7] != c15)
+    || (sq[2] + sq[5] + sq[8] != c15)
+
+    || (sq[0] + sq[4] + sq[8] != c15)
+    || (sq[2] + sq[4] + sq[6] != c15))
+    return false;
+
+  auto char_map = ideal_char_map;
+  for(auto i = 0u; i &lt; 9; ++i)
+    char_map ^= char_map_one &lt;&lt; sq[i]; 
+  if (char_map != 0)
+    return false;
+
+  return true;
+  }
     </pre>
     </td>
     <td>
     <pre>
-right       
+auto magic_number = '5' * 3;
+auto not_so_magic_number = '5' * 2;
+const std::array&lt;uint16_t, 58&gt; bit_shifts {
+  0, 0, 0, 0,   0, 0, 0, 0,
+  0, 0, 0, 0,   0, 0, 0, 0,
+  0, 0, 0, 0,   0, 0, 0, 0,
+  0, 0, 0, 0,   0, 0, 0, 0,
+
+  0, 0, 0, 0,   0, 0, 0, 0,
+  0, 0, 0, 0,   0, 0, 0, 0,
+  0, 1, 2, 4,   8, 16, 32, 64,
+  128, 256
+  };
+
+bool check_if_magic(const std::string& sq)
+  {
+  if ((sq[0] + sq[1] + sq[2] != magic_number)
+    || (sq[3] + sq[5] != not_so_magic_number)
+    || (sq[6] + sq[7] + sq[8] != magic_number)
+
+    || (sq[0] + sq[3] + sq[6] != magic_number)
+    || (sq[1] + sq[7] != not_so_magic_number)
+    || (sq[2] + sq[5] + sq[8] != magic_number)
+    
+    || (sq[0] + sq[4] + sq[8] != magic_number)
+    || (sq[2] + sq[4] + sq[6] != magic_number))
+    return false;
+
+  auto char_map = 0u;
+  for(auto i = 0u; i < 9; ++i)
+    <b>char_map ^= bit_shifts[sq[i]];</b>
+  if (char_map != 511)
+    return false;
+
+  return true;
+  }      
     </pre>
     </td></tr></table>
+    <p>
+I think it would be helpful to look at the disassembly.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+Z14check_if_magic ...
+.LFB1711:
+	.cfi_startproc
+	movq	(%rdi), %rdx
+	xorl	%eax, %eax
+	movsbl	(%rdx), %esi
+	movsbl	1(%rdx), %edi
+	movsbl	2(%rdx), %r8d
+	leal	(%rsi,%rdi), %ecx
+	addl	%r8d, %ecx
+	cmpl	magic_number(%rip), %ecx
+	je	.L21
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L21:
+	pushq	%r13
+	.cfi_def_cfa_offset 16
+	.cfi_offset 13, -16
+	pushq	%r12
+	.cfi_def_cfa_offset 24
+	.cfi_offset 12, -24
+	pushq	%rbp
+	.cfi_def_cfa_offset 32
+	.cfi_offset 6, -32
+	pushq	%rbx
+	.cfi_def_cfa_offset 40
+	.cfi_offset 3, -40
+	movsbl	3(%rdx), %r10d
+	movsbl	4(%rdx), %r11d
+	movsbl	5(%rdx), %ebx
+	leal	(%r10,%r11), %r9d
+	addl	%ebx, %r9d
+	cmpl	%r9d, %ecx
+	je	.L22
+.L13:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_restore 3
+	.cfi_def_cfa_offset 32
+	popq	%rbp
+	.cfi_restore 6
+	.cfi_def_cfa_offset 24
+	popq	%r12
+	.cfi_restore 12
+	.cfi_def_cfa_offset 16
+	popq	%r13
+	.cfi_restore 13
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L22:
+	.cfi_restore_state
+	movsbl	6(%rdx), %ebp
+	movsbl	7(%rdx), %r13d
+	movsbl	8(%rdx), %r12d
+	leal	0(%rbp,%r13), %r9d
+	addl	%r12d, %r9d
+	cmpl	%r9d, %ecx
+	jne	.L13
+	leal	(%rsi,%r10), %r9d
+	addl	%ebp, %r9d
+	cmpl	%r9d, %ecx
+	jne	.L13
+	addl	%r11d, %edi
+	addl	%r13d, %edi
+	cmpl	%edi, %ecx
+	jne	.L13
+	leal	(%r8,%rbx), %edi
+	addl	%r12d, %edi
+	cmpl	%edi, %ecx
+	jne	.L13
+	addl	%r11d, %esi
+	addl	%r12d, %esi
+	cmpl	%esi, %ecx
+	jne	.L13
+	addl	%r11d, %r8d
+	addl	%ebp, %r8d
+	cmpl	%r8d, %ecx
+	jne	.L13
+	movq	ideal_char_map(%rip), %rsi
+	movq	char_map_one(%rip), %r8
+	leaq	9(%rdx), %rdi
+	movq	%rdx, %rax
+	.p2align 4,,10
+	.p2align 3
+.L4:
+	movsbl	(%rax), %ecx
+	movq	%r8, %rdx
+	addq	$1, %rax
+	salq	%cl, %rdx
+	xorq	%rdx, %rsi
+	cmpq	%rax, %rdi
+	jne	.L4
+	testq	%rsi, %rsi
+	sete	%al
+	jmp	.L13
+	.cfi_endproc
+    </pre>
+    </td>
+    <td>
+    <pre>
+_Z14check_if_magic ...
+.LFB1752:
+	.cfi_startproc
+	movq	(%rdi), %rdx
+	xorl	%eax, %eax
+	movsbl	(%rdx), %esi
+	movsbl	1(%rdx), %edi
+	movsbl	2(%rdx), %r8d
+	leal	(%rsi,%rdi), %ecx
+	addl	%r8d, %ecx
+	cmpl	magic_number(%rip), %ecx
+	je	.L17
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L17:
+	pushq	%r13
+	.cfi_def_cfa_offset 16
+	.cfi_offset 13, -16
+	pushq	%r12
+	.cfi_def_cfa_offset 24
+	.cfi_offset 12, -24
+	pushq	%rbp
+	.cfi_def_cfa_offset 32
+	.cfi_offset 6, -32
+	pushq	%rbx
+	.cfi_def_cfa_offset 40
+	.cfi_offset 3, -40
+	movsbl	3(%rdx), %r9d
+	movsbl	5(%rdx), %r10d
+	leal	(%r9,%r10), %ebp
+	cmpl	not_so_magic_number(%rip), %ebp
+	je	.L18
+.L2:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_restore 3
+	.cfi_def_cfa_offset 32
+	popq	%rbp
+	.cfi_restore 6
+	.cfi_def_cfa_offset 24
+	popq	%r12
+	.cfi_restore 12
+	.cfi_def_cfa_offset 16
+	popq	%r13
+	.cfi_restore 13
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L18:
+	.cfi_restore_state
+	movsbl	6(%rdx), %r11d
+	movsbl	7(%rdx), %r13d
+	movsbl	8(%rdx), %ebx
+	leal	(%r11,%r13), %r12d
+	addl	%ebx, %r12d
+	cmpl	%r12d, %ecx
+	jne	.L2
+	addl	%esi, %r9d
+	addl	%r11d, %r9d
+	cmpl	%r9d, %ecx
+	jne	.L2
+	addl	%r13d, %edi
+	cmpl	%edi, %ebp
+	jne	.L2
+	leal	(%r8,%r10), %edi
+	addl	%ebx, %edi
+	cmpl	%edi, %ecx
+	jne	.L2
+	movsbl	4(%rdx), %edi
+	addl	%edi, %esi
+	addl	%ebx, %esi
+	cmpl	%esi, %ecx
+	jne	.L2
+	addl	%r8d, %edi
+	addl	%edi, %r11d
+	cmpl	%r11d, %ecx
+	jne	.L2
+	movq	%rdx, %rax
+	leaq	9(%rdx), %rsi
+	xorl	%edx, %edx
+	.p2align 4,,10
+	.p2align 3
+.L3:
+	movsbq	(%rax), %rcx
+	addq	$1, %rax
+	movzwl	_ZL25bit_shifts(%rcx,%rcx), %ecx
+	xorl	%ecx, %edx
+	cmpq	%rax, %rsi
+	jne	.L3
+	cmpl	$511, %edx
+	sete	%al
+	jmp	.L2
+	.cfi_endproc     
+    </pre>
+    </td></tr></table>
+    <p>
+And... I was wrong. It is not really helpful. Apparently we read more data, and do less instructions, but what does this mean in terms of performance? To settle this we need Valgrind. 
+    </p>
+    <p>
+Valgrind is a dynamic analyzer, it can do lots of stuff for us. In this case I would be the most interested in the memory read/writes vs. instruction reads. 
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+I   refs:      13,099,624,571
+I1  misses:             1,846
+LLi misses:             1,705
+I1  miss rate:           0.00%
+LLi miss rate:           0.00%
 
+
+D   refs:       7,435,891,049  
+    (4,739,364,171 rd   + 2,696,526,878 wr)
+
+D1  misses:            15,886  
+    (       13,670 rd   +         2,216 wr)
+
+LLd misses:             9,155  
+    (        7,758 rd   +         1,397 wr)
+
+D1  miss rate:            0.0% 
+    (          0.0%     +           0.0%  )
+
+LLd miss rate:            0.0% 
+    (          0.0%     +           0.0%  )
+
+
+LL refs:               17,732  
+    (       15,516 rd   +         2,216 wr)
+
+LL misses:             10,860  
+    (        9,463 rd   +         1,397 wr)
+
+LL miss rate:             0.0% 
+    (          0.0%     +           0.0%  )
+    </pre>
+    </td>
+    <td>
+    <pre>
+I   refs:      13,041,321,061
+I1  misses:             1,843
+LLi misses:             1,705
+I1  miss rate:           0.00%
+LLi miss rate:           0.00%
+
+
+D   refs:       7,438,562,794  
+    (4,742,035,917 rd   + 2,696,526,877 wr)
+
+D1  misses:            15,894  
+    (       13,676 rd   +         2,218 wr)
+
+LLd misses:             9,156  
+    (        7,761 rd   +         1,395 wr)
+
+D1  miss rate:            0.0% 
+    (          0.0%     +           0.0%  )
+
+LLd miss rate:            0.0% 
+    (          0.0%     +           0.0%  )
+
+
+LL refs:               17,737  
+    (       15,519 rd   +         2,218 wr)
+    
+LL misses:             10,861  
+    (        9,466 rd   +         1,395 wr)
+    
+LL miss rate:             0.0% 
+    (          0.0%     +           0.0%  )
+    </pre>
+    </td></tr></table>    
+    <p>
+Apparently, we now have 3 000 000 more data cahce reads, but also 60 000 000 less intruction cache reads. All and all, it is now more effective. 
+    </p>
+    <p>
+But this works only because all the data fit in L1-cache perfectly. Which is, of course, rarely the case on practice, so it is generally better to abstain from using lookups. It is true, it just doesn't help in this particular exercise.
+    </p>
     <h2>
 Variables vs. constants
-    </h2>    
-    
+    </h2>
+    <p>
+<a href="https://www.reddit.com/user/FbF_">FbF_</a> from Reddit justly points out that leaving global variables non-constant is very wrong. Excellent point! This is indeed a mistake, of course, everythin that is meant to be constant should be const. But does it affect perfromance?
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+auto c15 = '5' * 3;
+uint_fast64_t ideal_char_map = 
+    static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
+uint_fast64_t char_map_one = 1u;
+
+bool check_if_magic(const std::string& sq)
+  {
+  if ((sq[0] + sq[1] + sq[2] != c15)
+    || (sq[3] + sq[4] + sq[5] != c15)
+    || (sq[6] + sq[7] + sq[8] != c15)
+
+    || (sq[0] + sq[3] + sq[6] != c15)
+    || (sq[1] + sq[4] + sq[7] != c15)
+    || (sq[2] + sq[5] + sq[8] != c15)
+
+    || (sq[0] + sq[4] + sq[8] != c15)
+    || (sq[2] + sq[4] + sq[6] != c15))
+    return false;
+
+  auto char_map = ideal_char_map;
+  for(auto i = 0u; i &lt; 9; ++i)
+    char_map ^= char_map_one &lt;&lt; sq[i]; 
+  if (char_map != 0)
+    return false;
+
+  return true;
+  }
+    </pre>
+    </td>
+    <td>
+    <pre>
+const auto c15 = '5' * 3;
+const uint_fast64_t ideal_char_map = 
+    static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
+const uint_fast64_t char_map_one = 1u;
+
+bool check_if_magic(const std::string& sq)
+  {
+  if ((sq[0] + sq[1] + sq[2] != c15)
+    || (sq[3] + sq[4] + sq[5] != c15)
+    || (sq[6] + sq[7] + sq[8] != c15)
+
+    || (sq[0] + sq[3] + sq[6] != c15)
+    || (sq[1] + sq[4] + sq[7] != c15)
+    || (sq[2] + sq[5] + sq[8] != c15)
+
+    || (sq[0] + sq[4] + sq[8] != c15)
+    || (sq[2] + sq[4] + sq[6] != c15))
+    return false;
+
+  auto char_map = ideal_char_map;
+  for(auto i = 0u; i &lt; 9; ++i)
+    char_map ^= char_map_one &lt;&lt; sq[i]; 
+  if (char_map != 0)
+    return false;
+
+  return true;
+  }      
+    </pre>
+    </td></tr></table>     
+    <p>
+Well, the difference in runtime is subtle. They both run for about 1.8 seconds along with the generator. But the difference is quite visible in the code. Indeed, the constant version does look better.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+Z14check_if_magic ...
+.LFB1711:
+	.cfi_startproc
+	movq	(%rdi), %rdx
+	xorl	%eax, %eax
+	movsbl	(%rdx), %esi
+	movsbl	1(%rdx), %edi
+	movsbl	2(%rdx), %r8d
+	leal	(%rsi,%rdi), %ecx
+	addl	%r8d, %ecx
+	cmpl	magic_number(%rip), %ecx
+	je	.L21
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L21:
+	pushq	%r13
+	.cfi_def_cfa_offset 16
+	.cfi_offset 13, -16
+	pushq	%r12
+	.cfi_def_cfa_offset 24
+	.cfi_offset 12, -24
+	pushq	%rbp
+	.cfi_def_cfa_offset 32
+	.cfi_offset 6, -32
+	pushq	%rbx
+	.cfi_def_cfa_offset 40
+	.cfi_offset 3, -40
+	movsbl	3(%rdx), %r10d
+	movsbl	4(%rdx), %r11d
+	movsbl	5(%rdx), %ebx
+	leal	(%r10,%r11), %r9d
+	addl	%ebx, %r9d
+	cmpl	%r9d, %ecx
+	je	.L22
+.L13:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_restore 3
+	.cfi_def_cfa_offset 32
+	popq	%rbp
+	.cfi_restore 6
+	.cfi_def_cfa_offset 24
+	popq	%r12
+	.cfi_restore 12
+	.cfi_def_cfa_offset 16
+	popq	%r13
+	.cfi_restore 13
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L22:
+	.cfi_restore_state
+	movsbl	6(%rdx), %ebp
+	movsbl	7(%rdx), %r13d
+	movsbl	8(%rdx), %r12d
+	leal	0(%rbp,%r13), %r9d
+	addl	%r12d, %r9d
+	cmpl	%r9d, %ecx
+	jne	.L13
+	leal	(%rsi,%r10), %r9d
+	addl	%ebp, %r9d
+	cmpl	%r9d, %ecx
+	jne	.L13
+	addl	%r11d, %edi
+	addl	%r13d, %edi
+	cmpl	%edi, %ecx
+	jne	.L13
+	leal	(%r8,%rbx), %edi
+	addl	%r12d, %edi
+	cmpl	%edi, %ecx
+	jne	.L13
+	addl	%r11d, %esi
+	addl	%r12d, %esi
+	cmpl	%esi, %ecx
+	jne	.L13
+	addl	%r11d, %r8d
+	addl	%ebp, %r8d
+	cmpl	%r8d, %ecx
+	jne	.L13
+	movq	ideal_char_map(%rip), %rsi
+	movq	char_map_one(%rip), %r8
+	leaq	9(%rdx), %rdi
+	movq	%rdx, %rax
+	.p2align 4,,10
+	.p2align 3
+.L4:
+	movsbl	(%rax), %ecx
+	movq	%r8, %rdx
+	addq	$1, %rax
+	salq	%cl, %rdx
+	xorq	%rdx, %rsi
+	cmpq	%rax, %rdi
+	jne	.L4
+	testq	%rsi, %rsi
+	sete	%al
+	jmp	.L13
+	.cfi_endproc
+    </pre>
+    </td>
+    <td>
+    <pre>
+_Z14check_if_magic ...
+.LFB1711:
+	.cfi_startproc
+	movq	(%rdi), %rdx
+	xorl	%eax, %eax
+	movsbl	(%rdx), %esi
+	movsbl	1(%rdx), %edi
+	movsbl	2(%rdx), %r8d
+	leal	(%rsi,%rdi), %ecx
+	addl	%r8d, %ecx
+	cmpl	$159, %ecx
+	je	.L17
+.L15:
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L17:
+	movsbl	3(%rdx), %r9d
+	movsbl	4(%rdx), %r10d
+	movsbl	5(%rdx), %r11d
+	leal	(%r9,%r10), %ecx
+	addl	%r11d, %ecx
+	cmpl	$159, %ecx
+	jne	.L15
+	pushq	%r12
+	.cfi_def_cfa_offset 16
+	.cfi_offset 12, -16
+	pushq	%rbp
+	.cfi_def_cfa_offset 24
+	.cfi_offset 6, -24
+	pushq	%rbx
+	.cfi_def_cfa_offset 32
+	.cfi_offset 3, -32
+	movsbl	6(%rdx), %ebx
+	movsbl	7(%rdx), %r12d
+	movsbl	8(%rdx), %ebp
+	leal	(%rbx,%r12), %ecx
+	addl	%ebp, %ecx
+	cmpl	$159, %ecx
+	je	.L18
+.L2:
+	popq	%rbx
+	.cfi_remember_state
+	.cfi_restore 3
+	.cfi_def_cfa_offset 24
+	popq	%rbp
+	.cfi_restore 6
+	.cfi_def_cfa_offset 16
+	popq	%r12
+	.cfi_restore 12
+	.cfi_def_cfa_offset 8
+	ret
+.L18:
+	.cfi_restore_state
+	leal	(%rsi,%r9), %ecx
+	addl	%ebx, %ecx
+	cmpl	$159, %ecx
+	jne	.L2
+	addl	%r10d, %edi
+	addl	%r12d, %edi
+	cmpl	$159, %edi
+	jne	.L2
+	leal	(%r8,%r11), %ecx
+	addl	%ebp, %ecx
+	cmpl	$159, %ecx
+	jne	.L2
+	addl	%r10d, %esi
+	addl	%ebp, %esi
+	cmpl	$159, %esi
+	jne	.L2
+	addl	%r10d, %r8d
+	addl	%ebx, %r8d
+	cmpl	$159, %r8d
+	jne	.L2
+	movq	%rdx, %rax
+	leaq	9(%rdx), %rdi
+	movl	$1, %esi
+	movabsq	$287667426198290432, %rdx
+	.p2align 4,,10
+	.p2align 3
+.L3:
+	movsbl	(%rax), %ecx
+	movq	%rsi, %rbx
+	addq	$1, %rax
+	salq	%cl, %rbx
+	xorq	%rbx, %rdx
+	cmpq	%rax, %rdi
+	jne	.L3
+	testq	%rdx, %rdx
+	sete	%al
+	jmp	.L2
+	.cfi_endproc      
+    </pre>
+    </td></tr></table>     
+    <p>
+How come they do not show the difference in the runtime? Let's take a look at what Valgrind has to say. 
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+I   refs:      13,099,624,571
+I1  misses:             1,846
+LLi misses:             1,705
+I1  miss rate:           0.00%
+LLi miss rate:           0.00%
+
+D   refs:       7,435,891,049  
+    (4,739,364,171 rd   + 2,696,526,878 wr)
+D1  misses:            15,886  
+    (       13,670 rd   +         2,216 wr)
+LLd misses:             9,155  
+    (        7,758 rd   +         1,397 wr)
+D1  miss rate:            0.0% 
+    (          0.0%     +           0.0%  )
+LLd miss rate:            0.0% 
+    (          0.0%     +           0.0%  )
+
+LL refs:               17,732  
+    (       15,516 rd   +         2,216 wr)
+LL misses:             10,860  
+    (        9,463 rd   +         1,397 wr)
+LL miss rate:             0.0% 
+    (          0.0%     +           0.0%  )
+    </pre>
+    </td>
+    <td>
+    <pre>
+I   refs:      12,856,556,965
+I1  misses:             1,843
+LLi misses:             1,703
+I1  miss rate:           0.00%
+LLi miss rate:           0.00%
+
+D   refs:       6,805,402,908  
+    (4,230,409,813 rd   + 2,574,993,095 wr)
+D1  misses:            15,882  
+    (       13,665 rd   +         2,217 wr)
+LLd misses:             9,154  
+    (        7,758 rd   +         1,396 wr)
+D1  miss rate:            0.0% 
+    (          0.0%     +           0.0%  )
+LLd miss rate:            0.0% 
+    (          0.0%     +           0.0%  )
+
+LL refs:               17,725  
+    (       15,508 rd   +         2,217 wr)
+LL misses:             10,857  
+    (        9,461 rd   +         1,396 wr)
+LL miss rate:             0.0% 
+    (          0.0%     +           0.0%  )  
+    </pre>
+    </td></tr></table>
+    <p>
+There is a difference, and it shows up in larger numbers, it's just that the benchmark is too small to show it properly. So yes, it is best to have your constants constant, even if it doesn't show immediately.
+    </p>
+        
     <h2>
 Global vs. local
     </h2>
-        
-    <h2>
-Shifts vs. no shifts
-    </h2>        
-    
+    <p>
+<a href="https://twitter.com/FolwarcznyAdam">FolwarcznyAdam</a> from Twitter suggests that changing data locality might be a good thing.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+const std::array&lt;uint64_t, 8&gt; magic_numbers
+{
+  3545515123101087289, 3690191062107239479,
+  3544956562637535289, 3978984379655991859,
+  3689073941180135479, 4123101758198592049,
+  3977867258728887859, 4122543197735040049
+};
+bool check_if_magic(const std::string& sq)
+{
+  if(sq[4] != '5')
+    return false;
+
+  <b>uint64_t magic_number = 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()));
+  magic_number <<= 32;
+  magic_number += 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()+5));</b>
+
+  for(auto i = 0u; i &lt; 8; ++i)
+    if(magic_number == magic_numbers[i])
+      return true;
+  return false;
+}
+    </pre>
+    </td>
+    <td>
+    <pre>
+bool check_if_magic(const std::string& sq)
+{
+  const std::array&lt;uint64_t, 8&gt; magic_numbers
+  {
+    3545515123101087289, 3690191062107239479,
+    3544956562637535289, 3978984379655991859,
+    3689073941180135479, 4123101758198592049,
+    3977867258728887859, 4122543197735040049
+  };
+
+  if(sq[4] != '5')
+    return false;
+
+  <b>uint64_t magic_number = 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()));
+  magic_number <<= 32;
+  magic_number += 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()+5));</b>
+
+  for(auto i = 0u; i &lt; 8; ++i)
+    if(magic_number == magic_numbers[i])
+      return true;
+  return false;
+}    
+    </pre>
+    </td></tr></table>        
+    <p>
+It doesn't look rather relevant on the first glance, but GCC does produce quite a different code for global and local variables.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+_Z14check_if_magic ...
+.LFB1752:
+	.cfi_startproc
+	movq	(%rdi), %rdx
+	xorl	%eax, %eax
+	cmpb	$53, 4(%rdx)
+	je	.L8
+	rep ret
+	.p2align 4,,10
+	.p2align 3
+.L8:
+	movl	(%rdx), %ecx
+	movl	5(%rdx), %eax
+	movabsq	$3545515123101087289, %rdx
+	salq	$32, %rcx
+	addq	%rax, %rcx
+	movl	$_ZL13magic_numbers+8, %eax
+	jmp	.L3
+	.p2align 4,,10
+	.p2align 3
+.L9:
+	movq	(%rax), %rdx
+	addq	$8, %rax
+.L3:
+	cmpq	%rdx, %rcx
+	je	.L5
+	cmpq	$_ZL13magic_numbers+64, %rax
+	jne	.L9
+	xorl	%eax, %eax
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L5:
+	movl	$1, %eax
+	ret
+	.cfi_endproc
+    </pre>
+    </td>
+    <td>
+    <pre>
+_Z14check_if_magic ...
+.LFB1752:
+	.cfi_startproc
+	subq	$88, %rsp
+	.cfi_def_cfa_offset 96
+	movq	(%rdi), %rdx
+	movq	%fs:40, %rax
+	movq	%rax, 72(%rsp)
+	xorl	%eax, %eax
+	movabsq	$3545515123101087289, %rax
+	movq	%rax, (%rsp)
+	movabsq	$3690191062107239479, %rax
+	movq	%rax, 8(%rsp)
+	movabsq	$3544956562637535289, %rax
+	movq	%rax, 16(%rsp)
+	movabsq	$3978984379655991859, %rax
+	movq	%rax, 24(%rsp)
+	movabsq	$3689073941180135479, %rax
+	movq	%rax, 32(%rsp)
+	movabsq	$4123101758198592049, %rax
+	movq	%rax, 40(%rsp)
+	movabsq	$3977867258728887859, %rax
+	movq	%rax, 48(%rsp)
+	movabsq	$4122543197735040049, %rax
+	movq	%rax, 56(%rsp)
+	xorl	%eax, %eax
+	cmpb	$53, 4(%rdx)
+	je	.L10
+.L2:
+	movq	72(%rsp), %rsi
+	xorq	%fs:40, %rsi
+	jne	.L11
+	addq	$88, %rsp
+	.cfi_remember_state
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L10:
+	.cfi_restore_state
+	movl	(%rdx), %ecx
+	movl	5(%rdx), %eax
+	leaq	64(%rsp), %rsi
+	movabsq	$3545515123101087289, %rdx
+	salq	$32, %rcx
+	addq	%rax, %rcx
+	leaq	8(%rsp), %rax
+	jmp	.L3
+	.p2align 4,,10
+	.p2align 3
+.L12:
+	movq	(%rax), %rdx
+	addq	$8, %rax
+.L3:
+	cmpq	%rdx, %rcx
+	je	.L6
+	cmpq	%rsi, %rax
+	jne	.L12
+	xorl	%eax, %eax
+	jmp	.L2
+	.p2align 4,,10
+	.p2align 3
+.L6:
+	movl	$1, %eax
+	jmp	.L2
+.L11:
+	call	__stack_chk_fail
+	.cfi_endproc    
+    </pre>
+    </td></tr></table>
+    <p>
+Well, you might think that the right one is obviously worse. And it kind of is, but that's only because it's not what Adam had in mind. His version actually looks like this: <a href="https://godbolt.org/g/swssJY">godbolt.org/g/swssJY</a> and it is, of course, much-much better than mine.
+    </p>
+    <p>
+The reason for this difference is me using an outdated compiler. And the moral is — update your compiler often.
+    </p>
+   
     <h2>
 Loop vs. binary search
     </h2>
+
 
     <h2>
 Smart string comparison
@@ -160,10 +1021,18 @@ Conclusion
     <p>
 Nothing yet.
     </p>
-    <p>
-I learned something from this experience. Hope you did too. If so, then no matter what your score is, you are still the winner.
-    </p>
-    
+
+    <table><tr>
+    <td>
+    <pre>
+left
+    </pre>
+    </td>
+    <td>
+    <pre>
+right      
+    </pre>
+    </td></tr></table>
     
 
     <p class="footer">
