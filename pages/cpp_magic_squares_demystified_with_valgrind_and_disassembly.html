@@ -471,7 +471,7 @@ LL miss rate:             0.0%
     </pre>
     </td></tr></table>    
     <p>
-Apparently, we now have 3 000 000 more data cahce reads, but also 60 000 000 less intruction cache reads. All and all, it is now more effective. 
+Apparently, we now have 3 000 000 more data cahce reads, but also 60 000 000 less intruction cache reads. All and all, it is more effective with the lookup.
     </p>
     <p>
 But this works only because all the data fit in L1-cache perfectly. Which is, of course, rarely the case on practice, so it is generally better to abstain from using lookups. It is true, it just doesn't help in this particular exercise.
@@ -480,7 +480,7 @@ But this works only because all the data fit in L1-cache perfectly. Which is, of
 Variables vs. constants
     </h2>
     <p>
-<a href="https://www.reddit.com/user/FbF_">FbF_</a> from Reddit justly points out that leaving global variables non-constant is very wrong. Excellent point! This is indeed a mistake, of course, everythin that is meant to be constant should be const. But does it affect perfromance?
+<a href="https://www.reddit.com/user/FbF_">FbF_</a> from Reddit justly points out that leaving global variables non-constant is very wrong. Excellent point! This is indeed a mistake, of course, everything that is meant to be constant should be const. But does it affect performance?
     </p>
     <table><tr>
     <td>
@@ -1002,37 +1002,425 @@ The reason for this difference is me using an outdated compiler. And the moral i
     <h2>
 Loop vs. binary search
     </h2>
-
-
-    <h2>
-Smart string comparison
-    </h2>
-             
-    <h2>
-Smart lookup
-    </h2>  
-    
-    <h2>
-Smart indexing
-    </h2>
-    <h2>
-Conclusion
-    </h2> 
     <p>
-Nothing yet.
+Some guys from Reddit, particularly <a href="https://www.reddit.com/user/bschindl">bschindl</a>, <a href="https://www.reddit.com/user/Veedrac">Veedrac</a>, and <a href="https://www.reddit.com/user/PhilipTrettner">PhilipTrettner</a> came up with the idea of doing binary search. It is a great idea, but once again it doesn't work very well in this case because all the squares fit in a single cache line anyway.
     </p>
-
     <table><tr>
     <td>
     <pre>
-left
+const std::array&lt;uint64_t, 8&gt; magic_numbers
+{
+  3545515123101087289, 3690191062107239479,
+  3544956562637535289, 3978984379655991859,
+  3689073941180135479, 4123101758198592049,
+  3977867258728887859, 4122543197735040049
+};
+bool check_if_magic(const std::string& sq)
+{
+  if(sq[4] != '5')
+    return false;
+
+  uint64_t magic_number = 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()));
+  magic_number <<= 32;
+  magic_number += 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()+5));
+
+  for(auto i = 0u; i &lt; 8; ++i)
+    if(magic_number == magic_numbers[i])
+      return true;
+  return false;
+}
     </pre>
     </td>
     <td>
     <pre>
-right      
+const std::array&lt;uint64_t, 8&gt; magic_numbers
+{
+3545515123101087289, 3690191062107239479,
+3544956562637535289, 3978984379655991859,
+3689073941180135479, 4123101758198592049,
+3977867258728887859, 4122543197735040049
+};
+bool check_if_magic(const std::string& sq)
+{
+  if(square[4] != '5')
+    return false;
+
+  uint64_t nr = 
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()));
+  nr &lt;&lt;= 32;
+  nr +=	
+    *(reinterpret_cast&lt;const uint32_t*&gt;
+      (sq.data()+5));
+
+  if (nr &lt;= 3690191062107239479)
+    if (nr &lt;= 3545515123101087289)
+      if (nr &lt; 3545515123101087289)
+        return nr == 3544956562637535289;
+      else
+        return nr == 3545515123101087289;
+    else
+      if (nr &lt; 3690191062107239479)
+        return nr == 3689073941180135479;
+      else
+        return nr == 3690191062107239479;
+  else
+    if (nr &lt;= 3978984379655991859)
+      if (nr &lt; 3978984379655991859)
+        return nr == 3977867258728887859;
+      else
+        return nr == 3978984379655991859;
+    else
+      if (nr &lt; 4123101758198592049)
+        return nr == 4122543197735040049;
+      else
+        return nr == 4123101758198592049;
+}    
     </pre>
     </td></tr></table>
+    <p>
+Valgrind may confirm that sequential reading of 64 bytes is cheap.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+I   refs:      10,699,297,900
+I1  misses:             1,838
+LLi misses:             1,701
+I1  miss rate:           0.00%
+LLi miss rate:           0.00%
+
+D   refs:       5,521,473,844  
+    (3,342,039,069 rd   + 2,179,434,775 wr)
+D1  misses:            15,883  
+    (       13,668 rd   +         2,215 wr)
+LLd misses:             9,154  
+    (        7,758 rd   +         1,396 wr)
+D1  miss rate:            0.0% 
+    (          0.0%     +           0.0%  )
+LLd miss rate:            0.0% 
+    (          0.0%     +           0.0%  )
+
+LL refs:               17,721  
+    (       15,506 rd   +         2,215 wr)
+LL misses:             10,855  
+    (        9,459 rd   +         1,396 wr)
+LL miss rate:             0.0% 
+    (          0.0%     +           0.0%  )
+    </pre>
+    </td>
+    <td>
+    <pre>
+I   refs:      11,323,056,252
+I1  misses:             1,845
+LLi misses:             1,705
+I1  miss rate:           0.00%
+LLi miss rate:           0.00%
+
+D   refs:       5,994,987,820  
+    (3,428,132,553 rd   + 2,566,855,267 wr)
+D1  misses:            15,883  
+    (       13,666 rd   +         2,217 wr)
+LLd misses:             9,154  
+    (        7,758 rd   +         1,396 wr)
+D1  miss rate:            0.0% 
+    (          0.0%     +           0.0%  )
+LLd miss rate:            0.0% 
+    (          0.0%     +           0.0%  )
+
+LL refs:               17,728  
+    (       15,511 rd   +         2,217 wr)
+LL misses:             10,859  
+    (        9,463 rd   +         1,396 wr)
+LL miss rate:             0.0% 
+    (          0.0%     +           0.0%  )    
+    </pre>
+    </td></tr></table>
+    <p>
+So it is a bit worse than a simple loop. It is still extremely effective though. It's just with the plain loop being so small it doesn't make sence to make it even better.
+    </p>
+    <p>
+But the most amazing thing was found by <a href="https://www.reddit.com/user/adamf88">adamf88</a>. It turn out, Clang can do this by itself: <a href="https://godbolt.org/g/cXtdbB">https://godbolt.org/g/cXtdbB</a>! I'm astonished.
+    </p>             
+    <h2>
+Smart lookup
+    </h2>
+    <p>  
+One of the best ideas was proposed by <a href="https://www.reddit.com/user/Veedrac">Veedrac</a>. I'm not sure how it works exactly, the indexing thins looks a bit magical to me, but it goes like this:
+    </p>
+    <table><tr>
+    <td style="width: 505pt;">
+    <pre>
+const char squares[] =
+    "   " "   " "   "  // -/1
+
+    "276" "951" "438"  // 1/2
+    "294" "753" "618"  // 2/3
+
+    "438" "951" "276"  // 3/4
+    "492" "357" "816"  // 4/5
+
+    "618" "753" "294"  // 5/6
+    "672" "159" "834"  // 6/7
+
+    "816" "357" "492"  // 7/8
+    "834" "159" "672"  // 8/9
+
+    "   " "   " "   "; // 9/-
+
+// UB if sq contains characters [^1-9]
+//    or is not at least 9 characters long.
+bool check_if_magic(const std::string& square_as_string) {
+    const auto* square = square_as_string.data();
+    if (square[4] != '5') {
+        return false;
+    }
+
+    const auto idx = (*square - '1') * 9;
+    return
+        (!memcmp(square, &squares[idx],   9)) ||
+        (!memcmp(square, &squares[idx+9], 9));
+}
+    </pre>
+    </td>
+    </td></tr></table>
+    <p>
+Unfortunately, I had to change the function signature to match the benchmark and it lost quite a lot of speed because of that. It runs for 1.7 seconds that is a little bit slower than 64-bits hack. It does have nicer disassembly though.
+    </p>
+    <table><tr>
+    <td style="width: 505pt;">
+    <pre>
+_Z14check_if_magic ...
+.LFB1779:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	pushq	%rbx
+	.cfi_def_cfa_offset 24
+	.cfi_offset 3, -24
+	xorl	%eax, %eax
+	subq	$8, %rsp
+	.cfi_def_cfa_offset 32
+	movq	(%rdi), %rbx
+	cmpb	$53, 4(%rbx)
+	je	.L8
+.L2:
+	addq	$8, %rsp
+	.cfi_remember_state
+	.cfi_def_cfa_offset 24
+	popq	%rbx
+	.cfi_def_cfa_offset 16
+	popq	%rbp
+	.cfi_def_cfa_offset 8
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L8:
+	.cfi_restore_state
+	movsbl	(%rbx), %eax
+	movl	$9, %edx
+	movq	%rbx, %rdi
+	leal	-441(%rax,%rax,8), %ebp
+	movslq	%ebp, %rsi
+	addq	$_ZL7squares, %rsi
+	call	memcmp
+	movl	%eax, %edx
+	movl	$1, %eax
+	testl	%edx, %edx
+	je	.L2
+	leal	9(%rbp), %esi
+	movq	%rbx, %rdi
+	movl	$9, %edx
+	movslq	%esi, %rsi
+	addq	$_ZL7squares, %rsi
+	call	memcmp
+	testl	%eax, %eax
+	sete	%al
+	addq	$8, %rsp
+	.cfi_def_cfa_offset 24
+	popq	%rbx
+	.cfi_def_cfa_offset 16
+	popq	%rbp
+	.cfi_def_cfa_offset 8
+	ret
+	.cfi_endproc
+    </pre>
+    </td>
+    </td></tr></table>     
+    <p>
+On Valgrind it shows like this:
+    </p>    
+    <table><tr>
+    <td style="width: 505pt;">
+    <pre>
+I   refs:      16,045,605,063
+I1  misses:             1,849
+LLi misses:             1,713
+I1  miss rate:           0.00%
+LLi miss rate:           0.00%
+
+
+D   refs:       8,018,184,251  
+    (4,590,394,457 rd   + 3,427,789,794 wr)
+    
+D1  misses:            15,896  
+    (       13,678 rd   +         2,218 wr)
+    
+LLd misses:             9,159  
+    (        7,764 rd   +         1,395 wr)
+    
+D1  miss rate:            0.0% 
+    (          0.0%     +           0.0%  )
+    
+LLd miss rate:            0.0% 
+    (          0.0%     +           0.0%  )
+
+
+LL refs:               17,745  
+    (       15,527 rd   +         2,218 wr)
+LL misses:             10,872  
+    (        9,477 rd   +         1,395 wr)
+LL miss rate:             0.0% 
+    (          0.0%     +           0.0%  )
+    </pre>
+    </td>
+    </td></tr></table>    
+    <p>
+Data-wise it's absolutely splendid! But it is a bit fat on instruction reads. I would blame `memcpy`. I heard, with better compilers and better standard library implementation it might get properly inlined, but with my GCC it only gets called twice which is, in such a tight piece of code, simply too expencive.
+    </p>
+    <h2>
+Smart indexing
+    </h2>
+    <p>
+But the absolutely magical is the version from <a href="https://www.reddit.com/user/kocsis1david">kocsis1david</a>.
+    </p>
+    <table><tr>
+    <td style="width: 505pt;">
+    <pre>
+static uint64_t magic_numbers[8] = {
+    0x3336313832393437,
+    0x3134333832373639,
+    0x3734393238313633,
+    0x3936373238333431,
+    0x3332393436313837,
+    0x3938333436373231,
+    0x3738313634393233,
+    0x3132373634333839,
+};
+
+static uint64_t magic_number(const char sq[9]) {
+    uint32_t a, b;
+    memcpy(&a, sq, sizeof(uint32_t));
+    memcpy(&b, sq + 5, sizeof(uint32_t));
+    return ((uint64_t)a &lt;&lt; 32) + b;
+}
+
+bool check_if_magic(const std::string& square) {
+    const auto* sq = square.data();
+    if (sq[4] != '5')
+        return false;
+
+    int index = sq[0] & 7 | (sq[1] &gt;&gt; 1) & 1;
+    return magic_numbers[index] == magic_number(sq);
+}
+    </pre>
+    </td>
+    </td></tr></table>
+    <p>
+It also exploits the same smart indexing idea, but it uses less instructions and no external calls whatsoever.
+    </p>
+    <table><tr>
+    <td style="width: 505pt;">
+    <pre>
+_Z14check_if_magic ...
+.LFB1780:
+	.cfi_startproc
+	movq	(%rdi), %rdx
+	xorl	%eax, %eax
+	cmpb	$53, 4(%rdx)
+	je	.L5
+	rep ret
+	.p2align 4,,10
+	.p2align 3
+.L5:
+	movsbl	1(%rdx), %eax
+	movzbl	(%rdx), %ecx
+	movl	(%rdx), %esi
+	sarl	%eax
+	andl	$7, %ecx
+	andl	$1, %eax
+	salq	$32, %rsi
+	orl	%ecx, %eax
+	movl	5(%rdx), %ecx
+	cltq
+	leaq	(%rsi,%rcx), %rdx
+	cmpq	%rdx, _ZL13magic_numbers(,%rax,8)
+	sete	%al
+	ret
+	.cfi_endproc
+    </pre>
+    </td>
+    </td></tr></table> 
+    <p>
+Its Valgrind report is impressive too!
+    </p>
+    <table><tr>
+    <td style="width: 505pt;">
+    <pre>
+I   refs:      8,977,429,337
+I1  misses:            1,842
+LLi misses:            1,704
+I1  miss rate:          0.00%
+LLi miss rate:          0.00%
+
+
+D   refs:      5,349,287,013  
+    (3,169,852,226 rd   + 2,179,434,787 wr)
+    
+D1  misses:           15,885  
+    (       13,668 rd   +         2,217 wr)
+    
+LLd misses:            9,155  
+    (        7,759 rd   +         1,396 wr)
+    
+D1  miss rate:           0.0% 
+    (          0.0%     +           0.0%  )
+    
+LLd miss rate:           0.0% 
+    (          0.0%     +           0.0%  )
+
+
+LL refs:              17,727  
+    (       15,510 rd   +         2,217 wr)
+    
+LL misses:            10,859  
+    (        9,463 rd   +         1,396 wr)
+    
+LL miss rate:            0.0% 
+    (          0.0%     +           0.0%  )
+    </pre>
+    </td>
+    </td></tr></table> 
+    <p>
+And it runs for little less than a second which, considering the generator takes some 0.8 of it, is almost 3 times faster than the best take I had to offer.
+    </p>
+    <p>
+Excellent! 
+    </p>
+    <h2>
+Conclusion
+    </h2> 
+    <p>
+I don't know how about you, but I learned from this idea exchange quite a lot. Way more than from tinkering with a toy problem all on my own. 
+    </p>
+    <p>
+Think we should do this again sometime. Probably, with better benchmark though. And a better problem. And Clang. I'm fascinated to try Clang at this point.
+    </p>
     
 
     <p class="footer">
