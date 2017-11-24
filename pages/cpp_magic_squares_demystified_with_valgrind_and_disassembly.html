@@ -282,13 +282,13 @@ Z14check_if_magic ...
 	.p2align 3
 .L4:
 	<a title="Move">movsbl</a>	(%rax), %ecx
-	<a title="Move quadword">movq</a>	%r8, %rdx
+	<b><a title="Move quadword">movq</a>	%r8, %rdx
 	<a title="Add">addq</a>	$1, %rax
 	<a title="Shift Arithmetically left (signed shift left)">salq</a>	%cl, %rdx
 	<a title="Exclusive OR">xorq</a>	%rdx, %rsi
 	<a title="Compare operands">cmpq</a>	%rax, %rdi
 	<a title="Jump if condition">jne</a>	.L4
-	<a title="Logical compare (AND)">testq</a>	%rsi, %rsi
+	<a title="Logical compare (AND)">testq</a>	%rsi, %rsi</b>
 	<a title="Set byte to one on condition, zero otherwise">sete</a>	%al
 	<a title="Jump">jmp</a>	.L13
 	.cfi_endproc
@@ -382,19 +382,19 @@ _Z14check_if_magic ...
 	.p2align 3
 .L3:
 	<a title="Move">movsbq</a>	(%rax), %rcx
-	<a title="Add">addq</a>	$1, %rax
+	<b><a title="Add">addq</a>	$1, %rax
 	<a title="Move">movzwl</a>	_ZL25bit_shifts(%rcx,%rcx), %ecx
 	<a title="Exclusive OR">xorl</a>	%ecx, %edx
 	<a title="Compare operands">cmpq</a>	%rax, %rsi
 	<a title="Jump if condition">jne</a>	.L3
-	<a title="Compare operands">cmpl</a>	$511, %edx
+	<a title="Compare operands">cmpl</a>	$511, %edx</b>
 	<a title="Set byte to one on condition, zero otherwise">sete</a>	%al
 	<a title="Jump">jmp</a>	.L2
 	.cfi_endproc
     </pre>
     </td></tr></table>
     <p>
-<a title="Logical AND">And... I was wrong. It is not really helpful. Apparently we read more data, and do less instructions, but what does this mean in terms of performance? To settle this we need Valgrind.</a>
+<a title="Logical AND">And... I was wrong. It is not really helpful. Apparently, we read more data, and do less instructions, but what does this mean in terms of performance? To settle this we need Valgrind.</a>
     </p>
     <p>
 Valgrind is a dynamic analyzer, it can do lots of stuff for us. In this case I would be the most interested in the memory read/writes vs. instruction reads.
@@ -810,7 +810,10 @@ LL miss rate:             0.0%
     </pre>
     </td></tr></table>
     <p>
-There is a difference, and it shows up in larger numbers, it's just that the benchmark is too small to show it properly. So yes, it is best to have your constants constant, even if it doesn't show immediately.
+There is a difference, and it shows up in larger numbers, it's just that the benchmark is too small to show it properly. Most of the time we don't even get to do this map thing, we fail on one of the previous tests.
+    </p>
+    <p>
+So yes, it is best to have your constants constant, even if it doesn't show immediately.
     </p>
 
     <h2>
@@ -834,13 +837,13 @@ bool check_if_magic(const std::string& sq)
   if(sq[4] != '5')
     return false;
 
-  <b>uint64_t magic_number =
+  uint64_t magic_number =
     *(reinterpret_cast&lt;const uint32_t*&gt;
       (sq.data()));
   magic_number <<= 32;
   magic_number +=
     *(reinterpret_cast&lt;const uint32_t*&gt;
-      (sq.data()+5));</b>
+      (sq.data()+5));
 
   for(auto i = 0u; i &lt; 8; ++i)
     if(magic_number == magic_numbers[i])
@@ -864,13 +867,13 @@ bool check_if_magic(const std::string& sq)
   if(sq[4] != '5')
     return false;
 
-  <b>uint64_t magic_number =
+  uint64_t magic_number =
     *(reinterpret_cast&lt;const uint32_t*&gt;
       (sq.data()));
   magic_number <<= 32;
   magic_number +=
     *(reinterpret_cast&lt;const uint32_t*&gt;
-      (sq.data()+5));</b>
+      (sq.data()+5));
 
   for(auto i = 0u; i &lt; 8; ++i)
     if(magic_number == magic_numbers[i])
@@ -996,7 +999,7 @@ _Z14check_if_magic ...
     </pre>
     </td></tr></table>
     <p>
-Well, you might think that the right one is obviously worse. And it kind of is, but that's only because it's not what Adam had in mind. His version actually looks like this: <a href="https://godbolt.org/g/swssJY">godbolt.org/g/swssJY</a> and it is, of course, much-much better than mine.
+Well, you might think that the right one is obviously worse. It fills the stack with out values every time the function is called. And it kind of is worse, but that's only because it's not what Adam had in mind. His version actually looks like this: <a href="https://godbolt.org/g/swssJY">godbolt.org/g/swssJY</a> and it is, of course, much-much better than mine.
     </p>
     <p>
 The reason for this difference is me using an outdated compiler. And the moral is — update your compiler often.
@@ -1144,7 +1147,7 @@ LL miss rate:             0.0%
     </pre>
     </td></tr></table>
     <p>
-So a binary search is a bit worse than a simple loop. It is still extremely effective though. It's just with the plain loop being so small it doesn't make sence to make it even better.
+So a binary search is a bit worse than a simple loop. It is still extremely effective though. It's just with the plain loop being so small it doesn't make sence to make it even better.    
     </p>
     <p>
 But the most amazing thing was found by <a href="https://www.reddit.com/user/adamf88">adamf88</a>. It turn out, Clang can do this by itself: <a href="https://godbolt.org/g/cXtdbB">https://godbolt.org/g/cXtdbB</a>! I'm astonished.
@@ -1294,7 +1297,7 @@ LL miss rate:             0.0%
     </td>
     </td></tr></table>
     <p>
-Data-wise it's absolutely splendid! But it is a bit fat on instruction reads. I would blame `memcpy`. I heard, with better compilers and better standard library implementation it might get properly inlined, but with my GCC it only gets called twice which is, in such a tight piece of code, simply too expencive.
+Data-wise it's absolutely splendid! But it is a bit fat on instruction reads. I would blame `memcpy`. I heard, with better compilers and better standard library implementation it might get properly inlined and optimized contextually, but with my GCC it only gets called twice which is, in such a tight piece of code, simply too expensive.
     </p>
     <h2>
 Smart indexing
@@ -1422,7 +1425,7 @@ Conclusion
 I don't know how about you, but I learned from this idea exchange quite a lot. Way more than from tinkering with a toy problem all on my own.
     </p>
     <p>
-Think we should do this again sometime. Probably, with better benchmark though. And a better problem. And Clang. I'm fascinated to try Clang at this point.
+We should do this again sometime. Probably, with better benchmark though. And a better problem. And Clang. I'm fascinated to try Clang at this point.
     </p>
 
 
