@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Interactive guide to iterative algorithms</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.footer {
+    margin-top: 64pt;
+    padding-bottom: 32pt;
+    font-family: sans-serif;
+    font-size: 14pt;
+}
+
+pre {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+}
+
+.code {
+    background-color: #bbbbff;
+}
+
+.code_piece {
+    background-color: #bbbbff;
+    font-family: monospace;
+    padding-left: 2pt;
+    padding-right: 2pt;
+}
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+}
+
+input[type="text"] {
+    width: 100pt;
+    height: 22pt;
+    margin: 8pt 8pt 8pt 8pt;
+    padding-left: 3pt;
+    font-size: 16pt;
+}
+
+button {
+    width: 100pt;
+    height: 22pt;
+    margin-left:8pt;
+    margin-right:8pt;
+    font-size: 16pt;
+}
+
+input[type="radio"]{
+    width: 22pt;
+    height: 22pt;
+    margin: 8pt 8pt 8pt 8pt;
+}
+    </style>
+    <script language="JavaScript">
+
+function client_to_x(client_x){
+    return (client_x - 256.) / 32.;
+}
+
+function client_to_y(client_y){
+    return (256 - client_y) / 32.;
+}
+
+function x_to_client(x){
+    return x * 32. + 256;
+}
+
+function y_to_client(y){
+    return 256 - y * 32.;
+}
+
+function draw_grid_on(context){
+	// grid
+ 	context.beginPath();
+	context.moveTo(0, 256);
+	context.lineTo(512, 256);
+	context.lineTo(500, 251);
+	context.moveTo(512, 256);
+	context.lineTo(500, 261);
+	context.moveTo(256, 512);
+	context.lineTo(256, 0);
+	context.lineTo(251, 12);
+	context.moveTo(256, 0);
+	context.lineTo(261, 12);
+    context.fillStyle="#000000";
+	for(var i = -7; i <= 7; i++){
+	    context.moveTo(256 + i*32, 256);
+		context.lineTo(256 + i*32, 251);
+		context.fillText(i, 256 + i*32 + 4, 256 + 16);
+	    context.moveTo(256, 256 - i*32);
+		context.lineTo(261, 256 - i*32);
+		context.fillText(i, 261, 256 - i*32 + 16);
+	}
+	context.strokeStyle="#000000";
+    context.stroke();
+    context.closePath();
+}
+
+var point_x = 0;
+var point_y = 0;
+
+function init_pick_a_point(){
+    pick_a_point = document.getElementById("pick_a_point");
+    var canvas_rect = pick_a_point.getBoundingClientRect();
+    client_x = canvas_rect.left + point_x * 32 + 256;
+    client_y = canvas_rect.top + 256 - point_y * 32;
+    pick_a_point_draw(client_x, client_y);
+    
+    pick_a_point.addEventListener('mousemove', function(e){
+        if(point_x == 0 && point_y == 0)
+    	    pick_a_point_draw(e.clientX, e.clientY);
+    }, false);
+
+    pick_a_point.addEventListener('mousedown', function(e){
+        var canvas_rect = pick_a_point.getBoundingClientRect();
+        point_x = Math.round(client_to_x(e.clientX - canvas_rect.left)*10)/10;
+        point_y = Math.round(client_to_y(e.clientY - canvas_rect.top)*10)/10;
+	    pick_a_point_draw(e.clientX, e.clientY);        
+    }, false);
+}
+
+function pick_a_point_draw(client_x, client_y){
+    // coordiantes correction
+    var canvas_rect = pick_a_point.getBoundingClientRect();
+    client_x -= canvas_rect.left;
+    client_y -= canvas_rect.top;
+
+    var pick_a_point_context = pick_a_point.getContext("2d"); 
+    pick_a_point_context.font = "16px sans-serif";
+    // background
+    pick_a_point_context.fillStyle="#eeeeee";
+	pick_a_point_context.fillRect(0,0,512,512);
+	
+	// selection
+    pick_a_point_context.beginPath();
+    pick_a_point_context.setLineDash([2, 2]);
+	pick_a_point_context.moveTo(client_x, 256);
+	pick_a_point_context.lineTo(client_x, client_y);
+	pick_a_point_context.moveTo(256, client_y);
+	pick_a_point_context.lineTo(client_x, client_y);
+	pick_a_point_context.strokeStyle="#dd6644";
+    pick_a_point_context.stroke();
+    pick_a_point_context.fillStyle="#dd6644";
+    pick_a_point_context.fillText(client_to_x(client_x).toFixed(1) + ", " + client_to_y(client_y).toFixed(1), client_x + 4, client_y + 16);
+    pick_a_point_context.setLineDash([]);
+    pick_a_point_context.closePath();
+    
+	// grid
+	draw_grid_on(pick_a_point_context);
+}
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+Interactive guide to iterative algorithms
+    </h1>
+    <p>
+All iterative algorithms are essentially simple.
+    </p>
+
+    <canvas id="pick_a_point" width=512 height=512></canvas> 
+    <script language="JavaScript">
+    init_pick_a_point();
+    </script>
+
+    
+    <p class="footer">
+    There are more words and plots on <a href="index.html">wordsandbuttons.online</a>.<br>
+    Also please follow us on <a href="https://twitter.com/wordsandbuttons">Twitter</a>.
+    </p>
+    </center>
+  </body>
+</html>
