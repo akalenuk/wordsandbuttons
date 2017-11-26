@@ -141,57 +141,66 @@ function draw_grid_on(context){
     context.closePath();
 }
 
-var point_x = 0;
-var point_y = 0;
+var a11 = 1.1;
+var a12 = 1.2;
+var b1 = 1;
+var a21 = 2.1;
+var a22 = 2.2;
+var b2 = 2;
 
-function init_pick_a_point(){
-    pick_a_point = document.getElementById("pick_a_point");
-    var canvas_rect = pick_a_point.getBoundingClientRect();
-    client_x = canvas_rect.left + point_x * 32 + 256;
-    client_y = canvas_rect.top + 256 - point_y * 32;
-    pick_a_point_draw(client_x, client_y);
+var start_x = 0;
+var start_y = 0;
+
+var end_step_length = 0.25;
+
+function init_solver(){
+    solver = document.getElementById("solver");
+    var canvas_rect = solver.getBoundingClientRect();
+    solver_draw();
     
-    pick_a_point.addEventListener('mousemove', function(e){
-        if(point_x == 0 && point_y == 0)
-    	    pick_a_point_draw(e.clientX, e.clientY);
+    solver.addEventListener('mousemove', function(e){
+   	    solver_draw();
     }, false);
 
-    pick_a_point.addEventListener('mousedown', function(e){
-        var canvas_rect = pick_a_point.getBoundingClientRect();
-        point_x = Math.round(client_to_x(e.clientX - canvas_rect.left)*10)/10;
-        point_y = Math.round(client_to_y(e.clientY - canvas_rect.top)*10)/10;
-	    pick_a_point_draw(e.clientX, e.clientY);        
+    solver.addEventListener('mousedown', function(e){
+        var canvas_rect = solver.getBoundingClientRect();
+	    solver_draw();        
     }, false);
 }
 
-function pick_a_point_draw(client_x, client_y){
-    // coordiantes correction
-    var canvas_rect = pick_a_point.getBoundingClientRect();
-    client_x -= canvas_rect.left;
-    client_y -= canvas_rect.top;
-
-    var pick_a_point_context = pick_a_point.getContext("2d"); 
-    pick_a_point_context.font = "16px sans-serif";
+function solver_draw(){
+    solver = document.getElementById("solver");
+    var solver_context = solver.getContext("2d"); 
+    solver_context.font = "16px sans-serif";
     // background
-    pick_a_point_context.fillStyle="#eeeeee";
-	pick_a_point_context.fillRect(0,0,512,512);
+    solver_context.fillStyle="#eeeeee";
+	solver_context.fillRect(0,0,512,512);
 	
 	// selection
-    pick_a_point_context.beginPath();
-    pick_a_point_context.setLineDash([2, 2]);
-	pick_a_point_context.moveTo(client_x, 256);
-	pick_a_point_context.lineTo(client_x, client_y);
-	pick_a_point_context.moveTo(256, client_y);
-	pick_a_point_context.lineTo(client_x, client_y);
-	pick_a_point_context.strokeStyle="#dd6644";
-    pick_a_point_context.stroke();
-    pick_a_point_context.fillStyle="#dd6644";
-    pick_a_point_context.fillText(client_to_x(client_x).toFixed(1) + ", " + client_to_y(client_y).toFixed(1), client_x + 4, client_y + 16);
-    pick_a_point_context.setLineDash([]);
-    pick_a_point_context.closePath();
+/*    solver_context.beginPath();
+    solver_context.setLineDash([2, 2]);
+	solver_context.moveTo(client_x, 256);
+	solver_context.lineTo(client_x, client_y);
+	solver_context.moveTo(256, client_y);
+	solver_context.lineTo(client_x, client_y);
+	solver_context.strokeStyle="#dd6644";
+    solver_context.stroke();
+    solver_context.fillStyle="#dd6644";
+    solver_context.fillText(client_to_x(client_x).toFixed(1) + ", " + client_to_y(client_y).toFixed(1), client_x + 4, client_y + 16);
+    solver_context.setLineDash([]);
+    solver_context.closePath();*/
     
 	// grid
-	draw_grid_on(pick_a_point_context);
+	draw_grid_on(solver_context);
+}
+
+function radio(n){
+    for(var i = 1; i <=4; i++){
+        radio_i = document.getElementById("button_" + i);
+        radio_i.disabled = false;
+    }
+    radio_n = document.getElementById("button_" + n);
+    radio_n.disabled = true; 
 }
     </script>
   </head>
@@ -204,9 +213,17 @@ Interactive guide to iterative algorithms
 All iterative algorithms are essentially simple.
     </p>
 
-    <canvas id="pick_a_point" width=512 height=512></canvas> 
+    <canvas id="solver" width=512 height=512></canvas>
+    <form>
+        <center>
+            <button type="button" id="button_1" onclick="radio(1)" disabled="true">Red line</button>
+            <button type="button" id="button_2" onclick="radio(2)">Blue line</button>
+            <button type="button" id="button_3" onclick="radio(3)">Start point</button>
+            <button type="button" id="button_4" onclick="radio(4)">End criteria</button>
+        </center>
+    </form> 
     <script language="JavaScript">
-    init_pick_a_point();
+    init_solver();
     </script>
 
     
