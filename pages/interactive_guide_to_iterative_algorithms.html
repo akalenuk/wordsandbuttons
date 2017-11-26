@@ -141,12 +141,12 @@ function draw_grid_on(context){
     context.closePath();
 }
 
-var a11 = 1.1;
-var a12 = 1.2;
-var b1 = 1;
-var a21 = 2.1;
-var a22 = 2.2;
-var b2 = 2;
+var a11 = -0.5;
+var a12 = 1.0;
+var b1 = -4.0;
+var a21 = 0.5;
+var a22 = 1.0;
+var b2 = 4.0;
 
 var start_x = 0;
 var start_y = 0;
@@ -156,19 +156,20 @@ var end_step_length = 0.25;
 function init_solver(){
     solver = document.getElementById("solver");
     var canvas_rect = solver.getBoundingClientRect();
-    solver_draw();
+    solver_draw(0, 0, false);
     
     solver.addEventListener('mousemove', function(e){
-   	    solver_draw();
+        var canvas_rect = solver.getBoundingClientRect();
+   	    solver_draw(e.clientX, e.clientY, true);
     }, false);
 
     solver.addEventListener('mousedown', function(e){
         var canvas_rect = solver.getBoundingClientRect();
-	    solver_draw();        
+	    solver_draw(0, 0, false);        
     }, false);
 }
 
-function solver_draw(){
+function solver_draw(client_x, client_y, do_guides){
     solver = document.getElementById("solver");
     var solver_context = solver.getContext("2d"); 
     solver_context.font = "16px sans-serif";
@@ -176,6 +177,22 @@ function solver_draw(){
     solver_context.fillStyle="#eeeeee";
 	solver_context.fillRect(0,0,512,512);
 	
+	// red line
+	solver_context.beginPath();
+	solver_context.moveTo(x_to_client(-8), y_to_client(b1 - a11*(-8))/a12);
+	solver_context.lineTo(x_to_client(8), y_to_client(b1 - a11*(8))/a12);
+	solver_context.strokeStyle="#dd6644";
+    solver_context.stroke();
+    solver_context.closePath();
+	
+	// blue line
+	solver_context.beginPath();
+	solver_context.moveTo(x_to_client(-8), y_to_client(b2 - a21*(-8))/a22);
+	solver_context.lineTo(x_to_client(8), y_to_client(b2 - a21*(8))/a22);
+	solver_context.strokeStyle="#3366dd";
+    solver_context.stroke();
+    solver_context.closePath();
+    
 	// selection
 /*    solver_context.beginPath();
     solver_context.setLineDash([2, 2]);
