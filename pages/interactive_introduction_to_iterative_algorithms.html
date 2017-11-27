@@ -148,10 +148,26 @@ var a21 = 0.5;
 var a22 = 1.0;
 var b2 = 4.0;
 
-var start_x = 0;
-var start_y = 0;
+var start_x = -7.0;
+var start_y = 0.0;
 
 var end_step_length = 0.25;
+
+function dot_of(a11, a12, a21, a22){
+    return a11*a21 + a12*a22;
+}
+
+function length_of(a1, a2){
+    return Math.sqrt(dot_of(a1, a2, a1, a2));
+}
+
+function projected_x(x, y, a1, a2, b){
+    return x + a1 * (b - dot_of(x, y, a1, a2) / dot_of(a1, a2, a1, a2));
+}
+
+function projected_y(x, y, a1, a2, b){
+    return y + a2 * (b - dot_of(x, y, a1, a2) / dot_of(a1, a2, a1, a2));
+}
 
 function init_solver(){
     solver = document.getElementById("solver");
@@ -191,6 +207,34 @@ function solver_draw(client_x, client_y, do_guides){
 	solver_context.lineTo(x_to_client(8), y_to_client(b2 - a21*(8))/a22);
 	solver_context.strokeStyle="#3366dd";
     solver_context.stroke();
+    solver_context.closePath();
+
+    // solver
+    solver_context.beginPath();
+    solver_context.setLineDash([1, 1]);
+	solver_context.moveTo(x_to_client(start_x), y_to_client(start_y));
+	var prev_x = start_x + end_step_length + 1.;    // not to fall as done
+	var prev_y = start_y;
+	var cur_x = start_x;
+	var cur_y = start_y;
+	for(var i = 0; i < 100; i++) // max iterations = 100
+	{
+	    if(length_of(prev_x - cur_x, prev_y - cur_y) < end_step_length)
+	        break;  // done
+	    prev_x = cur_x;
+	    prev_y = cur_y;
+	    if(i % 2 == 0){
+    	    cur_x = projected_x(prev_x, prev_y, a11, a12, b1);
+    	    cur_y = projected_y(prev_x, prev_y, a11, a12, b1);
+    	}else{
+    	    cur_x = projected_x(prev_x, prev_y, a21, a22, b2);
+    	    cur_y = projected_y(prev_x, prev_y, a21, a22, b2);
+    	}
+    	solver_context.lineTo(x_to_client(cur_x), y_to_client(cur_y));
+	}
+	solver_context.strokeStyle="#446644";
+    solver_context.stroke();
+    solver_context.setLineDash([]);
     solver_context.closePath();
     
 	// selection
