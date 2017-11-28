@@ -215,7 +215,7 @@ function solver_draw(client_x, client_y, do_guides){
 	solver_context.lineTo(x_to_client(8), y_to_client((b1 - end_step_length - a11*(8))/a12));
 	solver_context.moveTo(x_to_client(-8), y_to_client((b1 + end_step_length - a11*(-8))/a12));
 	solver_context.lineTo(x_to_client(8), y_to_client((b1 + end_step_length - a11*(8))/a12));
-    solver_context.strokeStyle="#dd6644";
+    solver_context.strokeStyle="#ff8866";
     solver_context.stroke();
     solver_context.setLineDash([]);    
     solver_context.closePath();
@@ -234,7 +234,7 @@ function solver_draw(client_x, client_y, do_guides){
 	solver_context.lineTo(x_to_client(8), y_to_client((b2 - end_step_length - a21*(8))/a22));
 	solver_context.moveTo(x_to_client(-8), y_to_client((b2 + end_step_length - a21*(-8))/a22));
 	solver_context.lineTo(x_to_client(8), y_to_client((b2 + end_step_length - a21*(8))/a22));
-    solver_context.strokeStyle="#3366dd";
+    solver_context.strokeStyle="#6699ff";
     solver_context.stroke();
     solver_context.setLineDash([]);    
     solver_context.closePath();
@@ -246,7 +246,8 @@ function solver_draw(client_x, client_y, do_guides){
 	var prev_y = start_y;
 	var cur_x = start_x;
 	var cur_y = start_y;
-	for(var i = 0; i < 100; i++) // max iterations = 100
+	var i;
+	for(i = 0; i <= 100; i++) // max iterations = 100
 	{
 	    if(length_of(prev_x - cur_x, prev_y - cur_y) < end_step_length)
 	        break;  // done
@@ -268,17 +269,25 @@ function solver_draw(client_x, client_y, do_guides){
 	// grid
 	draw_grid_on(solver_context);
 	
+
 	// mouse move
-	if(!do_guides)
-	    return;
-	if(document.getElementById("button_3").disabled){
-	    solver_context.beginPath();
-    	solver_context.moveTo(x_to_client(start_x), y_to_client(start_y));
-    	solver_context.lineTo(client_x, client_y);
-        solver_context.strokeStyle="#ff6688";
-        solver_context.stroke();
-        solver_context.closePath();   
+	if(do_guides){
+	    if(document.getElementById("button_3").disabled){
+	        solver_context.beginPath();
+        	solver_context.moveTo(x_to_client(start_x), y_to_client(start_y));
+        	solver_context.lineTo(client_x, client_y);
+            solver_context.strokeStyle="#ff6688";
+            solver_context.stroke();
+            solver_context.closePath();   
+        }
 	}
+	
+	// iteration count
+	if(i > 100){
+    	solver_context.fillText("Iterations > 100", 32, 480);
+    }else{
+        solver_context.fillText("Iterations = " + (i-1), 32, 480);
+    }
 }
 
 function radio(n){
