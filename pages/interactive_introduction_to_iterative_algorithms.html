@@ -176,13 +176,21 @@ function init_solver(){
     
     solver.addEventListener('mousemove', function(e){
         var canvas_rect = solver.getBoundingClientRect();
-   	    solver_draw(e.clientX, e.clientY, true);
+   	    solver_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
     }, false);
 
     solver.addEventListener('mousedown', function(e){
         var canvas_rect = solver.getBoundingClientRect();
+       	if(document.getElementById("button_3").disabled){
+       	    start_x = client_to_x(e.clientX - canvas_rect.left);
+       	    start_y = client_to_y(e.clientY - canvas_rect.top);
+       	}
 	    solver_draw(0, 0, false);        
     }, false);
+    
+    solver.addEventListener('mouseleave', function(e){
+	    solver_draw(0, 0, false);        
+    }, false);    
 }
 
 function solver_draw(client_x, client_y, do_guides){
@@ -259,6 +267,18 @@ function solver_draw(client_x, client_y, do_guides){
     
 	// grid
 	draw_grid_on(solver_context);
+	
+	// mouse move
+	if(!do_guides)
+	    return;
+	if(document.getElementById("button_3").disabled){
+	    solver_context.beginPath();
+    	solver_context.moveTo(x_to_client(start_x), y_to_client(start_y));
+    	solver_context.lineTo(client_x, client_y);
+        solver_context.strokeStyle="#ff6688";
+        solver_context.stroke();
+        solver_context.closePath();   
+	}
 }
 
 function radio(n){
