@@ -153,6 +153,11 @@ var start_y = 0.0;
 
 var end_step_length = 0.5;
 
+
+var temp_a11 = 0.0;
+var temp_a12 = 0.0;
+var temp_b1 = 0.0;
+
 function dot_of(a11, a12, a21, a22){
     return a11*a21 + a12*a22;
 }
@@ -181,6 +186,11 @@ function init_solver(){
 
     solver.addEventListener('mousedown', function(e){
         var canvas_rect = solver.getBoundingClientRect();
+       	if(document.getElementById("button_1").disabled){
+       	    a11 = temp_a11;
+       	    a12 = temp_a12;
+       	    b1 = temp_b1;
+       	}
        	if(document.getElementById("button_3").disabled){
        	    start_x = client_to_x(e.clientX - canvas_rect.left);
        	    start_y = client_to_y(e.clientY - canvas_rect.top);
@@ -272,6 +282,27 @@ function solver_draw(client_x, client_y, do_guides){
 
 	// mouse move
 	if(do_guides){
+    	if(document.getElementById("button_1").disabled){
+            var x = client_to_x(client_x);
+            var y = client_to_y(client_y);
+            if(x > 0){
+                x0 = -8;
+            }else{
+                x0 = 8;
+            }
+            y0 = (b1 - a11*x0/a12);
+            temp_a11 = (y - y0)/(-x + x0);
+            temp_a12 = 1.0;
+            temp_b1 = (x*y0 - x0*y)/(x - x0);
+   	        solver_context.beginPath();
+   	        solver_context.setLineDash([6, 3]);	
+	        solver_context.moveTo(x_to_client(-8), y_to_client((temp_b1 - temp_a11*(-8))/temp_a12));
+	        solver_context.lineTo(x_to_client(8), y_to_client((temp_b1 - temp_a11*(8))/temp_a12));
+            solver_context.strokeStyle="#dd6644";
+            solver_context.stroke();
+            solver_context.setLineDash([]);	
+            solver_context.closePath();  
+    	}
 	    if(document.getElementById("button_3").disabled){
 	        solver_context.beginPath();
         	solver_context.moveTo(x_to_client(start_x), y_to_client(start_y));
