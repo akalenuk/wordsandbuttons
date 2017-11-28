@@ -157,6 +157,9 @@ var end_step_length = 0.5;
 var temp_a11 = 0.0;
 var temp_a12 = 0.0;
 var temp_b1 = 0.0;
+var temp_a21 = 0.0;
+var temp_a22 = 0.0;
+var temp_b2 = 0.0;
 
 function dot_of(a11, a12, a21, a22){
     return a11*a21 + a12*a22;
@@ -190,8 +193,11 @@ function init_solver(){
        	    a11 = temp_a11;
        	    a12 = temp_a12;
        	    b1 = temp_b1;
-       	}
-       	if(document.getElementById("button_3").disabled){
+       	}else if(document.getElementById("button_2").disabled){
+       	    a21 = temp_a21;
+       	    a22 = temp_a22;
+       	    b2 = temp_b2;
+       	}else if(document.getElementById("button_3").disabled){
        	    start_x = client_to_x(e.clientX - canvas_rect.left);
        	    start_y = client_to_y(e.clientY - canvas_rect.top);
        	}
@@ -298,8 +304,23 @@ function solver_draw(client_x, client_y, do_guides){
             solver_context.stroke();
             solver_context.setLineDash([]);	
             solver_context.closePath();  
-    	}
-	    if(document.getElementById("button_3").disabled){
+    	}else if(document.getElementById("button_2").disabled){
+            var x = client_to_x(client_x);
+            var y = client_to_y(client_y);
+            var x0 = - x - 0.001;
+            var y0 = (b2 - a21*x0/a22);
+            temp_a21 = (y - y0)/(-x + x0);
+            temp_a22 = 1.0;
+            temp_b2 = (x*y0 - x0*y)/(x - x0);
+   	        solver_context.beginPath();
+   	        solver_context.setLineDash([6, 3]);	
+	        solver_context.moveTo(x_to_client(-8), y_to_client((temp_b2 - temp_a21*(-8))/temp_a22));
+	        solver_context.lineTo(x_to_client(8), y_to_client((temp_b2 - temp_a21*(8))/temp_a22));
+            solver_context.strokeStyle="#3366dd";
+            solver_context.stroke();
+            solver_context.setLineDash([]);
+            solver_context.closePath();      	
+	    }else if(document.getElementById("button_3").disabled){
 	        solver_context.beginPath();
         	solver_context.moveTo(x_to_client(start_x), y_to_client(start_y));
         	solver_context.lineTo(client_x, client_y);
