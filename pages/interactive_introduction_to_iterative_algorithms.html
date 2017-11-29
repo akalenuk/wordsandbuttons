@@ -98,49 +98,68 @@ input[type="radio"]{
     </style>
     <script language="JavaScript">
 
+// client
+var w = 512.0;
+var h = 512.0;
+
+// visible region
+var x_min = -8.0;
+var y_min = -8.0;
+var x_max = 8.0;
+var y_max = 8.0;
+
+var client_x_center = w*(0-x_min)/(x_max-x_min);
+var client_x_step = (w/(x_max-x_min));
+
+var client_y_center = h*(0-y_min)/(y_max-y_min);
+var client_y_step = (h/(y_max-y_min));
+
 function client_to_x(client_x){
-    return (client_x - 256.) / 32.;
+    return (client_x - client_x_center) / client_x_step;
 }
 
 function client_to_y(client_y){
-    return (256 - client_y) / 32.;
+    return (client_y_center - client_y) / client_y_step;
 }
 
 function x_to_client(x){
-    return x * 32. + 256;
+    return x * client_x_step + client_x_center;
 }
 
 function y_to_client(y){
-    return 256 - y * 32.;
+    return client_y_center - y * client_y_step;
 }
 
 function draw_grid_on(context){
 	// grid
  	context.beginPath();
-	context.moveTo(0, 256);
-	context.lineTo(512, 256);
-	context.lineTo(500, 251);
-	context.moveTo(512, 256);
-	context.lineTo(500, 261);
-	context.moveTo(256, 512);
-	context.lineTo(256, 0);
-	context.lineTo(251, 12);
-	context.moveTo(256, 0);
-	context.lineTo(261, 12);
+	context.moveTo(0, client_y_center);
+	context.lineTo(w, client_y_center);
+	context.lineTo(w - 12, client_y_center - 5);
+	context.moveTo(w, client_y_center);
+	context.lineTo(w - 12, client_y_center + 5);
+	context.moveTo(client_x_center, h);
+	context.lineTo(client_x_center, 0);
+	context.lineTo(client_x_center - 5, 12);
+	context.moveTo(client_x_center, 0);
+	context.lineTo(client_x_center + 5, 12);
     context.fillStyle="#000000";
-	for(var i = -7; i <= 7; i++){
-	    context.moveTo(256 + i*32, 256);
-		context.lineTo(256 + i*32, 251);
-		context.fillText(i, 256 + i*32 + 4, 256 + 16);
-	    context.moveTo(256, 256 - i*32);
-		context.lineTo(261, 256 - i*32);
-		context.fillText(i, 261, 256 - i*32 + 16);
+	for(var i = x_min + 1; i <= x_max - 1; i++){
+	    context.moveTo(client_x_center + i*client_x_step, client_y_center);
+		context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+		context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+	}
+	for(var i = y_min + 1; i <= y_max - 1; i++){
+	    context.moveTo(client_x_center, client_y_center - i*client_y_step);
+		context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+		context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
 	}
 	context.strokeStyle="#000000";
     context.stroke();
     context.closePath();
 }
 
+// lines
 var a11 = -0.5;
 var a12 = 1.0;
 var b1 = -4.0;
@@ -148,12 +167,14 @@ var a21 = 0.5;
 var a22 = 1.0;
 var b2 = 4.0;
 
+// start
 var start_x = -2.0;
 var start_y = 0.0;
 
+// margin
 var end_step_length = 0.5;
 
-
+// temps
 var temp_a11 = 0.0;
 var temp_a12 = 0.0;
 var temp_b1 = 0.0;
