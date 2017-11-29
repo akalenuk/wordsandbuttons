@@ -161,6 +161,8 @@ var temp_a21 = 0.0;
 var temp_a22 = 0.0;
 var temp_b2 = 0.0;
 
+var temp_end_step_length = 0.5;
+
 function dot_of(a11, a12, a21, a22){
     return a11*a21 + a12*a22;
 }
@@ -200,6 +202,8 @@ function init_solver(){
        	}else if(document.getElementById("button_3").disabled){
        	    start_x = client_to_x(e.clientX - canvas_rect.left);
        	    start_y = client_to_y(e.clientY - canvas_rect.top);
+       	}else if(document.getElementById("button_4").disabled){
+       	    end_step_length = temp_end_step_length;
        	}
 	    solver_draw(0, 0, false);        
     }, false);
@@ -327,6 +331,42 @@ function solver_draw(client_x, client_y, do_guides){
             solver_context.strokeStyle="#ff6688";
             solver_context.stroke();
             solver_context.closePath();   
+   	    }else if(document.getElementById("button_4").disabled){
+            var x = client_to_x(client_x);
+            var y = client_to_y(client_y);
+            var x1 = projected_x(x, y, a11, a12, b1);
+            var y1 = projected_y(x, y, a11, a12, b1);
+            var x2 = projected_x(x, y, a21, a22, b2);
+            var y2 = projected_y(x, y, a21, a22, b2);
+            var d1 = length_of(x-x1, y-y1);
+            var d2 = length_of(x-x2, y-y2);
+            if(d1<d2){
+                temp_end_step_length = d1;
+            }else{
+                temp_end_step_length = d2;
+            }
+       	    // red
+   	    	solver_context.beginPath();
+            solver_context.setLineDash([4, 4]);	
+	        solver_context.moveTo(x_to_client(-8), y_to_client((b1 - temp_end_step_length - a11*(-8))/a12));
+	        solver_context.lineTo(x_to_client(8), y_to_client((b1 - temp_end_step_length - a11*(8))/a12));
+	        solver_context.moveTo(x_to_client(-8), y_to_client((b1 + temp_end_step_length - a11*(-8))/a12));
+	        solver_context.lineTo(x_to_client(8), y_to_client((b1 + temp_end_step_length - a11*(8))/a12));
+            solver_context.strokeStyle="#ff9977";
+            solver_context.stroke();
+            solver_context.setLineDash([]);    
+            solver_context.closePath();
+            // blue
+            solver_context.beginPath();
+            solver_context.setLineDash([4, 4]);	
+	        solver_context.moveTo(x_to_client(-8), y_to_client((b2 - temp_end_step_length - a21*(-8))/a22));
+	        solver_context.lineTo(x_to_client(8), y_to_client((b2 - temp_end_step_length - a21*(8))/a22));
+	        solver_context.moveTo(x_to_client(-8), y_to_client((b2 + temp_end_step_length - a21*(-8))/a22));
+	        solver_context.lineTo(x_to_client(8), y_to_client((b2 + temp_end_step_length - a21*(8))/a22));
+            solver_context.strokeStyle="#77aaff";
+            solver_context.stroke();
+            solver_context.setLineDash([]);    
+            solver_context.closePath();
         }
 	}
 	
