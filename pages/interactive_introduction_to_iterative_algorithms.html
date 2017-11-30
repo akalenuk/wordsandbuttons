@@ -103,15 +103,15 @@ var w = 512.0;
 var h = 512.0;
 
 // visible region
-var x_min = -8.0;
-var y_min = -8.0;
-var x_max = 8.0;
-var y_max = 8.0;
+var x_min = -1.0;
+var y_min = -1.0;
+var x_max = 7.0;
+var y_max = 7.0;
 
 var client_x_center = w*(0-x_min)/(x_max-x_min);
 var client_x_step = (w/(x_max-x_min));
 
-var client_y_center = h*(0-y_min)/(y_max-y_min);
+var client_y_center = h - h*(0-y_min)/(y_max-y_min);
 var client_y_step = (h/(y_max-y_min));
 
 function client_to_x(client_x){
@@ -320,7 +320,7 @@ function solver_draw(client_x, client_y, do_guides){
     	if(document.getElementById("button_1").disabled){
             var x = client_to_x(client_x);
             var y = client_to_y(client_y);
-            var x0 = - x - 0.001;
+            var x0 = x_max - (x-x_min) - 0.001;
             var y0 = (b1 - a11*x0/a12);
             temp_a11 = (y - y0)/(-x + x0);
             temp_a12 = 1.0;
@@ -336,7 +336,7 @@ function solver_draw(client_x, client_y, do_guides){
     	}else if(document.getElementById("button_2").disabled){
             var x = client_to_x(client_x);
             var y = client_to_y(client_y);
-            var x0 = - x - 0.001;
+            var x0 = x_max - (x-x_min) - 0.001;
             var y0 = (b2 - a21*x0/a22);
             temp_a21 = (y - y0)/(-x + x0);
             temp_a22 = 1.0;
@@ -396,10 +396,11 @@ function solver_draw(client_x, client_y, do_guides){
 	}
 	
 	// iteration count
+	results = document.getElementById("results");
 	if(i > 100){
-    	solver_context.fillText("Iterations > 100", 32, 480);
+    	results.innerHTML = "Iterations > 100";
     }else{
-        solver_context.fillText("Iterations = " + i, 32, 480);
+        results.innerHTML = "Iterations = " + i;
     }
 }
 
@@ -423,6 +424,8 @@ This is not only a tongue-twister, but an actual interactice introduction.
     </p>
 
     <canvas id="solver" width=512 height=512></canvas>
+    <p style="comment" id="results">
+    </p>
     <form>
         <center>
             <button type="button" id="button_1" onclick="radio(1)" disabled="true">Red line</button>
