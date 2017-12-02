@@ -222,7 +222,8 @@ function init_solver(){
        	}else if(document.getElementById("button_4").disabled){
        	    end_step_length = temp_end_step_length;
        	}
-	    solver_draw(0, 0, false);        
+	    solver_draw(0, 0, false);
+	    check_ex();     
     }, false);
     
     solver.addEventListener('mouseleave', function(e){
@@ -230,6 +231,8 @@ function init_solver(){
     }, false);    
 }
 
+var last_iterations = 100;
+var last_error = 100.;
 function solver_draw(client_x, client_y, do_guides){
     solver = document.getElementById("solver");
     var solver_context = solver.getContext("2d"); 
@@ -404,6 +407,7 @@ function solver_draw(client_x, client_y, do_guides){
     }else{
         results.innerHTML = "Iterations = " + i;
     }
+    last_iterations = i;
     // solution
     sx = (-a12*b2 + a22*b1)/(a11*a22 - a12*a21);
     sy = (a11*b2 - a21*b1)/(a11*a22 - a12*a21);
@@ -413,6 +417,7 @@ function solver_draw(client_x, client_y, do_guides){
     error = length_of(sx-cur_x, sy-cur_y);
     results.innerHTML += "<br>";
     results.innerHTML += "Tolerance: " + end_step_length.toFixed(3) + ", real error: " + error.toFixed(3);
+    last_error = error;
 }
 
 function radio(n){
@@ -423,6 +428,60 @@ function radio(n){
     radio_n = document.getElementById("button_" + n);
     radio_n.disabled = true; 
 }
+
+var ex_no = 0;
+function reset_ex(n){
+    document.getElementById("ex_choice").style = "display: none;";
+    ex_no = n;
+    // lines
+    a11 = -1.0;    a12 = 1.0;    b1 = -1.0;
+    a21 = -0.25;   a22 = 1.0;    b2 = 4.0;
+    // start
+    start_x = 2.0;
+    start_y = 3.0;
+    // margin
+    end_step_length = 0.5;
+    solver_draw(0, 0, false); 
+        
+    document.getElementById("buttons").style = "display: none;";
+    for(var i = 1; i <=4; i++){
+        document.getElementById("ex_" + i).style = "display: none;";
+    }
+    if(n != 0){
+        radio(4 - n + 1);
+        document.getElementById("ex_" + n).style = "display: block;";
+    }else{
+        document.getElementById("buttons").style = "display: block;";
+        radio(1);
+    }
+}
+
+function check_ex(){
+    if(ex_no == 1)
+        if(last_error < 0.25)
+            reset_ex(2);
+    if(ex_no == 2)
+        if(last_iterations == 16)
+            reset_ex(3);
+    if(ex_no == 3)
+        if(last_iterations >= 50)
+            reset_ex(4);
+    if(ex_no == 4)
+        if(last_iterations == 3)
+            done();
+}
+
+function done(){
+    reset_ex(0);
+    document.getElementById("congratulations").style = "display: block;";
+    show_the_rest();
+}
+
+function show_the_rest(){
+    document.getElementById("the_rest").style = "display: block;";
+    document.getElementById("ex_choice").style = "display: none;";
+}
+
     </script>
   </head>
   <body>
@@ -479,29 +538,77 @@ The plot below is the interactive illustration of the algorithm. You can move th
     <p class="results" id="results">
     </p>
     <form>
+        <div id="buttons">
         <center>
             <button type="button" id="button_1" onclick="radio(1)" disabled="true">Red line</button>
             <button type="button" id="button_2" onclick="radio(2)">Blue line</button>
             <button type="button" id="button_3" onclick="radio(3)">Start point</button>
             <button type="button" id="button_4" onclick="radio(4)">Threshold</button>
         </center>
+        </div>
+        <div id="ex_1" style="display: none;">
+Ex. 1. Using threshold only, please achieve computation error less than 0.25.
+<br>
+<br>
+        <center>
+            <button type="button" id="ex_1_reset" onclick="reset_ex(1)">Reset</button>
+            <button type="button" id="ex_1_skip" onclick="reset_ex(2)">Skip</button>       
+        </cener>
+        </div>
+        <div id="ex_2" style="display: none;">
+Ex. 2. Using starting point, please solve the system in exactly 16 iterations.
+<br>
+<br>
+        <center>
+            <button type="button" id="ex_2_reset" onclick="reset_ex(2)">Reset</button>
+            <button type="button" id="ex_2_skip" onclick="reset_ex(3)">Skip</button>       
+        </center>
+        </div>
+        <div id="ex_3" style="display: none;">
+Ex. 3. By moving the blue line, please make a system that can be solved in no less than 50 iterations.
+<br>
+<br>
+        <center>
+            <button type="button" id="ex_3_reset" onclick="reset_ex(3)">Reset</button>
+            <button type="button" id="ex_3_skip" onclick="reset_ex(4)">Skip</button>       
+        </center>
+        </div>
+        <div id="ex_4" style="display: none;">
+Ex. 4. By moving the red line, please make a system that can be solved in exactly 3 iterations.
+<br>
+<br>
+        <center>
+            <button type="button" id="ex_4_reset" onclick="reset_ex(4)">Reset</button>
+            <button type="button" id="ex_4_skip" onclick="done()">Skip</button>       
+        </center>
+        </div>
     </form> 
-    <script language="JavaScript">
-    init_solver();
-    </script>
     <p>
 As you can see, everything matters.     
     </p>
     <p>
 You can get more precise solution with more iterations, but sometimes you'd need too many, so this particular algorithm limits iteration count to 100. Some systems can be solved very fast and some can't be solved at all. And sometimes you can solve an unpleasant system simply by taking a lucky guess with a starting point.
     </p>
+    <div id="ex_choice">
     <p>
 Just before we go deeper, how about some exercises?
-    </p>
-    <button type="button" id="ex_yes" onclick="reset(1)">Yes, please</button>
+    </p>    
+    <button type="button" id="ex_yes" onclick="reset_ex(1)">Yes, please</button>
     <button type="button" id="ex_no" onclick="show_the_rest()">No, thanks</button>
-    
-    
+    </div>
+    <script language="JavaScript">
+    init_solver();
+    </script>
+        
+    <p id="congratulations" style="display: none;">
+Congratulations!
+    </p>
+    <div id="the_rest" style="display: none;">
+        <p>
+The rest.
+        </p>
+    </div>
+        
     <p class="footer">
     There are more words and plots on <a href="index.html">wordsandbuttons.online</a>.<br>
     Also please follow us on <a href="https://twitter.com/wordsandbuttons">Twitter</a>.
