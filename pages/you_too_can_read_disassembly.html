@@ -58,12 +58,7 @@ pre {
     width: 360pt;
 }
 
-.code {
-    background-color: #ccccff;
-}
-
 .code_piece {
-    background-color: #ccccff;
     font-family: monospace;
     padding-left: 4pt;
     padding-right: 4pt;
@@ -100,27 +95,45 @@ button{
 You too can read disassembly
     </h1>
     <p>
-...
+Reading disassembly is more like reading tracks than reading a book. You have to know the language to read a book, but reading tracks, although it gets better with skills and experience, mostly requires attentiveness and logic thinking.
     </p>
-
+    <p>
+Most of the time we browse disassembly only to answer one simple question: <i>does compiler do what we expect it to do</i>? In 3 simple exercises, I’ll show you that you too can answer such questions even if you have never seen disassembly before. I’ll use C++ as a source language, but what I’m trying to show is more or less universal, so it doesn’t matter if you write in C or Java, C# or Rust, — if you compile to some sort of machine code — you can benefit from understanding your compiler.
+    </p>
     <h2>
 1. Compile time computation
     </h2>
+    <p>
+Any decent compiler tries to make your code efficient. This means doing as little work in runtime as possible. Sometimes it can even conduct the whole computation in compile time, so your machine code will only have to contain the answer.
+    </p>
+    <p>
+This source code defines the number of bits in a byte, provides a template function that accepts the type <span class="code_piece">T</span> and returns the size of <span class="code_piece">T</span> in bits. Then it calls this function from the main section setting <span class="code_piece">T = int</span>.
+    </p>
     <table><tr>
     <td style="width: 505pt;">
     <pre>
 static int BITS_IN_BYTE = 8;
+
 template&lt;typename T&gt;
 size_t bits_in(){
         return sizeof(T)*BITS_IN_BYTE;
 }
+
 int main(){
         return bits_in<int>();
 }
     </pre>
     </td>
-    </td></tr></table>    
-
+    </td></tr></table>
+    <p>
+The compiler knows the size of an <span class="code_piece">int</span>. Let's say, for the target platform it is 4 bytes. We also set the number of bits in a byte explicitly. Since all we want is a simple multiplication, and both numbers are known in compile time, the compiler can simply compute the number instead of generating the code that computed the same number each time it's being executed.
+    </p>
+    <p>
+Although, this is not something that is guaranteed by the standard. The compiler may or may not provide this optimization.
+    </p>
+    <p>
+Now look at two possible disassemblies for this source code and decide what variant does compile time computation and what doesn’t.
+    </p>
     <table><tr>
     <td>
     <pre>
@@ -135,8 +148,12 @@ int main(){
 003C1000  push        20h
 003C1002  pop         eax    </pre>
     </td></tr></table>
-    
-
+    <p>
+Well, that’s a no-brainer. Of course, the one on the left does.
+    </p>
+    <p>
+On 32-bit platform <span class="code_piece">int</span>'s size is 4 bytes, which is 32 bits, which is 20h in hexadecimal. You might not know the convention by which a function returns the value in <span class="code_piece">eax</span>, but you see that the first variant is long enough to contain an actual multiplication, while the second one has only two lines: something containing the computed answer and the other one.    
+    </p>
 
     <table><tr>
     <td style="width: 505pt;">
