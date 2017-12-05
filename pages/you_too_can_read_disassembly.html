@@ -227,9 +227,9 @@ Now look at these two disassembly variants below and choose the one where the fu
 Not really a mystery either. It’s the one on the left. You might not know, that the instruction to call a function is called the <span class="code_piece">call</span>, but since the disassembly on the left contains no recall of the name <span class="code_piece">twice</span>, it must be inlined.
     </p>
     
-    <h3>
+    <h2>
 3. Loop unrolling
-    </h3>    
+    </h2>    
     <p>
 Just like calling functions, going in loops implies some overhead. You have to increment the counter; then compare it against some number; then jump back to the loop beginning.    
     </p>
@@ -245,28 +245,66 @@ Let's say we have this piece of code:
 int main(int argc, char*)
 {
     int result = 1;
-    for(short int i = 0; i < 4; ++i)
+    for(short int i = 0; i &lt; 4; ++i)
         result *= argc;
     return result;
 }
     </pre>
     </td>
     </td></tr></table>
-
+    <p>
+The compiler has all the reasons to unroll such a simple loop, but it might as well choose not to. 
+    </p>
+    <p>
+Which disassembly has the unrolled loop? 
+    </p>
     <table><tr>
     <td>
     <pre>
-asm1
-    </pre>
+00EB1002  in          al,dx  
+00EB1003  mov         edx,dword ptr [argc]  
+00EB1006  mov         eax,1  
+00EB100B  mov         ecx,4  
+00EB1010  imul        eax,edx  
+00EB1013  dec         ecx  
+00EB1014  jne         main+10h (0EB1010h)  
+00EB1016  pop         ebp  
+00EB1017  ret</pre>
     </td>
     <td>
     <pre>
-asm2
-    </pre>
+00BF1002  in          al,dx  
+00BF1003  mov         ecx,dword ptr [argc]  
+00BF1006  mov         eax,ecx  
+00BF1008  imul        eax,ecx  
+00BF100B  imul        eax,ecx  
+00BF100E  imul        eax,ecx  
+00BF1011  pop         ebp  
+00BF1012  ret</pre>
     </td></tr></table>
+    <p>
+It's the one on the right.
+    </p>
+    <p>
+Once again, you might not know that <span class="code_piece">j&lt;something-something&gt;</span> is the family of jump instructions, and <span class="code_piece">cmp</span> stands for “compare” but the code on the right clearly has a repeating pattern, while the one on the left has some address manipulation instead which does look suspicieously close to branching.
+    </p>
 
-
-
+    <h2>
+Conclusion
+    </h2>
+    <p>
+You could argue that these examples were deliberately simplified. It’s only a half-truth. I did refine them to be more demonstrative, but conceptually they are all taken from my own practice.
+    </p>
+    <p>
+Using static dispatch instead of dynamic made our image processing pipeline up to 5 times faster. Repairing broken inlining helped to win back 50% of performance for edge-to-edge distance function. And changing counter type to enable loop unrolling won us about 10% performance gain on matrix transformation, which is not much, but all it took to achive that was simply changing <span class="code_piece">short int</span> to <span class="code_piece">size_t</span> in one place.
+    </p>
+    <p>
+Apparently, old versions of MSVC fail to unroll loops with counters of non-native type. Who would have thought? Well, the truth is, even if you know that particular quirck, you can't possibly know every aspect of every compiler out there, so looking at disassembly once in a while might be useufl.
+    </p>
+    <p>
+And it is not even that obscure.
+    </p>
+    
     <p class="footer">
     There are more words and buttons on <a href="index.html">wordsandbuttons.online</a>.<br>
     Also please follow us on <a href="https://twitter.com/wordsandbuttons">Twitter</a>.
