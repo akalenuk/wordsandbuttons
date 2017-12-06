@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>You too can read disassembly</title>
+    <title>You don't have to learn assembly to read disassembly</title>
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <style>
 body{
@@ -77,28 +77,31 @@ td {
 }
 
 button{
-    width: 304pt;
+    width: 248pt;
     height: 42pt;
     margin-left:4pt;
     margin-right:4pt;
-    font-size: 18pt;
+    font-size: 16pt;
 }
 
     </style>
     <script language="JavaScript">
-
+function show(n){
+    document.getElementById("shown_" + n).style.display = "none";
+    document.getElementById("hidden_" + n).style.display = "block";
+}
     </script>
   </head>
   <body>
     <center>
     <h1>
-You too can read disassembly
+You don't have to learn assembly to read disassembly
     </h1>
     <p>
 Reading disassembly is more like reading tracks than reading a book. You have to know the language to read a book, but reading tracks, although it gets better with skills and experience, mostly requires attentiveness and logic thinking.
     </p>
     <p>
-Most of the time we browse disassembly only to answer one simple question: <i>does compiler do what we expect it to do</i>? In 3 simple exercises, I’ll show you that you too can answer such questions even if you have never seen disassembly before. I’ll use C++ as a source language, but what I’m trying to show is more or less universal, so it doesn’t matter if you write in C or Java, C# or Rust, — if you compile to some sort of machine code — you can benefit from understanding your compiler.
+Most of the time we read disassembly only to answer one simple question: <i>does compiler do what we expect it to do</i>? In 3 simple exercises, I’ll show you that you too can often answer this question even if you have no previous knowledge of assembly. I’ll use C++ as a source language, but what I’m trying to show is more or less universal, so it doesn’t matter if you write in C or Java, C# or Rust. If you compile to any kind of machine code — you can benefit from understanding your compiler.
     </p>
     <h2>
 1. Compile time computation
@@ -148,12 +151,18 @@ Now look at two possible disassemblies for this source code and decide what vari
 003C1000  push        20h
 003C1002  pop         eax    </pre>
     </td></tr></table>
-    <p>
+    <div id="shown_1">
+        <button type="button" onclick="show(1)">The left one does</button>
+        <button type="button" onclick="show(1)">The right one does</button>
+    </div>
+    <div id="hidden_1" style="display:none;">
+        <p>
 Well, that’s a no-brainer. Of course, the one on the left does.
-    </p>
-    <p>
+        </p>
+        <p>
 On 32-bit platform <span class="code_piece">int</span>'s size is 4 bytes, which is 32 bits, which is 20h in hexadecimal. You might not know the convention by which a function returns the value in <span class="code_piece">eax</span>, but you see that the first variant is long enough to contain an actual multiplication, while the second one has only two lines: something containing the computed answer and the other one.    
-    </p>
+        </p>
+    </div>
 
     <h2>
 2. Function inlining
@@ -222,10 +231,16 @@ Now look at these two disassembly variants below and choose the one where the fu
 008F101A  add         esp,4  
 008F101D  pop         ebp  
 008F101E  ret</pre>
-    </td></tr></table>    
-    <p>
-Not really a mystery either. It’s the one on the left. You might not know, that the instruction to call a function is called the <span class="code_piece">call</span>, but since the disassembly on the left contains no recall of the name <span class="code_piece">twice</span>, it must be inlined.
-    </p>
+    </td></tr></table>
+    <div id="shown_2">
+        <button type="button" onclick="show(2)">Inlined in the left one</button>
+        <button type="button" onclick="show(2)">Inlined in the right one</button>
+    </div>
+    <div id="hidden_2" style="display:none;">
+        <p>
+Not really a mystery either. It’s the one on the left. You might not know, that the instruction to call a function is called <span class="code_piece">call</span>, but since the disassembly on the left doesn't even contain any recall of <span class="code_piece">twice</span>, it has to be inlined.
+        </p>
+    </div>
     
     <h2>
 3. Loop unrolling
@@ -282,12 +297,18 @@ Which disassembly has the unrolled loop?
 00BF1011  pop         ebp  
 00BF1012  ret</pre>
     </td></tr></table>
-    <p>
+    <div id="shown_3">
+        <button type="button" onclick="show(3)">Unrolled loop is on the left</button>
+        <button type="button" onclick="show(3)">Unrolled loop is on the right</button>
+    </div>
+    <div id="hidden_3" style="display:none;">   
+        <p>
 It's the one on the right.
-    </p>
-    <p>
+        </p>
+        <p>
 Once again, you might not know that <span class="code_piece">j&lt;something-something&gt;</span> is the family of jump instructions, and <span class="code_piece">cmp</span> stands for “compare” but the code on the right clearly has a repeating pattern, while the one on the left has some address manipulation instead which does look suspicieously close to branching.
-    </p>
+        </p>
+    </div>
 
     <h2>
 Conclusion
