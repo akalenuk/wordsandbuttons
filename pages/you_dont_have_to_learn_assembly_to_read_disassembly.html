@@ -186,6 +186,7 @@ If the compiler makes such an optimization, this code:
 <i>inline</i> double <b>twice</b>(double x){
     return x + x;
 }
+
 double <b>triple</b>(double x){
     return twice(x) + x;
 }
@@ -259,11 +260,10 @@ Let's say we have this piece of code:
     <table><tr>
     <td style="width: 505pt;">
     <pre>
-int main(int argc, char*)
-{
-    int result = 1;
-    for(short int i = 0; i &lt; 4; ++i)
-        result *= argc;
+float power_of_4(float x){
+    float result = 1;
+    for(int i = 0; i &lt; 4; ++i)
+        result *= x;
     return result;
 }
     </pre>
@@ -278,26 +278,23 @@ Which disassembly has the unrolled loop?
     <table><tr>
     <td>
     <pre>
-00EB1002  in          al,dx  
-00EB1003  mov         edx,dword ptr [argc]  
-00EB1006  mov         eax,1  
-00EB100B  mov         ecx,4  
-00EB1010  imul        eax,edx  
-00EB1013  dec         ecx  
-00EB1014  jne         main+10h (0EB1010h)  
-00EB1016  pop         ebp  
-00EB1017  ret</pre>
+        movaps  xmm1, xmm0
+        movss   xmm0, dword ptr [rip + .LCPI0_0]
+        mov     eax, 4
+.LBB0_1:
+        mulss   xmm0, xmm1
+        add     eax, -1
+        jne     .LBB0_1
+        ret</pre>
     </td>
     <td>
     <pre>
-00BF1002  in          al,dx  
-00BF1003  mov         ecx,dword ptr [argc]  
-00BF1006  mov         eax,ecx  
-00BF1008  imul        eax,ecx  
-00BF100B  imul        eax,ecx  
-00BF100E  imul        eax,ecx  
-00BF1011  pop         ebp  
-00BF1012  ret</pre>
+        movaps  xmm1, xmm0
+        mulss   xmm1, xmm1
+        mulss   xmm1, xmm0
+        mulss   xmm1, xmm0
+        movaps  xmm0, xmm1
+        ret</pre>
     </td></tr></table>
     <div id="shown_3">
         <button type="button" onclick="show(3)">Unrolled loop is on the left</button>
@@ -308,7 +305,7 @@ Which disassembly has the unrolled loop?
 It's the one on the right.
         </p>
         <p>
-Once again, you might not know that <span class="code_piece">j&lt;*&gt;</span> is the family of jump instructions but the code on the right clearly has a repeating pattern, while the one on the left has some address manipulation instead which does look suspiciously like a self-reference.
+You might not know that <span class="code_piece">j&lt;*&gt;</span> is the family of <span id="shown_jump" onclick="show('jump');"><u>jump instructions</u></span><span id="hidden_jump" style="display:none">jump instructions. There is one unconditional jump <span class="code_piece">jmp</span>, and a bunch of conditional jumps like: <span class="code_piece">jz</span> — jump when zero; <span class="code_piece">jg</span> — jump when greater; or, like in our code, <span class="code_piece">jne</span> — jump when not equal. These react on the <span id="shown_flags" onclick="show('flags')"><u>flags</u> previously set by a processor</span><span id="hidden_flags" style="display:none">flags previously set by a processor. These are the bits residing in a special register that get triggered by arithmetic instructions such as <span class="code_piece">add</span> or <span class="code_piece">sub</span>, or by a special instruction to compare things <span class="code_piece">cmp</span></span></span>. Then again, the code on the right clearly has a repeating pattern, while the one on the left has a number four that is the loop's exit condition, and that should be enough to make a conclusion.
         </p>
     </div>
 
