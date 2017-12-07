@@ -164,7 +164,7 @@ Now look at two possible disassemblies for this source code and decide what vari
 Of course, the one on the right does.
         </p>
         <p>
-On 32-bit platform <span class="code_piece">int</span>'s size is 4 bytes, which is 32 bits, which is exactly the number in the code. You might not know the convention by which a function returns the value in <span class="code_piece" id="shown_eax" onclick="show('eax')"><u>eax</u></span><span style="display: none;" id="hidden_eax"><span class="code_piece">eax</span> which is a <span id="shown_register" onclick="show('register')"><u>register</u></span><span style="display: none;" id="hidden_register">register. There are quite a few registers but most important for us are the general purpose registers, more specifically <span class="code_piece">eax</span>, <span class="code_piece">ebx</span>, <span class="code_piece">ecx</span>, and <span class="code_piece">edx</span>. Their names respectively are: <b>a</b>ccumulator, <b>b</b>ase, <b>c</b>ounter and <b>d</b>ata. They are not necessary interchangeable</span>. You can think of them as ultrafast predefined variables of known <span id="shown_size" onclick="show('size')"><u>size</u></span><span id="hidden_size" style="display: none">size. For instance, <span class="code_piece">rax</span> is 64 bits long. The lower 32 bits of it is accessible by the name <span class="code_piece">eax</span>. The lower 16 bit of it as <span class="code_piece">ax</span>, which in its own turn consists of two bytes <span class="code_piece">ah</span> and <span class="code_piece">al</span>. These are all the parts of a same register</span></span>. But the thing is, the code on the right already has an answer in it, so it doesn't even matter.
+On 32-bit platform <span class="code_piece">int</span>'s size is 4 bytes, which is 32 bits, which is exactly the number in the code. You might not know that integer function conventionally returns output in <span class="code_piece" id="shown_eax" onclick="show('eax')"><u>eax</u></span><span style="display: none;" id="hidden_eax"><span class="code_piece">eax</span> which is a <span id="shown_register" onclick="show('register')"><u>register</u></span><span style="display: none;" id="hidden_register">register. There are quite a few registers but most important for us are the general purpose registers, more specifically <span class="code_piece">eax</span>, <span class="code_piece">ebx</span>, <span class="code_piece">ecx</span>, and <span class="code_piece">edx</span>. Their names respectively are: <b>a</b>ccumulator, <b>b</b>ase, <b>c</b>ounter and <b>d</b>ata. They are not necessary interchangeable</span>. You can think of them as ultrafast predefined variables of known <span id="shown_size" onclick="show('size')"><u>size</u></span><span id="hidden_size" style="display: none">size. For instance, <span class="code_piece">rax</span> is 64 bits long. The lower 32 bits of it is accessible by the name <span class="code_piece">eax</span>. The lower 16 bit of it as <span class="code_piece">ax</span>, which in its own turn consists of two bytes <span class="code_piece">ah</span> and <span class="code_piece">al</span>. These are all the parts of a same register</span></span>. But the thing is, the code on the right already has an answer in it, so it doesn't even matter.
         </p>
     </div>
 
@@ -183,11 +183,11 @@ If the compiler makes such an optimization, this code:
     <table><tr>
     <td style="width: 505pt;">
     <pre>
-<i>inline</i> int <b>twice</b>(int x){
+<i>inline</i> double <b>twice</b>(double x){
     return x + x;
 }
-int main(){
-    return <b>twice</b>(2);
+double <b>triple</b>(double x){
+    return twice(x) + x;
 }
     </pre>
     </td>
@@ -199,8 +199,8 @@ Virtually becomes this:
     <td style="width: 505pt;">
     <pre>
 <i>// not really a source code, just explaining the idea</i>
-int main(){ 
-    return 2 + 2; <i>// twice gets inlined here</i>
+double triple(double x){ 
+    return x + x + x; <i>// twice gets inlined here</i>
 }
     </pre>
     </td>
@@ -214,27 +214,25 @@ Now look at these two disassembly variants below and choose the one where the fu
     <table><tr>
     <td>
     <pre>
-00E71002  in          al,dx  
-00E71003  mov         eax,2  
-00E71008  add         eax,2  
-00E7100B  pop         ebp  
-00E7100C  ret</pre>
+        movapd  xmm1, xmm0
+        addsd   xmm1, xmm1
+        addsd   xmm1, xmm0
+        movapd  xmm0, xmm1
+        ret</pre>
     </td>
     <td>
     <pre>
-00261002  in          al,dx  
-00261003  mov         eax,dword ptr [x]  
-00261006  add         eax,dword ptr [x]  
-00261009  pop         ebp  
-0026100A  ret
-...
-008F1010  push        ebp  
-008F1011  mov         ebp,esp  
-008F1013  push        2  
-008F1015  call        twice (08F1000h)  
-008F101A  add         esp,4  
-008F101D  pop         ebp  
-008F101E  ret</pre>
+        push    rax
+        movsd   qword ptr [rsp], xmm0
+        call    twice(double)
+        addsd   xmm0, qword ptr [rsp]
+        pop     rax
+        ret
+        .
+        .
+        .
+        addsd   xmm0, xmm0
+        ret</pre>
     </td></tr></table>
     <div id="shown_2">
         <button type="button" onclick="show(2)">Inlined in the left one</button>
@@ -242,7 +240,7 @@ Now look at these two disassembly variants below and choose the one where the fu
     </div>
     <div id="hidden_2" style="display:none;">
         <p>
-Not really a mystery either. It’s the one on the left. You might not know, that the instruction to call a function is really called <span class="code_piece">call</span>. But since the disassembly on the left doesn't even contain any recall of <span class="code_piece">twice</span>, the function has to be inlined anyway.
+Not really a mystery either. It’s the one on the left. You might not know, that the instruction to call a function is really called the <span id="shown_call" onclick="show('call')"><span class="code_piece"><u>call</u></span></span><span id="hidden_call" style="display:none"><span class="code_piece">call</span>. It stores a special register that points to the next instruction after the call in the stack and then sets it to the function address. A processor hence jumps to run the function. The function then uses <span id="shown_ret"><span class="code_piece" onclick="show('ret')"><u>ret</u></span> to get</span><span id="hidden_ret" style="display:none"><span class="code_piece">ret</span> to get a stored address from the stack back to the register, and make processor jump</span> back to from where it has been called</span>. But since the disassembly on the left doesn't even contain any recall of <span class="code_piece">twice</span>, the function has to be inlined anyway.
         </p>
     </div>
     
