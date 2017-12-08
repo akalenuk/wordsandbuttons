@@ -106,13 +106,13 @@ You don't have to learn assembly to read disassembly
 Reading disassembly is more like reading tracks than reading a book. You have to know the language to read a book, but reading tracks, although it gets better with skills and experience, mostly requires attentiveness and logic thinking.
     </p>
     <p>
-Most of the time we read disassembly only to answer one simple question: <i>does compiler do what we expect it to do</i>? In 3 simple exercises, I’ll show you that you too can often answer this question even if you have no previous knowledge of assembly. I’ll use C++ as a source language, but what I’m trying to show is more or less universal, so it doesn’t matter if you write in C or Java, C# or Rust. If you compile to any kind of machine code — you can benefit from understanding your compiler.
+Most of the time we read disassembly only to answer one simple question: <i>does compiler do what we expect it to do</i>? In 3 simple exercises, I’ll show you that you can too often answer this question even if you have no previous knowledge of assembly. I’ll use C++ as a source language, but what I’m trying to show is more or less universal, so it doesn’t matter if you write in C or Java, C# or Rust. If you compile to any kind of machine code — you can benefit from understanding your compiler.
     </p>
     <h2>
 1. Compile time computation
     </h2>
     <p>
-Any decent compiler tries to make your code efficient. This means doing as little work in runtime as possible. Sometimes it can even conduct the whole computation in compile time, so your machine code will only have to contain the answer.
+Any decent compiler tries to make your binary code not only correct but efficient. This means doing as little work in runtime as possible. Sometimes it can even conduct the whole computation in a compile time, so your machine code will only have to contain the answer.
     </p>
     <p>
 This source code defines the number of bits in a byte and returns the size of <span class="code_piece">int</span> in bits.
@@ -129,10 +129,10 @@ int main(){
     </td>
     </td></tr></table>
     <p>
-The compiler knows the size of an <span class="code_piece">int</span>. Let's say, for the target platform it is 4 bytes. We also set the number of bits in a byte explicitly. Since all we want is a simple multiplication, and both numbers are known in compile time, the compiler can simply compute the number instead of generating the code that computed the same number each time it's being executed.
+The compiler knows the size of an <span class="code_piece">int</span>. Let's say, for the target platform it is 4 bytes. We also set the number of bits in a byte explicitly. Since all we want is a simple multiplication, and both numbers are known in a compile time, a compiler can simply compute the resulting number itself instead of generating the code that computes the same number each time it's being executed.
     </p>
     <p>
-Although, this is not something that is guaranteed by the standard. The compiler may or may not provide this optimization.
+Although, this is not something guaranteed by the standard. A compiler may or may not provide this optimization.
     </p>
     <p>
 Now look at two possible disassemblies for this source code and decide what variant does compile time computation and what doesn’t.
@@ -164,7 +164,7 @@ Now look at two possible disassemblies for this source code and decide what vari
 Of course, the one on the right does.
         </p>
         <p>
-On 32-bit platform <span class="code_piece">int</span>'s size is 4 bytes, which is 32 bits, which is exactly the number in the code. You might not know that integer function conventionally returns output in <span class="code_piece" id="shown_eax" onclick="show('eax')"><u>eax</u></span><span style="display: none;" id="hidden_eax"><span class="code_piece">eax</span> which is a <span id="shown_register" onclick="show('register')"><u>register</u></span><span style="display: none;" id="hidden_register">register. There are quite a few registers but most important for us are the general purpose registers, more specifically <span class="code_piece">eax</span>, <span class="code_piece">ebx</span>, <span class="code_piece">ecx</span>, and <span class="code_piece">edx</span>. Their names respectively are: <b>a</b>ccumulator, <b>b</b>ase, <b>c</b>ounter and <b>d</b>ata. They are not necessary interchangeable</span>. You can think of them as ultrafast predefined variables of known <span id="shown_size" onclick="show('size')"><u>size</u></span><span id="hidden_size" style="display: none">size. For instance, <span class="code_piece">rax</span> is 64 bits long. The lower 32 bits of it is accessible by the name <span class="code_piece">eax</span>. The lower 16 bit of it as <span class="code_piece">ax</span>, which in its own turn consists of two bytes <span class="code_piece">ah</span> and <span class="code_piece">al</span>. These are all the parts of a same register</span></span>. But the thing is, the code on the right already has an answer in it, so it doesn't even matter.
+On 32-bit platform <span class="code_piece">int</span>'s size is 4 bytes, which is 32 bits, which is exactly the number in the code. You might not know that an integer function conventionally returns output in <span class="code_piece" id="shown_eax" onclick="show('eax')"><u>eax</u></span><span style="display: none;" id="hidden_eax"><span class="code_piece">eax</span> which is a <span id="shown_register" onclick="show('register')"><u>register</u></span><span style="display: none;" id="hidden_register">register. There are quite a few registers but most important for us are the general purpose registers, more specifically <span class="code_piece">eax</span>, <span class="code_piece">ebx</span>, <span class="code_piece">ecx</span>, and <span class="code_piece">edx</span>. Their names respectively are: <b>a</b>ccumulator, <b>b</b>ase, <b>c</b>ounter and <b>d</b>ata. They are not necessary interchangeable</span>. You can think of them as ultrafast predefined variables of known <span id="shown_size" onclick="show('size')"><u>size</u></span><span id="hidden_size" style="display: none">size. For instance, <span class="code_piece">rax</span> is 64 bits long. The lower 32 bits of it is accessible by the name <span class="code_piece">eax</span>. The lower 16 bit of it as <span class="code_piece">ax</span>, which in its own turn consists of two bytes <span class="code_piece">ah</span> and <span class="code_piece">al</span>. These are all the parts of the same register</span></span>. But the thing is, the code on the right already has an answer in it, so it doesn't even matter.
         </p>
     </div>
 
@@ -175,7 +175,7 @@ On 32-bit platform <span class="code_piece">int</span>'s size is 4 bytes, which 
 Calling a function implies some overhead by preparing input data in the particular order; then starting the execution from another piece of memory; then preparing output data; and then returning back.
     </p>
     <p>
-Not that it's that ineffective but if you only want to call the function once, you don’t have to <i>actually call</i> the function. It just makes sense to copy or “inline” the function body to the place it is called from and skip all the formalities. Compilers can often do this for you so you don't even have to bother.
+Not that it is all too slow but if you only want to call a function once, you don’t have to <i>actually call</i> the function. It just makes sense to copy or “inline” the function's body to the place it is called from and skip all the formalities. Compilers can often do this for you so you don't even have to bother.
     </p>
     <p>
 If the compiler makes such an optimization, this code:
@@ -239,7 +239,7 @@ Now look at these two disassembly variants below and choose the one where the fu
     </div>
     <div id="hidden_2" style="display:none;">
         <p>
-Not really a mystery either. It’s the one on the left. You might not know, that the instruction to call a function is really called the <span id="shown_call" onclick="show('call')"><span class="code_piece"><u>call</u></span></span><span id="hidden_call" style="display:none"><span class="code_piece">call</span>. It stores a special register that points to the next instruction after the call in the stack and then sets it to the function address. A processor hence jumps to run the function. The function then uses <span id="shown_ret"><span class="code_piece" onclick="show('ret')"><u>ret</u></span> to get</span><span id="hidden_ret" style="display:none"><span class="code_piece">ret</span> to get a stored address from the stack back to the register, and make processor jump</span> back to from where it has been called</span>. But since the disassembly on the left doesn't even contain any recall of <span class="code_piece">twice</span>, the function has to be inlined anyway.
+Not really a mystery either. It’s the one on the left. You might not know, that the instruction to call a function is really called the <span id="shown_call" onclick="show('call')"><span class="code_piece"><u>call</u></span></span><span id="hidden_call" style="display:none"><span class="code_piece">call</span>. It stores a special register that points to the next instruction after the call in the stack and then sets it to the function's address. A processor hence jumps to run the function. The function then uses <span id="shown_ret"><span class="code_piece" onclick="show('ret')"><u>ret</u></span> to get</span><span id="hidden_ret" style="display:none"><span class="code_piece">ret</span> to get a stored address from the stack back to the register, and make processor jump</span> back to from where it has been called</span>. But since the disassembly on the left doesn't even contain any recall of <span class="code_piece">twice</span>, the function has to be inlined anyway.
         </p>
     </div>
     
@@ -247,7 +247,7 @@ Not really a mystery either. It’s the one on the left. You might not know, tha
 3. Loop unrolling
     </h2>    
     <p>
-Just like calling functions, going in loops implies some overhead. You have to increment the counter; then compare it against some number; then jump back to the loop beginning.    
+Just like calling functions, going in loops implies some overhead. You have to increment the counter; then compare it against some number; then jump back to the loop's beginning.    
     </p>
     <p>
 Compilers know that in some context it is more effective to unroll the loop. It means that some piece of code will actually be repeated several times in a row instead of messing with the counter comparison and jumping here and there.
@@ -311,15 +311,18 @@ You might not know that <span class="code_piece">j&lt;*&gt;</span> is the family
 Conclusion
     </h2>
     <p>
-You could argue that these examples were deliberately simplified. It’s only a half-truth. I did refine them to be more demonstrative, but conceptually they are all taken from my own practice.
+You can argue that these examples were deliberately simplified. It’s only a half-truth. I did refine them to be more demonstrative, but conceptually they are all taken from my own practice.
     </p>
     <p>
-Using static dispatch instead of dynamic made our image processing pipeline up to 5 times faster. Repairing broken inlining helped to win back 50% of performance for edge-to-edge distance function. And changing counter type to enable loop unrolling won us about 10% performance gain on matrix transformation, which is not much, but all it took to achieve that was simply changing <span class="code_piece">short int</span> to <span class="code_piece">size_t</span> in one place.
+Using static dispatch instead of dynamic made my image processing pipeline up to 5 times faster. Repairing broken inlining helped to win back 50% of performance for edge-to-edge distance function. And changing counter type to enable loop unrolling won me about 10% performance gain on matrix transformations, which is not much, but since all it took to achieve was simply changing <span class="code_piece">short int</span> to <span class="code_piece">size_t</span> in one place, I think of is as a good return of investment.
     </p>
     <p>
-Apparently, old versions of MSVC fail to unroll loops with counters of non-native type. Who would have thought? Well, the truth is, even if you know that particular quirk, you can't possibly know every aspect of every compiler out there, so looking at disassembly once in a while might be useful.
+Apparently, old versions of MSVC fail to unroll loops with counters of non-native type. Who would have thought? Well, the truth is, even if you know this particular quirk, you can't possibly know every other aspect of every compiler's behavior out there, so looking at disassembly once in a while might be good for you.
     </p>
-
+    <p>
+And you don't even have to spend years learning every assembly dialect. Reading disassembly is often easier than it looks. <a href="https://godbolt.org/">Try it</a>.
+    </p>
+    
     
     <p class="footer">
     There are more words and buttons on <a href="index.html">wordsandbuttons.online</a>.<br>
