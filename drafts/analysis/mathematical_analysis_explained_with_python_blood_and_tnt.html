@@ -192,10 +192,25 @@ function plot_draw(client_x, client_y, do_guides){
     plot_context.fillStyle="#eeeeee";
 	plot_context.fillRect(0,0,512,512);
 	
+	// function
+	plot_context.beginPath();
+	n = button_n();
+	for(var w = 0; w < 512 - 1; w++){
+	    x1 = client_to_x(w);
+	    x2 = client_to_x(w+1);
+	    y1 = the_function(n, x1);
+	    y2 = the_function(n, x2);
+	    plot_context.moveTo(x_to_client(x1), y_to_client(y1));
+	    plot_context.lineTo(x_to_client(x2), y_to_client(y2));
+	}
+	plot_context.strokeStyle="#660000";
+    plot_context.stroke();	
+	plot_context.closePath();
    
 	// grid
 	draw_grid_on(plot_context);
 }
+
 
 function radio(n){
     for(var i = 1; i <= 8; i++){
@@ -203,8 +218,10 @@ function radio(n){
         radio_i.disabled = false;
     }
     radio_n = document.getElementById("button_" + n);
-    radio_n.disabled = true; 
+    radio_n.disabled = true;
+    plot_draw(0, 0, false);  
 }
+
 
 function the_function(n, x){
     if(n == 1)
@@ -223,6 +240,13 @@ function the_function(n, x){
         return Math.sin(x);
     if(n == 8)
         return Math.cos(x);
+}
+
+
+function button_n(){
+    for(var i = 1; i <= 8; i++)
+        if(document.getElementById("button_" + i).disabled)
+            return i;
 }
     </script>
   </head>
