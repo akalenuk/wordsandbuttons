@@ -174,8 +174,7 @@ function init_plot(){
     }, false);
 
     plot.addEventListener('mousedown', function(e){
-	    plot_draw(0, 0, false);
-	    check_ex();     
+	    plot_draw(0, 0, false);   
     }, false);
     
     plot.addEventListener('mouseleave', function(e){
@@ -206,6 +205,20 @@ function plot_draw(client_x, client_y, do_guides){
 	plot_context.strokeStyle="#660000";
     plot_context.stroke();	
 	plot_context.closePath();
+	
+	// derivative
+	if(do_guides){
+	    plot_context.beginPath();
+        var	x1 = client_to_x(client_x);
+        var y1 = the_function(n, x1);
+        var x2 = x1 + 1.;
+        var y2 = y1 + d(n, x1);
+	    plot_context.moveTo(x_to_client(x1), y_to_client(y1));
+	    plot_context.lineTo(x_to_client(x2), y_to_client(y2));
+	    plot_context.strokeStyle="#aa4444";
+        plot_context.stroke();	
+	    plot_context.closePath();
+	}
    
 	// grid
 	draw_grid_on(plot_context);
@@ -242,6 +255,10 @@ function the_function(n, x){
         return Math.cos(x);
 }
 
+function d(n, x){
+    var e = 0.0001;
+    return (the_function(n, x+e) - the_function(n, x))/e;
+}
 
 function button_n(){
     for(var i = 1; i <= 8; i++)
