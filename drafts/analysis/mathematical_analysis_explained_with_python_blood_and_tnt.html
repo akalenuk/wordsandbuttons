@@ -315,7 +315,7 @@ function init_derivative(){
     }, false);    
 }
 
-function draw_derivative(react_on_move){
+function draw_derivative(client_x, client_y, react_on_move){
     var d = document.getElementById("derivative");
     var d_context = d.getContext("2d"); 
     d_context.font = "16px sans-serif";
@@ -335,6 +335,40 @@ function draw_derivative(react_on_move){
 	d_context.strokeStyle="#660000";
     d_context.stroke();	
 	d_context.closePath();
+
+
+    var	x1 = client_to_x(0);
+    var y1 = demo_f(x1);
+	if(react_on_move){
+        var x2 = client_to_x(client_x);
+        var y2 = demo_f(x2);
+        d_context.beginPath();        
+        d_context.setLineDash([10, 10]);
+	    d_context.moveTo(x_to_client(x1), y_to_client(y1));
+	    d_context.lineTo(x_to_client(x2), y_to_client(y2));
+	    d_context.strokeStyle="#44aa44";
+        d_context.stroke();
+   	    d_context.setLineDash([]);
+   	    d_context.closePath();
+   	    var x3 = -1;
+   	    var y3 = y1 + (y2-y1) * (x3-x1) / (x2-x1);
+        d_context.beginPath();
+	    d_context.moveTo(x_to_client(x1), y_to_client(y1));
+	    d_context.lineTo(x_to_client(x3), y_to_client(y3));
+	    d_context.strokeStyle="#44aa44";
+        d_context.stroke();
+        d_context.closePath();
+    }else{
+        var d = (demo_f(x1+0.0001) - demo_f(x1))/0.0001;
+        var x2 = -1;
+        var y2 = y1 + d*2; 
+        d_context.beginPath();        
+   	    d_context.moveTo(x_to_client(x1), y_to_client(y1));
+	    d_context.lineTo(x_to_client(x2), y_to_client(y2));
+	    d_context.strokeStyle="#44aa44";
+        d_context.stroke(); 
+        d_context.closePath();
+    }
 }
     </script>
   </head>
