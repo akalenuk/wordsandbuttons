@@ -291,6 +291,51 @@ function button_n(){
         if(document.getElementById("button_" + i).disabled)
             return i;
 }
+
+function demo_f(x){
+    return 1-x*x*0.25;
+}
+
+function init_derivative(){
+    var d = document.getElementById("derivative");
+    var canvas_rect = d.getBoundingClientRect();
+    draw_derivative(0, 0, false);
+    
+    d.addEventListener('mousemove', function(e){
+        var canvas_rect = d.getBoundingClientRect();
+   	    draw_derivative(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+    }, false);
+
+    d.addEventListener('mousedown', function(e){
+	    draw_derivative(0, 0, false);   
+    }, false);
+    
+    d.addEventListener('mouseleave', function(e){
+	    draw_derivative(0, 0, false);        
+    }, false);    
+}
+
+function draw_derivative(react_on_move){
+    var d = document.getElementById("derivative");
+    var d_context = d.getContext("2d"); 
+    d_context.font = "16px sans-serif";
+    // background
+    d_context.fillStyle="#eeeeee";
+	d_context.fillRect(0,0,512,512);
+	// function
+	d_context.beginPath();
+	for(var w = 0; w < 512 - 1; w++){
+	    x1 = client_to_x(w);
+	    x2 = client_to_x(w+1);
+	    y1 = demo_f(x1);
+	    y2 = demo_f(x2);
+	    d_context.moveTo(x_to_client(x1), y_to_client(y1));
+	    d_context.lineTo(x_to_client(x2), y_to_client(y2));
+	}
+	d_context.strokeStyle="#660000";
+    d_context.stroke();	
+	d_context.closePath();
+}
     </script>
   </head>
   <body>
@@ -317,6 +362,16 @@ Mathematical analysis is also about taking things apart. Specifically, functions
     <h2>
 Derivative
     </h2>
+    <p>
+...
+    </p>
+    <canvas id="derivative" width=512 height=512></canvas>
+    <script language="JavaScript">
+    init_derivative();
+    </script>
+    <p>
+...
+    </p>
     <canvas id="plot" width=512 height=512></canvas>
     <p class="results" id="results">
     </p>
