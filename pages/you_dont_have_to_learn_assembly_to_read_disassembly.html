@@ -84,7 +84,7 @@ button{
     font-size: 16pt;
 }
 
-u {    
+u {
     border-bottom: 1px dotted #000;
     text-decoration: none;
     cursor: pointer;
@@ -192,20 +192,20 @@ double <b>triple</b>(double x){
 }
     </pre>
     </td>
-    </td></tr></table>    
+    </td></tr></table>
     <p>
 Virtually becomes this:
-    </p>    
+    </p>
     <table><tr>
     <td style="width: 505pt;">
     <pre>
 <i>// not really a source code, just explaining the idea</i>
-double triple(double x){ 
+double triple(double x){
     return x + x + x; <i>// twice gets inlined here</i>
 }
     </pre>
     </td>
-    </td></tr></table> 
+    </td></tr></table>
     <p>
 But the standard does not promise that all the functions marked as <span class="code_piece">inline</span> shall get inlined. It's more a suggestion than a directive.
     </p>
@@ -242,12 +242,12 @@ Now look at these two disassembly variants below and choose the one where the fu
 Not really a mystery either. It’s the one on the left. You might not know, that the instruction to call a function is really called the <span id="shown_call" onclick="show('call')"><span class="code_piece"><u>call</u></span></span><span id="hidden_call" style="display:none"><span class="code_piece">call</span>. It stores a special register that points to the next instruction after the call in the stack and then sets it to the function's address. A processor hence jumps to run the function. The function then uses <span id="shown_ret"><span class="code_piece" onclick="show('ret')"><u>ret</u></span> to get</span><span id="hidden_ret" style="display:none"><span class="code_piece">ret</span> to get a stored address from the <span id="shown_stack" onclick="show('stack')"><u>stack</u></span><span id="hidden_stack" style="display:none">stack (which is a piece of memory organized in a first in last out fashion so if you, for instance, <span class="code_piece">push</span> rax and rbx there and then <span class="code_piece">pop</span> rax and rbx, these two will get swapped)</span> back to the register, and make processor jump</span> back to from where it has been called</span>. But since the disassembly on the left doesn't even contain any recall of <span class="code_piece">twice</span>, the function has to be inlined anyway.
         </p>
     </div>
-    
+
     <h2>
 3. Loop unrolling
-    </h2>    
+    </h2>
     <p>
-Just like calling functions, going in loops implies some overhead. You have to increment the counter; then compare it against some number; then jump back to the loop's beginning.    
+Just like calling functions, going in loops implies some overhead. You have to increment the counter; then compare it against some number; then jump back to the loop's beginning.
     </p>
     <p>
 Compilers know that in some context it is more effective to unroll the loop. It means that some piece of code will actually be repeated several times in a row instead of messing with the counter comparison and jumping here and there.
@@ -268,10 +268,10 @@ float power_of_4(float x){
     </td>
     </td></tr></table>
     <p>
-The compiler has all the reasons to unroll such a simple loop, but it might as well choose not to. 
+The compiler has all the reasons to unroll such a simple loop, but it might as well choose not to.
     </p>
     <p>
-Which disassembly has the unrolled loop? 
+Which disassembly has the unrolled loop?
     </p>
     <table><tr>
     <td>
@@ -298,7 +298,7 @@ Which disassembly has the unrolled loop?
         <button type="button" onclick="show(3)">Unrolled loop is on the left</button>
         <button type="button" onclick="show(3)">Unrolled loop is on the right</button>
     </div>
-    <div id="hidden_3" style="display:none;">   
+    <div id="hidden_3" style="display:none;">
         <p>
 It's the one on the right.
         </p>
@@ -322,9 +322,9 @@ Apparently, old versions of MSVC fail to unroll loops with counters of non-nativ
     <p>
 And you don't even have to spend years learning every assembly dialect. Reading disassembly is often easier than it looks. <a href="https://godbolt.org/">Try it</a>.
     </p>
-    
+
     <h2>
-P. S.    
+P. S.
     </h2>
     <p>
 I would like to thank people of Reddit for <a href="https://www.reddit.com/r/programming/comments/7if9bw/you_dont_have_to_learn_assembly_to_read/">constructive criticism</a>, and especially <a href="https://www.reddit.com/user/IJzerbaard">IJzerbaard</a> for his splendid mini-intro to disassembly. I liked it so much, I had to incorporate some of it into my expandable texts.
@@ -332,8 +332,8 @@ I would like to thank people of Reddit for <a href="https://www.reddit.com/r/pro
     <p>
 It's pleasure to see that “no you can't” comments are well balanced with “that's how I started”. It's satisfying that it is the boldness of the claim is being criticized the most and not the claim itself. I'm sorry, but “you can read disassembly without learning assembly but only once in a while and it's not super effective, and it, of course, does help to learn assembly after all, the more you know — the better you are at reading disassembly”, just doesn't fit for the title. Although, I have to agree, this is much closer to the truth.
     </p>
-    
-    
+
+
     <p class="footer">
     There are more words and buttons on <a href="index.html">wordsandbuttons.online</a>.<br>
     Also please follow us on <a href="https://twitter.com/wordsandbuttons">Twitter</a>.

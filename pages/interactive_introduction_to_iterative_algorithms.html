@@ -200,7 +200,7 @@ function init_solver(){
     solver = document.getElementById("solver");
     var canvas_rect = solver.getBoundingClientRect();
     solver_draw(0, 0, false);
-    
+
     solver.addEventListener('mousemove', function(e){
         var canvas_rect = solver.getBoundingClientRect();
    	    solver_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
@@ -223,24 +223,24 @@ function init_solver(){
        	    end_step_length = temp_end_step_length;
        	}
 	    solver_draw(0, 0, false);
-	    check_ex();     
+	    check_ex();
     }, false);
-    
+
     solver.addEventListener('mouseleave', function(e){
-	    solver_draw(0, 0, false);        
-    }, false);    
+	    solver_draw(0, 0, false);
+    }, false);
 }
 
 var last_iterations = 100;
 var last_error = 100.;
 function solver_draw(client_x, client_y, do_guides){
     solver = document.getElementById("solver");
-    var solver_context = solver.getContext("2d"); 
+    var solver_context = solver.getContext("2d");
     solver_context.font = "16px sans-serif";
     // background
     solver_context.fillStyle="#eeeeee";
 	solver_context.fillRect(0,0,512,512);
-	
+
     // red margin
 	solver_context.beginPath();
 	var db1 = end_step_length * length_of(a11, a12);
@@ -250,7 +250,7 @@ function solver_draw(client_x, client_y, do_guides){
 	solver_context.lineTo(x_to_client(x_min), y_to_client((b1 + db1 - a11*(y_min))/a12));
 	solver_context.lineTo(x_to_client(x_min), y_to_client((b1 - db1 - a11*(y_min))/a12));
     solver_context.strokeStyle="#ff8866";
-    solver_context.stroke();   
+    solver_context.stroke();
     solver_context.closePath();
     solver_context.fillStyle="#ffddbb";
     solver_context.fill();
@@ -264,11 +264,11 @@ function solver_draw(client_x, client_y, do_guides){
 	solver_context.lineTo(x_to_client(x_min), y_to_client((b2 + db2 - a21*(y_min))/a22));
 	solver_context.lineTo(x_to_client(x_min), y_to_client((b2 - db2 - a21*(y_min))/a22));
     solver_context.strokeStyle="#6699ff";
-    solver_context.stroke();    
+    solver_context.stroke();
     solver_context.closePath();
     solver_context.fillStyle="#bbddff";
     solver_context.fill();
-    
+
 	// red line
 	solver_context.beginPath();
 	solver_context.moveTo(x_to_client(x_min), y_to_client((b1 - a11*(y_min))/a12));
@@ -276,7 +276,7 @@ function solver_draw(client_x, client_y, do_guides){
 	solver_context.strokeStyle="#dd6644";
     solver_context.stroke();
     solver_context.closePath();
-    	    
+
 	// blue line
 	solver_context.beginPath();
 	solver_context.moveTo(x_to_client(x_min), y_to_client((b2 - a21*(y_min))/a22));
@@ -284,7 +284,7 @@ function solver_draw(client_x, client_y, do_guides){
 	solver_context.strokeStyle="#3366dd";
     solver_context.stroke();
     solver_context.closePath();
-    
+
     // solver
     solver_context.beginPath();
 	solver_context.moveTo(x_to_client(start_x), y_to_client(start_y));
@@ -311,10 +311,10 @@ function solver_draw(client_x, client_y, do_guides){
 	solver_context.strokeStyle="#446644";
     solver_context.stroke();
     solver_context.closePath();
-    
+
 	// grid
 	draw_grid_on(solver_context);
-	
+
 
 	// mouse move
 	if(do_guides){
@@ -327,13 +327,13 @@ function solver_draw(client_x, client_y, do_guides){
             temp_a12 = 1.0;
             temp_b1 = (x*y0 - x0*y)/(x - x0);
    	        solver_context.beginPath();
-   	        solver_context.setLineDash([4, 4]);	
+   	        solver_context.setLineDash([4, 4]);
 	        solver_context.moveTo(x_to_client(x_min), y_to_client((temp_b1 - temp_a11*(y_min))/temp_a12));
 	        solver_context.lineTo(x_to_client(x_max), y_to_client((temp_b1 - temp_a11*(y_max))/temp_a12));
             solver_context.strokeStyle="#dd6644";
             solver_context.stroke();
-            solver_context.setLineDash([]);	
-            solver_context.closePath();  
+            solver_context.setLineDash([]);
+            solver_context.closePath();
     	}else if(document.getElementById("button_2").disabled){
             var x = client_to_x(client_x);
             var y = client_to_y(client_y);
@@ -343,13 +343,13 @@ function solver_draw(client_x, client_y, do_guides){
             temp_a22 = 1.0;
             temp_b2 = (x*y0 - x0*y)/(x - x0);
    	        solver_context.beginPath();
-   	        solver_context.setLineDash([4, 4]);	
+   	        solver_context.setLineDash([4, 4]);
 	        solver_context.moveTo(x_to_client(x_min), y_to_client((temp_b2 - temp_a21*(y_min))/temp_a22));
 	        solver_context.lineTo(x_to_client(x_max), y_to_client((temp_b2 - temp_a21*(y_max))/temp_a22));
             solver_context.strokeStyle="#3366dd";
             solver_context.stroke();
             solver_context.setLineDash([]);
-            solver_context.closePath();      	
+            solver_context.closePath();
 	    }else if(document.getElementById("button_3").disabled){
 	        solver_context.beginPath();
 	        solver_context.setLineDash([4, 4]);
@@ -357,8 +357,8 @@ function solver_draw(client_x, client_y, do_guides){
         	solver_context.lineTo(client_x, client_y);
             solver_context.strokeStyle="#557755";
             solver_context.stroke();
-            solver_context.setLineDash([]);	
-            solver_context.closePath();   
+            solver_context.setLineDash([]);
+            solver_context.closePath();
    	    }else if(document.getElementById("button_4").disabled){
             var x = client_to_x(client_x);
             var y = client_to_y(client_y);
@@ -383,7 +383,7 @@ function solver_draw(client_x, client_y, do_guides){
 	        solver_context.lineTo(x_to_client(x_max), y_to_client((b1 + db1 - a11*(y_max))/a12));
             solver_context.strokeStyle="#ff8866";
             solver_context.stroke();
-            solver_context.setLineDash([]);    
+            solver_context.setLineDash([]);
             solver_context.closePath();
             // blue
             solver_context.beginPath();
@@ -395,11 +395,11 @@ function solver_draw(client_x, client_y, do_guides){
 	        solver_context.lineTo(x_to_client(x_max), y_to_client((b2 + db2 - a21*(y_max))/a22));
             solver_context.strokeStyle="#6699ff";
             solver_context.stroke();
-            solver_context.setLineDash([]);    
+            solver_context.setLineDash([]);
             solver_context.closePath();
         }
 	}
-	
+
 	// iteration count
 	results = document.getElementById("results");
 	if(i > 100){
@@ -426,7 +426,7 @@ function radio(n){
         radio_i.disabled = false;
     }
     radio_n = document.getElementById("button_" + n);
-    radio_n.disabled = true; 
+    radio_n.disabled = true;
 }
 
 var ex_no = 0;
@@ -441,8 +441,8 @@ function reset_ex(n){
     start_y = 1.0;
     // margin
     end_step_length = 0.5;
-    solver_draw(0, 0, false); 
-        
+    solver_draw(0, 0, false);
+
     document.getElementById("buttons").style.display = "none";
     for(var i = 1; i <=4; i++){
         document.getElementById("ex_" + i).style.display = "none";
@@ -530,12 +530,12 @@ Start at any point in 2D space.
 Stop when the distance point travels in one iteration is less then some predefined threshold.
     </li>
     <li>
-Project current point on one of the lines.    
+Project current point on one of the lines.
     </li>
     </ol>
-    <div id="canvas_ex"></div>    
+    <div id="canvas_ex"></div>
     <p>
-The plot below is the interactive illustration of the algorithm. You can move the equation-lines, change the starting point or set your own tolerance. 
+The plot below is the interactive illustration of the algorithm. You can move the equation-lines, change the starting point or set your own tolerance.
     </p>
     <canvas id="solver" width=512 height=512></canvas>
     <p class="results" id="results">
@@ -555,7 +555,7 @@ Ex. 1. Using threshold only, please achieve computation error less than 0.25.
 <br>
         <center>
             <button type="button" id="ex_1_reset" onclick="reset_ex(1)">Reset</button>
-            <button type="button" id="ex_1_skip" onclick="reset_ex(2)">Skip</button>       
+            <button type="button" id="ex_1_skip" onclick="reset_ex(2)">Skip</button>
         </cener>
         </div>
         <div id="ex_2" style="display: none;">
@@ -564,7 +564,7 @@ Ex. 2. Using starting point, please make the algorithm solve the system in exact
 <br>
         <center>
             <button type="button" id="ex_2_reset" onclick="reset_ex(2)">Reset</button>
-            <button type="button" id="ex_2_skip" onclick="reset_ex(3)">Skip</button>       
+            <button type="button" id="ex_2_skip" onclick="reset_ex(3)">Skip</button>
         </center>
         </div>
         <div id="ex_3" style="display: none;">
@@ -573,7 +573,7 @@ Ex. 3. By moving the blue line, please make a system that would be solved by the
 <br>
         <center>
             <button type="button" id="ex_3_reset" onclick="reset_ex(3)">Reset</button>
-            <button type="button" id="ex_3_skip" onclick="reset_ex(4)">Skip</button>       
+            <button type="button" id="ex_3_skip" onclick="reset_ex(4)">Skip</button>
         </center>
         </div>
         <div id="ex_4" style="display: none;">
@@ -582,12 +582,12 @@ Ex. 4. By moving the red line, please make the algorithm find a solution in exac
 <br>
         <center>
             <button type="button" id="ex_4_reset" onclick="reset_ex(4)">Reset</button>
-            <button type="button" id="ex_4_skip" onclick="done()">Skip</button>       
+            <button type="button" id="ex_4_skip" onclick="done()">Skip</button>
         </center>
         </div>
-    </form> 
+    </form>
     <p>
-As you can see, everything matters.     
+As you can see, everything matters.
     </p>
     <p>
 You can get some more precise solution with more iterations, but sometimes you'd need too many. <i>(This particular algorithm doesn't go past 100)</i> Some systems can be solved very fast and some can't be solved at all. And sometimes you can solve an unpleasant system simply by taking a lucky guess with a starting point.
@@ -595,7 +595,7 @@ You can get some more precise solution with more iterations, but sometimes you'd
     <div id="ex_choice">
     <p>
 Just before we go deeper, how do you feel about some exercises?
-    </p>    
+    </p>
     <button type="button" id="ex_yes" onclick="reset_ex(1)">Yes please</button>
     <button type="button" id="ex_no" onclick="show_the_rest()">No thanks</button>
     </div>
@@ -613,7 +613,7 @@ Congratulations! You now have some hands-on experience. Let's add some theory to
 This was probably the simplest iterative algorithm ever. It has no much use in the “real life” though. Real iterative algorithms for solving systems of linear equations look like this:
         </p>
         <p class="formula">
-<a href="https://en.wikipedia.org/wiki/Iterative_method#Linear_systems">https://en.wikipedia.org/wiki/Iterative_method#Linear_systems</a>. 
+<a href="https://en.wikipedia.org/wiki/Iterative_method#Linear_systems">https://en.wikipedia.org/wiki/Iterative_method#Linear_systems</a>.
         </p>
         <p>
 Iterative algorithms may seem simple in their 3-step idea, but every single step brings a problem on its own.
@@ -625,14 +625,14 @@ Finding good <b>initial</b> values is not a real problem for us. We can pick jus
 Sometimes you don't even know what sub-algorithms do you have in your batch, you let the algorithm choose how it will evolve. You let it make attempts and choose the best results. Simply put, this is how <a href="https://en.wikipedia.org/wiki/Genetic_algorithm">genetic algorithms</a> work.
         </p>
         <p>
-The next problem is the <b>termination criteria</b>. As you might have noticed, what we use for termination criteria doesn't work all that well even for the simplest case. Yes, there is some correlation between the threshold we pick and an error we get but it also depends on the system itself. The sharper the angle between our lines, the sooner we will stop and the larger our error will be. 
+The next problem is the <b>termination criteria</b>. As you might have noticed, what we use for termination criteria doesn't work all that well even for the simplest case. Yes, there is some correlation between the threshold we pick and an error we get but it also depends on the system itself. The sharper the angle between our lines, the sooner we will stop and the larger our error will be.
         </p>
         <p>
 Even in our simple case establishing some good termination criteria is not trivial.
         </p>
         <p>
 The last problem is the <b>convergence</b>. The algorithm converges if it gets closer to the solution on every iteration and diverges if it gets even further. Our algorithm can only converge or not converge meaning full stop. It happens when the lines are parallel. They simply don't have a point of intersection and therefore we will never find it.
-        </p>    
+        </p>
         <p>
 But convergence is not a categorical thing. It is measurable. Convergence analysis is the main part of developing a good iterative algorithm. Better convergence means less iterations and faster results.
         </p>
@@ -646,7 +646,7 @@ Iterative algorithms are very simple on high-level, but on low-level, they may g
 This introduction should have shown you a general idea of initial guess, termination criteria and convergence. But for the details, you have to get acquainted with the very algorithm you want to use. Whichever it would be.
         </p>
     </div>
-        
+
     <p class="footer">
     There are more words and plots on <a href="index.html">wordsandbuttons.online</a>.<br>
     Also please follow us on <a href="https://twitter.com/wordsandbuttons">Twitter</a>.
