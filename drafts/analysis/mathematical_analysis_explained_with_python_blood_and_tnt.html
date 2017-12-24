@@ -56,11 +56,27 @@ p {
     font-size: 14pt;
 }
 
-li {
-    font-size: 16pt;
-    width: 505pt;
+pre {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 12pt;
     text-align: left;
-    padding-bottom: 6pt;
+    width: 505pt;
+}
+
+.code_piece {
+    font-family: monospace;
+    padding-left: 4pt;
+    padding-right: 4pt;
+}
+
+u {
+    border-bottom: 1px dotted #000;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 form {
@@ -373,6 +389,10 @@ function button_n(){
             return i;
 }
 
+function show(n){
+    document.getElementById("shown_" + n).style.display = "none";
+    document.getElementById("hidden_" + n).style.display = "inline";
+}
     </script>
   </head>
   <body>
@@ -478,12 +498,62 @@ There are tables of derivatives and there are quite elaborate rules that allow y
     <p>
 If you are not a practicing mathematician, you should be fine with automated tools for symbolic mathematics. Probably the most available of which is <a href="http://www.sympy.org/en/index.html">SymPy</a>. It is available on-line, so you don't even have to install anything: <a href="http://live.sympy.org/">SymPy Live</a>.
     </p>
-    <h2>
+    <p>
+SymPy in a Python library, but don't worry. We only need 1 function, so you don't really have to know Python to get some useful work out of SymPy. Let's say we have a function:
+    </p>    
+    <p class="formula">
+y = x<sup>3</sup> - 2x<sup>2</sup> + 3x - 4
+    </p>
+    <p>
+All we have to do to get its derivative with SymPy is to write it in <span id="shown_ascii" onclick="show('ascii')"><u>ASCII</u></span><span id="hidden_ascii" style="display:none">ASCII (by the way, you might want to also choose Str as the output format in settings menu)</span> in a Python manner and run a <span class="code_piece">diff</span> function. Like this:
+    </p>
+    <pre>
+>>> <b>diff</b>(x**3 - 2*x**2 + 3*x - 4, x)
+3*x**2 - 4*x + 3 
+    </pre>
+    <p>
+If you choose Str as the output format, the result is also calculatable Python formula. You can get a second, and a third derivative with it.
+    </p>
+    <pre>
+>>> diff(x**3 - 2*x**2 + 3*x - 4, x)
+<b>3*x**2 - 4*x + 3</b>
+
+>>> diff(<b>3*x**2 - 4*x + 3</b>, x)
+<b><i>6*x - 4</i></b>
+
+>>> diff(<b><i>6*x - 4</i></b>, x)
+6    
+    </pre>
+    <p>
+Of course, you don't have to manually copy the string just to get to the third derivative. You can just ask the SymPy to do it for you:
+    </p>
+    <pre>
+>>> diff(x*x*x - 2*x*x + 3*x - 4, x, <b>3</b>)
+6
+    </pre>
+    <p>
+It's as simple as that! 
+    </p>
+    <p>
+SymPy is in all ways amazing, it does all kind of symbolical computations for you. It does derivatives, integrals, equations, simplifications and many more. And getting started with it is as easy as typing one function.
+    <p>
+    <p>
+But back to the mathematics. What we just did here is we analyzed the polynom into all its derivatives. It was the third degree polynom, so it had exactly 3 non-zero derivatives. But why did we do that? What is it good for? This can be answered in many ways, and one of them would be to synthesize things alike.
+    </p>
+    
+    <h2>   
 Mathematical synthesis
     </h2>
     <p>
 The antonym for “analysis” is “synthesis” which means making things out of parts. Mathematical analysis as a domain of knowledge also covers mathematical synthesis, which may seem confusing at first, but makes perfect sense when you see the duality of these terms.
     </p>
+    <p>
+...
+    </p>
+    <p>
+Polymons are especially interesting in this regard, because functions don't usually run out of derivatives just like that. Functions like sinus or exponent have an infinite number of derivatives, so we can't just disassemble them completely.
+    </p>
+    
 
     <p class="footer">
     There are more words and plots on <a href="index.html">wordsandbuttons.online</a>.<br>
