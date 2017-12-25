@@ -91,7 +91,7 @@ form {
     background-color: #eeee99;
 }
 
-input[type="text"] {
+input[type="number"] {
     width: 100pt;
     height: 22pt;
     margin: 8pt 8pt 8pt 8pt;
@@ -406,19 +406,40 @@ function draw_series(){
     // background
     series_context.fillStyle="#eeeeee";
 	series_context.fillRect(0,0,512,512);
+
+    // original function	
+    series_context.beginPath();
+	n = button2_n();
+	for(var w = 0; w < 512 - 1; w++){
+	    x1 = client_to_x(w);
+	    x2 = client_to_x(w+1);
+	    y1 = the_function(n, x1);
+	    y2 = the_function(n, x2);
+	    series_context.moveTo(x_to_client(x1), y_to_client(y1));
+	    series_context.lineTo(x_to_client(x2), y_to_client(y2));
+	}
+	series_context.strokeStyle="#AA7777";
+    series_context.stroke();
+	series_context.closePath();
 	
 	// grid
 	draw_grid_on(series_context);
 }
 
 function radio2(n){
-    for(var i = 1; i <= 8; i++){
+    for(var i = 5; i <= 8; i++){
         radio_i = document.getElementById("button2_" + i);
         radio_i.disabled = false;
     }
     radio_n = document.getElementById("button2_" + n);
     radio_n.disabled = true;
     draw_series();
+}
+
+function button2_n(){
+    for(var i = 5; i <= 8; i++)
+        if(document.getElementById("button2_" + i).disabled)
+            return i;
 }
 
     </script>
@@ -603,19 +624,15 @@ Polynomial series
     </p>
     <canvas id="series" width=512 height=512></canvas>
     <form>
-        <div id="buttons2">
         <center>
-            <button type="button" id="button2_1" onclick="radio2(1)" disabled="true">y = x</sup></button>
-            <button type="button" id="button2_2" onclick="radio2(2)">y = x<sup>2</sup></button>
-            <button type="button" id="button2_3" onclick="radio2(3)">y = x<sup>3</sup>/4 - x</button>
-            <button type="button" id="button2_4" onclick="radio2(4)">y = 2</button>
+Derivatives to count: <input type="number" id="derivatives_n" value="5">
         </center>
-        <br />
+        <div id="buttons2">
         <center>
             <button type="button" id="button2_5" onclick="radio2(5)">y = ln(x)</button>
             <button type="button" id="button2_6" onclick="radio2(6)">y = e<sup>x</sup></button>
             <button type="button" id="button2_7" onclick="radio2(7)">y = sin(x)</button>
-            <button type="button" id="button2_8" onclick="radio2(8)">y = cos(x)</button>
+            <button type="button" id="button2_8" onclick="radio2(8)" disabled="true">y = cos(x)</button>
         </center>
         </div>
     </form>
