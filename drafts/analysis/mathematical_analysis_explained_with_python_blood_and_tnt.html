@@ -409,7 +409,7 @@ function draw_series(){
 
     // original function	
     series_context.beginPath();
-	n = button2_n();
+	var n = button2_n();
 	for(var w = 0; w < 512 - 1; w++){
 	    x1 = client_to_x(w);
 	    x2 = client_to_x(w+1);
@@ -419,6 +419,27 @@ function draw_series(){
 	    series_context.lineTo(x_to_client(x2), y_to_client(y2));
 	}
 	series_context.strokeStyle="#AA7777";
+    series_context.stroke();
+	series_context.closePath();
+	
+	// series
+	// original function	
+    series_context.beginPath();
+	var dn = document.getElementById("derivatives_n").value;
+	if(dn < 0){
+	    dn = 0;
+	    document.getElementById("derivatives_n").value = 0;
+	}
+	    
+	for(var w = 0; w < 512 - 1; w++){
+	    x1 = client_to_x(w);
+	    x2 = client_to_x(w+1);
+	    y1 = the_series(n, x1, dn);
+	    y2 = the_series(n, x2, dn);
+	    series_context.moveTo(x_to_client(x1), y_to_client(y1));
+	    series_context.lineTo(x_to_client(x2), y_to_client(y2));
+	}
+	series_context.strokeStyle="#660000";
     series_context.stroke();
 	series_context.closePath();
 	
@@ -440,6 +461,33 @@ function button2_n(){
     for(var i = 5; i <= 8; i++)
         if(document.getElementById("button2_" + i).disabled)
             return i;
+}
+
+function factorial(n){
+    if (n <= 1) return 1;
+    return n*factorial(n-1);
+}
+
+function the_series(n, x, dn){
+    if(n == 5){
+        var one_minus_x = 1-x;
+        var log = 0.0;
+        for(var i = 1; i <= dn; i++){
+            log -= one_minus_x / i;
+        }
+        return log;
+    }
+    if(n == 6)
+        return Math.exp(x);
+    if(n == 7)
+        return Math.sin(x);
+    if(n == 8){
+        var cos = 1.0;
+        for(var i = 1; i <= dn/2; i++){
+            cos += Math.pow(-1.0, i) * Math.pow(x, 2.0*i) / factorial(2*i);
+        }
+        return cos;
+    }
 }
 
     </script>
@@ -625,7 +673,7 @@ Polynomial series
     <canvas id="series" width=512 height=512></canvas>
     <form>
         <center>
-Derivatives to count: <input type="number" id="derivatives_n" value="5">
+Derivatives to count: <input type="number" id="derivatives_n" value="5" oninput="draw_series()">
         </center>
         <div id="buttons2">
         <center>
