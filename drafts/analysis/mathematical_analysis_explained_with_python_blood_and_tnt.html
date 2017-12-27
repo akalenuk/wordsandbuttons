@@ -106,6 +106,13 @@ button {
     margin-right:4pt;
     font-size: 16pt;
 }
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
     </style>
     <script language="JavaScript">
 
@@ -673,12 +680,102 @@ However, what we can do is we can extract some minuscule quantity of nitrogen fr
     <p>
 The same principle works in mathematics too. We can't always synthesize the exact function we want, but we can provide a substitute for it. Or something that will blow up in our faces.
     </p>
+    
     <h2>
 Polynomial series
     </h2>
-    
     <p>
-...
+Let's start with something familiar. Like the polynom from before.
+    </p>
+    <p class="formula">
+f(x) = x<sup>3</sup> - 2x<sup>2</sup> + 3x - 4
+    </p>
+    <p>
+The easies point to calculate <i>f(x)</i> is <i>x = 0</i>. If <i>x</i> is 0 then <i>x<sup>3</sup></i> is 0, <i>2x<sup>2</sup></i> is 0, and <i>3x</i> is 0. <i>f(0) = -4</i>.
+    </p>
+    <p>
+The first derivatife of <i>f(x)</i>, as we established with SymPy is:
+    </p>
+    <p class="formula">
+f'(x) = 3x<sup>2</sup> - 4x + 3
+    </p>
+    <p>
+By the same logic <i>f'(0) = 3</i>. Then the second derivative:
+    </p>
+    <p class="formula">
+f"(x) = 6x - 4
+    </p>
+    <p>
+And <i>f"(0) = -4</i>. The last third derivative is just a number 6, so </i>f'''(0) = 6</i>.
+    </p>
+    <p>
+So, we analyzed the polynom to the set of its derivatives in 0. Including the original value they are: [-4, 3, -4, 6]. Now let's synthesize it back.
+    </p>
+    <p>
+You might have noticed that when you get a derivative of a single term you decrement its x's power but multiply its coefficient to the power decremented.
+    </p>
+    <table class="formula">
+    <tr>
+    <td style="border-bottom:1px solid black">
+    d
+    </td>
+    <td rowspan=2>
+    a<b>x</b><sup>n</sup>
+    </td>
+    <td rowspan=2>
+    =
+    </td>  
+    <td rowspan=2>
+    na<b>x</b><sup>n-1</sup>
+    </td>   
+    </tr>
+    <tr>
+    <td>
+    dx
+    </td>
+    </tr>
+    </table>
+    <p>
+That also means that:
+    <ul>
+        <li>
+the n'th derivative of that very term is a number, since <i>x<sup>0</sup> = 1</i>;
+        </li><li>
+the number is <i>an!</i> since its the product of all decrements of n.
+        </li>
+    </ul>
+    </p>
+    <p>
+And, more importantly, this means that we can reconstruct our polynom term by term out of its derivatives in 0:
+    <ul>
+        <li>
+the last coefficient will remain -4;
+        </li><li>
+the one before last will be <i>3/1!</i> which is, of course, 3;
+        </li><li>
+the one before that will be <i>-4/2!</i> that is -2;
+        </li><li>
+and the first one: <i>6/3!</i> that is 1.
+        </li>
+    </ul>
+    </p>
+    <p>
+Not really impressive, is it? We took polynom apart and glued it back. There is no much point in this exercise. But what if I tell you that you can do more than polynoms in this very way?
+    </p>
+    <p>
+Polymons are especially interesting in this regard, because functions don't usually run out of derivatives just like that. Functions like sinus or exponent have an infinite number of derivatives, so we can't just disassemble them completely. But we can try to analyze any function into a finite series of numbers and then take it back as a polynom. Usually the more derivatives we count, the more precise our polynom will model the original funciton.
+    </p>
+    <p>
+Why is this important? For once, computers don't know trigonometry. They don't know logariphms or exponents, they are basically summators on steroids. They can do multiplication reasonably fast, but that's it. Fortunately, with polynomial series that's all we need! We only need summation and multiplication to calculate a polynom.
+    </p>
+    <p>
+Of course, this is not the ultimate solution. For instance, polynoms are quite good substitutes for trigonometric functions, but they are only substitutes. There is always a question of precision. Luckily, all of our computation in floating point numbers are imprecise, so usually we can get away by making our series just marginally more precise than the carrier type.
+    </p>
+    <p>
+And there is always a more serious problem of representability. Remember (almost) from before? We can't actually represent <i>every</i> function we want, for the very least the logarithm is not determined in 0. There is no <i>log(0)</i> and that upsets our scheme. We can cheat it out by synthesizing <i>log(1-x)</i>. But even though the model we'll get will only be plausible on a certain interval.
+    </p>
+    <p>
+Here is a plot with some most known serializable functions. Feel free to explore.
     </p>
     <canvas id="series" width=512 height=512></canvas>
     <form>
@@ -697,13 +794,17 @@ Derivatives to count: <input type="number" id="derivatives_n" value="5" oninput=
     <script language="JavaScript">
     init_series();
     </script>    
-    <p>
-...
-    </p>
-    <p>
-Polymons are especially interesting in this regard, because functions don't usually run out of derivatives just like that. Functions like sinus or exponent have an infinite number of derivatives, so we can't just disassemble them completely.
-    </p>
     
+    <h2>
+Conclusion
+    </h2>
+    <p>
+Of course, mathematical analysis doesn't end there. I college it takes a couple of years to master the basics of it, so even considering the short cuts it simply can't be comprehensibly exposed in one small piece of words and buttons. However, I hope this piece shows you <i>the reason</i> people are willing to spend years studying it. It's not only about polynomial series. Splines, approximations, extrapolations, differential equations, the largest part of mathematical modeling is based on analysis. It's very pragmatic thing, although it is incredibly dull when you only do exercises and don't even see how it pays off in the end.
+    </p>
+    <p>
+But it does. If anything, analysis is the most stable investment. You can do more money with the framework of your choice in the short run, but the expertise in it will expire in some 10 or 20 years, while the analysis is still valuable four centuries after its invention.
+    </p>
+   
 
     <p class="footer">
     There are more words and plots on <a href="index.html">wordsandbuttons.online</a>.<br>
