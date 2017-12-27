@@ -231,6 +231,8 @@ function draw_derivative(client_x, client_y, react_on_move){
         d_context.setLineDash([10, 10]);
 	    d_context.moveTo(x_to_client(x1), y_to_client(y1));
 	    d_context.lineTo(x_to_client(x2), y_to_client(y2));
+	    d_context.lineTo(x_to_client(x2), y_to_client(y1));
+	    d_context.lineTo(x_to_client(x1), y_to_client(y1));
 	    d_context.strokeStyle="#44aa44";
         d_context.stroke();
    	    d_context.setLineDash([]);
@@ -243,6 +245,9 @@ function draw_derivative(client_x, client_y, react_on_move){
 	    d_context.strokeStyle="#44aa44";
         d_context.stroke();
         d_context.closePath();
+        d_context.fillStyle="#003300";
+        d_context.fillText("dx", x_to_client((x1+x2)/2), y_to_client(y1) - 8);
+        d_context.fillText("f(x+dx)-f(x)", x_to_client(x2) + 8, y_to_client((y1+y2)/2));
     }else{
         var d = (demo_f(x1+0.0001) - demo_f(x1))/0.0001;
         var x2 = -1;
@@ -782,7 +787,7 @@ Here is a plot with some most known serializable functions. Feel free to explore
     <canvas id="series" width=512 height=512></canvas>
     <form>
         <center>
-Derivatives to count: <input type="number" id="derivatives_n" value="5" oninput="draw_series()">
+Derivatives to count: <input type="number" id="derivatives_n" value="3" oninput="draw_series()">
         </center>
         <div id="buttons2">
         <center>
