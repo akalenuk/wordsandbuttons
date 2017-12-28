@@ -235,4 +235,112 @@ Donald E. Knuth, Luis Trabb Pardo, 1976
 
 
 
+Namespace current addSubspace: #SimpleTCP!
+Namespace current: SimpleTCP!
+
+"A simple TCP server"
+Object subclass: #Server
+  instanceVariableNames: 'serverSocket socketHandler'
+  classVariableNames: ''
+  poolDictionaries: ''
+  category: ''!
+
+!Server class methodsFor: 'instance creation'!
+
+new: aServerSocket handler: aHandler
+  | simpleServer |
+  simpleServer := super new.
+  simpleServer socket: aServerSocket.
+  simpleServer handler: aHandler.
+  simpleServer init.
+  ^simpleServer
+!!
+
+!Server methodsFor: 'initialization'!
+
+init
+  ^self
+!!
+
+!Server methodsFor: 'accessing'!
+
+socket
+  ^serverSocket
+!
+
+socket: aServerSocket
+  serverSocket := aServerSocket.
+  ^self
+!
+
+handler
+  ^socketHandler
+!
+
+handler: aHandler
+  socketHandler := aHandler.
+  ^self
+!!
+
+!Server methodsFor: 'running'!
+
+run
+  | s |
+  [
+    serverSocket waitForConnection.
+    s := (serverSocket accept).
+    self handle: s
+  ] repeat
+!
+
+!Server methodsFor: 'handling'!
+
+handle: aSocket
+  socketHandler handle: aSocket
+!!
+
+GNU SmallTalk
+Source: https://sblinn.jottit.com/gnu_smalltalk_simplechat_tcp_server
+http://smalltalk.gnu.org/wiki/examples
+Building a simple chat server with GNU Smalltalk using class inheritance
+
+
+
+
+GET "LIBHDR"
+
+GLOBAL $(
+        COUNT: 200
+        ALL: 201
+$)
+
+LET TRY(LD, ROW, RD) BE
+        TEST ROW = ALL THEN
+                COUNT := COUNT + 1
+        ELSE $(
+                LET POSS = ALL & ~(LD | ROW | RD)
+                UNTIL POSS = 0 DO $(
+                        LET P = POSS & -POSS
+                        POSS := POSS - P
+                        TRY(LD + P << 1, ROW + P, RD + P >> 1)
+                $)
+        $)
+
+LET START() = VALOF $(
+        ALL := 1
+        FOR I = 1 TO 12 DO $(
+                COUNT := 0
+                TRY(0, 0, 0)
+                WRITEF("%I2-QUEENS PROBLEM HAS %I5 SOLUTIONS*N", I, COUNT)
+                ALL := 2 * ALL + 1
+        $)
+        RESULTIS 0
+$)
+
+BCPL
+Source: https://en.wikipedia.org/wiki/BCPL#Examples
+BCPL From Wikipedia, the free encyclopedia
+
+
+
 
