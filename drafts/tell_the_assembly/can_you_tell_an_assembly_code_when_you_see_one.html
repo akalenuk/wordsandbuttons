@@ -100,7 +100,7 @@ Can you tell an assembly code when you see one?
     </p>
 
     <h2>
-...
+GUI with WinAPI
     </h2>
     <p>
 ...    
@@ -108,7 +108,46 @@ Can you tell an assembly code when you see one?
     <table><tr>
     <td style="width: 505pt;">
     <pre>
-...
+nMain proc hInst:HINSTANCE,hPrevInst:HINSTANCE,CmdLine:LPSTR,CmdShow:DWORD 
+    LOCAL wc:WNDCLASSEX       ; create local variables on stack 
+    LOCAL msg:MSG 
+    LOCAL hwnd:HWND
+
+    mov   wc.cbSize,SIZEOF WNDCLASSEX      ; fill values in members of wc 
+    mov   wc.style, CS_HREDRAW or CS_VREDRAW 
+    mov   wc.lpfnWndProc, OFFSET WndProc 
+    mov   wc.cbClsExtra,NULL 
+    mov   wc.cbWndExtra,NULL 
+    push  hInstance 
+    pop   wc.hInstance 
+    mov   wc.hbrBackground,COLOR_WINDOW+1 
+    mov   wc.lpszMenuName,NULL 
+    mov   wc.lpszClassName,OFFSET ClassName 
+    invoke LoadIcon,NULL,IDI_APPLICATION 
+    mov   wc.hIcon,eax 
+    mov   wc.hIconSm,eax 
+    invoke LoadCursor,NULL,IDC_ARROW 
+    mov   wc.hCursor,eax 
+    invoke RegisterClassEx, addr wc        ; register our window class 
+    invoke CreateWindowEx,NULL, 
+        ADDR ClassName, ADDR AppName,\ 
+        WS_OVERLAPPEDWINDOW,\ 
+        CW_USEDEFAULT, CW_USEDEFAULT,\ 
+        CW_USEDEFAULT, CW_USEDEFAULT,\ 
+        NULL, NULL, hInst, NULL 
+    mov   hwnd,eax 
+    invoke ShowWindow, hwnd,CmdShow        ; display our window on desktop 
+    invoke UpdateWindow, hwnd              ; refresh the client area
+
+    .WHILE TRUE                            ; Enter message loop 
+                invoke GetMessage, ADDR msg,NULL,0,0 
+                .BREAK .IF (!eax) 
+                invoke TranslateMessage, ADDR msg 
+                invoke DispatchMessage, ADDR msg 
+   .ENDW 
+    mov     eax,msg.wParam                 ; return exit code in eax 
+    ret 
+WinMain endp
     </pre>
     </td>
     </td></tr></table>
@@ -119,12 +158,15 @@ Can you tell an assembly code when you see one?
     </div>
     <div id="hidden_1" style="display:none;">
         <p>
-...
+MASM32
+Source: http://win32assembly.programminghorizon.com/tut3.html
+Iczelion's Win32 Assembly Homepage
+Tutorial 3: A Simple Window
         </p>
     </div>
 
     <h2>
-...
+Functional interface
     </h2>
     <p>
 ...    
@@ -132,7 +174,13 @@ Can you tell an assembly code when you see one?
     <table><tr>
     <td style="width: 505pt;">
     <pre>
-...
+(module
+  (func $add (param $lhs i32) (param $rhs i32) (result i32)
+    get_local $lhs
+    get_local $rhs
+    i32.add)
+  (export "add" (func $add))
+)
     </pre>
     </td>
     </td></tr></table>
@@ -143,12 +191,15 @@ Can you tell an assembly code when you see one?
     </div>
     <div id="hidden_2" style="display:none;">
         <p>
-...
+WebAssembly
+Source: https://github.com/mdn/webassembly-examples/blob/master/understanding-text-format/add.wat
+https://developer.mozilla.org/en-US/docs/WebAssembly
+Examples
         </p>
     </div>
 
     <h2>
-...
+Elaborate algorithm
     </h2>
     <p>
 ...    
@@ -156,7 +207,39 @@ Can you tell an assembly code when you see one?
     <table><tr>
     <td style="width: 505pt;">
     <pre>
-...
+1   c@VA t@IC x@½C y@RC z@NC
+2   INTEGERS +5 →c
+3           →t
+4       +t      TESTA Z
+5       -t
+6               ENTRY Z
+7   SUBROUTINE 6→z
+8       +tt→y→z
+9       +tx→y→x
+10  +z+cx   CLOSE WRITE 1
+
+11  a@/½ b@MA c@GA d@OA e@PA f#HA i@VE x@ME
+12  INTEGERS +20 →b +10 →c +400 →d +999 →e +1 →f
+13  LOOP 10n
+14      n→x
+15  +b-x→x
+16      x→q
+17  SUBROUTINE 5 →aq
+18  REPEAT n
+16      +c →i
+20  LOOP 10n
+21      +an SUBROUTINE 1 →y
+22      +d-y TESTA Z
+23      +i SUBROUTINE 3
+24      +e SUBROUTINE 4
+25              CONTROL X
+26              ENTRY Z
+27      +i SUBROUTINE 3
+28      +y SUBROUTINE 4
+29              ENTRY X
+30      +i→f→i
+31  REPEAT n
+32  ENTRY A CONTROL A WRITE 2 START 2
     </pre>
     </td>
     </td></tr></table>
@@ -167,20 +250,33 @@ Can you tell an assembly code when you see one?
     </div>
     <div id="hidden_3" style="display:none;">
         <p>
-...
+Glennie's AUTOCODE
+Source: http://bitsavers.trailing-edge.com/pdf/stanford/cs_techReports/STAN-CS-76-562_EarlyDevelPgmgLang_Aug76.pdf
+The Early Development Of Programming Languages
+Donald E. Knuth, Luis Trabb Pardo, 1976
         </p>
     </div>
 
     <h2>
-...
+Structural programming
     </h2>
     <p>
-...    
+...  
     </p>    
     <table><tr>
     <td style="width: 505pt;">
     <pre>
-...
+v0 = my_vector 			// we want the horizontal sum of this
+int64 r0 = get_len ( v0 ) 	// length of vector in bytes
+int64 r0 = round_u2 ( r0 ) 	// round up to nearest power of 2
+float v0 = set_len ( r0 , v0 ) 	// adjust vector length
+while ( uint64 r0 > 4) { 	// loop to calculate horizontal sum
+	uint64 r0 > >= 1 	// the vector length is halved
+	float v1 = shift_reduce ( r0 , v0 ) // get upper half of vector
+	// the result vector has the length of the first operand :
+	float v0 = v1 + v0 	// Add upper half and lower half
+}
+// The sum is now a scalar in v0  
     </pre>
     </td>
     </td></tr></table>
@@ -191,12 +287,17 @@ Can you tell an assembly code when you see one?
     </div>
     <div id="hidden_4" style="display:none;">
         <p>
-...
+ForwardCom assembly language
+Source: https://github.com/ForwardCom/manual/blob/master/forwardcom.pdf
+ForwardCom: An open-standard instruction set for high-performance
+microprocessors
+Agner Fog
+14 Code examples
         </p>
     </div>
 
     <h2>
-...
+Classes and methods
     </h2>
     <p>
 ...    
@@ -204,7 +305,55 @@ Can you tell an assembly code when you see one?
     <table><tr>
     <td style="width: 505pt;">
     <pre>
-...
+// Metadata version: v2.0.50215
+.assembly extern mscorlib
+{
+  .publickeytoken = (B7 7A 5C 56 19 34 E0 89 )
+  .ver 2:0:0:0
+}
+.assembly sample
+{
+  .custom instance void [mscorlib]System.Runtime.CompilerServices.CompilationRelaxationsAttribute::.ctor(int32) = ( 01 00 08 00 00 00 00 00 )
+  .hash algorithm 0x00008004
+  .ver 0:0:0:0
+}
+.module sample.exe
+// MVID: {A224F460-A049-4A03-9E71-80A36DBBBCD3}
+.imagebase 0x00400000
+.file alignment 0x00000200
+.stackreserve 0x00100000
+.subsystem 0x0003       // WINDOWS_CUI
+.corflags 0x00000001    //  ILONLY
+// Image base: 0x02F20000
+
+// =============== CLASS MEMBERS DECLARATION ===================
+
+.class public auto ansi beforefieldinit Hello
+       extends [mscorlib]System.Object
+{
+  .method public hidebysig static void  Main(string[] args) cil managed
+  {
+    .entrypoint
+    // Code size       13 (0xd)
+    .maxstack  8
+    IL_0000:  nop
+    IL_0001:  ldstr      "Hello World!"
+    IL_0006:  call       void [mscorlib]System.Console::WriteLine(string)
+    IL_000b:  nop
+    IL_000c:  ret
+  } // end of method Hello::Main
+
+  .method public hidebysig specialname rtspecialname
+          instance void  .ctor() cil managed
+  {
+    // Code size       7 (0x7)
+    .maxstack  8
+    IL_0000:  ldarg.0
+    IL_0001:  call       instance void [mscorlib]System.Object::.ctor()
+    IL_0006:  ret
+  } // end of method Hello::.ctor
+
+} // end of class Hello
     </pre>
     </td>
     </td></tr></table>
@@ -215,12 +364,14 @@ Can you tell an assembly code when you see one?
     </div>
     <div id="hidden_5" style="display:none;">
         <p>
-...
+ilasm
+Source: https://docs.microsoft.com/en-us/dotnet/framework/tools/ilasm-exe-il-assembler
+Examples
         </p>
     </div>
 
     <h2>
-...
+Objects and messages
     </h2>
     <p>
 ...    
@@ -228,7 +379,69 @@ Can you tell an assembly code when you see one?
     <table><tr>
     <td style="width: 505pt;">
     <pre>
-...
+Namespace current addSubspace: #SimpleTCP!
+Namespace current: SimpleTCP!
+
+"A simple TCP server"
+Object subclass: #Server
+  instanceVariableNames: 'serverSocket socketHandler'
+  classVariableNames: ''
+  poolDictionaries: ''
+  category: ''!
+
+!Server class methodsFor: 'instance creation'!
+
+new: aServerSocket handler: aHandler
+  | simpleServer |
+  simpleServer := super new.
+  simpleServer socket: aServerSocket.
+  simpleServer handler: aHandler.
+  simpleServer init.
+  ^simpleServer
+!!
+
+!Server methodsFor: 'initialization'!
+
+init
+  ^self
+!!
+
+!Server methodsFor: 'accessing'!
+
+socket
+  ^serverSocket
+!
+
+socket: aServerSocket
+  serverSocket := aServerSocket.
+  ^self
+!
+
+handler
+  ^socketHandler
+!
+
+handler: aHandler
+  socketHandler := aHandler.
+  ^self
+!!
+
+!Server methodsFor: 'running'!
+
+run
+  | s |
+  [
+    serverSocket waitForConnection.
+    s := (serverSocket accept).
+    self handle: s
+  ] repeat
+!
+
+!Server methodsFor: 'handling'!
+
+handle: aSocket
+  socketHandler handle: aSocket
+!!
     </pre>
     </td>
     </td></tr></table>
@@ -239,12 +452,15 @@ Can you tell an assembly code when you see one?
     </div>
     <div id="hidden_6" style="display:none;">
         <p>
-...
+GNU SmallTalk
+Source: https://sblinn.jottit.com/gnu_smalltalk_simplechat_tcp_server
+http://smalltalk.gnu.org/wiki/examples
+Building a simple chat server with GNU Smalltalk using class inheritance
         </p>
     </div>
 
     <h2>
-...
+Console application
     </h2>
     <p>
 ...    
@@ -252,7 +468,35 @@ Can you tell an assembly code when you see one?
     <table><tr>
     <td style="width: 505pt;">
     <pre>
-...
+GET "LIBHDR"
+
+GLOBAL $(
+        COUNT: 200
+        ALL: 201
+$)
+
+LET TRY(LD, ROW, RD) BE
+        TEST ROW = ALL THEN
+                COUNT := COUNT + 1
+        ELSE $(
+                LET POSS = ALL & ~(LD | ROW | RD)
+                UNTIL POSS = 0 DO $(
+                        LET P = POSS & -POSS
+                        POSS := POSS - P
+                        TRY(LD + P << 1, ROW + P, RD + P >> 1)
+                $)
+        $)
+
+LET START() = VALOF $(
+        ALL := 1
+        FOR I = 1 TO 12 DO $(
+                COUNT := 0
+                TRY(0, 0, 0)
+                WRITEF("%I2-QUEENS PROBLEM HAS %I5 SOLUTIONS*N", I, COUNT)
+                ALL := 2 * ALL + 1
+        $)
+        RESULTIS 0
+$)
     </pre>
     </td>
     </td></tr></table>
@@ -263,12 +507,14 @@ Can you tell an assembly code when you see one?
     </div>
     <div id="hidden_7" style="display:none;">
         <p>
-...
+BCPL
+Source: https://en.wikipedia.org/wiki/BCPL#Examples
+BCPL From Wikipedia, the free encyclopedia
         </p>
     </div>
 
     <h2>
-...
+Another concole application
     </h2>
     <p>
 ...    
@@ -276,7 +522,51 @@ Can you tell an assembly code when you see one?
     <table><tr>
     <td style="width: 505pt;">
     <pre>
-...
+<<console_input_output.min>>
+<<branching.min>>
+<<instructions.min>>
+
+.assembly extern mscorlib {}
+
+.assembly hello
+{
+    .ver 1:0:1:0
+}
+
+.module hello.exe
+
+.method static void main() cil managed
+{
+        .maxstack 2
+        .entrypoint
+    
+        .locals init (int32 a, int32 b)
+
+        ((write: "Input positive x: "))
+        ((read line))
+        ((parse it as int32))
+        ((store it as local a))
+        ((check if ((local a)) > ((int32 0)) ))
+        ((if so {{
+                    ((write: "It is positive!\n")) 
+                    ((load int32 2))
+                    ((store it as local b))
+                     
+                    ((write: "x * 2 = "))
+
+                    ((load local a))
+                    ((load local b))
+                    ((multiply them))
+
+                    ((write int32))      
+                    ((write line: ""))      
+            }}else{{
+                    ((write: "It isn't positive.\n"))
+            }} 
+        ))
+        ((read line))           
+        ((return))
+}
     </pre>
     </td>
     </td></tr></table>
@@ -287,7 +577,8 @@ Can you tell an assembly code when you see one?
     </div>
     <div id="hidden_8" style="display:none;">
         <p>
-...
+milasm
+Source: https://github.com/akalenuk/milasm
         </p>
     </div>
 
