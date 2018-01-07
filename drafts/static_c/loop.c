@@ -12,7 +12,8 @@ case 0: ID=0;(BODY);\
 
 int main(){
   int y;
-  FACTORIAL(4, y);
+  int x = 4;
+  FACTORIAL(x, y);
   printf("%d\n", y);
 }
 
