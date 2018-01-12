@@ -1,46 +1,40 @@
-#define LOOP_TO_0(ID, N, BODY) {int ID; switch(N){\
-case 7: ID=7;{BODY};\
-case 6: ID=6;{BODY};\
-case 5: ID=5;{BODY};\
-case 4: ID=4;{BODY};\
-case 3: ID=3;{BODY};\
-case 2: ID=2;{BODY};\
-case 1: ID=1;{BODY};\
-case 0: ID=0;{BODY};\
-}}
+#define F_0(N) ((N)==1 ? 1 : (N)*F_1((N)-1))
+#define F_1(N) ((N)==1 ? 1 : (N)*F_2((N)-1))
+#define F_2(N) ((N)==1 ? 1 : (N)*F_3((N)-1))
+#define F_3(N) ((N)==1 ? 1 : (N)*F_4((N)-1))
+#define F_4(N) ((N)==1 ? 1 : (N)*F_5((N)-1))
+#define F_5(N) ((N)==1 ? 1 : (N)*F_6((N)-1))
+#define F_6(N) ((N)==1 ? 1 : (N)*F_7((N)-1))
+#define F_7(N) ((N)==1 ? 1 : (N)*F_8((N)-1))
+#define F_8(N)  (1)
 
-#define LOOP_TO(ID, START, END, BODY) \
-  LOOP_TO_0(ID, (END)-(START), ID=(END)-ID; BODY)
+int f_8(int i) {return 1;}
+int f_7(int i) {return i == 1 ? 1 : i*f_8(i-1);}
+int f_6(int i) {return i == 1 ? 1 : i*f_7(i-1);}
+int f_5(int i) {return i == 1 ? 1 : i*f_6(i-1);}
+int f_4(int i) {return i == 1 ? 1 : i*f_5(i-1);}
+int f_3(int i) {return i == 1 ? 1 : i*f_4(i-1);}
+int f_2(int i) {return i == 1 ? 1 : i*f_3(i-1);}
+int f_1(int i) {return i == 1 ? 1 : i*f_2(i-1);}
+int f_0(int i) {return i == 1 ? 1 : i*f_1(i-1);}
 
-#define LOOP_DOWNTO(ID, START, END, BODY) \
-  LOOP_TO_0(ID, (START)-(END), ID=(END)+ID; BODY)
+#define RECURSIVE(PREFIX, CHUNK1, SUFFIX, END_SUFFIX) \
+PREFIX##0##CHUNK1##1##SUFFIX \
+PREFIX##1##CHUNK1##2##SUFFIX \
+PREFIX##2##CHUNK1##3##SUFFIX \
+PREFIX##3##CHUNK1##4##SUFFIX \
+PREFIX##4##CHUNK1##5##SUFFIX \
+PREFIX##5##CHUNK1##6##SUFFIX \
+PREFIX##6##CHUNK1##7##SUFFIX \
+PREFIX##7##CHUNK1##8##SUFFIX \
+PREFIX##8##END_SUFFIX 
 
-#define SOLVE_A(A, B, I, J, N) \
-  ((N == sizeof(B)/sizeof(B[0])) ? A[I][I] : \
-    SOLVE_A(A, B, I, J, N+1) * SOLVE_A(A, B, N, N, N+1) - \
-    SOLVE_A(A, B, I, N, N+1) * SOLVE_A(A, B, N, J, N+1))
-
-#define SOLVE_B(A, B, I, N) \
-  ((N == sizeof(B)/sizeof(B[0])) ? B[I] : \
-    SOLVE_A(A, B, N, N, N+1) * SOLVE_B(A, B, I, N+1) - \
-    SOLVE_A(A, B, I, N, N+1) * SOLVE_B(A, B, N, N+1))
-
-#define SOLVE_X(A, B, X, I) \
-  double d = SOLVE_B(A, B, I, I+1); \
-  LOOP_TO(j, 0, I-1, d-=SOLVE_A(A, B, I, j, I+1)*X[j];); \
-  X[I] = d / SOLVE_A(A, B, I, I, I+1);
-
-#define STATIC_SOLVE(A, B, X) \
-  LOOP_TO(k, 0, sizeof(X)/sizeof(X[0])-1, SOLVE_X(A, B, X, k););
+REFURSIVE(int ff_, (int i){return i == 1 ? 1 : i*ff_, (i-1);}, (int){return 0;})
 
 #include "stdio.h"
 #include "stdlib.h"
 
 int main(){
-  double a[3][3] = {{4., 2., 5.}, {1., 6., 4.}, {6.,2.,7.}};
-  double b[3] = {5., 3., 1.};
-  double x[3];
-  STATIC_SOLVE(a, b, x);
-  printf("%f %f %f", x[0], x[1], x[2]);
+  printf("%d", ff_0(4));  
 }
 
