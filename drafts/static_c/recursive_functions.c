@@ -18,19 +18,19 @@ inline int f_2(int i) {return i == 1 ? 1 : i*f_3(i-1);}
 inline int f_1(int i) {return i == 1 ? 1 : i*f_2(i-1);}
 inline int f_0(int i) {return i == 1 ? 1 : i*f_1(i-1);}
 
-#define RECURSIVE(PREFIX, NAME, CHUNK1, SUFFIX, END_SUFFIX) \
-inline PREFIX NAME##_8 END_SUFFIX \
-inline PREFIX NAME##_7 CHUNK1 NAME##_8 SUFFIX \
-inline PREFIX NAME##_6 CHUNK1 NAME##_7 SUFFIX \
-inline PREFIX NAME##_5 CHUNK1 NAME##_6 SUFFIX \
-inline PREFIX NAME##_4 CHUNK1 NAME##_5 SUFFIX \
-inline PREFIX NAME##_3 CHUNK1 NAME##_4 SUFFIX \
-inline PREFIX NAME##_2 CHUNK1 NAME##_3 SUFFIX \
-inline PREFIX NAME##_1 CHUNK1 NAME##_2 SUFFIX \
-inline PREFIX NAME##_0 CHUNK1 NAME##_1 SUFFIX 
+#define RECURSIVE(PREFIX, CHUNK1, SUFFIX, END_SUFFIX) \
+inline PREFIX##_8 END_SUFFIX \
+inline PREFIX##_7 CHUNK1##_8 SUFFIX \
+inline PREFIX##_6 CHUNK1##_7 SUFFIX \
+inline PREFIX##_5 CHUNK1##_6 SUFFIX \
+inline PREFIX##_4 CHUNK1##_5 SUFFIX \
+inline PREFIX##_3 CHUNK1##_4 SUFFIX \
+inline PREFIX##_2 CHUNK1##_3 SUFFIX \
+inline PREFIX##_1 CHUNK1##_2 SUFFIX \
+inline PREFIX##_0 CHUNK1##_1 SUFFIX 
 
 
-RECURSIVE(int, ff, (int i){return i == 1 ? 1 : i*, (i-1);}, (int i){return 0;})
+RECURSIVE(int ff, (int i){return i == 1 ? 1 : i*ff, (i-1);},   (int i){return 0;})
 
 #include "stdio.h"
 #include "stdlib.h"
