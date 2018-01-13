@@ -76,7 +76,7 @@
 #include <stdio.h>
 
 /* DGESV prototype */
-extern void dgesv( int* n, int* nrhs, double* a, int* lda, int* ipiv,
+void dgesv_( int* n, int* nrhs, double* a, int* lda, int* ipiv,
                 double* b, int* ldb, int* info );
 /* Auxiliary routines prototypes */
 extern void print_matrix( char* desc, int m, int n, double* a, int lda );
@@ -109,7 +109,7 @@ int main() {
         /* Executable statements */
         printf( " DGESV Example Program Results\n" );
         /* Solve the equations A*X = B */
-        dgesv( &n, &nrhs, a, &lda, ipiv, b, &ldb, &info );
+        dgesv_( &n, &nrhs, a, &lda, ipiv, b, &ldb, &info );
         /* Check for the exact singularity */
         if( info > 0 ) {
                 printf( "The diagonal element of the triangular factor of A,\n" );
