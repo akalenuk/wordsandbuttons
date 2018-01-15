@@ -5,13 +5,13 @@ RECURSIVE_4_CALLS(double aijn, (double* a, double* b, int i, int j, int n, int m
   return (n == m) ? a[i*m+j] : 
     aijn, (a, b, i, j, n+1, m) * aijn, (a, b, n, n, n+1, m) - 
     aijn, (a, b, i, n, n+1, m) * aijn, (a, b, n, j, n+1, m); 
-}, (double* a, double* b, int i, int j, int n, int m){return 1.;})
+}, (double* a, double* b, int i, int j, int n, int m){return a[i*m+j];})
 
 RECURSIVE_4_CALLS(double bin, (double* a, double* b, int i, int n, int m){ 
   return (n == m) ? b[i] : 
     aijn, (a, b, n, n, n+1, m) * bin, (a, b, i, n+1, m) - 
     aijn, (a, b, i, n, n+1, m) * bin, (a, b, n, n+1, m);
-}, (double* a, double* b, int i, int n, int m){return 1.;})
+}, (double* a, double* b, int i, int n, int m){return b[i];})
 
 #define SOLVE_X(A, B, X, I, M) \
   double d = bin_0(A, B, I, (I+1), M); \

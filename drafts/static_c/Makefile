@@ -1,9 +1,10 @@
 all:
-	gcc -std=c11 -O2 loop.c -o loop
-	gcc -std=c11 -O2 loop.c -S -o loop.s
-	./loop
-lapack:
+	gcc -std=c11 -O2 exp_static_a_b.c -o exp_static_a_b
+	gcc -std=c11 -O2 exp_static_a_b.c -S -o exp_static_a_b.s
+	./exp_static_a_b
 	gcc -std=c11 -O2 exp_lapack.c -L/usr/lib -llapack -lblas -lf2c -o exp_lapack
+	./exp_lapack
 clean:
-	rm loop
-	rm loop.s
+	rm exp_static_a_b
+	rm exp_static_a_b.s
+	rm exp_lapack
