@@ -17,6 +17,6 @@ int main() {
     double x[5];
 
     STATIC_SOLVE(a, b, x);
-    printf("%f, %f, %f, %f, %f\n", b[0], b[1], b[2], b[3], b[4]);
+    printf("%f, %f, %f, %f, %f\n", x[0], x[1], x[2], x[3], x[4]);
 }
 
