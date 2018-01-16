@@ -11,6 +11,9 @@ all:
 	gcc -std=c11 -O2 exp_volatile_a_b.c -o exp_volatile_a_b
 	gcc -std=c11 -O2 exp_volatile_a_b.c -S -o exp_volatile_a_b.s
 	./exp_volatile_a_b	
+	gcc -std=c11 -O2 exp_triangular_matrix.c -o exp_triangular_matrix
+	gcc -std=c11 -O2 exp_triangular_matrix.c -S -o exp_triangular_matrix.s
+	./exp_triangular_matrix	
 	gcc -std=c11 -O2 exp_lapack.c -L/usr/lib -llapack -lblas -lf2c -o exp_lapack
 	./exp_lapack
 clean:
@@ -22,4 +25,6 @@ clean:
 	rm exp_volatile_a_static_b.s	
 	rm exp_volatile_a_b
 	rm exp_volatile_a_b.s	
+	rm exp_triangular_matrix
+	rm exp_triangular_matrix.s
 	rm exp_lapack
