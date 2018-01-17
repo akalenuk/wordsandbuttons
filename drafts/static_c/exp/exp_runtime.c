@@ -14,13 +14,13 @@ double bin(double* a, double* b, int i, int n, int m){
 
 void solve_xi(double* a, double* b, double* x, int i, int m){
   double d = bin(a, b, i, i+1, m); 
-  for(int j = 0; i < i-1; ++j)
+  for(int j = 0; j < i; ++j)
     d-=aijn(a, b, i, j, i+1, m)*x[j];
   x[i] = d / aijn(a, b, i, i, i+1, m);
 }
 
 void runtime_solve(double* a, double * b, double* x, int m){
-  for(int k = 0; k < m-1; ++k)
+  for(int k = 0; k < m; ++k)
     solve_xi(a, b, x, k, m);
 }
 
