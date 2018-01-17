@@ -16,7 +16,7 @@ case 0: ID=0;{BODY};\
   LOOP_TO_0(ID, (START)-(END), ID=(END)+ID; BODY)
 
 double aijn(double* a, double* b, int i, int j, int n, int m){
-  return (n == m) ? a[i*m+i] : 
+  return (n == m) ? a[i*m+j] : 
     aijn(a, b, i, j, n+1, m) * aijn(a, b, n, n, n+1, m) - 
     aijn(a, b, i, n, n+1, m) * aijn(a, b, n, j, n+1, m);
 }
