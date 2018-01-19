@@ -1,0 +1,378 @@
+time -f "%U\n" ./exp_static_a_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+0.00
+
+time -f "%U\n" ./exp_static_a_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+0.00
+
+time -f "%U\n" ./exp_static_a_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+0.00
+
+perf stat ./exp_static_a_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+
+ Performance counter stats for './exp_static_a_b':
+
+         11.133867      task-clock (msec)         #    0.981 CPUs utilized          
+                 0      context-switches          #    0.000 K/sec                  
+                 0      cpu-migrations            #    0.000 K/sec                  
+                51      page-faults               #    0.005 M/sec                  
+        28,872,375      cycles                    #    2.593 GHz                    
+   <not supported>      stalled-cycles-frontend  
+   <not supported>      stalled-cycles-backend   
+        53,576,034      instructions              #    1.86  insns per cycle        
+        11,115,152      branches                  #  998.319 M/sec                  
+             6,180      branch-misses             #    0.06% of all branches        
+
+       0.011354947 seconds time elapsed
+
+valgrind --tool=cachegrind ./exp_static_a_b 
+==5278== Cachegrind, a cache and branch-prediction profiler
+==5278== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==5278== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==5278== Command: ./exp_static_a_b
+==5278== 
+--5278-- warning: L3 cache found, using its data for the LL simulation.
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+==5278== 
+==5278== I   refs:      53,168,748
+==5278== I1  misses:         1,037
+==5278== LLi misses:         1,019
+==5278== I1  miss rate:       0.00%
+==5278== LLi miss rate:       0.00%
+==5278== 
+==5278== D   refs:      24,056,208  (14,042,548 rd   + 10,013,660 wr)
+==5278== D1  misses:         3,003  (     2,427 rd   +        576 wr)
+==5278== LLd misses:         2,457  (     1,945 rd   +        512 wr)
+==5278== D1  miss rate:        0.0% (       0.0%     +        0.0%  )
+==5278== LLd miss rate:        0.0% (       0.0%     +        0.0%  )
+==5278== 
+==5278== LL refs:            4,040  (     3,464 rd   +        576 wr)
+==5278== LL misses:          3,476  (     2,964 rd   +        512 wr)
+==5278== LL miss rate:         0.0% (       0.0%     +        0.0%  )
+time -f "%U\n" ./exp_static_a_volatile_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+0.04
+
+time -f "%U\n" ./exp_static_a_volatile_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+0.04
+
+time -f "%U\n" ./exp_static_a_volatile_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+0.04
+
+perf stat ./exp_static_a_volatile_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+
+ Performance counter stats for './exp_static_a_volatile_b':
+
+         49.977410      task-clock (msec)         #    0.995 CPUs utilized          
+                 0      context-switches          #    0.000 K/sec                  
+                 0      cpu-migrations            #    0.000 K/sec                  
+                52      page-faults               #    0.001 M/sec                  
+       171,656,404      cycles                    #    3.435 GHz                    
+   <not supported>      stalled-cycles-frontend  
+   <not supported>      stalled-cycles-backend   
+       144,597,614      instructions              #    0.84  insns per cycle        
+        11,119,181      branches                  #  222.484 M/sec                  
+             6,837      branch-misses             #    0.06% of all branches        
+
+       0.050207637 seconds time elapsed
+
+valgrind --tool=cachegrind ./exp_static_a_volatile_b 
+==5292== Cachegrind, a cache and branch-prediction profiler
+==5292== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==5292== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==5292== Command: ./exp_static_a_volatile_b
+==5292== 
+--5292-- warning: L3 cache found, using its data for the LL simulation.
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+==5292== 
+==5292== I   refs:      144,168,750
+==5292== I1  misses:          1,050
+==5292== LLi misses:          1,028
+==5292== I1  miss rate:        0.00%
+==5292== LLi miss rate:        0.00%
+==5292== 
+==5292== D   refs:       55,056,214  (35,042,555 rd   + 20,013,659 wr)
+==5292== D1  misses:          3,000  (     2,420 rd   +        580 wr)
+==5292== LLd misses:          2,462  (     1,948 rd   +        514 wr)
+==5292== D1  miss rate:         0.0% (       0.0%     +        0.0%  )
+==5292== LLd miss rate:         0.0% (       0.0%     +        0.0%  )
+==5292== 
+==5292== LL refs:             4,050  (     3,470 rd   +        580 wr)
+==5292== LL misses:           3,490  (     2,976 rd   +        514 wr)
+==5292== LL miss rate:          0.0% (       0.0%     +        0.0%  )
+time -f "%U\n" ./exp_volatile_a_static_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+0.11
+
+time -f "%U\n" ./exp_volatile_a_static_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+0.11
+
+time -f "%U\n" ./exp_volatile_a_static_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+0.10
+
+perf stat ./exp_volatile_a_static_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+
+ Performance counter stats for './exp_volatile_a_static_b':
+
+        110.494191      task-clock (msec)         #    0.998 CPUs utilized          
+                 0      context-switches          #    0.000 K/sec                  
+                 0      cpu-migrations            #    0.000 K/sec                  
+                53      page-faults               #    0.480 K/sec                  
+       390,677,574      cycles                    #    3.536 GHz                    
+   <not supported>      stalled-cycles-frontend  
+   <not supported>      stalled-cycles-backend   
+       299,688,508      instructions              #    0.77  insns per cycle        
+        11,135,223      branches                  #  100.777 M/sec                  
+             7,077      branch-misses             #    0.06% of all branches        
+
+       0.110705534 seconds time elapsed
+
+valgrind --tool=cachegrind ./exp_volatile_a_static_b
+==5306== Cachegrind, a cache and branch-prediction profiler
+==5306== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==5306== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==5306== Command: ./exp_volatile_a_static_b
+==5306== 
+--5306-- warning: L3 cache found, using its data for the LL simulation.
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+==5306== 
+==5306== I   refs:      324,168,744
+==5306== I1  misses:          1,060
+==5306== LLi misses:          1,041
+==5306== I1  miss rate:        0.00%
+==5306== LLi miss rate:        0.00%
+==5306== 
+==5306== D   refs:      156,056,205  (105,042,546 rd   + 51,013,659 wr)
+==5306== D1  misses:          3,008  (      2,424 rd   +        584 wr)
+==5306== LLd misses:          2,464  (      1,948 rd   +        516 wr)
+==5306== D1  miss rate:         0.0% (        0.0%     +        0.0%  )
+==5306== LLd miss rate:         0.0% (        0.0%     +        0.0%  )
+==5306== 
+==5306== LL refs:             4,068  (      3,484 rd   +        584 wr)
+==5306== LL misses:           3,505  (      2,989 rd   +        516 wr)
+==5306== LL miss rate:          0.0% (        0.0%     +        0.0%  )
+time -f "%U\n" ./exp_volatile_a_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+0.10
+
+time -f "%U\n" ./exp_volatile_a_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+0.10
+
+time -f "%U\n" ./exp_volatile_a_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+0.10
+
+perf stat ./exp_volatile_a_b
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+
+ Performance counter stats for './exp_volatile_a_b':
+
+        114.016384      task-clock (msec)         #    0.998 CPUs utilized          
+                 0      context-switches          #    0.000 K/sec                  
+                 0      cpu-migrations            #    0.000 K/sec                  
+                53      page-faults               #    0.465 K/sec                  
+       392,633,721      cycles                    #    3.444 GHz                    
+   <not supported>      stalled-cycles-frontend  
+   <not supported>      stalled-cycles-backend   
+       324,691,613      instructions              #    0.83  insns per cycle        
+        11,135,365      branches                  #   97.665 M/sec                  
+             7,450      branch-misses             #    0.07% of all branches        
+
+       0.114204749 seconds time elapsed
+
+valgrind --tool=cachegrind ./exp_volatile_a_b
+==5320== Cachegrind, a cache and branch-prediction profiler
+==5320== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==5320== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==5320== Command: ./exp_volatile_a_b
+==5320== 
+--5320-- warning: L3 cache found, using its data for the LL simulation.
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+==5320== 
+==5320== I   refs:      349,168,762
+==5320== I1  misses:          1,063
+==5320== LLi misses:          1,045
+==5320== I1  miss rate:        0.00%
+==5320== LLi miss rate:        0.00%
+==5320== 
+==5320== D   refs:      184,056,211  (119,042,549 rd   + 65,013,662 wr)
+==5320== D1  misses:          3,015  (      2,431 rd   +        584 wr)
+==5320== LLd misses:          2,468  (      1,949 rd   +        519 wr)
+==5320== D1  miss rate:         0.0% (        0.0%     +        0.0%  )
+==5320== LLd miss rate:         0.0% (        0.0%     +        0.0%  )
+==5320== 
+==5320== LL refs:             4,078  (      3,494 rd   +        584 wr)
+==5320== LL misses:           3,513  (      2,994 rd   +        519 wr)
+==5320== LL miss rate:          0.0% (        0.0%     +        0.0%  )
+time -f "%U\n" ./exp_triangular_matrix
+591176.470584, -2253752.228162, -190390.044234, 2936482.302720, 1459137.710977
+0.07
+
+time -f "%U\n" ./exp_triangular_matrix
+591176.470584, -2253752.228162, -190390.044234, 2936482.302720, 1459137.710977
+0.08
+
+time -f "%U\n" ./exp_triangular_matrix
+591176.470584, -2253752.228162, -190390.044234, 2936482.302720, 1459137.710977
+0.08
+
+perf stat ./exp_triangular_matrix
+591176.470584, -2253752.228162, -190390.044234, 2936482.302720, 1459137.710977
+
+ Performance counter stats for './exp_triangular_matrix':
+
+         81.335207      task-clock (msec)         #    0.998 CPUs utilized          
+                 0      context-switches          #    0.000 K/sec                  
+                 0      cpu-migrations            #    0.000 K/sec                  
+                52      page-faults               #    0.639 K/sec                  
+       277,481,244      cycles                    #    3.412 GHz                    
+   <not supported>      stalled-cycles-frontend  
+   <not supported>      stalled-cycles-backend   
+       251,689,969      instructions              #    0.91  insns per cycle        
+        11,135,347      branches                  #  136.907 M/sec                  
+             7,537      branch-misses             #    0.07% of all branches        
+
+       0.081537728 seconds time elapsed
+
+valgrind --tool=cachegrind ./exp_triangular_matrix
+==5334== Cachegrind, a cache and branch-prediction profiler
+==5334== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==5334== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==5334== Command: ./exp_triangular_matrix
+==5334== 
+--5334-- warning: L3 cache found, using its data for the LL simulation.
+591176.470584, -2253752.228162, -190390.044234, 2936482.302720, 1459137.710977
+==5334== 
+==5334== I   refs:      276,168,966
+==5334== I1  misses:          1,057
+==5334== LLi misses:          1,037
+==5334== I1  miss rate:        0.00%
+==5334== LLi miss rate:        0.00%
+==5334== 
+==5334== D   refs:      139,056,307  (78,042,608 rd   + 61,013,699 wr)
+==5334== D1  misses:          3,013  (     2,425 rd   +        588 wr)
+==5334== LLd misses:          2,467  (     1,948 rd   +        519 wr)
+==5334== D1  miss rate:         0.0% (       0.0%     +        0.0%  )
+==5334== LLd miss rate:         0.0% (       0.0%     +        0.0%  )
+==5334== 
+==5334== LL refs:             4,070  (     3,482 rd   +        588 wr)
+==5334== LL misses:           3,504  (     2,985 rd   +        519 wr)
+==5334== LL miss rate:          0.0% (       0.0%     +        0.0%  )
+time -f "%U\n" ./exp_runtime
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+2.10
+
+time -f "%U\n" ./exp_runtime
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+2.10
+
+time -f "%U\n" ./exp_runtime
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+2.06
+
+perf stat ./exp_runtime
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+
+ Performance counter stats for './exp_runtime':
+
+       2093.193531      task-clock (msec)         #    1.000 CPUs utilized          
+                 5      context-switches          #    0.002 K/sec                  
+                 0      cpu-migrations            #    0.000 K/sec                  
+                52      page-faults               #    0.025 K/sec                  
+     7,366,476,637      cycles                    #    3.519 GHz                    
+   <not supported>      stalled-cycles-frontend  
+   <not supported>      stalled-cycles-backend   
+    20,468,617,966      instructions              #    2.78  insns per cycle        
+     3,327,473,267      branches                  # 1589.663 M/sec                  
+         1,318,079      branch-misses             #    0.04% of all branches        
+
+       2.093406269 seconds time elapsed
+
+valgrind --tool=cachegrind ./exp_runtime
+==5356== Cachegrind, a cache and branch-prediction profiler
+==5356== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==5356== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==5356== Command: ./exp_runtime
+==5356== 
+--5356-- warning: L3 cache found, using its data for the LL simulation.
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+==5356== 
+==5356== I   refs:      20,491,168,741
+==5356== I1  misses:             1,048
+==5356== LLi misses:             1,030
+==5356== I1  miss rate:           0.00%
+==5356== LLi miss rate:           0.00%
+==5356== 
+==5356== D   refs:       8,133,056,216  (4,474,042,550 rd   + 3,659,013,666 wr)
+==5356== D1  misses:             3,008  (        2,424 rd   +           584 wr)
+==5356== LLd misses:             2,464  (        1,947 rd   +           517 wr)
+==5356== D1  miss rate:            0.0% (          0.0%     +           0.0%  )
+==5356== LLd miss rate:            0.0% (          0.0%     +           0.0%  )
+==5356== 
+==5356== LL refs:                4,056  (        3,472 rd   +           584 wr)
+==5356== LL misses:              3,494  (        2,977 rd   +           517 wr)
+==5356== LL miss rate:             0.0% (          0.0%     +           0.0%  )
+time -f "%U\n" ./exp_lapack
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+0.65
+
+time -f "%U\n" ./exp_lapack
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+0.62
+
+time -f "%U\n" ./exp_lapack
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+0.68
+
+perf stat ./exp_lapack
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+
+ Performance counter stats for './exp_lapack':
+
+        618.590673      task-clock (msec)         #    1.000 CPUs utilized          
+                 1      context-switches          #    0.002 K/sec                  
+                 0      cpu-migrations            #    0.000 K/sec                  
+               110      page-faults               #    0.178 K/sec                  
+     2,199,478,788      cycles                    #    3.556 GHz                    
+   <not supported>      stalled-cycles-frontend  
+   <not supported>      stalled-cycles-backend   
+     6,657,924,902      instructions              #    3.03  insns per cycle        
+     1,188,370,570      branches                  # 1921.094 M/sec                  
+            14,667      branch-misses             #    0.00% of all branches        
+
+       0.618787571 seconds time elapsed
+
+valgrind --tool=cachegrind ./exp_lapack
+==5422== Cachegrind, a cache and branch-prediction profiler
+==5422== Copyright (C) 2002-2015, and GNU GPL'd, by Nicholas Nethercote et al.
+==5422== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==5422== Command: ./exp_lapack
+==5422== 
+--5422-- warning: L3 cache found, using its data for the LL simulation.
+-800714.025732, -695243.384448, 593914.994902, 1321725.609087, 565756.196571
+==5422== 
+==5422== I   refs:      6,681,366,269
+==5422== I1  misses:            1,574
+==5422== LLi misses:            1,476
+==5422== I1  miss rate:          0.00%
+==5422== LLi miss rate:          0.00%
+==5422== 
+==5422== D   refs:      2,695,124,009  (1,739,093,903 rd   + 956,030,106 wr)
+==5422== D1  misses:            6,084  (        5,037 rd   +       1,047 wr)
+==5422== LLd misses:            4,509  (        3,597 rd   +         912 wr)
+==5422== D1  miss rate:           0.0% (          0.0%     +         0.0%  )
+==5422== LLd miss rate:           0.0% (          0.0%     +         0.0%  )
+==5422== 
+==5422== LL refs:               7,658  (        6,611 rd   +       1,047 wr)
+==5422== LL misses:             5,985  (        5,073 rd   +         912 wr)
+==5422== LL miss rate:            0.0% (          0.0%     +         0.0%  )
