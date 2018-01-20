@@ -78,6 +78,13 @@ button{
     font-size: 16pt;
 }
 
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
 u {
     border-bottom: 1px dotted #000;
     text-decoration: none;
@@ -529,33 +536,263 @@ Technically, one can do the very same hack via the inlined pseudo-recursion from
 Racing LAPACK
     </h2>
     <p>
-... 
-    </p> 
-    <table><tr>
-    <td>
-    <pre><span id="slides_1_1" style="display:block"> 
-1. ...
-    </span><span id="slides_1_2" style="display:none"> 
-2. ...
-    </span><span id="slides_1_3" style="display:none"> 
-3. ...
-    </span></pre>
-    </td>
-    </td></tr></table>
-    <p style="text-align:right">
-    <button type="button" onclick="next('slides_1')">Next step</button>
+<a href="http://www.netlib.org/lapack/">LAPACK</a> is known to be a rather effective library for solving linear algebra problems. I'm going to measure how it performs on 1M small linear systems, and compare it to the brute Kramers rule solution done with loops and recursive functions first, and with metaprogramming tricks to remove overhead then. 
     </p>
     <p>
-...
+That's exactly what I want to measure:
     </p>
+    <table><tr>
+    <td>
+    <pre>
+#include "stdio.h"
+
+void dgesv_( int* n, int* nrhs, double* a, int* lda, int* ipiv,
+                double* b, int* ldb, int* info );
+
+#define N 5
+#define NRHS 1
+#define LDA N
+#define LDB N
+
+int main() {
+    double sum_x[5] = {0., 0., 0., 0., 0.};
+    for(int i = 0; i &lt; 1000000; ++i) {
+        int n = N, nrhs = NRHS, lda = LDA, ldb = LDB, info;
+
+        int ipiv[N];
+        double a[LDA*N] = {
+         6.80, -2.11,  5.66,  5.97,  8.23,
+        -6.05, -3.30,  5.36, -4.44,  1.08,
+        -0.45,  2.58, -2.70,  0.27,  9.04,
+         8.32,  2.71,  4.35, -7.17,  2.14,
+        -9.67, -5.14, -7.26,  6.08, -6.87
+        };
+        double b[LDB*NRHS] = {
+            4.02,  6.19, -8.22, -7.57, -3.03,
+        };
+
+        dgesv_( &n, &nrhs, a, &lda, ipiv, b, &ldb, &info );
+        for(int j = 0; j &lt; 5; ++j){
+            sum_x[j] += b[j];
+        }
+    }
+    printf("%f, %f, %f, %f, %f\n", 
+      sum_x[0], sum_x[1], sum_x[2], sum_x[3], sum_x[4]);
+}
+    </pre>
+    </td></tr></table>
+    <p>
+I know this is <a href="https://medium.com/@veedrac/learning-the-value-of-good-benchmarking-technique-with-c-magic-squares-b61b3386c97f">not a perfect benchmark</a>, for the very least it doesn't account for branch misprediction. But I'm ok with it. The metaprogrammed version I am going to compare it too simply has no branches to mispredict.
+    </p>
+    <p>
+But first, the version with overheads:
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+#include "stdio.h"
+
+double aijn(double* a, double* b, int i, int j, int n, int m){
+  return (n == m) ? a[i*m+j] : 
+    aijn(a, b, i, j, n+1, m) * aijn(a, b, n, n, n+1, m) - 
+    aijn(a, b, i, n, n+1, m) * aijn(a, b, n, j, n+1, m);
+}
+
+double bin(double* a, double* b, int i, int n, int m){ 
+  return (n == m) ? b[i] : 
+    aijn(a, b, n, n, n+1, m) * bin(a, b, i, n+1, m) - 
+    aijn(a, b, i, n, n+1, m) * bin(a, b, n, n+1, m);
+}
+
+void solve_xi(double* a, double* b, double* x, int i, int m){
+  double d = bin(a, b, i, i+1, m); 
+  for(int j = 0; j &lt; i; ++j)
+    d-=aijn(a, b, i, j, i+1, m)*x[j];
+  x[i] = d / aijn(a, b, i, i, i+1, m);
+}
+
+void runtime_solve(double* a, double * b, double* x, int m){
+  for(int k = 0; k &lt; m; ++k)
+    solve_xi(a, b, x, k, m);
+}
+
+int main() {
+    double sum_x[5] = {0., 0., 0., 0., 0.};
+        for(int i = 0; i &lt; 1000000; ++i) {
+        double a[5*5] = {
+            6.80, -6.05, -0.45,  8.32, -9.67,
+           -2.11, -3.30,  2.58,  2.71, -5.14,
+            5.66,  5.36, -2.70,  4.35, -7.26,
+            5.97, -4.44,  0.27, -7.17,  6.08,
+            8.23,  1.08,  9.04,  2.14, -6.87
+        };
+        double b[5] = {
+            4.02,  6.19, -8.22, -7.57, -3.03,
+        };
+        
+        double x[5];
+
+        runtime_solve(a, b, x, sizeof(x) / sizeof(x[0]));
+        for(int j = 0; j &lt; 5; ++j){
+            sum_x[j] += x[j];
+        }
+    }
+    printf("%f, %f, %f, %f, %f\n", 
+      sum_x[0], sum_x[1], sum_x[2], sum_x[3], sum_x[4]);
+}
+    </pre>
+    </td></tr></table>    
+    <p>
+So, it has a loop, a nested loop and a pair of recursive functions. Nothing we can't linearize with macroses. The version with metaprogramming tricks looks like this:
+    </p>
+    <table><tr>
+    <td>
+    <pre style="width: 620pt;">
+// from static_recursion.h
+#define RECURSIVE_4_CALLS(PREFIX, CHUNK1, CHUNK2, CHUNK3, CHUNK4, SUFFIX, END_SUFFIX) \
+inline PREFIX##_4 END_SUFFIX \
+inline PREFIX##_3 CHUNK1##_4 CHUNK2##_4 CHUNK3##_4 CHUNK4##_4 SUFFIX \
+inline PREFIX##_2 CHUNK1##_3 CHUNK2##_3 CHUNK3##_3 CHUNK4##_3 SUFFIX \
+inline PREFIX##_1 CHUNK1##_2 CHUNK2##_2 CHUNK3##_2 CHUNK4##_2 SUFFIX \
+inline PREFIX##_0 CHUNK1##_1 CHUNK2##_1 CHUNK3##_1 CHUNK4##_1 SUFFIX     
+
+
+// from static_loops.h
+#define LOOP_TO_0(ID, N, BODY) {int ID; switch(N){\
+case 7: ID=7;{BODY};\
+case 6: ID=6;{BODY};\
+case 5: ID=5;{BODY};\
+case 4: ID=4;{BODY};\
+case 3: ID=3;{BODY};\
+case 2: ID=2;{BODY};\
+case 1: ID=1;{BODY};\
+case 0: ID=0;{BODY};\
+}}
+
+#define LOOP_TO(ID, START, END, BODY) \
+  LOOP_TO_0(ID, (END)-(START), ID=(END)-ID; BODY)
+
+#define LOOP_DOWNTO(ID, START, END, BODY) \
+  LOOP_TO_0(ID, (START)-(END), ID=(END)+ID; BODY)
+  
+  
+// from static_linear_solver.h
+RECURSIVE_4_CALLS(double aijn, (double* a, double* b, int i, int j, int n, int m){ 
+  return (n == m) ? a[i*m+j] : 
+    aijn, (a, b, i, j, n+1, m) * aijn, (a, b, n, n, n+1, m) - 
+    aijn, (a, b, i, n, n+1, m) * aijn, (a, b, n, j, n+1, m); 
+}, (double* a, double* b, int i, int j, int n, int m){return a[i*m+j];})
+
+RECURSIVE_4_CALLS(double bin, (double* a, double* b, int i, int n, int m){ 
+  return (n == m) ? b[i] : 
+    aijn, (a, b, n, n, n+1, m) * bin, (a, b, i, n+1, m) - 
+    aijn, (a, b, i, n, n+1, m) * bin, (a, b, n, n+1, m);
+}, (double* a, double* b, int i, int n, int m){return b[i];})
+
+#define SOLVE_X(A, B, X, I, M) \
+  double d = bin_0(A, B, I, (I+1), M); \
+  LOOP_TO(j, 0, (I)-1, d-=aijn_0(A, B, I, j, (I+1), M)*X[j];); \
+  X[I] = d / aijn_0(A, B, I, I, (I+1), M);
+
+#define STATIC_SOLVE(A, B, X) \
+  int m = sizeof(X) / sizeof(X[0]); \
+  LOOP_TO(k, 0, m-1, SOLVE_X(A, B, X, k, m););
+  
+
+// from volatile_a_b.c
+#include "stdio.h"
+#include "static_linear_solver.h"
+
+int main() {
+    double sum_x[5] = {0., 0., 0., 0., 0.};
+    for(int i = 0; i &lt; 1000000; ++i) {
+        volatile double v_a[5*5] = {
+            6.80, -6.05, -0.45,  8.32, -9.67,
+           -2.11, -3.30,  2.58,  2.71, -5.14,
+            5.66,  5.36, -2.70,  4.35, -7.26,
+            5.97, -4.44,  0.27, -7.17,  6.08,
+            8.23,  1.08,  9.04,  2.14, -6.87
+        };
+        double a[5*5] = {
+            v_a[0+0],  v_a[0+1],  v_a[0+2],  v_a[0+3],  v_a[0+4],
+            v_a[5+0],  v_a[5+1],  v_a[5+2],  v_a[5+3],  v_a[5+4], 
+            v_a[10+0], v_a[10+1], v_a[10+2], v_a[10+3], v_a[10+4],
+            v_a[15+0], v_a[15+1], v_a[15+2], v_a[15+3], v_a[15+4],
+            v_a[20+0], v_a[20+1], v_a[20+2], v_a[20+3], v_a[20+4],
+        };
+        volatile double v_b[5] = {
+            4.02,  6.19, -8.22, -7.57, -3.03,
+        };    
+        double b[5] = {
+            v_b[0],  v_b[1], v_b[2], v_b[3], v_b[4],
+        };
+        
+        double x[5];
+
+        STATIC_SOLVE(a, b, x);
+        for(int j = 0; j &lt; 5; ++j){
+            sum_x[j] += x[j];
+        }
+    }
+    printf("%f, %f, %f, %f, %f\n", sum_x[0], sum_x[1], sum_x[2], sum_x[3], sum_x[4]);
+}
+    </pre>
+    </td></tr></table>
+    <p>
+Note that I put volatile keyword for input arrays I then copy to the STATIC_SOLVE's input. The thing is, if I don't do that, the whole thing will get solved statically for 0 runtime cost. That's not entirely what I want to measure. I want my compiler to build a code that would work on arbitrary data, that's why the input data should be volatile. 
+    </p>
+    <p>
+But frankly, I want static and semi-static solutions measured as well. The beauty of this kind of programming is that it makes compiler account for any piece of static data it has on compile time. So I measured not only LAPACK and metaprogrammed solution, but several other things as well.
+    </p>
+    <ol>
+    <li>
+Full static solution. Predictably it ran for 0.00 seconds.
+    </li>
+    <li>
+Static A matrix, volatile B vector. 0.04 seconds.
+    </li>
+    <li>
+Volatile A matric, static B vector. 0.10 seconds.
+    </li>
+    <li>
+<b>The metaprogrammed solution for all volatile data. 0.10 seconds.</b>
+    </li>
+    <li>
+The solution when the matrix is triangle, meaning upper right half is all 0, and the other data is volatile. 0.08 seconds.
+    </li>
+    <li>
+<b>LAPACK. 0.65 seconds.</b>
+    </li>
+    <li>
+Original solution with recursion and loops. 2.10 seconds.
+    </li>
+    </ol>
     <canvas id="results" width=700 height=500></canvas>
     <script language="JavaScript">
     init_results();
     </script>
-    <p> 
     <p>
-...
+Of course, these measurements are not at all precise, but I think they still work since the difference is so obvious.
+    </p> 
+    <h2>
+Conclusion
+    </h2>
+    <p>
+I want to mention several things that I personally learned from this experiments.
     </p>
+    <p>
+The compiler was suprisingly good in localizing static data. You can copy some of the array elements from side-effect source, and leave other defined in the compile time, and the compiler would accound for that. The solution with triangle matrix clearly wins from that.
+    </p>
+    <p>
+Semi-static computation does not necessary give good advantage. The solution with static B is roughly the same and sometimes even worse than the solution with both arrays being volatile.
+    </p>
+    <p>
+The compiled size of the solution with loops and calls unrolled would not neccessary be large. In my case the unrolled solution fits into roughly 8KB executable, while the direct one compiles to 9KB.
+    </p>
+    <p style="font-family: sans-serif; font-size: 14pt;">
+All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the code is compiled with g++ 5.4.0 -std=c++11 -O2. The code for the benchmark is available on <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/drafts/static_c/benchmark">Github</a>.
+    </p>
+
 
     <p class="footer">
     There are more words and buttons on <a href="index.html">wordsandbuttons.online</a>.<br>
