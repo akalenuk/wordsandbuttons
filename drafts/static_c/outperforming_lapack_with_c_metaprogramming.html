@@ -236,7 +236,7 @@ In this example we will make in compute a quasi-recursive factorial function sta
     <table><tr>
     <td>
     <pre><span id="slides_recursive_1" style="display:block"><div style="color:#994466"><b>Step 1. C source code</b></div>
-#define RECURSIVE(PREFIX, CHUNK1, SUFFIX, END_SUFFIX) \
+<b>#define RECURSIVE(PREFIX, CHUNK1, SUFFIX, END_SUFFIX) \
 inline PREFIX##_8 END_SUFFIX \
 inline PREFIX##_7 CHUNK1##_8 SUFFIX \
 inline PREFIX##_6 CHUNK1##_7 SUFFIX \
@@ -245,7 +245,7 @@ inline PREFIX##_4 CHUNK1##_5 SUFFIX \
 inline PREFIX##_3 CHUNK1##_4 SUFFIX \
 inline PREFIX##_2 CHUNK1##_3 SUFFIX \
 inline PREFIX##_1 CHUNK1##_2 SUFFIX \
-inline PREFIX##_0 CHUNK1##_1 SUFFIX 
+inline PREFIX##_0 CHUNK1##_1 SUFFIX </b>
 
 RECURSIVE(int f, (int i)
   {return i == 1 
@@ -257,7 +257,8 @@ RECURSIVE(int f, (int i)
 
 int main(){
   printf("%d", f_0(4));  
-}    
+}
+   
     </span><span id="slides_recursive_2" style="display:none"><div style="color:#992244"><b>Step 2. C pseudo-code after preprocessing</b></div>
 inline int f_8(int i) {return 1;}
 inline int f_7(int i) {return i == 1 ? 1 : i*f_8(i-1);}
@@ -274,6 +275,7 @@ inline int f_0(int i) {return i == 1 ? 1 : i*f_1(i-1);}
 int main(){
   printf("%d", f_0(4));
 }
+
 
 
 
@@ -304,6 +306,7 @@ int main(){
 }
 
 
+
     </span><span id="slides_recursive_4" style="display:none"><div style="color:#881122"><b>Step 4. Pseudo-code after constant propagation</b></div>
 
 
@@ -317,6 +320,7 @@ int main(){
 int main(){
   printf("%d", 4*(4-1)*(4-1-1)*1);
 }
+
 
 
 
@@ -361,6 +365,169 @@ int main(){
     <p>
 Of course, this hack has its limits. For instance, when you have to do several calls from a quasi-recursive function, the compiler would have to build not a list of bodies, but a whole tree. This slows down compilation enormously. It takes noticeable time to compile 4-depth 4-branches quasi-recursion on a modern desktop. 6-depth 6-branches might turn it catatonic.
     </p>
+    <h2>
+2. Forced loop unroll
+    </h2>
+    <p>
+Compilers are usually good in unrolling loops. In fact, they are usually better than us, regular people. The good side of the loop unrolling is that it once again loses the overhead on index counting and comparison. The bad side is bigger code. Sometimes we would win more from a small loop running completely in instruction cahce than from a huge unrolled loop that has to be read from uncached memory.
+    </p>
+    <p>
+Sometimes however we know better than the compiler. We know that the loop is short, and finite, and even if it has inner loops it should still be eligeable for unrolling. Here is the trick that will no options to the C compiler.
+    </p>
+    <table><tr>
+    <td>
+    <pre><span id="unroll_1" style="display:block"><div style="color:#994466"><b>Step 1. C source code</b></div> 
+<b>#define LOOP_TO_0(ID, N, BODY) {int ID; switch(N){\
+case 4: ID=4;{BODY};\
+case 3: ID=3;{BODY};\
+case 2: ID=2;{BODY};\
+case 1: ID=1;{BODY};\
+case 0: ID=0;{BODY};\
+}}</b>
+
+#define STATIC_SORT_INT(a) \
+  LOOP_TO_0(i, sizeof(a)/sizeof(a[0]) - 2, LOOP_TO_0(j, i, \
+    int k = i-j; \
+    int s = a[k]+a[k+1]; \
+    int d = abs(a[k]-a[k+1]); \
+    a[k] = (s-d)/2; \
+    a[k+1] = (s+d)/2; \
+  ));
+
+#include "stdio.h"
+
+int main(){
+  int a[4] = {1, 5, 2, 4};
+  STATIC_SORT_INT(a);
+  printf("%d %d %d %d\n", a[0], a[1], a[2], a[3]);
+}
+
+
+
+    </span><span id="unroll_2" style="display:none"><div style="color:#992244"><b>Step 2. C pseudo-code after preprocessing</b></div> 
+#include "stdio.h"
+
+int main(){
+  int a[4] = {1, 5, 2, 4};
+  int i; switch(2){
+    case 4: i=4; {
+    int j; switch(4){
+      case 4: j=4; int k=i-j; int s=a[k]+a[k+1]; 
+        int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+      case 3: j=3; int k=i-j; int s=a[k]+a[k+1]; 
+        int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+      case 2: j=2; int k=i-j; int s=a[k]+a[k+1]; 
+        int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+      case 1: j=1; int k=i-j; int s=a[k]+a[k+1]; 
+        int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+      case 0: j=0; int k=i-j; int s=a[k]+a[k+1]; 
+        int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+      }
+      case 3: i=3; {
+      ...
+      }
+    ...
+    }
+  }
+  printf("%d %d %d %d\n", a[0], a[1], a[2], a[3]);
+}
+
+    </span><span id="unroll_3" style="display:none"><div style="color:#992244"><b>Step 3. C pseudo-code after dead cases elimination</b></div>  
+#include "stdio.h"
+
+int main(){
+  int a[4] = {1, 5, 2, 4};
+  int i; 
+  i = 2;
+  j = 2; int k=i-j; int s=a[k]+a[k+1]; int d=abs(a[k]-a[k+1]);
+    a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+  j = 1; int k=i-j; int s=a[k]+a[k+1]; int d=abs(a[k]-a[k+1]);
+    a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+  j = 0; int k=i-j; int s=a[k]+a[k+1]; int d=abs(a[k]-a[k+1]);
+    a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+  i = 1;
+   j = 1; int k=i-j; int s=a[k]+a[k+1]; int d=abs(a[k]-a[k+1]);
+    a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+  j = 0; int k=i-j; int s=a[k]+a[k+1]; int d=abs(a[k]-a[k+1]);
+    a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+  i = 0;   
+  j = 0; int k=i-j; int s=a[k]+a[k+1]; int d=abs(a[k]-a[k+1]);
+    a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+  }
+  printf("%d %d %d %d\n", a[0], a[1], a[2], a[3]);
+}
+
+
+
+
+    </span><span id="unroll_4" style="display:none"><div style="color:#881122"><b>Step 4. Pseudo-code after constant propagation</b></div> 
+
+
+
+
+
+
+
+
+
+
+#include "stdio.h"
+
+int main(){
+  <span style="color:#881122"><b>printf("%d %d %d %d\n", 1, 2, 4, 5);</b></span>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+    </span><span id="unroll_5" style="display:none"><div style="color:#880000"><b>Step 5. Assembly</b></div>
+	.cfi_startproc
+	leal	4(%esp), %ecx
+	.cfi_def_cfa 1, 0
+	andl	$-16, %esp
+	pushl	-4(%ecx)
+	pushl	%ebp
+	.cfi_escape 0x10,0x5,0x2,0x75,0
+	movl	%esp, %ebp
+	pushl	%ecx
+	.cfi_escape 0xf,0x3,0x75,0x7c,0x6
+	subl	$12, %esp
+<span style="color:#880000"><b>	pushl	$5
+	pushl	$4
+	pushl	$2
+	pushl	$1
+	pushl	$.LC0
+	pushl	$1
+	call	__printf_chk</b></span>
+	movl	-4(%ebp), %ecx
+	.cfi_def_cfa 1, 0
+	addl	$32, %esp
+	xorl	%eax, %eax
+	leave
+	.cfi_restore 5
+	leal	-4(%ecx), %esp
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc</span></pre>
+    </td>
+    </td></tr></table>
+    <p style="text-align:right">
+    <button type="button" onclick="next('unroll')">Next step</button>
+    </p>
+    <p>
+Technically, one can do the very same hack via the inlined pseudo-recursion from before. But this compiles faster and it has shown itself easier to debug. 
+    </p>
+    <h2>
+Racing LAPACK
+    </h2>
     <p>
 ... 
     </p> 
