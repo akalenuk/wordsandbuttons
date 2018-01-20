@@ -221,7 +221,145 @@ Yet with preprocessor macroses only you can help your compiler build you the mos
     <p>
 Function inlining is the basics of compiler optimization. When the body of function is small and the arguments are numerous it makes perfect sense to build the body into the code directly without arranging the conventional data configurating and jumping there and back in the memory. However, there are things that effectively prevent function inlining and one of them is the recursion.
     </p>
-    <p> 
+    <p>
+Ideed, when a function calls itself simply building its body into its body will not work. You can force GCC to do that, but it will only eat up all the memory and hang up.
+    </p>
+    <p>
+The trick is to promice a compiler that the recursion will soon end. You have to unroll a recursive call into a finite number of specific function calls. And you can do this with macroses.
+    </p>
+    <p>
+Yes, the compiler would have to generate extra code on the first steps of compilation, but it will eventually eliminate the dead calls once the variables are proven to be constant during the runtime. GCC is rather good in doing that. In fact, you don't even have to help it with const modifiers. If it can, it will minimize the runtime computation to the very possible extend. 
+    </p>
+    <p>
+In this example we will make in compute a quasi-recursive factorial function statically. Please press the "next step" button to see how the preprocessor and the compiler work together. 
+    </p>
+    <table><tr>
+    <td>
+    <pre><span id="slides_recursive_1" style="display:block"><div style="color:#994466"><b>Step 1. C source code</b></div>
+#define RECURSIVE(PREFIX, CHUNK1, SUFFIX, END_SUFFIX) \
+inline PREFIX##_8 END_SUFFIX \
+inline PREFIX##_7 CHUNK1##_8 SUFFIX \
+inline PREFIX##_6 CHUNK1##_7 SUFFIX \
+inline PREFIX##_5 CHUNK1##_6 SUFFIX \
+inline PREFIX##_4 CHUNK1##_5 SUFFIX \
+inline PREFIX##_3 CHUNK1##_4 SUFFIX \
+inline PREFIX##_2 CHUNK1##_3 SUFFIX \
+inline PREFIX##_1 CHUNK1##_2 SUFFIX \
+inline PREFIX##_0 CHUNK1##_1 SUFFIX 
+
+RECURSIVE(int f, (int i)
+  {return i == 1 
+    ? 1 
+    : i*f, (i-1);},   
+  (int i){return 0;})
+    
+#include "stdio.h"
+
+int main(){
+  printf("%d", f_0(4));  
+}    
+    </span><span id="slides_recursive_2" style="display:none"><div style="color:#992244"><b>Step 2. C pseudo-code after preprocessing</b></div>
+inline int f_8(int i) {return 1;}
+inline int f_7(int i) {return i == 1 ? 1 : i*f_8(i-1);}
+inline int f_6(int i) {return i == 1 ? 1 : i*f_7(i-1);}
+inline int f_5(int i) {return i == 1 ? 1 : i*f_6(i-1);}
+inline int f_4(int i) {return i == 1 ? 1 : i*f_5(i-1);}
+inline int f_3(int i) {return i == 1 ? 1 : i*f_4(i-1);}
+inline int f_2(int i) {return i == 1 ? 1 : i*f_3(i-1);}
+inline int f_1(int i) {return i == 1 ? 1 : i*f_2(i-1);}
+inline int f_0(int i) {return i == 1 ? 1 : i*f_1(i-1);}
+
+#include "stdio.h"
+
+int main(){
+  printf("%d", f_0(4));
+}
+
+
+
+
+
+
+
+    </span><span id="slides_recursive_3" style="display:none"><div style="color:#881122"><b>Step 3. Pseudo-code after inlining</b></div>
+int main(){
+  printf("%d", (int i){
+  i == 1 
+    ? 1 
+    : i*(i == 1 
+      ? 1 
+      : i*(i == 1 
+        ? 1 
+        : i*(i == 1 
+          ? 1 
+          : i*(i == 1 
+            ? 1 
+            : i*(i == 1 
+              ? 1 
+              : i*(i == 1 
+                ? 1 
+                : i*(i == 1 
+                  ? 1 
+                  : i*1;);););););););}(4));  
+}
+
+
+    </span><span id="slides_recursive_4" style="display:none"><div style="color:#881122"><b>Step 4. Pseudo-code after constant propagation</b></div>
+
+
+
+
+
+
+
+
+
+int main(){
+  printf("%d", 4*(4-1)*(4-1-1)*1);
+}
+
+
+
+
+
+
+
+
+
+
+    </span><span id="slides_recursive_5" style="display:none"><div style="color:#880000"><b>Step 5. Assembly</b></div>
+	.cfi_startproc
+	leal	4(%esp), %ecx
+	.cfi_def_cfa 1, 0
+	andl	$-16, %esp
+	pushl	-4(%ecx)
+	pushl	%ebp
+	.cfi_escape 0x10,0x5,0x2,0x75,0
+	movl	%esp, %ebp
+	pushl	%ecx
+	.cfi_escape 0xf,0x3,0x75,0x7c,0x6
+	subl	$8, %esp
+	<span style="color:#880000"><b>pushl	$24
+	pushl	$.LC0
+	pushl	$1
+	call	__printf_chk</b></span>
+	movl	-4(%ebp), %ecx
+	.cfi_def_cfa 1, 0
+	addl	$16, %esp
+	xorl	%eax, %eax
+	leave
+	.cfi_restore 5
+	leal	-4(%ecx), %esp
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc</span></pre>
+    </td>
+    </td></tr></table>
+    <p style="text-align:right">
+    <button type="button" onclick="next('slides_recursive')">Next step</button>
+    </p>
+    <p>
+Of course, this hack has its limits. For instance, when you have to do several calls from a quasi-recursive function, the compiler would have to build not a list of bodies, but a whole tree. This slows down compilation enormously. It takes noticeable time to compile 4-depth 4-branches quasi-recursion on a modern desktop. 6-depth 6-branches might turn it catatonic.
     </p>
     <p>
 ... 
