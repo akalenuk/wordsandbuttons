@@ -217,7 +217,7 @@ function init_results(){
 Outperforming LAPACK with C metaprogramming
     </h1>
     <p>
-We don't have many tools for metaprogramming in C. We don't have templates or <a href="http://en.cppreference.com/w/cpp/language/constexpr">constexpr</a>s C++ has; we don't have <a href="https://dlang.org/mixin.html">mixins</a> like in D; and we certainly don't have <a href="https://en.wikipedia.org/wiki/Homoiconicity">homoiconicity</a> of Lisp and Julia. All we have in C is the preprocessor that supports macroses. And we don't even have recursive macroses neither as in macroses that recurrently call themselves, nor as in macroses that define macroses. Apparently you can't implement something as awesome as <a href="https://github.com/kw-udon/constexpr-8cc">a compile time compiler</a> with this.
+We don't have many tools for metaprogramming in C. We don't have templates or <a href="http://en.cppreference.com/w/cpp/language/constexpr">constexpr</a>s C++ has; we don't have <a href="https://dlang.org/mixin.html">mixins</a> like in D; and we certainly don't have <a href="https://en.wikipedia.org/wiki/Homoiconicity">homoiconicity</a> of Lisp and Julia. All we have in C is the preprocessor that supports macroses. And we don't even have recursive macroses neither as in macroses that recurrently call themselves, nor as in macroses that define macroses. Apparently, you can't implement something as awesome as <a href="https://github.com/kw-udon/constexpr-8cc">a compile time compiler</a> with this.
     </p>
     <p>
 Yet with preprocessor macroses only you can still explain your compiler what do you want, and the compiler, being sophisticated machine, will use this knowledge to generate better code. You can make it compute rather elaborate things statically, and more importantly you can make it generate zero-overhead code to win quite a lot in performance. 
@@ -749,13 +749,13 @@ int main() {
     </pre>
     </td></tr></table>
     <p>
-Note that the input arrays start as volatile but then get copied to the non-modified arrays used as the STATIC_SOLVE's input. The thing is, if we don't do that, the whole thing gets solved statically for 0 runtime cost. That's not entirely what I want to measure. I want my compiler to build a code that would work on arbitrary data, that's why the input data should be volatile. 
+Note that the input arrays start as volatile but then get copied to the non-modified arrays used as the STATIC_SOLVE's input. The thing is, if we don't do that, the whole thing gets solved statically for 0 runtime cost. That's not all I want to measure. I want my compiler to build a code that would work on arbitrary data, that's why the input data should be volatile. 
     </p>
     <p>
-On the other hand, having volatile as function argument inside the macroses would kill the optimization for constant data and I want static and semi-static solutions measured as well. 
+On the other hand, having volatile as function argument inside the macroses would kill the optimization for constant data, and I want static and semi-static solutions measured as well. 
     </p>
     <p>
-The beauty of this kind of programming is that it makes compiler account for any piece of static data it has on compile time. A single macros works best for every possible configuration of constant and volatile data. It makes sense to measure LAPACK and metaprogrammed solution, but several other things as well. Here are the measurements.
+We can have both static and runtime solution with explicit copying. This way a single macros fits every possible configuration of constant and volatile data. In this regard it makes sense to measure not only LAPACK and metaprogrammed solution, but several other things as well. Here are the measurements.
     </p>
     <ol>
     <li>
@@ -785,25 +785,30 @@ Original solution with recursion and loops. 10 KLOC, 2.10 seconds.
     init_results();
     </script>
     <p>
-Of course, these measurements are not at all precise, but I think they still work since the numbers are so distinct.
+Of course, these measurements are not at all precise but I think they still work since the numbers are so distinct.
     </p> 
     <h2>
 Conclusion
     </h2>
     <p>
+You can trick the compiler into doing things it wouldn't normally do, and benefit from this performance-wise. Technically, you can even do this without macroses, but macroses make it easier. 
+    </p>
+    <p>
 Apart from the tricks themselves there are also some things worth mentioning.
     </p>
-    <p>
-The compiler was suprisingly good in localizing constant data. You can copy some of the array elements from side-effect source, and leave other defined in the compile time, and the compiler would accound for that. The solution with triangle matrix clearly wins from this.
-    </p>
-    <p>
+    <ul>
+    <li>
+The compiler can be suprisingly good in localizing constant data. You can copy some of the array elements from side-effect source, and leave other defined in the compile time, and the compiler would accound for that. The solution with triangle matrix clearly wins from this.
+    </li>
+    <li>
 Semi-static computation does not necessary give good advantage. The solution with static B is roughly the same and sometimes even worse than the solution with both arrays being volatile.
-    </p>
-    <p>
+    </li>
+    <li>
 The compiled size of the solution with loops and calls unrolled would not neccessary be large. In my case the unrolled solution results into roughly 8 KLOC of assembly, while the direct one compiles to 10 KLOC.
-    </p>
+    </li>
+    </ul>
     <p style="font-family: sans-serif; font-size: 14pt;">
-All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the code is compiled with g++ 5.4.0 -std=c++11 -O2. The code for the benchmark is available on <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/drafts/static_c/benchmark">Github</a>.
+All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the code is compiled with g++ 5.4.0 -std=c++11 -O2. The source code for the benchmark is available on <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/drafts/static_c/benchmark">Github</a>.
     </p>
 
 
