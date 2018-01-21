@@ -229,13 +229,13 @@ I'll show you a pair of tricks that will turn a crude and inefficient algorithm 
 1. Quasi-recursive inlinable functions
     </h2>
     <p>
-Function inlining is the basics of compiler optimization. When the body of a function is small and the arguments are numerous it makes perfect sense to build the body into the code directly without arranging the conventional data configurating and jumping there and back in the memory. However, there are things that effectively prevent function inlining and one of them is the recursion.
+Function inlining is the basics of compiler optimization. When the body of a function is small and the arguments are numerous it makes perfect sense to build the body into the code directly without arranging the conventional data configuring and jumping there and back in the memory. However, there are things that effectively prevent function inlining and one of them is the recursion.
     </p>
     <p>
-Ideed, when a function calls itself simply building its body into its body will not work. You can force GCC to do that, but it will only eat up all the memory and crash.
+Indeed, when a function calls itself simply building its body into its body will not work. You can force GCC to do that, but it will only eat up all the memory and crash.
     </p>
     <p>
-The trick is to promice a compiler that the recursion will soon end. You have to unroll a recursive call into a finite number of specific function calls. And you can do this with macroses.
+The trick is to promise a compiler that the recursion will soon end. You have to unroll a recursive call into a finite number of specific function calls. And you can do this with macroses.
     </p>
     <p>
 Yes, the compiler would have to generate extra code on the first steps of compilation, but it will eventually eliminate the dead calls once the variables are proven to be constant during the runtime. GCC is very good in doing this. In fact, you don't even have to help it with const modifiers. If it can, it will minimize the runtime computation to the very possible extend. 
@@ -383,10 +383,10 @@ Of course, this hack has its limits. For instance, when you have to do several c
 2. Forced loop unroll
     </h2>
     <p>
-Compilers are usually good in unrolling loops. In fact, they are usually better than us, regular people. The good side of the loop unrolling is that it removes the overhead on index counting and comparison. The bad side is larger code. Sometimes we would win more from a small loop running completely in instruction cahce than from a huge unrolled loop that has to be read from uncached memory. Usually, compilers can balance these things for a specific processor architecture better than people with assemblers.
+Compilers are usually good in unrolling loops. In fact, they are usually better than us, regular people. The good side of the loop unrolling is that it removes the overhead on index counting and comparison. The bad side is larger code. Sometimes we would win more from a small loop running completely in the instruction cache than from a huge unrolled loop that has to be read from uncached memory. Usually, compilers can balance these things for a specific processor architecture better than people with assemblers.
     </p>
     <p>
-Sometimes however we know better than the compiler. We know that even if the loop is not quite short, and even if it has inner loops it should still be eligeable for unrolling because it will shrink after the dead code elimination. Here is the trick that will leave no options to the C compiler.
+Sometimes however we know better than the compiler. We know that even if the loop is not quite short, and even if it has inner loops it should still be eligible for unrolling because it will shrink after the dead code elimination. Here is the trick that will leave no options to the C compiler.
     </p>
     <p>
 This is a bubble sort conducted in compile time. Once again, please use the “next step” button to see how it goes.
@@ -592,7 +592,7 @@ int main() {
     </pre>
     </td></tr></table>
     <p>
-I know this is <a href="https://medium.com/@veedrac/learning-the-value-of-good-benchmarking-technique-with-c-magic-squares-b61b3386c97f">not a perfect benchmark</a>, for the very least it doesn't account for branch misprediction. But I'm ok with this. The metaprogrammed version I am going to compare it to simply has no branches to mispredict.
+I know this is <a href="https://medium.com/@veedrac/learning-the-value-of-good-benchmarking-technique-with-c-magic-squares-b61b3386c97f">not a perfect benchmark</a>, for the very least it doesn't account for branch mis-prediction. But I'm ok with this. The metaprogrammed version I am going to compare it to simply has no branches to mis-predict.
     </p>
     <p>
 But first, the version with all the overheads:
@@ -765,7 +765,7 @@ Full static solution. 1 KLOC of assembly running for 0.00 seconds.
 Static A matrix, volatile B vector. 5 KLOC of assembly, 0.04 seconds.
     </li>
     <li>
-Volatile A matric, static B vector. 7.5 KLOC, 0.10 seconds.
+Volatile A matrix, static B vector. 7.5 KLOC, 0.10 seconds.
     </li>
     <li>
 <b>The metaprogrammed solution for all volatile data. 8.3 KLOC, 0.10 seconds.</b>
@@ -798,13 +798,13 @@ Apart from the tricks themselves there are also some things worth mentioning.
     </p>
     <ul>
     <li>
-The compiler can be suprisingly good in localizing constant data. You can copy some of the array elements from side-effect source, and leave other defined in the compile time, and the compiler would accound for that. The solution with triangle matrix clearly wins from this.
+The compiler can be surprisingly good in localizing constant data. You can copy some of the array elements from side-effect source, and leave other defined in the compile time, and the compiler would account for that. The solution with triangle matrix clearly wins from this.
     </li>
     <li>
 Semi-static computation does not necessary give good advantage. The solution with static B is roughly the same and sometimes even worse than the solution with both arrays being volatile.
     </li>
     <li>
-The compiled size of the solution with loops and calls unrolled would not neccessary be large. In my case the unrolled solution results into roughly 8 KLOC of assembly, while the direct one compiles to 10 KLOC.
+The compiled size of the solution with loops and calls unrolled would not necessarily be large. In my case the unrolled solution results into roughly 8 KLOC of assembly, while the direct one compiles to 10 KLOC.
     </li>
     </ul>
     <p style="font-family: sans-serif; font-size: 14pt;">
