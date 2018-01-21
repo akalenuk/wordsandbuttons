@@ -217,28 +217,31 @@ function init_results(){
 Outperforming LAPACK with C metaprogramming
     </h1>
     <p>
-We don't have much tools for metaprogramming in C. We don't have C++' templates or <a href="http://en.cppreference.com/w/cpp/language/constexpr">constexprs</a>, we don't have D's <a href="https://dlang.org/mixin.html">mixins</a>, and we certainly don't have Lisp's and Julia's <a href="https://en.wikipedia.org/wiki/Homoiconicity">homoiconicity</a>. All we have in C is the preprocessor and its macroses. We don't have recursive macroses neither as in macroses that recurrently call themselves, nor as in macroses that define macroses. Apparently you can't implement something as awesome as <a href="https://github.com/kw-udon/constexpr-8cc">a compile time compiler</a> with this.
+We don't have many tools for metaprogramming in C. We don't have templates or <a href="http://en.cppreference.com/w/cpp/language/constexpr">constexpr</a>s C++ has; we don't have <a href="https://dlang.org/mixin.html">mixins</a> like in D; and we certainly don't have <a href="https://en.wikipedia.org/wiki/Homoiconicity">homoiconicity</a> of Lisp and Julia. All we have in C is the preprocessor that supports macroses. And we don't even have recursive macroses neither as in macroses that recurrently call themselves, nor as in macroses that define macroses. Apparently you can't implement something as awesome as <a href="https://github.com/kw-udon/constexpr-8cc">a compile time compiler</a> with this.
     </p>
     <p>
-Yet with preprocessor macroses only you can help your compiler build you the most efficient code. You can make it compute rather elaborate things statically, and you can make it generate zero-overhead code to win quite a lot in performance. I'll show you a pair of tricks that will turn a crude and inefficient algorithm for solving small linear systems into something that can outrun LAPACK.
+Yet with preprocessor macroses only you can still explain your compiler what do you want, and the compiler, being sophisticated machine, will use this knowledge to generate better code. You can make it compute rather elaborate things statically, and more importantly you can make it generate zero-overhead code to win quite a lot in performance. 
+    </p>
+    <p>
+I'll show you a pair of tricks that will turn a crude and inefficient algorithm for solving small linear systems into something that can outrun LAPACK.
     </p>
     <h2>
 1. Quasi-recursive inlinable functions
     </h2>
     <p>
-Function inlining is the basics of compiler optimization. When the body of function is small and the arguments are numerous it makes perfect sense to build the body into the code directly without arranging the conventional data configurating and jumping there and back in the memory. However, there are things that effectively prevent function inlining and one of them is the recursion.
+Function inlining is the basics of compiler optimization. When the body of a function is small and the arguments are numerous it makes perfect sense to build the body into the code directly without arranging the conventional data configurating and jumping there and back in the memory. However, there are things that effectively prevent function inlining and one of them is the recursion.
     </p>
     <p>
-Ideed, when a function calls itself simply building its body into its body will not work. You can force GCC to do that, but it will only eat up all the memory and hang up.
+Ideed, when a function calls itself simply building its body into its body will not work. You can force GCC to do that, but it will only eat up all the memory and crash.
     </p>
     <p>
 The trick is to promice a compiler that the recursion will soon end. You have to unroll a recursive call into a finite number of specific function calls. And you can do this with macroses.
     </p>
     <p>
-Yes, the compiler would have to generate extra code on the first steps of compilation, but it will eventually eliminate the dead calls once the variables are proven to be constant during the runtime. GCC is rather good in doing that. In fact, you don't even have to help it with const modifiers. If it can, it will minimize the runtime computation to the very possible extend. 
+Yes, the compiler would have to generate extra code on the first steps of compilation, but it will eventually eliminate the dead calls once the variables are proven to be constant during the runtime. GCC is very good in doing this. In fact, you don't even have to help it with const modifiers. If it can, it will minimize the runtime computation to the very possible extend. 
     </p>
     <p>
-In this example we will make in compute a quasi-recursive factorial function statically. Please press the "next step" button to see how the preprocessor and the compiler work together. 
+In this example we will make it compute a quasi-recursive factorial function statically. Please press the “next step” button to see how the preprocessor and the compiler work together. 
     </p>
     <table><tr>
     <td>
@@ -380,10 +383,13 @@ Of course, this hack has its limits. For instance, when you have to do several c
 2. Forced loop unroll
     </h2>
     <p>
-Compilers are usually good in unrolling loops. In fact, they are usually better than us, regular people. The good side of the loop unrolling is that it once again loses the overhead on index counting and comparison. The bad side is bigger code. Sometimes we would win more from a small loop running completely in instruction cahce than from a huge unrolled loop that has to be read from uncached memory.
+Compilers are usually good in unrolling loops. In fact, they are usually better than us, regular people. The good side of the loop unrolling is that it removes the overhead on index counting and comparison. The bad side is larger code. Sometimes we would win more from a small loop running completely in instruction cahce than from a huge unrolled loop that has to be read from uncached memory. Usually, compilers can balance these things for a specific processor architecture better than people with assemblers.
     </p>
     <p>
-Sometimes however we know better than the compiler. We know that the loop is short, and finite, and even if it has inner loops it should still be eligeable for unrolling. Here is the trick that will no options to the C compiler.
+Sometimes however we know better than the compiler. We know that even if the loop is not quite short, and even if it has inner loops it should still be eligeable for unrolling because it will shrink after the dead code elimination. Here is the trick that will leave no options to the C compiler.
+    </p>
+    <p>
+This is a bubble sort conducted in compile time. Once again, please use the “next step” button to see how it goes.
     </p>
     <table><tr>
     <td>
@@ -422,22 +428,22 @@ int main(){
   int a[4] = {1, 5, 2, 4};
   int i; switch(2){
     case 4: i=4; {
-    int j; switch(4){
-      case 4: j=4; int k=i-j; int s=a[k]+a[k+1]; 
-        int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
-      case 3: j=3; int k=i-j; int s=a[k]+a[k+1]; 
-        int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
-      case 2: j=2; int k=i-j; int s=a[k]+a[k+1]; 
-        int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
-      case 1: j=1; int k=i-j; int s=a[k]+a[k+1]; 
-        int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
-      case 0: j=0; int k=i-j; int s=a[k]+a[k+1]; 
-        int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+      int j; switch(4){
+        case 4: j=4; int k=i-j; int s=a[k]+a[k+1]; 
+          int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+        case 3: j=3; int k=i-j; int s=a[k]+a[k+1]; 
+          int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+        case 2: j=2; int k=i-j; int s=a[k]+a[k+1]; 
+          int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+        case 1: j=1; int k=i-j; int s=a[k]+a[k+1]; 
+          int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+        case 0: j=0; int k=i-j; int s=a[k]+a[k+1]; 
+          int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
+        }
       }
-      case 3: i=3; {
-      ...
-      }
-    ...
+    case 3: i=3; {
+      <span style="color:#992244"><b>// ... 14 lines per high-level case
+    //... that's 70 lines in total</b></span>
     }
   }
   printf("%d %d %d %d\n", a[0], a[1], a[2], a[3]);
@@ -534,7 +540,7 @@ int main(){
     <button type="button" onclick="next('unroll')">Next step</button>
     </p>
     <p>
-Technically, one can do the very same hack via the inlined pseudo-recursion from before. But this compiles faster and it has shown itself easier to debug. 
+Technically, one can do the very same hack with the inlined pseudo-recursion from before. But this compiles faster and it has shown itself easier to debug. 
     </p>
     <h2>
 Racing LAPACK
@@ -586,10 +592,10 @@ int main() {
     </pre>
     </td></tr></table>
     <p>
-I know this is <a href="https://medium.com/@veedrac/learning-the-value-of-good-benchmarking-technique-with-c-magic-squares-b61b3386c97f">not a perfect benchmark</a>, for the very least it doesn't account for branch misprediction. But I'm ok with it. The metaprogrammed version I am going to compare it too simply has no branches to mispredict.
+I know this is <a href="https://medium.com/@veedrac/learning-the-value-of-good-benchmarking-technique-with-c-magic-squares-b61b3386c97f">not a perfect benchmark</a>, for the very least it doesn't account for branch misprediction. But I'm ok with this. The metaprogrammed version I am going to compare it to simply has no branches to mispredict.
     </p>
     <p>
-But first, the version with overheads:
+But first, the version with all the overheads:
     </p>
     <table><tr>
     <td>
@@ -647,21 +653,21 @@ int main() {
     </pre>
     </td></tr></table>    
     <p>
-So, it has a loop, a nested loop and a pair of recursive functions. Nothing we can't linearize with macroses. The version with metaprogramming tricks looks like this:
+It has a loop, a nested loop and a pair of recursive functions. Nothing we can't linearize with macroses. The version with metaprogramming tricks looks like this:
     </p>
     <table><tr>
     <td>
     <pre style="width: 620pt;">
-// from static_recursion.h
+<b>// from static_recursion.h</b>
 #define RECURSIVE_4_CALLS(PREFIX, CHUNK1, CHUNK2, CHUNK3, CHUNK4, SUFFIX, END_SUFFIX) \
 inline PREFIX##_4 END_SUFFIX \
 inline PREFIX##_3 CHUNK1##_4 CHUNK2##_4 CHUNK3##_4 CHUNK4##_4 SUFFIX \
 inline PREFIX##_2 CHUNK1##_3 CHUNK2##_3 CHUNK3##_3 CHUNK4##_3 SUFFIX \
 inline PREFIX##_1 CHUNK1##_2 CHUNK2##_2 CHUNK3##_2 CHUNK4##_2 SUFFIX \
-inline PREFIX##_0 CHUNK1##_1 CHUNK2##_1 CHUNK3##_1 CHUNK4##_1 SUFFIX     
+inline PREFIX##_0 CHUNK1##_1 CHUNK2##_1 CHUNK3##_1 CHUNK4##_1 SUFFIX
 
-
-// from static_loops.h
+</pre></td></tr><tr><td><pre>
+<b>// from static_loops.h</b>
 #define LOOP_TO_0(ID, N, BODY) {int ID; switch(N){\
 case 7: ID=7;{BODY};\
 case 6: ID=6;{BODY};\
@@ -679,8 +685,8 @@ case 0: ID=0;{BODY};\
 #define LOOP_DOWNTO(ID, START, END, BODY) \
   LOOP_TO_0(ID, (START)-(END), ID=(END)+ID; BODY)
   
-  
-// from static_linear_solver.h
+</pre></td></tr><tr><td><pre>
+<b>// from static_linear_solver.h</b>
 RECURSIVE_4_CALLS(double aijn, (double* a, double* b, int i, int j, int n, int m){ 
   return (n == m) ? a[i*m+j] : 
     aijn, (a, b, i, j, n+1, m) * aijn, (a, b, n, n, n+1, m) - 
@@ -702,8 +708,8 @@ RECURSIVE_4_CALLS(double bin, (double* a, double* b, int i, int n, int m){
   int m = sizeof(X) / sizeof(X[0]); \
   LOOP_TO(k, 0, m-1, SOLVE_X(A, B, X, k, m););
   
-
-// from volatile_a_b.c
+</pre></td></tr><tr><td><pre>
+<b>// and the benchmark itself</b>
 #include "stdio.h"
 #include "static_linear_solver.h"
 
@@ -743,32 +749,35 @@ int main() {
     </pre>
     </td></tr></table>
     <p>
-Note that I put volatile keyword for input arrays I then copy to the STATIC_SOLVE's input. The thing is, if I don't do that, the whole thing will get solved statically for 0 runtime cost. That's not entirely what I want to measure. I want my compiler to build a code that would work on arbitrary data, that's why the input data should be volatile. 
+Note that the input arrays start as volatile but then get copied to the non-modified arrays used as the STATIC_SOLVE's input. The thing is, if we don't do that, the whole thing gets solved statically for 0 runtime cost. That's not entirely what I want to measure. I want my compiler to build a code that would work on arbitrary data, that's why the input data should be volatile. 
     </p>
     <p>
-But frankly, I want static and semi-static solutions measured as well. The beauty of this kind of programming is that it makes compiler account for any piece of static data it has on compile time. So I measured not only LAPACK and metaprogrammed solution, but several other things as well.
+On the other hand, having volatile as function argument inside the macroses would kill the optimization for constant data and I want static and semi-static solutions measured as well. 
+    </p>
+    <p>
+The beauty of this kind of programming is that it makes compiler account for any piece of static data it has on compile time. A single macros works best for every possible configuration of constant and volatile data. It makes sense to measure LAPACK and metaprogrammed solution, but several other things as well. Here are the measurements.
     </p>
     <ol>
     <li>
-Full static solution. Predictably it ran for 0.00 seconds.
+Full static solution. 1 KLOC of assembly running for 0.00 seconds.
     </li>
     <li>
-Static A matrix, volatile B vector. 0.04 seconds.
+Static A matrix, volatile B vector. 5 KLOC of assembly, 0.04 seconds.
     </li>
     <li>
-Volatile A matric, static B vector. 0.10 seconds.
+Volatile A matric, static B vector. 7.5 KLOC, 0.10 seconds.
     </li>
     <li>
-<b>The metaprogrammed solution for all volatile data. 0.10 seconds.</b>
+<b>The metaprogrammed solution for all volatile data. 8.3 KLOC, 0.10 seconds.</b>
     </li>
     <li>
-The solution when the matrix is triangle, meaning upper right half is all 0, and the other data is volatile. 0.08 seconds.
+The solution when the matrix is triangle, meaning upper right half is all 0, and the other data is volatile. 6.5 KLOC, 0.08 seconds.
     </li>
     <li>
 <b>LAPACK. 0.65 seconds.</b>
     </li>
     <li>
-Original solution with recursion and loops. 2.10 seconds.
+Original solution with recursion and loops. 10 KLOC, 2.10 seconds.
     </li>
     </ol>
     <canvas id="results" width=700 height=500></canvas>
@@ -776,22 +785,22 @@ Original solution with recursion and loops. 2.10 seconds.
     init_results();
     </script>
     <p>
-Of course, these measurements are not at all precise, but I think they still work since the difference is so obvious.
+Of course, these measurements are not at all precise, but I think they still work since the numbers are so distinct.
     </p> 
     <h2>
 Conclusion
     </h2>
     <p>
-Apart from the tricks themselves, there are also some things worse mentioning.
+Apart from the tricks themselves there are also some things worth mentioning.
     </p>
     <p>
-The compiler was suprisingly good in localizing static data. You can copy some of the array elements from side-effect source, and leave other defined in the compile time, and the compiler would accound for that. The solution with triangle matrix clearly wins from that.
+The compiler was suprisingly good in localizing constant data. You can copy some of the array elements from side-effect source, and leave other defined in the compile time, and the compiler would accound for that. The solution with triangle matrix clearly wins from this.
     </p>
     <p>
 Semi-static computation does not necessary give good advantage. The solution with static B is roughly the same and sometimes even worse than the solution with both arrays being volatile.
     </p>
     <p>
-The compiled size of the solution with loops and calls unrolled would not neccessary be large. In my case the unrolled solution fits into roughly 8KB executable, while the direct one compiles to 9KB.
+The compiled size of the solution with loops and calls unrolled would not neccessary be large. In my case the unrolled solution results into roughly 8 KLOC of assembly, while the direct one compiles to 10 KLOC.
     </p>
     <p style="font-family: sans-serif; font-size: 14pt;">
 All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the code is compiled with g++ 5.4.0 -std=c++11 -O2. The code for the benchmark is available on <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/drafts/static_c/benchmark">Github</a>.
