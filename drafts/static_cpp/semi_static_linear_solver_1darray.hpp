@@ -75,8 +75,8 @@ namespace linear_equations{
                     x[I] = 0.0;
                 else if(std::abs(aiji) < SMALL_ENOUGH)
                     return false;
-                else
-                    x[I] = d / aiji;*/
+                else*/
+                    x[I] = d / aiji;
                 x[I] = d / aiji;
                 return x_for<I+(I<N), N>(a, b, x);
             }
