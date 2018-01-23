@@ -217,10 +217,10 @@ function init_results(){
 Outperforming LAPACK with C metaprogramming
     </h1>
     <p>
-We don't have many tools for metaprogramming in C. We don't have templates or <a href="http://en.cppreference.com/w/cpp/language/constexpr">constexpr</a>s C++ has; we don't have <a href="https://dlang.org/mixin.html">mixins</a> like in D; and we certainly don't have <a href="https://en.wikipedia.org/wiki/Homoiconicity">homoiconicity</a> of Lisp and Julia. All we have in C is the preprocessor that supports macroses. And we don't even have recursive macroses neither as in macroses that recurrently call themselves, nor as in macroses that define macroses. Apparently, you can't implement something as awesome as <a href="https://github.com/kw-udon/constexpr-8cc">a compile time compiler</a> with this.
+We don't have many tools for metaprogramming in C. We don't have templates or <a href="http://en.cppreference.com/w/cpp/language/constexpr">constexpr</a>s C++ has; we don't have <a href="https://dlang.org/mixin.html">mixins</a> like in D; and we certainly don't have <a href="https://en.wikipedia.org/wiki/Homoiconicity">homoiconicity</a> of Lisp and Julia. All we have in C is the preprocessor that supports macros. And we don't even have recursive macros neither as in macros that recurrently call themselves, nor as in macros that define macros. Apparently, you can't implement something as awesome as <a href="https://github.com/kw-udon/constexpr-8cc">a compile time compiler</a> with this.
     </p>
     <p>
-Yet with preprocessor macroses only you can still explain your compiler what do you want, and the compiler, being sophisticated machine, will use this knowledge to generate better code. You can make it compute rather elaborate things statically, and more importantly you can make it generate zero-overhead code to win quite a lot in performance. 
+Yet with preprocessor macros only you can still explain your compiler what do you want, and the compiler, being sophisticated machine, will use this knowledge to generate better code. You can make it compute rather elaborate things statically, and more importantly you can make it generate zero-overhead code to win quite a lot in performance. 
     </p>
     <p>
 I'll show you a pair of tricks that will turn a crude and inefficient algorithm for solving small linear systems into something that can outrun LAPACK.
@@ -235,7 +235,7 @@ Function inlining is the basics of compiler optimization. When the body of a fun
 Indeed, when a function calls itself simply building its body into its body will not work. You can force GCC to do that, but it will only eat up all the memory and crash.
     </p>
     <p>
-The trick is to promise a compiler that the recursion will soon end. You have to unroll a recursive call into a finite number of specific function calls. And you can do this with macroses.
+The trick is to promise a compiler that the recursion will soon end. You have to unroll a recursive call into a finite number of specific function calls. And you can do this with macros.
     </p>
     <p>
 Yes, the compiler would have to generate extra code on the first steps of compilation, but it will eventually eliminate the dead calls once the variables are proven to be constant during the runtime. GCC is very good in doing this. In fact, you don't even have to help it with const modifiers. If it can, it will minimize the runtime computation to the very possible extend. 
@@ -653,7 +653,7 @@ int main() {
     </pre>
     </td></tr></table>    
     <p>
-It has a loop, a nested loop and a pair of recursive functions. Nothing we can't linearize with macroses. The version with metaprogramming tricks looks like this:
+It has a loop, a nested loop and a pair of recursive functions. Nothing we can't linearize with macros. The version with metaprogramming tricks looks like this:
     </p>
     <table><tr>
     <td>
@@ -752,7 +752,7 @@ int main() {
 Note that the input arrays start as volatile but then get copied to the non-modified arrays used as the STATIC_SOLVE's input. The thing is, if we don't do that, the whole thing gets solved statically for 0 runtime cost. That's not all I want to measure. I want my compiler to build a code that would work on arbitrary data, that's why the input data should be volatile. 
     </p>
     <p>
-On the other hand, having volatile as function argument inside the macroses would kill the optimization for constant data, and I want static and semi-static solutions measured as well. 
+On the other hand, having volatile as function argument inside the macros would kill the optimization for constant data, and I want static and semi-static solutions measured as well. 
     </p>
     <p>
 We can have both static and runtime solution with explicit copying. This way a single macros fits every possible configuration of constant and volatile data. In this regard it makes sense to measure not only LAPACK and metaprogrammed solution, but several other things as well. Here are the measurements.
@@ -791,7 +791,7 @@ Of course, these measurements are not at all precise but I think they still work
 Conclusion
     </h2>
     <p>
-You can trick the compiler into doing things it wouldn't normally do, and benefit from this performance-wise. Technically, you can even do this without macroses, but macroses make it easier. 
+You can trick the compiler into doing things it wouldn't normally do, and benefit from this performance-wise. Technically, you can even do this without macros, but macros make it easier. 
     </p>
     <p>
 Apart from the tricks themselves there are also some things worth mentioning.
