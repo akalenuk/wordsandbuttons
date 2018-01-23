@@ -40,19 +40,19 @@ namespace linear_equations{
 
     namespace semi_static{
         template <int I, int J, int K, int N>
-        inline static double aij(const std::array<std::array<double, N>, N>& a){
-            if(K == N) return a[I][J];
+        inline static double aij(const std::array<double, N*N>& a){
+            if(K == N) return a[I*N+J];
             return aij<I, J, K+(K<N), N>(a) * aij<K, K, K+(K<N), N>(a) - aij<I, K, K+(K<N), N>(a) * aij<K, J, K+(K<N), N>(a);
         }
 
         template <int I, int K, int N>
-        inline static double bi(const std::array<std::array<double, N>, N>& a, const std::array<double, N>& b){
+        inline static double bi(const std::array<double, N*N>& a, const std::array<double, N>& b){
             if(K == N) return b[I];
             return aij<K, K, K+(K<N), N>(a) * bi<I, K+(K<N), N>(a, b) - aij<I, K, K+(K<N), N>(a) * bi<K, K+(K<N), N>(a, b);
         }
 
         template <int J, int I, int N>
-        inline static void d_for(double& d, const std::array<std::array<double, N>, N>& a, std::array<double, N>& x){
+        inline static void d_for(double& d, const std::array<double, N*N>& a, std::array<double, N>& x){
             if(J < I){
                 d -= aij<I, J, I+(J<I), N>(a) * x[J];
                 d_for<J+(J<I), I, N>(d, a, x);
@@ -60,14 +60,14 @@ namespace linear_equations{
         }
 
         template <int I, int N>
-        inline static double di(const std::array<std::array<double, N>, N>& a, const std::array<double, N>& b, std::array<double, N>& x){
+        inline static double di(const std::array<double, N*N>& a, const std::array<double, N>& b, std::array<double, N>& x){
             double d = bi<I, I+1, N>(a, b);
             d_for<0, I, N>(d, a, x);
             return d;
         }
 
         template <int I, int N>
-        inline static bool x_for(const std::array<std::array<double, N>, N>& a, const std::array<double, N>& b, std::array<double, N>& x){
+        inline static bool x_for(const std::array<double, N*N>& a, const std::array<double, N>& b, std::array<double, N>& x){
             if(I < N){
                 double d = di<I, N>(a, b, x);
                 double aiji = aij<I, I, I+1, N>(a);
@@ -77,13 +77,14 @@ namespace linear_equations{
                     return false;
                 else
                     x[I] = d / aiji;*/
+                x[I] = d / aiji;
                 return x_for<I+(I<N), N>(a, b, x);
             }
             return true;
         }
 
         template <int N>
-        inline static bool solve(const std::array<std::array<double, N>, N>& a, const std::array<double, N>& b, std::array<double, N>& x){
+        inline static bool solve(const std::array<double, N*N>& a, const std::array<double, N>& b, std::array<double, N>& x){
             return x_for<0, N>(a, b, x);
         }
     }
