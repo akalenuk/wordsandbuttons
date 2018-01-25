@@ -1,11 +1,20 @@
 all:
-	g++ -O2 -std=c++14 -march=native exp_static_a_b.cpp -o exp_static_a_b
-	g++ -O2 -std=c++14 -march=native exp_static_a_b.cpp -S -o exp_static_a_b.s
-	g++ -O2 -std=c++14 -march=native exp_volatile_a_b.cpp -o exp_volatile_a_b
-	g++ -O2 -std=c++14 -march=native exp_volatile_a_b.cpp -S -o exp_volatile_a_b.s
-	ls -l *.s 
+	g++ -O2 -std=c++14 exp_inline.cpp -o exp_inline
+	g++ -O2 -std=c++14 exp_inline.cpp -S -o exp_inline.s
+	g++ -O2 -std=c++14 exp_forced_inline.cpp -o exp_forced_inline
+	g++ -O2 -std=c++14 exp_forced_inline.cpp -S -o exp_forced_inline.s
+	g++ -O2 -std=c++14 -march=native exp_forced_inline_march_native.cpp -o exp_forced_inline_march_native
+	g++ -O2 -std=c++14 -march=native exp_forced_inline_march_native.cpp -S -o exp_forced_inline_march_native.s
+	ls -l *.s
+.PHONY: measurements
+measurements:
+	perf stat ./exp_inline
+	perf stat ./exp_forced_inline
+	perf stat ./exp_forced_inline_march_native
 clean:
-	rm exp_static_a_b
-	rm exp_static_a_b.s
-	rm exp_volatile_a_b
-	rm exp_volatile_a_b.s
+	rm exp_inline
+	rm exp_inline.s
+	rm exp_forced_inline
+	rm exp_forced_inline.s
+	rm exp_forced_inline_march_native
+	rm exp_forced_inline_march_native.s
