@@ -5,9 +5,6 @@
 #include <iostream>
 
 namespace linear_equations{
-
-    constexpr double SMALL_ENOUGH = std::sqrt(std::numeric_limits<double>::epsilon());
-
     namespace semi_static{
         template <int I, int J, int K, int N>
         __attribute__((always_inline)) inline static double aij(const std::array<std::array<double, N>, N>& a){
@@ -37,7 +34,7 @@ namespace linear_equations{
         }
 
         template <int I, int N>
-        inline static void x_for(const std::array<std::array<double, N>, N>& a, const std::array<double, N>& b, std::array<double, N>& x){
+        __attribute__((always_inline)) inline static void x_for(const std::array<std::array<double, N>, N>& a, const std::array<double, N>& b, std::array<double, N>& x){
             if(I < N){
                 double d = di<I, N>(a, b, x);
                 double aiji = aij<I, I, I+1, N>(a);
@@ -47,7 +44,7 @@ namespace linear_equations{
         }
 
         template <int N>
-        inline static void solve(const std::array<std::array<double, N>, N>& a, const std::array<double, N>& b, std::array<double, N>& x){
+        __attribute__((always_inline)) inline static void solve(const std::array<std::array<double, N>, N>& a, const std::array<double, N>& b, std::array<double, N>& x){
             x_for<0, N>(a, b, x);
         }
     }

@@ -5,9 +5,6 @@
 #include <iostream>
 
 namespace linear_equations{
-
-    constexpr double SMALL_ENOUGH = std::sqrt(std::numeric_limits<double>::epsilon());
-
     namespace semi_static{
         template <int I, int J, int K, int N>
         inline static double aij(const std::array<std::array<double, N>, N>& a){
