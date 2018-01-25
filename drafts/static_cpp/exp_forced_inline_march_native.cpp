@@ -37,19 +37,18 @@ namespace linear_equations{
         }
 
         template <int I, int N>
-        inline static bool x_for(const std::array<std::array<double, N>, N>& a, const std::array<double, N>& b, std::array<double, N>& x){
+        inline static void x_for(const std::array<std::array<double, N>, N>& a, const std::array<double, N>& b, std::array<double, N>& x){
             if(I < N){
                 double d = di<I, N>(a, b, x);
                 double aiji = aij<I, I, I+1, N>(a);
                 x[I] = d / aiji;
-                return x_for<I+(I<N), N>(a, b, x);
+                x_for<I+(I<N), N>(a, b, x);
             }
-            return true;
         }
 
         template <int N>
-        inline static bool solve(const std::array<std::array<double, N>, N>& a, const std::array<double, N>& b, std::array<double, N>& x){
-            return x_for<0, N>(a, b, x);
+        inline static void solve(const std::array<std::array<double, N>, N>& a, const std::array<double, N>& b, std::array<double, N>& x){
+            x_for<0, N>(a, b, x);
         }
     }
 }
