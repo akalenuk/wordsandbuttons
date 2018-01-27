@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vastly outperforming LAPACK with C++ metaprogramming</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.footer {
+    margin-top: 64pt;
+    padding-bottom: 32pt;
+    font-family: sans-serif;
+    font-size: 18pt;
+    text-align: center;
+}
+
+pre {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 12pt;
+    text-align: left;
+    width: 300pt;
+}
+
+.code_piece {
+    font-family: monospace;
+    padding-left: 4pt;
+    padding-right: 4pt;
+}
+
+
+table {
+    border-width: 0pt;
+}
+
+td {
+    vertical-align: top;
+    padding: 6pt 12pt 6pt 12pt;
+    font-size: 16pt;
+    border: 1px solid black;
+    width: 505pt;
+}
+
+button{
+    width: 248pt;
+    height: 42pt;
+    margin-left:4pt;
+    margin-right:4pt;
+    font-size: 16pt;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+u {
+    border-bottom: 1px dotted #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+    </style>
+    <script language="JavaScript">
+function next(slides){
+    var first_slide = document.getElementById(slides + "_" + 1);
+    for(var i = 1; i < 9; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if(this_slide)
+            if(this_slide.style.display == "block")
+                {
+                this_slide.style.display = "none";
+                if(next_slide)
+                    next_slide.style.display = "block";
+                else
+                    first_slide.style.display = "block";
+                return;
+                }
+    }
+}
+
+function draw_results(){
+    var d = document.getElementById("results");
+    var d_context = d.getContext("2d");
+    d_context.font = "16px sans-serif";
+    // background
+    d_context.fillStyle="#eeeeee";
+	d_context.fillRect(0, 0, 700, 500);
+	
+	var x = 0.0;
+	var y = 0.0;
+	// static
+	x = 0.5;
+	y = 499.5;
+	d_context.fillStyle="#882200";
+	d_context.fillText("0.00 static", x + 4, y - 8);
+	d_context.beginPath();
+	d_context.strokeStyle="#882200";
+	d_context.moveTo(x, y);
+	d_context.lineTo(x+99, y);
+	d_context.stroke();
+	d_context.closePath();
+	
+	// static A
+	x = 100.5;
+	y = 499.5 - Math.floor(499 * 0.04 / 2.10);
+	d_context.fillStyle="#882200";
+	d_context.fillText("0.04 static a", x + 4, y - 8);
+	d_context.beginPath();
+	d_context.strokeStyle="#882200";
+	d_context.moveTo(x, y);
+	d_context.lineTo(x+99, y);
+	d_context.stroke();
+	d_context.closePath();
+	
+	// static B
+	x = 200.5;
+	y = 499.5 - Math.floor(499 * 0.10 / 2.10);
+	d_context.fillStyle="#882200";
+	d_context.fillText("0.10 static b", x + 4, y - 8);
+	d_context.beginPath();
+	d_context.strokeStyle="#882200";
+	d_context.moveTo(x, y);
+	d_context.lineTo(x+99, y);
+	d_context.stroke();
+	d_context.closePath();
+	
+	// unrolled
+	x = 300.5;
+	y = 499.5 - Math.floor(499 * 0.10 / 2.10);
+	d_context.fillStyle="#882200";
+	d_context.fillText("0.10 unrolled", x + 4, y - 8);
+	d_context.beginPath();
+	d_context.strokeStyle="#882200";
+	d_context.moveTo(x, y);
+	d_context.lineTo(x+99, y);
+	d_context.stroke();
+	d_context.closePath();
+	
+	// triangular
+	x = 400.5;
+	y = 499.5 - Math.floor(499 * 0.08 / 2.10);
+	d_context.fillStyle="#886600";
+	d_context.fillText("0.08 triangular", x + 4, y - 8);
+	d_context.beginPath();
+	d_context.strokeStyle="#886600";
+	d_context.moveTo(x, y);
+	d_context.lineTo(x+99, y);
+	d_context.stroke();
+	d_context.closePath();
+	
+	// lapack
+	x = 500.5;
+	y = 499.5 - Math.floor(499 * 0.65 / 2.10);
+	d_context.fillStyle="#002288";
+	d_context.fillText("0.65 LAPACK", x + 4, y - 8);
+	d_context.beginPath();
+	d_context.strokeStyle="#002288";
+	d_context.moveTo(x, y);
+	d_context.lineTo(x+99, y);
+	d_context.stroke();
+	d_context.closePath();
+	
+	// runtime
+	x = 600.5;
+	y = 0.05;
+	d_context.fillStyle="#AA0011";
+	d_context.fillText("2.10 recursive", x - 8, y + 16);
+	d_context.beginPath();
+	d_context.strokeStyle="#AA0011";
+	d_context.moveTo(x, y);
+	d_context.lineTo(x+99, y);
+	d_context.stroke();
+	d_context.closePath();
+}
+
+function init_results(){
+    draw_results();
+}
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+Vastly outperforming LAPACK with C++ metaprogramming
+    </h1>
+    <p>
+...
+    </p>
+    <p>
+Yet with preprocessor macros only you can still explain your compiler what do you want, and the compiler, being sophisticated machine, will use this knowledge to generate better code. You can make it compute rather elaborate things statically, and more importantly you can make it generate zero-overhead code to win quite a lot in performance. 
+    </p>
+
+    <table><tr>
+    <td>
+    <pre><span id="slides_recursive_1" style="display:block"><div style="color:#994466"><b>Step 1. C source code</b></div>
+1
+    </span><span id="slides_recursive_2" style="display:none"><div style="color:#992244"><b>Step 2. C pseudo-code after preprocessing</b></div>
+2
+    </span><span id="slides_recursive_3" style="display:none"><div style="color:#881122"><b>Step 3. Pseudo-code after inlining</b></div>
+3
+    </span><span id="slides_recursive_4" style="display:none"><div style="color:#881122"><b>Step 4. Pseudo-code after constant propagation</b></div>
+4
+    </span><span id="slides_recursive_5" style="display:none"><div style="color:#880000"><b>Step 5. Assembly</b></div>
+5
+    </span></pre>
+    </td>
+    </td></tr></table>
+    <p style="text-align:right">
+    <button type="button" onclick="next('slides_recursive')">Next step</button>
+    </p>
+
+    <ol>
+    <li>
+...
+    </li>
+    <li>
+...
+    </li>
+    <li>
+...
+    </li>
+    <li>
+...
+    </li>
+    <li>
+...
+    </li>
+    <li>
+...
+    </li>
+    <li>
+...
+    </li>
+    </ol>
+    <canvas id="results" width=700 height=500></canvas>
+    <script language="JavaScript">
+    init_results();
+    </script>
+
+    <p style="font-family: sans-serif; font-size: 14pt;">
+All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the code is compiled with g++ 5.4.0 -std=c++11 -O2. The source code for the benchmark is available on <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/drafts/static_cpp">Github</a>.
+    </p>
+
+
+    <p class="footer">
+    <a href="index.html">wordsandbuttons.online</a> &nbsp;&nbsp;&bull;&nbsp;&nbsp; 
+    <a href="https://github.com/akalenuk/wordsandbuttons">GitHub</a> &nbsp;&nbsp;&bull;&nbsp;&nbsp; 
+    <a href="https://plus.google.com/u/0/collection/ExPALF">Google+</a> &nbsp;&nbsp;&bull;&nbsp;&nbsp; 
+    <a href="https://twitter.com/wordsandbuttons">Twitter</a>
+    </p>
+    </center>
+  </body>
+</html>
