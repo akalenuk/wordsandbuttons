@@ -1,4 +1,4 @@
-all:
+all: factorial
 	g++ -O2 -std=c++14 -fno-inline exp_default_inline.cpp -o exp_no_inline
 	g++ -O2 -std=c++14 -fno-inline exp_default_inline.cpp -S -o exp_no_inline.s
 	g++ -O2 -std=c++14 -fno-inline -march=native exp_default_inline.cpp -o exp_no_inline_march_native
@@ -16,7 +16,11 @@ measurements:
 	perf stat ./exp_no_inline_march_native
 	perf stat ./exp_forced_inline
 	perf stat ./exp_forced_inline_march_native
-	perf stat ./exp_triangular_matrix	
+	perf stat ./exp_triangular_matrix
+.PHONY: factorial
+factorial:
+	g++ -O2 -std=c++14 factorial.cpp -o factorial
+	g++ -O2 -std=c++14 factorial.cpp -S -o factorial.s	
 clean:
 	rm exp_no_inline
 	rm exp_no_inline.s
@@ -28,3 +32,5 @@ clean:
 	rm exp_forced_inline_march_native.s
 	rm exp_triangular_matrix
 	rm exp_triangular_matrix.s
+	rm factorial
+	rm factorial.s
