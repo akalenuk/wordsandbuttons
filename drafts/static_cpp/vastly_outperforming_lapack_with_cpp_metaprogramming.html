@@ -134,7 +134,7 @@ function draw_results(){
 	d_context.stroke();
 	d_context.closePath();
 	
-	// static A
+	// no inline
 	x = 100.5;
 	y = 499.5 - Math.floor(499 * 0.04 / 2.10);
 	d_context.fillStyle="#882200";
@@ -218,31 +218,227 @@ function init_results(){
 Vastly outperforming LAPACK with C++ metaprogramming
     </h1>
     <p>
-...
+This is kind of a sequel to <a href="http://wordsandbuttons.online/outperforming_lapack_with_c_metaprogramming.html">Outperforming LAPACK with C metaprogramming</a>. The tricks described there were effective, but rather ugly and not quite scaleable. What I propose here is the same trick — making compiler produce reduceable deterministic code agaist its best judgement — but in C++ template metaprogramming.
     </p>
     <p>
-Yet with preprocessor macros only you can still explain your compiler what do you want, and the compiler, being sophisticated machine, will use this knowledge to generate better code. You can make it compute rather elaborate things statically, and more importantly you can make it generate zero-overhead code to win quite a lot in performance. 
+I will also show a quick win you can gain with this type of code and point out a thing that may stand in a way. All and all, the solution I propose solves a linear system of 5 equations 10 times faster than LAPACK does.
     </p>
-
+    <h2>
+Making the compiler unroll recursion
+    </h2>
+    <p>
+C++ supports functions with integer templates which work in a remarkably straightforward way. The compiler creates an instance of a function for every template's value it knows the function should be instantiated. This means that you can't simply make a recursive template function even with the most explicit exit condition, because the compiler does not resolve conditions on early stages. If you make a usual factorial function into an integer template and, for instanve, run it as <i>factorial&lt;3&gt;()</i>, the compiler would have to create <i>factorial&lt;3&gt;()</i>, and <i>factorial&lt;2&gt;()</i>, and <i>factorial&lt;1&gt;()</i>, and <i>factorial&lt;0&gt;()</i>, and <i>factorial&lt;-1&gt;()</i>, and so on. I'm not sure if it stops eventually due to integer overflow, and I'm not even willing to know.
+    </p>
+    <p>
+The trick here is to hack a recursive call to do an extra instantiation with the exit condition on the case for the extra condition.
+    </p>
     <table><tr>
     <td>
-    <pre><span id="slides_recursive_1" style="display:block"><div style="color:#994466"><b>Step 1. C source code</b></div>
-1
-    </span><span id="slides_recursive_2" style="display:none"><div style="color:#992244"><b>Step 2. C pseudo-code after preprocessing</b></div>
-2
-    </span><span id="slides_recursive_3" style="display:none"><div style="color:#881122"><b>Step 3. Pseudo-code after inlining</b></div>
-3
-    </span><span id="slides_recursive_4" style="display:none"><div style="color:#881122"><b>Step 4. Pseudo-code after constant propagation</b></div>
-4
+    <pre><span id="slides_recursive_1" style="display:block"><div style="color:#994466"><b>Step 1. C++ source code</b></div>
+#include &lt;iostream&gt;
+
+template &lt;int N&gt;
+int factorial(){
+    return N == 1 
+        ? 1
+        : N*factorial&lt;N - 1<b> + (N == 1)</b>&gt;();
+}
+
+int main(){
+    return factorial&lt;3&gt;();
+}
+
+
+
+    </span><span id="slides_recursive_2" style="display:none"><div style="color:#992244"><b>Step 2. C++ pseudo-code with all the instantiations</b></div>
+int factorial&lt;3&gt;(){
+    return N == 1 ? 1 : N*factorial&lt;2&gt;();
+}
+
+int factorial&lt;2&gt;(){
+    return N == 1 ? 1 : N*factorial&lt;1&gt;();
+}
+
+int factorial&lt;1&gt;(){
+    return N == 1 ? 1 : N*factorial&lt;0+1&gt;();
+}
+
+int main(){
+    return factorial&lt;3&gt;();
+}
+    </span><span id="slides_recursive_3" style="display:none"><div style="color:#881122"><b>Step 3. Pseudo-code after constant propagation</b></div>
+int factorial&lt;3&gt;(){
+    return 3*factorial&lt;2&gt;();
+}
+
+int factorial&lt;2&gt;(){
+    return 2*factorial&lt;1&gt;();
+}
+
+int factorial&lt;1&gt;(){
+    return 1;
+}
+
+int main(){
+    return factorial&lt;3&gt;();
+}
+    </span><span id="slides_recursive_4" style="display:none"><div style="color:#881122"><b>Step 4. Pseudo-code after inlining</b></div>
+
+
+
+
+
+
+int main(){
+    return 3*2*1;
+}
+
+
+
+
+
+
     </span><span id="slides_recursive_5" style="display:none"><div style="color:#880000"><b>Step 5. Assembly</b></div>
-5
+
+
+
+
+
+main:
+.LFB1497:
+	.cfi_startproc
+	movl	$6, %eax
+	ret
+	.cfi_endproc
+	
+	
+	
+	
     </span></pre>
     </td>
     </td></tr></table>
     <p style="text-align:right">
     <button type="button" onclick="next('slides_recursive')">Next step</button>
     </p>
+    <p>
+The trick is as simple as effective. Static computation is a byproduct here, the point is — we can make the compiler unroll any kind of recursion with no limitations on depth and branching. Well, except for the compilation time.
+    </p>
+    <p>
+Just like in the original article I propose a recursive solution that is expected to unroll and reduce itself in the compile time.
+    </p>
+    <table><tr>
+    <td>
+    <pre style="width: 620pt;">
+#include &lt;array&gt;
+#include &lt;iostream&gt;
 
+namespace linear_equations
+{
+    namespace semi_static
+    {
+        template &lt;int I, int J, int K, int N&gt;
+        inline static double aij(
+            const std::array&lt;std::array&lt;double, N&gt;, N&gt;& a)
+        {
+            if(K == N) return a[I][J];
+            return aij&lt;I, J, K+(K&lt;N), N&gt;(a) * aij&lt;K, K, K+(K&lt;N), N&gt;(a) 
+                - aij&lt;I, K, K+(K&lt;N), N&gt;(a) * aij&lt;K, J, K+(K&lt;N), N&gt;(a);
+        }
+
+        template &lt;int I, int K, int N&gt;
+        inline static double bi(
+            const std::array&lt;std::array&lt;double, N&gt;, N&gt;& a, 
+            const std::array&lt;double, N&gt;& b)
+        {
+            if(K == N) return b[I];
+            return aij&lt;K, K, K+(K&lt;N), N&gt;(a) * bi&lt;I, K+(K&lt;N), N&gt;(a, b) 
+                - aij&lt;I, K, K+(K&lt;N), N&gt;(a) * bi&lt;K, K+(K&lt;N), N&gt;(a, b);
+        }
+
+        template &lt;int J, int I, int N&gt;
+        inline static void d_for(
+            double& d, 
+            const std::array&lt;std::array&lt;double, N&gt;, N&gt;& a, 
+            std::array&lt;double, N&gt;& x)
+        {
+            if(J &lt; I)
+            {
+                d -= aij&lt;I, J, I+(J&lt;I), N&gt;(a) * x[J];
+                d_for&lt;J+(J&lt;I), I, N&gt;(d, a, x);
+            }
+        }
+
+        template &lt;int I, int N&gt;
+        inline static double di(
+            const std::array&lt;std::array&lt;double, N&gt;, N&gt;& a, 
+            const std::array&lt;double, N&gt;& b, 
+            std::array&lt;double, N&gt;& x)
+        {
+            double d = bi&lt;I, I+1, N&gt;(a, b);
+            d_for&lt;0, I, N&gt;(d, a, x);
+            return d;
+        }
+
+        template &lt;int I, int N&gt;
+        inline static void x_for(
+            const std::array&lt;std::array&lt;double, N&gt;, N&gt;& a, 
+            const std::array&lt;double, N&gt;& b, 
+            std::array&lt;double, N&gt;& x)
+        {
+            if(I &lt; N)
+            {
+                double d = di&lt;I, N&gt;(a, b, x);
+                double aiji = aij&lt;I, I, I+1, N&gt;(a);
+                x[I] = d / aiji;
+                x_for&lt;I+(I&lt;N), N&gt;(a, b, x);
+            }
+        }
+
+        template &lt;int N&gt;
+        inline static void solve(
+            const std::array&lt;std::array&lt;double, N&gt;, N&gt;& a, 
+            const std::array&lt;double, N&gt;& b, 
+            std::array&lt;double, N&gt;& x)
+        {
+            x_for&lt;0, N&gt;(a, b, x);
+        }
+    }
+}
+    
+int main() {
+    auto sum_x = std::array&lt;double, 5&gt; {0., 0., 0., 0., 0.};
+    for(auto i = 0u; i &lt; 1000 * 1000; ++i){
+        auto v_a = std::array&lt;std::array&lt;volatile double, 5&gt;, 5&gt;{{
+            { 6.80, -6.05, -0.45,  8.32, -9.67},
+            {-2.11, -3.30,  2.58,  2.71, -5.14},
+            { 5.66,  5.36, -2.70,  4.35, -7.26},
+            { 5.97, -4.44,  0.27, -7.17,  6.08},
+            { 8.23,  1.08,  9.04,  2.14, -6.87}
+        }};    
+        auto v_b = std::array&lt;volatile double, 5&gt;
+            {4.02,  6.19, -8.22, -7.57, -3.03};
+            
+        const auto a = std::array&lt;std::array&lt;double, 5&gt;, 5&gt;{{
+            {v_a[0][0], v_a[0][1], v_a[0][2], v_a[0][3], v_a[0][4]},
+            {v_a[1][0], v_a[1][1], v_a[1][2], v_a[1][3], v_a[1][4]},
+            {v_a[2][0], v_a[2][1], v_a[2][2], v_a[2][3], v_a[2][4]},
+            {v_a[3][0], v_a[3][1], v_a[3][2], v_a[3][3], v_a[3][4]},
+            {v_a[4][0], v_a[4][1], v_a[4][2], v_a[4][3], v_a[4][4]}
+        }};    
+        const auto b = std::array&lt;double, 5&gt;
+            {v_b[0], v_b[1], v_b[2], v_b[3], v_b[4]};
+        auto x = std::array&lt;double, 5&gt; {};
+        linear_equations::semi_static::solve&lt;5&gt;(a, b, x);
+             
+        for(auto j = 0u; j &lt; 5; ++j)
+            sum_x[j] += x[j];
+    } 
+    std::cout &lt;&lt; sum_x[0] &lt;&lt; ' ' &lt;&lt; sum_x[1] &lt;&lt; ' ' 
+        &lt;&lt; sum_x[2] &lt;&lt; ' ' &lt;&lt; sum_x[3] &lt;&lt; ' ' &lt;&lt; sum_x[4] &lt;&lt; '\n';
+    return 0;
+}
+    </pre>
+    </td></tr></table> 
     <ol>
     <li>
 ...

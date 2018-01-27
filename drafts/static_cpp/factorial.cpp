@@ -8,6 +8,6 @@ int factorial(){
 }
 
 int main(){
-    return factorial<4>();
+    return factorial<3>();
 }
 
