@@ -7,6 +7,8 @@ all:
 	g++ -O2 -std=c++14 exp_forced_inline.cpp -S -o exp_forced_inline.s
 	g++ -O2 -std=c++14 -march=native exp_forced_inline.cpp -o exp_forced_inline_march_native
 	g++ -O2 -std=c++14 -march=native exp_forced_inline.cpp -S -o exp_forced_inline_march_native.s
+	g++ -O2 -std=c++14 -march=native exp_triangular_matrix.cpp -o exp_triangular_matrix
+	g++ -O2 -std=c++14 -march=native exp_triangular_matrix.cpp -S -o exp_triangular_matrix.s	
 	ls -l *.s
 .PHONY: measurements
 measurements:
@@ -14,6 +16,7 @@ measurements:
 	perf stat ./exp_no_inline_march_native
 	perf stat ./exp_forced_inline
 	perf stat ./exp_forced_inline_march_native
+	perf stat ./exp_triangular_matrix	
 clean:
 	rm exp_no_inline
 	rm exp_no_inline.s
@@ -23,3 +26,5 @@ clean:
 	rm exp_forced_inline.s
 	rm exp_forced_inline_march_native
 	rm exp_forced_inline_march_native.s
+	rm exp_triangular_matrix
+	rm exp_triangular_matrix.s
