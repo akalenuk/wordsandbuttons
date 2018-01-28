@@ -218,19 +218,19 @@ function init_results(){
 Vastly outperforming LAPACK with C++ metaprogramming
     </h1>
     <p>
-This is kind of a sequel to <a href="http://wordsandbuttons.online/outperforming_lapack_with_c_metaprogramming.html">Outperforming LAPACK with C metaprogramming</a>. The tricks described there were effective, but rather ugly and not quite scaleable. What I propose here is the same trick — making compiler produce reduceable deterministic code agaist its best judgement — but in C++ template metaprogramming.
+This is kind of a sequel to <a href="http://wordsandbuttons.online/outperforming_lapack_with_c_metaprogramming.html">Outperforming LAPACK with C metaprogramming</a>. The tricks described there were effective but rather ugly, and not quite scalable. What I propose here is the same trick (making compiler produce reducible deterministic code against its best judgment) but with C++ template metaprogramming.
     </p>
     <p>
-I will also show a quick win you can gain with this type of code and point out a thing that may stand in a way. All and all, the solution I propose solves a linear system of 5 equations 10 times faster than LAPACK does.
+I will also show a quick win you can gain with this type of code, and point out a thing that may stand in a way. The solution I propose solves a linear system of 5 equations 10 times faster than LAPACK does.
     </p>
     <h2>
 Making the compiler unroll recursion
     </h2>
     <p>
-C++ supports functions with integer templates which work in a remarkably straightforward way. The compiler creates an instance of a function for every template's value it knows the function should be instantiated. This means that you can't simply make a recursive template function even with the most explicit exit condition, because the compiler does not resolve conditions on early stages. If you make a usual factorial function into an integer template and, for instanve, run it as <i>factorial&lt;3&gt;()</i>, the compiler would have to create <i>factorial&lt;3&gt;()</i>, and <i>factorial&lt;2&gt;()</i>, and <i>factorial&lt;1&gt;()</i>, and <i>factorial&lt;0&gt;()</i>, and <i>factorial&lt;-1&gt;()</i>, and so on. I'm not sure if it stops eventually due to integer overflow, and I'm not even willing to know.
+C++ supports functions with integer templates which work in a remarkably straightforward way. The compiler creates an instance of a function for every template's value it knows the function should be instantiated. This means that you can't simply make a recursive template function even with the most explicit exit condition, because the compiler does not resolve conditions on early stages. If you make a usual factorial function into an integer template and, for instance, run it as <i>factorial&lt;3&gt;()</i>, the compiler would have to create <i>factorial&lt;3&gt;()</i>, and <i>factorial&lt;2&gt;()</i>, and <i>factorial&lt;1&gt;()</i>, and <i>factorial&lt;0&gt;()</i>, and <i>factorial&lt;-1&gt;()</i>, and so on. I'm not sure if it stops eventually due to integer overflow, and I'm not even willing to know.
     </p>
     <p>
-The trick here is to hack a recursive call to do an extra instantiation with the exit condition on the case for the extra condition.
+The trick here is to patch a recursive call to do an extra instantiation with the exit condition for the case with that very extra condition. Factorial of 1 should call a factorial of 1 (not 0) in the dead branch, and the compiler will have to stop spawning instantiations, since it already has a factorial of 1. This might seem like a thing that would prevent inlining by creating natural recursion, but the instantiation would be eliminated from the dead branch eventually, so the inlining would remain possible.
     </p>
     <table><tr>
     <td>
@@ -252,15 +252,15 @@ int main(){
 
     </span><span id="slides_recursive_2" style="display:none"><div style="color:#992244"><b>Step 2. C++ pseudo-code with all the instantiations</b></div>
 int factorial&lt;3&gt;(){
-    return N == 1 ? 1 : N*factorial&lt;2&gt;();
+    return N == 1 ? 1 : N*factorial&lt;2 + 0&gt;();
 }
 
 int factorial&lt;2&gt;(){
-    return N == 1 ? 1 : N*factorial&lt;1&gt;();
+    return N == 1 ? 1 : N*factorial&lt;1 + 0&gt;();
 }
 
 int factorial&lt;1&gt;(){
-    return N == 1 ? 1 : N*factorial&lt;0+1&gt;();
+    return N == 1 ? 1 : N*factorial&lt;0<b> + 1</b>&gt;();
 }
 
 int main(){
@@ -321,10 +321,10 @@ main:
     <button type="button" onclick="next('slides_recursive')">Next step</button>
     </p>
     <p>
-The trick is as simple as effective. Static computation is a byproduct here, the point is — we can make the compiler unroll any kind of recursion with no limitations on depth and branching. Well, except for the compilation time.
+The trick is as simple, as it is effective. Static computation is a byproduct here, the important thing is — we can make the compiler unroll any kind of recursion with no limitations on depth and branching. Well, no limitations except for the compilation time, of course.
     </p>
     <p>
-Just like in the original article I propose a recursive solution that is expected to unroll and reduce itself in the compile time.
+Just like in the original article I propose a recursive solution that is expected to unroll and reduce itself in the compile time. The input data is explicitly made volatile to prevent static computation.
     </p>
     <table><tr>
     <td>
@@ -337,70 +337,70 @@ namespace linear_equations
     namespace semi_static
     {
         template &lt;int I, int J, int K, int N&gt;
-        inline static double aij(
+        inline static double <b>aij</b>(
             const std::array&lt;std::array&lt;double, N&gt;, N&gt;& a)
         {
             if(K == N) return a[I][J];
-            return aij&lt;I, J, K+(K&lt;N), N&gt;(a) * aij&lt;K, K, K+(K&lt;N), N&gt;(a) 
-                - aij&lt;I, K, K+(K&lt;N), N&gt;(a) * aij&lt;K, J, K+(K&lt;N), N&gt;(a);
+            return <b>aij</b>&lt;I, J, K+(K&lt;N), N&gt;(a) * <b>aij</b>&lt;K, K, K+(K&lt;N), N&gt;(a) 
+                - <b>aij</b>&lt;I, K, K+(K&lt;N), N&gt;(a) * <b>aij</b>&lt;K, J, K+(K&lt;N), N&gt;(a);
         }
 
         template &lt;int I, int K, int N&gt;
-        inline static double bi(
+        inline static double <b>bi</b>(
             const std::array&lt;std::array&lt;double, N&gt;, N&gt;& a, 
             const std::array&lt;double, N&gt;& b)
         {
             if(K == N) return b[I];
-            return aij&lt;K, K, K+(K&lt;N), N&gt;(a) * bi&lt;I, K+(K&lt;N), N&gt;(a, b) 
-                - aij&lt;I, K, K+(K&lt;N), N&gt;(a) * bi&lt;K, K+(K&lt;N), N&gt;(a, b);
+            return <b>aij</b>&lt;K, K, K+(K&lt;N), N&gt;(a) * <b>bi</b>&lt;I, K+(K&lt;N), N&gt;(a, b) 
+                - <b>aij</b>&lt;I, K, K+(K&lt;N), N&gt;(a) * <b>bi</b>&lt;K, K+(K&lt;N), N&gt;(a, b);
         }
 
         template &lt;int J, int I, int N&gt;
-        inline static void d_for(
+        inline static void <b>d_for</b>(
             double& d, 
             const std::array&lt;std::array&lt;double, N&gt;, N&gt;& a, 
             std::array&lt;double, N&gt;& x)
         {
             if(J &lt; I)
             {
-                d -= aij&lt;I, J, I+(J&lt;I), N&gt;(a) * x[J];
-                d_for&lt;J+(J&lt;I), I, N&gt;(d, a, x);
+                d -= <b>aij</b>&lt;I, J, I+(J&lt;I), N&gt;(a) * x[J];
+                <b>d_for</b>&lt;J+(J&lt;I), I, N&gt;(d, a, x);
             }
         }
 
         template &lt;int I, int N&gt;
-        inline static double di(
+        inline static double <b>di</b>(
             const std::array&lt;std::array&lt;double, N&gt;, N&gt;& a, 
             const std::array&lt;double, N&gt;& b, 
             std::array&lt;double, N&gt;& x)
         {
-            double d = bi&lt;I, I+1, N&gt;(a, b);
-            d_for&lt;0, I, N&gt;(d, a, x);
+            double d = <b>bi</b>&lt;I, I+1, N&gt;(a, b);
+            <b>d_for</b>&lt;0, I, N&gt;(d, a, x);
             return d;
         }
 
         template &lt;int I, int N&gt;
-        inline static void x_for(
+        inline static void <b>x_for</b>(
             const std::array&lt;std::array&lt;double, N&gt;, N&gt;& a, 
             const std::array&lt;double, N&gt;& b, 
             std::array&lt;double, N&gt;& x)
         {
             if(I &lt; N)
             {
-                double d = di&lt;I, N&gt;(a, b, x);
-                double aiji = aij&lt;I, I, I+1, N&gt;(a);
+                double d = <b>di</b>&lt;I, N&gt;(a, b, x);
+                double aiji = <b>aij</b>&lt;I, I, I+1, N&gt;(a);
                 x[I] = d / aiji;
-                x_for&lt;I+(I&lt;N), N&gt;(a, b, x);
+                <b>x_for</b>&lt;I+(I&lt;N), N&gt;(a, b, x);
             }
         }
 
         template &lt;int N&gt;
-        inline static void solve(
+        inline static void <b>solve</b>(
             const std::array&lt;std::array&lt;double, N&gt;, N&gt;& a, 
             const std::array&lt;double, N&gt;& b, 
             std::array&lt;double, N&gt;& x)
         {
-            x_for&lt;0, N&gt;(a, b, x);
+            <b>x_for</b>&lt;0, N&gt;(a, b, x);
         }
     }
 }
@@ -428,7 +428,7 @@ int main() {
         const auto b = std::array&lt;double, 5&gt;
             {v_b[0], v_b[1], v_b[2], v_b[3], v_b[4]};
         auto x = std::array&lt;double, 5&gt; {};
-        linear_equations::semi_static::solve&lt;5&gt;(a, b, x);
+        linear_equations::semi_static::<b>solve</b>&lt;5&gt;(a, b, x);
              
         for(auto j = 0u; j &lt; 5; ++j)
             sum_x[j] += x[j];
@@ -440,34 +440,37 @@ int main() {
     </pre>
     </td></tr></table>
     <p>
-Unlike the C solution, this is completely scalable. It doesn't require macroses or language misuse. The downside is, it runs twice as long when being built with inlines off.
+Unlike the C solution, this is completely scalable. It doesn't require macros or <i>case</i> misuse. The downside is, it runs twice as long when being built with inlines off.
     </p>
     <h2>
 Two things to consider
     </h2>
     <p>
-1. In C++ inline specifier doesn't necessary specify inlining. It's up to the compiler and the compiler settings to decide. In our case we know we will eventually benefit from it, so it might be a good idea to demand inlining explicitly. GCC has a special attribute <i>__attribute__((always_inline))</i> for it.
+1. In C++ inline specifier doesn't necessary specify inlining. It's up to the compiler and the build parameters to decide. In our case we know we will eventually benefit from it, so it might be a good idea to demand inlining explicitly. GCC has a special attribute <i>__attribute__((always_inline))</i> for it.
     </p>
     <p>
 Generally it is ok to let the compiler decide, as excessive inlining may be bad for instruction cache usage, but it all depends on the code and the hardware. 
     </p>
     <p>
-2. The code we will get after the inlining will mostly cosist of arithmetic operations. There will be little memory access, no branching and no stack operations. This type of code may benefit drastically from superscalarization.  
+2. The code we will get after the inlining will mostly consist of arithmetic operations. There will be little memory access, no branching and no stack operations. This type of code may benefit drastically from superscalarization. Modern processors have the capabilities of processing several values as one big superscalar, and the more recent the model, the larger the superscalars are.  
     </p>
     <p>
-The compiler always has some target platform in mind. Usually the default one is a little conservative to make sure your binary will run fine on other machines. This means that unless you select it explicitly, the compiler would only use the benefits of 10 years old processor.
+The compiler always has some target platform in mind. Usually, the default one is a little conservative to make sure your binary will run on other machines. This means that unless you select it explicitly, the compiler would only use the benefits of 10 years old processor.
     </p>
     <p>
-For GCC you can select the target architecture with <i>-march</i> option. My choise for the evening will be <i>-march=native</i> since the only purpose of the binary I want is to run on my machine a couple of times.
+For GCC you can select the target architecture with <i>-march</i> option. My choice for the evening will be <i>-march=native</i> since the only purpose of the binary I want is to run on my machine a couple of times.
     </p>
     <h2>
 Measurements
     </h2>
     <p>
-I want to measure several solutions. The one with inlines prohibited by the compiler option, and the same one built for the native architecture. The one with forced inlines both with default and native architectures. Then the solution with a triangual matrix to make sure we still may benefit from partial constantness with this approach. These number then should be compared to the LAPACK solution from before. 
+I want to measure several solutions. The one with inlines prohibited by the compiler option, and the same one rebuilt for the native architecture. The one with forced inlines both with default and native architectures. Then the solution with a triangular matrix to make sure we still may benefit from partial constantness with this approach. These numbers then should be compared to the LAPACK and the recursive solutions <a href="http://wordsandbuttons.online/outperforming_lapack_with_c_metaprogramming.html">from the C piece</a>. 
     </p>
     <p>
-The numbers will seem more precise than before, but let it not decieve you, we still have quite an error in the measurements. It's just that the difference between the most and the least effective solutions is so great, we can't really put the numbers on the same scale. The whole runtime of the most efficient version fits in a error for the least efficient.
+The numbers will seem more precise than before, but let it not deceive you, we still have quite an error in the measurements. It's just that the difference between the most and the least effective solutions is so great, we can't really put the numbers on the same scale. The whole runtime of the most efficient version fits in the error of the least efficient.
+    </p>
+    <p>
+Anyway, the numbers are as follows.
     </p>
     <ol>
     <li>
@@ -501,10 +504,10 @@ Recursive solution from before: Runtime 2100 ms.
 Summary
     </h2>
     <p>
-The “unroll recursion” trick may be extremely effective in the right context. In the wrong context it may be as well harmful. We can make the compiler produce code 30 times more effective that the original recursive solution, but we may just as easy lose 2 times if the compiler fails to unroll loops. 
+The “unroll recursion” trick may be extremely effective in the right context. In the wrong context it may be as well harmful. We can make the compiler produce code 30 times more effective that the original recursive solution, but we may just as easy lose 2 times if the compiler fails to unroll recursive functions. 
     </p>
     <p>
-Superscalarization does wonders for the unrolled code. Without inlines there is only 10% speedup, but for the fully unrolled code it is a fair 2x. But even with 10% gain it is still something worth consideration. If your code runs in a cloud or on your own server, or in some other form of predictalbe environment, you might consider rebuilding it for the native architecture for a cheap speedup.
+Superscalarization does wonders for the unrolled code. Without inlines there is only 10% speedup, but for the fully unrolled code it is a fair 2x. But even with that 10% gain it is still something worth consideration. If your code runs in a cloud or on your own server, or in some other form of predictable environment, you might consider rebuilding it for the native architecture for a cheap speedup.
     </p>
     <p>
 The unrolled code is a subject of extremely efficient constant propagation. The computation on triangular matrix was another 10% speedup for no cost at all. You too can benefit from specializing the code to do your specific task without any additional effort.
