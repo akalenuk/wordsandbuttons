@@ -122,11 +122,11 @@ function draw_results(){
 	
 	var x = 0.0;
 	var y = 0.0;
-	// static
+	// no inlines default
 	x = 0.5;
-	y = 499.5;
+	y = 0.5;
 	d_context.fillStyle="#882200";
-	d_context.fillText("0.00 static", x + 4, y - 8);
+	d_context.fillText("4400 NI; def.", x + 4, y + 16);
 	d_context.beginPath();
 	d_context.strokeStyle="#882200";
 	d_context.moveTo(x, y);
@@ -134,11 +134,11 @@ function draw_results(){
 	d_context.stroke();
 	d_context.closePath();
 	
-	// no inline
+	// no inlines native
 	x = 100.5;
-	y = 499.5 - Math.floor(499 * 0.04 / 2.10);
+	y = 499.5 - Math.floor(499 * 4000/ 4400);
 	d_context.fillStyle="#882200";
-	d_context.fillText("0.04 static a", x + 4, y - 8);
+	d_context.fillText("4000 NI; nat.", x + 4, y - 8);
 	d_context.beginPath();
 	d_context.strokeStyle="#882200";
 	d_context.moveTo(x, y);
@@ -146,11 +146,11 @@ function draw_results(){
 	d_context.stroke();
 	d_context.closePath();
 	
-	// static B
+	// forced inlines default
 	x = 200.5;
-	y = 499.5 - Math.floor(499 * 0.10 / 2.10);
+	y = 499.5 - Math.floor(499 * 120 / 4400);
 	d_context.fillStyle="#882200";
-	d_context.fillText("0.10 static b", x + 4, y - 8);
+	d_context.fillText("120 FI; def.", x + 4, y - 8);
 	d_context.beginPath();
 	d_context.strokeStyle="#882200";
 	d_context.moveTo(x, y);
@@ -158,11 +158,11 @@ function draw_results(){
 	d_context.stroke();
 	d_context.closePath();
 	
-	// unrolled
+	// forced inlines native
 	x = 300.5;
-	y = 499.5 - Math.floor(499 * 0.10 / 2.10);
+	y = 499.5 - Math.floor(499 * 62 / 4400);
 	d_context.fillStyle="#882200";
-	d_context.fillText("0.10 unrolled", x + 4, y - 8);
+	d_context.fillText("62 FI; nat.", x + 4, y - 8);
 	d_context.beginPath();
 	d_context.strokeStyle="#882200";
 	d_context.moveTo(x, y);
@@ -172,9 +172,9 @@ function draw_results(){
 	
 	// triangular
 	x = 400.5;
-	y = 499.5 - Math.floor(499 * 0.08 / 2.10);
+	y = 499.5 - Math.floor(499 * 56 / 4400);
 	d_context.fillStyle="#886600";
-	d_context.fillText("0.08 triangular", x + 4, y - 8);
+	d_context.fillText("56 triangular", x + 4, y - 8);
 	d_context.beginPath();
 	d_context.strokeStyle="#886600";
 	d_context.moveTo(x, y);
@@ -184,9 +184,9 @@ function draw_results(){
 	
 	// lapack
 	x = 500.5;
-	y = 499.5 - Math.floor(499 * 0.65 / 2.10);
+	y = 499.5 - Math.floor(499 * 650 / 4400);
 	d_context.fillStyle="#002288";
-	d_context.fillText("0.65 LAPACK", x + 4, y - 8);
+	d_context.fillText("650 LAPACK", x + 4, y - 8);
 	d_context.beginPath();
 	d_context.strokeStyle="#002288";
 	d_context.moveTo(x, y);
@@ -196,9 +196,9 @@ function draw_results(){
 	
 	// runtime
 	x = 600.5;
-	y = 0.05;
+	y = 499.5 - Math.floor(499 * 2100 / 4400);
 	d_context.fillStyle="#AA0011";
-	d_context.fillText("2.10 recursive", x - 8, y + 16);
+	d_context.fillText("2100 rec.", x + 4, y -8);
 	d_context.beginPath();
 	d_context.strokeStyle="#AA0011";
 	d_context.moveTo(x, y);
@@ -446,35 +446,69 @@ Unlike the C solution, this is completely scalable. It doesn't require macroses 
 Two things to consider
     </h2>
     <p>
-In C++ inline specifier doesn't necessary specify inlining. 
+1. In C++ inline specifier doesn't necessary specify inlining. It's up to the compiler and the compiler settings to decide. In our case we know we will eventually benefit from it, so it might be a good idea to demand inlining explicitly. GCC has a special attribute <i>__attribute__((always_inline))</i> for it.
+    </p>
+    <p>
+Generally it is ok to let the compiler decide, as excessive inlining may be bad for instruction cache usage, but it all depends on the code and the hardware. 
+    </p>
+    <p>
+2. The code we will get after the inlining will mostly cosist of arithmetic operations. There will be little memory access, no branching and no stack operations. This type of code may benefit drastically from superscalarization.  
+    </p>
+    <p>
+The compiler always has some target platform in mind. Usually the default one is a little conservative to make sure your binary will run fine on other machines. This means that unless you select it explicitly, the compiler would only use the benefits of 10 years old processor.
+    </p>
+    <p>
+For GCC you can select the target architecture with <i>-march</i> option. My choise for the evening will be <i>-march=native</i> since the only purpose of the binary I want is to run on my machine a couple of times.
+    </p>
+    <h2>
+Measurements
+    </h2>
+    <p>
+I want to measure several solutions. The one with inlines prohibited by the compiler option, and the same one built for the native architecture. The one with forced inlines both with default and native architectures. Then the solution with a triangual matrix to make sure we still may benefit from partial constantness with this approach. These number then should be compared to the LAPACK solution from before. 
+    </p>
+    <p>
+The numbers will seem more precise than before, but let it not decieve you, we still have quite an error in the measurements. It's just that the difference between the most and the least effective solutions is so great, we can't really put the numbers on the same scale. The whole runtime of the most efficient version fits in a error for the least efficient.
     </p>
     <ol>
     <li>
-...
+No inlines, default architecture. Runtime: 4400 ms, assembly size 123 KB.
     </li>
     <li>
-...
+No inlines, native architecture. Runtime: 4000 ms, assembly size 123 KB.
     </li>
     <li>
-...
+Forced inlines, default architecture. Runtime: 120 ms, assembly size 10.2 KB.
     </li>
     <li>
-...
+<b>Forced inlines, native architecture. Runtime: 62 ms, assembly size 9.7 KB.</b>
     </li>
     <li>
-...
+Forced inlines, native architecture, triangular matrix. Runtime: 56 ms, assembly size 8.1 KB.
     </li>
     <li>
-...
+<b>LAPACK from before: Runtime 650 ms.</b>
     </li>
     <li>
-...
+Recursive solution from before: Runtime 2100 ms.
     </li>
     </ol>
     <canvas id="results" width=700 height=500></canvas>
     <script language="JavaScript">
     init_results();
     </script>
+    
+    <h2>
+Summary
+    </h2>
+    <p>
+The “unroll recursion” trick may be extremely effective in the right context. In the wrong context it may be as well harmful. We can make the compiler produce code 30 times more effective that the original recursive solution, but we may just as easy lose 2 times if the compiler fails to unroll loops. 
+    </p>
+    <p>
+Superscalarization does wonders for the unrolled code. Without inlines there is only 10% speedup, but for the fully unrolled code it is a fair 2x. But even with 10% gain it is still something worth consideration. If your code runs in a cloud or on your own server, or in some other form of predictalbe environment, you might consider rebuilding it for the native architecture for a cheap speedup.
+    </p>
+    <p>
+The unrolled code is a subject of extremely efficient constant propagation. The computation on triangular matrix was another 10% speedup for no cost at all. You too can benefit from specializing the code to do your specific task without any additional effort.
+    </p>
 
     <p style="font-family: sans-serif; font-size: 14pt;">
 All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the code is compiled with g++ 5.4.0 -std=c++11 -O2. The source code for the benchmark is available on <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/drafts/static_cpp">Github</a>.
