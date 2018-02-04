@@ -146,7 +146,7 @@ function solved_linear(A, B, n){
         
     // triangulize
     for (var i = 0; i < n-1; ++i)
-        for (var j = 0; j < i+1; ++k) {
+        for (var j = 0; j < i+1; ++j) {
             A[j][j] = underflow_padded(A[j][j]); 
             r = A[i+1][j] / A[j][j];
             A[i+1][j] = 0.;
@@ -169,6 +169,14 @@ function solved_linear(A, B, n){
         X[i] = (B[i] - s) / A[i][i];
     }
     return X;
+}
+
+function polynomial_in_x(A, x, n){
+    var y = 0.0;
+    for(var i = 0; i < n; ++i){
+        y = A[i] * Math.pow(x, i);
+    }
+    return y;
 }
 
 function draw_grid_on(context){
@@ -199,6 +207,10 @@ function draw_grid_on(context){
     context.stroke();
     context.closePath();
 }
+
+var polynomial_xs = [1.0, 4.0, 7.0];
+var polynomial_ys = [5.0, 2.0, 5.0];
+var polynomial_n = 3;
 
 function init_polynomial(){
     polynomial = document.getElementById("polynomial");
@@ -232,6 +244,32 @@ function polynomial_draw(client_x, client_y, do_guides){
 
 	// grid
 	draw_grid_on(polynomial_context);
+	
+	// polynomial
+	var A = [];
+	var B = [];
+	for(var i = 0; i < polynomial_n; ++i){
+	    A[i] = [];
+	    for(var j = 0; j < polynomial_n; ++j){
+	        A[i][j] = Math.pow(polynomial_xs[i], j);
+	    }
+	    B[i] = polynomial_ys[i];
+	}
+	
+	X = solved_linear(A, B, polynomial_n);
+	
+	polynomial_context.beginPath();
+	for(var j = 1; j < w; ++j){
+	    x1 = client_to_x(j-1);
+	    x2 = client_to_x(j);
+	    y1 = polynomial_in_x(X, x1, polynomial_n);
+	    y2 = polynomial_in_x(X, x2, polynomial_n);
+	    polynomial_context.moveTo(x_to_client(x1), y_to_client(y1));
+	    polynomial_context.lineTo(x_to_client(x2), y_to_client(y2));
+	}
+	polynomial_context.strokeStyle="#661100";
+    polynomial_context.stroke();
+	polynomial_context.closePath();
 }
     </script>
   </head>
