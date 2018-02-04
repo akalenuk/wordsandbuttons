@@ -127,6 +127,47 @@ function y_to_client(y){
     return client_y_center - y * client_y_step;
 }
 
+function sign_0_positive(x){
+    if(x >= 0)
+        return 1.0;
+    return -1.0;
+}
+
+function solved_linear(A, B, n){
+    var X = [];
+    for (var i = 0; i < n; ++i)
+        X[i] = 0.0;
+        
+    // triangulize
+    for (var i = 0; i < n-1; ++i)
+        for (var j = 0; j < i+1; ++k) {
+            if(Math.abs(A[j][j]) < 1.e-5)
+                A[j][j] = 1.e-5; // pixel-size input error is ok, so we don't want much precision anyway
+            r = A[i+1][j] / A[j][j];
+            A[i+1][j] = 0.;
+            for (var b_j = j+1; b_j < n; ++b_j){
+                A[i+1][b_j] -= A[j][b_j]*r; 
+            }
+            B[i+1] -= B[j]*r;
+        }
+        
+    // bring to 1
+    if(Math.abs(A[n-1][n-1]) < 1.e-5)
+        A[n-1][n-1] = 1.e-5;
+    X[n-1] = B[n-1] / A[n-1][n-1];
+    
+    for (var i = n-1; i >= 0; --i){
+        var s = 0.0;
+        for (var j = i; j < n; ++j){
+            s = s + A[i][j]*X[j];
+        }
+        if(Math.abs(A[i][j]) < 1.e-5)
+            A[i][j] = 1.e-5;
+        X[i] = (B[i] - s) / A[i][i];
+    }
+    return X;
+}
+
 function draw_grid_on(context){
 	// grid
  	context.beginPath();
