@@ -127,10 +127,16 @@ function y_to_client(y){
     return client_y_center - y * client_y_step;
 }
 
-function sign_0_positive(x){
+function sign_0_positive(x){ // Math.sign like with no 0 option
     if(x >= 0)
         return 1.0;
     return -1.0;
+}
+
+function underflow_padded(x){
+    if(Math.abs(x) < 1.e-5){ // pixel-size input error is ok, so we don't want much precision anyway
+        return 1.e-5 * sign_0_positive(x);
+    }
 }
 
 function solved_linear(A, B, n){
@@ -141,8 +147,7 @@ function solved_linear(A, B, n){
     // triangulize
     for (var i = 0; i < n-1; ++i)
         for (var j = 0; j < i+1; ++k) {
-            if(Math.abs(A[j][j]) < 1.e-5)
-                A[j][j] = 1.e-5; // pixel-size input error is ok, so we don't want much precision anyway
+            A[j][j] = underflow_padded(A[j][j]); 
             r = A[i+1][j] / A[j][j];
             A[i+1][j] = 0.;
             for (var b_j = j+1; b_j < n; ++b_j){
@@ -152,8 +157,7 @@ function solved_linear(A, B, n){
         }
         
     // bring to 1
-    if(Math.abs(A[n-1][n-1]) < 1.e-5)
-        A[n-1][n-1] = 1.e-5;
+    A[n-1][n-1] = underflow_padded(A[n-1][n-1]);
     X[n-1] = B[n-1] / A[n-1][n-1];
     
     for (var i = n-1; i >= 0; --i){
@@ -161,8 +165,7 @@ function solved_linear(A, B, n){
         for (var j = i; j < n; ++j){
             s = s + A[i][j]*X[j];
         }
-        if(Math.abs(A[i][j]) < 1.e-5)
-            A[i][j] = 1.e-5;
+        A[i][j] = underflow_padded(A[i][j]);
         X[i] = (B[i] - s) / A[i][i];
     }
     return X;
