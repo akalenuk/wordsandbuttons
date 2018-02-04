@@ -134,9 +134,9 @@ function sign_0_positive(x){ // Math.sign like with no 0 option
 }
 
 function underflow_padded(x){
-    if(Math.abs(x) < 1.e-5){ // pixel-size input error is ok, so we don't want much precision anyway
+    if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
         return 1.e-5 * sign_0_positive(x);
-    }
+    return x;
 }
 
 function solved_linear(A, B, n){
@@ -147,8 +147,7 @@ function solved_linear(A, B, n){
     // triangulize
     for (var i = 0; i < n-1; ++i)
         for (var j = 0; j < i+1; ++j) {
-            A[j][j] = underflow_padded(A[j][j]); 
-            r = A[i+1][j] / A[j][j];
+            r = A[i+1][j] / underflow_padded(A[j][j]);
             A[i+1][j] = 0.;
             for (var b_j = j+1; b_j < n; ++b_j){
                 A[i+1][b_j] -= A[j][b_j]*r; 
@@ -157,17 +156,16 @@ function solved_linear(A, B, n){
         }
         
     // bring to 1
-    A[n-1][n-1] = underflow_padded(A[n-1][n-1]);
-    X[n-1] = B[n-1] / A[n-1][n-1];
+    X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
     
     for (var i = n-1; i >= 0; --i){
         var s = 0.0;
         for (var j = i; j < n; ++j){
             s = s + A[i][j]*X[j];
         }
-        A[i][j] = underflow_padded(A[i][j]);
-        X[i] = (B[i] - s) / A[i][i];
+        X[i] = (B[i] - s) / underflow_padded(A[i][i]);
     }
+
     return X;
 }
 
@@ -255,7 +253,7 @@ function polynomial_draw(client_x, client_y, do_guides){
 	    }
 	    B[i] = polynomial_ys[i];
 	}
-	
+
 	X = solved_linear(A, B, polynomial_n);
 	
 	polynomial_context.beginPath();
