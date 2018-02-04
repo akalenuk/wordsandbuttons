@@ -155,24 +155,22 @@ function solved_linear(A, B, n){
             B[i+1] -= B[j]*r;
         }
         
-    // bring to 1
+    // calculate xs
     X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
-    
-    for (var i = n-1; i >= 0; --i){
+    for (var i = n-2; i >= 0; --i){
         var s = 0.0;
         for (var j = i; j < n; ++j){
             s = s + A[i][j]*X[j];
         }
         X[i] = (B[i] - s) / underflow_padded(A[i][i]);
     }
-
     return X;
 }
 
 function polynomial_in_x(A, x, n){
     var y = 0.0;
     for(var i = 0; i < n; ++i){
-        y = A[i] * Math.pow(x, i);
+        y += A[i] * Math.pow(x, i);
     }
     return y;
 }
@@ -255,7 +253,7 @@ function polynomial_draw(client_x, client_y, do_guides){
 	}
 
 	X = solved_linear(A, B, polynomial_n);
-	
+
 	polynomial_context.beginPath();
 	for(var j = 1; j < w; ++j){
 	    x1 = client_to_x(j-1);
