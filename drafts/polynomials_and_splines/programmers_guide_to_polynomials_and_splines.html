@@ -207,6 +207,7 @@ function draw_grid_on(context){
 var polynomial_xs = [1.0, 4.0, 7.0];
 var polynomial_ys = [5.0, 2.0, 5.0];
 var polynomial_n = 3;
+var polynomial_i = 0;
 
 function init_polynomial(){
     polynomial = document.getElementById("polynomial");
@@ -220,6 +221,8 @@ function init_polynomial(){
 
     polynomial.addEventListener('mousedown', function(e){
         var canvas_rect = polynomial.getBoundingClientRect();
+        polynomial_xs[polynomial_i] = client_to_x(e.clientX - canvas_rect.left);
+        polynomial_ys[polynomial_i] = client_to_y(e.clientY - canvas_rect.top);
 	    polynomial_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
@@ -278,6 +281,28 @@ function polynomial_draw(client_x, client_y, do_guides){
 	polynomial_context.strokeStyle="#AA3311";
     polynomial_context.stroke();
 	polynomial_context.closePath();
+	
+	// guides
+	if(do_guides){
+	    min_d = Math.pow(polynomial_xs[0] - client_to_x(client_x), 2) + Math.pow(polynomial_ys[0] - client_to_y(client_y), 2);
+	    min_i = 0;
+	    for(var i = 1; i < polynomial_n; ++i){
+	        var di = Math.pow(polynomial_xs[i] - client_to_x(client_x), 2) + Math.pow(polynomial_ys[i] - client_to_y(client_y), 2);
+	        if(di < min_d){
+	            min_d = di;
+	            min_i = i;
+	        }
+	    }
+	    polynomial_i = min_i;
+	    polynomial_context.setLineDash([4, 4]);
+	    polynomial_context.beginPath();
+	    polynomial_context.moveTo(x_to_client(polynomial_xs[min_i]), y_to_client(polynomial_ys[min_i]));
+	    polynomial_context.lineTo(client_x, client_y);
+	    polynomial_context.strokeStyle="#AA3311";
+        polynomial_context.stroke();
+	    polynomial_context.closePath();
+	    polynomial_context.setLineDash([]);
+	}
 }
     </script>
   </head>
