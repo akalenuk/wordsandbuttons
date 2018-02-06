@@ -337,9 +337,9 @@ function polynomial_draw(client_x, client_y, do_guides){
 }
 
 // synthesis
-var synthesis_xs = [1.0, 4.0, 7.0];
-var synthesis_ys = [5.0, 2.0, 5.0];
-var synthesis_n = 3;
+var synthesis_xs = [0.0, 2.0, 6.0, 8.0];
+var synthesis_ys = [5.0, 2.0, 2.0, 5.0];
+var synthesis_n = 4;
 var synthesis_i = 0;
 
 function init_synthesis(){
@@ -385,7 +385,14 @@ function synthesis_draw(client_x, client_y, do_guides){
 	// synthesis
 	var A = [];
 	var B = [];
-	for(var i = 0; i < synthesis_n; ++i){
+
+	A[0] = [];
+	for(var j = 0; j < synthesis_n-1; ++j)
+        A[0][j+1] = Math.pow(synthesis_xs[1], j) * (j+1);
+    A[0][0] = 0.0;
+    B[0] = (synthesis_ys[1] - synthesis_ys[0]) / (synthesis_xs[1] - synthesis_xs[0]);
+
+	for(var i = 1; i < synthesis_n-1; ++i){
 	    A[i] = [];
 	    for(var j = 0; j < synthesis_n; ++j){
 	        A[i][j] = Math.pow(synthesis_xs[i], j);
@@ -393,9 +400,17 @@ function synthesis_draw(client_x, client_y, do_guides){
 	    B[i] = synthesis_ys[i];
 	}
 
+	A[synthesis_n-1] = [];
+	for(var j = 0; j < synthesis_n-1; ++j)
+        A[synthesis_n-1][j+1] = Math.pow(synthesis_xs[synthesis_n-2], j) * (j+1);
+    A[synthesis_n-1][0] = 0.0;
+    B[synthesis_n-1] = (synthesis_ys[synthesis_n-1] - synthesis_ys[synthesis_n-2]) / (synthesis_xs[synthesis_n-1] - synthesis_xs[synthesis_n-2]);
+    
+    /*B[0] = 1.0;
+    B[3] = -1.0;*/
 	X = solved_linear(A, B, synthesis_n);
 	
-	synthesis_system = document.getElementById("synthesis_system");
+	/*synthesis_system = document.getElementById("synthesis_system");
 	synthesis_system.innerHTML = "P(x<sub>1</sub>) = "+synthesis_xs[0].toFixed(2)+"<sup>2</sup>a + "+synthesis_xs[0].toFixed(2)+" b + c = "+synthesis_ys[0].toFixed(2);
     synthesis_system.innerHTML += "<br>";
     synthesis_system.innerHTML += "P(x<sub>2</sub>) = "+synthesis_xs[1].toFixed(2)+"<sup>2</sup>a + "+synthesis_xs[1].toFixed(2)+" b + c = "+synthesis_ys[1].toFixed(2);
@@ -404,7 +419,7 @@ function synthesis_draw(client_x, client_y, do_guides){
     synthesis_formula = document.getElementById("synthesis_formula");
     synthesis_formula.innerHTML = "a = " + X[2].toFixed(2) + ", b = " + X[1].toFixed(2) + ", c = " + X[0].toFixed(2);
     synthesis_formula.innerHTML += "<br>";    
-    synthesis_formula.innerHTML += "P(x) = " + X[2].toFixed(2) + "x<sup>2</sup> + " + X[1].toFixed(2) + "x + " + X[0].toFixed(2);
+    synthesis_formula.innerHTML += "P(x) = " + X[2].toFixed(2) + "x<sup>2</sup> + " + X[1].toFixed(2) + "x + " + X[0].toFixed(2);*/
      
 	synthesis_context.beginPath();
 	for(var j = 1; j < w; ++j){
@@ -427,6 +442,10 @@ function synthesis_draw(client_x, client_y, do_guides){
 	    synthesis_context.moveTo(x_to_client(synthesis_xs[i])+5.5, y_to_client(synthesis_ys[i])+5.5);
 	    synthesis_context.lineTo(x_to_client(synthesis_xs[i])-5.5, y_to_client(synthesis_ys[i])-5.5);
 	}
+	synthesis_context.moveTo(x_to_client(synthesis_xs[0]), y_to_client(synthesis_ys[0]));
+    synthesis_context.lineTo(x_to_client(synthesis_xs[1]), y_to_client(synthesis_ys[1]));
+    synthesis_context.moveTo(x_to_client(synthesis_xs[synthesis_n-2]), y_to_client(synthesis_ys[synthesis_n-2]));
+    synthesis_context.lineTo(x_to_client(synthesis_xs[synthesis_n-1]), y_to_client(synthesis_ys[synthesis_n-1]));	    
 	synthesis_context.strokeStyle="#AA3311";
     synthesis_context.stroke();
 	synthesis_context.closePath();
@@ -477,6 +496,10 @@ Programmer's guide to polynomials and splines
     <script language="JavaScript">
     init_polynomial();
     </script>
+
+    <p>
+...
+    </p>
 
     <canvas id="synthesis" width=640 height=512></canvas>
     <table>
