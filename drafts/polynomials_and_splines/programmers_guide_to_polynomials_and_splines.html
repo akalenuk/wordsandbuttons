@@ -218,6 +218,7 @@ function draw_grid_on(context){
     context.closePath();
 }
 
+// polynomial
 var polynomial_xs = [1.0, 4.0, 7.0];
 var polynomial_ys = [5.0, 2.0, 5.0];
 var polynomial_n = 3;
@@ -334,6 +335,124 @@ function polynomial_draw(client_x, client_y, do_guides){
 	    polynomial_context.setLineDash([]);
 	}
 }
+
+// synthesis
+var synthesis_xs = [1.0, 4.0, 7.0];
+var synthesis_ys = [5.0, 2.0, 5.0];
+var synthesis_n = 3;
+var synthesis_i = 0;
+
+function init_synthesis(){
+    synthesis = document.getElementById("synthesis");
+    var canvas_rect = synthesis.getBoundingClientRect();
+    synthesis_draw(0, 0, false);
+
+    synthesis.addEventListener('mousemove', function(e){
+        var canvas_rect = synthesis.getBoundingClientRect();
+   	    synthesis_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+   	    if(e.buttons == 1){
+            synthesis_xs[synthesis_i] = client_to_x(e.clientX - canvas_rect.left);
+            synthesis_ys[synthesis_i] = client_to_y(e.clientY - canvas_rect.top);
+            synthesis_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+   	    }
+    }, false);
+
+    synthesis.addEventListener('mousedown', function(e){
+        var canvas_rect = synthesis.getBoundingClientRect();
+        synthesis_xs[synthesis_i] = client_to_x(e.clientX - canvas_rect.left);
+        synthesis_ys[synthesis_i] = client_to_y(e.clientY - canvas_rect.top);
+	    synthesis_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    synthesis.addEventListener('mouseleave', function(e){
+	    synthesis_draw(0, 0, false);
+    }, false);
+}
+
+var last_iterations = 100;
+var last_error = 100.;
+function synthesis_draw(client_x, client_y, do_guides){
+    synthesis = document.getElementById("synthesis");
+    var synthesis_context = synthesis.getContext("2d");
+    synthesis_context.font = "16px sans-serif";
+    // background
+    synthesis_context.fillStyle="#eeeeee";
+	synthesis_context.fillRect(0, 0, w, h);
+
+	// grid
+	draw_grid_on(synthesis_context);
+	
+	// synthesis
+	var A = [];
+	var B = [];
+	for(var i = 0; i < synthesis_n; ++i){
+	    A[i] = [];
+	    for(var j = 0; j < synthesis_n; ++j){
+	        A[i][j] = Math.pow(synthesis_xs[i], j);
+	    }
+	    B[i] = synthesis_ys[i];
+	}
+
+	X = solved_linear(A, B, synthesis_n);
+	
+	synthesis_system = document.getElementById("synthesis_system");
+	synthesis_system.innerHTML = "P(x<sub>1</sub>) = "+synthesis_xs[0].toFixed(2)+"<sup>2</sup>a + "+synthesis_xs[0].toFixed(2)+" b + c = "+synthesis_ys[0].toFixed(2);
+    synthesis_system.innerHTML += "<br>";
+    synthesis_system.innerHTML += "P(x<sub>2</sub>) = "+synthesis_xs[1].toFixed(2)+"<sup>2</sup>a + "+synthesis_xs[1].toFixed(2)+" b + c = "+synthesis_ys[1].toFixed(2);
+    synthesis_system.innerHTML += "<br>";
+    synthesis_system.innerHTML += "P(x<sub>3</sub>) = "+synthesis_xs[2].toFixed(2)+"<sup>2</sup>a + "+synthesis_xs[2].toFixed(2)+" b + c = "+synthesis_ys[2].toFixed(2);
+    synthesis_formula = document.getElementById("synthesis_formula");
+    synthesis_formula.innerHTML = "a = " + X[2].toFixed(2) + ", b = " + X[1].toFixed(2) + ", c = " + X[0].toFixed(2);
+    synthesis_formula.innerHTML += "<br>";    
+    synthesis_formula.innerHTML += "P(x) = " + X[2].toFixed(2) + "x<sup>2</sup> + " + X[1].toFixed(2) + "x + " + X[0].toFixed(2);
+     
+	synthesis_context.beginPath();
+	for(var j = 1; j < w; ++j){
+	    x1 = client_to_x(j-1);
+	    x2 = client_to_x(j);
+	    y1 = polynomial_in_x(X, x1, synthesis_n);
+	    y2 = polynomial_in_x(X, x2, synthesis_n);
+	    synthesis_context.moveTo(x_to_client(x1), y_to_client(y1));
+	    synthesis_context.lineTo(x_to_client(x2), y_to_client(y2));
+	}
+	synthesis_context.strokeStyle="#661100";
+    synthesis_context.stroke();
+	synthesis_context.closePath();
+	
+	// dots
+	synthesis_context.beginPath();
+	for(var i = 0; i < synthesis_n; ++i){
+	    synthesis_context.moveTo(x_to_client(synthesis_xs[i])-5.5, y_to_client(synthesis_ys[i])+5.5);
+	    synthesis_context.lineTo(x_to_client(synthesis_xs[i])+5.5, y_to_client(synthesis_ys[i])-5.5);
+	    synthesis_context.moveTo(x_to_client(synthesis_xs[i])+5.5, y_to_client(synthesis_ys[i])+5.5);
+	    synthesis_context.lineTo(x_to_client(synthesis_xs[i])-5.5, y_to_client(synthesis_ys[i])-5.5);
+	}
+	synthesis_context.strokeStyle="#AA3311";
+    synthesis_context.stroke();
+	synthesis_context.closePath();
+	
+	// guides
+	if(do_guides){
+	    min_d = Math.pow(synthesis_xs[0] - client_to_x(client_x), 2) + Math.pow(synthesis_ys[0] - client_to_y(client_y), 2);
+	    min_i = 0;
+	    for(var i = 1; i < synthesis_n; ++i){
+	        var di = Math.pow(synthesis_xs[i] - client_to_x(client_x), 2) + Math.pow(synthesis_ys[i] - client_to_y(client_y), 2);
+	        if(di < min_d){
+	            min_d = di;
+	            min_i = i;
+	        }
+	    }
+	    synthesis_i = min_i;
+	    synthesis_context.setLineDash([4, 4]);
+	    synthesis_context.beginPath();
+	    synthesis_context.moveTo(x_to_client(synthesis_xs[min_i]), y_to_client(synthesis_ys[min_i]));
+	    synthesis_context.lineTo(client_x, client_y);
+	    synthesis_context.strokeStyle="#AA3311";
+        synthesis_context.stroke();
+	    synthesis_context.closePath();
+	    synthesis_context.setLineDash([]);
+	}
+}
     </script>
   </head>
   <body>
@@ -359,13 +478,26 @@ Programmer's guide to polynomials and splines
     init_polynomial();
     </script>
 
-        <h2>
+    <canvas id="synthesis" width=640 height=512></canvas>
+    <table>
+    <tr><td rowspan="2">
+<b>P(x) = ax<sup>3</sup> + bx<sup>2</sup> + cx + d</b>
+    </td><td id="synthesis_system">
+    
+    </td>
+    </tr><tr><td id="synthesis_formula">
+    
+    </td></tr></table>
+    <script language="JavaScript">
+    init_synthesis();
+    </script>
+    
+    <h2>
 Conclusion
-        </h2>
-        <p>
+    </h2>
+    <p>
 ...
-        </p>
-    </div>
+    </p>
 
     <p class="footer">
 There are more words and buttons such as this on <a href="index.html">wordsandbuttons.online</a>.
