@@ -251,8 +251,6 @@ function init_polynomial(){
     }, false);
 }
 
-var last_iterations = 100;
-var last_error = 100.;
 function polynomial_draw(client_x, client_y, do_guides){
     polynomial = document.getElementById("polynomial");
     var polynomial_context = polynomial.getContext("2d");
@@ -336,6 +334,7 @@ function polynomial_draw(client_x, client_y, do_guides){
 	}
 }
 
+
 // synthesis
 var synthesis_xs = [0.0, 2.0, 6.0, 8.0];
 var synthesis_ys = [5.0, 2.0, 2.0, 5.0];
@@ -369,8 +368,6 @@ function init_synthesis(){
     }, false);
 }
 
-var last_iterations = 100;
-var last_error = 100.;
 function synthesis_draw(client_x, client_y, do_guides){
     synthesis = document.getElementById("synthesis");
     var synthesis_context = synthesis.getContext("2d");
@@ -473,6 +470,112 @@ function synthesis_draw(client_x, client_y, do_guides){
 	    synthesis_context.setLineDash([]);
 	}
 }
+
+
+// runge
+var runge_xs = [-1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
+var runge_ys = [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0];
+var runge_n = 11;
+var runge_i = 0;
+
+function init_runge(){
+    runge = document.getElementById("runge");
+    var canvas_rect = runge.getBoundingClientRect();
+    runge_draw(0, 0, false);
+
+    runge.addEventListener('mousemove', function(e){
+        var canvas_rect = runge.getBoundingClientRect();
+   	    runge_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+   	    if(e.buttons == 1){
+            runge_xs[runge_i] = client_to_x(e.clientX - canvas_rect.left);
+            runge_ys[runge_i] = client_to_y(e.clientY - canvas_rect.top);
+            runge_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+   	    }
+    }, false);
+
+    runge.addEventListener('mousedown', function(e){
+        var canvas_rect = runge.getBoundingClientRect();
+        runge_xs[runge_i] = client_to_x(e.clientX - canvas_rect.left);
+        runge_ys[runge_i] = client_to_y(e.clientY - canvas_rect.top);
+	    runge_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    runge.addEventListener('mouseleave', function(e){
+	    runge_draw(0, 0, false);
+    }, false);
+}
+
+function runge_draw(client_x, client_y, do_guides){
+    runge = document.getElementById("runge");
+    var runge_context = runge.getContext("2d");
+    runge_context.font = "16px sans-serif";
+    // background
+    runge_context.fillStyle="#eeeeee";
+	runge_context.fillRect(0, 0, w, h);
+
+	// grid
+	draw_grid_on(runge_context);
+	
+	// runge
+	var A = [];
+	var B = [];
+	for(var i = 0; i < runge_n; ++i){
+	    A[i] = [];
+	    for(var j = 0; j < runge_n; ++j){
+	        A[i][j] = Math.pow(runge_xs[i], j);
+	    }
+	    B[i] = runge_ys[i];
+	}
+
+	X = solved_linear(A, B, runge_n);
+     
+	runge_context.beginPath();
+	for(var j = 1; j < w; ++j){
+	    x1 = client_to_x(j-1);
+	    x2 = client_to_x(j);
+	    y1 = polynomial_in_x(X, x1, runge_n);
+	    y2 = polynomial_in_x(X, x2, runge_n);
+	    runge_context.moveTo(x_to_client(x1), y_to_client(y1));
+	    runge_context.lineTo(x_to_client(x2), y_to_client(y2));
+	}
+	runge_context.strokeStyle="#661100";
+    runge_context.stroke();
+	runge_context.closePath();
+	
+	// dots
+	runge_context.beginPath();
+	for(var i = 0; i < runge_n; ++i){
+	    runge_context.moveTo(x_to_client(runge_xs[i])-5.5, y_to_client(runge_ys[i])+5.5);
+	    runge_context.lineTo(x_to_client(runge_xs[i])+5.5, y_to_client(runge_ys[i])-5.5);
+	    runge_context.moveTo(x_to_client(runge_xs[i])+5.5, y_to_client(runge_ys[i])+5.5);
+	    runge_context.lineTo(x_to_client(runge_xs[i])-5.5, y_to_client(runge_ys[i])-5.5);
+	}
+	runge_context.strokeStyle="#AA3311";
+    runge_context.stroke();
+	runge_context.closePath();
+	
+	// guides
+	if(do_guides){
+	    min_d = Math.pow(runge_xs[0] - client_to_x(client_x), 2) + Math.pow(runge_ys[0] - client_to_y(client_y), 2);
+	    min_i = 0;
+	    for(var i = 1; i < runge_n; ++i){
+	        var di = Math.pow(runge_xs[i] - client_to_x(client_x), 2) + Math.pow(runge_ys[i] - client_to_y(client_y), 2);
+	        if(di < min_d){
+	            min_d = di;
+	            min_i = i;
+	        }
+	    }
+	    runge_i = min_i;
+	    runge_context.setLineDash([4, 4]);
+	    runge_context.beginPath();
+	    runge_context.moveTo(x_to_client(runge_xs[min_i]), y_to_client(runge_ys[min_i]));
+	    runge_context.lineTo(client_x, client_y);
+	    runge_context.strokeStyle="#AA3311";
+        runge_context.stroke();
+	    runge_context.closePath();
+	    runge_context.setLineDash([]);
+	}
+}
     </script>
   </head>
   <body>
@@ -514,6 +617,15 @@ Programmer's guide to polynomials and splines
     </td></tr></table>
     <script language="JavaScript">
     init_synthesis();
+    </script>
+    
+    <p>
+...
+    </p>
+    
+    <canvas id="runge" width=640 height=512></canvas>
+    <script language="JavaScript">
+    init_runge();
     </script>
     
     <h2>
