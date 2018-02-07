@@ -579,8 +579,37 @@ function runge_draw(client_x, client_y, do_guides){
 
 
 //  chebyshev
-var chebyshev_xs = [-1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
-var chebyshev_ys = [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0];
+// chebyshev visible region
+var chebyshev_x_min = -1.2;
+var chebyshev_y_min = -0.2;
+var chebyshev_x_max = 1.2;
+var chebyshev_y_max = 1.2;
+
+var chebyshev_client_x_center = w*(0-chebyshev_x_min)/(chebyshev_x_max-chebyshev_x_min);
+var chebyshev_client_x_step = (w/(chebyshev_x_max-chebyshev_x_min));
+
+var chebyshev_client_y_center = h - h*(0-chebyshev_y_min)/(chebyshev_y_max-chebyshev_y_min);
+var chebyshev_client_y_step = (h/(chebyshev_y_max-chebyshev_y_min));
+
+function chebyshev_client_to_x(client_x){
+    return (client_x - chebyshev_client_x_center) / chebyshev_client_x_step;
+}
+
+function chebyshev_client_to_y(client_y){
+    return (chebyshev_client_y_center - client_y) / chebyshev_client_y_step;
+}
+
+function chebyshev_x_to_client(x){
+    return x * chebyshev_client_x_step + chebyshev_client_x_center;
+}
+
+function chebyshev_y_to_client(y){
+    return chebyshev_client_y_center - y * chebyshev_client_y_step;
+}
+
+// chebyshev points
+var chebyshev_xs = [-1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0];
+var chebyshev_ys = [ 0.1,  0.2,  0.3,  0.4,  0.5, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1];
 var chebyshev_n = 11;
 var chebyshev_i = 0;
 
@@ -593,14 +622,14 @@ function init_chebyshev(){
         var canvas_rect = chebyshev.getBoundingClientRect();
    	    chebyshev_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
    	    if(e.buttons == 1){
-            chebyshev_ys[chebyshev_i] = client_to_y(e.clientY - canvas_rect.top);
+            chebyshev_ys[chebyshev_i] = chebyshev_client_to_y(e.clientY - canvas_rect.top);
             chebyshev_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
    	    }
     }, false);
 
     chebyshev.addEventListener('mousedown', function(e){
         var canvas_rect = chebyshev.getBoundingClientRect();
-        chebyshev_ys[chebyshev_i] = client_to_y(e.clientY - canvas_rect.top);
+        chebyshev_ys[chebyshev_i] = chebyshev_client_to_y(e.clientY - canvas_rect.top);
 	    chebyshev_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
@@ -619,32 +648,32 @@ function chebyshev_draw(client_x, client_y, do_guides){
 
 	// grid
  	chebyshev_context.beginPath();
-	chebyshev_context.moveTo(0, client_y_center);
-	chebyshev_context.lineTo(w, client_y_center);
-	chebyshev_context.lineTo(w - 12, client_y_center - 5);
-	chebyshev_context.moveTo(w, client_y_center);
-	chebyshev_context.lineTo(w - 12, client_y_center + 5);
-	chebyshev_context.moveTo(client_x_center, h);
-	chebyshev_context.lineTo(client_x_center, 0);
-	chebyshev_context.lineTo(client_x_center - 5, 12);
-	chebyshev_context.moveTo(client_x_center, 0);
-	chebyshev_context.lineTo(client_x_center + 5, 12);
+	chebyshev_context.moveTo(0, chebyshev_client_y_center);
+	chebyshev_context.lineTo(w, chebyshev_client_y_center);
+	chebyshev_context.lineTo(w - 12, chebyshev_client_y_center - 5);
+	chebyshev_context.moveTo(w, chebyshev_client_y_center);
+	chebyshev_context.lineTo(w - 12, chebyshev_client_y_center + 5);
+	chebyshev_context.moveTo(chebyshev_client_x_center, h);
+	chebyshev_context.lineTo(chebyshev_client_x_center, 0);
+	chebyshev_context.lineTo(chebyshev_client_x_center - 5, 12);
+	chebyshev_context.moveTo(chebyshev_client_x_center, 0);
+	chebyshev_context.lineTo(chebyshev_client_x_center + 5, 12);
     chebyshev_context.fillStyle="#000000";
 	for(var i = x_min + 1; i <= x_max - 1; i++){
-	    chebyshev_context.moveTo(client_x_center + i*client_x_step, client_y_center);
-		chebyshev_context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
-		chebyshev_context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+	    chebyshev_context.moveTo(chebyshev_client_x_center + i*chebyshev_client_x_step, chebyshev_client_y_center);
+		chebyshev_context.lineTo(chebyshev_client_x_center + i*chebyshev_client_x_step, chebyshev_client_y_center - 5);
+		chebyshev_context.fillText(i, chebyshev_client_x_center + i*chebyshev_client_x_step + 4, chebyshev_client_y_center + 16);
 	}
 	for(var i = y_min + 1; i <= y_max - 1; i++){
-	    chebyshev_context.moveTo(client_x_center, client_y_center - i*client_y_step);
-		chebyshev_context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
-		chebyshev_context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+	    chebyshev_context.moveTo(chebyshev_client_x_center, chebyshev_client_y_center - i*chebyshev_client_y_step);
+		chebyshev_context.lineTo(chebyshev_client_x_center + 5, chebyshev_client_y_center - i*chebyshev_client_y_step);
+		chebyshev_context.fillText(i, chebyshev_client_x_center + 5, chebyshev_client_y_center - i*chebyshev_client_y_step + 16);
 	}
 	chebyshev_context.strokeStyle="#000000";
     chebyshev_context.stroke();
     chebyshev_context.closePath();
 	
-	// chebyshev
+	// polynomial
 	var A = [];
 	var B = [];
 	for(var i = 0; i < chebyshev_n; ++i){
@@ -659,12 +688,12 @@ function chebyshev_draw(client_x, client_y, do_guides){
      
 	chebyshev_context.beginPath();
 	for(var j = 1; j < w; ++j){
-	    x1 = client_to_x(j-1);
-	    x2 = client_to_x(j);
+	    x1 = chebyshev_client_to_x(j-1);
+	    x2 = chebyshev_client_to_x(j);
 	    y1 = polynomial_in_x(X, x1, chebyshev_n);
 	    y2 = polynomial_in_x(X, x2, chebyshev_n);
-	    chebyshev_context.moveTo(x_to_client(x1), y_to_client(y1));
-	    chebyshev_context.lineTo(x_to_client(x2), y_to_client(y2));
+	    chebyshev_context.moveTo(chebyshev_x_to_client(x1), chebyshev_y_to_client(y1));
+	    chebyshev_context.lineTo(chebyshev_x_to_client(x2), chebyshev_y_to_client(y2));
 	}
 	chebyshev_context.strokeStyle="#661100";
     chebyshev_context.stroke();
@@ -673,10 +702,10 @@ function chebyshev_draw(client_x, client_y, do_guides){
 	// dots
 	chebyshev_context.beginPath();
 	for(var i = 0; i < chebyshev_n; ++i){
-	    chebyshev_context.moveTo(x_to_client(chebyshev_xs[i])-5.5, y_to_client(chebyshev_ys[i])+5.5);
-	    chebyshev_context.lineTo(x_to_client(chebyshev_xs[i])+5.5, y_to_client(chebyshev_ys[i])-5.5);
-	    chebyshev_context.moveTo(x_to_client(chebyshev_xs[i])+5.5, y_to_client(chebyshev_ys[i])+5.5);
-	    chebyshev_context.lineTo(x_to_client(chebyshev_xs[i])-5.5, y_to_client(chebyshev_ys[i])-5.5);
+	    chebyshev_context.moveTo(chebyshev_x_to_client(chebyshev_xs[i])-5.5, chebyshev_y_to_client(chebyshev_ys[i])+5.5);
+	    chebyshev_context.lineTo(chebyshev_x_to_client(chebyshev_xs[i])+5.5, chebyshev_y_to_client(chebyshev_ys[i])-5.5);
+	    chebyshev_context.moveTo(chebyshev_x_to_client(chebyshev_xs[i])+5.5, chebyshev_y_to_client(chebyshev_ys[i])+5.5);
+	    chebyshev_context.lineTo(chebyshev_x_to_client(chebyshev_xs[i])-5.5, chebyshev_y_to_client(chebyshev_ys[i])-5.5);
 	}
 	chebyshev_context.strokeStyle="#AA3311";
     chebyshev_context.stroke();
@@ -684,10 +713,10 @@ function chebyshev_draw(client_x, client_y, do_guides){
 	
 	// guides
 	if(do_guides){
-	    min_d = Math.abs(chebyshev_xs[0] - client_to_x(client_x));
+	    min_d = Math.abs(chebyshev_xs[0] - chebyshev_client_to_x(client_x));
 	    min_i = 0;
 	    for(var i = 1; i < chebyshev_n; ++i){
-	        var di = Math.abs(chebyshev_xs[i] - client_to_x(client_x));
+	        var di = Math.abs(chebyshev_xs[i] - chebyshev_client_to_x(client_x));
 	        if(di < min_d){
 	            min_d = di;
 	            min_i = i;
@@ -696,8 +725,8 @@ function chebyshev_draw(client_x, client_y, do_guides){
 	    chebyshev_i = min_i;
 	    chebyshev_context.setLineDash([4, 4]);
 	    chebyshev_context.beginPath();
-	    chebyshev_context.moveTo(x_to_client(chebyshev_xs[min_i]), y_to_client(chebyshev_ys[min_i]));
-	    chebyshev_context.lineTo(x_to_client(chebyshev_xs[min_i]), client_y);
+	    chebyshev_context.moveTo(chebyshev_x_to_client(chebyshev_xs[min_i]), chebyshev_y_to_client(chebyshev_ys[min_i]));
+	    chebyshev_context.lineTo(chebyshev_x_to_client(chebyshev_xs[min_i]), client_y);
 	    chebyshev_context.strokeStyle="#AA3311";
         chebyshev_context.stroke();
 	    chebyshev_context.closePath();
