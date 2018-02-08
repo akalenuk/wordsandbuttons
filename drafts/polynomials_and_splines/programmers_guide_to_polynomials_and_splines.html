@@ -33,23 +33,6 @@ p {
     text-align: left;
 }
 
-.results {
-    font-family: sans-serif;
-    font-size: 14pt;
-    width: 505pt;
-    text-align: left;
-}
-
-.formula {
-    font-family: sans-serif;
-    font-size: 16pt;
-    font-style: italic;
-    width: 505pt;
-    text-align: center;
-    padding-top: 6pt;
-    padding-bottom: 6pt;
-}
-
 .footer {
     margin-top: 64pt;
     padding-bottom: 32pt;
@@ -157,18 +140,18 @@ function solved_linear(A, B, n){
     var X = [];
     for (var i = 0; i < n; ++i)
         X[i] = 0.0;
-        
+
     // triangulize
     for (var i = 0; i < n-1; ++i)
         for (var j = 0; j < i+1; ++j) {
             r = A[i+1][j] / underflow_padded(A[j][j]);
             A[i+1][j] = 0.;
             for (var b_j = j+1; b_j < n; ++b_j){
-                A[i+1][b_j] -= A[j][b_j]*r; 
+                A[i+1][b_j] -= A[j][b_j]*r;
             }
             B[i+1] -= B[j]*r;
         }
-        
+
     // calculate xs
     X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
     for (var i = n-2; i >= 0; --i){
@@ -261,7 +244,7 @@ function polynomial_draw(client_x, client_y, do_guides){
 
 	// grid
 	draw_grid_on(polynomial_context);
-	
+
 	// polynomial
 	var A = [];
 	var B = [];
@@ -274,7 +257,7 @@ function polynomial_draw(client_x, client_y, do_guides){
 	}
 
 	X = solved_linear(A, B, polynomial_n);
-	
+
 	polynomial_system = document.getElementById("polynomial_system");
 	polynomial_system.innerHTML = "P(x<sub>1</sub>) = "+polynomial_xs[0].toFixed(2)+"<sup>2</sup>a + "+polynomial_xs[0].toFixed(2)+" b + c = "+polynomial_ys[0].toFixed(2);
     polynomial_system.innerHTML += "<br>";
@@ -283,9 +266,9 @@ function polynomial_draw(client_x, client_y, do_guides){
     polynomial_system.innerHTML += "P(x<sub>3</sub>) = "+polynomial_xs[2].toFixed(2)+"<sup>2</sup>a + "+polynomial_xs[2].toFixed(2)+" b + c = "+polynomial_ys[2].toFixed(2);
     polynomial_formula = document.getElementById("polynomial_formula");
     polynomial_formula.innerHTML = "a = " + X[2].toFixed(2) + ", b = " + X[1].toFixed(2) + ", c = " + X[0].toFixed(2);
-    polynomial_formula.innerHTML += "<br>";    
+    polynomial_formula.innerHTML += "<br>";
     polynomial_formula.innerHTML += "P(x) = " + X[2].toFixed(2) + "x<sup>2</sup> + " + X[1].toFixed(2) + "x + " + X[0].toFixed(2);
-     
+
 	polynomial_context.beginPath();
 	for(var j = 1; j < w; ++j){
 	    x1 = client_to_x(j-1);
@@ -298,7 +281,7 @@ function polynomial_draw(client_x, client_y, do_guides){
 	polynomial_context.strokeStyle="#661100";
     polynomial_context.stroke();
 	polynomial_context.closePath();
-	
+
 	// dots
 	polynomial_context.beginPath();
 	for(var i = 0; i < polynomial_n; ++i){
@@ -310,7 +293,7 @@ function polynomial_draw(client_x, client_y, do_guides){
 	polynomial_context.strokeStyle="#AA3311";
     polynomial_context.stroke();
 	polynomial_context.closePath();
-	
+
 	// guides
 	if(do_guides){
 	    min_d = Math.pow(polynomial_xs[0] - client_to_x(client_x), 2) + Math.pow(polynomial_ys[0] - client_to_y(client_y), 2);
@@ -378,7 +361,7 @@ function synthesis_draw(client_x, client_y, do_guides){
 
 	// grid
 	draw_grid_on(synthesis_context);
-	
+
 	// synthesis
 	var A = [];
 	var B = [];
@@ -402,7 +385,7 @@ function synthesis_draw(client_x, client_y, do_guides){
         A[synthesis_n-1][j+1] = Math.pow(synthesis_xs[synthesis_n-2], j) * (j+1);
     A[synthesis_n-1][0] = 0.0;
     B[synthesis_n-1] = (synthesis_ys[synthesis_n-1] - synthesis_ys[synthesis_n-2]) / (synthesis_xs[synthesis_n-1] - synthesis_xs[synthesis_n-2]);
-    
+
     synthesis_system = document.getElementById("synthesis_system");
 	synthesis_system.innerHTML = "P(x<sub>1</sub>)' = "+A[0][3].toFixed(1)+"a + "+A[0][2].toFixed(1)+"b + "+A[0][1].toFixed(1)+"c = "+B[0].toFixed(1);
 	synthesis_system.innerHTML += "<br>";
@@ -411,14 +394,14 @@ function synthesis_draw(client_x, client_y, do_guides){
 	synthesis_system.innerHTML += "P(x<sub>2</sub>) = "+A[2][3].toFixed(1)+"a + "+A[2][2].toFixed(1)+"b + "+A[2][1].toFixed(1)+"c "+A[2][0].toFixed(1)+"d = "+B[2].toFixed(1);
 	synthesis_system.innerHTML += "<br>";
 	synthesis_system.innerHTML += "P(x<sub>2</sub>)' = "+A[3][3].toFixed(1)+"a + "+A[3][2].toFixed(1)+"b + "+A[3][1].toFixed(1)+"c = "+B[3].toFixed(1);
-	
+
 	X = solved_linear(A, B, synthesis_n);
-	
+
 	synthesis_formula = document.getElementById("synthesis_formula");
     synthesis_formula.innerHTML = "a = " + X[3].toFixed(2) + ", b = " + X[2].toFixed(2) + ", c = " + X[1].toFixed(2) + ", d = " + X[0].toFixed(2);
-    synthesis_formula.innerHTML += "<br>";    
+    synthesis_formula.innerHTML += "<br>";
     synthesis_formula.innerHTML += "P(x) = " + X[3].toFixed(2) + "x<sup>3</sup> + " + X[2].toFixed(2) + "x<sup>2</sup> + " + X[1].toFixed(2) + "x + " + X[0].toFixed(2);
-     
+
 	synthesis_context.beginPath();
 	for(var j = 1; j < w; ++j){
 	    x1 = client_to_x(j-1);
@@ -431,7 +414,7 @@ function synthesis_draw(client_x, client_y, do_guides){
 	synthesis_context.strokeStyle="#661100";
     synthesis_context.stroke();
 	synthesis_context.closePath();
-	
+
 	// dots
 	synthesis_context.beginPath();
 	for(var i = 0; i < synthesis_n; ++i){
@@ -443,11 +426,11 @@ function synthesis_draw(client_x, client_y, do_guides){
 	synthesis_context.moveTo(x_to_client(synthesis_xs[0]), y_to_client(synthesis_ys[0]));
     synthesis_context.lineTo(x_to_client(synthesis_xs[1]), y_to_client(synthesis_ys[1]));
     synthesis_context.moveTo(x_to_client(synthesis_xs[synthesis_n-2]), y_to_client(synthesis_ys[synthesis_n-2]));
-    synthesis_context.lineTo(x_to_client(synthesis_xs[synthesis_n-1]), y_to_client(synthesis_ys[synthesis_n-1]));	    
+    synthesis_context.lineTo(x_to_client(synthesis_xs[synthesis_n-1]), y_to_client(synthesis_ys[synthesis_n-1]));
 	synthesis_context.strokeStyle="#AA3311";
     synthesis_context.stroke();
 	synthesis_context.closePath();
-	
+
 	// guides
 	if(do_guides){
 	    min_d = Math.pow(synthesis_xs[0] - client_to_x(client_x), 2) + Math.pow(synthesis_ys[0] - client_to_y(client_y), 2);
@@ -515,7 +498,7 @@ function runge_draw(client_x, client_y, do_guides){
 
 	// grid
 	draw_grid_on(runge_context);
-	
+
 	// runge
 	var A = [];
 	var B = [];
@@ -528,7 +511,7 @@ function runge_draw(client_x, client_y, do_guides){
 	}
 
 	X = solved_linear(A, B, runge_n);
-     
+
 	runge_context.beginPath();
 	for(var j = 1; j < w; ++j){
 	    x1 = client_to_x(j-1);
@@ -541,7 +524,7 @@ function runge_draw(client_x, client_y, do_guides){
 	runge_context.strokeStyle="#661100";
     runge_context.stroke();
 	runge_context.closePath();
-	
+
 	// dots
 	runge_context.beginPath();
 	for(var i = 0; i < runge_n; ++i){
@@ -553,7 +536,7 @@ function runge_draw(client_x, client_y, do_guides){
 	runge_context.strokeStyle="#AA3311";
     runge_context.stroke();
 	runge_context.closePath();
-	
+
 	// guides
 	if(do_guides){
 	    min_d = Math.pow(runge_xs[0] - client_to_x(client_x), 2) + Math.pow(runge_ys[0] - client_to_y(client_y), 2);
@@ -680,7 +663,7 @@ function chebyshev_draw(client_x, client_y, do_guides){
 	chebyshev_context.strokeStyle="#000000";
     chebyshev_context.stroke();
     chebyshev_context.closePath();
-	
+
 	// polynomial
 	var A = [];
 	var B = [];
@@ -693,7 +676,7 @@ function chebyshev_draw(client_x, client_y, do_guides){
 	}
 
 	X = solved_linear(A, B, chebyshev_n);
-     
+
 	chebyshev_context.beginPath();
 	for(var j = 1; j < w; ++j){
 	    x1 = chebyshev_client_to_x(j-1);
@@ -706,7 +689,7 @@ function chebyshev_draw(client_x, client_y, do_guides){
 	chebyshev_context.strokeStyle="#661100";
     chebyshev_context.stroke();
 	chebyshev_context.closePath();
-	
+
 	// dots
 	chebyshev_context.beginPath();
 	for(var i = 0; i < chebyshev_n; ++i){
@@ -718,7 +701,7 @@ function chebyshev_draw(client_x, client_y, do_guides){
 	chebyshev_context.strokeStyle="#AA3311";
     chebyshev_context.stroke();
 	chebyshev_context.closePath();
-	
+
 	// guides
 	if(do_guides){
 	    min_d = Math.abs(chebyshev_xs[0] - chebyshev_client_to_x(client_x));
@@ -757,10 +740,10 @@ Programmer's guide to polynomials and splines
     <tr><td rowspan="2">
 <b>P(x) = ax<sup>2</sup> + bx + c</b>
     </td><td id="polynomial_system">
-    
+
     </td>
     </tr><tr><td id="polynomial_formula">
-    
+
     </td></tr></table>
     <script language="JavaScript">
     init_polynomial();
@@ -775,33 +758,33 @@ Programmer's guide to polynomials and splines
     <tr><td rowspan="2">
 <b>P(x) = ax<sup>3</sup> + bx<sup>2</sup> + cx + d</b>
     </td><td id="synthesis_system">
-    
+
     </td>
     </tr><tr><td id="synthesis_formula">
-    
+
     </td></tr></table>
     <script language="JavaScript">
     init_synthesis();
     </script>
-    
+
     <p>
 ...
     </p>
-    
+
     <canvas id="runge" width=640 height=512></canvas>
     <script language="JavaScript">
     init_runge();
     </script>
-    
+
     <p>
 ...
     </p>
-    
+
     <canvas id="chebyshev" width=640 height=512></canvas>
     <script language="JavaScript">
     init_chebyshev();
     </script>
-    
+
     <h2>
 Conclusion
     </h2>
