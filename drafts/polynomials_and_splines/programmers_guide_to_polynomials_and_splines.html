@@ -724,6 +724,150 @@ function chebyshev_draw(client_x, client_y, do_guides){
 	    chebyshev_context.setLineDash([]);
 	}
 }
+
+
+// spline
+var spline_xs = [0.0, 2.0, 3.0, 5.0, 6.0, 8.0];
+var spline_ys = [5.0, 2.0, 2.0, 5.0, 5.0, 2.0];
+var spline_n = 6;
+var spline_i = 0;
+
+function init_spline(){
+    spline = document.getElementById("spline");
+    var canvas_rect = spline.getBoundingClientRect();
+    spline_draw(0, 0, false);
+
+    spline.addEventListener('mousemove', function(e){
+        var canvas_rect = spline.getBoundingClientRect();
+   	    spline_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+   	    if(e.buttons == 1){
+            spline_xs[spline_i] = client_to_x(e.clientX - canvas_rect.left);
+            spline_ys[spline_i] = client_to_y(e.clientY - canvas_rect.top);
+            spline_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+   	    }
+    }, false);
+
+    spline.addEventListener('mousedown', function(e){
+        var canvas_rect = spline.getBoundingClientRect();
+        spline_xs[spline_i] = client_to_x(e.clientX - canvas_rect.left);
+        spline_ys[spline_i] = client_to_y(e.clientY - canvas_rect.top);
+	    spline_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    spline.addEventListener('mouseleave', function(e){
+	    spline_draw(0, 0, false);
+    }, false);
+}
+
+function spline_draw(client_x, client_y, do_guides){
+    spline = document.getElementById("spline");
+    var spline_context = spline.getContext("2d");
+    spline_context.font = "16px sans-serif";
+    // background
+    spline_context.fillStyle="#eeeeee";
+	spline_context.fillRect(0, 0, w, h);
+
+	// grid
+	draw_grid_on(spline_context);
+
+	// spline1
+	var A1 = [];
+	var B1 = [];
+    for(var i = 0; i < 4; i += 2) {
+        A1[i] = [];
+        for(var j = 0; j < spline_n; ++j){
+            A1[i][j] = Math.pow(spline_xs[i], j);
+        }
+        B1[i] = spline_ys[i];
+	    
+	    A1[i+1] = [];
+	    for(var j = 0; j < spline_n-1; ++j)
+            A1[i+1][j+1] = Math.pow(spline_xs[i], j) * (j+1);
+        A1[i+1][0] = 0.0;
+        B1[i+1] = (spline_ys[i+1] - spline_ys[i]) / (spline_xs[i+1] - spline_xs[i]);
+	}
+	X1 = solved_linear(A1, B1, 4);
+	
+	// spline2
+	var A2 = [];
+	var B2 = [];
+    for(var i = 0; i < 4; i += 2) {
+        A2[i] = [];
+        for(var j = 0; j < spline_n; ++j){
+            A2[i][j] = Math.pow(spline_xs[i+2], j);
+        }
+        B2[i] = spline_ys[i+2];
+	    
+	    A2[i+1] = [];
+	    for(var j = 0; j < spline_n-1; ++j)
+            A2[i+1][j+1] = Math.pow(spline_xs[i+2], j) * (j+1);
+        A2[i+1][0] = 0.0;
+        B2[i+1] = (spline_ys[i+1+2] - spline_ys[i+2]) / (spline_xs[i+1+2] - spline_xs[i+2]);
+	}
+	X2 = solved_linear(A1, B1, 4);
+    
+	spline_context.beginPath();
+	for(var j = 1; j < w; ++j){
+	    var x1 = client_to_x(j-1);
+	    var x2 = client_to_x(j);
+	    var y1 = 0.0;
+	    var y2 = 0.0;
+	    if(x1 > spline_xs[0] && x1 < spline_xs[2]){
+	        y1 = polynomial_in_x(X1, x1, spline_n);
+	        y2 = polynomial_in_x(X1, x2, spline_n);
+	        spline_context.moveTo(x_to_client(x1), y_to_client(y1));
+    	    spline_context.lineTo(x_to_client(x2), y_to_client(y2));
+	    }
+	    if(x1 > spline_xs[2] && x1 < spline_xs[4]){
+	        y1 = polynomial_in_x(X2, x1, spline_n);
+	        y2 = polynomial_in_x(X2, x2, spline_n);
+	        spline_context.moveTo(x_to_client(x1), y_to_client(y1));
+    	    spline_context.lineTo(x_to_client(x2), y_to_client(y2));
+	    }	    
+	}
+	spline_context.strokeStyle="#661100";
+    spline_context.stroke();
+	spline_context.closePath();
+
+	// dots
+	spline_context.beginPath();
+	for(var i = 0; i < spline_n; ++i){
+	    spline_context.moveTo(x_to_client(spline_xs[i])-5.5, y_to_client(spline_ys[i])+5.5);
+	    spline_context.lineTo(x_to_client(spline_xs[i])+5.5, y_to_client(spline_ys[i])-5.5);
+	    spline_context.moveTo(x_to_client(spline_xs[i])+5.5, y_to_client(spline_ys[i])+5.5);
+	    spline_context.lineTo(x_to_client(spline_xs[i])-5.5, y_to_client(spline_ys[i])-5.5);
+	}
+	for(var i = 0; i < spline_n/2; ++i){
+	    spline_context.moveTo(x_to_client(spline_xs[2*i]), y_to_client(spline_ys[2*i]));
+        spline_context.lineTo(x_to_client(spline_xs[2*i+1]), y_to_client(spline_ys[2*i+1]));
+    }
+	spline_context.strokeStyle="#AA3311";
+    spline_context.stroke();
+	spline_context.closePath();
+
+	// guides
+	if(do_guides){
+	    min_d = Math.pow(spline_xs[0] - client_to_x(client_x), 2) + Math.pow(spline_ys[0] - client_to_y(client_y), 2);
+	    min_i = 0;
+	    for(var i = 1; i < spline_n; ++i){
+	        var di = Math.pow(spline_xs[i] - client_to_x(client_x), 2) + Math.pow(spline_ys[i] - client_to_y(client_y), 2);
+	        if(di < min_d){
+	            min_d = di;
+	            min_i = i;
+	        }
+	    }
+	    spline_i = min_i;
+	    spline_context.setLineDash([4, 4]);
+	    spline_context.beginPath();
+	    spline_context.moveTo(x_to_client(spline_xs[min_i]), y_to_client(spline_ys[min_i]));
+	    spline_context.lineTo(client_x, client_y);
+	    spline_context.strokeStyle="#AA3311";
+        spline_context.stroke();
+	    spline_context.closePath();
+	    spline_context.setLineDash([]);
+	}
+}
+
     </script>
   </head>
   <body>
@@ -784,7 +928,16 @@ Programmer's guide to polynomials and splines
     <script language="JavaScript">
     init_chebyshev();
     </script>
+    
+    <p>
+...
+    </p>
 
+    <canvas id="spline" width=640 height=512></canvas>
+    <script language="JavaScript">
+    init_spline();
+    </script>
+    
     <h2>
 Conclusion
     </h2>
