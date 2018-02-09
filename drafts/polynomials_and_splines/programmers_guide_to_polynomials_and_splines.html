@@ -727,8 +727,8 @@ function chebyshev_draw(client_x, client_y, do_guides){
 
 
 // spline
-var spline_xs = [0.0, 2.0, 3.0, 5.0, 6.0, 8.0];
-var spline_ys = [5.0, 2.0, 2.0, 5.0, 5.0, 2.0];
+var spline_xs = [-0.5, 0.5, 4.0, 3.0, 8.5, 7.5];
+var spline_ys = [ 2.0, 1.0, 3.0, 4.0, 5.0, 6.0];
 var spline_n = 6;
 var spline_i = 0;
 
@@ -775,36 +775,36 @@ function spline_draw(client_x, client_y, do_guides){
 	var B1 = [];
     for(var i = 0; i < 4; i += 2) {
         A1[i] = [];
-        for(var j = 0; j < spline_n; ++j){
+        for(var j = 0; j < 4; ++j){
             A1[i][j] = Math.pow(spline_xs[i], j);
         }
         B1[i] = spline_ys[i];
 	    
 	    A1[i+1] = [];
-	    for(var j = 0; j < spline_n-1; ++j)
+	    for(var j = 0; j < 4-1; ++j)
             A1[i+1][j+1] = Math.pow(spline_xs[i], j) * (j+1);
         A1[i+1][0] = 0.0;
         B1[i+1] = (spline_ys[i+1] - spline_ys[i]) / (spline_xs[i+1] - spline_xs[i]);
 	}
 	X1 = solved_linear(A1, B1, 4);
-	
+
 	// spline2
 	var A2 = [];
 	var B2 = [];
     for(var i = 0; i < 4; i += 2) {
         A2[i] = [];
-        for(var j = 0; j < spline_n; ++j){
+        for(var j = 0; j < 4; ++j){
             A2[i][j] = Math.pow(spline_xs[i+2], j);
         }
         B2[i] = spline_ys[i+2];
 	    
 	    A2[i+1] = [];
-	    for(var j = 0; j < spline_n-1; ++j)
+	    for(var j = 0; j < 4-1; ++j)
             A2[i+1][j+1] = Math.pow(spline_xs[i+2], j) * (j+1);
         A2[i+1][0] = 0.0;
         B2[i+1] = (spline_ys[i+1+2] - spline_ys[i+2]) / (spline_xs[i+1+2] - spline_xs[i+2]);
 	}
-	X2 = solved_linear(A1, B1, 4);
+	X2 = solved_linear(A2, B2, 4);
     
 	spline_context.beginPath();
 	for(var j = 1; j < w; ++j){
@@ -813,14 +813,14 @@ function spline_draw(client_x, client_y, do_guides){
 	    var y1 = 0.0;
 	    var y2 = 0.0;
 	    if(x1 > spline_xs[0] && x1 < spline_xs[2]){
-	        y1 = polynomial_in_x(X1, x1, spline_n);
-	        y2 = polynomial_in_x(X1, x2, spline_n);
+	        y1 = polynomial_in_x(X1, x1, 4);
+	        y2 = polynomial_in_x(X1, x2, 4);
 	        spline_context.moveTo(x_to_client(x1), y_to_client(y1));
     	    spline_context.lineTo(x_to_client(x2), y_to_client(y2));
 	    }
 	    if(x1 > spline_xs[2] && x1 < spline_xs[4]){
-	        y1 = polynomial_in_x(X2, x1, spline_n);
-	        y2 = polynomial_in_x(X2, x2, spline_n);
+	        y1 = polynomial_in_x(X2, x1, 4);
+	        y2 = polynomial_in_x(X2, x2, 4);
 	        spline_context.moveTo(x_to_client(x1), y_to_client(y1));
     	    spline_context.lineTo(x_to_client(x2), y_to_client(y2));
 	    }	    
