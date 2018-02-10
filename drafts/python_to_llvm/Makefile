@@ -7,8 +7,12 @@ generate_s:
 	llc -O2 test.bc -o test.s
 .PHONY: generate_elf
 generate_elf:
-	as test.s -o test.out
-	ld -o test test.out
+	as test.s -o test.o
+	clang -o test test.o
+.PHONY: test
+test:
+	./test
+	echo $?
 .PHONY: clean
 clean:
-	rm test.s test.out test.bc test		
+	rm test.s test.o test.bc test		
