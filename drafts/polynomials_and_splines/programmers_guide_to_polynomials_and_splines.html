@@ -328,8 +328,8 @@ function polynomial_draw(client_x, client_y, do_guides){
 
 
 // synthesis
-var synthesis_xs = [0.0, 2.0, 6.0, 8.0];
-var synthesis_ys = [5.0, 2.0, 2.0, 5.0];
+var synthesis_xs = [-0.5, 1.0, 7.0, 8.5];
+var synthesis_ys = [ 2.0, 1.0, 6.0, 5.0];
 var synthesis_n = 4;
 var synthesis_i = 0;
 
@@ -367,9 +367,6 @@ function synthesis_draw(client_x, client_y, do_guides){
     // background
     synthesis_context.fillStyle="#eeeeee";
 	synthesis_context.fillRect(0, 0, w, h);
-
-	// grid
-	draw_grid_on(synthesis_context);
 
 	// synthesis
 	var A = [];
@@ -411,6 +408,7 @@ function synthesis_draw(client_x, client_y, do_guides){
     synthesis_formula.innerHTML += "<br>";
     synthesis_formula.innerHTML += "P(x) = " + X[3].toFixed(2) + "x<sup>3</sup> + " + X[2].toFixed(2) + "x<sup>2</sup> + " + X[1].toFixed(2) + "x + " + X[0].toFixed(2);
 
+    // back
 	synthesis_context.beginPath();
 	for(var j = 1; j < w; ++j){
 	    x1 = client_to_x(j-1);
@@ -420,9 +418,27 @@ function synthesis_draw(client_x, client_y, do_guides){
 	    synthesis_context.moveTo(x_to_client(x1), y_to_client(y1));
 	    synthesis_context.lineTo(x_to_client(x2), y_to_client(y2));
 	}
+	synthesis_context.strokeStyle="#FF9988";
+    synthesis_context.stroke();
+	synthesis_context.closePath();
+	// front
+	synthesis_context.beginPath();
+	for(var j = 1; j < w; ++j){
+	    x1 = client_to_x(j-1);
+	    x2 = client_to_x(j);
+	    if(x1 > synthesis_xs[1] && x2 < synthesis_xs[2]){
+	        y1 = polynomial_in_x(X, x1, synthesis_n);
+	        y2 = polynomial_in_x(X, x2, synthesis_n);
+	        synthesis_context.moveTo(x_to_client(x1), y_to_client(y1));
+	        synthesis_context.lineTo(x_to_client(x2), y_to_client(y2));
+	    }
+	}
 	synthesis_context.strokeStyle="#661100";
     synthesis_context.stroke();
 	synthesis_context.closePath();
+	
+	// grid
+	draw_grid_on(synthesis_context);
 
 	// dots
 	synthesis_context.beginPath();
@@ -432,12 +448,20 @@ function synthesis_draw(client_x, client_y, do_guides){
 	    synthesis_context.moveTo(x_to_client(synthesis_xs[i])+5.5, y_to_client(synthesis_ys[i])+5.5);
 	    synthesis_context.lineTo(x_to_client(synthesis_xs[i])-5.5, y_to_client(synthesis_ys[i])-5.5);
 	}
+    synthesis_context.strokeStyle="#AA3311";
+    synthesis_context.stroke();
+	synthesis_context.closePath();
+	
+	// tangents
+	synthesis_context.beginPath();
+	synthesis_context.setLineDash([4, 4]);
 	synthesis_context.moveTo(x_to_client(synthesis_xs[0]), y_to_client(synthesis_ys[0]));
     synthesis_context.lineTo(x_to_client(synthesis_xs[1]), y_to_client(synthesis_ys[1]));
     synthesis_context.moveTo(x_to_client(synthesis_xs[synthesis_n-2]), y_to_client(synthesis_ys[synthesis_n-2]));
     synthesis_context.lineTo(x_to_client(synthesis_xs[synthesis_n-1]), y_to_client(synthesis_ys[synthesis_n-1]));
 	synthesis_context.strokeStyle="#AA3311";
     synthesis_context.stroke();
+    synthesis_context.setLineDash([]);
 	synthesis_context.closePath();
 
 	// guides
