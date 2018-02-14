@@ -916,13 +916,16 @@ function spline_draw(client_x, client_y, do_guides){
 Programmer's guide to polynomials and splines
     </h1>
     <p>
-So you are a programmer. Why would you want to know about polynomials? Basically because it is the geometrical clay we can make interestings things of.
+So you are a programmer. Why would you want to know about polynomials? One reasons would be that it is the geometrical clay we can make interesting things of.
     </p>
     <p>
-<a href="http://wordsandbuttons.online/mathematical_analysis_explained_with_python_blood_and_tnt.html">Mathematical analysis explained with Python, blood, and TNT</a> shows how you can analyze and synthesize arbitrary functions as polynomials. But it doesn't have to be ready made functions. Sometimes you would want to model an arbitrary function out of some points or some properties like tangents of curvatures. Like when you want to do some animation or nice video effect or simply draw a curve that goes through the points you want and looks just as you want it to.
+<a href="http://wordsandbuttons.online/mathematical_analysis_explained_with_python_blood_and_tnt.html">Mathematical analysis explained with Python, blood, and TNT</a> shows how you can analyze and synthesize arbitrary functions as polynomials. But it doesn't have to be ready made functions. Sometimes you would want to model an arbitrary function out of some points or some properties like tangents of curvatures. Like when you want to do some animation or nice video effect or draw a curve that goes through the points you want or a surface that is flat in one place and curvy in another.
     </p>
     <p>
-Polynomials or even polynomial splines might not <i>always</i> be the best tool for the job but they posess some traits that programmers value. They are inherently simple, versatile, and, most noticably, highly effective in terms of performance. Let's say we have a polynomial like that:
+Polynomials or even polynomial splines might not <i>always</i> be the best tool for the job but they possess some traits that programmers value. They are inherently simple, versatile, and, most noticeably, highly effective in terms of performance. 
+    <p>
+    </p>
+Let's say we have a polynomial like that:
     </p>
     <p class="formula">
 P(x) = ax<sup>3</sup> + bx<sup>2</sup> + cx + d 
@@ -941,10 +944,10 @@ And that's only 3 multiplications and 3 additions. See, we barely started, and y
 Polynomial interpolation
     </h2>
     <p>
-Fitting a <i>n-</i>degree polynomial in exactly <i>n+1</i> points is called polynomial interpolation. There are several ways to do that. You can use <a href="https://en.wikipedia.org/wiki/Newton_polynomial">Newton polynomials</a> or <a href="https://en.wikipedia.org/wiki/Lagrange_polynomial">Lagrange polynomials</a> for that. But the very basic way you can get an interpolating polynom is by solving a linear system that it automagically makes itself.
+Fitting a <i>n-</i>degree polynomial in exactly <i>n+1</i> points is called polynomial interpolation. There are several ways to do that. You can use <a href="https://en.wikipedia.org/wiki/Newton_polynomial">Newton polynomials</a> or <a href="https://en.wikipedia.org/wiki/Lagrange_polynomial">Lagrange polynomials</a>. But the very basic way you can get an interpolating polynomial is by solving a linear system made of the polynomial values in several points.
     </p>
     <p>
-If a polynom <i>P(x)</i> goes through the point <i>(x<sub>i</sub>, y<sub>i</sub>)</i> then, obviuosly enough, we can claim that <i>P(x<sub>i</sub>) = y<sub>i</sub></i>. Say we want to fit a polynomial into a set of three points. This means that:
+If a polynomial <i>P(x)</i> goes through the point <i>(x<sub>i</sub>, y<sub>i</sub>)</i> then, obviously enough, we can claim that <i>P(x<sub>i</sub>) = y<sub>i</sub></i>. Say we want to fit a polynomial into a set of three points. This means that:
     </p>
     <p class="formula">
 P(x<sub>1</sub>) = y<sub>1</sub>
@@ -954,7 +957,7 @@ P(x<sub>2</sub>) = y<sub>2</sub>
 P(x<sub>3</sub>) = y<sub>3</sub>
     </p>
     <p>
-Generally, we can not fit a staight line into three arbitrary points. We would have to bend it forming a parabola. Or, put in another words, 2-nd degree poynomial also known as quadric.
+Generally, we can not fit a straight line into three arbitrary points. We would have to bend it forming a parabola. Or, put in another words, 2-nd degree polynomial also known as quadric.
     </p>
     <p class="formula">
 P(x<sub>1</sub>) = ax<sub>1</sub><sup>2</sup> + bx<sub>1</sub> + c = y<sub>1</sub>
@@ -964,7 +967,7 @@ P(x<sub>2</sub>) = ax<sub>2</sub><sup>2</sup> + bx<sub>2</sub> + c = y<sub>2</su
 P(x<sub>3</sub>) = ax<sub>3</sub><sup>2</sup> + bx<sub>3</sub> + c = y<sub>3</sub>
     </p>
     <p>
-Since we know xs and ys, we only have to solve the system for <i>(a, b, c)</i> coefficients and since it's a three equation system with three variables, it should generally give us one and only one solution. 
+Since we know <i>x</i>s and <i>y</i>s, we only have to solve the system for <i>(a, b, c)</i> coefficients and since it's a three equation system with three variables, it should generally give us one and only one solution. 
     </p>
     <p>
 Here, try it yourself. Here is the canvas you can drag the points on however you like:
@@ -987,26 +990,26 @@ Here, try it yourself. Here is the canvas you can drag the points on however you
 This is also a good mental model for understanding linear systems. Generally, you can't fit a straight line into three points just like you can't find a solution for <i>(n-1)</i> variables for n-equations system. But sometimes you can. It's when some of the point coincide of they all deliberately lie on a straight line.
     </p>
     <p>
-And the vise versa it's even more exiting. We can fit an infinite number of parabolas into a set of only two points. We just can't choose one of them, that's why can't unambiguously solve an n-equations system for <i>(n+1)</i> variables.
+And the vise versa it's even more exiting. We can fit an infinite number of parabolas into a set of only two points. We just can't choose between them, that's why can't unambiguously solve an n-equations system for <i>(n+1)</i> variables.
     </p>
     <p>
-But what if we can? What if we introduce some other criteria to choose the best fit?
+But what if we can? What if we introduce some additional criteria to choose the best fit?
     </p>
 
     <h2>
-Sythesis
+Synthesis
     </h2>
     <p>
-And this brings us to a field of polynomial synthesis. It is something between poynomial series and polynomial interpolation. With polynomial series we can model a function based on its derivatives at some point, and with synthesis we can use both points and derivatives. And even more than that actually, but that's a whole different story.
+And this brings us to a field of polynomial synthesis. It is something between polynomial series and polynomial interpolation. With polynomial series we can model a function based on its derivatives at some point, and with synthesis we can use both points and derivatives. And even more than that actually, but that's a whole different story.
     </p>
     <p>
 Function's derivative is closely related to a geometric properties of its plot. First derivative sets a tangent, and the second one sets a curvature.
     </p>
     <p>
-Let than say we want a function that goes throuth a pair of points and has a specific tangent in both points. We can easily synthesize this function as a polynomial.
+Let than say we want a function that goes through a pair of points and has a specific tangent in both points. We can easily synthesize this function as a polynomial.
     </p>
     <p>
-Just like before, we would have to set a system of equations. Now we want four conditions, so we should pick a 3-rd degree poynomial — a cubic.
+Just like before, we would have to set a system of equations. Now we want four conditions, so we should pick a 3-rd degree polynomial — a cubic.
     </p>
     <p class="formula">
 P(x<sub>1</sub>)' = 3ax<sub>1</sub><sup>2</sup> + 2bx<sub>1</sub> + c = dy<sub>1</sub>/dx
@@ -1018,10 +1021,10 @@ P(x<sub>2</sub>) = ax<sub>2</sub><sup>3</sup> + bx<sub>2</sub><sup>2</sup> + cx<
 P(x<sub>2</sub>)' = 3ax<sub>2</sub><sup>2</sup> + 2bx<sub>2</sub> + c = dy<sub>2</sub>/dx
     </p>
     <p>
-Some of the equations are formed from the points and some from derivatives. You could also add integrals if you wanted to constaint some integral properties just like that so this is a rather powerful technique.
+Some of the equations are formed from the points and some from derivatives. You could also add integrals if you wanted to constraint some integral properties just like that so this is a rather powerful technique.
     </p>
     <p>
-But anyway this gives us some way to form a smooth continuous function between two points with tangental constraints at these points. For now, let's stick to that.
+But anyway this gives us some way to form a smooth continuous function between two points with tangential constraints at these points. For now, let's stick to that.
     </p>
     <canvas id="synthesis" width=640 height=512></canvas>
     <table>
@@ -1044,10 +1047,10 @@ Now you have a function with desirable properties between two points. But what i
 Runge's phenomenon
     </h2>
     <p>
-One unpleasant propery of polynomial interpolation is that the function tends to oscilate at both ends of the interval more and more with adding more points. This is called the Runge's phenomenon. It limits the use cases where simple polynomial interpolation is appropriate. 
+One unpleasant property of polynomial interpolation is that the function tends to oscillate at both ends of the interval more and more with adding more points. This is called the Runge's phenomenon. It limits the use cases where simple polynomial interpolation is appropriate. 
     </p>
     <p>
-The other limitation is that interpolating polynomial is global meaning that touching a single point causes all the function to change. Now combine this with the oscilations and you have a recepie for chaos.
+The other limitation is that interpolating polynomial is global meaning that touching a single point causes all the function to change. Now combine this with the oscillations and you have yourself a recipe for chaos.
     </p>
     
     <canvas id="runge" width=640 height=512></canvas>
@@ -1062,7 +1065,7 @@ Chebyshev nodes
 One way to mitigate that chaos would be to select a special grid for an interpolation: <a href="https://en.wikipedia.org/wiki/Chebyshev_nodes">Chebyshev nodes</a>. These are specially calculated x values that represent a projection of equidistant intervals from a semicircle with radius 1 onto an x-axis. 
     </p>
     <p>
-There is some interesting mathematal magic behind this but pragmatially this disposition minimizes the Runge's phenomenon. Not that it makes interpolation completely predictable, but in the range <i>(-1; 1)</i> it now works more or less stable.
+There is some interesting mathematical magic behind this but pragmatically this disposition minimizes the Runge's phenomenon. Not that it makes interpolation completely predictable, but in the range <i>(-1; 1)</i> it now works more or less stable.
     </p>
 
     <canvas id="chebyshev" width=640 height=512></canvas>
@@ -1081,10 +1084,10 @@ But the interpolation is still global. The change in the first point still affec
 Splines
     </h2>
     <p>
-There are quite a lot of different types of splines, but they all share the common motivation. When, for some reason, global interpolation doesn't work for us, we can divide our interval into smaller ones, and we can then define separate interpolating function for each of them. We only have to make sure they conjoin in their ends to provide continuity. If we guarantee continuity not only for our resulting piecewise function but for its first derivative as well, then the tangents of every piece would match and the function's plot will be smooth. 
+There are quite a lot of different types of splines, but they all share the common motivation. When, for some reason, global interpolation doesn't work for us, we can divide our interval into smaller ones, and we can then define separate interpolating functions for each of them. We only have to make sure they conjoin in their ends to provide continuity. If we guarantee continuity not only for our resulting piecewise function but for its first derivative as well, then the tangents of every piece would match and the function's plot will seem smooth. 
     </p>
     <p>
-There is a definite classification for <a href="https://en.wikipedia.org/wiki/Spline_(mathematics)#Representations_and_Names">the types of splines</a>. For instnce, here is a 2-piece polynomial spline. It is <b>cubic</b>, meaning that the polynom in every piece is of third degree. It has <b>1-st derivative continuity</b>, since we make the pieces conjoint along with their tangents. It is <b>non-uniform</b>, since the length of the pieces' intervals is variable. It is <b>not natural</b>, since you can rule the derivatives at the end. And it is, of course, an <b>interpolating</b> spline since it goes exactly through the grid points.
+There is a definite classification for <a href="https://en.wikipedia.org/wiki/Spline_(mathematics)#Representations_and_Names">the types of splines</a>. For instance, here is a 2-piece polynomial spline. It is <b>cubic</b>, meaning that the polynomial in every piece is of third degree. It has <b>1-st derivative continuity</b>, since we make the pieces conjoint along with their tangents. It is <b>non-uniform</b>, since the length of the pieces' intervals is variable. It is <b>not natural</b>, since you can rule the derivatives at the end. And it is, of course, an <b>interpolating</b> spline since it goes exactly through the grid points.
     </p>
     <canvas id="spline" width=640 height=512></canvas>
     <script language="JavaScript">
@@ -1098,7 +1101,7 @@ Conclusion
 It is highly unlikely that you would ever have to implement your own interpolation. There are a lot of ready made solutions out there, most of the time you would only have to pick a right tool for the job. It's not all that hard, but the amount of unknown words may be overwhelming.
     </p>
     <p>
-The purpose of this guide is to give you the very basic understanding of the general ideas behind polynomials and splines. It is not at all comprehensive, in fact there are books being written on every small chapter of this guide. It's simply impossible to put it all in one small article. I hope, however, that the interactive experience from this piece will be helpful not only for the brief acknowledgement but, if necessary, will contribute to the understanding of more advanced topics.
+The purpose of this guide is to give you the very basic understanding of the general ideas behind polynomials and splines. It is not at all comprehensive, in fact there are books being written on every small chapter of this guide, so it's simply impossible to put it all in one small article. I hope, however, that the interactive experience from this piece will be helpful not only for the brief acknowledgement but, if necessary, will contribute to the understanding of more advanced topics.
     </p>
 
     <p class="footer">
