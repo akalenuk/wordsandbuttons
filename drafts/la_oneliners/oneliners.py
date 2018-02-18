@@ -35,7 +35,7 @@ def solution_for(A, B):
 	return solution_iteration(A, B, [0. for bi in B], 0)
 
 def solution_iteration(A, B, Xi, i):
-	return Xi if distance_between(multiplication_of(A, Xi), B) < 0.0001 else solution_iteration(A, B, projected_on_plane(Xi, A[i % len(B)], B[i % len(B)]), i+1)
+	return Xi if distance_between(multiplication_of(A, Xi), B) < 1e-5 else solution_iteration(A, B, projected_on_plane(Xi, A[i % len(B)], B[i % len(B)]), i+1)
 
 def inverted(A):
 	return transposed([solution_for(A, ort) for ort in identity_of_dim(len(A))])
