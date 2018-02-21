@@ -188,30 +188,31 @@ function init_pick_a_point(){
     var canvas_rect = pick_a_point.getBoundingClientRect();
     client_x = canvas_rect.left + point_x * 64 + 256;
     client_y = canvas_rect.top + 256 - point_y * 64;
-    pick_a_point_draw(client_x, client_y);
+    pick_a_point_draw(0, 0, false);
 
     pick_a_point.addEventListener('mousemove', function(e){
-        if(point_x == 0 && point_y == 0)
-            pick_a_point_draw(e.clientX, e.clientY);
+        var canvas_rect = pick_a_point.getBoundingClientRect();
+        if(e.buttons == 1){ // drag
+            point_x = Math.round(client_to_x(e.clientX - canvas_rect.left)*10)/10;
+            point_y = Math.round(client_to_y(e.clientY - canvas_rect.top)*10)/10;
+            pick_a_point_draw(0, 0, false);
+        }else{  // move
+            pick_a_point_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        }
     }, false);
 
     pick_a_point.addEventListener('mousedown', function(e){
         var canvas_rect = pick_a_point.getBoundingClientRect();
         point_x = Math.round(client_to_x(e.clientX - canvas_rect.left)*10)/10;
         point_y = Math.round(client_to_y(e.clientY - canvas_rect.top)*10)/10;
-        pick_a_point_draw(e.clientX, e.clientY);
+        pick_a_point_draw(0, 0, false);
         write_the_point_value();
         transform();
         slide_a_w_draw(e.clientX);
     }, false);
 }
 
-function pick_a_point_draw(client_x, client_y){
-    // coordiantes correction
-    var canvas_rect = pick_a_point.getBoundingClientRect();
-    client_x -= canvas_rect.left;
-    client_y -= canvas_rect.top;
-
+function pick_a_point_draw(client_x, client_y, do_guides){
     var pick_a_point_context = pick_a_point.getContext("2d");
     pick_a_point_context.font = "16px sans-serif";
     // background
@@ -221,16 +222,27 @@ function pick_a_point_draw(client_x, client_y){
     // selection
     pick_a_point_context.beginPath();
     pick_a_point_context.setLineDash([2, 2]);
-    pick_a_point_context.moveTo(client_x, 256);
-    pick_a_point_context.lineTo(client_x, client_y);
-    pick_a_point_context.moveTo(256, client_y);
-    pick_a_point_context.lineTo(client_x, client_y);
+    pick_a_point_context.moveTo(x_to_client(point_x), 256);
+    pick_a_point_context.lineTo(x_to_client(point_x), y_to_client(point_y));
+    pick_a_point_context.moveTo(256, y_to_client(point_y));
+    pick_a_point_context.lineTo(x_to_client(point_x), y_to_client(point_y));
     pick_a_point_context.strokeStyle="#dd6644";
     pick_a_point_context.stroke();
     pick_a_point_context.fillStyle="#dd6644";
-    pick_a_point_context.fillText(client_to_x(client_x).toFixed(1) + ", " + client_to_y(client_y).toFixed(1), client_x + 4, client_y + 16);
+    pick_a_point_context.fillText(point_x.toFixed(1) + ", " + point_y.toFixed(1), x_to_client(point_x) + 4, y_to_client(point_y) + 16);
     pick_a_point_context.setLineDash([]);
     pick_a_point_context.closePath();
+    
+    if(do_guides){
+        pick_a_point_context.beginPath();
+        pick_a_point_context.setLineDash([4, 4]);
+        pick_a_point_context.moveTo(client_x, client_y);
+        pick_a_point_context.lineTo(x_to_client(point_x), y_to_client(point_y));
+        pick_a_point_context.strokeStyle="#dd6644";
+        pick_a_point_context.stroke();
+        pick_a_point_context.setLineDash([]);
+        pick_a_point_context.closePath();
+    }
 
     // grid
     draw_grid_on(pick_a_point_context);
