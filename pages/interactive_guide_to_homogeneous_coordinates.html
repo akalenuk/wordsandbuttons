@@ -117,51 +117,51 @@ input[type="radio"]{
     <script language="JavaScript">
 
 function client_to_x(client_x){
-    return (client_x - 256.) / 32.;
+    return (client_x - 256.) / 64.;
 }
 
 function client_to_y(client_y){
-    return (256 - client_y) / 32.;
+    return (256 - client_y) / 64.;
 }
 
 function x_to_client(x){
-    return x * 32. + 256;
+    return x * 64. + 256;
 }
 
 function y_to_client(y){
-    return 256 - y * 32.;
+    return 256 - y * 64.;
 }
 
-var point_x = 5;
-var point_y = 4;
+var point_x = 2;
+var point_y = 3;
 
 var pick_a_point = null;
 var slide_a_w = null;
 var translation = null;
 
 function draw_grid_on(context){
-	// grid
- 	context.beginPath();
-	context.moveTo(0, 256);
-	context.lineTo(512, 256);
-	context.lineTo(500, 251);
-	context.moveTo(512, 256);
-	context.lineTo(500, 261);
-	context.moveTo(256, 512);
-	context.lineTo(256, 0);
-	context.lineTo(251, 12);
-	context.moveTo(256, 0);
-	context.lineTo(261, 12);
+    // grid
+    context.beginPath();
+    context.moveTo(0, 256);
+    context.lineTo(512, 256);
+    context.lineTo(500, 251);
+    context.moveTo(512, 256);
+    context.lineTo(500, 261);
+    context.moveTo(256, 512);
+    context.lineTo(256, 0);
+    context.lineTo(251, 12);
+    context.moveTo(256, 0);
+    context.lineTo(261, 12);
     context.fillStyle="#000000";
-	for(var i = -7; i <= 7; i++){
-	    context.moveTo(256 + i*32, 256);
-		context.lineTo(256 + i*32, 251);
-		context.fillText(i, 256 + i*32 + 4, 256 + 16);
-	    context.moveTo(256, 256 - i*32);
-		context.lineTo(261, 256 - i*32);
-		context.fillText(i, 261, 256 - i*32 + 16);
-	}
-	context.strokeStyle="#000000";
+    for(var i = -3; i <= 3; i++){
+        context.moveTo(256 + i*64, 256);
+        context.lineTo(256 + i*64, 251);
+        context.fillText(i, 256 + i*64 + 4, 256 + 16);
+        context.moveTo(256, 256 - i*64);
+        context.lineTo(261, 256 - i*64);
+        context.fillText(i, 261, 256 - i*64 + 16);
+    }
+    context.strokeStyle="#000000";
     context.stroke();
     context.closePath();
 }
@@ -186,21 +186,21 @@ function init_w(){
 function init_pick_a_point(){
     pick_a_point = document.getElementById("pick_a_point");
     var canvas_rect = pick_a_point.getBoundingClientRect();
-    client_x = canvas_rect.left + point_x * 32 + 256;
-    client_y = canvas_rect.top + 256 - point_y * 32;
+    client_x = canvas_rect.left + point_x * 64 + 256;
+    client_y = canvas_rect.top + 256 - point_y * 64;
     pick_a_point_draw(client_x, client_y);
 
     pick_a_point.addEventListener('mousemove', function(e){
         if(point_x == 0 && point_y == 0)
-    	    pick_a_point_draw(e.clientX, e.clientY);
+            pick_a_point_draw(e.clientX, e.clientY);
     }, false);
 
     pick_a_point.addEventListener('mousedown', function(e){
         var canvas_rect = pick_a_point.getBoundingClientRect();
         point_x = Math.round(client_to_x(e.clientX - canvas_rect.left)*10)/10;
         point_y = Math.round(client_to_y(e.clientY - canvas_rect.top)*10)/10;
-	    pick_a_point_draw(e.clientX, e.clientY);
-	    write_the_point_value();
+        pick_a_point_draw(e.clientX, e.clientY);
+        write_the_point_value();
         transform();
         slide_a_w_draw(e.clientX);
     }, false);
@@ -216,24 +216,24 @@ function pick_a_point_draw(client_x, client_y){
     pick_a_point_context.font = "16px sans-serif";
     // background
     pick_a_point_context.fillStyle="#eeeeee";
-	pick_a_point_context.fillRect(0,0,512,512);
+    pick_a_point_context.fillRect(0,0,512,512);
 
-	// selection
+    // selection
     pick_a_point_context.beginPath();
     pick_a_point_context.setLineDash([2, 2]);
-	pick_a_point_context.moveTo(client_x, 256);
-	pick_a_point_context.lineTo(client_x, client_y);
-	pick_a_point_context.moveTo(256, client_y);
-	pick_a_point_context.lineTo(client_x, client_y);
-	pick_a_point_context.strokeStyle="#dd6644";
+    pick_a_point_context.moveTo(client_x, 256);
+    pick_a_point_context.lineTo(client_x, client_y);
+    pick_a_point_context.moveTo(256, client_y);
+    pick_a_point_context.lineTo(client_x, client_y);
+    pick_a_point_context.strokeStyle="#dd6644";
     pick_a_point_context.stroke();
     pick_a_point_context.fillStyle="#dd6644";
     pick_a_point_context.fillText(client_to_x(client_x).toFixed(1) + ", " + client_to_y(client_y).toFixed(1), client_x + 4, client_y + 16);
     pick_a_point_context.setLineDash([]);
     pick_a_point_context.closePath();
 
-	// grid
-	draw_grid_on(pick_a_point_context);
+    // grid
+    draw_grid_on(pick_a_point_context);
 }
 
 function transform(){
@@ -246,8 +246,8 @@ function transform(){
         document.getElementById("to_hide_on_transform").style.display = "none";
     }else{
         document.getElementById("transformed").innerHTML =
-"<br>(" + point_x + ", " + point_y + ") = " +
-"(" + point_x * w + ", " + point_y * w + ", " + w + ")";
+            "<br>(" + point_x + ", " + point_y + ") = " +
+            "(" + point_x * w + ", " + point_y * w + ", " + w + ")";
     }
 }
 
@@ -257,7 +257,7 @@ function init_slide_a_w(){
     slide_a_w_draw(canvas_rect.left + 32 + 256);
 
     slide_a_w.addEventListener('mousemove', function(e){
-    	slide_a_w_draw(e.clientX);
+        slide_a_w_draw(e.clientX);
     }, false);
 
     slide_a_w.addEventListener('mouseleave', function(e){
@@ -275,39 +275,39 @@ function slide_a_w_draw(client_x){
     slide_a_w_context.font = "16px sans-serif";
     // background
     slide_a_w_context.fillStyle="#eeeeee";
-	slide_a_w_context.fillRect(0,0,512,512);
+    slide_a_w_context.fillRect(0,0,512,512);
 
-	// selection
-	var w = (client_x - 256) / 32;
-	var canvas_x = x_to_client(point_x / w);
-	var canvas_y = y_to_client(point_y / w);
+    // selection
+    var w = (client_x - 256) / 32;
+    var canvas_x = x_to_client(point_x / w);
+    var canvas_y = y_to_client(point_y / w);
     slide_a_w_context.beginPath();
-	slide_a_w_context.moveTo(x_to_client(point_x * 100), y_to_client(point_y * 100));
-	slide_a_w_context.lineTo(x_to_client(point_x * -100), y_to_client(point_y * -100));
-	slide_a_w_context.moveTo(x_to_client(point_x / w) - 10, y_to_client(point_y / w));
-	slide_a_w_context.lineTo(x_to_client(point_x / w) + 10, y_to_client(point_y / w));
-	slide_a_w_context.moveTo(x_to_client(point_x / w), y_to_client(point_y / w) - 10);
-	slide_a_w_context.lineTo(x_to_client(point_x / w), y_to_client(point_y / w) + 10);
-	slide_a_w_context.strokeStyle="#dd6644";
+    slide_a_w_context.moveTo(x_to_client(point_x * 100), y_to_client(point_y * 100));
+    slide_a_w_context.lineTo(x_to_client(point_x * -100), y_to_client(point_y * -100));
+    slide_a_w_context.moveTo(x_to_client(point_x / w) - 10, y_to_client(point_y / w));
+    slide_a_w_context.lineTo(x_to_client(point_x / w) + 10, y_to_client(point_y / w));
+    slide_a_w_context.moveTo(x_to_client(point_x / w), y_to_client(point_y / w) - 10);
+    slide_a_w_context.lineTo(x_to_client(point_x / w), y_to_client(point_y / w) + 10);
+    slide_a_w_context.strokeStyle="#dd6644";
     slide_a_w_context.stroke();
     slide_a_w_context.fillStyle="#dd6644";
     slide_a_w_context.fillText(point_x.toFixed(1) + ", " + point_y.toFixed(1) + ", " + w.toFixed(3), x_to_client(point_x / w) + 4, y_to_client(point_y / w) + 16);
     slide_a_w_context.fillText("w = " + w.toFixed(3), 32, 480);
     slide_a_w_context.closePath();
 
-	// grid
-	draw_grid_on(slide_a_w_context);
+    // grid
+    draw_grid_on(slide_a_w_context);
 }
 
 function draw_original_cube_on(context){
-	// original cube
-	context.beginPath();
-	context.moveTo(x_to_client(1), y_to_client(1));
-	context.lineTo(x_to_client(1 + 1), y_to_client(1));
-	context.lineTo(x_to_client(1 + 1), y_to_client(1 + 1));
-	context.lineTo(x_to_client(1), y_to_client(1 + 1));
-	context.lineTo(x_to_client(1), y_to_client(1));
-	context.strokeStyle="#999999";
+    // original cube
+    context.beginPath();
+    context.moveTo(x_to_client(1), y_to_client(1));
+    context.lineTo(x_to_client(1 + 1), y_to_client(1));
+    context.lineTo(x_to_client(1 + 1), y_to_client(1 + 1));
+    context.lineTo(x_to_client(1), y_to_client(1 + 1));
+    context.lineTo(x_to_client(1), y_to_client(1));
+    context.strokeStyle="#999999";
     context.stroke();
     context.closePath();
 }
@@ -318,7 +318,7 @@ function init_translation(){
     translation_draw(canvas_rect.left + 256+ 96, canvas_rect.top + 256 - 64, false);
 
     translation.addEventListener('mousemove', function(e){
-    	translation_draw(e.clientX, e.clientY, true);
+        translation_draw(e.clientX, e.clientY, true);
     }, false);
 
     translation.addEventListener('mouseleave', function(e){
@@ -332,35 +332,35 @@ function translation_draw(client_x, client_y, do_new){
     var canvas_rect = translation.getBoundingClientRect();
     client_x -= canvas_rect.left;
     client_y -= canvas_rect.top;
-   	var x = client_to_x(client_x);
-	var y = client_to_y(client_y);
+    var x = client_to_x(client_x);
+    var y = client_to_y(client_y);
 
     var translation_context = translation.getContext("2d");
     translation_context.font = "16px sans-serif";
     // background
     translation_context.fillStyle="#eeeeee";
-	translation_context.fillRect(0,0,512,512);
+    translation_context.fillRect(0,0,512,512);
 
-	if(do_new){
-	    // the connection
-	    translation_context.beginPath();
-	    translation_context.setLineDash([2, 2]);
-	    translation_context.moveTo(x_to_client(1), y_to_client(1));
-	    translation_context.lineTo(x_to_client(x), y_to_client(y));
+    if(do_new){
+        // the connection
+        translation_context.beginPath();
+        translation_context.setLineDash([2, 2]);
+        translation_context.moveTo(x_to_client(1), y_to_client(1));
+        translation_context.lineTo(x_to_client(x), y_to_client(y));
         translation_context.moveTo(x_to_client(1 + 1), y_to_client(1));
-	    translation_context.lineTo(x_to_client(x + 1), y_to_client(y));
-	    translation_context.moveTo(x_to_client(1 + 1), y_to_client(1 + 1));
-	    translation_context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
-	    translation_context.moveTo(x_to_client(1), y_to_client(1 + 1));
-	    translation_context.lineTo(x_to_client(x), y_to_client(y + 1));
-	    translation_context.strokeStyle="#eeaa88";
+        translation_context.lineTo(x_to_client(x + 1), y_to_client(y));
+        translation_context.moveTo(x_to_client(1 + 1), y_to_client(1 + 1));
+        translation_context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
+        translation_context.moveTo(x_to_client(1), y_to_client(1 + 1));
+        translation_context.lineTo(x_to_client(x), y_to_client(y + 1));
+        translation_context.strokeStyle="#eeaa88";
         translation_context.stroke();
         translation_context.setLineDash([]);
         translation_context.closePath();
     }
 
-	// original cube
-	draw_original_cube_on(translation_context);
+    // original cube
+    draw_original_cube_on(translation_context);
 
     // translation
     translation_context.beginPath();
@@ -376,8 +376,8 @@ function translation_draw(client_x, client_y, do_new){
     translation_context.fillText("x' = x + a, where a = " + (x-1).toFixed(1), 32, 460);
     translation_context.fillText("y' = y + b, where b = " + (y-1).toFixed(1), 32, 480);
 
-	// grid
-	draw_grid_on(translation_context);
+    // grid
+    draw_grid_on(translation_context);
 }
 
 function rotated_x(a, x, y){
@@ -394,7 +394,7 @@ function init_rotation(){
     rotation_draw(canvas_rect.left + 256 + 20, 0, false);
 
     rotation.addEventListener('mousemove', function(e){
-    	rotation_draw(e.clientX, e.clientY, true);
+        rotation_draw(e.clientX, e.clientY, true);
     }, false);
 
     rotation.addEventListener('mouseleave', function(e){
@@ -407,45 +407,45 @@ function rotation_draw(client_x, client_y, do_new){
     // coordiantes correction
     var canvas_rect = rotation.getBoundingClientRect();
     client_x -= canvas_rect.left;
-   	var a = client_to_x(client_x) / 2;
+    var a = client_to_x(client_x) / 2;
 
     var rotation_context = rotation.getContext("2d");
     rotation_context.font = "16px sans-serif";
     // background
     rotation_context.fillStyle="#eeeeee";
-	rotation_context.fillRect(0,0,512,512);
+    rotation_context.fillRect(0,0,512,512);
 
-	var xs = [1., 2., 2., 1.];
-	var ys = [1., 1., 2., 2.];
-	var new_xs = [0, 0, 0, 0];
-	var new_ys = [0, 0, 0, 0];
-	for(var i = 0; i < 4; i++){
-	  new_xs[i] = rotated_x(a, xs[i], ys[i]);
-	  new_ys[i] = rotated_y(a, xs[i], ys[i]);
-	}
+    var xs = [1., 2., 2., 1.];
+    var ys = [1., 1., 2., 2.];
+    var new_xs = [0, 0, 0, 0];
+    var new_ys = [0, 0, 0, 0];
+    for(var i = 0; i < 4; i++){
+      new_xs[i] = rotated_x(a, xs[i], ys[i]);
+      new_ys[i] = rotated_y(a, xs[i], ys[i]);
+    }
 
-	if(do_new){
-	    // the connection
-	    rotation_context.beginPath();
-	    rotation_context.setLineDash([2, 2]);
-	    for(var i = 0; i < 4; i++){
-		    rotation_context.moveTo(x_to_client(xs[i]), y_to_client(ys[i]));
-        	rotation_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
-	    }
-	    rotation_context.strokeStyle="#eeaa88";
+    if(do_new){
+        // the connection
+        rotation_context.beginPath();
+        rotation_context.setLineDash([2, 2]);
+        for(var i = 0; i < 4; i++){
+            rotation_context.moveTo(x_to_client(xs[i]), y_to_client(ys[i]));
+            rotation_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+        }
+        rotation_context.strokeStyle="#eeaa88";
         rotation_context.stroke();
         rotation_context.setLineDash([]);
         rotation_context.closePath();
     }
 
-	// original cube
-	draw_original_cube_on(rotation_context);
+    // original cube
+    draw_original_cube_on(rotation_context);
 
     // rotation
     rotation_context.beginPath();
     rotation_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
     for(var i = 0; i < 4; i++){
-    	rotation_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+        rotation_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
     }
     rotation_context.strokeStyle="#dd6644";
     rotation_context.stroke();
@@ -455,8 +455,8 @@ function rotation_draw(client_x, client_y, do_new){
     rotation_context.fillText("y' = cos(a) * x - sin(a) * y", 32, 460);
     rotation_context.fillText("where a = " + a.toFixed(2), 32, 480);
 
-	// grid
-	draw_grid_on(rotation_context);
+    // grid
+    draw_grid_on(rotation_context);
 }
 
 function init_scale(){
@@ -465,7 +465,7 @@ function init_scale(){
     scale_draw(canvas_rect.left + 256 + 96, canvas_rect.top + 256 - 64, false);
 
     scale.addEventListener('mousemove', function(e){
-    	scale_draw(e.clientX, e.clientY, true);
+        scale_draw(e.clientX, e.clientY, true);
     }, false);
 
     scale.addEventListener('mouseleave', function(e){
@@ -479,46 +479,46 @@ function scale_draw(client_x, client_y, do_new){
     var canvas_rect = scale.getBoundingClientRect();
     client_x -= canvas_rect.left;
     client_y -= canvas_rect.top;
-   	var a = client_to_x(client_x);
-   	var b = client_to_y(client_y);
+    var a = client_to_x(client_x);
+    var b = client_to_y(client_y);
 
     var scale_context = scale.getContext("2d");
     scale_context.font = "16px sans-serif";
     // background
     scale_context.fillStyle="#eeeeee";
-	scale_context.fillRect(0,0,512,512);
+    scale_context.fillRect(0,0,512,512);
 
-	var xs = [1., 2., 2., 1.];
-	var ys = [1., 1., 2., 2.];
-	var new_xs = [0, 0, 0, 0];
-	var new_ys = [0, 0, 0, 0];
-	for(var i = 0; i < 4; i++){
-	  new_xs[i] = a * xs[i];
-	  new_ys[i] = b * ys[i];
-	}
+    var xs = [1., 2., 2., 1.];
+    var ys = [1., 1., 2., 2.];
+    var new_xs = [0, 0, 0, 0];
+    var new_ys = [0, 0, 0, 0];
+    for(var i = 0; i < 4; i++){
+        new_xs[i] = a * xs[i];
+        new_ys[i] = b * ys[i];
+    }
 
-	if(do_new){
-	    // the connection
-	    scale_context.beginPath();
-	    scale_context.setLineDash([2, 2]);
-	    for(var i = 0; i < 4; i++){
-		    scale_context.moveTo(x_to_client(xs[i]), y_to_client(ys[i]));
-        	scale_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
-	    }
-	    scale_context.strokeStyle="#eeaa88";
+    if(do_new){
+        // the connection
+        scale_context.beginPath();
+        scale_context.setLineDash([2, 2]);
+        for(var i = 0; i < 4; i++){
+            scale_context.moveTo(x_to_client(xs[i]), y_to_client(ys[i]));
+            scale_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+        }
+        scale_context.strokeStyle="#eeaa88";
         scale_context.stroke();
         scale_context.setLineDash([]);
         scale_context.closePath();
     }
 
-	// original cube
-	draw_original_cube_on(scale_context);
+    // original cube
+    draw_original_cube_on(scale_context);
 
     // scale
     scale_context.beginPath();
     scale_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
     for(var i = 0; i < 4; i++){
-    	scale_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+        scale_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
     }
     scale_context.strokeStyle="#dd6644";
     scale_context.stroke();
@@ -527,8 +527,8 @@ function scale_draw(client_x, client_y, do_new){
     scale_context.fillText("x' = a * x, where a = " + a.toFixed(2), 32, 460);
     scale_context.fillText("y' = b * y, where b = " + b.toFixed(2), 32, 480);
 
-	// grid
-	draw_grid_on(scale_context);
+    // grid
+    draw_grid_on(scale_context);
 }
 
 function init_affine(){
@@ -536,25 +536,25 @@ function init_affine(){
     affine_draw(0, 0, false);
 
     affine.addEventListener('mousemove', function(e){
-    	affine_draw(e.clientX, e.clientY, true);
+        affine_draw(e.clientX, e.clientY, true);
     }, false);
 
     affine.addEventListener('mousedown', function(e){
         var canvas_rect = affine.getBoundingClientRect();
         client_x = e.clientX - canvas_rect.left;
         client_y = e.clientY - canvas_rect.top;
-       	var x = client_to_x(client_x);
-       	var y = client_to_y(client_y);
-       	affine_xs[affine_i] = x;
-       	affine_ys[affine_i] = y;
-       	affine_xs[3] = affine_xs[0] + affine_xs[2] - affine_xs[1];
-       	affine_ys[3] = affine_ys[0] + affine_ys[2] - affine_ys[1];
-       	affine_i = (affine_i + 1) % 3;
-       	affine_draw(e.clientX, e.clientY, true);
-   	}, false);
+        var x = client_to_x(client_x);
+        var y = client_to_y(client_y);
+        affine_xs[affine_i] = x;
+        affine_ys[affine_i] = y;
+        affine_xs[3] = affine_xs[0] + affine_xs[2] - affine_xs[1];
+        affine_ys[3] = affine_ys[0] + affine_ys[2] - affine_ys[1];
+        affine_i = (affine_i + 1) % 3;
+        affine_draw(e.clientX, e.clientY, true);
+    }, false);
 
     affine.addEventListener('mouseleave', function(e){
-    	affine_draw(0, 0, false);
+        affine_draw(0, 0, false);
     }, false);
 }
 
@@ -567,42 +567,42 @@ function affine_draw(client_x, client_y, do_new){
     var canvas_rect = affine.getBoundingClientRect();
     client_x -= canvas_rect.left;
     client_y -= canvas_rect.top;
-   	var x = client_to_x(client_x);
-   	var y = client_to_y(client_y);
+    var x = client_to_x(client_x);
+    var y = client_to_y(client_y);
 
     var affine_context = affine.getContext("2d");
     affine_context.font = "16px sans-serif";
     // background
     affine_context.fillStyle="#eeeeee";
-	affine_context.fillRect(0,0,512,512);
+    affine_context.fillRect(0,0,512,512);
 
-	// original cube
-	draw_original_cube_on(affine_context);
+    // original cube
+    draw_original_cube_on(affine_context);
 
-	// affine
-	affine_context.beginPath();
-	affine_context.moveTo(x_to_client(affine_xs[3]), y_to_client(affine_ys[3]));
-	for(var i = 0; i < 4; i++){
-    	affine_context.lineTo(x_to_client(affine_xs[i]), y_to_client(affine_ys[i]));
-	}
-	affine_context.strokeStyle="#dd6644";
+    // affine
+    affine_context.beginPath();
+    affine_context.moveTo(x_to_client(affine_xs[3]), y_to_client(affine_ys[3]));
+    for(var i = 0; i < 4; i++){
+        affine_context.lineTo(x_to_client(affine_xs[i]), y_to_client(affine_ys[i]));
+    }
+    affine_context.strokeStyle="#dd6644";
     affine_context.stroke();
     affine_context.closePath();
 
     if(do_new){
         // link
-      	affine_context.beginPath();
-      	affine_context.setLineDash([2, 2]);
-      	affine_context.moveTo(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]));
-      	affine_context.lineTo(x_to_client(x), y_to_client(y));
-	    affine_context.strokeStyle="#dd6644";
+        affine_context.beginPath();
+        affine_context.setLineDash([2, 2]);
+        affine_context.moveTo(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]));
+        affine_context.lineTo(x_to_client(x), y_to_client(y));
+        affine_context.strokeStyle="#dd6644";
         affine_context.stroke();
         affine_context.setLineDash([]);
         affine_context.closePath();
     }
 
-	// grid
-	draw_grid_on(affine_context);
+    // grid
+    draw_grid_on(affine_context);
 }
 
 function init_projective(){
@@ -610,23 +610,23 @@ function init_projective(){
     projective_draw(0, 0, false);
 
     projective.addEventListener('mousemove', function(e){
-    	projective_draw(e.clientX, e.clientY, true);
+        projective_draw(e.clientX, e.clientY, true);
     }, false);
 
     projective.addEventListener('mousedown', function(e){
         var canvas_rect = projective.getBoundingClientRect();
         client_x = e.clientX - canvas_rect.left;
         client_y = e.clientY - canvas_rect.top;
-       	var x = client_to_x(client_x);
-       	var y = client_to_y(client_y);
-       	projective_xs[projective_i] = x;
-       	projective_ys[projective_i] = y;
-       	projective_i = (projective_i + 1) % 4;
-       	projective_draw(e.clientX, e.clientY, true);
-   	}, false);
+        var x = client_to_x(client_x);
+        var y = client_to_y(client_y);
+        projective_xs[projective_i] = x;
+        projective_ys[projective_i] = y;
+        projective_i = (projective_i + 1) % 4;
+        projective_draw(e.clientX, e.clientY, true);
+    }, false);
 
     projective.addEventListener('mouseleave', function(e){
-    	projective_draw(0, 0, false);
+        projective_draw(0, 0, false);
     }, false);
 }
 
@@ -639,42 +639,42 @@ function projective_draw(client_x, client_y, do_new){
     var canvas_rect = projective.getBoundingClientRect();
     client_x -= canvas_rect.left;
     client_y -= canvas_rect.top;
-   	var x = client_to_x(client_x);
-   	var y = client_to_y(client_y);
+       var x = client_to_x(client_x);
+       var y = client_to_y(client_y);
 
     var projective_context = projective.getContext("2d");
     projective_context.font = "16px sans-serif";
     // background
     projective_context.fillStyle="#eeeeee";
-	projective_context.fillRect(0,0,512,512);
+    projective_context.fillRect(0,0,512,512);
 
-	// original cube
-	draw_original_cube_on(projective_context);
+    // original cube
+    draw_original_cube_on(projective_context);
 
-	// projective
-	projective_context.beginPath();
-	projective_context.moveTo(x_to_client(projective_xs[3]), y_to_client(projective_ys[3]));
-	for(var i = 0; i < 4; i++){
-    	projective_context.lineTo(x_to_client(projective_xs[i]), y_to_client(projective_ys[i]));
-	}
-	projective_context.strokeStyle="#dd6644";
+    // projective
+    projective_context.beginPath();
+    projective_context.moveTo(x_to_client(projective_xs[3]), y_to_client(projective_ys[3]));
+    for(var i = 0; i < 4; i++){
+        projective_context.lineTo(x_to_client(projective_xs[i]), y_to_client(projective_ys[i]));
+    }
+    projective_context.strokeStyle="#dd6644";
     projective_context.stroke();
     projective_context.closePath();
 
     if(do_new){
         // link
-      	projective_context.beginPath();
-      	projective_context.setLineDash([2, 2]);
-      	projective_context.moveTo(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]));
-      	projective_context.lineTo(x_to_client(x), y_to_client(y));
-	    projective_context.strokeStyle="#dd6644";
+        projective_context.beginPath();
+        projective_context.setLineDash([2, 2]);
+        projective_context.moveTo(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]));
+        projective_context.lineTo(x_to_client(x), y_to_client(y));
+        projective_context.strokeStyle="#dd6644";
         projective_context.stroke();
         projective_context.setLineDash([]);
         projective_context.closePath();
     }
 
-	// grid
-	draw_grid_on(projective_context);
+    // grid
+    draw_grid_on(projective_context);
 }
 
 
@@ -683,72 +683,72 @@ function init_composable(){
     composable_draw(0, 0, false);
 
     composable.addEventListener('mousemove', function(e){
-    	composable_draw(e.clientX, e.clientY, true);
+        composable_draw(e.clientX, e.clientY, true);
     }, false);
 
     composable.addEventListener('mousedown', function(e){
         var canvas_rect = composable.getBoundingClientRect();
         client_x = e.clientX - canvas_rect.left;
         client_y = e.clientY - canvas_rect.top;
-       	var x = client_to_x(client_x);
-       	var y = client_to_y(client_y);
+        var x = client_to_x(client_x);
+        var y = client_to_y(client_y);
 
-       	// new cube
+        // new cube
         var new_xs = [1., 2., 2., 1.];
-	    var new_ys = [1., 1., 2., 2.];
-	    if(document.getElementById("radio_p").checked){
-        	for(var i = 0; i < 4; i++){
-        	    new_xs[i] = composable_xs[i];
-        	    new_ys[i] = composable_ys[i];
-        	}
-	        new_xs[composable_i] = x;
-	        new_ys[composable_i] = y;
-	        composable_i = (composable_i + 1) % 4;
-	    }else if(document.getElementById("radio_t").checked){
-	        for(var i = 0; i < 4; i++){
-	            new_xs[i] = composable_xs[i] + x;
-        	    new_ys[i] = composable_ys[i] + y;
-	        }
-	    }else if(document.getElementById("radio_r").checked){
-	        for(var i = 0; i < 4; i++){
-	            new_xs[i] = rotated_x(x/2, composable_xs[i], composable_ys[i]);
-        	    new_ys[i] = rotated_y(x/2, composable_xs[i], composable_ys[i]);
-	        }
-	    }else if(document.getElementById("radio_s").checked){
-	        for(var i = 0; i < 4; i++){
-	            new_xs[i] = composable_xs[i] * x;
-        	    new_ys[i] = composable_ys[i] * y;
-	        }
-	    }
-	    for(var i = 0; i < 4; i++){
-           	composable_xs[i] = new_xs[i];
-           	composable_ys[i] = new_ys[i];
-       	}
+        var new_ys = [1., 1., 2., 2.];
+        if(document.getElementById("radio_p").checked){
+            for(var i = 0; i < 4; i++){
+                new_xs[i] = composable_xs[i];
+                new_ys[i] = composable_ys[i];
+            }
+            new_xs[composable_i] = x;
+            new_ys[composable_i] = y;
+            composable_i = (composable_i + 1) % 4;
+        }else if(document.getElementById("radio_t").checked){
+            for(var i = 0; i < 4; i++){
+                new_xs[i] = composable_xs[i] + x;
+                new_ys[i] = composable_ys[i] + y;
+            }
+        }else if(document.getElementById("radio_r").checked){
+            for(var i = 0; i < 4; i++){
+                new_xs[i] = rotated_x(x/2, composable_xs[i], composable_ys[i]);
+                new_ys[i] = rotated_y(x/2, composable_xs[i], composable_ys[i]);
+            }
+        }else if(document.getElementById("radio_s").checked){
+            for(var i = 0; i < 4; i++){
+                new_xs[i] = composable_xs[i] * x;
+                new_ys[i] = composable_ys[i] * y;
+            }
+        }
+        for(var i = 0; i < 4; i++){
+            composable_xs[i] = new_xs[i];
+            composable_ys[i] = new_ys[i];
+        }
 
-       	composable_draw(e.clientX, e.clientY, true);
-       	// calculate a matrix
-       	x0 = new_xs[0];     y0 = new_ys[0];
-       	x1 = new_xs[1];     y1 = new_ys[1];
-       	x2 = new_xs[2];     y2 = new_ys[2];
-       	x3 = new_xs[3];     y3 = new_ys[3];
-       	var A = (-x0*x2*y1 + x0*x2*y3 + x0*x3*y1 - x0*x3*y2 + x1*x2*y0 - x1*x2*y3 - x1*x3*y0 + x1*x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-       	var B = (x0*x1*y2 - x0*x1*y3 - x0*x2*y1 + x0*x2*y3 + x1*x3*y0 - x1*x3*y2 - x2*x3*y0 + x2*x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-       	var C = (-2*x0*x1*y2 + 2*x0*x1*y3 + 3*x0*x2*y1 - 3*x0*x2*y3 - 2*x0*x3*y1 + 2*x0*x3*y2 - x1*x2*y0 + x1*x2*y3 + x2*x3*y0 - x2*x3*y1)/
-       	    (x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-       	var D = (-x0*y1*y2 + x0*y1*y3 + x1*y0*y2 - x1*y0*y3 + x2*y0*y3 - x2*y1*y3 - x3*y0*y2 + x3*y1*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-       	var E = (-x0*y1*y3 + x0*y2*y3 + x1*y0*y2 - x1*y2*y3 - x2*y0*y1 + x2*y1*y3 + x3*y0*y1 - x3*y0*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-       	var F = (x0*y1*y2 - x0*y2*y3 - 3*x1*y0*y2 + 2*x1*y0*y3 + x1*y2*y3 + 2*x2*y0*y1 - 2*x2*y0*y3 - 2*x3*y0*y1 + 3*x3*y0*y2 - x3*y1*y2)/
-       	    (x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-       	var a = (-x0*y2 + x0*y3 + x1*y2 - x1*y3 + x2*y0 - x2*y1 - x3*y0 + x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-       	var b = (-x0*y1 + x0*y2 + x1*y0 - x1*y3 - x2*y0 + x2*y3 + x3*y1 - x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-       	var c = 1.;
-       	document.getElementById("matrix_col1").innerHTML = A.toFixed(3) + "<br>" + B.toFixed(3) + "<br>" + C.toFixed(3);
-       	document.getElementById("matrix_col2").innerHTML = D.toFixed(3) + "<br>" + E.toFixed(3) + "<br>" + F.toFixed(3);
-       	document.getElementById("matrix_col3").innerHTML = a.toFixed(3) + "<br>" + b.toFixed(3) + "<br>" + c.toFixed(3);
-   	}, false);
+        composable_draw(e.clientX, e.clientY, true);
+        // calculate a matrix
+        x0 = new_xs[0];     y0 = new_ys[0];
+        x1 = new_xs[1];     y1 = new_ys[1];
+        x2 = new_xs[2];     y2 = new_ys[2];
+        x3 = new_xs[3];     y3 = new_ys[3];
+        var A = (-x0*x2*y1 + x0*x2*y3 + x0*x3*y1 - x0*x3*y2 + x1*x2*y0 - x1*x2*y3 - x1*x3*y0 + x1*x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+        var B = (x0*x1*y2 - x0*x1*y3 - x0*x2*y1 + x0*x2*y3 + x1*x3*y0 - x1*x3*y2 - x2*x3*y0 + x2*x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+        var C = (-2*x0*x1*y2 + 2*x0*x1*y3 + 3*x0*x2*y1 - 3*x0*x2*y3 - 2*x0*x3*y1 + 2*x0*x3*y2 - x1*x2*y0 + x1*x2*y3 + x2*x3*y0 - x2*x3*y1)/
+            (x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+        var D = (-x0*y1*y2 + x0*y1*y3 + x1*y0*y2 - x1*y0*y3 + x2*y0*y3 - x2*y1*y3 - x3*y0*y2 + x3*y1*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+        var E = (-x0*y1*y3 + x0*y2*y3 + x1*y0*y2 - x1*y2*y3 - x2*y0*y1 + x2*y1*y3 + x3*y0*y1 - x3*y0*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+        var F = (x0*y1*y2 - x0*y2*y3 - 3*x1*y0*y2 + 2*x1*y0*y3 + x1*y2*y3 + 2*x2*y0*y1 - 2*x2*y0*y3 - 2*x3*y0*y1 + 3*x3*y0*y2 - x3*y1*y2)/
+            (x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+        var a = (-x0*y2 + x0*y3 + x1*y2 - x1*y3 + x2*y0 - x2*y1 - x3*y0 + x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+        var b = (-x0*y1 + x0*y2 + x1*y0 - x1*y3 - x2*y0 + x2*y3 + x3*y1 - x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+        var c = 1.;
+        document.getElementById("matrix_col1").innerHTML = A.toFixed(3) + "<br>" + B.toFixed(3) + "<br>" + C.toFixed(3);
+        document.getElementById("matrix_col2").innerHTML = D.toFixed(3) + "<br>" + E.toFixed(3) + "<br>" + F.toFixed(3);
+        document.getElementById("matrix_col3").innerHTML = a.toFixed(3) + "<br>" + b.toFixed(3) + "<br>" + c.toFixed(3);
+    }, false);
 
     composable.addEventListener('mouseleave', function(e){
-    	composable_draw(0, 0, false);
+        composable_draw(0, 0, false);
     }, false);
 }
 
@@ -761,77 +761,77 @@ function composable_draw(client_x, client_y, do_new){
     var canvas_rect = composable.getBoundingClientRect();
     client_x -= canvas_rect.left;
     client_y -= canvas_rect.top;
-   	var x = client_to_x(client_x);
-   	var y = client_to_y(client_y);
+    var x = client_to_x(client_x);
+    var y = client_to_y(client_y);
 
     var composable_context = composable.getContext("2d");
     composable_context.font = "16px sans-serif";
     // background
     composable_context.fillStyle="#eeeeee";
-	composable_context.fillRect(0,0,512,512);
+    composable_context.fillRect(0,0,512,512);
 
-	// original cube
-	draw_original_cube_on(composable_context);
+    // original cube
+    draw_original_cube_on(composable_context);
 
-	// composable
-	composable_context.beginPath();
-	composable_context.moveTo(x_to_client(composable_xs[3]), y_to_client(composable_ys[3]));
-	for(var i = 0; i < 4; i++){
-    	composable_context.lineTo(x_to_client(composable_xs[i]), y_to_client(composable_ys[i]));
-	}
-	composable_context.strokeStyle="#dd6644";
+    // composable
+    composable_context.beginPath();
+    composable_context.moveTo(x_to_client(composable_xs[3]), y_to_client(composable_ys[3]));
+    for(var i = 0; i < 4; i++){
+        composable_context.lineTo(x_to_client(composable_xs[i]), y_to_client(composable_ys[i]));
+    }
+    composable_context.strokeStyle="#dd6644";
     composable_context.stroke();
     composable_context.closePath();
 
     if(do_new){
         // new cube
         var new_xs = [1., 2., 2., 1.];
-	    var new_ys = [1., 1., 2., 2.];
-	    if(document.getElementById("radio_p").checked){
-        	for(var i = 0; i < 4; i++){
-        	    new_xs[i] = composable_xs[i];
-        	    new_ys[i] = composable_ys[i];
-        	}
-	        new_xs[composable_i] = x;
-	        new_ys[composable_i] = y;
-	    }else if(document.getElementById("radio_t").checked){
-	        for(var i = 0; i < 4; i++){
-	            new_xs[i] = composable_xs[i] + x;
-        	    new_ys[i] = composable_ys[i] + y;
-	        }
-	    }else if(document.getElementById("radio_r").checked){
-	        for(var i = 0; i < 4; i++){
-	            new_xs[i] = rotated_x(x/2, composable_xs[i], composable_ys[i]);
-        	    new_ys[i] = rotated_y(x/2, composable_xs[i], composable_ys[i]);
-	        }
-	    }else if(document.getElementById("radio_s").checked){
-	        for(var i = 0; i < 4; i++){
-	            new_xs[i] = composable_xs[i] * x;
-        	    new_ys[i] = composable_ys[i] * y;
-	        }
-	    }
+        var new_ys = [1., 1., 2., 2.];
+        if(document.getElementById("radio_p").checked){
+            for(var i = 0; i < 4; i++){
+                new_xs[i] = composable_xs[i];
+                new_ys[i] = composable_ys[i];
+            }
+            new_xs[composable_i] = x;
+            new_ys[composable_i] = y;
+        }else if(document.getElementById("radio_t").checked){
+            for(var i = 0; i < 4; i++){
+                new_xs[i] = composable_xs[i] + x;
+                new_ys[i] = composable_ys[i] + y;
+            }
+        }else if(document.getElementById("radio_r").checked){
+            for(var i = 0; i < 4; i++){
+                new_xs[i] = rotated_x(x/2, composable_xs[i], composable_ys[i]);
+                new_ys[i] = rotated_y(x/2, composable_xs[i], composable_ys[i]);
+            }
+        }else if(document.getElementById("radio_s").checked){
+            for(var i = 0; i < 4; i++){
+                new_xs[i] = composable_xs[i] * x;
+                new_ys[i] = composable_ys[i] * y;
+            }
+        }
 
-      	composable_context.beginPath();
-      	composable_context.setLineDash([2, 2]);
-	    composable_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
-	    for(var i = 0; i < 4; i++){
-        	composable_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
-	    }
-	    composable_context.strokeStyle="#dd6644";
+        composable_context.beginPath();
+        composable_context.setLineDash([2, 2]);
+        composable_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
+        for(var i = 0; i < 4; i++){
+            composable_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+        }
+        composable_context.strokeStyle="#dd6644";
         composable_context.stroke();
         composable_context.setLineDash([]);
         composable_context.closePath();
     }
-	// grid
-	draw_grid_on(composable_context);
+    // grid
+    draw_grid_on(composable_context);
 }
 
 function revert_composable(){
     composable_xs = [1., 2., 2., 1.];
-	composable_ys = [1., 1., 2., 2.];
-	document.getElementById("matrix_col1").innerHTML = "1<br>0<br>0";
-	document.getElementById("matrix_col2").innerHTML = "0<br>1<br>0";
-	document.getElementById("matrix_col3").innerHTML = "0<br>0<br>1";
+    composable_ys = [1., 1., 2., 2.];
+    document.getElementById("matrix_col1").innerHTML = "1<br>0<br>0";
+    document.getElementById("matrix_col2").innerHTML = "0<br>1<br>0";
+    document.getElementById("matrix_col3").innerHTML = "0<br>0<br>1";
     composable_draw(0, 0, false);
 }
     </script>
