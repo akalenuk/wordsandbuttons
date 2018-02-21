@@ -132,8 +132,8 @@ function y_to_client(y){
     return 256 - y * 64.;
 }
 
-var point_x = 2;
-var point_y = 3;
+var point_x = 3;
+var point_y = 2;
 
 var pick_a_point = null;
 var slide_a_w = null;
@@ -263,26 +263,35 @@ function transform(){
     }
 }
 
+var slide_w = 1.0;
+
 function init_slide_a_w(){
     slide_a_w = document.getElementById("slide_a_w");
     var canvas_rect = slide_a_w.getBoundingClientRect();
     slide_a_w_draw(canvas_rect.left + 32 + 256);
 
     slide_a_w.addEventListener('mousemove', function(e){
-        slide_a_w_draw(e.clientX);
+        var canvas_rect = slide_a_w.getBoundingClientRect();
+        slide_a_w_draw(e.clientX - canvas_rect.left, true);
+        if(e.buttons == 1){
+            slide_w = point_x / client_to_x(e.clientX - canvas_rect.left);
+            slide_a_w_draw(0, false);            
+        }
     }, false);
 
+    slide_a_w.addEventListener('mousedown', function(e){
+        var canvas_rect = slide_a_w.getBoundingClientRect();
+        slide_w = point_x / client_to_x(e.clientX - canvas_rect.left);
+        slide_a_w_draw(0, false);
+    }, false);
+    
     slide_a_w.addEventListener('mouseleave', function(e){
         var canvas_rect = slide_a_w.getBoundingClientRect();
-        slide_a_w_draw(canvas_rect.left + 32 + 256);
+        slide_a_w_draw(0, false);
     }, false);
 }
 
-function slide_a_w_draw(client_x){
-    // coordiantes correction
-    var canvas_rect = slide_a_w.getBoundingClientRect();
-    client_x -= canvas_rect.left;
-
+function slide_a_w_draw(client_x, is_moving){
     var slide_a_w_context = slide_a_w.getContext("2d");
     slide_a_w_context.font = "16px sans-serif";
     // background
@@ -290,16 +299,32 @@ function slide_a_w_draw(client_x){
     slide_a_w_context.fillRect(0,0,512,512);
 
     // selection
-    var w = (client_x - 256) / 32;
+    var w;
+    if(is_moving){
+        w = point_x / client_to_x(client_x);
+    }else{
+        w = slide_w;
+    }
+    
     var canvas_x = x_to_client(point_x / w);
     var canvas_y = y_to_client(point_y / w);
+      
     slide_a_w_context.beginPath();
+
     slide_a_w_context.moveTo(x_to_client(point_x * 100), y_to_client(point_y * 100));
     slide_a_w_context.lineTo(x_to_client(point_x * -100), y_to_client(point_y * -100));
-    slide_a_w_context.moveTo(x_to_client(point_x / w) - 10, y_to_client(point_y / w));
-    slide_a_w_context.lineTo(x_to_client(point_x / w) + 10, y_to_client(point_y / w));
-    slide_a_w_context.moveTo(x_to_client(point_x / w), y_to_client(point_y / w) - 10);
-    slide_a_w_context.lineTo(x_to_client(point_x / w), y_to_client(point_y / w) + 10);
+    
+    if(is_moving){
+        slide_a_w_context.moveTo(x_to_client(point_x / w) - 10, y_to_client(point_y / w));
+        slide_a_w_context.lineTo(x_to_client(point_x / w) + 10, y_to_client(point_y / w));
+        slide_a_w_context.moveTo(x_to_client(point_x / w), y_to_client(point_y / w) - 10);
+        slide_a_w_context.lineTo(x_to_client(point_x / w), y_to_client(point_y / w) + 10);
+    }
+    
+    slide_a_w_context.moveTo(x_to_client(point_x / slide_w) - 10, y_to_client(point_y / slide_w));
+    slide_a_w_context.lineTo(x_to_client(point_x / slide_w) + 10, y_to_client(point_y / slide_w));
+    slide_a_w_context.moveTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w) - 10);
+    slide_a_w_context.lineTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w) + 10);
     slide_a_w_context.strokeStyle="#dd6644";
     slide_a_w_context.stroke();
     slide_a_w_context.fillStyle="#dd6644";
