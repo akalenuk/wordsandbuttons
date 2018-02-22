@@ -336,6 +336,7 @@ function slide_a_w_draw(client_x, is_moving){
     draw_grid_on(slide_a_w_context);
 }
 
+
 function draw_original_cube_on(context){
     // original cube
     context.beginPath();
@@ -349,34 +350,54 @@ function draw_original_cube_on(context){
     context.closePath();
 }
 
+var dx = 0.5;
+var dy = 0.3;
+
 function init_translation(){
     translation = document.getElementById("translation");
-    var canvas_rect = translation.getBoundingClientRect();
-    translation_draw(canvas_rect.left + 256+ 96, canvas_rect.top + 256 - 64, false);
-
+    translation_draw(0, 0, false);
+        
+    translation.addEventListener('mousedown', function(e){
+        var canvas_rect = translation.getBoundingClientRect();
+        dx = client_to_x(e.clientX - canvas_rect.left);
+        dy = client_to_y(e.clientY - canvas_rect.top);
+        translation_draw(0, 0, false);
+    }, false);
+    
     translation.addEventListener('mousemove', function(e){
-        translation_draw(e.clientX, e.clientY, true);
+        var canvas_rect = translation.getBoundingClientRect();
+        if(e.buttons == 1){
+            dx = client_to_x(e.clientX - canvas_rect.left);
+            dy = client_to_y(e.clientY - canvas_rect.top);
+            translation_draw(0, 0, false);
+        }else{
+            translation_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        }
     }, false);
 
     translation.addEventListener('mouseleave', function(e){
         var canvas_rect = translation.getBoundingClientRect();
-        translation_draw(canvas_rect.left + 256 + 96, canvas_rect.top + 256 - 64, false);
+        translation_draw(0, 0, false);
     }, false);
 }
 
 function translation_draw(client_x, client_y, do_new){
-    // coordiantes correction
-    var canvas_rect = translation.getBoundingClientRect();
-    client_x -= canvas_rect.left;
-    client_y -= canvas_rect.top;
-    var x = client_to_x(client_x);
-    var y = client_to_y(client_y);
+    if(do_new){
+        var x = client_to_x(client_x);
+        var y = client_to_y(client_y);
+    }else{
+        var x = dx;
+        var y = dy;    
+    }
 
     var translation_context = translation.getContext("2d");
     translation_context.font = "16px sans-serif";
     // background
     translation_context.fillStyle="#eeeeee";
     translation_context.fillRect(0,0,512,512);
+
+    // original cube
+    draw_original_cube_on(translation_context);
 
     if(do_new){
         // the connection
@@ -394,11 +415,18 @@ function translation_draw(client_x, client_y, do_new){
         translation_context.stroke();
         translation_context.setLineDash([]);
         translation_context.closePath();
+        
+        // dx-dy cube
+        translation_context.beginPath();
+        translation_context.moveTo(x_to_client(dx), y_to_client(dy));
+        translation_context.lineTo(x_to_client(dx + 1), y_to_client(dy));
+        translation_context.lineTo(x_to_client(dx + 1), y_to_client(dy + 1));
+        translation_context.lineTo(x_to_client(dx), y_to_client(dy + 1));
+        translation_context.lineTo(x_to_client(dx), y_to_client(dy));
+        translation_context.strokeStyle="#ff8866";
+        translation_context.stroke();
+        translation_context.closePath();
     }
-
-    // original cube
-    draw_original_cube_on(translation_context);
-
     // translation
     translation_context.beginPath();
     translation_context.moveTo(x_to_client(x), y_to_client(y));
