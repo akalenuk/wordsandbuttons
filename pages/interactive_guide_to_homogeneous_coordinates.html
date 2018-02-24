@@ -458,27 +458,36 @@ function rotated_y(a, x, y){
     return Math.cos(a) * x - Math.sin(a) * y;
 }
 
+var rotation_a = 0.2;
+
 function init_rotation(){
     rotation = document.getElementById("rotation");
     var canvas_rect = translation.getBoundingClientRect();
-    rotation_draw(canvas_rect.left + 256 + 20, 0, false);
+    rotation_draw(rotation_a, false);
 
     rotation.addEventListener('mousemove', function(e){
-        rotation_draw(e.clientX, e.clientY, true);
+        var canvas_rect = rotation.getBoundingClientRect();
+        client_x = e.clientX, canvas_rect.left;
+        var a = client_to_x(client_x) / 2;
+        if(e.buttons == 1)
+            rotation_a = a;
+        rotation_draw(a, true);
     }, false);
 
+    rotation.addEventListener('mousedown', function(e){
+        var canvas_rect = rotation.getBoundingClientRect();
+        client_x = e.clientX, canvas_rect.left;
+        rotation_a = client_to_x(client_x) / 2;
+        rotation_draw(rotation_a, false);
+    }, false);
+    
     rotation.addEventListener('mouseleave', function(e){
         var canvas_rect = translation.getBoundingClientRect();
-        rotation_draw(canvas_rect.left + 256 + 20, 0, false);
+        rotation_draw(rotation_a, false);
     }, false);
 }
 
-function rotation_draw(client_x, client_y, do_new){
-    // coordiantes correction
-    var canvas_rect = rotation.getBoundingClientRect();
-    client_x -= canvas_rect.left;
-    var a = client_to_x(client_x) / 2;
-
+function rotation_draw(a, do_new){
     var rotation_context = rotation.getContext("2d");
     rotation_context.font = "16px sans-serif";
     // background
