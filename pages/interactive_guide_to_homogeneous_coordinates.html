@@ -538,29 +538,39 @@ function rotation_draw(a, do_new){
     draw_grid_on(rotation_context);
 }
 
+var scale_x = 1.5;
+var scale_y = 1.0;
+
 function init_scale(){
     scale = document.getElementById("scale");
-    var canvas_rect = scale.getBoundingClientRect();
-    scale_draw(canvas_rect.left + 256 + 96, canvas_rect.top + 256 - 64, false);
+    scale_draw(scale_x, scale_y, false);
 
     scale.addEventListener('mousemove', function(e){
-        scale_draw(e.clientX, e.clientY, true);
+        var canvas_rect = scale.getBoundingClientRect();
+        var new_scale_x = client_to_x(e.clientX - canvas_rect.left);
+        var new_scale_y = client_to_y(e.clientY - canvas_rect.top);
+        if(e.buttons == 1){
+            scale_x = new_scale_x;
+            scale_y = new_scale_y;
+            scale_draw(scale_x, scale_y, false);
+        }else{
+            scale_draw(new_scale_x, new_scale_y, true);
+        }
+    }, false);
+    
+    scale.addEventListener('mousedown', function(e){
+        var canvas_rect = scale.getBoundingClientRect();
+        scale_x = client_to_x(e.clientX - canvas_rect.left);
+        scale_y = client_to_y(e.clientY - canvas_rect.top);
+        scale_draw(scale_x, scale_y, false);
     }, false);
 
     scale.addEventListener('mouseleave', function(e){
-        var canvas_rect = scale.getBoundingClientRect();
-        scale_draw(canvas_rect.left + 256 + 96, canvas_rect.top + 256 - 64, false);
+        scale_draw(scale_x, scale_y, false);
     }, false);
 }
 
-function scale_draw(client_x, client_y, do_new){
-    // coordiantes correction
-    var canvas_rect = scale.getBoundingClientRect();
-    client_x -= canvas_rect.left;
-    client_y -= canvas_rect.top;
-    var a = client_to_x(client_x);
-    var b = client_to_y(client_y);
-
+function scale_draw(a, b, do_new){
     var scale_context = scale.getContext("2d");
     scale_context.font = "16px sans-serif";
     // background
