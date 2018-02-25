@@ -661,13 +661,23 @@ function init_affine(){
     affine_draw(0, 0, false);
 
     affine.addEventListener('mousemove', function(e){
-        affine_draw(e.clientX, e.clientY, true);
+        if(e.buttons == 1){
+            var canvas_rect = affine.getBoundingClientRect();
+            var client_x = e.clientX - canvas_rect.left;
+            var client_y = e.clientY - canvas_rect.top;
+            affine_xs[affine_i] = client_to_x(client_x);
+            affine_ys[affine_i] = client_to_y(client_y);
+            affine_draw(0, 0, false);
+        }
+        else{
+            affine_draw(e.clientX, e.clientY, true);
+        }
     }, false);
 
-    affine.addEventListener('mousedown', function(e){
+    affine.addEventListener('mouseup', function(e){
         var canvas_rect = affine.getBoundingClientRect();
-        client_x = e.clientX - canvas_rect.left;
-        client_y = e.clientY - canvas_rect.top;
+        var client_x = e.clientX - canvas_rect.left;
+        var client_y = e.clientY - canvas_rect.top;
         var x = client_to_x(client_x);
         var y = client_to_y(client_y);
         affine_xs[affine_i] = x;
@@ -683,8 +693,8 @@ function init_affine(){
     }, false);
 }
 
-var affine_xs = [0., 4., 5., 1.];
-var affine_ys = [0., 1., 5., 4.];
+var affine_xs = [0.5, 2.0, 2.5, 1.0];
+var affine_ys = [0.5, 1.0, 2.5, 2.0];
 var affine_i = 0;
 
 function affine_draw(client_x, client_y, do_new){
@@ -726,6 +736,17 @@ function affine_draw(client_x, client_y, do_new){
         affine_context.closePath();
     }
 
+    // x
+    affine_context.beginPath();
+    affine_context.moveTo(x_to_client(affine_xs[affine_i]) - 10, y_to_client(affine_ys[affine_i]));
+    affine_context.lineTo(x_to_client(affine_xs[affine_i]) + 10, y_to_client(affine_ys[affine_i]));
+    affine_context.moveTo(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]) - 10);
+    affine_context.lineTo(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]) + 10);
+    affine_context.strokeStyle="#dd6644";
+    affine_context.stroke();
+    affine_context.setLineDash([]);
+    affine_context.closePath();
+        
     // grid
     draw_grid_on(affine_context);
 }
