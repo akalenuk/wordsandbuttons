@@ -843,73 +843,87 @@ function projective_draw(client_x, client_y, do_new){
 }
 
 
+function recalculate_composable(client_x, client_y){
+    var x = client_to_x(client_x);
+    var y = client_to_y(client_y);
+    
+    // new cube
+    var new_xs = [1., 2., 2., 1.];
+    var new_ys = [1., 1., 2., 2.];
+    if(document.getElementById("radio_p").checked){
+        for(var i = 0; i < 4; i++){
+            new_xs[i] = composable_xs[i];
+            new_ys[i] = composable_ys[i];
+        }
+        new_xs[composable_i] = x;
+        new_ys[composable_i] = y;
+    }else if(document.getElementById("radio_t").checked){
+        for(var i = 0; i < 4; i++){
+            new_xs[i] = composable_xs[i] + x;
+            new_ys[i] = composable_ys[i] + y;
+        }
+    }else if(document.getElementById("radio_r").checked){
+        for(var i = 0; i < 4; i++){
+            new_xs[i] = rotated_x(x/2, composable_xs[i], composable_ys[i]);
+            new_ys[i] = rotated_y(x/2, composable_xs[i], composable_ys[i]);
+        }
+    }else if(document.getElementById("radio_s").checked){
+        for(var i = 0; i < 4; i++){
+            new_xs[i] = composable_xs[i] * x;
+            new_ys[i] = composable_ys[i] * y;
+        }
+    }
+    for(var i = 0; i < 4; i++){
+        composable_xs[i] = new_xs[i];
+        composable_ys[i] = new_ys[i];
+    }
+
+    // calculate a matrix
+    x0 = new_xs[0];     y0 = new_ys[0];
+    x1 = new_xs[1];     y1 = new_ys[1];
+    x2 = new_xs[2];     y2 = new_ys[2];
+    x3 = new_xs[3];     y3 = new_ys[3];
+    var A = (-x0*x2*y1 + x0*x2*y3 + x0*x3*y1 - x0*x3*y2 + x1*x2*y0 - x1*x2*y3 - x1*x3*y0 + x1*x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var B = (x0*x1*y2 - x0*x1*y3 - x0*x2*y1 + x0*x2*y3 + x1*x3*y0 - x1*x3*y2 - x2*x3*y0 + x2*x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var C = (-2*x0*x1*y2 + 2*x0*x1*y3 + 3*x0*x2*y1 - 3*x0*x2*y3 - 2*x0*x3*y1 + 2*x0*x3*y2 - x1*x2*y0 + x1*x2*y3 + x2*x3*y0 - x2*x3*y1)/
+        (x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var D = (-x0*y1*y2 + x0*y1*y3 + x1*y0*y2 - x1*y0*y3 + x2*y0*y3 - x2*y1*y3 - x3*y0*y2 + x3*y1*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var E = (-x0*y1*y3 + x0*y2*y3 + x1*y0*y2 - x1*y2*y3 - x2*y0*y1 + x2*y1*y3 + x3*y0*y1 - x3*y0*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var F = (x0*y1*y2 - x0*y2*y3 - 3*x1*y0*y2 + 2*x1*y0*y3 + x1*y2*y3 + 2*x2*y0*y1 - 2*x2*y0*y3 - 2*x3*y0*y1 + 3*x3*y0*y2 - x3*y1*y2)/
+        (x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var a = (-x0*y2 + x0*y3 + x1*y2 - x1*y3 + x2*y0 - x2*y1 - x3*y0 + x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var b = (-x0*y1 + x0*y2 + x1*y0 - x1*y3 - x2*y0 + x2*y3 + x3*y1 - x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var c = 1.;
+    document.getElementById("matrix_col1").innerHTML = A.toFixed(3) + "<br>" + B.toFixed(3) + "<br>" + C.toFixed(3);
+    document.getElementById("matrix_col2").innerHTML = D.toFixed(3) + "<br>" + E.toFixed(3) + "<br>" + F.toFixed(3);
+    document.getElementById("matrix_col3").innerHTML = a.toFixed(3) + "<br>" + b.toFixed(3) + "<br>" + c.toFixed(3);
+}
+
 function init_composable(){
     composable = document.getElementById("composable");
     composable_draw(0, 0, false);
 
     composable.addEventListener('mousemove', function(e){
-        composable_draw(e.clientX, e.clientY, true);
+        if(e.buttons == 1){
+            var canvas_rect = composable.getBoundingClientRect();
+            client_x = e.clientX - canvas_rect.left;
+            client_y = e.clientY - canvas_rect.top;
+            recalculate_composable(client_x, client_y);
+            composable_draw(e.clientX, e.clientY, false);
+        }else{
+            composable_draw(e.clientX, e.clientY, true);
+        }
     }, false);
 
-    composable.addEventListener('mousedown', function(e){
+    composable.addEventListener('mouseup', function(e){
         var canvas_rect = composable.getBoundingClientRect();
         client_x = e.clientX - canvas_rect.left;
         client_y = e.clientY - canvas_rect.top;
-        var x = client_to_x(client_x);
-        var y = client_to_y(client_y);
-
-        // new cube
-        var new_xs = [1., 2., 2., 1.];
-        var new_ys = [1., 1., 2., 2.];
+        recalculate_composable(client_x, client_y);
         if(document.getElementById("radio_p").checked){
-            for(var i = 0; i < 4; i++){
-                new_xs[i] = composable_xs[i];
-                new_ys[i] = composable_ys[i];
-            }
-            new_xs[composable_i] = x;
-            new_ys[composable_i] = y;
             composable_i = (composable_i + 1) % 4;
-        }else if(document.getElementById("radio_t").checked){
-            for(var i = 0; i < 4; i++){
-                new_xs[i] = composable_xs[i] + x;
-                new_ys[i] = composable_ys[i] + y;
-            }
-        }else if(document.getElementById("radio_r").checked){
-            for(var i = 0; i < 4; i++){
-                new_xs[i] = rotated_x(x/2, composable_xs[i], composable_ys[i]);
-                new_ys[i] = rotated_y(x/2, composable_xs[i], composable_ys[i]);
-            }
-        }else if(document.getElementById("radio_s").checked){
-            for(var i = 0; i < 4; i++){
-                new_xs[i] = composable_xs[i] * x;
-                new_ys[i] = composable_ys[i] * y;
-            }
         }
-        for(var i = 0; i < 4; i++){
-            composable_xs[i] = new_xs[i];
-            composable_ys[i] = new_ys[i];
-        }
-
         composable_draw(e.clientX, e.clientY, true);
-        // calculate a matrix
-        x0 = new_xs[0];     y0 = new_ys[0];
-        x1 = new_xs[1];     y1 = new_ys[1];
-        x2 = new_xs[2];     y2 = new_ys[2];
-        x3 = new_xs[3];     y3 = new_ys[3];
-        var A = (-x0*x2*y1 + x0*x2*y3 + x0*x3*y1 - x0*x3*y2 + x1*x2*y0 - x1*x2*y3 - x1*x3*y0 + x1*x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-        var B = (x0*x1*y2 - x0*x1*y3 - x0*x2*y1 + x0*x2*y3 + x1*x3*y0 - x1*x3*y2 - x2*x3*y0 + x2*x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-        var C = (-2*x0*x1*y2 + 2*x0*x1*y3 + 3*x0*x2*y1 - 3*x0*x2*y3 - 2*x0*x3*y1 + 2*x0*x3*y2 - x1*x2*y0 + x1*x2*y3 + x2*x3*y0 - x2*x3*y1)/
-            (x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-        var D = (-x0*y1*y2 + x0*y1*y3 + x1*y0*y2 - x1*y0*y3 + x2*y0*y3 - x2*y1*y3 - x3*y0*y2 + x3*y1*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-        var E = (-x0*y1*y3 + x0*y2*y3 + x1*y0*y2 - x1*y2*y3 - x2*y0*y1 + x2*y1*y3 + x3*y0*y1 - x3*y0*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-        var F = (x0*y1*y2 - x0*y2*y3 - 3*x1*y0*y2 + 2*x1*y0*y3 + x1*y2*y3 + 2*x2*y0*y1 - 2*x2*y0*y3 - 2*x3*y0*y1 + 3*x3*y0*y2 - x3*y1*y2)/
-            (x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-        var a = (-x0*y2 + x0*y3 + x1*y2 - x1*y3 + x2*y0 - x2*y1 - x3*y0 + x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-        var b = (-x0*y1 + x0*y2 + x1*y0 - x1*y3 - x2*y0 + x2*y3 + x3*y1 - x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
-        var c = 1.;
-        document.getElementById("matrix_col1").innerHTML = A.toFixed(3) + "<br>" + B.toFixed(3) + "<br>" + C.toFixed(3);
-        document.getElementById("matrix_col2").innerHTML = D.toFixed(3) + "<br>" + E.toFixed(3) + "<br>" + F.toFixed(3);
-        document.getElementById("matrix_col3").innerHTML = a.toFixed(3) + "<br>" + b.toFixed(3) + "<br>" + c.toFixed(3);
     }, false);
 
     composable.addEventListener('mouseleave', function(e){
@@ -977,18 +991,42 @@ function composable_draw(client_x, client_y, do_new){
         }
 
         composable_context.beginPath();
-        composable_context.setLineDash([2, 2]);
+        composable_context.setLineDash([4, 4]);
         composable_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
         for(var i = 0; i < 4; i++){
             composable_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
         }
-        composable_context.strokeStyle="#dd6644";
+        composable_context.strokeStyle="#992200";
         composable_context.stroke();
         composable_context.setLineDash([]);
         composable_context.closePath();
     }
     // grid
     draw_grid_on(composable_context);
+    
+    // x
+    if(document.getElementById("radio_p").checked){
+        composable_context.beginPath();
+        composable_context.moveTo(x_to_client(composable_xs[composable_i]) - 10, y_to_client(composable_ys[composable_i]));
+        composable_context.lineTo(x_to_client(composable_xs[composable_i]) + 10, y_to_client(composable_ys[composable_i]));
+        composable_context.moveTo(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]) - 10);
+        composable_context.lineTo(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]) + 10);
+        composable_context.strokeStyle="#dd6644";
+        composable_context.stroke();
+        composable_context.setLineDash([]);
+        composable_context.closePath();
+        // guide
+        if(do_new){
+            composable_context.beginPath();
+            composable_context.setLineDash([2, 2]);
+            composable_context.moveTo(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]));
+            composable_context.lineTo(x_to_client(x), y_to_client(y));
+            composable_context.strokeStyle="#dd6644";
+            composable_context.stroke();
+            composable_context.setLineDash([]);
+            composable_context.closePath();
+        }
+    }
 }
 
 function revert_composable(){
