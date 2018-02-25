@@ -842,11 +842,13 @@ function projective_draw(client_x, client_y, do_new){
     projective_context.closePath();
 }
 
+var composable_reference_x = 1.0;
+var composable_reference_y = 1.0;
 
 function recalculate_composable(client_x, client_y){
     var x = client_to_x(client_x);
     var y = client_to_y(client_y);
-    
+        
     // new cube
     var new_xs = [1., 2., 2., 1.];
     var new_ys = [1., 1., 2., 2.];
@@ -904,14 +906,29 @@ function init_composable(){
     composable_draw(0, 0, false);
 
     composable.addEventListener('mousemove', function(e){
+        var canvas_rect = composable.getBoundingClientRect();
+        client_x = e.clientX - canvas_rect.left;
+        client_y = e.clientY - canvas_rect.top;
         if(e.buttons == 1){
-            var canvas_rect = composable.getBoundingClientRect();
-            client_x = e.clientX - canvas_rect.left;
-            client_y = e.clientY - canvas_rect.top;
-            recalculate_composable(client_x, client_y);
-            composable_draw(e.clientX, e.clientY, false);
+            if(document.getElementById("radio_p").checked){
+                recalculate_composable(client_x, client_y);
+                composable_draw(client_x, client_y, false);
+            }else{                
+                var new_client_x = x_to_client(client_to_x(client_x) - composable_reference_x);
+                var new_client_y = y_to_client(client_to_y(client_y) - composable_reference_y);
+                recalculate_composable(new_client_x, new_client_y);
+                composable_draw(new_client_x, new_client_y, false);
+                composable_reference_x = client_to_x(client_x);
+                composable_reference_y = client_to_y(client_y); 
+            }
         }else{
-            composable_draw(e.clientX, e.clientY, true);
+            if(document.getElementById("radio_p").checked){
+                composable_draw(client_x, client_y, true);
+            }else{
+                var new_client_x = x_to_client(client_to_x(client_x) - composable_reference_x);
+                var new_client_y = y_to_client(client_to_y(client_y) - composable_reference_y);
+                composable_draw(new_client_x, new_client_y, true); 
+            }
         }
     }, false);
 
@@ -919,11 +936,18 @@ function init_composable(){
         var canvas_rect = composable.getBoundingClientRect();
         client_x = e.clientX - canvas_rect.left;
         client_y = e.clientY - canvas_rect.top;
-        recalculate_composable(client_x, client_y);
-        if(document.getElementById("radio_p").checked){
+        if(document.getElementById("radio_p").checked){            
+            recalculate_composable(client_x, client_y);
             composable_i = (composable_i + 1) % 4;
+            composable_draw(client_x, client_y, false);
+        }else{
+            var new_client_x = x_to_client(client_to_x(client_x) - composable_reference_x);
+            var new_client_y = y_to_client(client_to_y(client_y) - composable_reference_y);
+            recalculate_composable(new_client_x, new_client_y);
+            composable_draw(new_client_x, new_client_y, false);
+            composable_reference_x = client_to_x(client_x);
+            composable_reference_y = client_to_y(client_y); 
         }
-        composable_draw(e.clientX, e.clientY, true);
     }, false);
 
     composable.addEventListener('mouseleave', function(e){
@@ -936,10 +960,6 @@ var composable_ys = [1., 1., 2., 2.];
 var composable_i = 0;
 
 function composable_draw(client_x, client_y, do_new){
-    // coordiantes correction
-    var canvas_rect = composable.getBoundingClientRect();
-    client_x -= canvas_rect.left;
-    client_y -= canvas_rect.top;
     var x = client_to_x(client_x);
     var y = client_to_y(client_y);
 
