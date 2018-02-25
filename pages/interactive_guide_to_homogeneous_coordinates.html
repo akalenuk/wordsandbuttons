@@ -871,8 +871,8 @@ function recalculate_composable(client_x, client_y){
         }
     }else if(document.getElementById("radio_s").checked){
         for(var i = 0; i < 4; i++){
-            new_xs[i] = composable_xs[i] * (1.0 + x);
-            new_ys[i] = composable_ys[i] * (1.0 + y);
+            new_xs[i] = composable_xs[i] * x;
+            new_ys[i] = composable_ys[i] * y;
         }
     }
     for(var i = 0; i < 4; i++){
@@ -913,6 +913,8 @@ function init_composable(){
             if(document.getElementById("radio_p").checked){
                 recalculate_composable(client_x, client_y);
                 composable_draw(client_x, client_y, false);
+            }else if(document.getElementById("radio_s").checked){
+                composable_draw(client_x, client_y, true);
             }else{                
                 var new_client_x = x_to_client(client_to_x(client_x) - composable_reference_x);
                 var new_client_y = y_to_client(client_to_y(client_y) - composable_reference_y);
@@ -940,7 +942,10 @@ function init_composable(){
             recalculate_composable(client_x, client_y);
             composable_i = (composable_i + 1) % 4;
             composable_draw(client_x, client_y, false);
-        }else{
+        }else if(document.getElementById("radio_s").checked){
+            recalculate_composable(client_x, client_y);
+            composable_draw(client_x, client_y, false);
+        }else{ // translation
             var new_client_x = x_to_client(client_to_x(client_x) - composable_reference_x);
             var new_client_y = y_to_client(client_to_y(client_y) - composable_reference_y);
             recalculate_composable(new_client_x, new_client_y);
