@@ -668,8 +668,7 @@ function init_affine(){
             affine_xs[affine_i] = client_to_x(client_x);
             affine_ys[affine_i] = client_to_y(client_y);
             affine_draw(0, 0, false);
-        }
-        else{
+        }else{
             affine_draw(e.clientX, e.clientY, true);
         }
     }, false);
@@ -736,6 +735,9 @@ function affine_draw(client_x, client_y, do_new){
         affine_context.closePath();
     }
 
+    // grid
+    draw_grid_on(affine_context);
+    
     // x
     affine_context.beginPath();
     affine_context.moveTo(x_to_client(affine_xs[affine_i]) - 10, y_to_client(affine_ys[affine_i]));
@@ -746,9 +748,6 @@ function affine_draw(client_x, client_y, do_new){
     affine_context.stroke();
     affine_context.setLineDash([]);
     affine_context.closePath();
-        
-    // grid
-    draw_grid_on(affine_context);
 }
 
 function init_projective(){
@@ -756,10 +755,19 @@ function init_projective(){
     projective_draw(0, 0, false);
 
     projective.addEventListener('mousemove', function(e){
-        projective_draw(e.clientX, e.clientY, true);
+        if(e.buttons == 1){
+            var canvas_rect = projective.getBoundingClientRect();
+            var client_x = e.clientX - canvas_rect.left;
+            var client_y = e.clientY - canvas_rect.top;
+            projective_xs[projective_i] = client_to_x(client_x);
+            projective_ys[projective_i] = client_to_y(client_y);
+            projective_draw(0, 0, false);
+        }else{
+            projective_draw(e.clientX, e.clientY, true);
+        }
     }, false);
 
-    projective.addEventListener('mousedown', function(e){
+    projective.addEventListener('mouseup', function(e){
         var canvas_rect = projective.getBoundingClientRect();
         client_x = e.clientX - canvas_rect.left;
         client_y = e.clientY - canvas_rect.top;
@@ -776,8 +784,8 @@ function init_projective(){
     }, false);
 }
 
-var projective_xs = [1., 6., 5., 1.];
-var projective_ys = [1., 1., 6., 3.];
+var projective_xs = [1.0, 3.0, 2.5, 1.0];
+var projective_ys = [1.0, 1.0, 3.0, 1.5];
 var projective_i = 0;
 
 function projective_draw(client_x, client_y, do_new){
@@ -821,6 +829,17 @@ function projective_draw(client_x, client_y, do_new){
 
     // grid
     draw_grid_on(projective_context);
+    
+    // x
+    projective_context.beginPath();
+    projective_context.moveTo(x_to_client(projective_xs[projective_i]) - 10, y_to_client(projective_ys[projective_i]));
+    projective_context.lineTo(x_to_client(projective_xs[projective_i]) + 10, y_to_client(projective_ys[projective_i]));
+    projective_context.moveTo(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]) - 10);
+    projective_context.lineTo(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]) + 10);
+    projective_context.strokeStyle="#dd6644";
+    projective_context.stroke();
+    projective_context.setLineDash([]);
+    projective_context.closePath();
 }
 
 
