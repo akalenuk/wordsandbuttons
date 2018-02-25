@@ -842,8 +842,8 @@ function projective_draw(client_x, client_y, do_new){
     projective_context.closePath();
 }
 
-var composable_reference_x = 1.0;
-var composable_reference_y = 1.0;
+var composable_reference_x = 0.0;
+var composable_reference_y = 0.0;
 
 function recalculate_composable(client_x, client_y){
     var x = client_to_x(client_x);
@@ -871,8 +871,8 @@ function recalculate_composable(client_x, client_y){
         }
     }else if(document.getElementById("radio_s").checked){
         for(var i = 0; i < 4; i++){
-            new_xs[i] = composable_xs[i] * x;
-            new_ys[i] = composable_ys[i] * y;
+            new_xs[i] = composable_xs[i] * (1.0 + x);
+            new_ys[i] = composable_ys[i] * (1.0 + y);
         }
     }
     for(var i = 0; i < 4; i++){
@@ -1056,6 +1056,16 @@ function revert_composable(){
     document.getElementById("matrix_col2").innerHTML = "0<br>1<br>0";
     document.getElementById("matrix_col3").innerHTML = "0<br>0<br>1";
     composable_draw(0, 0, false);
+}
+
+function setup_reference_for_translation(){
+    composable_reference_x = composable_xs[0];
+    composable_reference_y = composable_ys[0];
+}
+
+function setup_reference_for_scale(){
+    composable_reference_x = 0.0;
+    composable_reference_y = 0.0;
 }
     </script>
   </head>
@@ -1322,9 +1332,9 @@ Doesn't it look familiar? Well, of course, it does! It's the projective transfor
 But that's not yet all. Matrices are composable. You can compose your own translation + rotation + another translation + scale + projection — and it all will still fit into a single matrix!
     </p>
     <form>
-    <input type="radio" name="transformation_type" id="radio_t">Translation&nbsp;&nbsp;
+    <input type="radio" name="transformation_type" id="radio_t" onclick="setup_reference_for_translation()">Translation&nbsp;&nbsp;
     <input type="radio" name="transformation_type" id="radio_r">Rotation&nbsp;&nbsp;
-    <input type="radio" name="transformation_type" id="radio_s">Scale&nbsp;&nbsp;
+    <input type="radio" name="transformation_type" id="radio_s" onclick="setup reference_for_scale()">Scale&nbsp;&nbsp;
     <input type="radio" name="transformation_type" id="radio_p" checked="true">Projection<br>
     </form>
     <canvas id="composable" width=512 height=512></canvas>
