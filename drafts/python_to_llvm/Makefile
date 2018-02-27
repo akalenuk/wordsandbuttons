@@ -1,4 +1,4 @@
-all: generate_llvm generate_s generate_elf
+all: generate_llvm generate_s generate_elf test
 .PHONY: generate_llvm
 generate_llvm:
 	clang test.c -S -emit-llvm -o test.bc
@@ -12,7 +12,6 @@ generate_elf:
 .PHONY: test
 test:
 	./test
-	echo $?
 .PHONY: clean
 clean:
 	rm test.s test.o test.bc test		
