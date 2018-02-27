@@ -1,0 +1,28 @@
+
+define double @calculate(double %a, double %b) #0 {
+  %1 = alloca double, align 8
+  %2 = alloca double, align 8
+  store double %a, double* %1, align 8
+  store double %b, double* %2, align 8
+  %3 = load double, double* %1, align 8
+  %4 = load double, double* %2, align 8
+  %5 = fdiv double %3, %4
+  ret double %5
+}
+
+define i32 @main() #0 {
+  %1 = alloca i32, align 4
+  %a = alloca double, align 8
+  %b = alloca double, align 8
+  store i32 0, i32* %1, align 4
+  store volatile double 2.000000e+00, double* %a, align 8
+  store volatile double 3.000000e+00, double* %b, align 8
+  %2 = load volatile double, double* %a, align 8
+  %3 = load volatile double, double* %b, align 8
+  %4 = call double @calculate(double %2, double %3)
+  %5 = fptosi double %4 to i32
+  ret i32 %5
+}
+
+attributes #0 = { nounwind uwtable }
+
