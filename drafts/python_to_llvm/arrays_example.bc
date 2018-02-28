@@ -1,0 +1,49 @@
+; ModuleID = 'test.c'
+target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-pc-linux-gnu"
+
+@main.b = private unnamed_addr constant [2 x double] [double 3.000000e+00, double 5.000000e+00], align 16
+
+; Function Attrs: nounwind uwtable
+define double @calculate(double %a, double* %b) #0 {
+  %1 = alloca double, align 8
+  %2 = alloca double*, align 8
+  store double %a, double* %1, align 8
+  store double* %b, double** %2, align 8
+  %3 = load double, double* %1, align 8
+  %4 = load double*, double** %2, align 8
+  %5 = getelementptr inbounds double, double* %4, i64 0
+  %6 = load double, double* %5, align 8
+  %7 = load double*, double** %2, align 8
+  %8 = getelementptr inbounds double, double* %7, i64 1
+  %9 = load double, double* %8, align 8
+  %10 = fadd double %6, %9
+  %11 = fdiv double %3, %10
+  ret double %11
+}
+
+; Function Attrs: nounwind uwtable
+define i32 @main() #0 {
+  %1 = alloca i32, align 4
+  %a = alloca double, align 8
+  %b = alloca [2 x double], align 16
+  store i32 0, i32* %1, align 4
+  store volatile double 2.000000e+00, double* %a, align 8
+  %2 = bitcast [2 x double]* %b to i8*
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* %2, i8* bitcast ([2 x double]* @main.b to i8*), i64 16, i32 16, i1 true)
+  %3 = load volatile double, double* %a, align 8
+  %4 = getelementptr inbounds [2 x double], [2 x double]* %b, i32 0, i32 0
+  %5 = call double @calculate(double %3, double* %4)
+  %6 = fptosi double %5 to i32
+  ret i32 %6
+}
+
+; Function Attrs: argmemonly nounwind
+declare void @llvm.memcpy.p0i8.p0i8.i64(i8* nocapture, i8* nocapture readonly, i64, i32, i1) #1
+
+attributes #0 = { nounwind uwtable "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+fxsr,+mmx,+sse,+sse2" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #1 = { argmemonly nounwind }
+
+!llvm.ident = !{!0}
+
+!0 = !{!"clang version 3.8.0-2ubuntu4 (tags/RELEASE_380/final)"}
