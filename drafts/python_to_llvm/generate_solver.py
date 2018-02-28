@@ -26,13 +26,11 @@ def generate_solver(a_name, b_name, x_name, n_value):
     def a(i, j, n):
         if n==n_value: 
             return array_to_stack(a_name, i * n + j)
-#        return a(i,j,n+1)*a(n,n,n+1)-a(i,n,n+1)*a(n,j,n+1)
         return a(i,j,n+1) + a(n,n,n+1) + mul_in_stack() + a(i,n,n+1) + a(n,j,n+1) + mul_in_stack() + sub_in_stack()
 
     def b(i, n):
         if n==n_value: 
             return array_to_stack(b_name, i)
-#        return a(n,n,n+1)*b(i,n+1)-a(i,n,n+1)*b(n,n+1)
         return a(n,n,n+1) + b(i,n+1) + mul_in_stack() + a(i,n,n+1) + b(n,n+1) + mul_in_stack() + sub_in_stack()
 
     def x(i):
