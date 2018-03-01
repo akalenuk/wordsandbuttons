@@ -24,5 +24,6 @@ int main() {
         }
     }
     printf("%f, %f, %f, %f, %f\n", sum_x[0], sum_x[1], sum_x[2], sum_x[3], sum_x[4]);
+    return 0;
 }
 
