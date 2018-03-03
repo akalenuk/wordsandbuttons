@@ -21,16 +21,22 @@ g_stack_counter = 0
 
 def array_to_stack(a_name, i):
     global g_stack_counter
+    load = "%" + str(g_stack_counter+1) + " = alloca double*, align 8\n"
+    load = "store double* %" + a_name + ", double** %" + str(g_stack_counter+1) +", align 8\n"
+    load = "%" + str(g_stack_counter+2) + " = load double*, double** %" + str(g_stack_counter+1) + ", align 8\n"
+    load = "%" + str(g_stack_counter+3) + " = getelementptr inbounds double, double* %"+ str(g_stack_counter+2) +", i64 " + str(i) + "\n"
+    load = "%" + str(g_stack_counter+4) + " = load double, double* %" + str(g_stack_counter+4) + ", align 8\n;
+    g_stack_counter += 4    
+    return load;
+
+def stack_to_array(a_name, i):
     store = "%" + str(g_stack_counter+1) + " = alloca double*, align 8\n"
     store = "store double* %" + a_name + ", double** %" + str(g_stack_counter+1) +", align 8\n"
     store = "%" + str(g_stack_counter+2) + " = load double*, double** %" + str(g_stack_counter+1) + ", align 8\n"
     store = "%" + str(g_stack_counter+3) + " = getelementptr inbounds double, double* %"+ str(g_stack_counter+2) +", i64 " + str(i) + "\n"
-    store = "%" + str(g_stack_counter+4) + " = load double, double* %" + str(g_stack_counter+4) + ", align 8\n;
-    g_stack_counter += 4    
+    store = "store double %" + str(g_stack_counter) + ", double* %" + str(g_stack_counter+3) + ", align 8\n"
+    g_stack_counter += 3
     return store;
-
-def stack_to_array(a_name, i):
-    return 'put_to ' + a_name + ' element ' + str(i) + '\n';
 
 def compute(a, operator, b):
     return a + b + operator + '_last_two put_as stack-1 decrement stack\n';
