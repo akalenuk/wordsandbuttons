@@ -16,18 +16,26 @@ attributes #0 = { nounwind uwtable "disable-tail-calls"="false" "less-precise-fp
 !0 = !{!"clang version 3.8.0-2ubuntu4 (tags/RELEASE_380/final)"} 
 """
 
-# this generates n-solver in pseudo-code
+# this is basically the whole LLVM layer (well, excluding head and tail that are very specific)
+g_stack_counter = 0
 
 def array_to_stack(a_name, i):
-    return 'get_from ' + a_name + ' element ' + str(i) + '\n';
+    global g_stack_counter
+    store = "%" + str(g_stack_counter+1) + " = alloca double*, align 8\n"
+    store = "store double* %" + a_name + ", double** %" + str(g_stack_counter+1) +", align 8\n"
+    store = "%" + str(g_stack_counter+2) + " = load double*, double** %" + str(g_stack_counter+1) + ", align 8\n"
+    store = "%" + str(g_stack_counter+3) + " = getelementptr inbounds double, double* %"+ str(g_stack_counter+2) +", i64 " + str(i) + "\n"
+    store = "%" + str(g_stack_counter+4) + " = load double, double* %" + str(g_stack_counter+4) + ", align 8\n;
+    g_stack_counter += 4    
+    return store;
 
 def stack_to_array(a_name, i):
     return 'put_to ' + a_name + ' element ' + str(i) + '\n';
 
-
 def compute(a, operator, b):
     return a + b + operator + '_last_two put_as stack-1 decrement stack\n';
 
+# this generates n-solver in pseudo-code
 def generate_solver(a_name, b_name, x_name, n_value):
     generated = ""       
    
