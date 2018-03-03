@@ -2,6 +2,8 @@
 
 #define N 5
 
+extern void solve_5(double* a, double* b, double* x);
+
 int main() {
     double sum_x[N] = {0., 0., 0., 0., 0.};
     for(int i = 0; i < 1000000; ++i) {
