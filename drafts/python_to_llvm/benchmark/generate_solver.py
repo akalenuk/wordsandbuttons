@@ -7,7 +7,8 @@ target triple = "x86_64-pc-linux-gnu"
 define void @solve_5(double* %a, double* %b, double* %x) #0 { 
 """
 
-tail = """}
+tail = """ret void
+}
 
 attributes #0 = { nounwind uwtable "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+fxsr,+mmx,+sse,+sse2" "unsafe-fp-math"="false" "use-soft-float"="false" }
 
@@ -17,33 +18,37 @@ attributes #0 = { nounwind uwtable "disable-tail-calls"="false" "less-precise-fp
 """
 
 # this is basically the whole LLVM layer (well, excluding the head and tail that are very specific)
-g_stack_counter = 0
+g_instruction_no = 0
+g_stack = []
 
 def array_to_stack(a_name, i):
-    global g_stack_counter
-    load = "%" + str(g_stack_counter+1) + " = alloca double*, align 8\n"
-    load += "store double* %" + a_name + ", double** %" + str(g_stack_counter+1) +", align 8\n"
-    load += "%" + str(g_stack_counter+2) + " = load double*, double** %" + str(g_stack_counter+1) + ", align 8\n"
-    load += "%" + str(g_stack_counter+3) + " = getelementptr inbounds double, double* %"+ str(g_stack_counter+2) +", i64 " + str(i) + "\n"
-    load += "%" + str(g_stack_counter+1) + " = load double, double* %" + str(g_stack_counter+3) + ", align 8\n"
-    g_stack_counter += 1
+    global g_instruction_no, g_stack
+    load = "%" + str(g_instruction_no+1) + " = alloca double*, align 8\n"
+    load += "store double* %" + a_name + ", double** %" + str(g_instruction_no+1) +", align 8\n"
+    load += "%" + str(g_instruction_no+2) + " = load double*, double** %" + str(g_instruction_no+1) + ", align 8\n"
+    load += "%" + str(g_instruction_no+3) + " = getelementptr inbounds double, double* %"+ str(g_instruction_no+2) +", i64 " + str(i) + "\n"
+    load += "%" + str(g_instruction_no+4) + " = load double, double* %" + str(g_instruction_no+3) + ", align 8\n"
+    g_instruction_no += 4
+    g_stack += [g_instruction_no]   
     return load;
 
 def stack_to_array(a_name, i):
-    global g_stack_counter
-    store = "%" + str(g_stack_counter+1) + " = alloca double*, align 8\n"
-    store += "store double* %" + a_name + ", double** %" + str(g_stack_counter+1) +", align 8\n"
-    store += "%" + str(g_stack_counter+2) + " = load double*, double** %" + str(g_stack_counter+1) + ", align 8\n"
-    store += "%" + str(g_stack_counter+3) + " = getelementptr inbounds double, double* %"+ str(g_stack_counter+2) +", i64 " + str(i) + "\n"
-    store += "store double %" + str(g_stack_counter) + ", double* %" + str(g_stack_counter+3) + ", align 8\n"
-    g_stack_counter -= 1
+    global g_instruction_no, g_stack
+    store = "%" + str(g_instruction_no+1) + " = alloca double*, align 8\n"
+    store += "store double* %" + a_name + ", double** %" + str(g_instruction_no+1) +", align 8\n"
+    store += "%" + str(g_instruction_no+2) + " = load double*, double** %" + str(g_instruction_no+1) + ", align 8\n"
+    store += "%" + str(g_instruction_no+3) + " = getelementptr inbounds double, double* %"+ str(g_instruction_no+2) +", i64 " + str(i) + "\n"
+    store += "store double %" + str(g_instruction_no) + ", double* %" + str(g_instruction_no+3) + ", align 8\n"
+    g_instruction_no += 3
+    g_stack = g_stack[:-1]
     return store;
 
 def compute(a, operator, b):
-    global g_stack_counter
+    global g_instruction_no, g_stack
     operation = a + b;
-    operation += "%" + str(g_stack_counter+1) + " = f" + operator + " double %" + str(g_stack_counter-1) + ", %" + str(g_stack_counter) + "\n";
-    g_stack_counter += 1
+    operation += "%" + str(g_instruction_no+1) + " = f" + operator + " double %" + str(g_stack[-1]) + ", %" + str(g_stack[-2]) + "\n";
+    g_instruction_no += 1
+    g_stack = g_stack[:-2] + [g_instruction_no]
     return operation;
 
 # this generates n-solver in pseudo-code
