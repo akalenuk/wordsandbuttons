@@ -43,32 +43,33 @@ def stack_to_array(a_name, i):
     g_stack = g_stack[:-1]
     return store;
 
-def in_stack(operator):
+def compute(a, operator, b):
     global g_instruction_no, g_stack
-    operation = "%" + str(g_instruction_no+1) + " = f" + operator + " double %" + str(g_stack[-1]) + ", %" + str(g_stack[-2]) + "\n";
+    operation = a + b;
+    operation += "%" + str(g_instruction_no+1) + " = f" + operator + " double %" + str(g_stack[-2]) + ", %" + str(g_stack[-1]) + "\n";
     g_instruction_no += 1
     g_stack = g_stack[:-2] + [g_instruction_no]
     return operation;
 
 # this generates n-solver in pseudo-code
 def generate_solver(a_name, b_name, x_name, n_value):
-    generated = ""
-
+    generated = ""       
+   
     def a(i, j, n):
         if n==n_value: 
             return array_to_stack(a_name, i * n + j)
-        return a(i,j,n+1) + a(n,n,n+1) + in_stack('mul') + a(i,n,n+1) + a(n,j,n+1) + in_stack('mul') + in_stack('sub')
+        return compute( compute(a(i,j,n+1), 'mul', a(n,n,n+1)), 'sub', compute(a(i,n,n+1), 'mul', a(n,j,n+1)) )
 
     def b(i, n):
         if n==n_value: 
             return array_to_stack(b_name, i)
-        return a(n,n,n+1) + b(i,n+1) + in_stack('mul') + a(i,n,n+1) + b(n,n+1) + in_stack('mul') + in_stack('sub')
+        return compute( compute(a(n,n,n+1), 'mul', b(i,n+1)), 'sub', compute(a(i,n,n+1), 'mul', b(n,n+1)) )
 
     def x(i):
         d = b(i,i+1)
         for j in xrange(i): 
-            d += a(i,j,i+1) + array_to_stack(x_name, j) + in_stack('mul') + in_stack('sub')
-        return d + a(i,i,i+1) + in_stack('div')
+            d = compute(d, 'sub', compute(a(i,j,i+1), 'mul', array_to_stack(x_name, j) ) )
+        return compute(d, 'div', a(i,i,i+1))
 
     for k in xrange(n_value):
         generated += x(k) + stack_to_array(x_name, k)
@@ -77,5 +78,6 @@ def generate_solver(a_name, b_name, x_name, n_value):
     
 if __name__ == '__main__':
     print head + generate_solver('a', 'b', 'x', 5) + tail
+#    print head + compute(array_to_stack('b', 0), 'div', array_to_stack('a', 0)) + stack_to_array('x', 0) + tail
 
 
