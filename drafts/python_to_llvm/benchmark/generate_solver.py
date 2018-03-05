@@ -1,4 +1,6 @@
-# this is the head and tail for one specific function
+### This is the example of python script that generates LLVM code in high-level-ish manner.
+
+# this is the head and tail for one specific function - solve_5(double* a, double* b, double *x)
 head = """; ModuleID = 'solve_5.c'
 target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu" 
@@ -51,7 +53,7 @@ def compute(a, operator, b):
     g_stack = g_stack[:-2] + [g_instruction_no]
     return operation;
 
-# this generates n-solver in pseudo-code
+# this generates n-solver in LLVM code. No actual LLVM stuff
 def generate_solver(a_name, b_name, x_name, n_value):
     generated = ""       
    
@@ -75,9 +77,8 @@ def generate_solver(a_name, b_name, x_name, n_value):
         generated += x(k) + stack_to_array(x_name, k)
 
     return generated
+
     
 if __name__ == '__main__':
     print head + generate_solver('a', 'b', 'x', 5) + tail
-#    print head + compute(array_to_stack('b', 0), 'div', array_to_stack('a', 0)) + stack_to_array('x', 0) + tail
-
 
