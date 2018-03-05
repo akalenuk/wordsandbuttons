@@ -25,8 +25,8 @@ def array_to_stack(a_name, i):
     load += "store double* %" + a_name + ", double** %" + str(g_stack_counter+1) +", align 8\n"
     load += "%" + str(g_stack_counter+2) + " = load double*, double** %" + str(g_stack_counter+1) + ", align 8\n"
     load += "%" + str(g_stack_counter+3) + " = getelementptr inbounds double, double* %"+ str(g_stack_counter+2) +", i64 " + str(i) + "\n"
-    load += "%" + str(g_stack_counter+4) + " = load double, double* %" + str(g_stack_counter+3) + ", align 8\n"
-    g_stack_counter += 4    
+    load += "%" + str(g_stack_counter+1) + " = load double, double* %" + str(g_stack_counter+3) + ", align 8\n"
+    g_stack_counter += 1
     return load;
 
 def stack_to_array(a_name, i):
@@ -36,7 +36,7 @@ def stack_to_array(a_name, i):
     store += "%" + str(g_stack_counter+2) + " = load double*, double** %" + str(g_stack_counter+1) + ", align 8\n"
     store += "%" + str(g_stack_counter+3) + " = getelementptr inbounds double, double* %"+ str(g_stack_counter+2) +", i64 " + str(i) + "\n"
     store += "store double %" + str(g_stack_counter) + ", double* %" + str(g_stack_counter+3) + ", align 8\n"
-    g_stack_counter += 3
+    g_stack_counter -= 1
     return store;
 
 def compute(a, operator, b):
