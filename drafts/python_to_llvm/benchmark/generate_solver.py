@@ -43,33 +43,32 @@ def stack_to_array(a_name, i):
     g_stack = g_stack[:-1]
     return store;
 
-def compute(a, operator, b):
+def in_stack(operator):
     global g_instruction_no, g_stack
-    operation = a + b;
-    operation += "%" + str(g_instruction_no+1) + " = f" + operator + " double %" + str(g_stack[-1]) + ", %" + str(g_stack[-2]) + "\n";
+    operation = "%" + str(g_instruction_no+1) + " = f" + operator + " double %" + str(g_stack[-1]) + ", %" + str(g_stack[-2]) + "\n";
     g_instruction_no += 1
     g_stack = g_stack[:-2] + [g_instruction_no]
     return operation;
 
 # this generates n-solver in pseudo-code
 def generate_solver(a_name, b_name, x_name, n_value):
-    generated = ""       
-   
+    generated = ""
+
     def a(i, j, n):
         if n==n_value: 
             return array_to_stack(a_name, i * n + j)
-        return compute( compute(a(i,j,n+1), 'mul', a(n,n,n+1)), 'sub', compute(a(i,n,n+1), 'mul', a(n,j,n+1)) )
+        return a(i,j,n+1) + a(n,n,n+1) + in_stack('mul') + a(i,n,n+1) + a(n,j,n+1) + in_stack('mul') + in_stack('sub')
 
     def b(i, n):
         if n==n_value: 
             return array_to_stack(b_name, i)
-        return compute( compute(a(n,n,n+1), 'mul', b(i,n+1)), 'sub', compute(a(i,n,n+1), 'mul', b(n,n+1)) )
+        return a(n,n,n+1) + b(i,n+1) + in_stack('mul') + a(i,n,n+1) + b(n,n+1) + in_stack('mul') + in_stack('sub')
 
     def x(i):
         d = b(i,i+1)
         for j in xrange(i): 
-            d = compute(d, 'sub', compute(a(i,j,i+1), 'mul', array_to_stack(x_name, j) ) )
-        return compute(d, 'div', a(i,i,i+1))
+            d += a(i,j,i+1) + array_to_stack(x_name, j) + in_stack('mul') + in_stack('sub')
+        return d + a(i,i,i+1) + in_stack('div')
 
     for k in xrange(n_value):
         generated += x(k) + stack_to_array(x_name, k)
