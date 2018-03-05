@@ -1,7 +1,7 @@
 all: generate_llvm generate_s generate_elf test
 .PHONY: generate_llvm
 generate_llvm:
-#	clang solve_5.c -S -emit-llvm -o solve_5.bc
+#	clang solve_5.c -march=native -S -emit-llvm -o solve_5.bc
 	python generate_solver.py > solve_5.bc
 	clang benchmark.c -S -emit-llvm -o benchmark.bc
 .PHONY: generate_s
