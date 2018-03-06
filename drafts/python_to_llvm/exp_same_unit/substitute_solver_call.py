@@ -1,23 +1,5 @@
-### This is the example of python script that generates LLVM code in high-level-ish manner.
-
-# this is the head and tail for one specific function - solve_5(double* a, double* b, double *x)
-head = """; ModuleID = 'solve_5.c'
-target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
-target triple = "x86_64-pc-linux-gnu" 
-
-; Function Attrs: nounwind uwtable
-define void @solve_5(double* %a, double* %b, double* %x) #0 { 
-"""
-
-tail = """ret void
-}
-
-attributes #0 = { nounwind uwtable "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="broadwell" "target-features"="+adx,+aes,+avx,+avx2,+bmi,+bmi2,+cmov,+cx16,+f16c,+fma,+fsgsbase,+fxsr,+lzcnt,+mmx,+movbe,+pclmul,+popcnt,+prfchw,+rdrnd,+rdseed,+sse,+sse2,+sse3,+sse4.1,+sse4.2,+ssse3,+xsave,+xsavec,+xsaveopt,+xsaves,-avx512bw,-avx512cd,-avx512dq,-avx512er,-avx512f,-avx512pf,-avx512vl,-fma4,-hle,-pku,-rtm,-sha,-sse4a,-tbm,-xop" "unsafe-fp-math"="false" "use-soft-float"="false" }
-
-!llvm.ident = !{!0}
-
-!0 = !{!"clang version 3.8.0-2ubuntu4 (tags/RELEASE_380/final)"} 
-"""
+import sys
+import re
 
 # this is basically the whole LLVM layer (well, excluding the head and tail that are very specific)
 g_instruction_no = 0
@@ -80,5 +62,13 @@ def generate_solver(a_name, b_name, x_name, n_value):
 
     
 if __name__ == '__main__':
-    print head + generate_solver('a', 'b', 'x', 5) + tail
+    f = open(sys.argv[1], 'r')
+    lines = f.read().split('\n')
+    f.close()
+    replacements = []
+    for line in lines:
+        if line.find('call void @solve_5') != -1:
+            params = [chunk.split(' ')[-1] for chunk in line.replace(')', ',').split(',')][:-1]
+            replacements += [(line, params)]
+    print replacements
 

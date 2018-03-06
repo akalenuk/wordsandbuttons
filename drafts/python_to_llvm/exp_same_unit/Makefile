@@ -1,18 +1,15 @@
-all: generate_llvm generate_s generate_elf test
+all: generate_llvm #generate_s generate_elf test
 .PHONY: generate_llvm
 generate_llvm:
-#	clang solve_5.c -march=native -S -emit-llvm -o solve_5.bc
-	python generate_solver.py > solve_5.bc
-	clang benchmark.c -S -emit-llvm -o benchmark.bc
+	clang benchmark.c -march=native -S -emit-llvm -o benchmark.bc
+	python substitute_solver_call.py benchmark.bc
 .PHONY: generate_s
 generate_s:
-	llc -O2 solve_5.bc -o solve_5.s
 	llc -O2 benchmark.bc -o benchmark.s
 .PHONY: generate_elf
 generate_elf:
-	as solve_5.s -o solve_5.o	
 	as benchmark.s -o benchmark.o
-	clang -o benchmark benchmark.o solve_5.o
+	clang -o benchmark benchmark.o
 .PHONY: test
 test:
 	./benchmark
