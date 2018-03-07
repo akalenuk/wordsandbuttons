@@ -61,8 +61,19 @@ def get_number_only(string):
 def replace_call(text, line, params):
     global g_instruction_no, g_stack
     g_instruction_no = get_number_only(params[2])
+    first_instruction_to_replace = g_instruction_no + 1
     g_stack = []
-    return text.replace(line, generate_solver(params[0], params[1], params[2], 5))
+    replacement = generate_solver(params[0], params[1], params[2], 5)
+    delta_instruction = g_instruction_no - first_instruction_to_replace + 1
+    for i in xrange(first_instruction_to_replace, sys.maxint):
+        new_i = i + delta_instruction
+        if text.find('%' + str(i) + ',') == -1 and text.find('%' + str(i) + ' ') == -1 and text.find('%' + str(i) + '\n') == -1 and text.find('%' + str(i) + ')'):
+            break
+        text = text.replace('%' + str(i) + ',', '%' + str(new_i) + ',')
+        text = text.replace('%' + str(i) + ' ', '%' + str(new_i) + ' ')
+        text = text.replace('%' + str(i) + '\n', '%' + str(new_i) + '\n')
+        text = text.replace('%' + str(i) + ')', '%' + str(new_i) + ')')
+    return text.replace(line, replacement)
 
 if __name__ == '__main__':
     f = open(sys.argv[1], 'r')
@@ -79,5 +90,4 @@ if __name__ == '__main__':
     f = open(sys.argv[1], 'w')
     f.write(text)
     f.close()
-
 
