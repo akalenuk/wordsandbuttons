@@ -1,4 +1,4 @@
-all: generate_llvm #generate_s generate_elf test
+all: generate_llvm generate_s generate_elf test
 .PHONY: generate_llvm
 generate_llvm:
 	clang benchmark.c -march=native -S -emit-llvm -o benchmark.bc
