@@ -7,9 +7,6 @@ g_stack = []
 
 def array_to_stack(a_no, i):
     global g_instruction_no, g_stack
-#    load = "%" + str(g_instruction_no+1) + " = alloca double*, align 8\n"
-#    load += "store double* %" + a_name + ", double** %" + str(g_instruction_no+1) +", align 8\n"
-#    load += "%" + str(g_instruction_no+2) + " = load double*, double** %" + str(g_instruction_no+1) + ", align 8\n"
     load = "%" + str(g_instruction_no+1) + " = getelementptr inbounds double, double* "+ a_no +", i64 " + str(i) + "\n"
     load += "%" + str(g_instruction_no+2) + " = load double, double* %" + str(g_instruction_no+1) + ", align 8\n"
     g_instruction_no += 2
@@ -18,9 +15,6 @@ def array_to_stack(a_no, i):
 
 def stack_to_array(a_no, i):
     global g_instruction_no, g_stack
-#    store = "%" + str(g_instruction_no+1) + " = alloca double*, align 8\n"
-#    store += "store double* %" + a_name + ", double** %" + str(g_instruction_no+1) +", align 8\n"
-#    store += "%" + str(g_instruction_no+2) + " = load double*, double** %" + str(g_instruction_no+1) + ", align 8\n"
     store = "%" + str(g_instruction_no+1) + " = getelementptr inbounds double, double* "+ a_no +", i64 " + str(i) + "\n"
     store += "store double %" + str(g_instruction_no) + ", double* %" + str(g_instruction_no+1) + ", align 8\n"
     g_instruction_no += 1
@@ -37,9 +31,6 @@ def compute(a, operator, b):
 
 # this generates n-solver in LLVM code. No actual LLVM stuff
 def generate_solver(a_no, b_no, x_no, n_value):
-    global g_instruction_no, g_stack
-    g_instruction_no = int(''.join([xi for xi in x_no if xi.isdigit()]))
-    g_stack = []
     generated = ""       
    
     def a(i, j, n):
@@ -63,7 +54,16 @@ def generate_solver(a_no, b_no, x_no, n_value):
 
     return generated
 
+# this replaces the function call and updates all the instruction indices
+def get_number_only(string):
+    return int(''.join([xi for xi in string if xi.isdigit()]))
     
+def replace_call(text, line, params):
+    global g_instruction_no, g_stack
+    g_instruction_no = get_number_only(params[2])
+    g_stack = []
+    return text.replace(line, generate_solver(params[0], params[1], params[2], 5))
+
 if __name__ == '__main__':
     f = open(sys.argv[1], 'r')
     text = f.read()
@@ -75,7 +75,7 @@ if __name__ == '__main__':
             params = [chunk.split(' ')[-1] for chunk in line.replace(')', ',').split(',')][:-1]
             replacements += [(line, params)]
     for (line, params) in replacements:
-        text = text.replace(line, generate_solver(params[0], params[1], params[2], 5))
+        text = replace_call(text, line, params)
     f = open(sys.argv[1], 'w')
     f.write(text)
     f.close()
