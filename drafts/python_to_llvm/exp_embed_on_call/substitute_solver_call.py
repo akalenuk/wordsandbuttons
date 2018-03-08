@@ -1,6 +1,8 @@
 import sys
 import re
 
+POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH = [' ', '\n', ')', ',']
+
 # this is basically the whole LLVM layer (well, excluding the head and tail that are very specific)
 g_instruction_no = 0
 g_stack = []
@@ -53,26 +55,22 @@ def generate_solver(a_no, b_no, x_no, n_value):
         generated += x(k) + stack_to_array(x_no, k)
 
     return generated
-
-# this replaces the function call and updates all the instruction indices
-def get_number_only(string):
-    return int(''.join([xi for xi in string if xi.isdigit()]))
     
+# this replaces the function call and updates all the instruction indices   
 def replace_call(text, line, params):
     global g_instruction_no, g_stack
-    g_instruction_no = get_number_only(params[2])
+    g_instruction_no = int(''.join([xi for xi in params[2] if xi.isdigit()])) # '%12 ' -> 12
     first_instruction_to_replace = g_instruction_no + 1
     g_stack = []
     replacement = generate_solver(params[0], params[1], params[2], 5)
     delta_instruction = g_instruction_no - first_instruction_to_replace + 1
     for i in xrange(first_instruction_to_replace, sys.maxint):
-        new_i = i + delta_instruction
-        if text.find('%' + str(i) + ',') == -1 and text.find('%' + str(i) + ' ') == -1 and text.find('%' + str(i) + '\n') == -1 and text.find('%' + str(i) + ')'):
+        not_found = sum([text.find('%' + str(i) + c) == -1 for c in POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH])
+        if not_found == 4:  # the last instruction has already been substituted
             break
-        text = text.replace('%' + str(i) + ',', '%' + str(new_i) + ',')
-        text = text.replace('%' + str(i) + ' ', '%' + str(new_i) + ' ')
-        text = text.replace('%' + str(i) + '\n', '%' + str(new_i) + '\n')
-        text = text.replace('%' + str(i) + ')', '%' + str(new_i) + ')')
+        new_i = i + delta_instruction
+        for c in POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH: # substitute instruction number
+            text = text.replace('%' + str(i) + c, '%' + str(new_i) + c)
     return text.replace(line, replacement)
 
 if __name__ == '__main__':
@@ -82,7 +80,7 @@ if __name__ == '__main__':
     f.close()
     replacements = []
     for line in lines:
-        if line.find('call void @solve_5') != -1:
+        if line.find('call void @solve_5') != -1: # the function's type is expected, not specified
             params = [chunk.split(' ')[-1] for chunk in line.replace(')', ',').split(',')][:-1]
             replacements += [(line, params)]
     for (line, params) in replacements:
