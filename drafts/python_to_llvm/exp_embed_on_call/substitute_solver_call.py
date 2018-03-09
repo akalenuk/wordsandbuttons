@@ -11,8 +11,7 @@ class LLVMCode:
     def __init__(self, io, code = ''): # the only constructor for now is by double* instruction
         self.m_io = io
         self.m_code = code
-    def __getitem__(self, i):
-        print 'get' 
+    def __getitem__(self, i): 
         global g_instruction_no, g_stack
         copy_code = "%" + str(g_instruction_no+1) + " = getelementptr inbounds double, double* "+ self.m_io +", i64 " + str(i) + "\n"
         copy_code += "%" + str(g_instruction_no+2) + " = load double, double* %" + str(g_instruction_no+1) + ", align 8\n"
@@ -20,16 +19,14 @@ class LLVMCode:
         g_stack += [g_instruction_no]
         return LLVMCode(self.m_io, copy_code)
     def __setitem__(self, i, other_llvm_code):
-        print 'set'
         global g_instruction_no, g_stack
-        self.m_code = other_llvm_code.m_code
+        self.m_code += other_llvm_code.m_code
         self.m_code += "%" + str(g_instruction_no+1) + " = getelementptr inbounds double, double* "+ self.m_io +", i64 " + str(i) + "\n"
         self.m_code += "store double %" + str(g_instruction_no) + ", double* %" + str(g_instruction_no+1) + ", align 8\n"
         g_instruction_no += 1
         g_stack = g_stack[:-1]
         return self
     def general_arithmetics(self, operator, other_llvm_code):
-        print operator
         global g_instruction_no, g_stack
         self.m_code += other_llvm_code.m_code;
         self.m_code += "%" + str(g_instruction_no+1) + " = f" + operator + " double %" + str(g_stack[-2]) + ", %" + str(g_stack[-1]) + "\n";
