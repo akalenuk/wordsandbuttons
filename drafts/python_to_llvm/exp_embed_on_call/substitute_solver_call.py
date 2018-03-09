@@ -7,54 +7,64 @@ POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH = [' ', '\n', ')', ',']
 g_instruction_no = 0
 g_stack = []
 
-def array_to_stack(a_no, i):
-    global g_instruction_no, g_stack
-    load = "%" + str(g_instruction_no+1) + " = getelementptr inbounds double, double* "+ a_no +", i64 " + str(i) + "\n"
-    load += "%" + str(g_instruction_no+2) + " = load double, double* %" + str(g_instruction_no+1) + ", align 8\n"
-    g_instruction_no += 2
-    g_stack += [g_instruction_no]   
-    return load;
+class LLVMCode:
+    def __init__(self, io): # the only constructor for now is by double* instruction
+        self.m_io = io
+        self.m_code = ''
+    def __getitem__(self, i):
+        global g_instruction_no, g_stack
+        self.m_code += "%" + str(g_instruction_no+1) + " = getelementptr inbounds double, double* "+ self.m_io +", i64 " + str(i) + "\n"
+        self.m_code += "%" + str(g_instruction_no+2) + " = load double, double* %" + str(g_instruction_no+1) + ", align 8\n"
+        g_instruction_no += 2
+        g_stack += [g_instruction_no]   
+        return self
+    def __setitem__(self, i):
+        global g_instruction_no, g_stack
+        self.m_code += "%" + str(g_instruction_no+1) + " = getelementptr inbounds double, double* "+ self.m_io +", i64 " + str(i) + "\n"
+        self.m_code += "store double %" + str(g_instruction_no) + ", double* %" + str(g_instruction_no+1) + ", align 8\n"
+        g_instruction_no += 1
+        g_stack = g_stack[:-1]
+        return self
+    def general_arithmetics(self, operator, other_llvm_code):
+        global g_instruction_no, g_stack
+        self.m_code += self.m_code + other_llvm_code.m_code;
+        self.m_code += "%" + str(g_instruction_no+1) + " = f" + operator + " double %" + str(g_stack[-2]) + ", %" + str(g_stack[-1]) + "\n";
+        g_instruction_no += 1
+        g_stack = g_stack[:-2] + [g_instruction_no]
+        return self
+    def __add__(self, other_llvm_code):
+        return self.general_arithmetics('add', other_llvm_code)
+    def __sub__(self, other_llvm_code):
+        return self.general_arithmetics('sub', other_llvm_code)
+    def __mul__(self, other_llvm_code):
+        return self.general_arithmetics('mul', other_llvm_code)    
+    def __div__(self, other_llvm_code):
+        return self.general_arithmetics('div', other_llvm_code)    
 
-def stack_to_array(a_no, i):
-    global g_instruction_no, g_stack
-    store = "%" + str(g_instruction_no+1) + " = getelementptr inbounds double, double* "+ a_no +", i64 " + str(i) + "\n"
-    store += "store double %" + str(g_instruction_no) + ", double* %" + str(g_instruction_no+1) + ", align 8\n"
-    g_instruction_no += 1
-    g_stack = g_stack[:-1]
-    return store;
-
-def compute(a, operator, b):
-    global g_instruction_no, g_stack
-    operation = a + b;
-    operation += "%" + str(g_instruction_no+1) + " = f" + operator + " double %" + str(g_stack[-2]) + ", %" + str(g_stack[-1]) + "\n";
-    g_instruction_no += 1
-    g_stack = g_stack[:-2] + [g_instruction_no]
-    return operation;
-
-# this generates n-solver in LLVM code. No actual LLVM stuff
-def generate_solver(a_no, b_no, x_no, n_value):
-    generated = ""       
+# this generates n-solver in LLVM code with LLVMCode objects. No actual LLVM stuff, just completely Pythonic solution
+def solve_linear_system(a_array, b_array, x_array, n_value):
+    generated = ""
    
     def a(i, j, n):
-        if n==n_value: 
-            return array_to_stack(a_no, i * n + j)
-        return compute( compute(a(i,j,n+1), 'mul', a(n,n,n+1)), 'sub', compute(a(i,n,n+1), 'mul', a(n,j,n+1)) )
+        if n == n_value: 
+            return a_array[i * n_value + j]
+        return a(i,j,n+1) * a(n,n,n+1) - a(i,n,n+1) * a(n,j,n+1)
 
     def b(i, n):
-        if n==n_value: 
-            return array_to_stack(b_no, i)
-        return compute( compute(a(n,n,n+1), 'mul', b(i,n+1)), 'sub', compute(a(i,n,n+1), 'mul', b(n,n+1)) )
+        if n == n_value: 
+            return b_array[i]
+        return a(n,n,n+1) * b(i,n+1) - a(i,n,n+1) * b(n,n+1)
 
     def x(i):
         d = b(i,i+1)
-        for j in xrange(i): 
-            d = compute(d, 'sub', compute(a(i,j,i+1), 'mul', array_to_stack(x_no, j) ) )
-        return compute(d, 'div', a(i,i,i+1))
+        for j in range(i): 
+            d -=a (i,j,i+1)*x_array[j]
+        return d/a(i,i,i+1)
 
-    for k in xrange(n_value):
-        generated += x(k) + stack_to_array(x_no, k)
+    for k in range(n_value):
+        x_array[k] = x(k)
 
-    return generated
+    return x_array
     
 # this replaces the function call and updates all the instruction indices   
 def replace_call(text, line, params):
@@ -62,7 +72,7 @@ def replace_call(text, line, params):
     g_instruction_no = int(''.join([xi for xi in params[2] if xi.isdigit()])) # '%12 ' -> 12
     first_instruction_to_replace = g_instruction_no + 1
     g_stack = []
-    replacement = generate_solver(params[0], params[1], params[2], 5)
+    replacement = solve_linear_system(LLVMCode(params[0]), LLVMCode(params[1]), LLVMCode(params[2]), 5).m_code
     delta_instruction = g_instruction_no - first_instruction_to_replace + 1
     for i in xrange(first_instruction_to_replace, sys.maxint):
         not_found = sum([text.find('%' + str(i) + c) == -1 for c in POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH])
