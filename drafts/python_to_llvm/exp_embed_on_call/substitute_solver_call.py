@@ -8,26 +8,30 @@ g_instruction_no = 0
 g_stack = []
 
 class LLVMCode:
-    def __init__(self, io): # the only constructor for now is by double* instruction
+    def __init__(self, io, code = ''): # the only constructor for now is by double* instruction
         self.m_io = io
-        self.m_code = ''
+        self.m_code = code
     def __getitem__(self, i):
+        print 'get' 
         global g_instruction_no, g_stack
-        self.m_code += "%" + str(g_instruction_no+1) + " = getelementptr inbounds double, double* "+ self.m_io +", i64 " + str(i) + "\n"
-        self.m_code += "%" + str(g_instruction_no+2) + " = load double, double* %" + str(g_instruction_no+1) + ", align 8\n"
+        copy_code = "%" + str(g_instruction_no+1) + " = getelementptr inbounds double, double* "+ self.m_io +", i64 " + str(i) + "\n"
+        copy_code += "%" + str(g_instruction_no+2) + " = load double, double* %" + str(g_instruction_no+1) + ", align 8\n"
         g_instruction_no += 2
-        g_stack += [g_instruction_no]   
-        return self
-    def __setitem__(self, i):
+        g_stack += [g_instruction_no]
+        return LLVMCode(self.m_io, copy_code)
+    def __setitem__(self, i, other_llvm_code):
+        print 'set'
         global g_instruction_no, g_stack
+        self.m_code = other_llvm_code.m_code
         self.m_code += "%" + str(g_instruction_no+1) + " = getelementptr inbounds double, double* "+ self.m_io +", i64 " + str(i) + "\n"
         self.m_code += "store double %" + str(g_instruction_no) + ", double* %" + str(g_instruction_no+1) + ", align 8\n"
         g_instruction_no += 1
         g_stack = g_stack[:-1]
         return self
     def general_arithmetics(self, operator, other_llvm_code):
+        print operator
         global g_instruction_no, g_stack
-        self.m_code += self.m_code + other_llvm_code.m_code;
+        self.m_code += other_llvm_code.m_code;
         self.m_code += "%" + str(g_instruction_no+1) + " = f" + operator + " double %" + str(g_stack[-2]) + ", %" + str(g_stack[-1]) + "\n";
         g_instruction_no += 1
         g_stack = g_stack[:-2] + [g_instruction_no]
@@ -43,23 +47,21 @@ class LLVMCode:
 
 # this generates n-solver in LLVM code with LLVMCode objects. No actual LLVM stuff, just completely Pythonic solution
 def solve_linear_system(a_array, b_array, x_array, n_value):
-    generated = ""
-   
     def a(i, j, n):
         if n == n_value: 
             return a_array[i * n_value + j]
-        return a(i,j,n+1) * a(n,n,n+1) - a(i,n,n+1) * a(n,j,n+1)
+        return a(i, j, n+1) * a(n, n, n+1) - a(i, n, n+1) * a(n, j, n+1)
 
     def b(i, n):
         if n == n_value: 
             return b_array[i]
-        return a(n,n,n+1) * b(i,n+1) - a(i,n,n+1) * b(n,n+1)
+        return a(n, n, n+1) * b(i, n+1) - a(i, n, n+1) * b(n, n+1)
 
     def x(i):
         d = b(i,i+1)
         for j in range(i): 
-            d -=a (i,j,i+1)*x_array[j]
-        return d/a(i,i,i+1)
+            d -= a(i, j, i+1) * x_array[j]
+        return d / a(i, i, i+1)
 
     for k in range(n_value):
         x_array[k] = x(k)
