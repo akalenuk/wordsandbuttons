@@ -377,10 +377,34 @@ The C++ version was built with Clang and it runs for 60 ms.
 Of course, this advantage is not something you would kill for. It is more of a symbolic victory. You can write programs in Python that will outperform ones written in C or C++. You don't have to have an elaborate compiler (plus libraries, tooling, documents and community) to generate high-performant code.
     </p>
     <h2>
-
+Details on implementation
     </h2>
     <p>
-...
+The script that does the substitution, implements an algorithm and, most importantly, provides a Python to LLVM layer is only 100 lines long! You can see it in <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/drafts/python_to_llvm/exp_embed_on_call/substitute_solver_call.py">one piece on GitHub</a>.
+    </p>
+    <p>
+The most fascinating is the <i>LLVMCode</i> object. It is something that pretends to be a mere array, it looks like it can provide data by the index, accept data by the index, and be a subject of some simple arithmetic operators. But actually, what it does undercover is logging the history of all operations performed with it or its quasi-co-operands, or its quasi-data. The log is written in for of LLVM intermediate representation. 
+    </p>
+    <p>
+So if you have some perfectly Python-ish algorithm that operates on arrays, you can feed it with <i>LLVMCode</i> objects and what you get in return is the log of all LLVM operations required to achieve a result of the initial algorithm. Which is LLVM code. <i>LLVMCode</i> obejcts turn usual Python code into LLVM code-generator.
+    </p>
+    <p>
+In our case the algorithm is the recursive Kramer's linear solver named <i>solve_linear_system</i>. It is not some special code-generating algorithm, it is an actual solver. It was designed to work with numbers. But since Python is dynamically typed, all you have to do to turn it into a code generator is to run it with <i>LLVMCode</i> objects instead of arrays. That's it!
+    </p>
+    <h2>
+Conclusion
+    </h2>
+    <p>
+What I show here is not at all novel. People has been using dynamically typed languages to generate code for decades. What is indeed worth your attention is how unbelivebly easy it became to do so in the XXI century. I am not an LLVM expert, I don't even write in Python professionally, yet I could make a highly performant piece of code with a bit of googling, trial and error, and a 100-lines-long Python script.
+    </p>
+    <p>
+I really think that the difference between highly-perfromant compiling languages and slow but fast-to-develop scripting languages is more a matter of public opinion rather that some objective reality. You can generate fast code with Python or Perl or, of course, Lisp. Native code generation may very well be not a core feature of a language, but something like a plugable option. Something done by a dedicated library.
+    </p>
+    <p>
+And the prospects of this approach are rather appealing. You can do your research, rapid prototyping, preliminary measuremetns and tuning in one language, and then generate some highly-performant native code... in the same language. Probably with the same algorithm you have been developing.
+    </p>
+    <p>
+High-perfromance computing has no reason to remain a priviledge of compiling languages. Compiler is just a program, you can do its job in any language. I believe you can teach Matlab to generate intermediate LLVM code if you want to.
     </p>
     <br>
     <p style="font-family: sans-serif; font-size: 14pt;">
