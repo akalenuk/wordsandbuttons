@@ -203,38 +203,170 @@ And the solution for the second problem is basically any language you want. Lisp
     <h2>
 Function call substitution with Python
     </h2>
+    <p>
+What I want to do here is to repeat the same experiment I did with C and C++ before. I want to generate a fully inlined fully unrolled solution that would embed itself into the benchmarking code. My plan then is as follows.
+    <ol>
+    <li>
+Use Clang to generate LLVM intermediate code for a benchmark that is supposed to measure non-existent function named <i>solve_5</i>
+    </li>
+    <li>
+Hijack a benchmark with a Python script meaning replacing <i>solve_5</i> call with a completely auto-generated solution and updating all the instructions numbers after it. 
+    </li>
+    <li>
+Use the LLVM static compiler LLC to turn the intermediate code into the machine code.
+    </li>
+    <li>
+Use the GNU assembler and the Clang's linker to make the machine code into an executable binary.
+    </li>
+    </ol>
+    <p>
+In terms of source code the transformation should look somehow like this.
+    </p>
     <table><tr>
     <td>
     <pre><span id="slides_recursive_1" style="display:block"><div style="color:#994466"><b>Step 1. Benchmark C source code</b></div>
-1.
-    </span><span id="slides_recursive_2" style="display:none"><div style="color:#992244"><b>Step 2. LLVM assembly language</b></div>
-2.
-    </span><span id="slides_recursive_3" style="display:none"><div style="color:#881122"><b>Step 3. LLVM after the call replacement</b></div>
-3.
-    </span><span id="slides_recursive_4" style="display:none"><div style="color:#881122"><b>Step 4. Native optimized assembly</b></div>
-4.
-    </span></pre>
+#include "stdio.h"
+
+<b>extern void solve_5(double* a, double* b, double* x);</b> // fake
+
+int main() {
+    double sum_x[5] = {0., 0., 0., 0., 0.};
+    for(int i = 0; i &lt; 1000000; ++i) {
+        double a[5*5] = {
+            6.80, -6.05, -0.45,  8.32, -9.67,
+           -2.11, -3.30,  2.58,  2.71, -5.14,
+            5.66,  5.36, -2.70,  4.35, -7.26,
+            5.97, -4.44,  0.27, -7.17,  6.08,
+            8.23,  1.08,  9.04,  2.14, -6.87
+        };
+        double b[5] = {
+            4.02,  6.19, -8.22, -7.57, -3.03,
+        };
+        double x[5];
+
+        <b>solve_5(a, b, x);</b> // this will get replaced later
+         
+        for(int j = 0; j &lt; 5; ++j){
+            sum_x[j] += x[j];
+        }
+    }
+    printf("%f, %f, %f, %f, %f\n", 
+        sum_x[0], sum_x[1], sum_x[2], sum_x[3], sum_x[4]);
+    return 0;
+}    
+
+</span><span id="slides_recursive_2" style="display:none"><div style="color:#992244"><b>Step 2. LLVM assembly language</b></div>
+... 27 lines before...
+<span style="font-size:10pt;">; &lt;label&gt;:6                                       ; preds = %3
+  %7 = bitcast [25 x double]* %a to i8*
+  call void @llvm.memcpy.p0i8.p0i8.i32
+    (i8* %7, i8* bitcast ([25 x double]* @main.a to i8*), i32 200, i32 8, i1 false)
+  %8 = bitcast [5 x double]* %b to i8*
+  call void @llvm.memset.p0i8.i32(i8* %8, i8 0, i32 40, i32 8, i1 false)
+  %9 = bitcast i8* %8 to [5 x double]*
+  %10 = getelementptr [5 x double], [5 x double]* %9, i32 0, i32 0
+  store double 4.020000e+00, double* %10
+  %11 = getelementptr [5 x double], [5 x double]* %9, i32 0, i32 1
+  store double 6.190000e+00, double* %11
+  %12 = getelementptr [5 x double], [5 x double]* %9, i32 0, i32 2
+  store double -8.220000e+00, double* %12
+  %13 = getelementptr [5 x double], [5 x double]* %9, i32 0, i32 3
+  store double -7.570000e+00, double* %13
+  %14 = getelementptr [5 x double], [5 x double]* %9, i32 0, i32 4
+  store double -3.030000e+00, double* %14
+  %15 = getelementptr inbounds [25 x double], [25 x double]* %a, i32 0, i32 0
+  %16 = getelementptr inbounds [5 x double], [5 x double]* %b, i32 0, i32 0
+  %17 = getelementptr inbounds [5 x double], [5 x double]* %x, i32 0, i32 0
+  <b>call void @solve_5(double* %15, double* %16, double* %17) ; to replace</b>
+  store i32 0, i32* %j, align 4
+  br label <b>%18 ; to update</b>
+
+; &lt;label&gt;:18                                      ; preds = <b>%29</b>, <b>%6</b>
+  <b>%19</b> = load i32, i32* %j, align 4
+  <b>%20</b> = icmp slt i32 <b>%19</b>, 5
+  br i1 <b>%20</b>, label <b>%21</b>, label <b>%32</b></span>
+... 58 lines after... </span><span id="slides_recursive_3" style="display:none"><div style="color:#881122"><b>Step 3. LLVM after the call replacement</b></div>
+... 44 lines before ...
+<span style="font-size:10pt;">  %15 = getelementptr inbounds [25 x double], [25 x double]* %a, i32 0, i32 0
+  %16 = getelementptr inbounds [5 x double], [5 x double]* %b, i32 0, i32 0
+  %17 = getelementptr inbounds [5 x double], [5 x double]* %x, i32 0, i32 0
+<b>%18 = getelementptr inbounds double, double* %15, i64 6  ; generated
+%19 = load double, double* %18, align 8                  ; by
+%20 = getelementptr inbounds double, double* %15, i64 24 ; the
+%21 = load double, double* %20, align 8                  ; Python
+%22 = fmul double %19, %21                               ; script</b>
+
+</span>... 2407 more lines of auto-generated code ...<span style="font-size:10pt;">
+
+<b>%2422 = getelementptr inbounds double, double* %17, i64 3
+%2423 = load double, double* %2422, align 8
+%2424 = fmul double %2421, %2423
+%2425 = fsub double %2419, %2424
+%2426 = getelementptr inbounds double, double* %15, i64 24
+%2427 = load double, double* %2426, align 8
+%2428 = fdiv double %2425, %2427
+%2429 = getelementptr inbounds double, double* %17, i64 4
+store double %2428, double* %2429, align 8</b>
+
+  store i32 0, i32* %j, align 4
+  br label <b>%2430  ; instructions updated by the same script</b>
+
+; <label>:18                                      ; preds = %2441, %6
+  <b>%2431</b> = load i32, i32* %j, align 4
+  <b>%2432</b> = icmp slt i32 <b>%2431</b>, 5
+  br i1 <b>%2432</b>, label <b>%2433</b>, label <b>%2444</b>
+</span>... still 58 lines after...</span><span id="slides_recursive_4" style="display:none"><div style="color:#881122"><b>Step 4. Native optimized assembly</b></div>
+... 139 lines of assembly ...
+	vmovsd	352(%esp), %xmm0        # xmm0 = mem[0],zero
+	vmulsd	256(%esp), %xmm2, %xmm6
+	vmovsd	.LCPI0_0, %xmm4         # xmm4 = mem[0],zero
+	vmulsd	%xmm4, %xmm0, %xmm7
+	vsubsd	%xmm7, %xmm6, %xmm6
+	vmulsd	128(%esp), %xmm0, %xmm5 # 8-byte Folded Reload
+	vmovapd	%xmm0, %xmm3
+	vmulsd	344(%esp), %xmm2, %xmm7
+	vsubsd	%xmm5, %xmm7, %xmm1
+	vmovsd	%xmm1, 128(%esp)        # 8-byte Spill
+	vmulsd	280(%esp), %xmm2, %xmm7
+	vmulsd	192(%esp), %xmm4, %xmm5 # 8-byte Folded Reload
+	vsubsd	%xmm5, %xmm7, %xmm7
+	vmovsd	%xmm7, 120(%esp)        # 8-byte Spill
+	vmovsd	104(%esp), %xmm0        # 8-byte Reload
+
+	vmulsd	%xmm6, %xmm0, %xmm5
+	vmulsd	%xmm7, %xmm1, %xmm6
+	vsubsd	%xmm6, %xmm5, %xmm5
+	vmovsd	%xmm5, 64(%esp)         # 8-byte Spill
+	vmovapd	%xmm3, %xmm7
+	vmulsd	88(%esp), %xmm7, %xmm3  # 8-byte Folded Reload
+	vmulsd	336(%esp), %xmm2, %xmm6
+	vsubsd	%xmm3, %xmm6, %xmm3
+	vmulsd	%xmm0, %xmm3, %xmm3
+	vmulsd	80(%esp), %xmm1, %xmm6  # 8-byte Folded Reload
+	vsubsd	%xmm6, %xmm3, %xmm1
+	vmovsd	%xmm1, 88(%esp)         # 8-byte Spill
+... only 400 more lines of assembly ...</span></pre>
     </td>
     </td></tr></table>
     <p style="text-align:right">
     <button type="button" onclick="next('slides_recursive')">Next step</button>
     </p>
     <p>
-...
+The most interesting thing is how the crappy intermediate code generated by Python script turned into very compact and very effective code for the hardware. It is highly superscalarized and the huge parts of it has been reduced by LLVM. But were these low-level optimizations enough to generate something competetive in performance with C and C++ solutions?
     </p>
 
     <p>
-The numbers:
+It's hard to tell the exact numbers when everything runs super-fast to begin with. But after several measurements I can provide some approximate measurements for three cases: C with tricks, C++ with a trick, and Python + LLVM.
     </p>
     <ol>
     <li>
-...
+The tricks for C don't quite work for Clang, so I had to measure GCC version. It runs for roughly 70 ms in average.
     </li>
     <li>
-...
+The C++ version was built with Clang and it runs for 60 ms.
     </li>
     <li>
-<b>...</b>
+<b>The Python version, the one described here, runs only for 55 ms.</b>
     </li>
     </ol>
     <canvas id="results" width=700 height=500></canvas>
@@ -242,8 +374,11 @@ The numbers:
     init_results();
     </script>
     <p>
-...
+Of course, this advantage is not something you would kill for. It is more of a symbolic victory. You can write programs in Python that will outperform ones written in C or C++. You don't have to have an elaborate compiler (plus libraries, tooling, documents and community) to generate high-performant code.
     </p>
+    <h2>
+
+    </h2>
     <p>
 ...
     </p>
