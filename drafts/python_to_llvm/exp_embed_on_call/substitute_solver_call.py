@@ -4,7 +4,7 @@ import re
 POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH = [' ', '\n', ')', ',']
 
 # this is basically the whole LLVM layer (well, excluding the head and tail that are very specific)
-g_instruction_no = 0
+g_i = 0
 g_stack = []
 
 class LLVMCode:
@@ -12,26 +12,26 @@ class LLVMCode:
         self.m_io = io
         self.m_code = code
     def __getitem__(self, i): 
-        global g_instruction_no, g_stack
-        copy_code = "%" + str(g_instruction_no+1) + " = getelementptr inbounds double, double* "+ self.m_io +", i64 " + str(i) + "\n"
-        copy_code += "%" + str(g_instruction_no+2) + " = load double, double* %" + str(g_instruction_no+1) + ", align 8\n"
-        g_instruction_no += 2
-        g_stack += [g_instruction_no]
+        global g_i, g_stack
+        copy_code = "%" + str(g_i+1) + " = getelementptr inbounds double, double* "+ self.m_io +", i64 " + str(i) + "\n"
+        copy_code += "%" + str(g_i+2) + " = load double, double* %" + str(g_i+1) + ", align 8\n"
+        g_i += 2
+        g_stack += [g_i]
         return LLVMCode(self.m_io, copy_code)
     def __setitem__(self, i, other_llvm_code):
-        global g_instruction_no, g_stack
+        global g_i, g_stack
         self.m_code += other_llvm_code.m_code
-        self.m_code += "%" + str(g_instruction_no+1) + " = getelementptr inbounds double, double* "+ self.m_io +", i64 " + str(i) + "\n"
-        self.m_code += "store double %" + str(g_instruction_no) + ", double* %" + str(g_instruction_no+1) + ", align 8\n"
-        g_instruction_no += 1
+        self.m_code += "%" + str(g_i+1) + " = getelementptr inbounds double, double* "+ self.m_io +", i64 " + str(i) + "\n"
+        self.m_code += "store double %" + str(g_i) + ", double* %" + str(g_i+1) + ", align 8\n"
+        g_i += 1
         g_stack = g_stack[:-1]
         return self
     def general_arithmetics(self, operator, other_llvm_code):
-        global g_instruction_no, g_stack
+        global g_i, g_stack
         self.m_code += other_llvm_code.m_code;
-        self.m_code += "%" + str(g_instruction_no+1) + " = f" + operator + " double %" + str(g_stack[-2]) + ", %" + str(g_stack[-1]) + "\n";
-        g_instruction_no += 1
-        g_stack = g_stack[:-2] + [g_instruction_no]
+        self.m_code += "%" + str(g_i+1) + " = f" + operator + " double %" + str(g_stack[-2]) + ", %" + str(g_stack[-1]) + "\n";
+        g_i += 1
+        g_stack = g_stack[:-2] + [g_i]
         return self
     def __add__(self, other_llvm_code):
         return self.general_arithmetics('add', other_llvm_code)
@@ -67,12 +67,12 @@ def solve_linear_system(a_array, b_array, x_array, n_value):
     
 # this replaces the function call and updates all the instruction indices   
 def replace_call(text, line, params):
-    global g_instruction_no, g_stack
-    g_instruction_no = int(''.join([xi for xi in params[2] if xi.isdigit()])) # '%12 ' -> 12
-    first_instruction_to_replace = g_instruction_no + 1
+    global g_i, g_stack
+    g_i = int(''.join([xi for xi in params[2] if xi.isdigit()])) # '%12 ' -> 12
+    first_instruction_to_replace = g_i + 1
     g_stack = []
     replacement = solve_linear_system(LLVMCode(params[0]), LLVMCode(params[1]), LLVMCode(params[2]), 5).m_code
-    delta_instruction = g_instruction_no - first_instruction_to_replace + 1
+    delta_instruction = g_i - first_instruction_to_replace + 1
     for i in xrange(first_instruction_to_replace, sys.maxint):
         not_found = sum([text.find('%' + str(i) + c) == -1 for c in POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH])
         if not_found == 4:  # the last instruction has already been substituted
