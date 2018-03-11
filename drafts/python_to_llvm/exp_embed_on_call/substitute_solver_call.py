@@ -3,7 +3,7 @@ import re
 
 POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH = [' ', '\n', ')', ',']
 
-# this is basically the whole LLVM layer (well, excluding the head and tail that are very specific)
+# this is basically the whole LLVM layer
 I = 0
 STACK = []
 
