@@ -178,27 +178,27 @@ Outperforming everything with anything
 This continues <a href="http://wordsandbuttons.online/outperforming_lapack_with_c_metaprogramming.html">Outperforming LAPACK with C metaprogramming</a>, and <a href="http://wordsandbuttons.online/vastly_outperforming_lapack_with_cpp_metaprogramming.html"> Vastly outperforming LAPACK with C++ metaprogramming</a>. The two articles describe language tricks to help you help the compiler generate highly-performant code. But the tricks described there imply that you know what you do better than the compiler does. But if this is the case, do you really need a compiler at all?
     </p>
     <p>
-The alternative would be writing programs in plain assembly. Although, the horrors of it is vastly exaggerated, this approach has two major flaws.
+The alternative would be writing programs in plain assembly. Although the horrors of it is vastly exaggerated, this approach has two major flaws.
     </p>
     <ol>
     <li>
-Assembly code is not really portable. Sure, sometimes it's not even that important. You may have to implement some specific algorithm for some dedicated hardware and the priority of portability may seem low. But consider this. What if you are actually good at your job? What if the algorithm you implement survives some five or ten years? At some point you would want to update your hardware and non-portability may suddenly become an issue.
+Assembly code is not really portable. Sure, sometimes it's not even that important. You may have to implement some specific algorithm for some dedicated hardware, and the priority of portability may seem low. But consider this. What if you are actually good at your job? What if the algorithm you implement survives some five or ten years? At some point you would want to update your hardware and non-portability may suddenly become an issue.
     </li>
     <li>
-Although it became mush easier with modern tools, assembly programming still requires a lot of tedious manual labor. What seems to be just a line of code in C may become a screen full of assembly. And a screen full of C code may become an all-night typing party.
+Although it became much easier with modern tools, assembly programming still requires a lot of tedious manual labor. What seems to be just a line of code in C may become a screen full of assembly. And a screen full of C code may become an all-night typing party.
     </li>
     </ol>
     <p>
-Thankfully, we all live in the XXI century and both of these problems have already been addressed.
+Thankfully, we all live in the XXI century, and both of these problems have already been addressed.
     </p>
     <p>
-The solution to the first one would be <a href="https://en.wikipedia.org/wiki/LLVM">LLVM</a>. Initially it meant “Low Level Virtual Machine” and that is exactly what we want to ensure portability. Simply put, it takes some code written in very low-level language called intermediate representation and generates highly optimized native code from it. Single input — many outputs for many hardware platforms.
+The solution to the first one would be <a href="https://en.wikipedia.org/wiki/LLVM">LLVM</a>. Initially, it meant “Low Level Virtual Machine” and that is exactly what we want to ensure portability. Simply put, it takes some code written in very low-level language called intermediate representation and generates highly optimized native code from it. Single input — many outputs for many hardware platforms.
     </p>
     <p>
-With LLVM we have the power of low-level programming, so we can structure our program manually, and we still delegate hardware micro-optimizations to the machine.
+With LLVM we have the power of low-level programming so that we can structure our program manually, and we still delegate hardware micro-optimizations to the machine.
     </p>
     <p>
-And the solution for the second problem is basically any language you want. Lisp, Python, Perl, even bash, and AWK will do. They are all meant to eliminate tedious labor. Every language you use daily for automation may be used to generate highly-performant code. And it's reasonably easy too. I'll show you.
+And the solution to the second problem is basically any language you want. Lisp, Python, Perl, even bash, and AWK will do. They are all meant to eliminate tedious labor. Every language you use daily for automation may be used to generate highly-performant code. And it's reasonably easy too. I'll show you.
     </p>
     <h2>
 Function call substitution with Python
@@ -220,7 +220,7 @@ Use the GNU assembler and the Clang's linker to make the machine code into an ex
     </li>
     </ol>
     <p>
-In terms of source code the whole process should look somehow like this.
+In terms of source code, the whole process should look somehow like this.
     </p>
     <table><tr>
     <td>
@@ -352,11 +352,11 @@ store double %2428, double* %2429, align 8</b>
     <button type="button" onclick="next('slides_recursive')">Next step</button>
     </p>
     <p>
-The most interesting thing is how the crappy intermediate code generated by the Python script turns into very compact and very effective code for the hardware. It is highly super-scalarized and the huge parts of it has been reduced by LLVM. But were these low-level optimizations enough to generate something competitive in performance with C and C++ solutions?
+The most exciting thing is how the crappy intermediate code generated by the Python script turns into very compact and very effective code for the hardware. It is highly super-scalarized, and the huge parts of it have been reduced by LLVM. But were these low-level optimizations enough to generate something competitive in performance with C and C++ solutions?
     </p>
 
     <p>
-It's hard to tell the exact numbers when everything runs super-fast to begin with. But after several measurements I can provide some approximate measurements for the three cases: C with tricks, C++ with a trick, and Python with LLVM.
+It's hard to tell the exact numbers when everything runs super-fast to begin with. But after several measurements, I can provide some approximate measurements for the three cases: C with tricks, C++ with a trick, and Python with LLVM.
     </p>
     <ol>
     <li>
@@ -374,22 +374,22 @@ The C++ version was built with Clang and it runs for 60 ms.
     init_results();
     </script>
     <p>
-Of course, this advantage is not something you would kill for. It is more of a symbolic victory. You can write programs in Python that will outperform ones written in C or C++. You don't have to have an elaborate compiler (plus libraries, tooling, documents and community) to generate high-performant code.
+Of course, this advantage is not something you would kill for. It is more of a symbolic victory. You can write programs in Python that will outperform ones written in C or C++. You don't have to have an elaborate compiler (plus libraries, tooling, documents, and community) to generate high-performant code.
     </p>
     <h2>
 Details on implementation
     </h2>
     <p>
-The script that does the substitution, implements an algorithm and, most importantly, provides a Python to LLVM layer, is only 100 lines long! You can see it in <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/drafts/python_to_llvm/exp_embed_on_call/substitute_solver_call.py">one piece on GitHub</a>.
+The script that does the substitution, implements an algorithm, and, most importantly, provides a Python to LLVM layer, is only 100 lines long! You can see it in <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/drafts/python_to_llvm/exp_embed_on_call/substitute_solver_call.py">one piece on GitHub</a>.
     </p>
     <p>
-The most fascinating is the <i>LLVMCode</i> object. It is something that pretends to be a mere array, it looks like it can provide data by the index, accept data by the index, and be a subject of some simple arithmetic operators. But actually, what it does undercover is it logs the history of all operations performed with it or its quasi-co-operands or its quasi-data. The log is being written in form of LLVM intermediate representation. 
+The most fascinating is the <i>LLVMCode</i> object. It is something that pretends to be a mere array, it looks like it can provide data by the index, accept data by the index, and be a subject of some simple arithmetic operators. But actually, what it does undercover is it logs the history of all operations performed with it or its quasi-co-operands or its quasi-data. The log is being written in the form of LLVM intermediate representation. 
     </p>
     <p>
 So if you have some perfectly Python-ish algorithm that operates on lists, you can feed it with <i>LLVMCode</i> objects and what you get in return is the log of all LLVM operations required to achieve a result of the initial algorithm. Which is LLVM code. <i>LLVMCode</i> objects turn everyday Python code into LLVM code-generators.
     </p>
     <p>
-In our case the algorithm is the recursive Kramer's linear solver named <i>solve_linear_system</i>. It is not some special code-generating algorithm, it is an actual solver. It was designed to work with numbers. But since Python is dynamically typed, all you have to do to turn it into a code generator is to run it with <i>LLVMCode</i> objects instead of arrays. That's it!
+In our case, the algorithm is the recursive Kramer's linear solver named <i>solve_linear_system</i>. It is not some special code-generating algorithm, it is an actual solver. It was designed to work with numbers. But since Python is dynamically typed, all you have to do to turn it into a code generator is to run it with <i>LLVMCode</i> objects instead of arrays. That's it!
     </p>
     <h2>
 Conclusion
@@ -404,7 +404,7 @@ I really think that the difference between high performance compiling languages 
 And the prospects of this approach are rather appealing. You can do your research, rapid prototyping, preliminary measurements and tuning in one language, and then generate some highly-performant native code... in the same language. Probably, without even adopting the algorithm you have been developing.
     </p>
     <p>
-High-performance computing has no reason to remain a privilege of compiling languages. Compiler is just a program, you can do its job in any language. I believe you can teach Matlab to generate intermediate LLVM code if you want to.
+High-performance computing has no reason to remain a privilege of compiling languages. A compiler is just a program, you can do its job in any language. I&nbsp;believe you can teach Matlab to generate LLVM code if you want to.
     </p>
     <br>
     <p style="font-family: sans-serif; font-size: 14pt;">
