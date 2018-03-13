@@ -149,7 +149,7 @@ Introduction to linear algebra with 12 Python oneliners
     <table><tr>
     <td>
     <pre>
-def scale(A, x): return <b>[</b>ai*x <b>for</b> ai <b>in</b> A<b>]</b>
+def scaled(A, x): return <b>[</b>ai*x <b>for</b> ai <b>in</b> A<b>]</b>
     </pre>
     </td>
     </td></tr></table>
@@ -157,7 +157,7 @@ def scale(A, x): return <b>[</b>ai*x <b>for</b> ai <b>in</b> A<b>]</b>
     <table><tr>
     <td>
     <pre>
-def add(A, B): return [ai+bi for <b>(ai, bi)</b> in <b>zip</b>(A, B)]
+def sum_of(A, B): return [ai+bi for <b>(ai, bi)</b> in <b>zip</b>(A, B)]
     </pre>
     </td>
     </td></tr></table>
@@ -165,7 +165,7 @@ def add(A, B): return [ai+bi for <b>(ai, bi)</b> in <b>zip</b>(A, B)]
     <table><tr>
     <td>
     <pre>
-def dot(A, B): return <b>sum</b>([ai*bi for (ai, bi) in zip(A, B)])
+def dot_of(A, B): return <b>sum</b>([ai*bi for (ai, bi) in zip(A, B)])
     </pre>
     </td>
     </td></tr></table>
@@ -173,7 +173,7 @@ def dot(A, B): return <b>sum</b>([ai*bi for (ai, bi) in zip(A, B)])
     <table><tr>
     <td>
     <pre>
-def ident(n): 
+def identity(n): 
     return [[1.0 <b>if</b> i==j <b>else</b> 0.0 
             for j in range(n)] 
         for i in range(n)]
@@ -184,7 +184,7 @@ def ident(n):
     <table><tr>
     <td>
     <pre>
-def transpose(A): return [list(aj) for aj in <b>zip(*A)</b>]
+def transposed(A): return [list(aj) for aj in <b>zip(*A)</b>]
     </pre>
     </td>
     </td></tr></table>
@@ -192,7 +192,7 @@ def transpose(A): return [list(aj) for aj in <b>zip(*A)</b>]
     <table><tr>
     <td>
     <pre>
-def mul(A, X): return [<b>dot</b>(ai, X) for ai in A]
+def matrix_vector_of(A, X): return [<b>dot_of</b>(ai, X) for ai in A]
     </pre>
     </td>
     </td></tr></table>
@@ -200,8 +200,10 @@ def mul(A, X): return [<b>dot</b>(ai, X) for ai in A]
     <table><tr>
     <td>
     <pre>
-def project(A, Pn, Pd): 
-    return add(A, scale(Pn, (Pd — dot(Pn, A)) / dot(Pn, Pn)))
+def projected_on(A, Pn, Pd): 
+    return sum_of(A, 
+        scaled(Pn, 
+            (Pd — dot_of(Pn, A)) / dot_of(Pn, Pn)))
     </pre>
     </td>
     </td></tr></table>
@@ -210,7 +212,7 @@ def project(A, Pn, Pd):
     <td>
     <pre>
 def distance(A, B): 
-    return pow(dot( *(add(A, scale(B, -1.0)), )<b>*2</b> ), 0.5)
+    return pow(dot_of( *(sum_of(A, scaled(B, -1.0)), )<b>*2</b> ), 0.5)
     </pre>
     </td>
     </td></tr></table>
@@ -219,9 +221,11 @@ def distance(A, B):
     <td>
     <pre>
 def <b>solve</b>(A, B, Xi): 
-    return Xi if distance(mul(A, Xi), B) &lt; 1e-5 else 
-        <b>solve</b>(A[1:] + [A[0]], <b>B[1:] + [B[0]]</b>, 
-            project(Xi, A[0], B[0]))
+    return 
+        Xi if distance(matrix_vector_of(A, Xi), B) &lt; 1e-5 
+        else 
+            <b>solve</b>(A[1:] + [A[0]], <b>B[1:] + [B[0]]</b>, 
+                projected_on(Xi, A[0], B[0]))
     </pre>
     </td>
     </td></tr></table>
@@ -229,9 +233,9 @@ def <b>solve</b>(A, B, Xi):
     <table><tr>
     <td>
     <pre>
-def invert(A): 
+def inverted(A): 
     return transpose([solve(A, ort, [0.0]*len(A)) 
-        for ort in ident(len(A))])
+        for ort in identity(len(A))])
     </pre>
     </td>
     </td></tr></table>     
