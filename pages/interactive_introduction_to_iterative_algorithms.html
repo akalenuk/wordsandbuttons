@@ -197,6 +197,26 @@ function projected_y(x, y, a1, a2, b){
     return y + a2 * (b - dot_of(x, y, a1, a2)) / dot_of(a1, a2, a1, a2);
 }
 
+function invalidate_solver(client_x, client_y){
+    var canvas_rect = solver.getBoundingClientRect();
+    if(document.getElementById("button_1").disabled){
+   	    a11 = temp_a11;
+   	    a12 = temp_a12;
+   	    b1 = temp_b1;
+   	}else if(document.getElementById("button_2").disabled){
+   	    a21 = temp_a21;
+   	    a22 = temp_a22;
+   	    b2 = temp_b2;
+   	}else if(document.getElementById("button_3").disabled){
+   	    start_x = client_to_x(client_x - canvas_rect.left);
+   	    start_y = client_to_y(client_y - canvas_rect.top);
+   	}else if(document.getElementById("button_4").disabled){
+   	    end_step_length = temp_end_step_length;
+   	}
+    solver_draw(0, 0, false);
+    check_ex();
+}
+
 function init_solver(){
     solver = document.getElementById("solver");
     var canvas_rect = solver.getBoundingClientRect();
@@ -205,26 +225,13 @@ function init_solver(){
     solver.addEventListener('mousemove', function(e){
         var canvas_rect = solver.getBoundingClientRect();
    	    solver_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+   	    if(e.buttons == 1){
+   	        invalidate_solver(e.clientX, e.clientY);
+   	    }
     }, false);
 
-    solver.addEventListener('mousedown', function(e){
-        var canvas_rect = solver.getBoundingClientRect();
-       	if(document.getElementById("button_1").disabled){
-       	    a11 = temp_a11;
-       	    a12 = temp_a12;
-       	    b1 = temp_b1;
-       	}else if(document.getElementById("button_2").disabled){
-       	    a21 = temp_a21;
-       	    a22 = temp_a22;
-       	    b2 = temp_b2;
-       	}else if(document.getElementById("button_3").disabled){
-       	    start_x = client_to_x(e.clientX - canvas_rect.left);
-       	    start_y = client_to_y(e.clientY - canvas_rect.top);
-       	}else if(document.getElementById("button_4").disabled){
-       	    end_step_length = temp_end_step_length;
-       	}
-	    solver_draw(0, 0, false);
-	    check_ex();
+    solver.addEventListener('mouseup', function(e){
+        invalidate_solver(e.clientX, e.clientY);
     }, false);
 
     solver.addEventListener('mouseleave', function(e){
