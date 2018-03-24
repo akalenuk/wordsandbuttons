@@ -598,8 +598,17 @@ In our case we need to duplicate a list and feed it to the function.
 9. Rotation and linear solver
     </h2>
     <p>
-The solver itself is explained in another article: <a href="http://wordsandbuttons.online/interactive_introduction_to_iterative_algorithms.html">Interactive introduction to iterative algorithms</a>.
-    </p>    
+Solving linear equations is a respected field of engineering on its own. It is conceptually simple, but you face all kind of problems that nullify the simplicity. Computational error, unreasonable execution time, memory exhaustion, etc. 
+    </p>
+    <p>
+What I want to show here is that you can, using the power of Python, make a linear solver in one single line of code. Please remember though, that you shouldn't. There are <a href="https://docs.scipy.org/doc/numpy-1.13.0/reference/routines.linalg.html">libraries</a> that do that much better than a mere one-liner.
+    </p>
+    <p>
+The solver itself is explained in another article: <a href="http://wordsandbuttons.online/interactive_introduction_to_iterative_algorithms.html">Interactive introduction to iterative algorithms</a>. It is an iterative solver that jumps from one hyperplane to another slowly but steadily getting to the point of the solution.
+    </p>
+    <p>
+Or it hangs. Or exhaust your stack. It all depends on a system really.
+    </p>
     
     <table><tr>
     <td>
@@ -613,24 +622,27 @@ def <b>solve</b>(A, B, Xi):
     </pre>
     </td>
     </td></tr></table>
+    <p>
+The only interesting thing here Python-wise is the list syntax we use to rotate our hyperplane in a projection queue. It is very simple once you get it. You just chop the head off a list, make it into a list and concatenate the tail with a former head back together.
+    </p>
     <table><tr>
     <td>
     <pre><span id="rotation_1" style="display:block"><span style="color:#994466"><b>Rotation: step 1</b></span>
     
 >>> B = [<b>1</b>, 2, 3]
->>> print B[1:] + B[0]
+>>> print B[1:] + [B[0]]
 
 [2, 3, <b>1</b>]
     </span><span id="rotation_2" style="display:none"><span style="color:#aa2244"><b>Rotation: step 2</b></span>
     
 >>> B = [2, 3, <b>1</b>]
->>> print B[1:] + B[0]
+>>> print B[1:] + [B[0]]
 
 [3, <b>1</b>, 2]
     </span><span id="rotation_3" style="display:none"><span style="color:#aa2244"><b>Rotation: step 3</b></span>
     
 >>> B = [3, <b>1</b>, 2]
->>> print B[1:] + B[0]
+>>> print B[1:] + [B[0]]
 
 [<b>1</b>, 2, 3]
     </span></pre>
@@ -638,9 +650,6 @@ def <b>solve</b>(A, B, Xi):
     </td></tr></table>
     <p style="text-align:right">
     <button type="button" onclick="next('rotation')">Next step</button>
-    </p>
-    <p>
-... 
     </p>
     
     <h2>
