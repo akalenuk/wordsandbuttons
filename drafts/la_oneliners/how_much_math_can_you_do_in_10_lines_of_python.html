@@ -408,6 +408,12 @@ Let's call it a matter of style. I personally like to draw a line between facts 
     <h2>
 5. Passing container's content as arguments
     </h2>
+    <p>
+Let's say we have a matrix in Python as a list of lists where every nested list is a row. Now if we feed these rows to a zip from before, it will form a list of tuples where every tuple is a matrix's column. That's basically a ready made matrix transposition.
+    </p>
+    <p>
+But we still have to settle two things. One is trivial: we want our matrix as a list of lists not tuples, so we would have to fix that with a simple list comprehension. The other requires special Python syntax that will allow us to make a list of lists into a tuple of function's arguments. And the syntax is as easy as puting an asterisk before the matrix.
+    </p>
     <table><tr>
     <td>
     <pre>
@@ -415,6 +421,9 @@ def transposed(A): return [list(aj) for aj in <b>zip(*A)</b>]
     </pre>
     </td>
     </td></tr></table>
+    <p>
+The difference between passing a list of lists and lists as arguments looks like this.
+    </p>
     <table><tr>
     <td>
     <pre><span id="transpose_1" style="display:block"><span style="color:#994466"><b>Pasing a container</b></span>
@@ -460,12 +469,27 @@ def transposed(A): return [list(aj) for aj in <b>zip(*A)</b>]
     <button type="button" onclick="next('transpose')">Next step</button>
     </p>
     <p>
-... 
+The same syntax works the other way around. If you want to recieve all arguments as a single tuple, you can.
     </p>
+    <table><tr>
+    <td>
+    <pre>
+>>> def print_arguments_as_tuple(*A): 
+...     print A
+
+>>> print_A_as_tuple(1, 2, 3)
+
+(1, 2, 3)
+    </pre>
+    </td>
+    </td></tr></table>
     
     <h2>
 6. Matrix multiplication
     </h2>
+    <p>
+When you keep ypur matrices as lists of lists, you can easily multiply a matrix by a vector using a single list comprehension with a dot product inside.
+    </p>
     <table><tr>
     <td>
     <pre>
@@ -474,15 +498,15 @@ def matrix_vector_of(A, X): return [<b>dot_of</b>(ai, X) for ai in A]
     </td>
     </td></tr></table>
     <p>
-<a href="http://wordsandbuttons.online/interactive_guide_to_homogeneous_coordinates.html">Interactive guide to homogeneous coordinates</a>
-    </p>
-    <p>
-... 
+This operation is particularly important in projective geometry. With a single matrix multiplication you can do rotation, scale, translation, affine and projective transformations, — all at the same time. If you wan to know more, please take a look at <a href="http://wordsandbuttons.online/interactive_guide_to_homogeneous_coordinates.html">Interactive guide to homogeneous coordinates</a>.
     </p>
     
     <h2>
-7. Projection
+7. Point on a plane projection
     </h2>
+    <p>
+In computational geometry a plane is often set by a point in space and a normal vector in this point. With this notation you can project an arbitrary point on a plane as simple as this.
+    </p>
     <table><tr>
     <td>
     <pre>
@@ -494,12 +518,15 @@ def projected_on(A, Pn, Pd):
     </td>
     </td></tr></table>
     <p>
-... 
+We don't need any special Python syntax for that, but hold on, we'll get back to it.
     </p>
     
     <h2>
 8. List multiplication in arguments
     </h2>
+    <p>
+Let's find an Euclidean distance between two points. All we have to do is to do a vector subtraction, take its self dot product, and then take a square root of what we got.
+    </p>
     <table><tr>
     <td>
     <pre>
@@ -508,6 +535,26 @@ def distance_between(A, B):
     </pre>
     </td>
     </td></tr></table>
+    <p>
+The trick here is to make a self dot product, that implies passing the same argument to a dunction, without repeating itself. Python has a nice syntax for multiplication in a sense of making something multiply. And it is... multiplication. You can use integer mutpliplication to replicate list, tuples and so on.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+>>> (1, 2, 3) * 2
+(1, 2, 3, 1, 2, 3)
+
+>>> [1, 2, 3] * 2
+[1, 2, 3, 1, 2, 3]
+
+>>> ([1, 2, 3],) * 2
+([1, 2, 3], [1, 2, 3])
+    </pre>
+    </td>
+    </td></tr></table>
+    <p>
+In our case we need to duplicate a list and feed it to the function.
+    </p>    
     <table><tr>
     <td>
     <pre><span id="doubling_1" style="display:block"><span style="color:#994466"><b>List concatenation</b></span>
