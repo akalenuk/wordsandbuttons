@@ -218,9 +218,9 @@ function draw_grid_on(context){
 }
 
 // parametric
-var parametric_xs = [1.0, 4.0, 7.0];
-var parametric_ys = [5.0, 2.0, 5.0];
-var parametric_n = 3;
+var parametric_xs = [1.0, 4.0, 8.0, 5.5];
+var parametric_ys = [1.5, 1.0, 5.0, 6.0];
+var parametric_n = 4;
 var parametric_i = 0;
 
 function init_parametric(){
@@ -262,24 +262,38 @@ function parametric_draw(client_x, client_y, do_guides){
     draw_grid_on(parametric_context);
 
     // parametric
-    var A = [];
-    var B = [];
+    var Ax = [];
+    var Bx = [];
     for(var i = 0; i < parametric_n; ++i){
-        A[i] = [];
+        var parameter = i;
+        Ax[i] = [];
         for(var j = 0; j < parametric_n; ++j){
-            A[i][j] = Math.pow(parametric_xs[i], j);
+            Ax[i][j] = Math.pow(parameter, j);
         }
-        B[i] = parametric_ys[i];
+        Bx[i] = parametric_xs[i];
     }
 
-    X = solved_linear(A, B, parametric_n);
+    Xx = solved_linear(Ax, Bx, parametric_n);
+    
+    var Ay = [];
+    var By = [];
+    for(var i = 0; i < parametric_n; ++i){
+        var parameter = i;
+        Ay[i] = [];
+        for(var j = 0; j < parametric_n; ++j){
+            Ay[i][j] = Math.pow(parameter, j);
+        }
+        By[i] = parametric_ys[i];
+    }
+    Xy = solved_linear(Ay, By, parametric_n);
+    
 
     parametric_context.beginPath();
-    for(var j = 1; j < w; ++j){
-        x1 = client_to_x(j-1);
-        x2 = client_to_x(j);
-        y1 = polynomial_in_x(X, x1, parametric_n);
-        y2 = polynomial_in_x(X, x2, parametric_n);
+    for(var j = -0.5; j <= parametric_n - 0.5; j += 0.01){
+        x1 = polynomial_in_x(Xx, j - 0.01, parametric_n);
+        x2 = polynomial_in_x(Xx, j, parametric_n);
+        y1 = polynomial_in_x(Xy, j - 0.01, parametric_n);
+        y2 = polynomial_in_x(Xy, j, parametric_n);
         parametric_context.moveTo(x_to_client(x1), y_to_client(y1));
         parametric_context.lineTo(x_to_client(x2), y_to_client(y2));
     }
