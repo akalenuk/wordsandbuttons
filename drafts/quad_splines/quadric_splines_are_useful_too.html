@@ -336,6 +336,124 @@ function parametric_draw(client_x, client_y, do_guides){
     }
 }
 
+// naive spline 2
+var naive_spline2_xs = [1.0, 2.0, 5.0, 8.5];
+var naive_spline2_ys = [2.0, 1.0, 1.0, 3.0];
+var naive_spline2_n = 4;
+var naive_spline2_i = 0;
+
+function init_naive_spline2(){
+    naive_spline2 = document.getElementById("naive_spline2");
+    var canvas_rect = naive_spline2.getBoundingClientRect();
+    naive_spline2_draw(0, 0, false);
+
+    naive_spline2.addEventListener('mousemove', function(e){
+        var canvas_rect = naive_spline2.getBoundingClientRect();
+           naive_spline2_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+           if(e.buttons == 1){
+            naive_spline2_xs[naive_spline2_i] = client_to_x(e.clientX - canvas_rect.left);
+            naive_spline2_ys[naive_spline2_i] = client_to_y(e.clientY - canvas_rect.top);
+            naive_spline2_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+           }
+    }, false);
+
+    naive_spline2.addEventListener('mousedown', function(e){
+        var canvas_rect = naive_spline2.getBoundingClientRect();
+        naive_spline2_xs[naive_spline2_i] = client_to_x(e.clientX - canvas_rect.left);
+        naive_spline2_ys[naive_spline2_i] = client_to_y(e.clientY - canvas_rect.top);
+        naive_spline2_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    naive_spline2.addEventListener('mouseleave', function(e){
+        naive_spline2_draw(0, 0, false);
+    }, false);
+}
+
+function naive_spline2_draw(client_x, client_y, do_guides){
+    naive_spline2 = document.getElementById("naive_spline2");
+    var naive_spline2_context = naive_spline2.getContext("2d");
+    naive_spline2_context.font = "16px sans-serif";
+    // background
+    naive_spline2_context.fillStyle="#eeeeee";
+    naive_spline2_context.fillRect(0, 0, w, h);
+
+    // grid
+    draw_grid_on(naive_spline2_context);
+
+    // naive_spline2
+    naive_spline2_context.beginPath();
+    var nT=0;
+    var ax,bx,cx,dx, ay,by,cy,dy;
+    var d_x=0;
+    var d_y=0;
+    var dd_x=0;
+    var dd_y=0;
+    var ox=naive_spline2_xs[0];
+    var oy=naive_spline2_ys[0];
+    var derivative_divisor = 1.0; 
+    for(var T = 0.0; T <= naive_spline2_n - 1 + 0.001; T += 0.01) {
+        if(T >= nT){
+            dx=naive_spline2_xs[nT];
+            cx=d_x;
+            bx=dd_x/2;
+            ax=naive_spline2_xs[nT+1]-dx-cx-bx;
+            dy=naive_spline2_ys[nT];
+            cy=d_y
+            by=dd_y/2;
+            ay=naive_spline2_ys[nT+1]-dy-cy-by;
+            nT++;
+        }
+        var t01=T-(nT-1);
+        var x=ax*t01*t01*t01 + bx*t01*t01 + cx*t01 + dx;
+        var y=ay*t01*t01*t01 + by*t01*t01 + cy*t01 + dy;
+        naive_spline2_context.moveTo(x_to_client(ox), y_to_client(oy));
+        naive_spline2_context.lineTo(x_to_client(x), y_to_client(y));
+        d_x=(3*ax*t01*t01+2*bx*t01+cx)/derivative_divisor;
+        d_y=(3*ay*t01*t01+2*by*t01+cy)/derivative_divisor;
+        dd_x=(6*ax*t01+2*bx)/derivative_divisor;
+        dd_y=(6*ay*t01+2*by)/derivative_divisor;
+        ox=x;
+        oy=y;
+    }
+    
+    naive_spline2_context.strokeStyle="#661100";
+    naive_spline2_context.stroke();
+    naive_spline2_context.closePath();
+
+    // dots
+    naive_spline2_context.beginPath();
+    for(var i = 0; i < naive_spline2_n; ++i){
+        naive_spline2_context.moveTo(x_to_client(naive_spline2_xs[i])-5.5, y_to_client(naive_spline2_ys[i])+5.5);
+        naive_spline2_context.lineTo(x_to_client(naive_spline2_xs[i])+5.5, y_to_client(naive_spline2_ys[i])-5.5);
+        naive_spline2_context.moveTo(x_to_client(naive_spline2_xs[i])+5.5, y_to_client(naive_spline2_ys[i])+5.5);
+        naive_spline2_context.lineTo(x_to_client(naive_spline2_xs[i])-5.5, y_to_client(naive_spline2_ys[i])-5.5);
+    }
+    naive_spline2_context.strokeStyle="#AA3311";
+    naive_spline2_context.stroke();
+    naive_spline2_context.closePath();
+
+    // guides
+    if(do_guides){
+        min_d = Math.pow(naive_spline2_xs[0] - client_to_x(client_x), 2) + Math.pow(naive_spline2_ys[0] - client_to_y(client_y), 2);
+        min_i = 0;
+        for(var i = 1; i < naive_spline2_n; ++i){
+            var di = Math.pow(naive_spline2_xs[i] - client_to_x(client_x), 2) + Math.pow(naive_spline2_ys[i] - client_to_y(client_y), 2);
+            if(di < min_d){
+                min_d = di;
+                min_i = i;
+            }
+        }
+        naive_spline2_i = min_i;
+        naive_spline2_context.setLineDash([4, 4]);
+        naive_spline2_context.beginPath();
+        naive_spline2_context.moveTo(x_to_client(naive_spline2_xs[min_i]), y_to_client(naive_spline2_ys[min_i]));
+        naive_spline2_context.lineTo(client_x, client_y);
+        naive_spline2_context.strokeStyle="#AA3311";
+        naive_spline2_context.stroke();
+        naive_spline2_context.closePath();
+        naive_spline2_context.setLineDash([]);
+    }
+}
     </script>
   </head>
   <body>
@@ -351,7 +469,14 @@ Quadric splines are useful too
     <script language="JavaScript">
     init_parametric();
     </script>
-    
+    <p>
+...
+    </p>
+
+    <canvas id="naive_spline2" width=640 height=512></canvas>
+    <script language="JavaScript">
+    init_naive_spline2();
+    </script>
     <h2>
 Conclusion
     </h2>
