@@ -337,8 +337,8 @@ function parametric_draw(client_x, client_y, do_guides){
 }
 
 // naive spline 2
-var naive_spline2_xs = [1.0, 2.0, 5.0, 8.5];
-var naive_spline2_ys = [2.0, 1.0, 1.0, 3.0];
+var naive_spline2_xs = [1.0, 2.0, 5.0, 8.0];
+var naive_spline2_ys = [2.0, 1.0, 1.0, 0.5];
 var naive_spline2_n = 4;
 var naive_spline2_i = 0;
 
@@ -504,7 +504,7 @@ function naive_spline2_derivatives_draw(client_x, client_y, do_guides){
     // grid
     draw_grid_on(naive_spline2_derivatives_context);
 
-    // naive_spline2_derivatives
+    // naive_spline2 derivatives
     naive_spline2_derivatives_context.beginPath();
     var nT=0;
     var ax,bx,cx,dx, ay,by,cy,dy;
@@ -515,6 +515,45 @@ function naive_spline2_derivatives_draw(client_x, client_y, do_guides){
     var ox=naive_spline2_xs[0];
     var oy=naive_spline2_ys[0];
     var derivative_divisor = 1.0; 
+    for(var T = 0.0; T <= naive_spline2_n - 1 + 0.001; T += 0.01) {
+        if(T >= nT){
+            dx=naive_spline2_xs[nT];
+            cx=d_x;
+            bx=dd_x/2;
+            ax=naive_spline2_xs[nT+1]-dx-cx-bx;
+            dy=naive_spline2_ys[nT];
+            cy=d_y
+            by=dd_y/2;
+            ay=naive_spline2_ys[nT+1]-dy-cy-by;
+            nT++;
+        }
+        var t01=T-(nT-1);
+        var x=ax*t01*t01*t01 + bx*t01*t01 + cx*t01 + dx;
+        var y=ay*t01*t01*t01 + by*t01*t01 + cy*t01 + dy;
+        naive_spline2_derivatives_context.moveTo(x_to_client(x), y_to_client(y));
+        naive_spline2_derivatives_context.lineTo(x_to_client(x - 10.0*(y-oy)), y_to_client(y + 10.0*(x-ox)));
+        d_x=(3*ax*t01*t01+2*bx*t01+cx)/derivative_divisor;
+        d_y=(3*ay*t01*t01+2*by*t01+cy)/derivative_divisor;
+        dd_x=(6*ax*t01+2*bx)/derivative_divisor;
+        dd_y=(6*ay*t01+2*by)/derivative_divisor;
+        ox=x;
+        oy=y;
+    }
+    
+    naive_spline2_derivatives_context.strokeStyle="#AA5500";
+    naive_spline2_derivatives_context.stroke();
+    naive_spline2_derivatives_context.closePath();
+    
+    // naive_spline2
+    naive_spline2_derivatives_context.beginPath();
+    nT=0;
+    d_x=0;
+    d_y=0;
+    dd_x=0;
+    dd_y=0;
+    ox=naive_spline2_xs[0];
+    oy=naive_spline2_ys[0];
+    derivative_divisor = 1.0; 
     for(var T = 0.0; T <= naive_spline2_n - 1 + 0.001; T += 0.01) {
         if(T >= nT){
             dx=naive_spline2_xs[nT];
