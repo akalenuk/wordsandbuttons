@@ -90,7 +90,7 @@ form {
     background-color: #eeee99;
 }
 
-input[type="text"] {
+input[type="number"] {
     width: 100pt;
     height: 22pt;
     margin: 8pt 8pt 8pt 8pt;
@@ -538,7 +538,7 @@ function naive_spline2_derivatives_draw(client_x, client_y, do_guides){
         oy=y;
     }
     
-    naive_spline2_derivatives_context.strokeStyle="#AA5500";
+    naive_spline2_derivatives_context.strokeStyle="#DD6644";
     naive_spline2_derivatives_context.stroke();
     naive_spline2_derivatives_context.closePath();
     
@@ -551,7 +551,6 @@ function naive_spline2_derivatives_draw(client_x, client_y, do_guides){
     dd_y=0;
     ox=naive_spline2_xs[0];
     oy=naive_spline2_ys[0];
-    derivative_divisor = 1.0; 
     for(var T = 0.0; T <= naive_spline2_n - 1 + 0.001; T += 0.01) {
         if(T >= nT){
             dx=naive_spline2_xs[nT];
@@ -644,6 +643,8 @@ function init_compensated_spline2_derivatives(){
     }, false);
 }
 
+var compensated_spline2_derivative_divisor = 4.0;
+
 function compensated_spline2_derivatives_draw(client_x, client_y, do_guides){
     compensated_spline2_derivatives = document.getElementById("compensated_spline2_derivatives");
     var compensated_spline2_derivatives_context = compensated_spline2_derivatives.getContext("2d");
@@ -655,7 +656,7 @@ function compensated_spline2_derivatives_draw(client_x, client_y, do_guides){
     // grid
     draw_grid_on(compensated_spline2_derivatives_context);
 
-    // naive_spline2 derivatives
+    // spline2 derivatives
     compensated_spline2_derivatives_context.beginPath();
     var nT=0;
     var ax,bx,cx,dx, ay,by,cy,dy;
@@ -665,7 +666,7 @@ function compensated_spline2_derivatives_draw(client_x, client_y, do_guides){
     var dd_y=0;
     var ox=naive_spline2_xs[0];
     var oy=naive_spline2_ys[0];
-    var derivative_divisor = 4.0; 
+    var derivative_divisor = compensated_spline2_derivative_divisor; 
     for(var T = 0.0; T <= naive_spline2_n - 1 + 0.001; T += 0.01) {
         if(T >= nT){
             dx=naive_spline2_xs[nT];
@@ -691,11 +692,11 @@ function compensated_spline2_derivatives_draw(client_x, client_y, do_guides){
         oy=y;
     }
     
-    compensated_spline2_derivatives_context.strokeStyle="#AA5500";
+    compensated_spline2_derivatives_context.strokeStyle="#DD6644";
     compensated_spline2_derivatives_context.stroke();
     compensated_spline2_derivatives_context.closePath();
     
-    // naive_spline2
+    // spline2
     compensated_spline2_derivatives_context.beginPath();
     nT=0;
     d_x=0;
@@ -703,8 +704,7 @@ function compensated_spline2_derivatives_draw(client_x, client_y, do_guides){
     dd_x=0;
     dd_y=0;
     ox=naive_spline2_xs[0];
-    oy=naive_spline2_ys[0];
-    derivative_divisor = 4.0; 
+    oy=naive_spline2_ys[0]; 
     for(var T = 0.0; T <= naive_spline2_n - 1 + 0.001; T += 0.01) {
         if(T >= nT){
             dx=naive_spline2_xs[nT];
@@ -742,7 +742,7 @@ function compensated_spline2_derivatives_draw(client_x, client_y, do_guides){
         compensated_spline2_derivatives_context.moveTo(x_to_client(naive_spline2_xs[i])+5.5, y_to_client(naive_spline2_ys[i])+5.5);
         compensated_spline2_derivatives_context.lineTo(x_to_client(naive_spline2_xs[i])-5.5, y_to_client(naive_spline2_ys[i])-5.5);
     }
-    compensated_spline2_derivatives_context.strokeStyle="#AA3311";
+    compensated_spline2_derivatives_context.strokeStyle="#BB6644";
     compensated_spline2_derivatives_context.stroke();
     compensated_spline2_derivatives_context.closePath();
 
@@ -767,6 +767,15 @@ function compensated_spline2_derivatives_draw(client_x, client_y, do_guides){
         compensated_spline2_derivatives_context.closePath();
         compensated_spline2_derivatives_context.setLineDash([]);
     }
+}
+
+function change_divisor() {
+    compensated_spline2_derivative_divisor = Number(document.getElementById("derivative_divisor").value);
+    if(compensated_spline2_derivative_divisor == NaN || compensated_spline2_derivative_divisor < 1.0) {
+        compensated_spline2_derivative_divisor = 1.0;
+        document.getElementById("derivative_divisor").value = 1;
+        }
+    naive_spline2_draw(0, 0, false);
 }
     </script>
   </head>
@@ -798,6 +807,11 @@ Quadric splines are useful too
     <p>
 ...
     </p>
+
+    <form>
+    Derivative divisor:
+    <input type="number" id="derivative_divisor" value="4" onchange="change_divisor()">
+    </form>
 
     <canvas id="compensated_spline2_derivatives" width=640 height=512></canvas>
     <script language="JavaScript">
