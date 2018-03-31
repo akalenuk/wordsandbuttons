@@ -198,7 +198,7 @@ function do_spline2(grid_xs, grid_ys, grid_n, derivative_divisor, callback_on_se
     var ox = grid_xs[0];
     var oy = grid_ys[0]; 
     for(var T = 0.0; T <= grid_n - 1 + 0.001; T += 0.01) {
-        if(T >= nT){    // spline on the new grid piece
+        if(T >= nT){   // spline on the new grid piece
             dx = grid_xs[nT];
             cx = d_x;
             bx = dd_x/2;
@@ -255,6 +255,42 @@ function draw_grid_on(context){
     context.closePath();
 }
 
+function draw_dots_and_guides(context, grid_xs, grid_ys, grid_n, do_guides, client_x, client_y){
+    // dots
+    context.beginPath();
+    for(var i = 0; i < grid_n; ++i){
+        context.moveTo(x_to_client(grid_xs[i])-5.5, y_to_client(grid_ys[i])+5.5);
+        context.lineTo(x_to_client(grid_xs[i])+5.5, y_to_client(grid_ys[i])-5.5);
+        context.moveTo(x_to_client(grid_xs[i])+5.5, y_to_client(grid_ys[i])+5.5);
+        context.lineTo(x_to_client(grid_xs[i])-5.5, y_to_client(grid_ys[i])-5.5);
+    }
+    context.strokeStyle="#BB6644";
+    context.stroke();
+    context.closePath();
+
+    // guides
+    var closest_i = 0;
+    if(do_guides){
+        min_d = Math.pow(grid_xs[0] - client_to_x(client_x), 2) + Math.pow(grid_ys[0] - client_to_y(client_y), 2);
+        for(var i = 1; i < grid_n; ++i){
+            var di = Math.pow(grid_xs[i] - client_to_x(client_x), 2) + Math.pow(grid_ys[i] - client_to_y(client_y), 2);
+            if(di < min_d){
+                min_d = di;
+                closest_i = i;
+            }
+        }
+        context.setLineDash([4, 4]);
+        context.beginPath();
+        context.moveTo(x_to_client(grid_xs[closest_i]), y_to_client(grid_ys[closest_i]));
+        context.lineTo(client_x, client_y);
+        context.strokeStyle="#AA3311";
+        context.stroke();
+        context.closePath();
+        context.setLineDash([]);
+    }
+    return closest_i;
+}
+
 // parametric
 var parametric_xs = [1.0, 4.0, 8.0, 5.5];
 var parametric_ys = [1.5, 1.0, 5.0, 6.0];
@@ -268,12 +304,12 @@ function init_parametric(){
 
     parametric.addEventListener('mousemove', function(e){
         var canvas_rect = parametric.getBoundingClientRect();
-           parametric_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-           if(e.buttons == 1){
+        parametric_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
             parametric_xs[parametric_i] = client_to_x(e.clientX - canvas_rect.left);
             parametric_ys[parametric_i] = client_to_y(e.clientY - canvas_rect.top);
             parametric_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
-           }
+        }
     }, false);
 
     parametric.addEventListener('mousedown', function(e){
@@ -339,39 +375,11 @@ function parametric_draw(client_x, client_y, do_guides){
     parametric_context.stroke();
     parametric_context.closePath();
 
-    // dots
-    parametric_context.beginPath();
-    for(var i = 0; i < parametric_n; ++i){
-        parametric_context.moveTo(x_to_client(parametric_xs[i])-5.5, y_to_client(parametric_ys[i])+5.5);
-        parametric_context.lineTo(x_to_client(parametric_xs[i])+5.5, y_to_client(parametric_ys[i])-5.5);
-        parametric_context.moveTo(x_to_client(parametric_xs[i])+5.5, y_to_client(parametric_ys[i])+5.5);
-        parametric_context.lineTo(x_to_client(parametric_xs[i])-5.5, y_to_client(parametric_ys[i])-5.5);
-    }
-    parametric_context.strokeStyle="#AA3311";
-    parametric_context.stroke();
-    parametric_context.closePath();
-
-    // guides
-    if(do_guides){
-        min_d = Math.pow(parametric_xs[0] - client_to_x(client_x), 2) + Math.pow(parametric_ys[0] - client_to_y(client_y), 2);
-        min_i = 0;
-        for(var i = 1; i < parametric_n; ++i){
-            var di = Math.pow(parametric_xs[i] - client_to_x(client_x), 2) + Math.pow(parametric_ys[i] - client_to_y(client_y), 2);
-            if(di < min_d){
-                min_d = di;
-                min_i = i;
-            }
-        }
-        parametric_i = min_i;
-        parametric_context.setLineDash([4, 4]);
-        parametric_context.beginPath();
-        parametric_context.moveTo(x_to_client(parametric_xs[min_i]), y_to_client(parametric_ys[min_i]));
-        parametric_context.lineTo(client_x, client_y);
-        parametric_context.strokeStyle="#AA3311";
-        parametric_context.stroke();
-        parametric_context.closePath();
-        parametric_context.setLineDash([]);
-    }
+    // dots and guides (guide sets the current point to drag)
+    parametric_i = draw_dots_and_guides(
+        parametric_context, 
+        parametric_xs, parametric_ys, parametric_n, 
+        do_guides, client_x, client_y);
 }
 
 // naive spline 2
@@ -433,39 +441,13 @@ function naive_spline2_draw(client_x, client_y, do_guides){
     naive_spline2_context.stroke();
     naive_spline2_context.closePath();
 
-    // dots
-    naive_spline2_context.beginPath();
-    for(var i = 0; i < naive_spline2_n; ++i){
-        naive_spline2_context.moveTo(x_to_client(naive_spline2_xs[i])-5.5, y_to_client(naive_spline2_ys[i])+5.5);
-        naive_spline2_context.lineTo(x_to_client(naive_spline2_xs[i])+5.5, y_to_client(naive_spline2_ys[i])-5.5);
-        naive_spline2_context.moveTo(x_to_client(naive_spline2_xs[i])+5.5, y_to_client(naive_spline2_ys[i])+5.5);
-        naive_spline2_context.lineTo(x_to_client(naive_spline2_xs[i])-5.5, y_to_client(naive_spline2_ys[i])-5.5);
-    }
-    naive_spline2_context.strokeStyle="#AA3311";
-    naive_spline2_context.stroke();
-    naive_spline2_context.closePath();
-
-    // guides
-    if(do_guides){
-        min_d = Math.pow(naive_spline2_xs[0] - client_to_x(client_x), 2) + Math.pow(naive_spline2_ys[0] - client_to_y(client_y), 2);
-        min_i = 0;
-        for(var i = 1; i < naive_spline2_n; ++i){
-            var di = Math.pow(naive_spline2_xs[i] - client_to_x(client_x), 2) + Math.pow(naive_spline2_ys[i] - client_to_y(client_y), 2);
-            if(di < min_d){
-                min_d = di;
-                min_i = i;
-            }
-        }
-        naive_spline2_i = min_i;
-        naive_spline2_context.setLineDash([4, 4]);
-        naive_spline2_context.beginPath();
-        naive_spline2_context.moveTo(x_to_client(naive_spline2_xs[min_i]), y_to_client(naive_spline2_ys[min_i]));
-        naive_spline2_context.lineTo(client_x, client_y);
-        naive_spline2_context.strokeStyle="#AA3311";
-        naive_spline2_context.stroke();
-        naive_spline2_context.closePath();
-        naive_spline2_context.setLineDash([]);
-    }
+    // dots and guides
+    naive_spline2_i = draw_dots_and_guides(
+        naive_spline2_context, 
+        naive_spline2_xs, naive_spline2_ys, naive_spline2_n, 
+        do_guides, client_x, client_y);
+    
+    // synchronized draws
     naive_spline2_derivatives_draw(client_x, client_y, do_guides);
     compensated_spline2_derivatives_draw(client_x, client_y, do_guides);
 }
@@ -532,39 +514,11 @@ function naive_spline2_derivatives_draw(client_x, client_y, do_guides){
     naive_spline2_derivatives_context.stroke();
     naive_spline2_derivatives_context.closePath();
 
-    // dots
-    naive_spline2_derivatives_context.beginPath();
-    for(var i = 0; i < naive_spline2_n; ++i){
-        naive_spline2_derivatives_context.moveTo(x_to_client(naive_spline2_xs[i])-5.5, y_to_client(naive_spline2_ys[i])+5.5);
-        naive_spline2_derivatives_context.lineTo(x_to_client(naive_spline2_xs[i])+5.5, y_to_client(naive_spline2_ys[i])-5.5);
-        naive_spline2_derivatives_context.moveTo(x_to_client(naive_spline2_xs[i])+5.5, y_to_client(naive_spline2_ys[i])+5.5);
-        naive_spline2_derivatives_context.lineTo(x_to_client(naive_spline2_xs[i])-5.5, y_to_client(naive_spline2_ys[i])-5.5);
-    }
-    naive_spline2_derivatives_context.strokeStyle="#AA3311";
-    naive_spline2_derivatives_context.stroke();
-    naive_spline2_derivatives_context.closePath();
-
-    // guides
-    if(do_guides){
-        min_d = Math.pow(naive_spline2_xs[0] - client_to_x(client_x), 2) + Math.pow(naive_spline2_ys[0] - client_to_y(client_y), 2);
-        min_i = 0;
-        for(var i = 1; i < naive_spline2_n; ++i){
-            var di = Math.pow(naive_spline2_xs[i] - client_to_x(client_x), 2) + Math.pow(naive_spline2_ys[i] - client_to_y(client_y), 2);
-            if(di < min_d){
-                min_d = di;
-                min_i = i;
-            }
-        }
-        naive_spline2_derivatives_i = min_i;
-        naive_spline2_derivatives_context.setLineDash([4, 4]);
-        naive_spline2_derivatives_context.beginPath();
-        naive_spline2_derivatives_context.moveTo(x_to_client(naive_spline2_xs[min_i]), y_to_client(naive_spline2_ys[min_i]));
-        naive_spline2_derivatives_context.lineTo(client_x, client_y);
-        naive_spline2_derivatives_context.strokeStyle="#AA3311";
-        naive_spline2_derivatives_context.stroke();
-        naive_spline2_derivatives_context.closePath();
-        naive_spline2_derivatives_context.setLineDash([]);
-    }
+    // dots and guides
+    naive_spline2_i = draw_dots_and_guides(
+        naive_spline2_derivatives_context, 
+        naive_spline2_xs, naive_spline2_ys, naive_spline2_n, 
+        do_guides, client_x, client_y);
 }
 
 // compensated splines2 derivatives
@@ -631,39 +585,11 @@ function compensated_spline2_derivatives_draw(client_x, client_y, do_guides){
     compensated_spline2_derivatives_context.stroke();
     compensated_spline2_derivatives_context.closePath();
 
-    // dots
-    compensated_spline2_derivatives_context.beginPath();
-    for(var i = 0; i < naive_spline2_n; ++i){
-        compensated_spline2_derivatives_context.moveTo(x_to_client(naive_spline2_xs[i])-5.5, y_to_client(naive_spline2_ys[i])+5.5);
-        compensated_spline2_derivatives_context.lineTo(x_to_client(naive_spline2_xs[i])+5.5, y_to_client(naive_spline2_ys[i])-5.5);
-        compensated_spline2_derivatives_context.moveTo(x_to_client(naive_spline2_xs[i])+5.5, y_to_client(naive_spline2_ys[i])+5.5);
-        compensated_spline2_derivatives_context.lineTo(x_to_client(naive_spline2_xs[i])-5.5, y_to_client(naive_spline2_ys[i])-5.5);
-    }
-    compensated_spline2_derivatives_context.strokeStyle="#BB6644";
-    compensated_spline2_derivatives_context.stroke();
-    compensated_spline2_derivatives_context.closePath();
-
-    // guides
-    if(do_guides){
-        min_d = Math.pow(naive_spline2_xs[0] - client_to_x(client_x), 2) + Math.pow(naive_spline2_ys[0] - client_to_y(client_y), 2);
-        min_i = 0;
-        for(var i = 1; i < naive_spline2_n; ++i){
-            var di = Math.pow(naive_spline2_xs[i] - client_to_x(client_x), 2) + Math.pow(naive_spline2_ys[i] - client_to_y(client_y), 2);
-            if(di < min_d){
-                min_d = di;
-                min_i = i;
-            }
-        }
-        compensated_spline2_derivatives_i = min_i;
-        compensated_spline2_derivatives_context.setLineDash([4, 4]);
-        compensated_spline2_derivatives_context.beginPath();
-        compensated_spline2_derivatives_context.moveTo(x_to_client(naive_spline2_xs[min_i]), y_to_client(naive_spline2_ys[min_i]));
-        compensated_spline2_derivatives_context.lineTo(client_x, client_y);
-        compensated_spline2_derivatives_context.strokeStyle="#AA3311";
-        compensated_spline2_derivatives_context.stroke();
-        compensated_spline2_derivatives_context.closePath();
-        compensated_spline2_derivatives_context.setLineDash([]);
-    }
+    // dots and guides
+    naive_spline2_i = draw_dots_and_guides(
+        compensated_spline2_derivatives_context, 
+        naive_spline2_xs, naive_spline2_ys, naive_spline2_n, 
+        do_guides, client_x, client_y);
 }
 
 function change_divisor() {
