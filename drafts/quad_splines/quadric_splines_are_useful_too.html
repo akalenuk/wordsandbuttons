@@ -595,16 +595,40 @@ function change_divisor() {
     naive_spline2_draw(0, 0, false);
 }
 
+animation_xs = [320]
+animation_ys = [320]
+animation_t = 0.0;
+
 function init_animation() {
+    animation = document.getElementById("animation");
     draw_animation();
+    animation.addEventListener('mousedown', function(e){
+        var canvas_rect = animation.getBoundingClientRect();
+        animation_xs.push(e.clientX - canvas_rect.left);
+        animation_ys.push(e.clientY - canvas_rect.top);
+        draw_animation();
+    }, false);
 }
 
 function draw_animation() {
     animation = document.getElementById("animation");
     var animation_context = animation.getContext("2d");    
     // background
-    animation_context.fillStyle="#aabbee";
+    animation_context.fillStyle = "#aabbee";
     animation_context.fillRect(0, 0, 640, 640);
+    
+    // dots
+    animation_context.beginPath();
+    for(var i = 0; i < animation_xs.length; ++i){
+        animation_context.moveTo(animation_xs[i]-5.5, animation_ys[i]+5.5);
+        animation_context.lineTo(animation_xs[i]+5.5, animation_ys[i]-5.5);
+        animation_context.moveTo(animation_xs[i]+5.5, animation_ys[i]+5.5);
+        animation_context.lineTo(animation_xs[i]-5.5, animation_ys[i]-5.5);
+    }
+    animation_context.lineWidth = 2;
+    animation_context.strokeStyle = "#BB6644";
+    animation_context.stroke();
+    animation_context.closePath();
 }
     </script>
   </head>
