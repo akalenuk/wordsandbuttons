@@ -608,6 +608,20 @@ function init_animation() {
         animation_ys.push(e.clientY - canvas_rect.top);
         draw_animation();
     }, false);
+    setTimeout(animation_tick, 40);
+}
+
+function animation_tick() {
+    if(animation_xs.length > 1){
+        animation_t += 1.0 / 32.0;
+    }
+    if(animation_t >= 1.0){
+        animation_xs.shift();
+        animation_ys.shift();
+        animation_t = 0.0;
+    }
+    draw_animation();
+    setTimeout(animation_tick, 40);
 }
 
 function draw_animation() {
@@ -629,6 +643,26 @@ function draw_animation() {
     animation_context.strokeStyle = "#BB6644";
     animation_context.stroke();
     animation_context.closePath();
+    
+    // "boat"
+    var x;
+    var y;
+    if(animation_xs.length == 1){
+        x = animation_xs[0];
+        y = animation_ys[0];
+    }else{
+        x = animation_xs[0] * (1-animation_t) + animation_xs[1] * animation_t;
+        y = animation_ys[0] * (1-animation_t) + animation_ys[1] * animation_t;
+    }
+    animation_context.beginPath();
+    animation_context.moveTo(x-5.5, y+5.5);
+    animation_context.lineTo(x+5.5, y-5.5);
+    animation_context.moveTo(x+5.5, y+5.5);
+    animation_context.lineTo(x-5.5, y-5.5);
+    animation_context.lineWidth = 2;
+    animation_context.strokeStyle = "#331100";
+    animation_context.stroke();
+    animation_context.closePath();    
 }
     </script>
   </head>
