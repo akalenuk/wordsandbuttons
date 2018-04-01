@@ -299,7 +299,6 @@ var parametric_i = 0;
 
 function init_parametric(){
     parametric = document.getElementById("parametric");
-    var canvas_rect = parametric.getBoundingClientRect();
     parametric_draw(0, 0, false);
 
     parametric.addEventListener('mousemove', function(e){
@@ -363,7 +362,7 @@ function parametric_draw(client_x, client_y, do_guides){
     
 
     parametric_context.beginPath();
-    for(var j = -0.5; j <= parametric_n - 0.5; j += 0.01){
+    for(var j = -0.25; j <= parametric_n - 1 + 0.25; j += 0.01){
         x1 = polynomial_in_x(Xx, j - 0.01, parametric_n);
         x2 = polynomial_in_x(Xx, j, parametric_n);
         y1 = polynomial_in_x(Xy, j - 0.01, parametric_n);
@@ -390,19 +389,15 @@ var naive_spline2_i = 0;
 
 function init_naive_spline2(){
     naive_spline2 = document.getElementById("naive_spline2");
-    var canvas_rect = naive_spline2.getBoundingClientRect();
     naive_spline2_draw(0, 0, false);
-    naive_spline2_derivatives_draw(0, 0, false);
 
     naive_spline2.addEventListener('mousemove', function(e){
         var canvas_rect = naive_spline2.getBoundingClientRect();
            naive_spline2_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-           naive_spline2_derivatives_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
            if(e.buttons == 1){
             naive_spline2_xs[naive_spline2_i] = client_to_x(e.clientX - canvas_rect.left);
             naive_spline2_ys[naive_spline2_i] = client_to_y(e.clientY - canvas_rect.top);
             naive_spline2_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-            naive_spline2_derivatives_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
            }
     }, false);
 
@@ -411,12 +406,10 @@ function init_naive_spline2(){
         naive_spline2_xs[naive_spline2_i] = client_to_x(e.clientX - canvas_rect.left);
         naive_spline2_ys[naive_spline2_i] = client_to_y(e.clientY - canvas_rect.top);
         naive_spline2_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-        naive_spline2_derivatives_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
     naive_spline2.addEventListener('mouseleave', function(e){
         naive_spline2_draw(0, 0, false);
-        naive_spline2_derivatives_draw(0, 0, false);
     }, false);
 }
 
@@ -455,7 +448,6 @@ function naive_spline2_draw(client_x, client_y, do_guides){
 // naive splines2 derivatives
 function init_naive_spline2_derivatives(){
     naive_spline2_derivatives = document.getElementById("naive_spline2_derivatives");
-    var canvas_rect = naive_spline2_derivatives.getBoundingClientRect();
     naive_spline2_draw(0, 0, false);
 
     naive_spline2_derivatives.addEventListener('mousemove', function(e){
@@ -524,7 +516,6 @@ function naive_spline2_derivatives_draw(client_x, client_y, do_guides){
 // compensated splines2 derivatives
 function init_compensated_spline2_derivatives(){
     compensated_spline2_derivatives = document.getElementById("compensated_spline2_derivatives");
-    var canvas_rect = compensated_spline2_derivatives.getBoundingClientRect();
     naive_spline2_draw(0, 0, false);
 
     compensated_spline2_derivatives.addEventListener('mousemove', function(e){
