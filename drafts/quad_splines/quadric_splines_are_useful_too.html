@@ -268,17 +268,19 @@ function draw_dots_and_guides(context, grid_xs, grid_ys, grid_n, do_guides, clie
     context.stroke();
     context.closePath();
 
-    // guides
+    // closest point
     var closest_i = 0;
-    if(do_guides){
-        min_d = Math.pow(grid_xs[0] - client_to_x(client_x), 2) + Math.pow(grid_ys[0] - client_to_y(client_y), 2);
-        for(var i = 1; i < grid_n; ++i){
-            var di = Math.pow(grid_xs[i] - client_to_x(client_x), 2) + Math.pow(grid_ys[i] - client_to_y(client_y), 2);
-            if(di < min_d){
-                min_d = di;
-                closest_i = i;
-            }
+    min_d = Math.pow(grid_xs[0] - client_to_x(client_x), 2) + Math.pow(grid_ys[0] - client_to_y(client_y), 2);
+    for(var i = 1; i < grid_n; ++i){
+        var di = Math.pow(grid_xs[i] - client_to_x(client_x), 2) + Math.pow(grid_ys[i] - client_to_y(client_y), 2);
+        if(di < min_d){
+            min_d = di;
+            closest_i = i;
         }
+    }
+    
+    // guides
+    if(do_guides){        
         context.setLineDash([4, 4]);
         context.beginPath();
         context.moveTo(x_to_client(grid_xs[closest_i]), y_to_client(grid_ys[closest_i]));
@@ -288,6 +290,7 @@ function draw_dots_and_guides(context, grid_xs, grid_ys, grid_n, do_guides, clie
         context.closePath();
         context.setLineDash([]);
     }
+    
     return closest_i;
 }
 
