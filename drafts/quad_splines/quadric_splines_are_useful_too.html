@@ -609,6 +609,7 @@ var animation_ox = animation_xs[0];
 var animation_oy = animation_ys[0];
 var animation_x = animation_xs[0];
 var animation_y = animation_ys[0];
+var animation_derivative_divisor = 4.0;
 
 function init_animation() {
     animation = document.getElementById("animation");
@@ -623,21 +624,37 @@ function init_animation() {
 }
 
 function animation_tick() {
-    if(animation_xs.length > 1){
-        animation_t += 1.0 / 32.0;
-    }
     if(animation_t >= 1.0){
         animation_xs.shift();
         animation_ys.shift();
         animation_t = 0.0;
     }
     // movement
+    if(animation_t == 0.0 && animation_xs.length > 1) {
+        animation_dx = animation_xs[0];
+        animation_cx = animation_d_x;
+        animation_bx = animation_dd_x/2;
+        animation_ax = animation_xs[1]-animation_dx-animation_cx-animation_bx;
+        animation_dy = animation_ys[0];
+        animation_cy = animation_d_y
+        animation_by = animation_dd_y/2;
+        animation_ay = animation_ys[1]-animation_dy-animation_cy-animation_by;
+    }
     if(animation_xs.length == 1){
         animation_x = animation_xs[0];
         animation_y = animation_ys[0];
     }else{
-        animation_x = animation_xs[0] * (1-animation_t) + animation_xs[1] * animation_t;
-        animation_y = animation_ys[0] * (1-animation_t) + animation_ys[1] * animation_t;
+        animation_t += 1.0 / 32.0;
+        // spline in point
+        var t01 = animation_t;
+        animation_x = animation_ax*t01*t01*t01 + animation_bx*t01*t01 + animation_cx*t01 + animation_dx;
+        animation_y = animation_ay*t01*t01*t01 + animation_by*t01*t01 + animation_cy*t01 + animation_dy;
+        
+        // derivatives
+        animation_d_x = (3*animation_ax*t01*t01+2*animation_bx*t01+animation_cx) / animation_derivative_divisor;
+        animation_d_y = (3*animation_ay*t01*t01+2*animation_by*t01+animation_cy) / animation_derivative_divisor;
+        animation_dd_x = (6*animation_ax*t01+2*animation_bx) / animation_derivative_divisor;
+        animation_dd_y = (6*animation_ay*t01+2*animation_by) / animation_derivative_divisor;
     }
     
     draw_animation();
@@ -669,9 +686,6 @@ function draw_animation() {
     animation_context.closePath();
     
     // "boat"
-    var x;
-    var y;
- 
     animation_context.beginPath();
     animation_context.moveTo(animation_ox + 0.5, animation_oy + 0.5);
     animation_context.lineTo(animation_x + 0.5, animation_y + 0.5);
