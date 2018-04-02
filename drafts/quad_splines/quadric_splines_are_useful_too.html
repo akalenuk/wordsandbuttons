@@ -595,9 +595,20 @@ function change_divisor() {
     naive_spline2_draw(0, 0, false);
 }
 
-animation_xs = [320]
-animation_ys = [320]
-animation_t = 0.0;
+var animation_xs = [320]
+var animation_ys = [320]
+var animation_t = 0.0;
+
+var animation_ax, animation_bx, animation_cx, animation_dx;
+var animation_ay, animation_by, animation_cy, animation_dy;
+var animation_d_x = 0.01;
+var animation_d_y = 0;
+var animation_dd_x = 0.001;
+var animation_dd_y = 0;
+var animation_ox = animation_xs[0];
+var animation_oy = animation_ys[0];
+var animation_x = animation_xs[0];
+var animation_y = animation_ys[0];
 
 function init_animation() {
     animation = document.getElementById("animation");
@@ -620,7 +631,20 @@ function animation_tick() {
         animation_ys.shift();
         animation_t = 0.0;
     }
+    // movement
+    if(animation_xs.length == 1){
+        animation_x = animation_xs[0];
+        animation_y = animation_ys[0];
+    }else{
+        animation_x = animation_xs[0] * (1-animation_t) + animation_xs[1] * animation_t;
+        animation_y = animation_ys[0] * (1-animation_t) + animation_ys[1] * animation_t;
+    }
+    
     draw_animation();
+    
+    animation_ox = animation_x;
+    animation_oy = animation_y;
+    
     setTimeout(animation_tick, 40);
 }
 
@@ -647,18 +671,10 @@ function draw_animation() {
     // "boat"
     var x;
     var y;
-    if(animation_xs.length == 1){
-        x = animation_xs[0];
-        y = animation_ys[0];
-    }else{
-        x = animation_xs[0] * (1-animation_t) + animation_xs[1] * animation_t;
-        y = animation_ys[0] * (1-animation_t) + animation_ys[1] * animation_t;
-    }
+ 
     animation_context.beginPath();
-    animation_context.moveTo(x-5.5, y+5.5);
-    animation_context.lineTo(x+5.5, y-5.5);
-    animation_context.moveTo(x+5.5, y+5.5);
-    animation_context.lineTo(x-5.5, y-5.5);
+    animation_context.moveTo(animation_ox + 0.5, animation_oy + 0.5);
+    animation_context.lineTo(animation_x + 0.5, animation_y + 0.5);
     animation_context.lineWidth = 2;
     animation_context.strokeStyle = "#331100";
     animation_context.stroke();
