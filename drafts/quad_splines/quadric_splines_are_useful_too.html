@@ -190,6 +190,38 @@ function polynomial_in_x(A, x, n){
 
 function do_spline2(grid_xs, grid_ys, grid_n, derivative_divisor, callback_on_segment){
     var nT = 0;
+    var ax,bx,cx, ay,by,cy;
+    var d_x = 0;
+    var d_y = 0;
+    var ox = grid_xs[0];
+    var oy = grid_ys[0]; 
+    for(var T = 0.0; T <= grid_n - 1 + 0.001; T += 0.01) {
+        if(T >= nT){   // spline on the new grid piece
+            cx = grid_xs[nT];
+			bx = d_x;
+			ax = grid_xs[nT+1]-cx-bx;
+			cy = grid_ys[nT];
+			by = d_y;
+			ay = grid_ys[nT+1]-cy-by;
+            nT++;
+        }
+        // spline in point
+        var t01=T-(nT-1);
+        var x=ax*t01*t01 + bx*t01 + cx;
+        var y=ay*t01*t01 + by*t01 + cy;
+        
+        callback_on_segment(ox, oy, x, y); // drawing part
+        ox = x;
+        oy = y;
+        
+        // derivatives
+        d_x = (2 * ax * t01 + bx) / derivative_divisor;
+        d_y = (2 * ay * t01 + by) / derivative_divisor;
+    }
+}
+
+function do_spline3(grid_xs, grid_ys, grid_n, derivative_divisor, callback_on_segment){
+    var nT = 0;
     var ax,bx,cx,dx, ay,by,cy,dy;
     var d_x = 0;
     var d_y = 0;
