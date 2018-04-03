@@ -702,7 +702,7 @@ var animation_t = 0.0;
 
 var animation_ax, animation_bx, animation_cx, animation_dx;
 var animation_ay, animation_by, animation_cy, animation_dy;
-var animation_d_x = 0.01;
+var animation_d_x = 0.1;
 var animation_d_y = 0;
 var animation_ox = animation_xs[0];
 var animation_oy = animation_ys[0];
@@ -757,9 +757,10 @@ function animation_tick() {
     animation_oy = animation_y;
     
     // derivative attenuation
-    if(animation_d_x > 1e-5 || animation_d_y > 1e-5){
-        animation_d_x *= 0.99;
-        animation_d_y *= 0.99;
+    var d_length = Math.sqrt(animation_d_x*animation_d_x + animation_d_y*animation_d_y);
+    if(d_length > 1.0){
+        animation_d_x *= 0.95;
+        animation_d_y *= 0.95;
     }
     
     setTimeout(animation_tick, 40);
@@ -774,7 +775,7 @@ function draw_animation() {
     
     // dots
     animation_context.beginPath();
-    for(var i = 0; i < animation_xs.length; ++i){
+    for(var i = 1; i < animation_xs.length; ++i){
         animation_context.moveTo(animation_xs[i]-5.5, animation_ys[i]+5.5);
         animation_context.lineTo(animation_xs[i]+5.5, animation_ys[i]-5.5);
         animation_context.moveTo(animation_xs[i]+5.5, animation_ys[i]+5.5);
@@ -785,11 +786,18 @@ function draw_animation() {
     animation_context.stroke();
     animation_context.closePath();
     
-    // "boat"
+    // thing that moves around
     animation_context.beginPath();
-    animation_context.moveTo(animation_ox + 0.5, animation_oy + 0.5);
+    
+    // normalized tail (we don't want in to be 0)
+    var d_length = Math.sqrt(animation_d_x*animation_d_x + animation_d_y*animation_d_y);
+    var tail_x = -animation_d_x / d_length;
+    var tail_y = -animation_d_y / d_length;
+    // width 
+    var width = 1.0 + 15.0 / Math.max(1.0, d_length / 100);
+    animation_context.moveTo(animation_ox + tail_x * width + 0.5, animation_oy + tail_y * width + 0.5);
     animation_context.lineTo(animation_x + 0.5, animation_y + 0.5);
-    animation_context.lineWidth = 2;
+    animation_context.lineWidth = width;
     animation_context.strokeStyle = "#331100";
     animation_context.stroke();
     animation_context.closePath();    
