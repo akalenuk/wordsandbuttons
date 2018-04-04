@@ -852,20 +852,32 @@ function draw_animation() {
     animation_context.closePath();
     
     // thing that moves around
-    animation_context.beginPath();
-    
+   
     // normalized tail (we don't want in to be 0)
     var d_length = Math.sqrt(animation_d_x*animation_d_x + animation_d_y*animation_d_y);
     var tail_x = -animation_d_x / d_length;
     var tail_y = -animation_d_y / d_length;
     // width 
     var width = 1.0 + 15.0 / Math.max(1.0, d_length / 100);
+    
+    // tail
+    animation_context.beginPath();
     animation_context.moveTo(animation_ox + tail_x * width + 0.5, animation_oy + tail_y * width + 0.5);
     animation_context.lineTo(animation_x + 0.5, animation_y + 0.5);
     animation_context.lineWidth = width;
     animation_context.strokeStyle = "#331100";
     animation_context.stroke();
     animation_context.closePath();    
+    // head
+    for(var i = 0; i < width; ++i){
+        animation_context.beginPath();
+        animation_context.moveTo(animation_x - tail_x * (i - 0.5) + 0.5, animation_y - tail_y * (i - 0.5) + 0.5);
+        animation_context.lineTo(animation_x - tail_x * (i + 1.5) + 0.5, animation_y - tail_y * (i + 1.5) + 0.5);
+        animation_context.lineWidth = 1.5 * (width-i);
+        animation_context.strokeStyle = "#331100";
+        animation_context.stroke();
+        animation_context.closePath();        
+    }
 }
     </script>
   </head>
