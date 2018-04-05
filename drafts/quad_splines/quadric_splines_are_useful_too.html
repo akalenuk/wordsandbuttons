@@ -908,35 +908,105 @@ You can drag the points across the canvas to see how it reacts. It is rather pre
     init_parametric();
     </script>
     <p>
-Just like with simple non-parametric interpolation, you can't just add more points to the polynomial and expect it to behva nicely. It will eventually oscillate due to the Runge effect. That's why you need splines.
+Just like with simple non-parametric interpolation, you can't just add more points to the interpolating polynomial and expect it to behave nicely. It will eventually oscillate due to the Runge effect. That's why you need splines.
     </p>
-
+    <p>
+Now let's say we don't now how much points we want. Let's say points keep coming even while we're building our spline. We want to add points and retain the pieces of curve that we've built.
+    </p>
+    <p>
+We can still use qubic splines. It's just now we don't have to conjoint each of them from both sides, we only have to attach it from one. This can be done, for instance, by solving this system.
+    </p>
+    <p class="formula" style="text-align: left; margin-left: 10em;">
+a<sub>i</sub>t<sup>3</sup> + b<sub>i</sub>t<sup>2</sup> + c<sub>i</sub>t + d<sub>i</sub> = x<sub>i</sub>
+<br>
+a<sub>i</sub>(t+1)<sup>3</sup> + b<sub>i</sub>(t+1)<sup>2</sup> + c<sub>i</sub>(t+1) + d<sub>i</sub> = x<sub>i+1</sub>
+<br>
+3a<sub>i</sub>t<sup>2</sup> + 2b<sub>i</sub>t + c<sub>i</sub> = 3a<sub>i-1</sub>t<sup>2</sup> + 2b<sub>i-1</sub>t + c<sub>i-1</sub>
+<br>
+6a<sub>i</sub>t + 2b<sub>i</sub> = 6a<sub>i-1</sub>t + 2b<sub>i-1</sub>
+    </p>
+    <p>
+The first and the seconds equation here are just the interpolation conditions. The third and the fourth are the ones that connect the derivatives of the i-th piece and of its successor. 
+    </p>
+    <p>
+Here is an example of a 3-piece curve made of such one-sided cubic splines. Feel free to drag the points.
+    </p>
+    
     <canvas id="spline3" width=640 height=512></canvas>    
     <p>
-...
-    </p>  
+As you can see, it is smooth and continous, so it's kind of a win. But it is nearly impossible to make it go where you want it to. It's even worse than with Runge effect, it starts almost immediately.
+    </p>
+    <p>
+You probably noticed that the first segment is straight. That's because the initial derivatives are zeroes. The second segment is then quadratic, since its own second derivative on the left is 0, and only the third one is fully cubic. But this is the least controllable one.
+    </p>
+    <p>
+Stil, since we keep the second derivative continous, we know that our first derivative is smooth. You can see it on the next plot. The “hair” is the depiction of the derivative vector's length in multiple points. And yes, since the curve is parametric, and it's formed by two functions, it has two derivatives in every point: <i>dx/dt</i> and <i>dy/dt</i> and you can make a vector out of them.
+    </p>
     <canvas id="spline3_derivatives" width=640 height=512></canvas>
     
+    <p>
+Now here is a trick that may help us tame the curve we got. When we talk about a function's plot, we can expect it to be smooth only if the first derivative of a function is continous. That's tru for plots. But for parametric curves, the tangent is not the same as the derivative. It's the proportion of its derivatives. It doesn't have to be like this:
+    </p>
+    <p class="formula">
+dp<sub>xi</sub>(t) / dt = dp<sub>xi+1</sub>(t) / dt
+<br>
+dp<sub>yi</sub>(t) / dt = dp<sub>yi+1</sub>(t) / dt
+    </p>
+    <p>
+It's a little simpler than that:
+    </p>
+    <table class="formula">
+    <tr>
+    <td style="border-bottom:1px solid black">
+dp<sub>xi</sub>(t) / dt
+    </td>
+    <td rowspan=3 style="vertical-align: middle">=</td>
+    <td style="border-bottom:1px solid black">
+dp<sub>xi+1</sub>(t) / dt    
+    </td>
+    </tr>
+    <tr>
+    <td>
+dp<sub>yi</sub>(t) / dt
+    </td>
+    <td>
+dp<sub>yi+1</sub>(t) / dt
+    </td>
+    </tr>
+    </table>    
+    <p>
+Simply put, this means that when your curve becomes uncontrolable, you can safely cut down its derivative in every grip point to make it more like a piece-wise linear interpolation.
+    </p>
+    <p>
+Here is the example when in every grid point the derivative gets divided by some divisor.
+    </p>
     <form>
     Derivative divisor:
     <input type="number" id="derivative_divisor" value="3" onchange="change_divisor()">
     </form>
-
     <canvas id="compensated_spline3_derivatives" width=640 height=512></canvas>
-    
     <p>
-...
+Look at its hair! It's no longer continous, it gets cut off after every grid point.    
+    </p>    
+    <p>
+We also have another way to calm down our curve and it's to drop its second derivative on every grid point effectively turning it... into a quadric spline!
     </p>
     <canvas id="spline2" width=640 height=512></canvas>
 
     <p>
-...
+Quadric splines are even simpler than the qubic ones. We keep the idea of stealing the first derivative from the successor, but we don't touch the second one.
+    </p>
+    <p class="formula" style="text-align: left; margin-left: 10em;">
+a<sub>i</sub>t<sup>2</sup> + b<sub>i</sub>t + c<sub>i</sub> = x<sub>i</sub>
+<br>
+a<sub>i</sub>(t+1)<sup>2</sup> + b<sub>i</sub>(t+1) + c<sub>i</sub> = x<sub>i+1</sub>
+<br>
+2a<sub>i</sub>t + b<sub>i</sub> = 2a<sub>i-1</sub>t + b<sub>i-1</sub>
+    </p>
+    <p>
+The first derivative is then continous but it isn't smooth anymore. You can see it on the plot's hair. It gets a little bent at the grid points.
     </p>
     <canvas id="spline2_derivatives" width=640 height=512></canvas>
-         
-    <p>
-...
-    </p>
 
     <script language="JavaScript">
     init_spline2();
@@ -947,7 +1017,10 @@ Just like with simple non-parametric interpolation, you can't just add more poin
     </script>
     
     <p>
-...
+Now this has been all fun, but is it really a problem to solve? I mean, why would we want to have a curve that grows as we plot it? Well, we might very well not want exactly that. But there is a niche for building splines on the go and it is the animation.
+    </p>
+    <p>
+Here is an arrow. Just click on the canvas and it will go there. Setup several way-point, it will run through them all. Note that it also accumulates derivatives which is its speed an becomes thin and uncontrolable. Let it rest and get fat again. It calms it down.
     </p>
     <canvas id="animation" width=640 height=640></canvas>
     <script language="JavaScript">
@@ -958,7 +1031,10 @@ Just like with simple non-parametric interpolation, you can't just add more poin
 Conclusion
     </h2>
     <p>
-...
+Splines are more than just NURBS. Sometimes you need quadric splines, sometimes you want 5-th degree ones. There are even non-polynomial splines, they have their niche too.
+    </p>
+    <p>
+There is, however, some common body of knowledge that works for all splines, plots and curves in general. I think, even if you wouldn't have to ever implement any kind of splines, you can benefit from learning about derivatives, parameterization, continuity and smoothness. Quardic splines are just the simplest thing to study. It's a useful mental model in its own right.
     </p>
 
     <p class="footer">
