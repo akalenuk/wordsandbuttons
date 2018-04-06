@@ -879,10 +879,10 @@ function draw_animation() {
 Quadric splines are useful too
     </h1>
     <p>
-Usually, when people talk about splines, like at the patry or in a bar, they talk about polynomial cubic splines. This makes sense as this is the simplest piece of function you can link together with any other two functions and expect continuity and smoothness at the joints. But can you get it even simpler than that and still retain smoothness?
+Usually, when people talk about splines, like at a patry or in a pub, they talk about polynomial cubic splines. This makes sense as it is the simplest piece of function you can link together with any other two functions and expect continuity and smoothness at the joints. But can you get it even simpler than that?
     </p>
     <p>
-Consider this. A parametric curve is a curve that has its every point defined as a function of some parameter. Let's buid a polynomial curve that runs through the 4 points. 
+Consider this. A parametric curve is a curve that has its every point defined as a function of some parameter. Let's buid a polynomial curve that runs through 4 points. 
     </p>
     <p class="formula">
 x(t) = a<sub>x</sub>t<sup>3</sup> + b<sub>x</sub>t<sup>2</sup> + c<sub>x</sub>t + d<sub>x</sub>
@@ -890,35 +890,44 @@ x(t) = a<sub>x</sub>t<sup>3</sup> + b<sub>x</sub>t<sup>2</sup> + c<sub>x</sub>t 
 y(t) = a<sub>y</sub>t<sup>3</sup> + b<sub>y</sub>t<sup>2</sup> + c<sub>y</sub>t + d<sub>y</sub>
     </p>
     <p>
-There is an explanation how to build an interpolating function in the <a href="http://wordsandbuttons.online/programmers_guide_to_polynomials_and_splines.html">Programmer's guide to polynomials and splines</a>. TL&DR, if you run a polynom through 4 points, it should be of 3rd degree minimum. Which is a cubic. Yes, we basically got ourselves a cubic spline not conjoined with anything, but only constrained by the points.
+There is an explanation how to build an interpolating function in the <a href="http://wordsandbuttons.online/programmers_guide_to_polynomials_and_splines.html">Programmer's guide to polynomials and splines</a>. TL&DR, if you run a polynomial through some 4 points, it should be of 3rd degree minimum. Which is a cubic. Yes, we basically got ourselves a single cubic spline not conjoined with anything, but only constrained by the points.
     </p>
     <p>
-You can drag the points across the canvas to see how it reacts. It is rather predictable, especially in between the second and the third points. That's the piece we use to build cubic splines with.
+You can drag the points across the canvas to see how it reacts. It is rather predictable, especially in between the second and the third points. That's the piece we usually use to build agregate spline functions.
     </p>
     <canvas id="parametric" width=640 height=512></canvas>
     <script language="JavaScript">
     init_parametric();
     </script>
     <p>
-Just like with simple non-parametric interpolation, you can't just add more points to the interpolating polynomial and expect it to behave nicely. It will eventually oscillate due to the Runge effect. That's why you need splines.
+Just like with the simple non-parametric interpolation, you can't just add more points to the interpolating polynomial and expect it to behave nicely. It will eventually oscillate due to the Runge effect. That's why you need splines in the first place.
     </p>
     <p>
-Now let's say we don't now how much points we want. Let's say points keep coming even while we're building our spline. We want to add points and retain the pieces of curve that we've built.
+Now let's say we don't know how many points we want. Let's say points keep coming even while we're building our spline. We want to add points and retain the pieces of curve that we've built.
     </p>
     <p>
-We can still use qubic splines. It's just now we don't have to conjoint each of them from both sides, we only have to attach it from one. This can be done, for instance, by solving this system.
+We can still use cubic splines. It's just now we don't have to conjoint each of them from both sides, we only have to attach it from one. This can be done, for instance, by solving these systems:
     </p>
     <p class="formula" style="text-align: left; margin-left: 10em;">
-a<sub>i</sub>t<sup>3</sup> + b<sub>i</sub>t<sup>2</sup> + c<sub>i</sub>t + d<sub>i</sub> = x<sub>i</sub>
+a<sub>xi</sub>t<sup>3</sup> + b<sub>xi</sub>t<sup>2</sup> + c<sub>xi</sub>t + d<sub>xi</sub> = x<sub>i</sub>
 <br>
-a<sub>i</sub>(t+1)<sup>3</sup> + b<sub>i</sub>(t+1)<sup>2</sup> + c<sub>i</sub>(t+1) + d<sub>i</sub> = x<sub>i+1</sub>
+a<sub>xi</sub>(t+1)<sup>3</sup> + b<sub>xi</sub>(t+1)<sup>2</sup> + c<sub>xi</sub>(t+1) + d<sub>xi</sub> = x<sub>i+1</sub>
 <br>
-3a<sub>i</sub>t<sup>2</sup> + 2b<sub>i</sub>t + c<sub>i</sub> = 3a<sub>i-1</sub>t<sup>2</sup> + 2b<sub>i-1</sub>t + c<sub>i-1</sub>
+3a<sub>xi</sub>t<sup>2</sup> + 2b<sub>xi</sub>t + c<sub>xi</sub> = 3a<sub>xi-1</sub>t<sup>2</sup> + 2b<sub>xi-1</sub>t + c<sub>xi-1</sub>
 <br>
-6a<sub>i</sub>t + 2b<sub>i</sub> = 6a<sub>i-1</sub>t + 2b<sub>i-1</sub>
+6a<sub>xi</sub>t + 2b<sub>xi</sub> = 6a<sub>xi-1</sub>t + 2b<sub>xi-1</sub>
+<br>
+<br>
+a<sub>yi</sub>t<sup>3</sup> + b<sub>yi</sub>t<sup>2</sup> + c<sub>yi</sub>t + d<sub>yi</sub> = y<sub>i</sub>
+<br>
+a<sub>yi</sub>(t+1)<sup>3</sup> + b<sub>yi</sub>(t+1)<sup>2</sup> + c<sub>yi</sub>(t+1) + d<sub>yi</sub> = y<sub>i+1</sub>
+<br>
+3a<sub>yi</sub>t<sup>2</sup> + 2b<sub>yi</sub>t + c<sub>yi</sub> = 3a<sub>yi-1</sub>t<sup>2</sup> + 2b<sub>yi-1</sub>t + c<sub>yi-1</sub>
+<br>
+6a<sub>yi</sub>t + 2b<sub>yi</sub> = 6a<sub>yi-1</sub>t + 2b<sub>yi-1</sub>
     </p>
     <p>
-The first and the seconds equation here are just the interpolation conditions. The third and the fourth are the ones that connect the derivatives of the i-th piece and of its successor. 
+The first and the seconds equations here are just the interpolation conditions. The third and the fourth are the ones that connect the derivatives of the i-th piece and of its successor's. 
     </p>
     <p>
 Here is an example of a 3-piece curve made of such one-sided cubic splines. Feel free to drag the points.
@@ -926,18 +935,18 @@ Here is an example of a 3-piece curve made of such one-sided cubic splines. Feel
     
     <canvas id="spline3" width=640 height=512></canvas>    
     <p>
-As you can see, it is smooth and continous, so it's kind of a win. But it is nearly impossible to make it go where you want it to. It's even worse than with Runge effect, it starts almost immediately.
+As you can see, it is smooth and continous, so it's kind of a win. But it is nearly impossible to make it go where you want it to. It's even worse than with the Runge effect, it starts almost immediately.
     </p>
     <p>
-You probably noticed that the first segment is straight. That's because the initial derivatives are zeroes. The second segment is then quadratic, since its own second derivative on the left is 0, and only the third one is fully cubic. But this is the least controllable one.
+You probably noticed that the first segment is straight. That's because both the initial derivatives, the first one and the second one, are zeroes. The second segment is then quadratic, since its own second derivative on the left is still zero, and only the third one is fully cubic. But this is the least controllable one.
     </p>
     <p>
-Stil, since we keep the second derivative continous, we know that our first derivative is smooth. You can see it on the next plot. The “hair” is the depiction of the derivative vector's length in multiple points. And yes, since the curve is parametric, and it's formed by two functions, it has two derivatives in every point: <i>dx/dt</i> and <i>dy/dt</i> and you can make a vector out of them.
+Stil, since we keep the second derivative continous, we know that our first derivative is smooth. You can see it on the next plot. The “hair” is the depiction of the derivative vector's length in multiple points. And yes, since the curve is parametric, and it's formed by two functions, it has two derivatives in every point: <i>dx/dt</i> and <i>dy/dt</i>, and you can make a vector out of them.
     </p>
     <canvas id="spline3_derivatives" width=640 height=512></canvas>
     
     <p>
-Now here is a trick that may help us tame the curve we got. When we talk about a function's plot, we can expect it to be smooth only if the first derivative of a function is continous. That's tru for plots. But for parametric curves, the tangent is not the same as the derivative. It's the proportion of its derivatives. It doesn't have to be like this:
+Now here is a trick that may help us tame the curve we got. With a function's plot, we can expect it to be smooth only if the first derivative of a function is continous. That's true for plots. But for parametric curves, the tangent is not the same as the derivative. It's the proportion of its derivatives. It doesn't have to be like this:
     </p>
     <p class="formula">
 dp<sub>xi</sub>(t) / dt = dp<sub>xi+1</sub>(t) / dt
@@ -945,7 +954,7 @@ dp<sub>xi</sub>(t) / dt = dp<sub>xi+1</sub>(t) / dt
 dp<sub>yi</sub>(t) / dt = dp<sub>yi+1</sub>(t) / dt
     </p>
     <p>
-It's a little simpler than that:
+We only need that:
     </p>
     <table class="formula">
     <tr>
@@ -967,7 +976,7 @@ dp<sub>yi+1</sub>(t) / dt
     </tr>
     </table>    
     <p>
-Simply put, this means that when your curve becomes uncontrolable, you can safely cut down its derivative in every grip point to make it more like a piece-wise linear interpolation.
+Simply put, this means that when your curve becomes uncontrolable, you can safely slow it down. Cut down its derivatives in every grip point to make it more like a piece-wise linear interpolation.
     </p>
     <p>
 Here is the example when in every grid point the derivative gets divided by some divisor.
@@ -981,12 +990,12 @@ Here is the example when in every grid point the derivative gets divided by some
 Look at its hair! It's no longer continous, it gets cut off after every grid point.    
     </p>    
     <p>
-We also have another way to calm down our curve and it's to drop its second derivative on every grid point effectively turning it... into a quadric spline!
+We also have another way to calm down our curve and it's to drop its second derivative in every grid point effectively turning it... into a quadric spline!
     </p>
     <canvas id="spline2" width=640 height=512></canvas>
 
     <p>
-Quadric splines are even simpler than the qubic ones. We keep the idea of stealing the first derivative from the successor, but we don't touch the second one.
+Quadric splines are even simpler than the cubic ones. We keep the idea of stealing the first derivative from the successor, but we don't touch the second one.
     </p>
     <p class="formula" style="text-align: left; margin-left: 10em;">
 a<sub>i</sub>t<sup>2</sup> + b<sub>i</sub>t + c<sub>i</sub> = x<sub>i</sub>
@@ -1009,10 +1018,10 @@ The first derivative is then continous but it isn't smooth anymore. You can see 
     </script>
     
     <p>
-Now this has been all fun, but is it really a problem to solve? I mean, why would we want to have a curve that grows as we plot it? Well, we might very well not want exactly that. But there is a niche for building splines on the go and it is the animation.
+Now this has all been fun, but is it really a problem to solve? I mean, why would we want to have a curve that grows as we plot it? Well, we might not want exactly that. But there is a niche for building splines on the go and it is the animation.
     </p>
     <p>
-Here is an arrow. Just click on the canvas and it will go there. Setup several way-point, it will run through them all. Note that it also accumulates derivatives which is its speed an becomes thin and uncontrolable. Let it rest and get fat again. It calms it down.
+Here is an arrow. Just click somewhere on the canvas and it will go there. Setup several way-points, it will run through them all. Note that it also accumulates derivatives, which is its speed, and becomes thin and uncontrolable. Let it rest and get fat again. It calms it down.
     </p>
     <canvas id="animation" width=640 height=640></canvas>
     <script language="JavaScript">
@@ -1023,7 +1032,7 @@ Here is an arrow. Just click on the canvas and it will go there. Setup several w
 Conclusion
     </h2>
     <p>
-Splines are more than just NURBS. Sometimes you need quadric splines, sometimes you want 5-th degree ones. There are even non-polynomial splines, they have their niche too.
+Splines are more than just <a href="https://en.wikipedia.org/wiki/Non-uniform_rational_B-spline">NURBS</a>. Sometimes you need quadric splines, sometimes you want 5-th degree ones. There are even non-polynomial splines, they have their applications too.
     </p>
     <p>
 There is, however, some common body of knowledge that works for all splines, plots and curves in general. I think, even if you wouldn't have to ever implement any kind of splines, you can benefit from learning about derivatives, parameterization, continuity and smoothness. Quardic splines are just the simplest thing to study. It's a useful mental model in its own right.
