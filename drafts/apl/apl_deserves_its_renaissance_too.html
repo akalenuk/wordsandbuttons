@@ -85,13 +85,27 @@ function swap_textareas(a, b){
     document.getElementById(b).value = c;
 }
 
+function is_digit(c){
+    return c >= '0' && c <= '9';
+}
+
 function do_things(input, apl, output){
     var input = document.getElementById(input).value;
     var apl = document.getElementById(apl).value;
 
-    document.getElementById(output).value = "---\n";
-    for(var i = apl.length - 1; i >= 0; --i)
-        document.getElementById(output).value += apl.charAt(i) + '\n';
+    document.getElementById(output).value = "";
+    var chunks = [' ']
+    for (var i = apl.length - 1; i >= 0; --i) {
+        c = apl.charAt(i);
+        if (is_digit(chunks[chunks.length-1]) && is_digit(c))
+            chunks[chunks.length-1] = c + chunks[chunks.length-1];
+        else 
+            chunks.push(apl[i])
+    }
+    chunks = chunks.filter(function(c){return c!=' '});
+    
+    for (var i = 0; i < chunks.length; ++i)
+        document.getElementById(output).value += '"' + chunks[i] + '"\n'
 }
     </script>
   </head>
