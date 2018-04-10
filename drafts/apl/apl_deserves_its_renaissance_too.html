@@ -89,6 +89,19 @@ function is_digit(c){
     return c >= '0' && c <= '9';
 }
 
+function evaluate(chunks, omega) {
+    if (chunks.length == 0)
+        return omega;
+        
+    if (is_digit(chunks[0][0])){
+        var new_omega = omega;
+        new_omega.unshift(chunks[0]);
+        var new_chunks = chunks;
+        new_chunks.shift();
+        return evaluate(new_chunks, new_omega);
+    }
+}
+
 function do_things(input, apl, output){
     var input = document.getElementById(input).value;
     var apl = document.getElementById(apl).value;
@@ -103,9 +116,7 @@ function do_things(input, apl, output){
             chunks.push(apl[i])
     }
     chunks = chunks.filter(function(c){return c!=' '});
-    
-    for (var i = 0; i < chunks.length; ++i)
-        document.getElementById(output).value += '"' + chunks[i] + '"\n'
+    document.getElementById(output).value = evaluate(chunks, [])
 }
     </script>
   </head>
