@@ -50,10 +50,10 @@ p {
 
 button {
     width: 100pt;
-    height: 22pt;
+    height: 24pt;
     margin-left:4pt;
     margin-right:4pt;
-    font-size: 14:pt;
+    font-size: 12pt;
 }
 
 .in {
@@ -65,10 +65,16 @@ button {
 
 .apl {
     width: 250pt;
-    height: 22pt;
+    height: 24pt;
     margin: 8pt;
     font-size: 18pt;
     font-family: monospace;
+}
+
+.key {
+    width: 26pt;
+    height: 28pt;
+    font-size: 16pt;
 }
 
 .out {
@@ -83,6 +89,15 @@ function swap_textareas(a, b){
     var c = document.getElementById(a).value;
     document.getElementById(a).value = document.getElementById(b).value;
     document.getElementById(b).value = c;
+}
+
+function print_to(to, what) {
+    to = document.getElementById(to);
+    var pos = to.selectionStart;
+    to.value = to.value.slice(0, pos) + what + to.value.slice(pos);
+    to.focus();
+    to.selectionStart = pos+1;
+    to.selectionEnd = pos+1;
 }
 
 function is_digit(c){
@@ -164,6 +179,8 @@ APL deserves its renaissance too
         <button type="button" onclick="swap_textareas('input', 'output')">Swap in/out</button>
         <input type="text" id="apl" class="apl">
         <button type="button" onclick="do_things('input', 'apl', 'output')">Run APL</button>
+        <br>
+        <button type="button" class="key" onclick="print_to('apl', '⍴')">⍴</button>
         <br>
         <textarea type="text" id="output" class="out" rows=5></textarea>
     </form>
