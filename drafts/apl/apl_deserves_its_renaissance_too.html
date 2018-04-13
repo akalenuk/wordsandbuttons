@@ -114,20 +114,20 @@ function diadic(alpha, on_scalar, omega){
     }
 }
 
-function evaluate(chunks, omega) {
+function evaluate(alpha, chunks) {
     if (chunks.length == 0)
-        return omega;
+        return alpha;
         
     if (is_digit(chunks[0][0])){
-        var new_omega = omega;
-        new_omega.unshift(chunks[0]);
+        var new_alpha = alpha;
+        new_alpha.push(chunks[0]);
         var new_chunks = chunks;
         new_chunks.shift();
-        return evaluate(new_chunks, new_omega);
+        return evaluate(new_alpha, new_chunks);
     }else if (chunks[0] == '+'){
         var new_chunks = chunks;
         new_chunks.shift();
-        alpha = evaluate(new_chunks, []);
+        omega = evaluate([], new_chunks);
         return diadic(alpha, function(a, b){return Number(a) + Number(b);}, omega);
     }
 }
@@ -138,15 +138,15 @@ function do_things(input, apl, output){
 
     document.getElementById(output).value = "";
     var chunks = [' ']
-    for (var i = apl.length - 1; i >= 0; --i) {
+    for (var i = 0; i < apl.length; ++i) {
         c = apl.charAt(i);
         if (is_digit(chunks[chunks.length-1]) && is_digit(c))
-            chunks[chunks.length-1] = c + chunks[chunks.length-1];
+            chunks[chunks.length-1] = chunks[chunks.length-1] + c;
         else 
             chunks.push(apl[i])
     }
     chunks = chunks.filter(function(c){return c!=' '});
-    document.getElementById(output).value = evaluate(chunks, [])
+    document.getElementById(output).value = evaluate([], chunks)
 }
     </script>
   </head>
