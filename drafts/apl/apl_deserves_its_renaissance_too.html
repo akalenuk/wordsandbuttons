@@ -137,22 +137,36 @@ function monadic(on_scalar, on_array, omega) {
     }
 }
 
+function rho(alpha, omega) {
+    if (alpha.length == 1){
+        var ret = omega.slice(0, alpha[0]);
+        omega.splice(0, alpha[0]);
+        return ret
+    }else{
+        ret = [];
+        for (var i = 0; i < alpha[0]; ++i){
+            ret.push(rho(alpha.slice(1), omega));
+        }
+        return ret;
+    }
+}
+
 function evaluate(alpha, chunks) {
     if (chunks.length == 0)
         return alpha;
         
-    if (is_digit(chunks[0][0])){
+    var new_chunks = chunks;
+    var chunk = new_chunks.shift();        
+    if (is_digit(chunk[0])){
         var new_alpha = alpha;
-        new_alpha.push(chunks[0]);
-        var new_chunks = chunks;
-        new_chunks.shift();
+        new_alpha.push(chunk); 
         return evaluate(new_alpha, new_chunks);
-    }else if (chunks[0] == '+'){
-        var new_chunks = chunks;
-        new_chunks.shift();
+    }else if (chunk == '+'){
         omega = evaluate([], new_chunks);
         return diadic(alpha, function(a, b){return Number(a) + Number(b);}, omega);
-    }else if (chunks[0] == '⍴'){
+    }else if (chunk == '⍴'){
+        omega = evaluate([], new_chunks);
+        return rho(alpha, omega);        
     }
 }
 
