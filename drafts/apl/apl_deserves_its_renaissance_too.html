@@ -100,6 +100,24 @@ function print_to(to, what) {
     to.selectionEnd = pos+1;
 }
 
+function pretty_print(a) {
+    if(!Array.isArray(a)) {
+        return String(a);
+    }else if(!Array.isArray(a[0])){
+        var ret = '';
+        for(var i = 0; i < a.length; ++i){
+            ret += pretty_print(a[i]) + ' ';                
+        }
+        return ret;
+    }else {
+        var ret = '';
+        for(var i = 0; i < a.length; ++i){
+            ret += pretty_print(a[i]) + '\n';
+        }
+        return ret;
+    }
+}
+
 function is_digit(c){
     return c >= '0' && c <= '9';
 }
@@ -184,7 +202,7 @@ function do_things(input, apl, output){
             chunks.push(apl[i])
     }
     chunks = chunks.filter(function(c){return c!=' '});
-    document.getElementById(output).value = evaluate([], chunks)
+    document.getElementById(output).value = pretty_print(evaluate([], chunks));
 }
     </script>
   </head>
