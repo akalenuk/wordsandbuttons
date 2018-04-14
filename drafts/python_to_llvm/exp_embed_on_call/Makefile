@@ -1,11 +1,11 @@
 all: generate_llvm generate_s generate_elf test
 .PHONY: generate_llvm
 generate_llvm:
-	clang benchmark.c -march=native -S -emit-llvm -o benchmark.bc
+	clang benchmark.c -march=native -S -emit-llvm -o benchmark.bc # -msse* comes from -marc=native
 	python substitute_solver_call.py benchmark.bc
 .PHONY: generate_s
 generate_s:
-	llc -O2 benchmark.bc -o benchmark.s
+	llc -O2 benchmark.bc -o benchmark.s # O3 doesn't help
 .PHONY: generate_elf
 generate_elf:
 	as benchmark.s -o benchmark.o
