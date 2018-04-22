@@ -132,15 +132,12 @@ function as_number(x){
         return Number(x);
 }
 
-function rotate_inplace(a, i) {
-    if (i > 0) {
-        a.push(a.shift());
-        rotate_inplace(a, i - 1);
-    }
-    if (i < 0) {
-        a.unshift(a.pop());
-        rotate_inplace(a, i + 1);
-    }
+function rotated(a, i) {
+    if (i > 0)
+        return rotated(a.slice(1).concat([a[0]]), i - 1);
+    if (i < 0)
+        return rotated([a[a.length - 1]].concat(a.slice(0, a.length - 1)), i + 1);
+    return a;
 }
 
 function diadic(alpha, on_scalar, omega){
@@ -208,8 +205,7 @@ function evaluate(alpha, chunks) {
         return rho(alpha, omega);        
     }else if (chunk == '⌽'){
         omega = evaluate([], new_chunks);
-        rotate_inplace(omega, as_number(alpha[0]));
-        return omega;        
+        return rotated(omega, as_number(alpha[0]));       
     }
 }
 
