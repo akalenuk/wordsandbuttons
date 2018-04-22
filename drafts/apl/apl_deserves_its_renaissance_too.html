@@ -140,6 +140,12 @@ function rotated(a, i) {
     return a;
 }
 
+function reversed(a, b) {
+    if (a.length == 0)
+        return b;
+    return reversed(a.slice(1), [a[0]].concat(b));
+}
+
 function diadic(alpha, on_scalar, omega){
     if(Array.isArray(alpha) && Array.isArray(omega)){
         if(alpha.length != omega.length) {
@@ -205,7 +211,14 @@ function evaluate(alpha, chunks) {
         return rho(alpha, omega);        
     }else if (chunk == '⌽'){
         omega = evaluate([], new_chunks);
-        return rotated(omega, as_number(alpha[0]));       
+        if (alpha.length > 1) {
+            alert("Rank error:" + String(alpha.length) + " > 1");
+            return [];
+        } else if (alpha.length == 0) {
+            return reversed(omega, [])
+        } else if (alpha.length == 1) {
+            return rotated(omega, as_number(alpha[0]));
+        }
     }
 }
 
