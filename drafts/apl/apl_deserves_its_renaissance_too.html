@@ -102,7 +102,10 @@ function print_to(to, what) {
 
 function pretty_print(a) {
     if(!Array.isArray(a)) {
-        return String(a);
+        if (a < 0)
+            return '¯' + String(-a);
+	else
+            return String(a);
     }else if(!Array.isArray(a[0])){
         var ret = '';
         for(var i = 0; i < a.length; ++i){
@@ -119,7 +122,14 @@ function pretty_print(a) {
 }
 
 function is_digit(c){
-    return c >= '0' && c <= '9';
+    return (c >= '0' && c <= '9') || c == '¯';
+}
+
+function as_number(x){
+    if (x[0] == '¯')
+        return -Number(x.substring(1));
+    else
+        return Number(x);
 }
 
 function diadic(alpha, on_scalar, omega){
@@ -181,7 +191,7 @@ function evaluate(alpha, chunks) {
         return evaluate(new_alpha, new_chunks);
     }else if (chunk == '+'){
         omega = evaluate([], new_chunks);
-        return diadic(alpha, function(a, b){return Number(a) + Number(b);}, omega);
+        return diadic(alpha, function(a, b){return as_number(a) + as_number(b);}, omega);
     }else if (chunk == '⍴'){
         omega = evaluate([], new_chunks);
         return rho(alpha, omega);        
@@ -223,6 +233,7 @@ APL deserves its renaissance too
         <br>
         <button type="button" class="key" onclick="print_to('apl', '⍴')">⍴</button>
         <button type="button" class="key" onclick="print_to('apl', '+')">+</button>
+        <button type="button" class="key" onclick="print_to('apl', '¯')">¯</button>
         <button type="button" class="key" onclick="print_to('apl', '1')">1</button>
         <button type="button" class="key" onclick="print_to('apl', '2')">2</button>
         <button type="button" class="key" onclick="print_to('apl', '3')">3</button>
