@@ -132,6 +132,17 @@ function as_number(x){
         return Number(x);
 }
 
+function rotate_inplace(a, i) {
+    if (i > 0) {
+        a.push(a.shift());
+        rotate_inplace(a, i - 1);
+    }
+    if (i < 0) {
+        a.unshift(a.pop());
+        rotate_inplace(a, i + 1);
+    }
+}
+
 function diadic(alpha, on_scalar, omega){
     if(Array.isArray(alpha) && Array.isArray(omega)){
         if(alpha.length != omega.length) {
@@ -195,6 +206,10 @@ function evaluate(alpha, chunks) {
     }else if (chunk == '⍴'){
         omega = evaluate([], new_chunks);
         return rho(alpha, omega);        
+    }else if (chunk == '⌽'){
+        omega = evaluate([], new_chunks);
+        rotate_inplace(omega, as_number(alpha[0]));
+        return omega;        
     }
 }
 
@@ -232,6 +247,7 @@ APL deserves its renaissance too
         <button type="button" onclick="do_things('input', 'apl', 'output')">Run APL</button>
         <br>
         <button type="button" class="key" onclick="print_to('apl', '⍴')">⍴</button>
+        <button type="button" class="key" onclick="print_to('apl', '⌽')">⌽</button>
         <button type="button" class="key" onclick="print_to('apl', '+')">+</button>
         <button type="button" class="key" onclick="print_to('apl', '¯')">¯</button>
         <button type="button" class="key" onclick="print_to('apl', '1')">1</button>
