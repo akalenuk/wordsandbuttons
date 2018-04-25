@@ -150,7 +150,11 @@ function reversed(a, b) {
 }
 
 function diadic(alpha, on_scalar, omega){
-    if(Array.isArray(alpha) && Array.isArray(omega)){
+    if(alpha.length == 0 || omega.length == 0) {
+        alert('Error: diadic function on empty input');
+        return [];
+    }
+    if(alpha.length > 1 && omega.length > 1){
         if(alpha.length != omega.length) {
             alert('Length error. ' + alpha.length + ' != ' + omega.length);
             return [];
@@ -159,18 +163,18 @@ function diadic(alpha, on_scalar, omega){
         for(var i = 0; i < ret.length; ++i)
             ret[i] = diadic(ret[i], on_scalar, omega[i]);
         return ret;
-    }else if(Array.isArray(alpha) && !Array.isArray(omega)){
+    }else if(alpha.length > 1 && omega.length == 1){
         var ret = alpha;
         for(var i = 0; i < ret.length; ++i)
-            ret[i] = diadic(ret[i], on_scalar, omega);
+            ret[i] = diadic(ret[i], on_scalar, omega[0]);
         return ret;
-    }else if(!Array.isArray(alpha) && Array.isArray(omega)){
+    }else if(alpha.length == 1 && omega.length > 1){
         var ret = omega;
         for(var i = 0; i < ret.length; ++i)
-            ret[i] = diadic(alpha, on_scalar, ret[i]);
+            ret[i] = diadic(alpha[0], on_scalar, ret[i]);
         return ret;
     }else{
-        return on_scalar(alpha, omega);
+        return on_scalar(alpha[0], omega[0]);
     }
 }
 
@@ -198,10 +202,7 @@ function rho(alpha, omega) {
 
 function evaluate(alpha, chunks) {
     if (chunks.length == 0)
-        if (alpha.length == 1)
-            return alpha[0];
-        else
-            return alpha;
+        return alpha;
         
     var new_chunks = chunks;
     var chunk = new_chunks.shift();        
