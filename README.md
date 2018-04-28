@@ -4,9 +4,10 @@ This is the source code for Words and Buttons Online — a growing collectio
 
 See: http://wordsandbuttons.online/
 
----
-Example of the words and buttons typical pages are:
+***
+Examples of the words and buttons interactive pages are:
 
+---
 http://wordsandbuttons.online/programmers_guide_to_polynomials_and_splines.html
 
 ![alt screnshot](https://github.com/akalenuk/wordsandbuttons/blob/master/images/programmers_guide_to_polynomials_and_splines.png)
