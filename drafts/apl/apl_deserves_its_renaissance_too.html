@@ -126,7 +126,7 @@ function pretty_print(a) {
 }
 
 function is_digit(c){
-    return (c >= '0' && c <= '9') || c == '¯';
+    return (c >= '0' && c <= '9') || c == '¯' || c == '.';
 }
 
 function as_number(x){
@@ -175,7 +175,13 @@ function diadic(alpha, on_scalar, omega){
             ret[i] = diadic(alpha[0], on_scalar, ret[i]);
         return ret;
     }else{
-        return on_scalar(alpha[0], omega[0]);
+	if (Array.isArray(alpha) && Array.isArray(omega))
+            return on_scalar(alpha[0], omega[0]);
+	if (Array.isArray(alpha))
+            return on_scalar(alpha[0], omega);
+	if (Array.isArray(omega))
+            return on_scalar(alpha, omega[0]);
+        return on_scalar(alpha, omega);
     }
 }
 
@@ -209,20 +215,20 @@ function evaluate(alpha, chunks) {
     var chunk = new_chunks.shift();        
     if (is_digit(chunk[0])){
         var new_alpha = alpha;
-        new_alpha.push(chunk); 
+        new_alpha.push(as_number(chunk));
         return evaluate(new_alpha, new_chunks);
     }else if (chunk == '+'){
         omega = evaluate([], new_chunks);
-        return diadic(alpha, function(a, b){return as_number(a) + as_number(b);}, omega);
+        return diadic(alpha, function(a, b){return a + b;}, omega);
     }else if (chunk == '-'){
         omega = evaluate([], new_chunks);
-        return diadic(alpha, function(a, b){return as_number(a) - as_number(b);}, omega);
+        return diadic(alpha, function(a, b){return a - b;}, omega);
     }else if (chunk == '×'){
         omega = evaluate([], new_chunks);
-        return diadic(alpha, function(a, b){return as_number(a) * as_number(b);}, omega);
+        return diadic(alpha, function(a, b){return a * b;}, omega);
     }else if (chunk == '÷'){
         omega = evaluate([], new_chunks);
-        return diadic(alpha, function(a, b){return as_number(a) / as_number(b);}, omega);
+        return diadic(alpha, function(a, b){return a / b;}, omega);
     }else if (chunk == '⍴'){
         omega = evaluate([], new_chunks);
         return rho(alpha, omega);        
