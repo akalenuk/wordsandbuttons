@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Playing game of chance with C++ inline keyword</title>
+    <title>Playing a game of chance with C++ inline keyword</title>
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <style>
 body{
@@ -203,21 +203,21 @@ function pull_the_lever(){
   <body>
     <center>
     <h1>
-Playing game of chance with C++ inline keyword
+Playing a game of chance with C++ inline keyword
     </h1>
     <p>
-So one day I broke a weekly CI build by optimizing an innocent looking class method. Or, to be more precise, I broke the build running a week after the optimization. Or, to be more honest, I broke the code half a year before I broke the CI build. Ok, it gets complicated. I'll try to explain it step by step.
+One day I broke a weekly CI build by optimizing an innocent looking class method. Or, to be more precise, I broke the build that ran a week after the optimization. Or, to be more honest, I broke the code half a year before I broke the CI build. Ok, it gets complicated. I'll try to explain it step by step.
     </p>
     <p>
-You see, in C++ <span class="code_piece">inline</span> keyword doesn't mean function inlining like it does in C. There is a popular opinion that it works like an advice to a compiler, but this is, of course, misconception. Compilers don't want advices from us — meat-made machines.
+You see, in C++ <span class="code_piece">inline</span> keyword doesn't mean function inlining as it does in C. There is a widespread opinion that it works like an advice to a compiler, but this is, of course, a misconception. Compilers don't want advice from us — meat-made people.
     </p>
     <p>
-What it does in reality — it releases a compiler from the obligation to add an actual callable function in a translation module. It might be there on certain ocassions, but it might as well be missing.
+What it does in reality — it releases a compiler from the obligation to add an actual callable function in a translation unit. It might be there on certain occasions, but it might as well be missing.
     </p>
 
 <h2>Half a year before</h2>
     <p>
-There was a class with a header file and a cpp file. Some of the methods were exposed in the header as inlinable.
+There was a class with a header file and a cpp file. Some of the methods were defined in the header file as inlinable.
     </p>
     <table><tr>
     <td>
@@ -233,10 +233,10 @@ inline TOutput SomeClass::SomeMethod(TInput input) {
     </td></tr></table>
 
     <p>
-I don't like to expose code like this for no particular reason. Since the operation itself was heavy, it couldn't be inlined anyway, and even if it could, the penalty of the actual call would be too small relative to the body of the method to consider.
+It's not nice to expose code like this for no particular reason. Since the operation itself was heavy, it couldn't be inlined anyway, and even if it could, the penalty of the actual call would be too small relative to the body of the method to consider.
     </p>
     <p>
-So I put it into a cpp file and put a <span class="code_piece">__declspec(dllexport)</span> behind the declaration in the header file.
+So I moved it to the cpp file and made sure there is a <span class="code_piece">__declspec(dllexport)</span> before the declaration in the header file.
     </p>
     <table><tr>
     <td>
@@ -256,12 +256,15 @@ inline TOutput SomeClass::SomeMethod(TInput input) {
     </td>
     </td></tr></table>
     <p>
-My mistake here — I forgot to remove the inline. But it worked fine on my machine, it passed the gate build, and it was passing all the weekly CI builds in every posible configuraition.
+My mistake here — I forgot to remove the inline. But it worked fine on my machine, it passed the gated build, and it was passing all the weekly CI builds in every possible configuration.
     </p>
 
 <h2>The day X</h2>
     <p>
-I found a way to reduce DoLotOfThings to DoFewThings. Hurrah! I did the changes in the code.
+I found a way to reduce <span class="code_piece">DoLotOfThings</code> to <span class="code_piece">DoFewThings</code>. Hurrah! 
+    </p>
+    <p>
+I did the changes in the code.
     </p>
 
     <table><tr>
@@ -283,15 +286,15 @@ inline TOutput SomeClass::SomeMethod(TInput input) {
     </td></tr></table>
 
     <p>
-I ran a local test build. Then I checked in to a gate. Then I waited to see if the night builds were ok. They were ok. They were all ok.
+I ran a local test build. Then I pushed it through the gated build. Then I waited to see if the night builds were ok. They were ok. They were all ok.
     </p>
 
 <h2>The week after</h2>
     <p>
-We have to support quite a lot of configurations for a large project. And we have quite a lot of tests too. The gated check-in runs a few basic configurations. Then a few more a running every night. Then finally once a week all of them are built and tested. Now let's say my optimization was enough for MSVC to make code inlinable. And let's say not for Clang. Now in Debug configuration inlines are turned off by default, and in Release they are on. Also in Dynamic build dllexport plays its role making the compiler produce things that are promised in DLL interface, but in Static it is completely ignored.
+We have to support quite a lot of configurations and for a large project. And we have quite a lot of tests too. The gated check-in triggers builds for a few basic configurations. Then the nightly tests trigger a few more every night. Then finally once a week all of the configurations are built and tested. Now let's say my optimization was enough for MSVC to make code inlinable. And let's say not for Clang. Now in Debug configuration inlines are turned off by default, and in Release they are on. Also in Dynamic build dllexport plays its role making the compiler produce things that are promised in DLL interface, but in Static it doesn't.
     </p>
     <p>
-So in one particular configuration the compiler doesn't have to make SomeClass::SomeMethod as a separate function. But something in another translation module tries to call it, and this makes a linker a bit upset. So the build fails unexpectedly.
+So there is one particular configuration for which the compiler doesn't have to make SomeClass::SomeMethod as a separate function. But something in another translation module tries to call it, and this makes a linker a bit upset. So the build fails unexpectedly a week after the optimization has been checked in.
     </p>
     <p>
 After the local testing, after the gate, and after the nightly tests.
@@ -299,13 +302,13 @@ After the local testing, after the gate, and after the nightly tests.
 
 <h2>Conclusion</h2>
     <p>
-C++ inline is more of a rudiment than a tool. Most of the time compiler is fine with inlining things that are not shared between translation modules anyway. It doesn't need a special word for that.
+C++ inline is more of a rudiment than a tool. Most of the time compiler does a great job inlining things anyway. It doesn't need a special word for that.
     </p>
     <p>
 Also, most of the time you wouldn't shoot yourself in a foot immediately by putting inlines here and there, so people do that. But you don't have to shoot yourself to get hurt. Planting a landmine works just like that. Only more unpredictably. And you definitely can do this with inlines.
     </p>
     <p>
-To give you an impression of what it feels to have unpredictable bugs, I made a builder configuration slot-machine. Enjoy!
+To give you an impression of what it feels to have unpredictable bugs, I made a build configuration slot-machine. Enjoy!
     </p>
 
     <canvas id="results" width=700 height=300></canvas>
