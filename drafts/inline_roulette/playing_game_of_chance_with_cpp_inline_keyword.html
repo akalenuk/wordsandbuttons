@@ -105,8 +105,8 @@ var slots_t = [0.0, 0.0, 0.0]
 var winner_t = 0.0;
 
 function y_from_slots(i){
-    var t = slots_end_t[i] == slots_start_t[i] 
-        ? 0.0 
+    var t = slots_end_t[i] == slots_start_t[i]
+        ? 0.0
         : (slots_t[i] - slots_start_t[i]) / (slots_end_t[i] - slots_start_t[i]);
     var f = Math.sin(Math.PI * t / 2.0);
     var y = Math.floor(300 * (slots_start_t[i] + f * (slots_end_t[i] - slots_start_t[i]))) % 600;
@@ -116,36 +116,36 @@ function y_from_slots(i){
 function draw_results(){
     var d = document.getElementById("results");
     var d_context = d.getContext("2d");
-    
+
     // background
     d_context.fillStyle="#eeeeee";
     d_context.fillRect(0, 0, 700, 300);
-    
+
     d_context.font = '32px serif';
     d_context.textAlign = 'center';
     d_context.textBaseline = 'middle';
-    
+
     // debug / release
     d_context.fillStyle="#22BB00";
-    d_context.fillText("Debug", 150, y_from_slots(0) - 450);    
+    d_context.fillText("Debug", 150, y_from_slots(0) - 450);
     d_context.fillText("Debug", 150, y_from_slots(0) + 150);
     d_context.fillStyle="#BB0022";
     d_context.fillText("Release", 150, y_from_slots(0) - 150);
-    
+
     // static / dynamic
     d_context.fillStyle="#22BB00";
-    d_context.fillText("Dynamic", 350, y_from_slots(1) - 450);    
+    d_context.fillText("Dynamic", 350, y_from_slots(1) - 450);
     d_context.fillText("Dynamic", 350, y_from_slots(1) + 150);
     d_context.fillStyle="#BB0022";
     d_context.fillText("Static", 350, y_from_slots(1) - 150);
-    
-    // x64 / x86
+
+    // Clang / MSVC
     d_context.fillStyle="#22BB00";
-    d_context.fillText("x64", 550, y_from_slots(2) - 450);    
-    d_context.fillText("x64", 550, y_from_slots(2) + 150);
+    d_context.fillText("Clang", 550, y_from_slots(2) - 450);
+    d_context.fillText("Clang", 550, y_from_slots(2) + 150);
     d_context.fillStyle="#BB0022";
-    d_context.fillText("x86", 550, y_from_slots(2) - 150);
-                
+    d_context.fillText("MSVC", 550, y_from_slots(2) - 150);
+
     // winning
     if(winner_t > 0) {
         d_context.fillStyle="#000000";
@@ -153,7 +153,7 @@ function draw_results(){
         d_context.fillStyle="#BB0022";
         var size = 48 - (winner_t * 5) % 10;
         d_context.font = String(size) + 'px monospace';
-        d_context.fillText("☹☹☹ You broke the build! ☹☹☹", 350, 150); 
+        d_context.fillText("☹☹☹ You broke the build! ☹☹☹", 350, 150);
     }
 }
 
@@ -167,7 +167,7 @@ function slots_step(){
             slots_t[i] = slots_end_t[i];
             }
         }
-        
+
     // winning
     var you_won = true;
     for(var i = 0; i < 3; ++i)
@@ -206,7 +206,106 @@ function pull_the_lever(){
 Playing game of chance with C++ inline keyword
     </h1>
     <p>
+So one day I broke a weekly CI build by optimizing an innocent looking class method. Or, to be more precise, I broke the build running a week after the optimization. Or, to be more honest, I broke the code half a year before I broke the CI build. Ok, it gets complicated. I'll try to explain it step by step.
+    </p>
+    <p>
+You see, in C++ <span class="code_piece">inline</span> keyword doesn't mean function inlining like it does in C. There is a popular opinion that it works like an advice to a compiler, but this is, of course, misconception. Compilers don't want advices from us — meat-made machines.
+    </p>
+    <p>
+What it does in reality — it releases a compiler from the obligation to add an actual callable function in a translation module. It might be there on certain ocassions, but it might as well be missing.
+    </p>
 
+<h2>Half a year before</h2>
+    <p>
+There was a class with a header file and a cpp file. Some of the methods were exposed in the header as inlinable.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+// in SomeFile.h
+
+inline TOutput SomeClass::SomeMethod(TInput input) {
+    auto output = DoLotOfThings(input);
+    return output;
+}
+    </pre>
+    </td>
+    </td></tr></table>
+
+    <p>
+I don't like to expose code like this for no particular reason. Since the operation itself was heavy, it couldn't be inlined anyway, and even if it could, the penalty of the actual call would be too small relative to the body of the method to consider.
+    </p>
+    <p>
+So I put it into a cpp file and put a <span class="code_piece">__declspec(dllexport)</span> behind the declaration in the header file.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+// in SomeFile.h
+
+__declspec(dllexport) TOutput SomeClass::SomeMethod(TInput input);
+
+
+// in SomeFile.cpp
+
+inline TOutput SomeClass::SomeMethod(TInput input) {
+    auto output = DoLotOfThings(input);
+    return output;
+}
+    </pre>
+    </td>
+    </td></tr></table>
+    <p>
+My mistake here — I forgot to remove the inline. But it worked fine on my machine, it passed the gate build, and it was passing all the weekly CI builds in every posible configuraition.
+    </p>
+
+<h2>The day X</h2>
+    <p>
+I found a way to reduce DoLotOfThings to DoFewThings. Hurrah! I did the changes in the code.
+    </p>
+
+    <table><tr>
+    <td>
+    <pre>
+// in SomeFile.h
+
+__declspec(dllexport) TOutput SomeClass::SomeMethod(TInput input);
+
+
+// in SomeFile.cpp
+
+inline TOutput SomeClass::SomeMethod(TInput input) {
+    auto output = DoFewThings(input);
+    return output;
+}
+    </pre>
+    </td>
+    </td></tr></table>
+
+    <p>
+I ran a local test build. Then I checked in to a gate. Then I waited to see if the night builds were ok. They were ok. They were all ok.
+    </p>
+
+<h2>The week after</h2>
+    <p>
+We have to support quite a lot of configurations for a large project. And we have quite a lot of tests too. The gated check-in runs a few basic configurations. Then a few more a running every night. Then finally once a week all of them are built and tested. Now let's say my optimization was enough for MSVC to make code inlinable. And let's say not for Clang. Now in Debug configuration inlines are turned off by default, and in Release they are on. Also in Dynamic build dllexport plays its role making the compiler produce things that are promised in DLL interface, but in Static it is completely ignored.
+    </p>
+    <p>
+So in one particular configuration the compiler doesn't have to make SomeClass::SomeMethod as a separate function. But something in another translation module tries to call it, and this makes a linker a bit upset. So the build fails unexpectedly.
+    </p>
+    <p>
+After the local testing, after the gate, and after the nightly tests.
+    </p>
+
+<h2>Conclusion</h2>
+    <p>
+C++ inline is more of a rudiment than a tool. Most of the time compiler is fine with inlining things that are not shared between translation modules anyway. It doesn't need a special word for that.
+    </p>
+    <p>
+Also, most of the time you wouldn't shoot yourself in a foot immediately by putting inlines here and there, so people do that. But you don't have to shoot yourself to get hurt. Planting a landmine works just like that. Only more unpredictably. And you definitely can do this with inlines.
+    </p>
+    <p>
+To give you an impression of what it feels to have unpredictable bugs, I made a builder configuration slot-machine. Enjoy!
     </p>
 
     <canvas id="results" width=700 height=300></canvas>
@@ -214,10 +313,9 @@ Playing game of chance with C++ inline keyword
     init_results();
     </script>
     <br>
-    <button type="button" onclick="pull_the_lever()">Pull the lever!</button>    
-    <p>
-
-    </p>
+    <button type="button" onclick="pull_the_lever()">Pull the lever!</button>
+    <br>
+    <br>
 
     <p class="footer">
 There are more words and buttons on <a href="index.html">wordsandbuttons.online</a>.
