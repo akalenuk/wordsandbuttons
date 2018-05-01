@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Playing game of chances with C++ inline keyword</title>
+    <title>Playing game of chance with C++ inline keyword</title>
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <style>
 body{
@@ -95,11 +95,14 @@ u {
     <script language="JavaScript">
 
 const SLOT_STEPS_MIN = 5;
-const SLOT_STEPS_RANDOM = 10;
+const SLOT_STEPS_RANDOM = 7;
+const SPINNING_SPEED = 1.0/8.0;
 
 var slots_start_t = [0.0, 0.0, 0.0]
 var slots_end_t = [0.0, 0.0, 0.0]
 var slots_t = [0.0, 0.0, 0.0]
+
+var winner_t = 0.0;
 
 function y_from_slots(i){
     var t = slots_end_t[i] == slots_start_t[i] 
@@ -113,47 +116,71 @@ function y_from_slots(i){
 function draw_results(){
     var d = document.getElementById("results");
     var d_context = d.getContext("2d");
-    d_context.font = "16px sans-serif";
+    
     // background
     d_context.fillStyle="#eeeeee";
-	d_context.fillRect(0, 0, 700, 350);
-	
-	d_context.font = '32px serif';
-	d_context.textAlign = 'center';
-	d_context.textBaseline = 'middle';
-	
-	// debug / release
-	d_context.fillStyle="#22BB00";
-	d_context.fillText("Debug", 150, y_from_slots(0) - 450);	
-	d_context.fillText("Debug", 150, y_from_slots(0) + 150);
-	d_context.fillStyle="#BB0022";
-	d_context.fillText("Release", 150, y_from_slots(0) - 150);
-	
-	// static / dynamic
-	d_context.fillStyle="#22BB00";
-	d_context.fillText("Dynamic", 350, y_from_slots(1) - 450);	
-	d_context.fillText("Dynamic", 350, y_from_slots(1) + 150);
-	d_context.fillStyle="#BB0022";
-	d_context.fillText("Static", 350, y_from_slots(1) - 150);
+    d_context.fillRect(0, 0, 700, 300);
+    
+    d_context.font = '32px serif';
+    d_context.textAlign = 'center';
+    d_context.textBaseline = 'middle';
+    
+    // debug / release
+    d_context.fillStyle="#22BB00";
+    d_context.fillText("Debug", 150, y_from_slots(0) - 450);    
+    d_context.fillText("Debug", 150, y_from_slots(0) + 150);
+    d_context.fillStyle="#BB0022";
+    d_context.fillText("Release", 150, y_from_slots(0) - 150);
+    
+    // static / dynamic
+    d_context.fillStyle="#22BB00";
+    d_context.fillText("Dynamic", 350, y_from_slots(1) - 450);    
+    d_context.fillText("Dynamic", 350, y_from_slots(1) + 150);
+    d_context.fillStyle="#BB0022";
+    d_context.fillText("Static", 350, y_from_slots(1) - 150);
 
-	// x64 / x86
-	d_context.fillStyle="#22BB00";
-	d_context.fillText("x64", 550, y_from_slots(2) - 450);	
-	d_context.fillText("x64", 550, y_from_slots(2) + 150);
-	d_context.fillStyle="#BB0022";
-	d_context.fillText("x86", 550, y_from_slots(2) - 150);
+    // x64 / x86
+    d_context.fillStyle="#22BB00";
+    d_context.fillText("x64", 550, y_from_slots(2) - 450);    
+    d_context.fillText("x64", 550, y_from_slots(2) + 150);
+    d_context.fillStyle="#BB0022";
+    d_context.fillText("x86", 550, y_from_slots(2) - 150);
+    
+    // winning
+    if(winner_t > 0) {
+        d_context.fillStyle="#000000";
+        d_context.fillRect(0, 100, 700, 100);
+        d_context.fillStyle="#BB0022";
+        var size = 48 - (winner_t * 5) % 10;
+        d_context.font = String(size) + 'px monospace';
+        d_context.fillText("☹☹☹ You broke the build! ☹☹☹", 350, 150); 
+    }
 }
 
 function slots_step(){
+    // spinning
     for(var i = 0; i < 3; ++i) {
         if(slots_t[i] < slots_end_t[i])
-            slots_t[i] += 1./8.;
+            slots_t[i] += SPINNING_SPEED;
         if(slots_t[i] >= slots_end_t[i] && slots_start_t[i] != slots_end_t[i]){
             slots_start_t[i] = slots_end_t[i];
             slots_t[i] = slots_end_t[i];
             }
         }
-                
+        
+    // winning
+    var you_won = true;
+    for(var i = 0; i < 3; ++i)
+        if(slots_start_t[i] != slots_end_t[i] || slots_start_t[i] % 2 == 0)
+            you_won = false;
+    if(you_won) {
+        winner_t = 31.0;
+        for(var i = 0; i < 3; ++i) {
+            slots_end_t[i] += 31.0;
+        }
+    }
+    if(winner_t > 0)
+        winner_t -= SPINNING_SPEED;
     draw_results();
 }
 
@@ -177,13 +204,13 @@ function pull_the_lever(){
   <body>
     <center>
     <h1>
-Playing game of chances with C++ inline keyword
+Playing game of chance with C++ inline keyword
     </h1>
     <p>
 
     </p>
 
-    <canvas id="results" width=750 height=300></canvas>
+    <canvas id="results" width=700 height=300></canvas>
     <script language="JavaScript">
     init_results();
     </script>
