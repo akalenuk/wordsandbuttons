@@ -94,9 +94,21 @@ u {
     </style>
     <script language="JavaScript">
 
+const SLOT_STEPS_MIN = 5;
+const SLOT_STEPS_RANDOM = 5;
+
 var slots_start_t = [0.0, 0.0, 0.0]
 var slots_end_t = [0.0, 0.0, 0.0]
 var slots_t = [0.0, 0.0, 0.0]
+
+function y_from_slots(i){
+    var t = slots_end_t[i] == slots_start_t[i] 
+        ? 0.0 
+        : (slots_t[i] - slots_start_t[i]) / (slots_end_t[i] - slots_start_t[i]);
+    var f = Math.sin(Math.PI * t / 2.0);
+    var y = Math.floor(300 * (slots_start_t[i] + f * (slots_end_t[i] - slots_start_t[i]))) % 600;
+    return y;
+}
 
 function draw_results(){
     var d = document.getElementById("results");
@@ -106,21 +118,56 @@ function draw_results(){
     d_context.fillStyle="#eeeeee";
 	d_context.fillRect(0, 0, 700, 350);
 	
+	// debug / release
+	d_context.fillStyle="#22BB00";
+	d_context.fillText("Debug", 150, y_from_slots(0) - 450);	
+	d_context.fillText("Debug", 150, y_from_slots(0) + 150);
 	d_context.fillStyle="#BB0022";
-	d_context.fillText("Debug/Release", 150, slots_t[0]);
-	d_context.fillText("Static/Dynamic", 350, slots_t[1]);
-	d_context.fillText("x86/x64", 550, slots_t[2]);
+	d_context.fillText("Release", 150, y_from_slots(0) - 150);
+	
+	// static / dynamic
+	d_context.fillStyle="#22BB00";
+	d_context.fillText("Dynamic", 350, y_from_slots(1) - 450);	
+	d_context.fillText("Dymanic", 350, y_from_slots(1) + 150);
+	d_context.fillStyle="#BB0022";
+	d_context.fillText("Static", 350, y_from_slots(1) - 150);
+
+	// x64 / x86
+	d_context.fillStyle="#22BB00";
+	d_context.fillText("x64", 550, y_from_slots(2) - 450);	
+	d_context.fillText("x64", 550, y_from_slots(2) + 150);
+	d_context.fillStyle="#BB0022";
+	d_context.fillText("x86", 550, y_from_slots(2) - 150);
+}
+
+function slots_step(){
+    for(var i = 0; i < 3; ++i) {
+        if(slots_t[i] < slots_end_t[i])
+            slots_t[i] += 1./16.;
+        if(slots_t[i] >= slots_end_t[i] && slots_start_t[i] != slots_end_t[i]){
+            slots_start_t[i] = slots_end_t[i];
+            slots_t[i] = slots_end_t[i];
+            }
+        }
+                
+    draw_results();
 }
 
 function init_results(){
     draw_results();
+    setInterval(slots_step, 50);
 }
 
 function pull_the_lever(){
     for(var i = 0; i < 3; ++i){
-        
+        if(slots_t[i] < slots_end_t[i])
+            return;
+    }
+    for(var i = 0; i < 3; ++i){
+        slots_end_t[i] += SLOT_STEPS_MIN + Math.floor((Math.random() * SLOT_STEPS_RANDOM));
     }
 }
+
     </script>
   </head>
   <body>
@@ -132,12 +179,12 @@ Playing game of chances with C++ inline keyword
 
     </p>
 
-    <canvas id="results" width=700 height=350></canvas>
+    <canvas id="results" width=750 height=300></canvas>
     <script language="JavaScript">
     init_results();
     </script>
     <br>
-    <button type="button" onclick="run_slot_machine()">Pull the lever!</button>    
+    <button type="button" onclick="pull_the_lever()">Pull the lever!</button>    
     <p>
 
     </p>
