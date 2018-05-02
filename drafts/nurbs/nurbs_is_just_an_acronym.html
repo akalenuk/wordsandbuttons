@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>NURBS is just an acronym</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.comment {
+    font-size: 12pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
+
+.formula {
+    font-family: sans-serif;
+    font-size: 15pt;
+    font-style: italic;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+.footer {
+    margin-top: 64pt;
+    padding-bottom: 32pt;
+    font-family: sans-serif;
+    font-size: 16pt;
+    text-align: left;
+}
+
+table {
+    font-family: sans-serif;
+    font-size: 13pt;
+    font-style: italic;
+    width: 505pt;
+    text-align: center;
+}
+
+td {
+    vertical-align: text-top;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+}
+
+input[type="text"] {
+    width: 100pt;
+    height: 22pt;
+    margin: 8pt 8pt 8pt 8pt;
+    padding-left: 3pt;
+    font-size: 16pt;
+}
+
+button {
+    width: 108pt;
+    height: 28pt;
+    margin-left:4pt;
+    margin-right:4pt;
+    font-size: 16pt;
+}
+    </style>
+    <script language="JavaScript">
+
+// client
+var w = 640.0;
+var h = 512.0;
+
+// visible region
+var x_min = -1.0;
+var y_min = -1.0;
+var x_max = 9.0;
+var y_max = 7.0;
+
+var client_x_center = w*(0-x_min)/(x_max-x_min);
+var client_x_step = (w/(x_max-x_min));
+
+var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+var client_y_step = (h/(y_max-y_min));
+
+function client_to_x(client_x){
+    return (client_x - client_x_center) / client_x_step;
+}
+
+function client_to_y(client_y){
+    return (client_y_center - client_y) / client_y_step;
+}
+
+function x_to_client(x){
+    return x * client_x_step + client_x_center;
+}
+
+function y_to_client(y){
+    return client_y_center - y * client_y_step;
+}
+
+function sign_0_positive(x){ // Math.sign like with no 0 option
+    if(x >= 0)
+        return 1.0;
+    return -1.0;
+}
+
+function underflow_padded(x){
+    if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
+        return 1.e-5 * sign_0_positive(x);
+    return x;
+}
+
+function solved_linear(A, B, n){
+    var X = [];
+    for (var i = 0; i < n; ++i)
+        X[i] = 0.0;
+
+    // triangulize
+    for (var i = 0; i < n-1; ++i)
+        for (var j = 0; j < i+1; ++j) {
+            r = A[i+1][j] / underflow_padded(A[j][j]);
+            A[i+1][j] = 0.;
+            for (var b_j = j+1; b_j < n; ++b_j){
+                A[i+1][b_j] -= A[j][b_j]*r;
+            }
+            B[i+1] -= B[j]*r;
+        }
+
+    // calculate xs
+    X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
+    for (var i = n-2; i >= 0; --i){
+        var s = 0.0;
+        for (var j = i; j < n; ++j){
+            s = s + A[i][j]*X[j];
+        }
+        X[i] = (B[i] - s) / underflow_padded(A[i][i]);
+    }
+    return X;
+}
+
+function polynomial_in_x(A, x, n){
+    var y = 0.0;
+    for(var i = 0; i < n; ++i){
+        y += A[i] * Math.pow(x, i);
+    }
+    return y;
+}
+
+function draw_grid_on(context){
+    // grid
+    context.beginPath();
+    context.moveTo(0, client_y_center);
+    context.lineTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center - 5);
+    context.moveTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center + 5);
+    context.moveTo(client_x_center, h);
+    context.lineTo(client_x_center, 0);
+    context.lineTo(client_x_center - 5, 12);
+    context.moveTo(client_x_center, 0);
+    context.lineTo(client_x_center + 5, 12);
+    context.fillStyle="#000000";
+    for(var i = x_min + 1; i <= x_max - 1; i++){
+        context.moveTo(client_x_center + i*client_x_step, client_y_center);
+        context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+        context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+    }
+    for(var i = y_min + 1; i <= y_max - 1; i++){
+        context.moveTo(client_x_center, client_y_center - i*client_y_step);
+        context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+        context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+    }
+    context.strokeStyle="#000000";
+    context.stroke();
+    context.closePath();
+}
+
+// polynomial
+var polynomial_xs = [1.0, 4.0, 7.0];
+var polynomial_ys = [5.0, 2.0, 5.0];
+var polynomial_n = 3;
+var polynomial_i = 0;
+
+function init_polynomial(){
+    polynomial = document.getElementById("polynomial");
+    var canvas_rect = polynomial.getBoundingClientRect();
+    polynomial_draw(0, 0, false);
+
+    polynomial.addEventListener('mousemove', function(e){
+        var canvas_rect = polynomial.getBoundingClientRect();
+           polynomial_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+           if(e.buttons == 1){
+            polynomial_xs[polynomial_i] = client_to_x(e.clientX - canvas_rect.left);
+            polynomial_ys[polynomial_i] = client_to_y(e.clientY - canvas_rect.top);
+            polynomial_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+           }
+    }, false);
+
+    polynomial.addEventListener('mousedown', function(e){
+        var canvas_rect = polynomial.getBoundingClientRect();
+        polynomial_xs[polynomial_i] = client_to_x(e.clientX - canvas_rect.left);
+        polynomial_ys[polynomial_i] = client_to_y(e.clientY - canvas_rect.top);
+        polynomial_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    polynomial.addEventListener('mouseleave', function(e){
+        polynomial_draw(0, 0, false);
+    }, false);
+}
+
+function polynomial_draw(client_x, client_y, do_guides){
+    polynomial = document.getElementById("polynomial");
+    var polynomial_context = polynomial.getContext("2d");
+    polynomial_context.font = "16px sans-serif";
+    // background
+    polynomial_context.fillStyle="#eeeeee";
+    polynomial_context.fillRect(0, 0, w, h);
+
+    // grid
+    draw_grid_on(polynomial_context);
+
+    // polynomial
+    var A = [];
+    var B = [];
+    for(var i = 0; i < polynomial_n; ++i){
+        A[i] = [];
+        for(var j = 0; j < polynomial_n; ++j){
+            A[i][j] = Math.pow(polynomial_xs[i], j);
+        }
+        B[i] = polynomial_ys[i];
+    }
+
+    X = solved_linear(A, B, polynomial_n);
+
+    polynomial_context.beginPath();
+    for(var j = 1; j < w; ++j){
+        x1 = client_to_x(j-1);
+        x2 = client_to_x(j);
+        y1 = polynomial_in_x(X, x1, polynomial_n);
+        y2 = polynomial_in_x(X, x2, polynomial_n);
+        polynomial_context.moveTo(x_to_client(x1), y_to_client(y1));
+        polynomial_context.lineTo(x_to_client(x2), y_to_client(y2));
+    }
+    polynomial_context.strokeStyle="#661100";
+    polynomial_context.stroke();
+    polynomial_context.closePath();
+
+    // dots
+    polynomial_context.beginPath();
+    for(var i = 0; i < polynomial_n; ++i){
+        polynomial_context.moveTo(x_to_client(polynomial_xs[i])-5.5, y_to_client(polynomial_ys[i])+5.5);
+        polynomial_context.lineTo(x_to_client(polynomial_xs[i])+5.5, y_to_client(polynomial_ys[i])-5.5);
+        polynomial_context.moveTo(x_to_client(polynomial_xs[i])+5.5, y_to_client(polynomial_ys[i])+5.5);
+        polynomial_context.lineTo(x_to_client(polynomial_xs[i])-5.5, y_to_client(polynomial_ys[i])-5.5);
+    }
+    polynomial_context.strokeStyle="#AA3311";
+    polynomial_context.stroke();
+    polynomial_context.closePath();
+
+    // guides
+    if(do_guides){
+        min_d = Math.pow(polynomial_xs[0] - client_to_x(client_x), 2) + Math.pow(polynomial_ys[0] - client_to_y(client_y), 2);
+        min_i = 0;
+        for(var i = 1; i < polynomial_n; ++i){
+            var di = Math.pow(polynomial_xs[i] - client_to_x(client_x), 2) + Math.pow(polynomial_ys[i] - client_to_y(client_y), 2);
+            if(di < min_d){
+                min_d = di;
+                min_i = i;
+            }
+        }
+        polynomial_i = min_i;
+        polynomial_context.setLineDash([4, 4]);
+        polynomial_context.beginPath();
+        polynomial_context.moveTo(x_to_client(polynomial_xs[min_i]), y_to_client(polynomial_ys[min_i]));
+        polynomial_context.lineTo(client_x, client_y);
+        polynomial_context.strokeStyle="#AA3311";
+        polynomial_context.stroke();
+        polynomial_context.closePath();
+        polynomial_context.setLineDash([]);
+    }
+}
+
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+NURBS is just an acronym
+    </h1>
+    <p>
+...
+    </p>
+
+    <p class="formula">
+P(x) = ax<sup>3</sup> + bx<sup>2</sup> + cx + d 
+    </p>
+    <p>
+
+
+    <h2>
+...
+    </h2>
+    <p>
+
+    </p>
+
+    <canvas id="polynomial" width=640 height=512></canvas>
+    <script language="JavaScript">
+    init_polynomial();
+    </script>
+
+    <p>
+...
+    </p>
+
+    
+    <h2>
+Conclusion
+    </h2>
+    <p>
+
+    </p>
+
+
+    <p class="footer">
+There are more words and buttons on <a href="index.html">wordsandbuttons.online</a>.
+    </p>
+    </center>
+  </body>
+</html>
