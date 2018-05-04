@@ -217,108 +217,123 @@ function draw_grid_on(context){
     context.closePath();
 }
 
-// polynomial
-var polynomial_xs = [1.0, 4.0, 7.0];
-var polynomial_ys = [5.0, 2.0, 5.0];
-var polynomial_n = 3;
-var polynomial_i = 0;
+// nurbs
+var nurbs_control_and_knot_xs = [1.0, 3.5, 5.0, 7.0,   1.0, 2.5, 4.0, 5.5, 8.0];
+var nurbs_control_and_knot_ys = [3.0, 1.0, 2.5, 3.0,   5.0, 6.0, 6.5, 5.0, 4.0];
+var nurbs_control_n = 4;
+var nurbs_knot_n = 5;
+var nurbs_i = 0;
 
-function init_polynomial(){
-    polynomial = document.getElementById("polynomial");
-    var canvas_rect = polynomial.getBoundingClientRect();
-    polynomial_draw(0, 0, false);
+function init_nurbs(){
+    nurbs = document.getElementById("nurbs");
+    var canvas_rect = nurbs.getBoundingClientRect();
+    nurbs_draw(0, 0, false);
 
-    polynomial.addEventListener('mousemove', function(e){
-        var canvas_rect = polynomial.getBoundingClientRect();
-           polynomial_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+    nurbs.addEventListener('mousemove', function(e){
+        var canvas_rect = nurbs.getBoundingClientRect();
+           nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
            if(e.buttons == 1){
-            polynomial_xs[polynomial_i] = client_to_x(e.clientX - canvas_rect.left);
-            polynomial_ys[polynomial_i] = client_to_y(e.clientY - canvas_rect.top);
-            polynomial_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+               nurbs_control_and_knot_xs[nurbs_i] = client_to_x(e.clientX - canvas_rect.left);
+               nurbs_control_and_knot_ys[nurbs_i] = client_to_y(e.clientY - canvas_rect.top);
+               nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
            }
     }, false);
 
-    polynomial.addEventListener('mousedown', function(e){
-        var canvas_rect = polynomial.getBoundingClientRect();
-        polynomial_xs[polynomial_i] = client_to_x(e.clientX - canvas_rect.left);
-        polynomial_ys[polynomial_i] = client_to_y(e.clientY - canvas_rect.top);
-        polynomial_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    nurbs.addEventListener('mousedown', function(e){
+        var canvas_rect = nurbs.getBoundingClientRect();
+        nurbs_control_and_knot_xs[nurbs_i] = client_to_x(e.clientX - canvas_rect.left);
+        nurbs_control_and_knot_ys[nurbs_i] = client_to_y(e.clientY - canvas_rect.top);
+        nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
-    polynomial.addEventListener('mouseleave', function(e){
-        polynomial_draw(0, 0, false);
+    nurbs.addEventListener('mouseleave', function(e){
+        nurbs_draw(0, 0, false);
     }, false);
 }
 
-function polynomial_draw(client_x, client_y, do_guides){
-    polynomial = document.getElementById("polynomial");
-    var polynomial_context = polynomial.getContext("2d");
-    polynomial_context.font = "16px sans-serif";
+function nurbs_draw(client_x, client_y, do_guides){
+    nurbs = document.getElementById("nurbs");
+    var nurbs_context = nurbs.getContext("2d");
+    nurbs_context.font = "16px sans-serif";
     // background
-    polynomial_context.fillStyle="#eeeeee";
-    polynomial_context.fillRect(0, 0, w, h);
+    nurbs_context.fillStyle="#eeeeee";
+    nurbs_context.fillRect(0, 0, w, h);
 
     // grid
-    draw_grid_on(polynomial_context);
+    draw_grid_on(nurbs_context);
 
-    // polynomial
-    var A = [];
+    // nurbs
+/*    var A = [];
     var B = [];
-    for(var i = 0; i < polynomial_n; ++i){
+    for(var i = 0; i < nurbs_n; ++i){
         A[i] = [];
-        for(var j = 0; j < polynomial_n; ++j){
-            A[i][j] = Math.pow(polynomial_xs[i], j);
+        for(var j = 0; j < nurbs_n; ++j){
+            A[i][j] = Math.pow(nurbs_control_and_knot_xs[i], j);
         }
-        B[i] = polynomial_ys[i];
+        B[i] = nurbs_control_and_knot_ys[i];
     }
 
-    X = solved_linear(A, B, polynomial_n);
+    X = solved_linear(A, B, nurbs_n);
 
-    polynomial_context.beginPath();
+    nurbs_context.beginPath();
     for(var j = 1; j < w; ++j){
         x1 = client_to_x(j-1);
         x2 = client_to_x(j);
-        y1 = polynomial_in_x(X, x1, polynomial_n);
-        y2 = polynomial_in_x(X, x2, polynomial_n);
-        polynomial_context.moveTo(x_to_client(x1), y_to_client(y1));
-        polynomial_context.lineTo(x_to_client(x2), y_to_client(y2));
+        y1 = polynomial_in_x(X, x1, nurbs_n);
+        y2 = polynomial_in_x(X, x2, nurbs_n);
+        nurbs_context.moveTo(x_to_client(x1), y_to_client(y1));
+        nurbs_context.lineTo(x_to_client(x2), y_to_client(y2));
     }
-    polynomial_context.strokeStyle="#661100";
-    polynomial_context.stroke();
-    polynomial_context.closePath();
+    nurbs_context.strokeStyle="#661100";
+    nurbs_context.stroke();
+    nurbs_context.closePath();*/
+    
+    
 
-    // dots
-    polynomial_context.beginPath();
-    for(var i = 0; i < polynomial_n; ++i){
-        polynomial_context.moveTo(x_to_client(polynomial_xs[i])-5.5, y_to_client(polynomial_ys[i])+5.5);
-        polynomial_context.lineTo(x_to_client(polynomial_xs[i])+5.5, y_to_client(polynomial_ys[i])-5.5);
-        polynomial_context.moveTo(x_to_client(polynomial_xs[i])+5.5, y_to_client(polynomial_ys[i])+5.5);
-        polynomial_context.lineTo(x_to_client(polynomial_xs[i])-5.5, y_to_client(polynomial_ys[i])-5.5);
+    // control dots
+    nurbs_context.beginPath();
+    for(var i = 0; i < nurbs_control_n; ++i){
+        nurbs_context.moveTo(x_to_client(nurbs_control_and_knot_xs[i])-5.5, y_to_client(nurbs_control_and_knot_ys[i])+5.5);
+        nurbs_context.lineTo(x_to_client(nurbs_control_and_knot_xs[i])+5.5, y_to_client(nurbs_control_and_knot_ys[i])-5.5);
+        nurbs_context.moveTo(x_to_client(nurbs_control_and_knot_xs[i])+5.5, y_to_client(nurbs_control_and_knot_ys[i])+5.5);
+        nurbs_context.lineTo(x_to_client(nurbs_control_and_knot_xs[i])-5.5, y_to_client(nurbs_control_and_knot_ys[i])-5.5);
     }
-    polynomial_context.strokeStyle="#AA3311";
-    polynomial_context.stroke();
-    polynomial_context.closePath();
+    nurbs_context.strokeStyle="#AA3311";
+    nurbs_context.stroke();
+    nurbs_context.closePath();
+
+    // knot vector
+    nurbs_context.beginPath();
+    for(var i = nurbs_control_n; i < nurbs_control_n + nurbs_knot_n; ++i){
+        nurbs_context.moveTo(x_to_client(nurbs_control_and_knot_xs[i])-5.5, y_to_client(nurbs_control_and_knot_ys[i]));
+        nurbs_context.lineTo(x_to_client(nurbs_control_and_knot_xs[i])+5.5, y_to_client(nurbs_control_and_knot_ys[i]));
+        nurbs_context.moveTo(x_to_client(nurbs_control_and_knot_xs[i]), y_to_client(nurbs_control_and_knot_ys[i])+5.5);
+        nurbs_context.lineTo(x_to_client(nurbs_control_and_knot_xs[i]), y_to_client(nurbs_control_and_knot_ys[i])-5.5);
+    }
+    nurbs_context.strokeStyle="#449911";
+    nurbs_context.stroke();
+    nurbs_context.closePath();
 
     // guides
     if(do_guides){
-        min_d = Math.pow(polynomial_xs[0] - client_to_x(client_x), 2) + Math.pow(polynomial_ys[0] - client_to_y(client_y), 2);
+        min_d = Math.pow(nurbs_control_and_knot_xs[0] - client_to_x(client_x), 2) + Math.pow(nurbs_control_and_knot_ys[0] - client_to_y(client_y), 2);
         min_i = 0;
-        for(var i = 1; i < polynomial_n; ++i){
-            var di = Math.pow(polynomial_xs[i] - client_to_x(client_x), 2) + Math.pow(polynomial_ys[i] - client_to_y(client_y), 2);
+        for(var i = 1; i < nurbs_control_n + nurbs_knot_n; ++i){
+            var di = Math.pow(nurbs_control_and_knot_xs[i] - client_to_x(client_x), 2) + Math.pow(nurbs_control_and_knot_ys[i] - client_to_y(client_y), 2);
             if(di < min_d){
                 min_d = di;
                 min_i = i;
             }
         }
-        polynomial_i = min_i;
-        polynomial_context.setLineDash([4, 4]);
-        polynomial_context.beginPath();
-        polynomial_context.moveTo(x_to_client(polynomial_xs[min_i]), y_to_client(polynomial_ys[min_i]));
-        polynomial_context.lineTo(client_x, client_y);
-        polynomial_context.strokeStyle="#AA3311";
-        polynomial_context.stroke();
-        polynomial_context.closePath();
-        polynomial_context.setLineDash([]);
+        nurbs_i = min_i;
+        nurbs_context.setLineDash([4, 4]);
+        nurbs_context.beginPath();
+        nurbs_context.moveTo(x_to_client(nurbs_control_and_knot_xs[min_i]), y_to_client(nurbs_control_and_knot_ys[min_i]));
+        nurbs_context.lineTo(client_x, client_y);
+        nurbs_context.strokeStyle="#AA3311";
+        nurbs_context.stroke();
+        nurbs_context.closePath();
+        nurbs_context.setLineDash([]);
     }
 }
 
@@ -346,9 +361,9 @@ P(x) = ax<sup>3</sup> + bx<sup>2</sup> + cx + d
 
     </p>
 
-    <canvas id="polynomial" width=640 height=512></canvas>
+    <canvas id="nurbs" width=640 height=512></canvas>
     <script language="JavaScript">
-    init_polynomial();
+    init_nurbs();
     </script>
 
     <p>
