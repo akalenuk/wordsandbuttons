@@ -188,6 +188,12 @@ function polynomial_in_x(A, x, n){
     return y;
 }
 
+
+function nurbs_in_x(x, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot){
+    return x;
+}
+
+
 function draw_grid_on(context){
     // grid
     context.beginPath();
@@ -218,11 +224,14 @@ function draw_grid_on(context){
 }
 
 // nurbs
-var nurbs_control_and_knot_xs = [1.0, 3.5, 5.0, 7.0,   1.0, 2.5, 4.0, 5.5, 8.0];
-var nurbs_control_and_knot_ys = [3.0, 1.0, 2.5, 3.0,   5.0, 6.0, 6.5, 5.0, 4.0];
-var nurbs_control_and_knot_ws = [1.0, 1.0, 1.0, 1.0];
-var nurbs_control_n = 4;
+var nurbs_control_xs = [1.0, 2.5, 4.8, 6.8, 8.2];
+var nurbs_control_ys = [3.0, 2.2, 2.3, 3.5, 5.5];
+var nurbs_control_ws = [1.0, 1.0, 1.0, 1.0, 1.0];
+var nurbs_control_n = 5;
+
+var nurbs_knot = [0, 1, 2, 3, 4];
 var nurbs_knot_n = 5;
+
 var nurbs_i = 0;
 
 function init_nurbs(){
@@ -234,16 +243,16 @@ function init_nurbs(){
         var canvas_rect = nurbs.getBoundingClientRect();
            nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
            if(e.buttons == 1){
-               nurbs_control_and_knot_xs[nurbs_i] = client_to_x(e.clientX - canvas_rect.left);
-               nurbs_control_and_knot_ys[nurbs_i] = client_to_y(e.clientY - canvas_rect.top);
+               nurbs_control_xs[nurbs_i] = client_to_x(e.clientX - canvas_rect.left);
+               nurbs_control_ys[nurbs_i] = client_to_y(e.clientY - canvas_rect.top);
                nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
            }
     }, false);
 
     nurbs.addEventListener('mousedown', function(e){
         var canvas_rect = nurbs.getBoundingClientRect();
-        nurbs_control_and_knot_xs[nurbs_i] = client_to_x(e.clientX - canvas_rect.left);
-        nurbs_control_and_knot_ys[nurbs_i] = client_to_y(e.clientY - canvas_rect.top);
+        nurbs_control_xs[nurbs_i] = client_to_x(e.clientX - canvas_rect.left);
+        nurbs_control_ys[nurbs_i] = client_to_y(e.clientY - canvas_rect.top);
         nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
@@ -264,63 +273,38 @@ function nurbs_draw(client_x, client_y, do_guides){
     draw_grid_on(nurbs_context);
 
     // nurbs
-/*    var A = [];
-    var B = [];
-    for(var i = 0; i < nurbs_n; ++i){
-        A[i] = [];
-        for(var j = 0; j < nurbs_n; ++j){
-            A[i][j] = Math.pow(nurbs_control_and_knot_xs[i], j);
-        }
-        B[i] = nurbs_control_and_knot_ys[i];
-    }
-
-    X = solved_linear(A, B, nurbs_n);
-
     nurbs_context.beginPath();
     for(var j = 1; j < w; ++j){
         x1 = client_to_x(j-1);
         x2 = client_to_x(j);
-        y1 = polynomial_in_x(X, x1, nurbs_n);
-        y2 = polynomial_in_x(X, x2, nurbs_n);
+        y1 = nurbs_in_x(x1, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot);
+        y2 = nurbs_in_x(x2, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot);
         nurbs_context.moveTo(x_to_client(x1), y_to_client(y1));
         nurbs_context.lineTo(x_to_client(x2), y_to_client(y2));
     }
     nurbs_context.strokeStyle="#661100";
     nurbs_context.stroke();
-    nurbs_context.closePath();*/
+    nurbs_context.closePath();
     
     
-
     // control dots
     nurbs_context.beginPath();
     for(var i = 0; i < nurbs_control_n; ++i){
-        nurbs_context.moveTo(x_to_client(nurbs_control_and_knot_xs[i])-5.5, y_to_client(nurbs_control_and_knot_ys[i])+5.5);
-        nurbs_context.lineTo(x_to_client(nurbs_control_and_knot_xs[i])+5.5, y_to_client(nurbs_control_and_knot_ys[i])-5.5);
-        nurbs_context.moveTo(x_to_client(nurbs_control_and_knot_xs[i])+5.5, y_to_client(nurbs_control_and_knot_ys[i])+5.5);
-        nurbs_context.lineTo(x_to_client(nurbs_control_and_knot_xs[i])-5.5, y_to_client(nurbs_control_and_knot_ys[i])-5.5);
+        nurbs_context.moveTo(x_to_client(nurbs_control_xs[i])-5.5, y_to_client(nurbs_control_ys[i])+5.5);
+        nurbs_context.lineTo(x_to_client(nurbs_control_xs[i])+5.5, y_to_client(nurbs_control_ys[i])-5.5);
+        nurbs_context.moveTo(x_to_client(nurbs_control_xs[i])+5.5, y_to_client(nurbs_control_ys[i])+5.5);
+        nurbs_context.lineTo(x_to_client(nurbs_control_xs[i])-5.5, y_to_client(nurbs_control_ys[i])-5.5);
     }
     nurbs_context.strokeStyle="#AA3311";
     nurbs_context.stroke();
     nurbs_context.closePath();
 
-    // knot vector
-    nurbs_context.beginPath();
-    for(var i = nurbs_control_n; i < nurbs_control_n + nurbs_knot_n; ++i){
-        nurbs_context.moveTo(x_to_client(nurbs_control_and_knot_xs[i])-5.5, y_to_client(nurbs_control_and_knot_ys[i]));
-        nurbs_context.lineTo(x_to_client(nurbs_control_and_knot_xs[i])+5.5, y_to_client(nurbs_control_and_knot_ys[i]));
-        nurbs_context.moveTo(x_to_client(nurbs_control_and_knot_xs[i]), y_to_client(nurbs_control_and_knot_ys[i])+5.5);
-        nurbs_context.lineTo(x_to_client(nurbs_control_and_knot_xs[i]), y_to_client(nurbs_control_and_knot_ys[i])-5.5);
-    }
-    nurbs_context.strokeStyle="#449911";
-    nurbs_context.stroke();
-    nurbs_context.closePath();
-
     // guides
     if(do_guides){
-        min_d = Math.pow(nurbs_control_and_knot_xs[0] - client_to_x(client_x), 2) + Math.pow(nurbs_control_and_knot_ys[0] - client_to_y(client_y), 2);
+        min_d = Math.pow(nurbs_control_xs[0] - client_to_x(client_x), 2) + Math.pow(nurbs_control_ys[0] - client_to_y(client_y), 2);
         min_i = 0;
         for(var i = 1; i < nurbs_control_n + nurbs_knot_n; ++i){
-            var di = Math.pow(nurbs_control_and_knot_xs[i] - client_to_x(client_x), 2) + Math.pow(nurbs_control_and_knot_ys[i] - client_to_y(client_y), 2);
+            var di = Math.pow(nurbs_control_xs[i] - client_to_x(client_x), 2) + Math.pow(nurbs_control_ys[i] - client_to_y(client_y), 2);
             if(di < min_d){
                 min_d = di;
                 min_i = i;
@@ -329,7 +313,7 @@ function nurbs_draw(client_x, client_y, do_guides){
         nurbs_i = min_i;
         nurbs_context.setLineDash([4, 4]);
         nurbs_context.beginPath();
-        nurbs_context.moveTo(x_to_client(nurbs_control_and_knot_xs[min_i]), y_to_client(nurbs_control_and_knot_ys[min_i]));
+        nurbs_context.moveTo(x_to_client(nurbs_control_xs[min_i]), y_to_client(nurbs_control_ys[min_i]));
         nurbs_context.lineTo(client_x, client_y);
         nurbs_context.strokeStyle="#AA3311";
         nurbs_context.stroke();
