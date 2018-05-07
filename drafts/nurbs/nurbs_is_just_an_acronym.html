@@ -192,12 +192,57 @@ function index_in_knots(x, nurbs_knot) {
     for(var i = 0; i < nurbs_knot.length - 1; ++i) {
         if(x >= nurbs_knot[i] && x < nurbs_knot[i+1])
             return i;
-    }
+    }    
     return -1;
 }
 
 function nurbs_in_x(x, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot){
-    return x;
+    // de Boor
+    var padded_knot = [nurbs_knot[0]-4, nurbs_knot[0]-3, nurbs_knot[0]-2, nurbs_knot[0]-1]
+        .concat(nurbs_knot)
+        .concat([nurbs_knot[nurbs_knot.length-1]+1, nurbs_knot[nurbs_knot.length-1]+2, nurbs_knot[nurbs_knot.length-1]+3, nurbs_knot[nurbs_knot.length-1]+4]);
+   
+    var k = index_in_knots(x, padded_knot);
+
+    if(k == -1)
+        return NaN;
+
+    var p = 3; // degree
+    var d_x = [];
+    var d_y = [];
+    var d_w = [];
+    for(var j = 0; j < p + 1; ++j) {
+        d_x.push(nurbs_control_xs[j + k - p]);
+        d_y.push(nurbs_control_ys[j + k - p]);
+        d_w.push(nurbs_control_ws[j + k - p]);
+    }
+
+    for(var r = 1; r < p+1; ++r)
+        for(var j = p; j > r - 1; --j){
+            var alpha = (x - padded_knot[j+k-p]) / (padded_knot[j+1+k-r] - padded_knot[j+k-p]);
+            d_x[j] = (1.0 - alpha) * d_x[j-1] + alpha * d_x[j];
+            d_y[j] = (1.0 - alpha) * d_y[j-1] + alpha * d_y[j];
+            d_w[j] = (1.0 - alpha) * d_w[j-1] + alpha * d_w[j];
+        }      
+    return d_y[p] / d_w[p];
+/*def deBoor(k, x, t, c, p):
+    """
+    Evaluates S(x).
+
+    Args
+    ----
+    k: index of knot interval that contains x
+    x: position
+    t: array of knot positions, needs to be padded as described above
+    c: array of control points
+    p: degree of B-spline
+    """
+    d = [c[j + k - p] for j in range(0, p+1)]
+    for r in range(1, p+1):
+        for j in range(p, r-1, -1):
+            alpha = (x - t[j+k-p]) / (t[j+1+k-r] - t[j+k-p])
+            d[j] = (1.0 - alpha) * d[j-1] + alpha * d[j]
+    return d[p]*/
 }
 
 
