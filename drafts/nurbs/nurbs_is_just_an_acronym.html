@@ -196,7 +196,7 @@ function index_in_knots(x, nurbs_knot) {
     return -1;
 }
 
-function nurbs_in_x(x, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot){
+function nurbs_in_t(x, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot){
     // de Boor
     var padded_knot = [nurbs_knot[0]-4, nurbs_knot[0]-3, nurbs_knot[0]-2, nurbs_knot[0]-1]
         .concat(nurbs_knot)
@@ -223,8 +223,8 @@ function nurbs_in_x(x, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nur
             d_x[j] = (1.0 - alpha) * d_x[j-1] + alpha * d_x[j];
             d_y[j] = (1.0 - alpha) * d_y[j-1] + alpha * d_y[j];
             d_w[j] = (1.0 - alpha) * d_w[j-1] + alpha * d_w[j];
-        }      
-    return d_y[p] / d_w[p];
+        }
+    return [d_x[p] / d_w[p], d_y[p] / d_w[p]];
 /*def deBoor(k, x, t, c, p):
     """
     Evaluates S(x).
@@ -326,14 +326,21 @@ function nurbs_draw(client_x, client_y, do_guides){
 
     // nurbs
     nurbs_context.beginPath();
-    for(var j = 1; j < w; ++j){
+    for(var t2 = nurbs_knot[0] + 0.01; t2 < nurbs_knot[nurbs_knot.length-1]; t2 += 0.01) {
+        var t1 = t2 - 0.01;
+        var xy1 = nurbs_in_t(t1, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot);
+        var xy2 = nurbs_in_t(t2, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot);
+        nurbs_context.moveTo(x_to_client(xy1[0]), y_to_client(xy1[1]));
+        nurbs_context.lineTo(x_to_client(xy2[0]), y_to_client(xy2[1]));
+    }
+    /*for(var j = 1; j < w; ++j){
         x1 = client_to_x(j-1);
         x2 = client_to_x(j);
-        y1 = nurbs_in_x(x1, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot);
-        y2 = nurbs_in_x(x2, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot);
+        y1 = nurbs_in_t(x1, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot);
+        y2 = nurbs_in_t(x2, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot);
         nurbs_context.moveTo(x_to_client(x1), y_to_client(y1));
         nurbs_context.lineTo(x_to_client(x2), y_to_client(y2));
-    }
+    }*/
     nurbs_context.strokeStyle="#661100";
     nurbs_context.stroke();
     nurbs_context.closePath();
