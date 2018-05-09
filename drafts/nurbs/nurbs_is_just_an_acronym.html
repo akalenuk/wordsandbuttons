@@ -264,6 +264,8 @@ var nurbs_knot_n = 8;
 
 var nurbs_i = 0;
 
+var D_T = 0.1;
+
 function init_nurbs(){
     nurbs = document.getElementById("nurbs");
     var canvas_rect = nurbs.getBoundingClientRect();
@@ -303,17 +305,20 @@ function nurbs_draw(client_x, client_y, do_guides){
     draw_grid_on(nurbs_context);
 
     // nurbs
-    nurbs_context.beginPath();
-    for(var t2 = nurbs_knot[3] + 0.01; t2 < nurbs_knot[nurbs_knot.length-1]; t2 += 0.01) {
-        var t1 = t2 - 0.01;
-        var xy1 = nurbs_in_t(t1, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot);
-        var xy2 = nurbs_in_t(t2, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot);
-        nurbs_context.moveTo(x_to_client(xy1[0]), y_to_client(xy1[1]));
-        nurbs_context.lineTo(x_to_client(xy2[0]), y_to_client(xy2[1]));
+    for (var i = 0; i < nurbs_knot.length + 1; i++){
+        nurbs_context.beginPath();
+        for(var t2 = nurbs_knot[i] + D_T; t2 < nurbs_knot[i+1]; t2 += D_T) {
+            var t1 = t2 - D_T;
+            var xy1 = nurbs_in_t(t1, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot);
+            var xy2 = nurbs_in_t(t2, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot);
+            nurbs_context.moveTo(x_to_client(xy1[0]), y_to_client(xy1[1]));
+            nurbs_context.lineTo(x_to_client(xy2[0]), y_to_client(xy2[1]));
+            nurbs_context.fillText(String(i), x_to_client(xy1[0]), y_to_client(xy1[1]));
+        }        
+        nurbs_context.strokeStyle="#661100";
+        nurbs_context.stroke();
+        nurbs_context.closePath();
     }
-    nurbs_context.strokeStyle="#661100";
-    nurbs_context.stroke();
-    nurbs_context.closePath();
     
     
     // control dots
