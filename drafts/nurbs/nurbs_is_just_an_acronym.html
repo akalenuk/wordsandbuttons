@@ -188,20 +188,18 @@ function polynomial_in_x(A, x, n){
     return y;
 }
 
-function index_in_knots(x, nurbs_knot) {
+function index_in_knots(t, nurbs_knot) {
     for(var i = 0; i < nurbs_knot.length - 1; ++i) {
-        if(x >= nurbs_knot[i] && x < nurbs_knot[i+1])
+        if(t >= nurbs_knot[i] && t < nurbs_knot[i+1])
             return i;
     }    
     return -1;
 }
 
-function nurbs_in_t(t, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot){
+function nurbs_in_t(t, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot, p){
     // de Boor
     var k = index_in_knots(t, nurbs_knot);
-
-    var p = 3; // degree
-       
+     
     var d_x = [];
     var d_y = [];
     var d_w = [];
@@ -210,14 +208,15 @@ function nurbs_in_t(t, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nur
         d_y.push(nurbs_control_ys[j + k - p]);
         d_w.push(nurbs_control_ws[j + k - p]);
     }
-
-    for(var r = 1; r < p+1; ++r)
+    
+    for(var r = 1; r < p+1; ++r){
         for(var j = p; j > r - 1; --j){
             var alpha = (t - nurbs_knot[j+k-p]) / (nurbs_knot[j+1+k-r] - nurbs_knot[j+k-p]);
             d_x[j] = (1.0 - alpha) * d_x[j-1] + alpha * d_x[j];
             d_y[j] = (1.0 - alpha) * d_y[j-1] + alpha * d_y[j];
             d_w[j] = (1.0 - alpha) * d_w[j-1] + alpha * d_w[j];
         }
+    }
     return [d_x[p] / d_w[p], d_y[p] / d_w[p]];
 }
 
@@ -257,7 +256,7 @@ var nurbs_control_ys = [3.0, 2.2, 2.3, 3.5, 5.5];
 var nurbs_control_ws = [1.0, 1.0, 1.0, 1.0, 1.0];
 var nurbs_control_n = 5;
 
-var nurbs_knot = [1, 2, 3, 4, 5, 6, 7, 8];
+var nurbs_knot = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
 var nurbs_i = 0;
 
@@ -302,20 +301,21 @@ function nurbs_draw(client_x, client_y, do_guides){
     draw_grid_on(nurbs_context);
 
     // nurbs
-    for (var i = 3; i < nurbs_knot.length - 1; i++){
+    degree = 2;
+    for(var t2 = nurbs_knot[degree] + D_T; t2 < nurbs_knot[degree + nurbs_control_n - 1]; t2 += D_T) {
         nurbs_context.beginPath();
-        for(var t2 = nurbs_knot[i] + D_T; t2 < nurbs_knot[i+1]; t2 += D_T) {
-            var t1 = t2 - D_T;
-            var xy1 = nurbs_in_t(t1, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot);
-            var xy2 = nurbs_in_t(t2, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot);
-            nurbs_context.moveTo(x_to_client(xy1[0]), y_to_client(xy1[1]));
-            nurbs_context.lineTo(x_to_client(xy2[0]), y_to_client(xy2[1]));
-            nurbs_context.fillText(String(i), x_to_client(xy1[0]), y_to_client(xy1[1]));
-        }        
-        nurbs_context.strokeStyle="#661100";
+        var t1 = t2 - D_T;
+        var xy1 = nurbs_in_t(t1, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot, degree);
+        var xy2 = nurbs_in_t(t2, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot, degree);
+        nurbs_context.moveTo(x_to_client(xy1[0]), y_to_client(xy1[1]));
+        nurbs_context.lineTo(x_to_client(xy2[0]), y_to_client(xy2[1]));
+        if(index_in_knots((t1 + t2)/2, nurbs_knot) % 2 == 0)
+            nurbs_context.strokeStyle="#441100";
+        else
+            nurbs_context.strokeStyle="#FF8811";
         nurbs_context.stroke();
         nurbs_context.closePath();
-    }
+    }    
     
     // control dots
     nurbs_context.beginPath();
