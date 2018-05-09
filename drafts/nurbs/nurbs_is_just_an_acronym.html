@@ -200,10 +200,8 @@ function nurbs_in_t(t, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nur
     // de Boor
     var k = index_in_knots(t, nurbs_knot);
 
-    if(k == -1)
-        return NaN;
-
     var p = 3; // degree
+       
     var d_x = [];
     var d_y = [];
     var d_w = [];
@@ -259,8 +257,7 @@ var nurbs_control_ys = [3.0, 2.2, 2.3, 3.5, 5.5];
 var nurbs_control_ws = [1.0, 1.0, 1.0, 1.0, 1.0];
 var nurbs_control_n = 5;
 
-var nurbs_knot = [0, 1, 2, 3, 4, 5, 6, 7];
-var nurbs_knot_n = 8;
+var nurbs_knot = [1, 2, 3, 4, 5, 6, 7, 8];
 
 var nurbs_i = 0;
 
@@ -305,7 +302,7 @@ function nurbs_draw(client_x, client_y, do_guides){
     draw_grid_on(nurbs_context);
 
     // nurbs
-    for (var i = 0; i < nurbs_knot.length + 1; i++){
+    for (var i = 3; i < nurbs_knot.length - 1; i++){
         nurbs_context.beginPath();
         for(var t2 = nurbs_knot[i] + D_T; t2 < nurbs_knot[i+1]; t2 += D_T) {
             var t1 = t2 - D_T;
@@ -319,7 +316,6 @@ function nurbs_draw(client_x, client_y, do_guides){
         nurbs_context.stroke();
         nurbs_context.closePath();
     }
-    
     
     // control dots
     nurbs_context.beginPath();
