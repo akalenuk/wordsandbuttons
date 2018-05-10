@@ -250,6 +250,45 @@ function draw_grid_on(context){
     context.closePath();
 }
 
+function draw_dots_and_guides(context, grid_xs, grid_ys, grid_n, do_guides, client_x, client_y){
+    // dots
+    context.beginPath();
+    for(var i = 0; i < grid_n; ++i){
+        context.moveTo(x_to_client(grid_xs[i])-5.5, y_to_client(grid_ys[i])+5.5);
+        context.lineTo(x_to_client(grid_xs[i])+5.5, y_to_client(grid_ys[i])-5.5);
+        context.moveTo(x_to_client(grid_xs[i])+5.5, y_to_client(grid_ys[i])+5.5);
+        context.lineTo(x_to_client(grid_xs[i])-5.5, y_to_client(grid_ys[i])-5.5);
+    }
+    context.strokeStyle="#BB6644";
+    context.stroke();
+    context.closePath();
+
+    // closest point
+    var closest_i = 0;
+    min_d = Math.pow(grid_xs[0] - client_to_x(client_x), 2) + Math.pow(grid_ys[0] - client_to_y(client_y), 2);
+    for(var i = 1; i < grid_n; ++i){
+        var di = Math.pow(grid_xs[i] - client_to_x(client_x), 2) + Math.pow(grid_ys[i] - client_to_y(client_y), 2);
+        if(di < min_d){
+            min_d = di;
+            closest_i = i;
+        }
+    }
+    
+    // guides
+    if(do_guides){        
+        context.setLineDash([4, 4]);
+        context.beginPath();
+        context.moveTo(x_to_client(grid_xs[closest_i]), y_to_client(grid_ys[closest_i]));
+        context.lineTo(client_x, client_y);
+        context.strokeStyle="#AA3311";
+        context.stroke();
+        context.closePath();
+        context.setLineDash([]);
+    }
+    
+    return closest_i;
+}
+
 // nurbs
 var nurbs_control_xs = [1.0, 2.5, 4.8, 6.8, 8.2];
 var nurbs_control_ys = [3.0, 2.2, 2.3, 3.5, 5.5];
@@ -317,39 +356,11 @@ function nurbs_draw(client_x, client_y, do_guides){
         nurbs_context.closePath();
     }    
     
-    // control dots
-    nurbs_context.beginPath();
-    for(var i = 0; i < nurbs_control_n; ++i){
-        nurbs_context.moveTo(x_to_client(nurbs_control_xs[i])-5.5, y_to_client(nurbs_control_ys[i])+5.5);
-        nurbs_context.lineTo(x_to_client(nurbs_control_xs[i])+5.5, y_to_client(nurbs_control_ys[i])-5.5);
-        nurbs_context.moveTo(x_to_client(nurbs_control_xs[i])+5.5, y_to_client(nurbs_control_ys[i])+5.5);
-        nurbs_context.lineTo(x_to_client(nurbs_control_xs[i])-5.5, y_to_client(nurbs_control_ys[i])-5.5);
-    }
-    nurbs_context.strokeStyle="#AA3311";
-    nurbs_context.stroke();
-    nurbs_context.closePath();
-
-    // guides
-    if(do_guides){
-        min_d = Math.pow(nurbs_control_xs[0] - client_to_x(client_x), 2) + Math.pow(nurbs_control_ys[0] - client_to_y(client_y), 2);
-        min_i = 0;
-        for(var i = 1; i < nurbs_control_n; ++i){
-            var di = Math.pow(nurbs_control_xs[i] - client_to_x(client_x), 2) + Math.pow(nurbs_control_ys[i] - client_to_y(client_y), 2);
-            if(di < min_d){
-                min_d = di;
-                min_i = i;
-            }
-        }
-        nurbs_i = min_i;
-        nurbs_context.setLineDash([4, 4]);
-        nurbs_context.beginPath();
-        nurbs_context.moveTo(x_to_client(nurbs_control_xs[min_i]), y_to_client(nurbs_control_ys[min_i]));
-        nurbs_context.lineTo(client_x, client_y);
-        nurbs_context.strokeStyle="#AA3311";
-        nurbs_context.stroke();
-        nurbs_context.closePath();
-        nurbs_context.setLineDash([]);
-    }
+    // dots and guides
+    nurbs_i = draw_dots_and_guides(
+        nurbs_context, 
+        nurbs_control_xs, nurbs_control_ys, nurbs_control_n, 
+        do_guides, client_x, client_y);
 }
 
     </script>
