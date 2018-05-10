@@ -250,7 +250,7 @@ function draw_grid_on(context){
     context.closePath();
 }
 
-function draw_dots_and_guides(context, grid_xs, grid_ys, grid_n, do_guides, client_x, client_y){
+function draw_dots_and_guides_on(context, grid_xs, grid_ys, grid_n, do_guides, client_x, client_y){
     // dots
     context.beginPath();
     for(var i = 0; i < grid_n; ++i){
@@ -289,7 +289,24 @@ function draw_dots_and_guides(context, grid_xs, grid_ys, grid_n, do_guides, clie
     return closest_i;
 }
 
-// nurbs
+function draw_nurbs_on(context, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_control_n, nurbs_knot, degree) {
+    for(var t2 = nurbs_knot[degree] + D_T; t2 < nurbs_knot[degree + nurbs_control_n - 1]; t2 += D_T) {
+        context.beginPath();
+        var t1 = t2 - D_T;
+        var xy1 = nurbs_in_t(t1, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot, degree);
+        var xy2 = nurbs_in_t(t2, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot, degree);
+        context.moveTo(x_to_client(xy1[0]), y_to_client(xy1[1]));
+        context.lineTo(x_to_client(xy2[0]), y_to_client(xy2[1]));
+        if(index_in_knots((t1 + t2)/2, nurbs_knot) % 2 == 0)
+            context.strokeStyle="#441100";
+        else
+            context.strokeStyle="#FF8811";
+        context.stroke();
+        context.closePath();
+    }
+}
+
+// nurbs 
 var nurbs_control_xs = [1.0, 2.5, 4.8, 6.8, 8.2];
 var nurbs_control_ys = [3.0, 2.2, 2.3, 3.5, 5.5];
 var nurbs_control_ws = [1.0, 1.0, 1.0, 1.0, 1.0];
@@ -299,7 +316,8 @@ var nurbs_knot = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
 var nurbs_i = 0;
 
-var D_T = 0.1;
+var D_T = 0.02;
+
 
 function init_nurbs(){
     nurbs = document.getElementById("nurbs");
@@ -328,6 +346,7 @@ function init_nurbs(){
     }, false);
 }
 
+
 function nurbs_draw(client_x, client_y, do_guides){
     nurbs = document.getElementById("nurbs");
     var nurbs_context = nurbs.getContext("2d");
@@ -341,24 +360,11 @@ function nurbs_draw(client_x, client_y, do_guides){
 
     // nurbs
     degree = 2;
-    for(var t2 = nurbs_knot[degree] + D_T; t2 < nurbs_knot[degree + nurbs_control_n - 1]; t2 += D_T) {
-        nurbs_context.beginPath();
-        var t1 = t2 - D_T;
-        var xy1 = nurbs_in_t(t1, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot, degree);
-        var xy2 = nurbs_in_t(t2, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot, degree);
-        nurbs_context.moveTo(x_to_client(xy1[0]), y_to_client(xy1[1]));
-        nurbs_context.lineTo(x_to_client(xy2[0]), y_to_client(xy2[1]));
-        if(index_in_knots((t1 + t2)/2, nurbs_knot) % 2 == 0)
-            nurbs_context.strokeStyle="#441100";
-        else
-            nurbs_context.strokeStyle="#FF8811";
-        nurbs_context.stroke();
-        nurbs_context.closePath();
-    }    
+    draw_nurbs_on(nurbs_context, 
+        nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_control_n, nurbs_knot, degree);
     
     // dots and guides
-    nurbs_i = draw_dots_and_guides(
-        nurbs_context, 
+    nurbs_i = draw_dots_and_guides_on(nurbs_context, 
         nurbs_control_xs, nurbs_control_ys, nurbs_control_n, 
         do_guides, client_x, client_y);
 }
