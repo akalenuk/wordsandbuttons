@@ -314,42 +314,46 @@ var nurbs_control_n = 5;
 
 var nurbs_knot = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
-var nurbs_i = 0;
-var nurbs_degree = 2;
+var nurbs_bs_degree = 2;
+var nurbs_bs_i = 0;
+var nurbs_nu_i = 0;
 
 var D_T = 0.02;
 
+function all_nurbs_draw(client_x, client_y, do_guides){
+    nurbs_draw_bs(client_x, client_y, do_guides);
+    nurbs_draw_nu(client_x, client_y, do_guides);
+}
 
-function init_nurbs(){
-    nurbs = document.getElementById("nurbs");
+function init_nurbs_bs(){
+    var nurbs = document.getElementById("nurbs_bs");
     var canvas_rect = nurbs.getBoundingClientRect();
-    nurbs_draw(0, 0, false);
+    all_nurbs_draw(0, 0, false);
 
     nurbs.addEventListener('mousemove', function(e){
         var canvas_rect = nurbs.getBoundingClientRect();
-           nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-           if(e.buttons == 1){
-               nurbs_control_xs[nurbs_i] = client_to_x(e.clientX - canvas_rect.left);
-               nurbs_control_ys[nurbs_i] = client_to_y(e.clientY - canvas_rect.top);
-               nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
-           }
+        all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+            nurbs_control_xs[nurbs_bs_i] = client_to_x(e.clientX - canvas_rect.left);
+            nurbs_control_ys[nurbs_bs_i] = client_to_y(e.clientY - canvas_rect.top);
+            all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+        }
     }, false);
 
     nurbs.addEventListener('mousedown', function(e){
         var canvas_rect = nurbs.getBoundingClientRect();
-        nurbs_control_xs[nurbs_i] = client_to_x(e.clientX - canvas_rect.left);
-        nurbs_control_ys[nurbs_i] = client_to_y(e.clientY - canvas_rect.top);
-        nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+        nurbs_control_xs[nurbs_bs_i] = client_to_x(e.clientX - canvas_rect.left);
+        nurbs_control_ys[nurbs_bs_i] = client_to_y(e.clientY - canvas_rect.top);
+        all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
     nurbs.addEventListener('mouseleave', function(e){
-        nurbs_draw(0, 0, false);
+        all_nurbs_draw(0, 0, false);
     }, false);
 }
 
-
-function nurbs_draw(client_x, client_y, do_guides){
-    nurbs = document.getElementById("nurbs");
+function nurbs_draw_bs(client_x, client_y, do_guides){
+    var nurbs = document.getElementById("nurbs_bs");
     var nurbs_context = nurbs.getContext("2d");
     nurbs_context.font = "16px sans-serif";
     // background
@@ -361,24 +365,73 @@ function nurbs_draw(client_x, client_y, do_guides){
 
     // nurbs
     draw_nurbs_on(nurbs_context, 
-        nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_control_n, nurbs_knot, nurbs_degree);
+        nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_control_n, nurbs_knot, nurbs_bs_degree);
     
     // dots and guides
-    nurbs_i = draw_dots_and_guides_on(nurbs_context, 
+    nurbs_bs_i = draw_dots_and_guides_on(nurbs_context, 
         nurbs_control_xs, nurbs_control_ys, nurbs_control_n, 
         do_guides, client_x, client_y);
 }
 
-function change_nurbs_degree(){
-    nurbs_degree = Number(document.getElementById("nurbs_degree").value);
-    if(nurbs_degree == NaN || nurbs_degree < 1.0) {
-        nurbs_degree = 1.0;
+function change_nurbs_bs_degree(){
+    nurbs_bs_degree = Number(document.getElementById("nurbs_bs_degree").value);
+    if(nurbs_bs_degree == NaN || nurbs_bs_degree < 1.0) {
+        nurbs_bs_degree = 1.0;
     }
-    if(nurbs_degree > 4) {
-        nurbs_degree = 4.0;
+    if(nurbs_bs_degree > 4) {
+        nurbs_bs_degree = 4.0;
     }
-    document.getElementById("nurbs_degree").value = nurbs_degree;
-    nurbs_draw(0, 0, false);
+    document.getElementById("nurbs_bs_degree").value = nurbs_bs_degree;
+    all_nurbs_draw(0, 0, false);
+}
+
+
+function init_nurbs_nu(){
+    var nurbs = document.getElementById("nurbs_nu");
+    var canvas_rect = nurbs.getBoundingClientRect();
+    all_nurbs_draw(0, 0, false);
+
+    nurbs.addEventListener('mousemove', function(e){
+        var canvas_rect = nurbs.getBoundingClientRect();
+        all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+           nurbs_control_xs[nurbs_nu_i] = client_to_x(e.clientX - canvas_rect.left);
+           nurbs_control_ys[nurbs_nu_i] = client_to_y(e.clientY - canvas_rect.top);
+           all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+        }
+    }, false);
+
+    nurbs.addEventListener('mousedown', function(e){
+        var canvas_rect = nurbs.getBoundingClientRect();
+        nurbs_control_xs[nurbs_nu_i] = client_to_x(e.clientX - canvas_rect.left);
+        nurbs_control_ys[nurbs_nu_i] = client_to_y(e.clientY - canvas_rect.top);
+        all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    nurbs.addEventListener('mouseleave', function(e){
+        all_nurbs_draw(0, 0, false);
+    }, false);
+}
+
+function nurbs_draw_nu(client_x, client_y, do_guides){
+    var nurbs = document.getElementById("nurbs_nu");
+    var nurbs_context = nurbs.getContext("2d");
+    nurbs_context.font = "16px sans-serif";
+    // background
+    nurbs_context.fillStyle="#eeeeee";
+    nurbs_context.fillRect(0, 0, w, h);
+
+    // grid
+    draw_grid_on(nurbs_context);
+
+    // nurbs
+    draw_nurbs_on(nurbs_context, 
+        nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_control_n, nurbs_knot, 2);
+    
+    // dots and guides
+    nurbs_nu_i = draw_dots_and_guides_on(nurbs_context, 
+        nurbs_control_xs, nurbs_control_ys, nurbs_control_n, 
+        do_guides, client_x, client_y);
 }
 
     </script>
@@ -405,18 +458,19 @@ P(x) = ax<sup>3</sup> + bx<sup>2</sup> + cx + d
 
     </p>
 
-    <canvas id="nurbs" width=640 height=512></canvas>
-    <script language="JavaScript">
-    init_nurbs();
-    </script>
+    <canvas id="nurbs_bs" width=640 height=512></canvas>
     <form>
     Degree of the basis splines:
-    <input type="number" id="nurbs_degree" value="2" onchange="change_nurbs_degree()">
+    <input type="number" id="nurbs_bs_degree" value="2" onchange="change_nurbs_bs_degree()">
     </form>
     <p>
 ...
     </p>
-
+    <canvas id="nurbs_nu" width=640 height=512></canvas>
+    <script language="JavaScript">
+        init_nurbs_bs();
+        init_nurbs_nu();
+    </script>
     
     <h2>
 Conclusion
