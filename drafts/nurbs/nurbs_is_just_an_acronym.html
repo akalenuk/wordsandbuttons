@@ -387,6 +387,59 @@ function nurbs_draw_nu(client_x, client_y, do_guides){
         do_guides, client_x, client_y);
 }
 
+function init_nurbs_nu_knots(){
+    var nurbs = document.getElementById("nurbs_nu_knots");
+    var canvas_rect = nurbs.getBoundingClientRect();
+    nurbs_nu_knots_draw(0, 0, false);
+
+    nurbs.addEventListener('mousemove', function(e){
+        var canvas_rect = nurbs.getBoundingClientRect();
+        
+        // closest knot
+        nurbs_nu_knots_i = 0;
+        min_d = Math.abs(nurbs_knot[0] - client_to_x(e.clientX - canvas_rect.left));
+        for(var i = 1; i < nurbs_knot.length; ++i){
+            var di = Math.abs(nurbs_knot[i] - client_to_x(e.clientX - canvas_rect.left));
+            if(di < min_d){
+                min_d = di;
+                nurbs_nu_knots_i = i;
+            }
+        }
+    
+        nurbs_nu_knots_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+           nurbs_knot[nurbs_nu_knots_i] = client_to_x(e.clientX - canvas_rect.left);
+           nurbs_nu_knots_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+           all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+        }
+    }, false);
+
+    nurbs.addEventListener('mousedown', function(e){
+        var canvas_rect = nurbs.getBoundingClientRect();
+        nurbs_knot[nurbs_nu_knots_i] = client_to_x(e.clientX - canvas_rect.left);
+        nurbs_nu_knots_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+        all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    nurbs.addEventListener('mouseleave', function(e){
+        nurbs_nu_knots_draw(0, 0, false);
+    }, false);
+}
+
+function nurbs_nu_knots_draw(client_x, client_y, do_guides){
+    var nurbs = document.getElementById("nurbs_nu_knots");
+    var nurbs_context = nurbs.getContext("2d");
+    nurbs_context.font = "16px sans-serif";
+    // background
+    nurbs_context.fillStyle="#eeeeee";
+    nurbs_context.fillRect(0, 0, w, 128);
+    for(var i = 0; i < nurbs_knot.length-1; ++i) {
+        var x1 = x_to_client(nurbs_knot[i]);
+        var x2 = x_to_client(nurbs_knot[i+1]);
+        nurbs_context.fillStyle = between_knots_colors[i];
+        nurbs_context.fillRect(x1, 0, x2-x1, 128);
+    }
+}
     </script>
   </head>
   <body>
@@ -420,11 +473,16 @@ P(x) = ax<sup>3</sup> + bx<sup>2</sup> + cx + d
 ...
     </p>
     <canvas id="nurbs_nu" width=640 height=512></canvas>
+    <br>
+    <canvas id="nurbs_nu_knots" width=640 height=64></canvas>
+
+    
     <script language="JavaScript">
         init_nurbs_bs();
         init_nurbs_nu();
+        init_nurbs_nu_knots();
     </script>
-    
+        
     <h2>
 Conclusion
     </h2>
