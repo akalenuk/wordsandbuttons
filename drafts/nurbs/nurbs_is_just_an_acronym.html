@@ -197,7 +197,7 @@ function draw_grid_on(context){
         context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
         context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
     }
-    context.strokeStyle="#000000";
+    context.strokeStyle = "#000000";
     context.stroke();
     context.closePath();
 }
@@ -211,7 +211,7 @@ function draw_dots_and_guides_on(context, grid_xs, grid_ys, grid_n, do_guides, c
         context.moveTo(x_to_client(grid_xs[i])+5.5, y_to_client(grid_ys[i])+5.5);
         context.lineTo(x_to_client(grid_xs[i])-5.5, y_to_client(grid_ys[i])-5.5);
     }
-    context.strokeStyle="#BB6644";
+    context.strokeStyle = "#BB6644";
     context.stroke();
     context.closePath();
 
@@ -249,10 +249,7 @@ function draw_nurbs_on(context, nurbs_control_xs, nurbs_control_ys, nurbs_contro
         var xy2 = nurbs_in_t(t2, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot, degree);
         context.moveTo(x_to_client(xy1[0]), y_to_client(xy1[1]));
         context.lineTo(x_to_client(xy2[0]), y_to_client(xy2[1]));
-        if(index_in_knots((t1 + t2)/2, nurbs_knot) % 2 == 0)
-            context.strokeStyle="#441100";
-        else
-            context.strokeStyle="#FF8811";
+        context.strokeStyle = between_knots_colors[index_in_knots((t1 + t2)/2, nurbs_knot)];
         context.stroke();
         context.closePath();
     }
@@ -272,11 +269,15 @@ var nurbs_nu_i = 0;
 
 var D_T = 0.02;
 
+const between_knots_colors = ["#665566", "#FF3322", "#AA5500", "#BBAA11", "#007711", "#11EEFF", "#001188", "#AA00FF"]
+
 function all_nurbs_draw(client_x, client_y, do_guides){
     nurbs_draw_bs(client_x, client_y, do_guides);
     nurbs_draw_nu(client_x, client_y, do_guides);
 }
 
+
+// nurbs basis spline
 function init_nurbs_bs(){
     var nurbs = document.getElementById("nurbs_bs");
     var canvas_rect = nurbs.getBoundingClientRect();
