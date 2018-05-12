@@ -148,6 +148,13 @@ function index_in_knots(t, nurbs_knot) {
     return -1;
 }
 
+function affine(xs, ws) {
+    var axs = [];
+    for(var i = 0; i < xs.length; ++i)
+        axs.push(xs[i] / ws[i]);
+    return axs;
+}
+
 function nurbs_in_t(t, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot, p){
     // de Boor
     var k = index_in_knots(t, nurbs_knot);
@@ -255,6 +262,7 @@ function draw_nurbs_on(context, nurbs_control_xs, nurbs_control_ys, nurbs_contro
     }
 }
 
+
 // nurbs 
 var nurbs_control_xs = [1.0, 2.5, 4.8, 6.8, 8.2];
 var nurbs_control_ys = [3.0, 2.2, 2.3, 3.5, 5.5];
@@ -289,16 +297,16 @@ function init_nurbs_bs(){
         var canvas_rect = nurbs.getBoundingClientRect();
         all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
         if(e.buttons == 1){
-            nurbs_control_xs[nurbs_bs_i] = client_to_x(e.clientX - canvas_rect.left);
-            nurbs_control_ys[nurbs_bs_i] = client_to_y(e.clientY - canvas_rect.top);
+            nurbs_control_xs[nurbs_bs_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[nurbs_bs_i];
+            nurbs_control_ys[nurbs_bs_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[nurbs_bs_i];
             all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
         }
     }, false);
 
     nurbs.addEventListener('mousedown', function(e){
         var canvas_rect = nurbs.getBoundingClientRect();
-        nurbs_control_xs[nurbs_bs_i] = client_to_x(e.clientX - canvas_rect.left);
-        nurbs_control_ys[nurbs_bs_i] = client_to_y(e.clientY - canvas_rect.top);
+        nurbs_control_xs[nurbs_bs_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[nurbs_bs_i];
+        nurbs_control_ys[nurbs_bs_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[nurbs_bs_i];
         all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
@@ -324,7 +332,7 @@ function nurbs_draw_bs(client_x, client_y, do_guides){
     
     // dots and guides
     nurbs_bs_i = draw_dots_and_guides_on(nurbs_context, 
-        nurbs_control_xs, nurbs_control_ys, nurbs_control_n, 
+        affine(nurbs_control_xs, nurbs_control_ws), affine(nurbs_control_ys, nurbs_control_ws), nurbs_control_n, 
         do_guides, client_x, client_y);
 }
 
@@ -351,16 +359,16 @@ function init_nurbs_nu(){
         var canvas_rect = nurbs.getBoundingClientRect();
         all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
         if(e.buttons == 1){
-           nurbs_control_xs[nurbs_nu_i] = client_to_x(e.clientX - canvas_rect.left);
-           nurbs_control_ys[nurbs_nu_i] = client_to_y(e.clientY - canvas_rect.top);
+           nurbs_control_xs[nurbs_nu_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[nurbs_bs_i];
+           nurbs_control_ys[nurbs_nu_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[nurbs_bs_i];
            all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
         }
     }, false);
 
     nurbs.addEventListener('mousedown', function(e){
         var canvas_rect = nurbs.getBoundingClientRect();
-        nurbs_control_xs[nurbs_nu_i] = client_to_x(e.clientX - canvas_rect.left);
-        nurbs_control_ys[nurbs_nu_i] = client_to_y(e.clientY - canvas_rect.top);
+        nurbs_control_xs[nurbs_nu_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[nurbs_bs_i];
+        nurbs_control_ys[nurbs_nu_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[nurbs_bs_i];
         all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
@@ -386,7 +394,7 @@ function nurbs_draw_nu(client_x, client_y, do_guides){
     
     // dots and guides
     nurbs_nu_i = draw_dots_and_guides_on(nurbs_context, 
-        nurbs_control_xs, nurbs_control_ys, nurbs_control_n, 
+        affine(nurbs_control_xs, nurbs_control_ws), affine(nurbs_control_ys, nurbs_control_ws), nurbs_control_n, 
         do_guides, client_x, client_y);
 }
 
@@ -454,16 +462,16 @@ function init_nurbs_r(){
         var canvas_rect = nurbs.getBoundingClientRect();
         all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
         if(e.buttons == 1){
-           nurbs_control_xs[nurbs_r_i] = client_to_x(e.clientX - canvas_rect.left);
-           nurbs_control_ys[nurbs_r_i] = client_to_y(e.clientY - canvas_rect.top);
+           nurbs_control_xs[nurbs_r_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[nurbs_bs_i];
+           nurbs_control_ys[nurbs_r_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[nurbs_bs_i];
            all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
         }
     }, false);
 
     nurbs.addEventListener('mousedown', function(e){
         var canvas_rect = nurbs.getBoundingClientRect();
-        nurbs_control_xs[nurbs_r_i] = client_to_x(e.clientX - canvas_rect.left);
-        nurbs_control_ys[nurbs_r_i] = client_to_y(e.clientY - canvas_rect.top);
+        nurbs_control_xs[nurbs_r_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[nurbs_bs_i];
+        nurbs_control_ys[nurbs_r_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[nurbs_bs_i];
         all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
@@ -489,7 +497,7 @@ function nurbs_draw_r(client_x, client_y, do_guides){
     
     // dots and guides
     nurbs_r_i = draw_dots_and_guides_on(nurbs_context, 
-        nurbs_control_xs, nurbs_control_ys, nurbs_control_n, 
+        affine(nurbs_control_xs, nurbs_control_ws), affine(nurbs_control_ys, nurbs_control_ws), nurbs_control_n, 
         do_guides, client_x, client_y);
 }
 
@@ -500,8 +508,12 @@ function init_nurbs_r_weights(){
     nurbs.addEventListener('mousemove', function(e){
         var canvas_rect = nurbs.getBoundingClientRect();
         if(e.buttons == 1){
-           var i = Math.floor((e.clientX - canvas_rect.left) / 128);
-           nurbs_control_ws[i] = 2.0 * (1.0 - (e.clientY - canvas_rect.top) / 128.0);
+            var i = Math.floor((e.clientX - canvas_rect.left) / 128);
+            affine_x =  nurbs_control_xs[i] / nurbs_control_ws[i];
+            affine_y =  nurbs_control_ys[i] / nurbs_control_ws[i];
+            nurbs_control_ws[i] = 2.0 * (1.0 - (e.clientY - canvas_rect.top) / 128.0);
+            nurbs_control_xs[i] = affine_x * nurbs_control_ws[i];
+            nurbs_control_ys[i] = affine_y * nurbs_control_ws[i];
         }
         nurbs_draw_r_weights();
         all_nurbs_draw(0, 0, false);
@@ -510,7 +522,11 @@ function init_nurbs_r_weights(){
     nurbs.addEventListener('mousedown', function(e){
         var canvas_rect = nurbs.getBoundingClientRect();
         var i = Math.floor((e.clientX - canvas_rect.left) / 128);
+        affine_x =  nurbs_control_xs[i] / nurbs_control_ws[i];
+        affine_y =  nurbs_control_ys[i] / nurbs_control_ws[i];
         nurbs_control_ws[i] = 2.0 * (1.0 - (e.clientY - canvas_rect.top) / 128.0);
+        nurbs_control_xs[i] = affine_x * nurbs_control_ws[i];
+        nurbs_control_ys[i] = affine_y * nurbs_control_ws[i];
         nurbs_draw_r_weights();
         all_nurbs_draw(0, 0, false);
     }, false);
