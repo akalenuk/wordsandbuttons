@@ -266,6 +266,7 @@ var nurbs_degree = 2;
 
 var nurbs_bs_i = 0;
 var nurbs_nu_i = 0;
+var nurbs_r_i = 0;
 
 var D_T = 0.02;
 
@@ -274,10 +275,11 @@ const between_knots_colors = ["#665566", "#FF3322", "#AA5500", "#BBAA11", "#0077
 function all_nurbs_draw(client_x, client_y, do_guides){
     nurbs_draw_bs(client_x, client_y, do_guides);
     nurbs_draw_nu(client_x, client_y, do_guides);
+    nurbs_draw_r(client_x, client_y, do_guides);    
 }
 
 
-// nurbs basis spline
+// nurbs: basis spline
 function init_nurbs_bs(){
     var nurbs = document.getElementById("nurbs_bs");
     var canvas_rect = nurbs.getBoundingClientRect();
@@ -339,6 +341,7 @@ function change_nurbs_degree(){
 }
 
 
+// nurbs: non-uniform
 function init_nurbs_nu(){
     var nurbs = document.getElementById("nurbs_nu");
     var canvas_rect = nurbs.getBoundingClientRect();
@@ -440,6 +443,103 @@ function nurbs_nu_knots_draw(client_x, client_y, do_guides){
         nurbs_context.fillRect(x1, 0, x2-x1, 128);
     }
 }
+
+// nurbs: rational
+function init_nurbs_r(){
+    var nurbs = document.getElementById("nurbs_r");
+    var canvas_rect = nurbs.getBoundingClientRect();
+    all_nurbs_draw(0, 0, false);
+
+    nurbs.addEventListener('mousemove', function(e){
+        var canvas_rect = nurbs.getBoundingClientRect();
+        all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+           nurbs_control_xs[nurbs_r_i] = client_to_x(e.clientX - canvas_rect.left);
+           nurbs_control_ys[nurbs_r_i] = client_to_y(e.clientY - canvas_rect.top);
+           all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+        }
+    }, false);
+
+    nurbs.addEventListener('mousedown', function(e){
+        var canvas_rect = nurbs.getBoundingClientRect();
+        nurbs_control_xs[nurbs_r_i] = client_to_x(e.clientX - canvas_rect.left);
+        nurbs_control_ys[nurbs_r_i] = client_to_y(e.clientY - canvas_rect.top);
+        all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    nurbs.addEventListener('mouseleave', function(e){
+        all_nurbs_draw(0, 0, false);
+    }, false);
+}
+
+function nurbs_draw_r(client_x, client_y, do_guides){
+    var nurbs = document.getElementById("nurbs_r");
+    var nurbs_context = nurbs.getContext("2d");
+    nurbs_context.font = "16px sans-serif";
+    // background
+    nurbs_context.fillStyle="#eeeeee";
+    nurbs_context.fillRect(0, 0, w, h);
+
+    // grid
+    draw_grid_on(nurbs_context);
+
+    // nurbs
+    draw_nurbs_on(nurbs_context, 
+        nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_control_n, nurbs_knot, nurbs_degree);
+    
+    // dots and guides
+    nurbs_r_i = draw_dots_and_guides_on(nurbs_context, 
+        nurbs_control_xs, nurbs_control_ys, nurbs_control_n, 
+        do_guides, client_x, client_y);
+}
+
+function init_nurbs_r_weights(){
+    var nurbs = document.getElementById("nurbs_r_weights");
+    nurbs_draw_r_weights();
+
+    nurbs.addEventListener('mousemove', function(e){
+        var canvas_rect = nurbs.getBoundingClientRect();
+        if(e.buttons == 1){
+           var i = Math.floor((e.clientX - canvas_rect.left) / 128);
+           nurbs_control_ws[i] = 2.0 * (1.0 - (e.clientY - canvas_rect.top) / 128.0);
+        }
+        nurbs_draw_r_weights();
+        all_nurbs_draw(0, 0, false);
+    }, false);
+
+    nurbs.addEventListener('mousedown', function(e){
+        var canvas_rect = nurbs.getBoundingClientRect();
+        var i = Math.floor((e.clientX - canvas_rect.left) / 128);
+        nurbs_control_ws[i] = 2.0 * (1.0 - (e.clientY - canvas_rect.top) / 128.0);
+        nurbs_draw_r_weights();
+        all_nurbs_draw(0, 0, false);
+    }, false);
+}
+
+function nurbs_draw_r_weights(){
+    var nurbs = document.getElementById("nurbs_r_weights");
+    var nurbs_context = nurbs.getContext("2d");
+    nurbs_context.font = "14px sans-serif";
+    // background
+    nurbs_context.fillStyle="#eeeeee";
+    nurbs_context.fillRect(0, 0, w, 128);
+
+    for(var i = 0; i < nurbs_control_n; ++i) {
+        var x = i * 128.0 + 2.5;
+        var y = 128.0 - (nurbs_control_ws[i] * 64.0) + 0.5;
+        nurbs_context.fillStyle="#BB6644";
+        if(nurbs_control_ws[i] < 1.0)
+    	    nurbs_context.fillText("W" + String(i+1) + " = " + nurbs_control_ws[i].toFixed(2), x + 8, y + 16);
+    	else
+        	nurbs_context.fillText("W" + String(i+1) + " = " + nurbs_control_ws[i].toFixed(2), x + 8, y - 12);
+	    nurbs_context.beginPath();
+	    nurbs_context.strokeStyle="#BB6644";
+	    nurbs_context.moveTo(x, y);
+	    nurbs_context.lineTo(x+123, y);
+	    nurbs_context.stroke();
+	    nurbs_context.closePath();
+    }
+}
     </script>
   </head>
   <body>
@@ -475,12 +575,19 @@ P(x) = ax<sup>3</sup> + bx<sup>2</sup> + cx + d
     <canvas id="nurbs_nu" width=640 height=512></canvas>
     <br>
     <canvas id="nurbs_nu_knots" width=640 height=64></canvas>
-
+    <p>
+...
+    </p>
+    <canvas id="nurbs_r" width=640 height=512></canvas>
+    <br>
+    <canvas id="nurbs_r_weights" width=640 height=128></canvas>
     
     <script language="JavaScript">
         init_nurbs_bs();
         init_nurbs_nu();
         init_nurbs_nu_knots();
+        init_nurbs_r();
+        init_nurbs_r_weights();
     </script>
         
     <h2>
