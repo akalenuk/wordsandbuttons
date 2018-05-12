@@ -557,19 +557,68 @@ function nurbs_draw_r_weights(){
     }
 }
 
+// nurbs: circle
+const w_odd = 1.0 / Math.sqrt(2);
+var circle_control_xs = [1.0,  w_odd,  0.0, -w_odd, -1.0, -w_odd,  0.0,  w_odd,  1.0];
+var circle_control_ys = [0.0,  w_odd,  1.0,  w_odd,  0.0, -w_odd, -1.0, -w_odd,  0.0];
+var circle_control_ws = [1.0,  w_odd,  1.0,  w_odd,  1.0,  w_odd,  1.0,  w_odd,  1.0];
+var circle_control_n = circle_control_xs.length;
+var circle_knot = [0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4];
+var circle_degree = 2;
 
-function set_default() {
-    nurbs_control_xs = [1.0, 2.5, 4.8, 6.8, 8.2];
-    nurbs_control_ys = [3.0, 2.2, 2.3, 3.5, 5.5];
-    nurbs_control_ws = [1.0, 1.0, 1.0, 1.0, 1.0];
-    nurbs_control_n = 5;
+var circle_i = 0;
 
-    nurbs_knot = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    nurbs_degree = 2;
+function init_circle(){
+    for(var i = 0; i < circle_control_n; ++i) {
+        circle_control_xs[i] = (circle_control_xs[i] / circle_control_ws[i] * 2.5 + 4) * circle_control_ws[i];
+        circle_control_ys[i] = (circle_control_ys[i] / circle_control_ws[i] * 2.5 + 3.5) * circle_control_ws[i];
+    }
+
+    var nurbs = document.getElementById("circle");
+    var canvas_rect = nurbs.getBoundingClientRect();
+    circle_draw(0, 0, false);
+
+    nurbs.addEventListener('mousemove', function(e){
+        var canvas_rect = nurbs.getBoundingClientRect();
+        circle_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+           circle_control_xs[circle_i] = client_to_x(e.clientX - canvas_rect.left) * circle_control_ws[circle_i];
+           circle_control_ys[circle_i] = client_to_y(e.clientY - canvas_rect.top) * circle_control_ws[circle_i];
+           circle_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+        }
+    }, false);
+
+    nurbs.addEventListener('mousedown', function(e){
+        var canvas_rect = nurbs.getBoundingClientRect();
+        circle_control_xs[circle_i] = client_to_x(e.clientX - canvas_rect.left) * circle_control_ws[circle_i];
+        circle_control_ys[circle_i] = client_to_y(e.clientY - canvas_rect.top) * circle_control_ws[circle_i];
+        circle_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    nurbs.addEventListener('mouseleave', function(e){
+        circle_draw(0, 0, false);
+    }, false);
+}
+
+function circle_draw(client_x, client_y, do_guides){
+    var nurbs = document.getElementById("circle");
+    var circle_context = nurbs.getContext("2d");
+    circle_context.font = "16px sans-serif";
+    // background
+    circle_context.fillStyle="#eeeeee";
+    circle_context.fillRect(0, 0, w, h);
+
+    // grid
+    draw_grid_on(circle_context);
+
+    // nurbs
+    draw_nurbs_on(circle_context, 
+        circle_control_xs, circle_control_ys, circle_control_ws, circle_control_n, circle_knot, circle_degree);
     
-    nurbs_draw_r_weights();
-    all_nurbs_draw(0, 0, false);
-    nurbs_nu_knots_draw(0, 0, false);
+    // dots and guides
+    circle_i = draw_dots_and_guides_on(circle_context, 
+        affine(circle_control_xs, circle_control_ws), affine(circle_control_ys, circle_control_ws), circle_control_n, 
+        do_guides, client_x, client_y);
 }
 
     </script>
@@ -617,16 +666,15 @@ P(x) = ax<sup>3</sup> + bx<sup>2</sup> + cx + d
     <p>
 ...
     </p>
-    <button class="button" id="set_default" onclick="set_default()">Reset to default</button>
-    <button class="button" id="set_circle" onclick="set_circle()">Make circle</button>
-    <button class="button" id="set_cubic" onclick="set_cubic()">Make cubic</button>
-    
+    <canvas id="circle" width=640 height=512></canvas>
+        
     <script language="JavaScript">
         init_nurbs_bs();
         init_nurbs_nu();
         init_nurbs_nu_knots();
         init_nurbs_r();
         init_nurbs_r_weights();
+        init_circle();
     </script>
         
     <h2>
