@@ -257,7 +257,9 @@ function draw_nurbs_on(context, nurbs_control_xs, nurbs_control_ys, nurbs_contro
         context.moveTo(x_to_client(xy1[0]), y_to_client(xy1[1]));
         context.lineTo(x_to_client(xy2[0]), y_to_client(xy2[1]));
         context.strokeStyle = between_knots_colors[index_in_knots((t1 + t2)/2, nurbs_knot)];
+        context.lineWidth = 2;
         context.stroke();
+        context.lineWidth = 1;
         context.closePath();
     }
 }
@@ -637,16 +639,16 @@ Interpolation is intuitive. You set a number of control points and you expect a 
     <p>
 NURBS is one way to answer these questions. It is basically three concepts put together. Basis spline that is non-uniform and rational. 
     </p>
-    <p>
-Non
+    <p style="font-family: monospace;">
+NURBS = Non
 <br>
-Uniform
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Uniform
 <br>
-Rational
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Rational
 <br>
-Basis
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Basis
 <br>
-Spline
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Spline
     </p>
     <p>
 Let's go through these concept one in a time.
@@ -654,18 +656,15 @@ Let's go through these concept one in a time.
 
     <h2>
 Basis spline
-    </h2>
-    <p class="formula">
-P<sub>3</sub>(x) = ax<sup>3</sup> + bx<sup>2</sup> + cx + d 
+    </h2>    
+    <p>
+The idea here is: for each parameter <t>t</i> we can get a nice continous curve by mixing our control points in different proportions determined by some function of <t>t</i>. For basis spline these proportions are determined by the basis polynomials of certain degree.
     </p>
     <p>
-
-
-    <h2>
-...
-    </h2>
+Just like with the polynomial interpolation, you need a certain amount of points to set a polynomial. 2 points for linear, 3 for quadratic, 4 for cubic etc. This means that if we have 5 control points and we want to turn them into a piecewise polynomial function, we can have it as a 4-piece piecewise linear, 3-piece piecewise quadratic, 2-piece piecewise cubic, or a single polynomial of a degree 4.
+    </p>
     <p>
-
+Here is the example or NURBS-curve built by <a href="https://en.wikipedia.org/wiki/De_Boor%27s_algorithm">de Boor's algorithm</a>. You can select the degree and you can move points around as well. For now it consists of parameterically equal pieces, each one having its own color. The higher the degree — the shorter the curve you get. It's ok, you just get less basis polynomials — ergo less pieces.
     </p>
 
     <canvas id="nurbs_bs" width=640 height=512></canvas>
@@ -673,6 +672,10 @@ P<sub>3</sub>(x) = ax<sup>3</sup> + bx<sup>2</sup> + cx + d
     Degree of the basis splines:
     <input type="number" id="nurbs_degree" value="2" onchange="change_nurbs_degree()">
     </form>
+    
+    <h2>
+Non-uniform
+    </h2>    
     <p>
 ...
     </p>
