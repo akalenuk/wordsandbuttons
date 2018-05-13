@@ -105,6 +105,17 @@ button {
     margin-right:8pt;
     font-size: 16pt;
 }
+
+pre {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 12pt;
+    text-align: left;
+    width: 505pt;
+}
     </style>
     <script language="JavaScript">
 
@@ -694,16 +705,78 @@ The input for a NURBS therefore also consists of a <b>knot vector</b>. Every kno
     
     <h2>
 Rational
-    </h2>    
-    <canvas id="nurbs_r" width=640 height=512></canvas>
+    </h2>
+    <p>
+This may be tricky if you are not familiar with the concept of <a href="http://wordsandbuttons.online/interactive_guide_to_homogeneous_coordinates.html">homogeneous coordinates</a>. Long story short, there is less conventional way to denote points on a plane. Usually we do it like this:
+    </p>
+    <p class="formula">
+    P = (x, y)
+    </p>
+    <p>
+But we may as well add a third coordinate keeping a correspondence between the two ways:
+    </p>
+    <p class="formula">
+    P = (x<sub>h</sub>, y<sub>h</sub>, w<sub>h</sub>)
     <br>
+    x = x<sub>h</sub> / w<sub>h</sub>
+    <br>
+    y = y<sub>h</sub> / w<sub>h</sub>
+    </p>
+    <p>
+Not getting into the rationale for that in the general case, for us this affects the weighting scheme in a rather pragmatic way. The points with greater <i>w</i> “attract” the curve more. This is yet again another way to control our output.
+    </p>
+    <canvas id="nurbs_r" width=640 height=512></canvas>
+    <p>
+These are the weghts of corresponding points. You can drag them up and down.
+    </p>
     <canvas id="nurbs_r_weights" width=640 height=128></canvas>
     
     <p>
-...
+This means that, if you don't want to get deep into all this projective space stuff, that for NURBS every point also has its <b>weight</b>.
+    </p>
+    <p class="formula">
+<i>w<sub>h</sub></i>: <i>(x, y) = (x<sub>h</sub>w<sub>h</sub>, y<sub>h</sub>w<sub>h</sub>, w<sub>h</sub>)</i>. 
+    </p>
+    <p>
+This completes the input for NURBS.    
+    </p>
+    <h2>
+Conclusion
+    </h2>
+    <p>
+So to set up a NURBS curve you need:
+    </p>
+    <ul>
+    <li>a degree of basis polynomials</li>
+    <li>control points in form of <i>(x, y, w)</i></li>
+    <li>knot vector as a list of numbers</li>
+    </ul>
+    <p>
+But why bother? Why do we need all this control? What's wrong with simple <a href="https://en.wikipedia.org/wiki/Composite_B%C3%A9zier_curve">Bezier splines</a>?
+    </p>
+    <p>
+Well, for one you can't do this with Bezier:
     </p>
     <canvas id="circle" width=640 height=512></canvas>
-        
+    <p>
+This is a real circle, not a model. The NURBS recepie is:
+    </p>        
+    <pre>
+degree = 2;
+
+xs = [1,  √2/2,  0, -√2/2, -1, -√2/2,  0,  √2/2,  1]
+ys = [0,  √2/2,  1,  √2/2,  0, -√2/2, -1, -√2/2,  0]
+ws = [1,  √2/2,  1,  √2/2,  1,  √2/2,  1,  √2/2,  1]
+
+knots = [0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4]
+    </pre>
+    <p> 
+Ok, I also had to scale and translate it to make it bigger and fit a plot canvas nicer. But that's irrelevant. What is important, with NURBS you can do analytical curves and surfaces. Lines, circles, conics, etc. And, of course, you can do Bezier curves as well. You don't need special kinds of objects for all that. That's why NURBS are so popular in CAD systems.
+    </p>
+    <p>
+Not because they are complicated, but because they make computational geometry much simpler.
+    </p>
+    
     <script language="JavaScript">
         init_nurbs_bs();
         init_nurbs_nu();
@@ -712,13 +785,6 @@ Rational
         init_nurbs_r_weights();
         init_circle();
     </script>
-        
-    <h2>
-Conclusion
-    </h2>
-    <p>
-
-    </p>
 
 
     <p class="footer">
