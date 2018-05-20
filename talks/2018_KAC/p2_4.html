@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Part 2.4. Chebyshev nodes</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.comment {
+    font-size: 12pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
+
+.formula {
+    font-family: sans-serif;
+    font-size: 15pt;
+    font-style: italic;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+.footer {
+    margin-top: 64pt;
+    padding-bottom: 32pt;
+    font-family: sans-serif;
+    font-size: 16pt;
+    text-align: left;
+}
+
+table {
+    font-family: sans-serif;
+    font-size: 13pt;
+    font-style: italic;
+    width: 505pt;
+    text-align: center;
+}
+
+td {
+    vertical-align: text-top;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+}
+
+input[type="text"] {
+    width: 100pt;
+    height: 22pt;
+    margin: 8pt 8pt 8pt 8pt;
+    padding-left: 3pt;
+    font-size: 16pt;
+}
+
+button {
+    width: 108pt;
+    height: 28pt;
+    margin-left:4pt;
+    margin-right:4pt;
+    font-size: 16pt;
+}
+    </style>
+    <script language="JavaScript">
+
+// client
+var w = 640.0;
+var h = 512.0;
+
+// visible region
+var x_min = -1.0;
+var y_min = -1.0;
+var x_max = 9.0;
+var y_max = 7.0;
+
+var client_x_center = w*(0-x_min)/(x_max-x_min);
+var client_x_step = (w/(x_max-x_min));
+
+var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+var client_y_step = (h/(y_max-y_min));
+
+function client_to_x(client_x){
+    return (client_x - client_x_center) / client_x_step;
+}
+
+function client_to_y(client_y){
+    return (client_y_center - client_y) / client_y_step;
+}
+
+function x_to_client(x){
+    return x * client_x_step + client_x_center;
+}
+
+function y_to_client(y){
+    return client_y_center - y * client_y_step;
+}
+
+function sign_0_positive(x){ // Math.sign like with no 0 option
+    if(x >= 0)
+        return 1.0;
+    return -1.0;
+}
+
+function underflow_padded(x){
+    if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
+        return 1.e-5 * sign_0_positive(x);
+    return x;
+}
+
+function solved_linear(A, B, n){
+    var X = [];
+    for (var i = 0; i < n; ++i)
+        X[i] = 0.0;
+
+    // triangulize
+    for (var i = 0; i < n-1; ++i)
+        for (var j = 0; j < i+1; ++j) {
+            r = A[i+1][j] / underflow_padded(A[j][j]);
+            A[i+1][j] = 0.;
+            for (var b_j = j+1; b_j < n; ++b_j){
+                A[i+1][b_j] -= A[j][b_j]*r;
+            }
+            B[i+1] -= B[j]*r;
+        }
+
+    // calculate xs
+    X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
+    for (var i = n-2; i >= 0; --i){
+        var s = 0.0;
+        for (var j = i; j < n; ++j){
+            s = s + A[i][j]*X[j];
+        }
+        X[i] = (B[i] - s) / underflow_padded(A[i][i]);
+    }
+    return X;
+}
+
+function polynomial_in_x(A, x, n){
+    var y = 0.0;
+    for(var i = 0; i < n; ++i){
+        y += A[i] * Math.pow(x, i);
+    }
+    return y;
+}
+
+function draw_grid_on(context){
+    // grid
+    context.beginPath();
+    context.moveTo(0, client_y_center);
+    context.lineTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center - 5);
+    context.moveTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center + 5);
+    context.moveTo(client_x_center, h);
+    context.lineTo(client_x_center, 0);
+    context.lineTo(client_x_center - 5, 12);
+    context.moveTo(client_x_center, 0);
+    context.lineTo(client_x_center + 5, 12);
+    context.fillStyle="#000000";
+    for(var i = x_min + 1; i <= x_max - 1; i++){
+        context.moveTo(client_x_center + i*client_x_step, client_y_center);
+        context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+        context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+    }
+    for(var i = y_min + 1; i <= y_max - 1; i++){
+        context.moveTo(client_x_center, client_y_center - i*client_y_step);
+        context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+        context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+    }
+    context.strokeStyle="#000000";
+    context.stroke();
+    context.closePath();
+}
+
+// polynomial
+var polynomial_xs = [1.0, 4.0, 7.0];
+var polynomial_ys = [5.0, 2.0, 5.0];
+var polynomial_n = 3;
+var polynomial_i = 0;
+
+function init_polynomial(){
+    polynomial = document.getElementById("polynomial");
+    var canvas_rect = polynomial.getBoundingClientRect();
+    polynomial_draw(0, 0, false);
+
+    polynomial.addEventListener('mousemove', function(e){
+        var canvas_rect = polynomial.getBoundingClientRect();
+           polynomial_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+           if(e.buttons == 1){
+            polynomial_xs[polynomial_i] = client_to_x(e.clientX - canvas_rect.left);
+            polynomial_ys[polynomial_i] = client_to_y(e.clientY - canvas_rect.top);
+            polynomial_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+           }
+    }, false);
+
+    polynomial.addEventListener('mousedown', function(e){
+        var canvas_rect = polynomial.getBoundingClientRect();
+        polynomial_xs[polynomial_i] = client_to_x(e.clientX - canvas_rect.left);
+        polynomial_ys[polynomial_i] = client_to_y(e.clientY - canvas_rect.top);
+        polynomial_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    polynomial.addEventListener('mouseleave', function(e){
+        polynomial_draw(0, 0, false);
+    }, false);
+}
+
+function polynomial_draw(client_x, client_y, do_guides){
+    polynomial = document.getElementById("polynomial");
+    var polynomial_context = polynomial.getContext("2d");
+    polynomial_context.font = "16px sans-serif";
+    // background
+    polynomial_context.fillStyle="#eeeeee";
+    polynomial_context.fillRect(0, 0, w, h);
+
+    // grid
+    draw_grid_on(polynomial_context);
+
+    // polynomial
+    var A = [];
+    var B = [];
+    for(var i = 0; i < polynomial_n; ++i){
+        A[i] = [];
+        for(var j = 0; j < polynomial_n; ++j){
+            A[i][j] = Math.pow(polynomial_xs[i], j);
+        }
+        B[i] = polynomial_ys[i];
+    }
+
+    X = solved_linear(A, B, polynomial_n);
+
+    polynomial_system = document.getElementById("polynomial_system");
+    polynomial_system.innerHTML = "P(x<sub>1</sub>) = "+polynomial_xs[0].toFixed(2)+"<sup>2</sup>a + "+polynomial_xs[0].toFixed(2)+" b + c = "+polynomial_ys[0].toFixed(2);
+    polynomial_system.innerHTML += "<br>";
+    polynomial_system.innerHTML += "P(x<sub>2</sub>) = "+polynomial_xs[1].toFixed(2)+"<sup>2</sup>a + "+polynomial_xs[1].toFixed(2)+" b + c = "+polynomial_ys[1].toFixed(2);
+    polynomial_system.innerHTML += "<br>";
+    polynomial_system.innerHTML += "P(x<sub>3</sub>) = "+polynomial_xs[2].toFixed(2)+"<sup>2</sup>a + "+polynomial_xs[2].toFixed(2)+" b + c = "+polynomial_ys[2].toFixed(2);
+    polynomial_formula = document.getElementById("polynomial_formula");
+    polynomial_formula.innerHTML = "a = " + X[2].toFixed(2) + ", b = " + X[1].toFixed(2) + ", c = " + X[0].toFixed(2);
+    polynomial_formula.innerHTML += "<br>";
+    polynomial_formula.innerHTML += "P(x) = " + X[2].toFixed(2) + "x<sup>2</sup> + " + X[1].toFixed(2) + "x + " + X[0].toFixed(2);
+
+    polynomial_context.beginPath();
+    for(var j = 1; j < w; ++j){
+        x1 = client_to_x(j-1);
+        x2 = client_to_x(j);
+        y1 = polynomial_in_x(X, x1, polynomial_n);
+        y2 = polynomial_in_x(X, x2, polynomial_n);
+        polynomial_context.moveTo(x_to_client(x1), y_to_client(y1));
+        polynomial_context.lineTo(x_to_client(x2), y_to_client(y2));
+    }
+    polynomial_context.strokeStyle="#661100";
+    polynomial_context.stroke();
+    polynomial_context.closePath();
+
+    // dots
+    polynomial_context.beginPath();
+    for(var i = 0; i < polynomial_n; ++i){
+        polynomial_context.moveTo(x_to_client(polynomial_xs[i])-5.5, y_to_client(polynomial_ys[i])+5.5);
+        polynomial_context.lineTo(x_to_client(polynomial_xs[i])+5.5, y_to_client(polynomial_ys[i])-5.5);
+        polynomial_context.moveTo(x_to_client(polynomial_xs[i])+5.5, y_to_client(polynomial_ys[i])+5.5);
+        polynomial_context.lineTo(x_to_client(polynomial_xs[i])-5.5, y_to_client(polynomial_ys[i])-5.5);
+    }
+    polynomial_context.strokeStyle="#AA3311";
+    polynomial_context.stroke();
+    polynomial_context.closePath();
+
+    // guides
+    if(do_guides){
+        min_d = Math.pow(polynomial_xs[0] - client_to_x(client_x), 2) + Math.pow(polynomial_ys[0] - client_to_y(client_y), 2);
+        min_i = 0;
+        for(var i = 1; i < polynomial_n; ++i){
+            var di = Math.pow(polynomial_xs[i] - client_to_x(client_x), 2) + Math.pow(polynomial_ys[i] - client_to_y(client_y), 2);
+            if(di < min_d){
+                min_d = di;
+                min_i = i;
+            }
+        }
+        polynomial_i = min_i;
+        polynomial_context.setLineDash([4, 4]);
+        polynomial_context.beginPath();
+        polynomial_context.moveTo(x_to_client(polynomial_xs[min_i]), y_to_client(polynomial_ys[min_i]));
+        polynomial_context.lineTo(client_x, client_y);
+        polynomial_context.strokeStyle="#AA3311";
+        polynomial_context.stroke();
+        polynomial_context.closePath();
+        polynomial_context.setLineDash([]);
+    }
+}
+
+
+// synthesis
+var synthesis_xs = [-0.5, 1.0, 7.0, 8.5];
+var synthesis_ys = [ 2.0, 1.0, 6.0, 5.0];
+var synthesis_n = 4;
+var synthesis_i = 0;
+
+function init_synthesis(){
+    synthesis = document.getElementById("synthesis");
+    var canvas_rect = synthesis.getBoundingClientRect();
+    synthesis_draw(0, 0, false);
+
+    synthesis.addEventListener('mousemove', function(e){
+        var canvas_rect = synthesis.getBoundingClientRect();
+        synthesis_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+            synthesis_xs[synthesis_i] = client_to_x(e.clientX - canvas_rect.left);
+            synthesis_ys[synthesis_i] = client_to_y(e.clientY - canvas_rect.top);
+            synthesis_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+        }
+    }, false);
+
+    synthesis.addEventListener('mousedown', function(e){
+        var canvas_rect = synthesis.getBoundingClientRect();
+        synthesis_xs[synthesis_i] = client_to_x(e.clientX - canvas_rect.left);
+        synthesis_ys[synthesis_i] = client_to_y(e.clientY - canvas_rect.top);
+        synthesis_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    synthesis.addEventListener('mouseleave', function(e){
+        synthesis_draw(0, 0, false);
+    }, false);
+}
+
+function synthesis_draw(client_x, client_y, do_guides){
+    synthesis = document.getElementById("synthesis");
+    var synthesis_context = synthesis.getContext("2d");
+    synthesis_context.font = "16px sans-serif";
+    // background
+    synthesis_context.fillStyle="#eeeeee";
+    synthesis_context.fillRect(0, 0, w, h);
+
+    // synthesis
+    var A = [];
+    var B = [];
+
+    A[0] = [];
+    for(var j = 0; j < synthesis_n-1; ++j)
+        A[0][j+1] = Math.pow(synthesis_xs[1], j) * (j+1);
+    A[0][0] = 0.0;
+    B[0] = (synthesis_ys[1] - synthesis_ys[0]) / (synthesis_xs[1] - synthesis_xs[0]);
+
+    for(var i = 1; i < synthesis_n-1; ++i){
+        A[i] = [];
+        for(var j = 0; j < synthesis_n; ++j){
+            A[i][j] = Math.pow(synthesis_xs[i], j);
+        }
+        B[i] = synthesis_ys[i];
+    }
+
+    A[synthesis_n-1] = [];
+    for(var j = 0; j < synthesis_n-1; ++j)
+        A[synthesis_n-1][j+1] = Math.pow(synthesis_xs[synthesis_n-2], j) * (j+1);
+    A[synthesis_n-1][0] = 0.0;
+    B[synthesis_n-1] = (synthesis_ys[synthesis_n-1] - synthesis_ys[synthesis_n-2]) / (synthesis_xs[synthesis_n-1] - synthesis_xs[synthesis_n-2]);
+
+    synthesis_system = document.getElementById("synthesis_system");
+    synthesis_system.innerHTML = "P(x<sub>1</sub>)' = "+A[0][3].toFixed(1)+"a + "+A[0][2].toFixed(1)+"b + "+A[0][1].toFixed(1)+"c = "+B[0].toFixed(1);
+    synthesis_system.innerHTML += "<br>";
+    synthesis_system.innerHTML += "P(x<sub>1</sub>) = "+A[1][3].toFixed(1)+"a + "+A[1][2].toFixed(1)+"b + "+A[1][1].toFixed(1)+"c + "+A[1][0].toFixed(1)+"d = "+B[1].toFixed(1);
+    synthesis_system.innerHTML += "<br>";
+    synthesis_system.innerHTML += "P(x<sub>2</sub>) = "+A[2][3].toFixed(1)+"a + "+A[2][2].toFixed(1)+"b + "+A[2][1].toFixed(1)+"c + "+A[2][0].toFixed(1)+"d = "+B[2].toFixed(1);
+    synthesis_system.innerHTML += "<br>";
+    synthesis_system.innerHTML += "P(x<sub>2</sub>)' = "+A[3][3].toFixed(1)+"a + "+A[3][2].toFixed(1)+"b + "+A[3][1].toFixed(1)+"c = "+B[3].toFixed(1);
+
+    X = solved_linear(A, B, synthesis_n);
+
+    synthesis_formula = document.getElementById("synthesis_formula");
+    synthesis_formula.innerHTML = "a = " + X[3].toFixed(2) + ", b = " + X[2].toFixed(2) + ", c = " + X[1].toFixed(2) + ", d = " + X[0].toFixed(2);
+    synthesis_formula.innerHTML += "<br>";
+    synthesis_formula.innerHTML += "P(x) = " + X[3].toFixed(2) + "x<sup>3</sup> + " + X[2].toFixed(2) + "x<sup>2</sup> + " + X[1].toFixed(2) + "x + " + X[0].toFixed(2);
+
+    // back
+    synthesis_context.beginPath();
+    for(var j = 1; j < w; ++j){
+        x1 = client_to_x(j-1);
+        x2 = client_to_x(j);
+        y1 = polynomial_in_x(X, x1, synthesis_n);
+        y2 = polynomial_in_x(X, x2, synthesis_n);
+        synthesis_context.moveTo(x_to_client(x1), y_to_client(y1));
+        synthesis_context.lineTo(x_to_client(x2), y_to_client(y2));
+    }
+    synthesis_context.strokeStyle="#FF9988";
+    synthesis_context.stroke();
+    synthesis_context.closePath();
+    // front
+    synthesis_context.beginPath();
+    for(var j = 1; j < w; ++j){
+        x1 = client_to_x(j-1);
+        x2 = client_to_x(j);
+        if(x1 > synthesis_xs[1] && x2 < synthesis_xs[2]){
+            y1 = polynomial_in_x(X, x1, synthesis_n);
+            y2 = polynomial_in_x(X, x2, synthesis_n);
+            synthesis_context.moveTo(x_to_client(x1), y_to_client(y1));
+            synthesis_context.lineTo(x_to_client(x2), y_to_client(y2));
+        }
+    }
+    synthesis_context.strokeStyle="#661100";
+    synthesis_context.stroke();
+    synthesis_context.closePath();
+    
+    // grid
+    draw_grid_on(synthesis_context);
+
+    // dots
+    synthesis_context.beginPath();
+    for(var i = 0; i < synthesis_n; ++i){
+        synthesis_context.moveTo(x_to_client(synthesis_xs[i])-5.5, y_to_client(synthesis_ys[i])+5.5);
+        synthesis_context.lineTo(x_to_client(synthesis_xs[i])+5.5, y_to_client(synthesis_ys[i])-5.5);
+        synthesis_context.moveTo(x_to_client(synthesis_xs[i])+5.5, y_to_client(synthesis_ys[i])+5.5);
+        synthesis_context.lineTo(x_to_client(synthesis_xs[i])-5.5, y_to_client(synthesis_ys[i])-5.5);
+    }
+    synthesis_context.strokeStyle="#AA3311";
+    synthesis_context.stroke();
+    synthesis_context.closePath();
+    
+    // tangents
+    synthesis_context.beginPath();
+    synthesis_context.setLineDash([4, 4]);
+    synthesis_context.moveTo(x_to_client(synthesis_xs[0]), y_to_client(synthesis_ys[0]));
+    synthesis_context.lineTo(x_to_client(synthesis_xs[1]), y_to_client(synthesis_ys[1]));
+    synthesis_context.moveTo(x_to_client(synthesis_xs[synthesis_n-2]), y_to_client(synthesis_ys[synthesis_n-2]));
+    synthesis_context.lineTo(x_to_client(synthesis_xs[synthesis_n-1]), y_to_client(synthesis_ys[synthesis_n-1]));
+    synthesis_context.strokeStyle="#AA3311";
+    synthesis_context.stroke();
+    synthesis_context.setLineDash([]);
+    synthesis_context.closePath();
+
+    // guides
+    if(do_guides){
+        min_d = Math.pow(synthesis_xs[0] - client_to_x(client_x), 2) + Math.pow(synthesis_ys[0] - client_to_y(client_y), 2);
+        min_i = 0;
+        for(var i = 1; i < synthesis_n; ++i){
+            var di = Math.pow(synthesis_xs[i] - client_to_x(client_x), 2) + Math.pow(synthesis_ys[i] - client_to_y(client_y), 2);
+            if(di < min_d){
+                min_d = di;
+                min_i = i;
+            }
+        }
+        synthesis_i = min_i;
+        synthesis_context.setLineDash([4, 4]);
+        synthesis_context.beginPath();
+        synthesis_context.moveTo(x_to_client(synthesis_xs[min_i]), y_to_client(synthesis_ys[min_i]));
+        synthesis_context.lineTo(client_x, client_y);
+        synthesis_context.strokeStyle="#AA3311";
+        synthesis_context.stroke();
+        synthesis_context.closePath();
+        synthesis_context.setLineDash([]);
+    }
+}
+
+
+// Runge
+var runge_xs = [-1.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
+var runge_ys = [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0];
+var runge_n = 11;
+var runge_i = 0;
+
+function init_runge(){
+    runge = document.getElementById("runge");
+    var canvas_rect = runge.getBoundingClientRect();
+    runge_draw(0, 0, false);
+
+    runge.addEventListener('mousemove', function(e){
+        var canvas_rect = runge.getBoundingClientRect();
+           runge_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+           if(e.buttons == 1){
+            runge_xs[runge_i] = client_to_x(e.clientX - canvas_rect.left);
+            runge_ys[runge_i] = client_to_y(e.clientY - canvas_rect.top);
+            runge_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+           }
+    }, false);
+
+    runge.addEventListener('mousedown', function(e){
+        var canvas_rect = runge.getBoundingClientRect();
+        runge_xs[runge_i] = client_to_x(e.clientX - canvas_rect.left);
+        runge_ys[runge_i] = client_to_y(e.clientY - canvas_rect.top);
+        runge_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    runge.addEventListener('mouseleave', function(e){
+        runge_draw(0, 0, false);
+    }, false);
+}
+
+function runge_draw(client_x, client_y, do_guides){
+    runge = document.getElementById("runge");
+    var runge_context = runge.getContext("2d");
+    runge_context.font = "16px sans-serif";
+    // background
+    runge_context.fillStyle="#eeeeee";
+    runge_context.fillRect(0, 0, w, h);
+
+    // grid
+    draw_grid_on(runge_context);
+
+    // runge
+    var A = [];
+    var B = [];
+    for(var i = 0; i < runge_n; ++i){
+        A[i] = [];
+        for(var j = 0; j < runge_n; ++j){
+            A[i][j] = Math.pow(runge_xs[i], j);
+        }
+        B[i] = runge_ys[i];
+    }
+
+    X = solved_linear(A, B, runge_n);
+
+    runge_context.beginPath();
+    for(var j = 1; j < w; ++j){
+        x1 = client_to_x(j-1);
+        x2 = client_to_x(j);
+        y1 = polynomial_in_x(X, x1, runge_n);
+        y2 = polynomial_in_x(X, x2, runge_n);
+        runge_context.moveTo(x_to_client(x1), y_to_client(y1));
+        runge_context.lineTo(x_to_client(x2), y_to_client(y2));
+    }
+    runge_context.strokeStyle="#661100";
+    runge_context.stroke();
+    runge_context.closePath();
+
+    // dots
+    runge_context.beginPath();
+    for(var i = 0; i < runge_n; ++i){
+        runge_context.moveTo(x_to_client(runge_xs[i])-5.5, y_to_client(runge_ys[i])+5.5);
+        runge_context.lineTo(x_to_client(runge_xs[i])+5.5, y_to_client(runge_ys[i])-5.5);
+        runge_context.moveTo(x_to_client(runge_xs[i])+5.5, y_to_client(runge_ys[i])+5.5);
+        runge_context.lineTo(x_to_client(runge_xs[i])-5.5, y_to_client(runge_ys[i])-5.5);
+    }
+    runge_context.strokeStyle="#AA3311";
+    runge_context.stroke();
+    runge_context.closePath();
+
+    // guides
+    if(do_guides){
+        min_d = Math.pow(runge_xs[0] - client_to_x(client_x), 2) + Math.pow(runge_ys[0] - client_to_y(client_y), 2);
+        min_i = 0;
+        for(var i = 1; i < runge_n; ++i){
+            var di = Math.pow(runge_xs[i] - client_to_x(client_x), 2) + Math.pow(runge_ys[i] - client_to_y(client_y), 2);
+            if(di < min_d){
+                min_d = di;
+                min_i = i;
+            }
+        }
+        runge_i = min_i;
+        runge_context.setLineDash([4, 4]);
+        runge_context.beginPath();
+        runge_context.moveTo(x_to_client(runge_xs[min_i]), y_to_client(runge_ys[min_i]));
+        runge_context.lineTo(client_x, client_y);
+        runge_context.strokeStyle="#AA3311";
+        runge_context.stroke();
+        runge_context.closePath();
+        runge_context.setLineDash([]);
+    }
+}
+
+
+//  Chebyshev
+function chebyshev_node(k, n){
+    return Math.cos(Math.PI*(2*k - 1)/(2*n));
+}
+
+// Chebyshev visible region
+var chebyshev_x_min = -1.2;
+var chebyshev_y_min = -0.2;
+var chebyshev_x_max = 1.2;
+var chebyshev_y_max = 1.2;
+
+var chebyshev_client_x_center = w*(0-chebyshev_x_min)/(chebyshev_x_max-chebyshev_x_min);
+var chebyshev_client_x_step = (w/(chebyshev_x_max-chebyshev_x_min));
+
+var chebyshev_client_y_center = h - h*(0-chebyshev_y_min)/(chebyshev_y_max-chebyshev_y_min);
+var chebyshev_client_y_step = (h/(chebyshev_y_max-chebyshev_y_min));
+
+function chebyshev_client_to_x(client_x){
+    return (client_x - chebyshev_client_x_center) / chebyshev_client_x_step;
+}
+
+function chebyshev_client_to_y(client_y){
+    return (chebyshev_client_y_center - client_y) / chebyshev_client_y_step;
+}
+
+function chebyshev_x_to_client(x){
+    return x * chebyshev_client_x_step + chebyshev_client_x_center;
+}
+
+function chebyshev_y_to_client(y){
+    return chebyshev_client_y_center - y * chebyshev_client_y_step;
+}
+
+// Chebyshev points
+var chebyshev_xs = [-1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0];
+var chebyshev_ys = [ 0.1,  0.2,  0.3,  0.4,  0.5, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1];
+var chebyshev_n = 11;
+var chebyshev_i = 0;
+
+function init_chebyshev(){
+    for(var i = 0; i < chebyshev_n; ++i){
+        chebyshev_xs[i] = chebyshev_node(i+1, chebyshev_n);
+        chebyshev_ys[i] = Math.sqrt(1 - Math.pow(chebyshev_xs[i], 2))
+    }
+    chebyshev = document.getElementById("chebyshev");
+    var canvas_rect = chebyshev.getBoundingClientRect();
+    chebyshev_draw(0, 0, false);
+
+    chebyshev.addEventListener('mousemove', function(e){
+        var canvas_rect = chebyshev.getBoundingClientRect();
+           chebyshev_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+           if(e.buttons == 1){
+            chebyshev_ys[chebyshev_i] = chebyshev_client_to_y(e.clientY - canvas_rect.top);
+            chebyshev_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+           }
+    }, false);
+
+    chebyshev.addEventListener('mousedown', function(e){
+        var canvas_rect = chebyshev.getBoundingClientRect();
+        chebyshev_ys[chebyshev_i] = chebyshev_client_to_y(e.clientY - canvas_rect.top);
+        chebyshev_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    chebyshev.addEventListener('mouseleave', function(e){
+        chebyshev_draw(0, 0, false);
+    }, false);
+}
+
+function chebyshev_draw(client_x, client_y, do_guides){
+    chebyshev = document.getElementById("chebyshev");
+    var chebyshev_context = chebyshev.getContext("2d");
+    chebyshev_context.font = "16px sans-serif";
+    // background
+    chebyshev_context.fillStyle="#eeeeee";
+    chebyshev_context.fillRect(0, 0, w, h);
+
+    // grid
+     chebyshev_context.beginPath();
+    chebyshev_context.moveTo(0, chebyshev_client_y_center);
+    chebyshev_context.lineTo(w, chebyshev_client_y_center);
+    chebyshev_context.lineTo(w - 12, chebyshev_client_y_center - 5);
+    chebyshev_context.moveTo(w, chebyshev_client_y_center);
+    chebyshev_context.lineTo(w - 12, chebyshev_client_y_center + 5);
+    chebyshev_context.moveTo(chebyshev_client_x_center, h);
+    chebyshev_context.lineTo(chebyshev_client_x_center, 0);
+    chebyshev_context.lineTo(chebyshev_client_x_center - 5, 12);
+    chebyshev_context.moveTo(chebyshev_client_x_center, 0);
+    chebyshev_context.lineTo(chebyshev_client_x_center + 5, 12);
+    chebyshev_context.fillStyle="#000000";
+    for(var i = x_min + 1; i <= x_max - 1; i++){
+        chebyshev_context.moveTo(chebyshev_client_x_center + i*chebyshev_client_x_step, chebyshev_client_y_center);
+        chebyshev_context.lineTo(chebyshev_client_x_center + i*chebyshev_client_x_step, chebyshev_client_y_center - 5);
+        chebyshev_context.fillText(i, chebyshev_client_x_center + i*chebyshev_client_x_step + 4, chebyshev_client_y_center + 16);
+    }
+    for(var i = y_min + 1; i <= y_max - 1; i++){
+        chebyshev_context.moveTo(chebyshev_client_x_center, chebyshev_client_y_center - i*chebyshev_client_y_step);
+        chebyshev_context.lineTo(chebyshev_client_x_center + 5, chebyshev_client_y_center - i*chebyshev_client_y_step);
+        chebyshev_context.fillText(i, chebyshev_client_x_center + 5, chebyshev_client_y_center - i*chebyshev_client_y_step + 16);
+    }
+    chebyshev_context.strokeStyle="#000000";
+    chebyshev_context.stroke();
+    chebyshev_context.closePath();
+
+    // polynomial
+    var A = [];
+    var B = [];
+    for(var i = 0; i < chebyshev_n; ++i){
+        A[i] = [];
+        for(var j = 0; j < chebyshev_n; ++j){
+            A[i][j] = Math.pow(chebyshev_xs[i], j);
+        }
+        B[i] = chebyshev_ys[i];
+    }
+
+    X = solved_linear(A, B, chebyshev_n);
+
+    chebyshev_context.beginPath();
+    for(var j = 1; j < w; ++j){
+        x1 = chebyshev_client_to_x(j-1);
+        x2 = chebyshev_client_to_x(j);
+        y1 = polynomial_in_x(X, x1, chebyshev_n);
+        y2 = polynomial_in_x(X, x2, chebyshev_n);
+        chebyshev_context.moveTo(chebyshev_x_to_client(x1), chebyshev_y_to_client(y1));
+        chebyshev_context.lineTo(chebyshev_x_to_client(x2), chebyshev_y_to_client(y2));
+    }
+    chebyshev_context.strokeStyle="#661100";
+    chebyshev_context.stroke();
+    chebyshev_context.closePath();
+
+    // dots
+    chebyshev_context.beginPath();
+    for(var i = 0; i < chebyshev_n; ++i){
+        chebyshev_context.moveTo(chebyshev_x_to_client(chebyshev_xs[i])-5.5, chebyshev_y_to_client(chebyshev_ys[i])+5.5);
+        chebyshev_context.lineTo(chebyshev_x_to_client(chebyshev_xs[i])+5.5, chebyshev_y_to_client(chebyshev_ys[i])-5.5);
+        chebyshev_context.moveTo(chebyshev_x_to_client(chebyshev_xs[i])+5.5, chebyshev_y_to_client(chebyshev_ys[i])+5.5);
+        chebyshev_context.lineTo(chebyshev_x_to_client(chebyshev_xs[i])-5.5, chebyshev_y_to_client(chebyshev_ys[i])-5.5);
+    }
+    chebyshev_context.strokeStyle="#AA3311";
+    chebyshev_context.stroke();
+    chebyshev_context.closePath();
+
+    // guides
+    if(do_guides){
+        min_d = Math.abs(chebyshev_xs[0] - chebyshev_client_to_x(client_x));
+        min_i = 0;
+        for(var i = 1; i < chebyshev_n; ++i){
+            var di = Math.abs(chebyshev_xs[i] - chebyshev_client_to_x(client_x));
+            if(di < min_d){
+                min_d = di;
+                min_i = i;
+            }
+        }
+        chebyshev_i = min_i;
+        chebyshev_context.setLineDash([4, 4]);
+        chebyshev_context.beginPath();
+        chebyshev_context.moveTo(chebyshev_x_to_client(chebyshev_xs[min_i]), chebyshev_y_to_client(chebyshev_ys[min_i]));
+        chebyshev_context.lineTo(chebyshev_x_to_client(chebyshev_xs[min_i]), client_y);
+        chebyshev_context.strokeStyle="#AA3311";
+        chebyshev_context.stroke();
+        chebyshev_context.closePath();
+        chebyshev_context.setLineDash([]);
+    }
+}
+
+
+// spline
+var spline_xs = [-0.5, 0.5, 4.0, 3.0, 8.5, 7.5];
+var spline_ys = [ 2.0, 1.0, 3.0, 4.0, 5.0, 6.0];
+var spline_n = 6;
+var spline_i = 0;
+
+function init_spline(){
+    spline = document.getElementById("spline");
+    var canvas_rect = spline.getBoundingClientRect();
+    spline_draw(0, 0, false);
+
+    spline.addEventListener('mousemove', function(e){
+        var canvas_rect = spline.getBoundingClientRect();
+           spline_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+           if(e.buttons == 1){
+            spline_xs[spline_i] = client_to_x(e.clientX - canvas_rect.left);
+            spline_ys[spline_i] = client_to_y(e.clientY - canvas_rect.top);
+            spline_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+           }
+    }, false);
+
+    spline.addEventListener('mousedown', function(e){
+        var canvas_rect = spline.getBoundingClientRect();
+        spline_xs[spline_i] = client_to_x(e.clientX - canvas_rect.left);
+        spline_ys[spline_i] = client_to_y(e.clientY - canvas_rect.top);
+        spline_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    spline.addEventListener('mouseleave', function(e){
+        spline_draw(0, 0, false);
+    }, false);
+}
+
+function spline_draw(client_x, client_y, do_guides){
+    spline = document.getElementById("spline");
+    var spline_context = spline.getContext("2d");
+    spline_context.font = "16px sans-serif";
+    // background
+    spline_context.fillStyle="#eeeeee";
+    spline_context.fillRect(0, 0, w, h);
+
+    // grid
+    draw_grid_on(spline_context);
+
+    // spline1
+    var A1 = [];
+    var B1 = [];
+    for(var i = 0; i < 4; i += 2) {
+        A1[i] = [];
+        for(var j = 0; j < 4; ++j){
+            A1[i][j] = Math.pow(spline_xs[i], j);
+        }
+        B1[i] = spline_ys[i];
+        
+        A1[i+1] = [];
+        for(var j = 0; j < 4-1; ++j)
+            A1[i+1][j+1] = Math.pow(spline_xs[i], j) * (j+1);
+        A1[i+1][0] = 0.0;
+        B1[i+1] = (spline_ys[i+1] - spline_ys[i]) / (spline_xs[i+1] - spline_xs[i]);
+    }
+    X1 = solved_linear(A1, B1, 4);
+
+    // spline2
+    var A2 = [];
+    var B2 = [];
+    for(var i = 0; i < 4; i += 2) {
+        A2[i] = [];
+        for(var j = 0; j < 4; ++j){
+            A2[i][j] = Math.pow(spline_xs[i+2], j);
+        }
+        B2[i] = spline_ys[i+2];
+        
+        A2[i+1] = [];
+        for(var j = 0; j < 4-1; ++j)
+            A2[i+1][j+1] = Math.pow(spline_xs[i+2], j) * (j+1);
+        A2[i+1][0] = 0.0;
+        B2[i+1] = (spline_ys[i+1+2] - spline_ys[i+2]) / (spline_xs[i+1+2] - spline_xs[i+2]);
+    }
+    X2 = solved_linear(A2, B2, 4);
+    
+    spline_context.beginPath();
+    for(var j = 1; j < w; ++j){
+        var x1 = client_to_x(j-1);
+        var x2 = client_to_x(j);
+        var y1 = 0.0;
+        var y2 = 0.0;
+        if(x1 > spline_xs[0] && x1 < spline_xs[2]){
+            y1 = polynomial_in_x(X1, x1, 4);
+            y2 = polynomial_in_x(X1, x2, 4);
+            spline_context.moveTo(x_to_client(x1), y_to_client(y1));
+            spline_context.lineTo(x_to_client(x2), y_to_client(y2));
+        }
+        if(x1 > spline_xs[2] && x1 < spline_xs[4]){
+            y1 = polynomial_in_x(X2, x1, 4);
+            y2 = polynomial_in_x(X2, x2, 4);
+            spline_context.moveTo(x_to_client(x1), y_to_client(y1));
+            spline_context.lineTo(x_to_client(x2), y_to_client(y2));
+        }        
+    }
+    spline_context.strokeStyle="#661100";
+    spline_context.stroke();
+    spline_context.closePath();
+
+    // dots
+    spline_context.beginPath();
+    for(var i = 0; i < spline_n; ++i){
+        spline_context.moveTo(x_to_client(spline_xs[i])-5.5, y_to_client(spline_ys[i])+5.5);
+        spline_context.lineTo(x_to_client(spline_xs[i])+5.5, y_to_client(spline_ys[i])-5.5);
+        spline_context.moveTo(x_to_client(spline_xs[i])+5.5, y_to_client(spline_ys[i])+5.5);
+        spline_context.lineTo(x_to_client(spline_xs[i])-5.5, y_to_client(spline_ys[i])-5.5);
+    }
+    spline_context.strokeStyle="#AA3311";
+    spline_context.stroke();
+    spline_context.closePath();
+    spline_context.beginPath();
+    spline_context.setLineDash([4, 4]);
+    for(var i = 0; i < spline_n/2; ++i){
+        spline_context.moveTo(x_to_client(spline_xs[2*i]), y_to_client(spline_ys[2*i]));
+        spline_context.lineTo(x_to_client(spline_xs[2*i+1]), y_to_client(spline_ys[2*i+1]));
+    }
+    spline_context.strokeStyle="#AA3311";
+    spline_context.stroke();
+    spline_context.setLineDash([]);
+    spline_context.closePath();
+
+    // guides
+    if(do_guides){
+        min_d = Math.pow(spline_xs[0] - client_to_x(client_x), 2) + Math.pow(spline_ys[0] - client_to_y(client_y), 2);
+        min_i = 0;
+        for(var i = 1; i < spline_n; ++i){
+            var di = Math.pow(spline_xs[i] - client_to_x(client_x), 2) + Math.pow(spline_ys[i] - client_to_y(client_y), 2);
+            if(di < min_d){
+                min_d = di;
+                min_i = i;
+            }
+        }
+        spline_i = min_i;
+        spline_context.setLineDash([4, 4]);
+        spline_context.beginPath();
+        spline_context.moveTo(x_to_client(spline_xs[min_i]), y_to_client(spline_ys[min_i]));
+        spline_context.lineTo(client_x, client_y);
+        spline_context.strokeStyle="#AA3311";
+        spline_context.stroke();
+        spline_context.closePath();
+        spline_context.setLineDash([]);
+    }
+}
+
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+Chebyshev nodes
+    </h1>
+
+    <canvas id="chebyshev" width=640 height=512></canvas>
+    <script language="JavaScript">
+    init_chebyshev();
+    </script>
+
+    <p style="text-align:right"><a href="p2_3.html">Previous</a> &mdash; <a href="p2_5.html">Next</a></p>
+    </center>
+  </body>
+</html>
