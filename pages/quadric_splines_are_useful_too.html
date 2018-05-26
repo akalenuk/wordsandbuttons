@@ -82,20 +82,18 @@ form {
     background-color: #eeee99;
 }
 
-input[type="number"] {
-    width: 100pt;
+input[type="text"] {
+    width: 32pt;
     height: 22pt;
-    margin: 8pt 8pt 8pt 8pt;
-    padding-left: 3pt;
     font-size: 16pt;
+    text-align: center;
 }
 
 button {
-    width: 108pt;
-    height: 28pt;
-    margin-left:4pt;
-    margin-right:4pt;
+    width: 32pt;
+    height: 26pt;
     font-size: 16pt;
+    text-align: center;
 }
     </style>
     <script language="JavaScript">
@@ -741,7 +739,7 @@ function compensated_spline3_derivatives_draw(client_x, client_y, do_guides){
         do_guides, client_x, client_y);
 }
 
-function change_divisor() {
+function change_derivative_divisor() {
     compensated_spline3_derivative_divisor = Number(document.getElementById("derivative_divisor").value);
     if(compensated_spline3_derivative_divisor == NaN || compensated_spline3_derivative_divisor < 1.0) {
         compensated_spline3_derivative_divisor = 1.0;
@@ -868,6 +866,18 @@ function draw_animation() {
         animation_context.closePath();        
     }
 }
+
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) + 1;
+    eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) - 1;
+    eval('change_' + counter_name + '()');
+}
     </script>
   </head>
   <body>
@@ -980,7 +990,9 @@ Here is the example when in every grid point the derivative gets divided by some
     </p>
     <form>
     Derivative divisor:
-    <input type="number" id="derivative_divisor" value="3" onchange="change_divisor()">
+    <button type="button" onclick="dec('derivative_divisor')">-</button>
+    <input type="text" id="derivative_divisor" value="3">
+    <button type="button" onclick="inc('derivative_divisor')">+</button>
     </form>
     <canvas id="compensated_spline3_derivatives" width=640 height=512></canvas>
     <p>
