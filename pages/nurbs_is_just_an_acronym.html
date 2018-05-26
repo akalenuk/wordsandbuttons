@@ -90,20 +90,18 @@ form {
     background-color: #eeee99;
 }
 
-input[type="number"] {
-    width: 100pt;
+input[type="text"] {
+    width: 32pt;
     height: 22pt;
-    margin: 8pt 8pt 8pt 8pt;
-    padding-left: 3pt;
     font-size: 16pt;
+    text-align: center;
 }
 
 button {
-    width: 150pt;
+    width: 32pt;
     height: 26pt;
-    margin-left:8pt;
-    margin-right:8pt;
     font-size: 16pt;
+    text-align: center;
 }
 
 pre {
@@ -613,7 +611,7 @@ function init_circle(){
     }, false);
 }
 
-function circle_draw(client_x, client_y, do_guides){
+function circle_draw(client_x, client_y, do_guides) {
     var nurbs = document.getElementById("circle");
     var circle_context = nurbs.getContext("2d");
     circle_context.font = "16px sans-serif";
@@ -634,6 +632,17 @@ function circle_draw(client_x, client_y, do_guides){
         do_guides, client_x, client_y);
 }
 
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) + 1;
+    eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) - 1;
+    eval('change_' + counter_name + '()');
+}
     </script>
   </head>
   <body>
@@ -679,9 +688,11 @@ Here is the example or NURBS-curve built by <a href="https://en.wikipedia.org/wi
     </p>
 
     <canvas id="nurbs_bs" width=640 height=512></canvas>
-    <form>
+    <form id="degree">
     Degree of the basis spline:
-    <input type="number" id="nurbs_degree" value="2" onchange="change_nurbs_degree()">
+    <button type="button" onclick="dec('nurbs_degree')">-</button>
+    <input type="text" id="nurbs_degree" value="2">
+    <button type="button" onclick="inc('nurbs_degree')">+</button>
     </form>
     <p>
 The very basic input for NURBS is a set of <b>control points</b> and a basis polynomial <b>degree</b>. But that's not all.
