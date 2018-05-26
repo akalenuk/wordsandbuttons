@@ -102,12 +102,106 @@ function next(slides){
 APL deserves its renaissance too
     </h1>
     <p>
-...
+This is a <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Game of Life</a> in APL.
+    </p>
+    <table><tr>
+    <td>    
+    <pre>
+life←{↑1 ⍵∨.∧3 4=+/,¯1 0 1∘.⊖¯1 0 1∘.⌽⊂⍵}
+    </pre>
+    </td>
+    </td></tr></table>
+    <p>
+I know, I know. I should have started with introduction, but doesn’t it introduce itself rather well? You can see for yourself that it’s ultimately concise, expressive and completely alien to all the mainstream computer languages.    
+    </p>
+    <p>
+In fact, it didn’t originate as a computer language at all. It was proposed as a better notation for tensor algebra by Harvard mathematician Kenneth E. Iverson. It was meant to be written by hand on a blackboard to transfer mathematic ideas from one person to another.    
+    </p>
+    <p>
+But due to its formality it turned up to be surprisingly good to transfer ideas from people to computers as well. It was made into a computer language in early 60-th, and these weird symbols like <b>↑</b> or <b>⌽</b> were not a problem at all, because every manufacturer had its own char-set at the time anyway. ASCII wasn’t yet even ratificated.    
+    </p>
+    <p>
+Its popularity grown through the following years peaking in the 70th and decaying afterwards with the rise of BASIC based personal computing and C powered UNIX platform. It is still used in some niches, such as in financial sector, meaning people actually make money using APL up to this day. But what’s fascinating, the very first portable computer by IBM — IBM 5100 “a 50-lb package of interactive personal computing” — came 6 years before the IBM PC and with APL on board.    
     </p>
     <img src="https://upload.wikimedia.org/wikipedia/commons/a/af/Ibm5100_%282297950254%29.jpg" style="width: 529pt;"/>
     <p class="comment">
 By Marcin Wichary from San Francisco, U.S.A. ([1]Uploaded by Partyzan_XXI) [CC BY 2.0 (https://creativecommons.org/licenses/by/2.0)], via Wikimedia Commons
     </p>
+    <p>
+The secret of APL’s popularity is simple: learning all the alien symbols is one time investment, and expressiveness — the leverage you as programmer has over the computation — is for life.
+    </p>
+    <p>
+And it’s not even that hard to learn the language in the first place. You might not believe it, but it’s one of the simplest languages ever. Here, let me show you how the Game of Life works.
+    </p>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Gospers_glider_gun.gif" style="width: 500px;"/>
+    <p class="comment">
+By Kieff [GFDL (http://www.gnu.org/copyleft/fdl.html) or CC-BY-SA-3.0 (http://creativecommons.org/licenses/by-sa/3.0/)], from Wikimedia Commons
+    </p>    
+    <p>
+The left arrow is an assignment function and the brackets mark the function body. So this: <b>life←{...}</b> is simply a function definition.
+    </p>
+    <p>
+In APL function arguments are tacit, meaning you don’t have to specify a name for every argument, you just know by convention, that the left argument is always <b>⍺</b> and the right is <b>⍵</b>. Doesn’t it mean that APL functions take at most two arguments? Not really. When you want to call C-like function like this: <i>foo(x, y, z)</i>, in APL terms you simply pass a tuple of 3 values. It’s still one <b>⍵</b> though.
+    </p>
+    <p>
+Let’s run our life with some input. Let it be a planner. We’ll use a ⍴ function to form a matrix out of linear array.
+    </p>
+    <table><tr>
+    <td>    
+    <pre>
+in ← 5 5 ⍴ 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 1 1 1 0 0 0 0 0 0
+in
+
+0 0 0 0 0
+0 0 1 0 0
+0 0 0 1 0
+0 1 1 1 0
+0 0 0 0 0
+    </pre>
+    </td>
+    </td></tr></table>
+    <p>
+Running life for in will result in this:
+    </p>
+    <table><tr>
+    <td>    
+    <pre>
+life in
+
+0 0 0 0 0
+0 0 0 0 0
+0 1 0 1 0
+0 0 1 1 0
+0 0 1 0 0
+    </pre>
+    </td>
+    </td></tr></table>
+    <p>
+The planner moved!
+    </p>
+    <p>
+In APL what we would call operators are functions too. Things like <b>+</b>, <b>-</b>, <b>×</b> etc. The functions are executed from right to left one at the time. There is no precedence, all the functions are equal.
+    </p>
+    <p>
+    </p>
+    <p>
+The first function of the life body would be <i>enclose</i>: <b>⊂</b>. What it does — it makes our 5x5 matrix input into a scalar containing 5x5 matrix.
+    </p>
+    <table><tr>
+    <td>    
+    <pre>
+⊂ in
+
+┌─────────┐
+│0 0 0 0 0│
+│0 0 1 0 0│
+│0 0 0 1 0│
+│0 1 1 1 0│
+│0 0 0 0 0│
+└─────────┘
+    </pre>
+    </td>
+    </td></tr></table>
     
     <table><tr>
     <td>    
