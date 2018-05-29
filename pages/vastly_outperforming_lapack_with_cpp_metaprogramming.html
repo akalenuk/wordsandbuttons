@@ -94,6 +94,7 @@ u {
     </style>
     <script language="JavaScript">
 function next(slides){
+    // show the next slide
     var first_slide = document.getElementById(slides + "_" + 1);
     for(var i = 1; i < 9; ++i)
     {
@@ -107,8 +108,21 @@ function next(slides){
                     next_slide.style.display = "block";
                 else
                     first_slide.style.display = "block";
-                return;
+                break;
                 }
+    }
+    // name the button
+    var button = document.getElementById(slides + "_button")
+    for(var i = 1; i < 9; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if (this_slide && !next_slide && this_slide.style.display == "block") {
+            button.innerHTML = "Back to the 1-st step";
+            break;
+        }
+        else
+            button.innerHTML = "Next step";
     }
 }
 
@@ -325,7 +339,7 @@ main:
     </td>
     </td></tr></table>
     <p style="text-align:right">
-    <button type="button" onclick="next('slides_recursive')">Next step</button>
+    <button type="button" id="slides_recursive_button" onclick="next('slides_recursive')">Next step</button>
     </p>
     <p>
 The trick is as simple, as it is effective. Static computation is a byproduct here, the important thing is — we can make the compiler unroll any kind of recursion with no limitations on depth and branching. Well, no limitations except for the compilation time, of course.
