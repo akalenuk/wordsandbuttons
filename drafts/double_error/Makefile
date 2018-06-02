@@ -1,0 +1,2 @@
+all:
+	clang++ cubic_solver.cpp -std=c++14 -O0 -o cubic_solver
