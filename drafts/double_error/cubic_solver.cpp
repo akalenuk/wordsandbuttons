@@ -3,6 +3,8 @@
 #include <iostream>
 #include <limits>
 
+#include "double_interval.hpp"
+
 const double PI = std::atan(1.) * 4.;
 
 std::array<double, 3> solve_cubic(std::array<double, 4> abcd) {
