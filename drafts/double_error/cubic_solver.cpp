@@ -7,6 +7,8 @@
 
 const double PI = std::atan(1.) * 4.;
 
+#define double DoubleInterval
+
 std::array<double, 3> solve_cubic(std::array<double, 4> abcd) {
     double a1 = abcd[1] / abcd[0];
     double a2 = abcd[2] / abcd[0];

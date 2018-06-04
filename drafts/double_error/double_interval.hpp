@@ -3,8 +3,13 @@
 
 struct DoubleInterval 
 {
-    long double from;
-    long double to;
+    long double from = 0.;
+    long double to = 0.;
+    DoubleInterval() = default;
+    constexpr DoubleInterval(long double a, long double b) {
+        from = a;
+        to = b;
+    }
     DoubleInterval(double x) {
         from = x;
         to = std::nextafter<double>(x, std::numeric_limits<double>::max());
@@ -41,9 +46,62 @@ struct DoubleInterval
         to = std::max(aa, std::max(ab, std::max(ba, bb)));
         return *this;
     }
+    
+    DoubleInterval operator+=(const double that)
+    {
+        return *this + that;
+    }
+    DoubleInterval operator-=(const double that)
+    {
+        return *this - that;
+    }
+    DoubleInterval operator*=(const double that)
+    {
+        return *this * that;
+    }
+    DoubleInterval operator/=(const double that)
+    {
+        return *this / that;
+    }
+    
+    DoubleInterval operator+(const double that)
+    {
+        return *this + DoubleInterval(that);
+    }    
+    DoubleInterval operator-(const double that)
+    {
+        return *this - DoubleInterval(that);
+    }
+    DoubleInterval operator*(const double that)
+    {
+        return *this * DoubleInterval(that);
+    }    
+    DoubleInterval operator/(const double that)
+    {
+        return *this / DoubleInterval(that);
+    }
+    
     operator double() 
     {
     return static_cast<double>(from);
     }
 };
+
+namespace std {
+    DoubleInterval sqrt(DoubleInterval x) 
+    {
+        long double a = std::sqrt(static_cast<double>(x.from));
+        long double b = std::sqrt(static_cast<double>(x.to));
+        if(a < b)
+            return DoubleInterval(a, b);
+        else
+            return DoubleInterval(b, a);
+    }
+
+    template <>
+    constexpr DoubleInterval numeric_limits<DoubleInterval>::quiet_NaN() noexcept
+    {
+        return DoubleInterval(std::numeric_limits<long double>::quiet_NaN(), std::numeric_limits<long double>::quiet_NaN());
+    }
+}
 
