@@ -14,78 +14,120 @@ struct DoubleInterval
         from = x;
         to = std::nextafter<double>(x, std::numeric_limits<double>::max());
     }
-    DoubleInterval operator+(const DoubleInterval& that)
+    
+    DoubleInterval& operator+=(const DoubleInterval& rhs)
     {
-        from = static_cast<double>(this->from) + static_cast<double>(that.from);
-        to = static_cast<double>(this->to) + static_cast<double>(that.to);
+        from = static_cast<double>(this->from) + static_cast<double>(rhs.from);
+        to = static_cast<double>(this->to) + static_cast<double>(rhs.to);
         return *this;
     }
-    DoubleInterval operator-(const DoubleInterval& that)
+    friend DoubleInterval operator+(DoubleInterval lhs, const DoubleInterval& rhs)
     {
-        from = static_cast<double>(this->from) - static_cast<double>(that.to);
-        to = static_cast<double>(this->to) - static_cast<double>(that.from);
+        lhs += rhs;
+        return lhs;
+    }
+  
+    DoubleInterval& operator-=(const DoubleInterval& rhs)
+    {
+        from = static_cast<double>(this->from) - static_cast<double>(rhs.to);
+        to = static_cast<double>(this->to) - static_cast<double>(rhs.from);
         return *this;
     }
-    DoubleInterval operator*(const DoubleInterval& that)
+    friend DoubleInterval operator-(DoubleInterval lhs, const DoubleInterval& rhs)
     {
-        long double aa = static_cast<double>(this->from) * static_cast<double>(that.from);
-        long double ab = static_cast<double>(this->from) * static_cast<double>(that.to);
-        long double ba = static_cast<double>(this->to) * static_cast<double>(that.from);
-        long double bb = static_cast<double>(this->to) * static_cast<double>(that.to);
+        lhs -= rhs;
+        return lhs;
+    }
+    
+    DoubleInterval& operator*=(const DoubleInterval& rhs)
+    {
+        long double aa = static_cast<double>(this->from) * static_cast<double>(rhs.from);
+        long double ab = static_cast<double>(this->from) * static_cast<double>(rhs.to);
+        long double ba = static_cast<double>(this->to) * static_cast<double>(rhs.from);
+        long double bb = static_cast<double>(this->to) * static_cast<double>(rhs.to);
         from = std::min(aa, std::min(ab, std::min(ba, bb)));
         to = std::max(aa, std::max(ab, std::max(ba, bb)));
         return *this;
     }
-    DoubleInterval operator/(const DoubleInterval& that)
+    friend DoubleInterval operator*(DoubleInterval lhs, const DoubleInterval& rhs)
     {
-        long double aa = static_cast<double>(this->from) / static_cast<double>(that.from);
-        long double ab = static_cast<double>(this->from) / static_cast<double>(that.to);
-        long double ba = static_cast<double>(this->to) / static_cast<double>(that.from);
-        long double bb = static_cast<double>(this->to) / static_cast<double>(that.to);
+        lhs *= rhs;
+        return lhs;
+    }
+    
+    DoubleInterval& operator/=(const DoubleInterval& rhs)
+    {
+        long double aa = static_cast<double>(this->from) / static_cast<double>(rhs.from);
+        long double ab = static_cast<double>(this->from) / static_cast<double>(rhs.to);
+        long double ba = static_cast<double>(this->to) / static_cast<double>(rhs.from);
+        long double bb = static_cast<double>(this->to) / static_cast<double>(rhs.to);
         from = std::min(aa, std::min(ab, std::min(ba, bb)));
         to = std::max(aa, std::max(ab, std::max(ba, bb)));
         return *this;
     }
+    friend DoubleInterval operator/(DoubleInterval lhs, const DoubleInterval& rhs)
+    {
+        lhs /= rhs;
+        return lhs;
+    }
+
     
-    DoubleInterval operator+=(const double that)
+    DoubleInterval operator+=(const double rhs)
     {
-        return *this + that;
+        return *this + DoubleInterval(rhs);
     }
-    DoubleInterval operator-=(const double that)
+    DoubleInterval operator-=(const double rhs)
     {
-        return *this - that;
+        return *this - DoubleInterval(rhs);
     }
-    DoubleInterval operator*=(const double that)
+    DoubleInterval operator*=(const double rhs)
     {
-        return *this * that;
+        return *this * DoubleInterval(rhs);
     }
-    DoubleInterval operator/=(const double that)
+    DoubleInterval operator/=(const double rhs)
     {
-        return *this / that;
-    }
-    
-    DoubleInterval operator+(const double that)
-    {
-        return *this + DoubleInterval(that);
-    }    
-    DoubleInterval operator-(const double that)
-    {
-        return *this - DoubleInterval(that);
-    }
-    DoubleInterval operator*(const double that)
-    {
-        return *this * DoubleInterval(that);
-    }    
-    DoubleInterval operator/(const double that)
-    {
-        return *this / DoubleInterval(that);
-    }
+        return *this / DoubleInterval(rhs);
+    }  
     
     operator double() 
     {
     return static_cast<double>(from);
     }
 };
+
+DoubleInterval operator+(DoubleInterval lhs, const double& rhs)
+{
+    return lhs + DoubleInterval(rhs);
+}
+DoubleInterval operator-(DoubleInterval lhs, const double& rhs)
+{
+    return lhs - DoubleInterval(rhs);
+}
+DoubleInterval operator*(DoubleInterval lhs, const double& rhs)
+{
+    return lhs * DoubleInterval(rhs);
+}
+DoubleInterval operator/(DoubleInterval lhs, const double& rhs)
+{
+    return lhs / DoubleInterval(rhs);
+}
+
+DoubleInterval operator+(double lhs, const DoubleInterval& rhs)
+{
+    return DoubleInterval(lhs) + rhs;
+}
+DoubleInterval operator-(double lhs, const DoubleInterval& rhs)
+{
+    return DoubleInterval(lhs) - rhs;
+}
+DoubleInterval operator*(double lhs, const DoubleInterval& rhs)
+{
+    return DoubleInterval(lhs) * rhs;
+}
+DoubleInterval operator/(double lhs, const DoubleInterval& rhs)
+{
+    return DoubleInterval(lhs) / rhs;
+}
 
 #define std_monadic_function(name) \
     DoubleInterval name (DoubleInterval x) \
