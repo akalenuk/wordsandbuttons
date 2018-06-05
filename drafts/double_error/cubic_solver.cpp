@@ -38,6 +38,7 @@ std::array<double, 3> solve_cubic(std::array<double, 4> abcd) {
 int main() {
     auto roots = solve_cubic({-4., -3., 2., 1.});
     std::cout << "actual: " << roots[0] << " " << roots[1] << " " << roots[2] << "\n";
+    std::cout << "error: " << roots[0].to - roots[0].from << " " << roots[1].to - roots[1].from << " " << roots[2].to - roots[2].from << "\n";
     std::cout << "expected: -1 0.640388 -0.390388" << "\n";
 }
 
