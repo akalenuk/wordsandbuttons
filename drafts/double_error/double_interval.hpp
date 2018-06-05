@@ -87,17 +87,25 @@ struct DoubleInterval
     }
 };
 
-namespace std {
-    DoubleInterval sqrt(DoubleInterval x) 
-    {
-        long double a = std::sqrt(static_cast<double>(x.from));
-        long double b = std::sqrt(static_cast<double>(x.to));
-        if(a < b)
-            return DoubleInterval(a, b);
-        else
-            return DoubleInterval(b, a);
+#define std_monadic_function(name) \
+    DoubleInterval name (DoubleInterval x) \
+    { \
+        long double a = std:: name (static_cast<double>(x.from)); \
+        long double b = std:: name (static_cast<double>(x.to)); \
+        if(a < b) \
+            return DoubleInterval(a, b); \
+        else \
+            return DoubleInterval(b, a); \
     }
-
+    
+namespace std {
+    std_monadic_function(sqrt);
+    std_monadic_function(sin);
+    std_monadic_function(cos);
+    std_monadic_function(asin);    
+    std_monadic_function(acos);
+    std_monadic_function(abs);
+    
     template <>
     constexpr DoubleInterval numeric_limits<DoubleInterval>::quiet_NaN() noexcept
     {
