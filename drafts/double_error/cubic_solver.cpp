@@ -2,12 +2,26 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <algorithm>
 
 #include "double_interval.hpp"
 
+#define double DoubleInterval
+
+// calculation part
+
 const double PI = std::atan(1.) * 4.;
 
-#define double DoubleInterval
+std::array<double, 4> cubic_for_roots(std::array<double, 3> xs) {
+    // ax^3 + bx^2 + cx + d = 0 ; a = 1
+    // (x - x1)(x - x2)(x - x3) = 0
+    // x^3 - x^2 x1 - x^2 x2 - x^2 x3 + x x1 x2 + x x1 x3 + x x2 x3 - x1 x2 x3 = 0
+    // x^3 - (x1 + x2 + x3) x^2 + (x1x2 + x2x3 + x3x1) x - x1x2x3 = 0
+    return {1.
+    , - (xs[0] + xs[1] + xs[2])
+    , + (xs[0] * xs[1] + xs[1] * xs[2] + xs[2] * xs[0])
+    , - (xs[0] * xs[1] * xs[2])};
+}
 
 std::array<double, 3> solve_cubic(std::array<double, 4> abcd) {
     double a1 = abcd[1] / abcd[0];
@@ -35,10 +49,19 @@ std::array<double, 3> solve_cubic(std::array<double, 4> abcd) {
     return roots;
 }
 
+
+// testing part
+void test_roots(std::array<double, 3> xs) {
+    auto roots_back = solve_cubic(cubic_for_roots(xs));
+    std::sort(roots_back.begin(), roots_back.end());
+    std::cout << "roots before: " << xs[0] << " " << xs[1] << " " << xs[2] << "\n";
+    std::cout << "roots after: " << roots_back[0] << " " << roots_back[1] << " " << roots_back[2] << "\n";
+    std::cout << "factial error: " << std::abs(roots_back[0] - xs[0]) << " " << std::abs(roots_back[1] - xs[1]) << " " << std::abs(roots_back[2] - xs[2]) << "\n";
+    std::cout << "prognosed error: " << roots_back[0].to - roots_back[0].from << " " << roots_back[1].to - roots_back[1].from << " " << roots_back[2].to - roots_back[2].from << "\n";    
+    std::cout << "\n";
+}
+
 int main() {
-    auto roots = solve_cubic({-4., -3., 2., 1.});
-    std::cout << "actual: " << roots[0] << " " << roots[1] << " " << roots[2] << "\n";
-    std::cout << "error: " << roots[0].to - roots[0].from << " " << roots[1].to - roots[1].from << " " << roots[2].to - roots[2].from << "\n";
-    std::cout << "expected: -1 0.640388 -0.390388" << "\n";
+    test_roots({1., 2., 3.});
 }
 
