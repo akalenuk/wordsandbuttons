@@ -144,8 +144,12 @@ namespace std {
     std_monadic_function(sqrt);
     std_monadic_function(sin);
     std_monadic_function(cos);
+    std_monadic_function(tan);
+    std_monadic_function(ctg);
     std_monadic_function(asin);    
     std_monadic_function(acos);
+    std_monadic_function(atan);
+    std_monadic_function(actg);
     std_monadic_function(abs);
     
     template <>
