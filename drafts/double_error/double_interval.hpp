@@ -1,5 +1,6 @@
 #include <cmath>
 #include <limits>
+#include <functional>
 
 struct DoubleInterval 
 {
@@ -116,33 +117,39 @@ DoubleInterval operator/(double lhs, const DoubleInterval& rhs) {
     return DoubleInterval(lhs) / rhs;
 }
 
+namespace {
 // this selects a minimum and a maximum on an interval divided into a number of segments
-#define SEGMENTS 10 // 10 is arbitarary, we just want to have some approximation
-#define std_monadic_function(name) \
-    DoubleInterval name (DoubleInterval x) \
-    { \
-        long double a_min = std:: name (static_cast<double>(x.from)); \
-        long double a_max = a_min; \
-        for (auto i = 0u; i < SEGMENTS; ++i) { \
-           auto xi = x.from + (i + 1) * (x.to - x.from) / SEGMENTS; \
-	   long double ai = std:: name (static_cast<double>(xi)); \
-\
-           if (isnan(a_min)) \
-               a_min = ai; \
-           else \
-               if (!isnan(ai)) \
-                   a_min = std::min(a_min, ai); \
-\
-           if (isnan(a_max)) \
-               a_max = ai; \
-           else \
-               if (!isnan(ai)) \
-                   a_max = std::max(a_max, ai); \
-        } \
-        double original = std:: name(x); \
-        return DoubleInterval(a_min, a_max, original); \
-    }
+    static const unsigned int g_num_of_segments = 10; // 10 is arbitarary, we just want to have some approximation
     
+    DoubleInterval run_std(DoubleInterval x, std::function<double(double)> fun) {
+        long double a_min = fun(static_cast<double>(x.from));
+        long double a_max = a_min;
+        for (auto i = 0u; i < g_num_of_segments; ++i) {
+           auto xi = x.from + (i + 1) * (x.to - x.from) / g_num_of_segments;
+	   long double ai = fun(static_cast<double>(xi));
+
+           if (std::isnan(a_min))
+               a_min = ai;
+           else
+               if (! std::isnan(ai))
+                   a_min = std::min(a_min, ai);
+
+           if (std::isnan(a_max))
+               a_max = ai;
+           else
+               if (! std::isnan(ai))
+                   a_max = std::max(a_max, ai);
+        }
+        double original = fun(x);
+        return DoubleInterval(a_min, a_max, original);
+    }
+}
+
+#define std_monadic_function(name) \
+    DoubleInterval name (DoubleInterval x) { \
+        return run_std(x, [](double x) -> double {return std:: name(x);}); \
+    }
+
 namespace std {
     std_monadic_function(sqrt);
     std_monadic_function(sin);
