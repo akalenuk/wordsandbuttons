@@ -53,9 +53,9 @@ std::array<double, 3> solve_cubic(std::array<double, 4> abcd) {
 void test_roots(std::array<double, 3> xs) {
     auto roots_back = solve_cubic(cubic_for_roots(xs));
     std::sort(roots_back.begin(), roots_back.end());
-    std::cout << "roots before: " << xs[0] << " " << xs[1] << " " << xs[2] << "\n";
-    std::cout << "roots after: " << roots_back[0] << " " << roots_back[1] << " " << roots_back[2] << "\n";
-    std::cout << "factial error: " << std::abs(roots_back[0] - xs[0]) << " " << std::abs(roots_back[1] - xs[1]) << " " << std::abs(roots_back[2] - xs[2]) << "\n";
+    std::cout << "roots before: " << xs[0].original << " " << xs[1].original << " " << xs[2].original << "\n";
+    std::cout << "roots after: " << roots_back[0].original << " " << roots_back[1].original << " " << roots_back[2].original << "\n";
+    std::cout << "factial error: " << std::abs(roots_back[0].original - xs[0].original) << " " << std::abs(roots_back[1].original - xs[1].original) << " " << std::abs(roots_back[2].original - xs[2].original) << "\n";
     std::cout << "prognosed error: " << roots_back[0].to - roots_back[0].from << " " << roots_back[1].to - roots_back[1].from << " " << roots_back[2].to - roots_back[2].from << "\n";    
     std::cout << "\n";
 }
