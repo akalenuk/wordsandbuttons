@@ -9,7 +9,6 @@
 #define double DoubleInterval
 
 // calculation part
-
 const double PI = std::atan(1.) * 4.;
 
 std::array<double, 4> cubic_for_roots(std::array<double, 3> xs) {
