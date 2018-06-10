@@ -1,4 +1,4 @@
 all:
-	clang++ cubic_solver.cpp -std=c++14 -g -O0 -o cubic_solver
+	clang++ exp_1.cpp -std=c++14 -g -O0 -o exp_1
 clean:
-	rm cubic_solver
+	rm exp_1
