@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>Surrealismmeter for floating point numbers</title>
-    <meta name="keywords" content="programming,splines,nurbs,tutorial,guide,learning">
+    <meta name="keywords" content="programming,floating point,fixed point,error,learning">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <style>
 body{
@@ -118,23 +118,28 @@ pre {
     </style>
     <script language="JavaScript">
 const w = 640;
-const h = 128;    
-const cell_width = 84;    
-const cell_height = 84;
-const cell_y = (128.0 - 84.0) / 2.0 + 0.5;
+const h = 200;    
+const cell_width = 64;    
+const cell_height = 64;
+const cell_y = 20;
     
 // fixed point
-fixed_cell_xs = [100, 200, 300, 400, 500, 600];
+fixed_cell_xs = [20, 20 + 90 + 43, 20 + 90*2 + 43, 20 + 90*3 + 43, 20 + 90*4 + 43*2, 20 + 90*5 + 43*2];
+fixed_cell_colors = ["#dba0ac", "#cfa0db", "#cfa0db", "#cfa0db", "#cfa0db", "#cfa0db"];
 fixed_cell_bits = [0, 0, 0, 1, 1, 0];
 
 function init_fixed() {
     var fixed = document.getElementById("fixed");
     fixed_draw();
     
-    fixed.addEventListener('mousedown', function(e){
+    fixed.addEventListener('click', function(e){
         var canvas_rect = fixed.getBoundingClientRect();
         var x = e.clientX - canvas_rect.left;
         var y = e.clientY - canvas_rect.top;
+        for(var i = 0; i < fixed_cell_xs.length; ++i) {
+            if (x > fixed_cell_xs[i] && x < fixed_cell_xs[i] + cell_width && y > cell_y && y < cell_y + cell_height)
+                fixed_cell_bits[i] = 1 - fixed_cell_bits[i];
+        }
         fixed_draw();
     }, false);
 }
@@ -142,13 +147,41 @@ function init_fixed() {
 function fixed_draw() {
     var fixed = document.getElementById("fixed");
     var fixed_context = fixed.getContext("2d");
-    fixed_context.font = "16px sans-serif";
+
     // background
     fixed_context.fillStyle="#dbd5a0";
     fixed_context.fillRect(0, 0, w, h);
+    
+    for(var i = 0; i < fixed_cell_xs.length; ++i) {
+        fixed_context.fillStyle = fixed_cell_colors[i];
+        fixed_context.fillRect(fixed_cell_xs[i], cell_y, cell_width, cell_height);
+        
+        fixed_context.textAlign = "center";
+        fixed_context.textBaseline = "middle"; 
+        fixed_context.font = "48px sans-serif";
+        fixed_context.fillStyle = "#222222";        
+        fixed_context.fillText(fixed_cell_bits[i], fixed_cell_xs[i] + cell_width / 2.0, cell_y + cell_height / 2.0 + 4);
+    }
+    
+    // explicit point
+    fixed_context.fillStyle = "#597052";
+    fixed_context.fillText(".", 430, cell_y + cell_height / 2.0 + 4);
+    
+    // comment
+    fixed_context.fillStyle = "#914853"
+    fixed_context.textAlign = "left";
+    fixed_context.textBaseline = "alphabetic"; 
+    fixed_context.font = "20px sans-serif";
+    fixed_context.fillText(fixed_cell_bits[0] ? "Negative number" : "Positive number", 20, 120);
+    var n = fixed_cell_bits[5] + 2*fixed_cell_bits[4] + 4*fixed_cell_bits[3] + 8*fixed_cell_bits[2] + 16*fixed_cell_bits[1];
+    fixed_context.fillStyle = "#673670"
+    fixed_context.fillText("of " + n + " quarters,", 20, 145);
+    fixed_context.fillText("which is " + (fixed_cell_bits[0] ? -1.0 : 1.0) *(n / 4.0).toFixed(2) + " in real numbers.", 20, 170);
 }
 
 // floating point
+floating_cell_colors = ["#dba0ac", "#acdba0", "#acdba0", "#acdba0", "#cfa0db", "#cfa0db"];
+
 function init_floating() {
     floating_draw();
 }
@@ -173,16 +206,19 @@ Surrealismmeter for floating point numbers
 I hope we can all agree: floating point numbers are not real. They are just fancy integers that can't make up their mind.
     </p>
     <p>
-This is a 6-bit fixed point number. It's basically an integer number of quarters.
+Let me elaborate on that. For a contrast, here is a 6-bit <b>fixed point</b> number. It's basically an integer number of quarters.
     </p>
-    <canvas id="fixed" width=640 height=128></canvas>
+    <canvas id="fixed" width=640 height=200></canvas>
     <p class="comment">
 Bit cells are, of course, clickable.
     </p>
-
+    <p>
+It is simple, and it has simple limitations. You can't have numbers less than 0.25, and you can't have numbers greater than 7.75.
+    </p>
+    <p>
+And here is a 6-bit <b>floating point</b> number:
+    </p>
     <canvas id="floating" width=640 height=128></canvas>
-
-    
     <script language="JavaScript">
         init_fixed();
         init_floating();
