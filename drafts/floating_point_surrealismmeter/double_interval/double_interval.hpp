@@ -72,7 +72,7 @@ struct DoubleInterval
         return lhs;
     }
 
-    
+
     DoubleInterval operator+=(const double rhs) {
         return *this + DoubleInterval(rhs);
     }
@@ -115,6 +115,16 @@ DoubleInterval operator*(double lhs, const DoubleInterval& rhs) {
 }
 DoubleInterval operator/(double lhs, const DoubleInterval& rhs) {
     return DoubleInterval(lhs) / rhs;
+}
+
+bool operator<(const DoubleInterval& a, const DoubleInterval& b) {
+    return a.original < b.original;
+}
+bool operator<(const DoubleInterval& a, const double b) {
+    return a.original < b;
+}  
+bool operator<(const double a, const DoubleInterval& b) {
+    return a < b.original;
 }
 
 namespace {

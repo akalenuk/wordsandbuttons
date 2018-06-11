@@ -17,7 +17,7 @@ std::array<double, 3> solve_cubic(std::array<double, 4> abcd) {
     double z = r * r - q * q * q;
 
     std::array<double, 3> roots;
-    if(z <= 0) {
+    if(z <= 0.) {
         double t = std::acos(r / std::sqrt(q * q * q));
         roots[0] = sq * std::cos(t / 3.) - a1 / 3.;
         roots[1] = sq * std::cos((t + 2. * PI) / 3.) - a1 / 3.;
@@ -25,7 +25,7 @@ std::array<double, 3> solve_cubic(std::array<double, 4> abcd) {
     } else {
         roots[0] = pow(std::sqrt(z) + std::abs(r) , 1. / 3.);
         roots[0] += q / roots[0];
-        roots[0] *= ( r < 0 ) ? 1 : -1;
+        roots[0] *= ( r < 0. ) ? 1 : -1;
         roots[0] -= a1 / 3.;
         roots[1] = std::numeric_limits<double>::quiet_NaN();
         roots[2] = std::numeric_limits<double>::quiet_NaN();
