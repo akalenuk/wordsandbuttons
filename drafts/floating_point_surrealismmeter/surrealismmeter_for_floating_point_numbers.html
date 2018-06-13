@@ -295,6 +295,48 @@ function as_RRGGBB(r_01, g_01, b_01) {
     return RRGGBB;
 }
 
+// images
+function n_from_x_y(x, y) {
+    return 5;   // stub
+}
+
+// real error image
+var real_error_n = 5;
+
+function init_real_error() {
+    var real_error = document.getElementById("real_error");
+    var canvas_rect = real_error.getBoundingClientRect();
+    real_error_draw(0, 0, false);
+
+    real_error.addEventListener('mousemove', function(e){
+        var canvas_rect = real_error.getBoundingClientRect();
+        real_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+           real_error_n = n_from_x_y(e.clientX - canvas_rect.left);
+           real_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+        }
+    }, false);
+
+    real_error.addEventListener('mousedown', function(e){
+        var canvas_rect = real_error.getBoundingClientRect();
+        real_error_n = n_from_x_y(e.clientX - canvas_rect.left);
+        real_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    real_error.addEventListener('mouseleave', function(e){
+        real_error_draw(0, 0, false);
+    }, false);
+}
+
+function real_error_draw(client_x, client_y, do_guides) {
+    var real_error = document.getElementById("real_error");
+    var real_error_context = real_error.getContext("2d");
+    real_error_context.font = "16px sans-serif";
+    // background
+    real_error_context.fillStyle="#eeeeee";
+    real_error_context.fillRect(0, 0, 640, 512);
+}
+
     </script>
   </head>
   <body>
@@ -331,6 +373,7 @@ And here is a 6-bit <b>floating point</b> number:
     <script language="JavaScript">
         init_fixed();
         init_floating();
+        init_real_error();
     </script>
     
     <h2>
