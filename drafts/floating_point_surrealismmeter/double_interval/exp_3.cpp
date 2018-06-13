@@ -35,9 +35,9 @@ int main() {
           std::cout << "[";
            for(auto i3 = 0; i3 <= 10; ++i3) {
                auto roots = std::array<double, 3> {{
-                   1. * std::pow(10., i1 - 5), 
-                   2. * std::pow(10., i2 - 5), 
-                   3. * std::pow(10., i3 - 5) 
+                   1. * std::pow(100., i1 - 5), 
+                   2. * std::pow(100., i2 - 5), 
+                   3. * std::pow(100., i3 - 5) 
                }};
                std::cout << get_prognosed_worst_relative_error(roots) << ((i3 < 10) ? ",\t" : "");
            }   
