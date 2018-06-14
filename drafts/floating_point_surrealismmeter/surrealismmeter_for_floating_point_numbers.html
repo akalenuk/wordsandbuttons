@@ -631,7 +631,7 @@ function x_to_RRGGBB1(x) {
         return "#666666";
     var e = Math.floor( Math.log10(x) );
     var t01 = (e + 16.0) / (12.0 + 16.0);
-    return as_RRGGBB(Math.cos(t01), Math.sin(t01), 0.5);
+    return as_RRGGBB(Math.sin(t01 * 1.4), Math.cos(t01 * 1.4), 0.3);
 }
 
 function x_to_RRGGBB2(x) {
@@ -639,7 +639,7 @@ function x_to_RRGGBB2(x) {
         return "#444444";
     var e = Math.floor( Math.log10(x) );
     var t01 = (e + 16.0) / (12.0 + 16.0);
-    return as_RRGGBB(Math.cos(t01) * 0.8, Math.sin(t01) * 0.8, 0.4);
+    return as_RRGGBB(Math.sin(t01 * 1.4) * 0.8, Math.cos(t01 * 1.4) * 0.8, 0.2);
 }
 
 function x_to_RRGGBB3(x) {
@@ -647,7 +647,7 @@ function x_to_RRGGBB3(x) {
         return "#222222";
     var e = Math.floor( Math.log10(x) );
     var t01 = (e + 16.0) / (12.0 + 16.0);
-    return as_RRGGBB(Math.cos(t01) * 0.6, Math.sin(t01) * 0.6, 0.4);
+    return as_RRGGBB(Math.sin(t01 * 1.4) * 0.6, Math.cos(t01 * 1.4) * 0.6, 0.1);
 }
 
 // real error image
@@ -734,6 +734,13 @@ function real_error_draw(client_x, client_y, do_guides) {
                 }
             }
         }
+    }
+    
+    var legend_dx = 640 / (16 + 12 + 1);
+    var legend_dy = 24;
+    for(var i = -16; i <= 12; ++i) {
+        real_error_context.fillStyle = x_to_RRGGBB1(Math.pow(10, i));
+        real_error_context.fillRect((16 + i) * legend_dx, 512 - legend_dy, legend_dx, legend_dy);
     }
 }
 
