@@ -631,7 +631,7 @@ function x_to_RRGGBB1(x) {
         return "#666666";
     var e = Math.floor( Math.log10(x) );
     var t01 = (e + 16.0) / (12.0 + 16.0);
-    return as_RRGGBB(Math.sin(t01 * 1.4), Math.cos(t01 * 1.4), 0.3);
+    return as_RRGGBB(Math.sin(t01 * 1.6), Math.cos(t01 * 1.4) * 0.8, 0.3);
 }
 
 function x_to_RRGGBB2(x) {
@@ -639,7 +639,7 @@ function x_to_RRGGBB2(x) {
         return "#444444";
     var e = Math.floor( Math.log10(x) );
     var t01 = (e + 16.0) / (12.0 + 16.0);
-    return as_RRGGBB(Math.sin(t01 * 1.4) * 0.8, Math.cos(t01 * 1.4) * 0.8, 0.2);
+    return as_RRGGBB(Math.sin(t01 * 1.6) * 0.8, Math.cos(t01 * 1.4) * 0.7, 0.2);
 }
 
 function x_to_RRGGBB3(x) {
@@ -647,7 +647,7 @@ function x_to_RRGGBB3(x) {
         return "#222222";
     var e = Math.floor( Math.log10(x) );
     var t01 = (e + 16.0) / (12.0 + 16.0);
-    return as_RRGGBB(Math.sin(t01 * 1.4) * 0.6, Math.cos(t01 * 1.4) * 0.6, 0.1);
+    return as_RRGGBB(Math.sin(t01 * 1.6) * 0.6, Math.cos(t01 * 1.4) * 0.6, 0.1);
 }
 
 // real error image
@@ -682,7 +682,6 @@ function init_real_error() {
 function real_error_draw(client_x, client_y, do_guides) {
     var real_error = document.getElementById("real_error");
     var real_error_context = real_error.getContext("2d");
-    real_error_context.font = "16px sans-serif";
     // background
     real_error_context.fillStyle="#eeeeee";
     real_error_context.fillRect(0, 0, 640, 538);
@@ -738,12 +737,21 @@ function real_error_draw(client_x, client_y, do_guides) {
     // grid
     real_error_context.beginPath();
     real_error_context.strokeStyle="#000000";
+    real_error_context.fillStyle="#000000";
+    real_error_context.font = "16px sans-serif";
+    real_error_context.textAlign = "center";
+    real_error_context.textBaseline = "middle"; 
     // right
     real_error_context.moveTo(zero_x, zero_y);
     real_error_context.lineTo(zero_x + dx * 11, zero_y);
     real_error_context.lineTo(zero_x + dx * 11 - dx*0.8, zero_y - dy*0.2);
     real_error_context.moveTo(zero_x + dx * 11, zero_y);
     real_error_context.lineTo(zero_x + dx * 11 - dx*0.8, zero_y + dy*0.2);
+    for(var i = -10; i <= 10; i += 4) {
+        var x = zero_x + dx * (i + 10 + 1) / 2;
+        var y = zero_y + 12;
+        real_error_context.fillText("e" + i, x, y);
+    }
 
     // up
     real_error_context.moveTo(zero_x, zero_y);
@@ -751,6 +759,11 @@ function real_error_draw(client_x, client_y, do_guides) {
     real_error_context.lineTo(zero_x - dx*0.2, zero_y  + dy*11 - dy*0.8);
     real_error_context.moveTo(zero_x, zero_y + dy*11);
     real_error_context.lineTo(zero_x + dx*0.2, zero_y  + dy*11 - dy*0.8);
+    for(var i = -6; i <= 10; i += 4) {
+        var x = zero_x - 22;
+        var y = zero_y + dy * (i + 10 + 1) / 2;
+        real_error_context.fillText("e" + i, x, y);
+    }
     
     // away
     real_error_context.moveTo(zero_x, zero_y);
@@ -758,7 +771,12 @@ function real_error_draw(client_x, client_y, do_guides) {
     real_error_context.lineTo(zero_x + dzx*11 - dzx*0.8 - dzy*0.2, zero_y + dzy*11 - dzy*0.8 + dzx * 0.2);
     real_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11);
     real_error_context.lineTo(zero_x + dzx*11 - dzx*0.8 + dzy*0.2, zero_y + dzy*11 - dzy*0.8 - dzx * 0.2);
-    
+    for(var i = -6; i <= 10; i += 4) {
+        var x = zero_x + dzx * (i + 10 + 1) / 2 - 20;
+        var y = zero_y + dzy * (i + 10 + 1) / 2 + 8;
+        real_error_context.fillText("e" + i, x, y);
+    }
+        
     real_error_context.stroke();
     real_error_context.closePath();
      
@@ -771,6 +789,12 @@ function real_error_draw(client_x, client_y, do_guides) {
         real_error_context.fillRect((16 + i) * legend_dx, 538 - legend_dy, legend_dx, legend_dy);
     }
     
+    real_error_context.fillStyle="#000000";    
+    for(var i = -14; i <= 10; i += 4) {
+        var x = (16 + i + 0.5) * legend_dx;
+        var y = 538 - legend_dy * 0.5;
+        real_error_context.fillText("e" + i, x, y);
+    }
 }
 
     </script>
