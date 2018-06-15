@@ -605,8 +605,8 @@ const prognosed_relative_error = [[ // changes from -14 to 12
 
 
 // images
-const zero_x = 175;
-const zero_y = 450;
+const zero_x = 175.5;
+const zero_y = 450.5;
 const dx = 36;
 const dy = -24;
 const dzx = -10;
@@ -685,7 +685,7 @@ function real_error_draw(client_x, client_y, do_guides) {
     real_error_context.font = "16px sans-serif";
     // background
     real_error_context.fillStyle="#eeeeee";
-    real_error_context.fillRect(0, 0, 640, 512);
+    real_error_context.fillRect(0, 0, 640, 538);
     
     
     for(var i1 = 0; i1 <= 10; ++i1) {
@@ -735,13 +735,42 @@ function real_error_draw(client_x, client_y, do_guides) {
             }
         }
     }
+    // grid
+    real_error_context.beginPath();
+    real_error_context.strokeStyle="#000000";
+    // right
+    real_error_context.moveTo(zero_x, zero_y);
+    real_error_context.lineTo(zero_x + dx * 11, zero_y);
+    real_error_context.lineTo(zero_x + dx * 11 - dx*0.8, zero_y - dy*0.2);
+    real_error_context.moveTo(zero_x + dx * 11, zero_y);
+    real_error_context.lineTo(zero_x + dx * 11 - dx*0.8, zero_y + dy*0.2);
+
+    // up
+    real_error_context.moveTo(zero_x, zero_y);
+    real_error_context.lineTo(zero_x, zero_y + dy*11);
+    real_error_context.lineTo(zero_x - dx*0.2, zero_y  + dy*11 - dy*0.8);
+    real_error_context.moveTo(zero_x, zero_y + dy*11);
+    real_error_context.lineTo(zero_x + dx*0.2, zero_y  + dy*11 - dy*0.8);
     
+    // away
+    real_error_context.moveTo(zero_x, zero_y);
+    real_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11);
+    real_error_context.lineTo(zero_x + dzx*11 - dzx*0.8 - dzy*0.2, zero_y + dzy*11 - dzy*0.8 + dzx * 0.2);
+    real_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11);
+    real_error_context.lineTo(zero_x + dzx*11 - dzx*0.8 + dzy*0.2, zero_y + dzy*11 - dzy*0.8 - dzx * 0.2);
+    
+    real_error_context.stroke();
+    real_error_context.closePath();
+     
+    
+    // legend
     var legend_dx = 640 / (16 + 12 + 1);
     var legend_dy = 24;
     for(var i = -16; i <= 12; ++i) {
         real_error_context.fillStyle = x_to_RRGGBB1(Math.pow(10, i));
-        real_error_context.fillRect((16 + i) * legend_dx, 512 - legend_dy, legend_dx, legend_dy);
+        real_error_context.fillRect((16 + i) * legend_dx, 538 - legend_dy, legend_dx, legend_dy);
     }
+    
 }
 
     </script>
@@ -771,11 +800,11 @@ And here is a 6-bit <b>floating point</b> number:
     <p>
     ...
     </p>
-    <canvas id="real_error" width=640 height=512></canvas>
+    <canvas id="real_error" width=640 height=538></canvas>
     <p>
     ...
     </p>
-    <canvas id="prognosed_error" width=640 height=512></canvas>
+    <canvas id="prognosed_error" width=640 height=538></canvas>
     
     <script language="JavaScript">
         init_fixed();
