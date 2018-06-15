@@ -653,7 +653,6 @@ function x_to_RRGGBB3(x) {
 // real error image
 var real_error_n = 10;
 
-
 function init_real_error() {
     var real_error = document.getElementById("real_error");
     var canvas_rect = real_error.getBoundingClientRect();
@@ -797,6 +796,152 @@ function real_error_draw(client_x, client_y, do_guides) {
     }
 }
 
+// prognosed error image
+var prognosed_error_n = 10;
+
+function init_prognosed_error() {
+    var prognosed_error = document.getElementById("prognosed_error");
+    var canvas_rect = prognosed_error.getBoundingClientRect();
+    prognosed_error_draw(0, 0, false);
+
+    prognosed_error.addEventListener('mousemove', function(e){
+        var canvas_rect = prognosed_error.getBoundingClientRect();
+        prognosed_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+           prognosed_error_n = n_from_x_y(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+           prognosed_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+        }
+    }, false);
+
+    prognosed_error.addEventListener('mousedown', function(e){
+        var canvas_rect = prognosed_error.getBoundingClientRect();
+        prognosed_error_n = n_from_x_y(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+        prognosed_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    prognosed_error.addEventListener('mouseleave', function(e){
+        prognosed_error_draw(0, 0, false);
+    }, false);
+}
+
+function prognosed_error_draw(client_x, client_y, do_guides) {
+    var prognosed_error = document.getElementById("prognosed_error");
+    var prognosed_error_context = prognosed_error.getContext("2d");
+    // background
+    prognosed_error_context.fillStyle="#eeeeee";
+    prognosed_error_context.fillRect(0, 0, 640, 538);
+    
+    
+    for(var i1 = 0; i1 <= 10; ++i1) {
+        for(var i2 = 0; i2 <= 10; ++i2) {
+            for(var i3 = 0; i3 <= 10; ++i3) {
+                if(i3 > prognosed_error_n)
+                    break;
+                    
+                var x = zero_x + dx * i1 + dzx * i2;
+                var y = zero_y + dy * i3 + dzy * i2;
+                // front
+                if(i2 == 0) {
+                    prognosed_error_context.fillStyle = x_to_RRGGBB1(prognosed_relative_error[i1][i2][i3]);
+                    prognosed_error_context.beginPath();                
+                    prognosed_error_context.moveTo(x, y);
+                    prognosed_error_context.lineTo(x + dx, y);
+                    prognosed_error_context.lineTo(x + dx, y + dy);
+                    prognosed_error_context.lineTo(x, y + dy);
+                    prognosed_error_context.lineTo(x, y);
+                    prognosed_error_context.fill();
+                    prognosed_error_context.closePath();
+                }
+                // left
+                if(i1 == 0) {
+                    prognosed_error_context.fillStyle = x_to_RRGGBB2(prognosed_relative_error[i1][i2][i3]);
+                    prognosed_error_context.beginPath();                
+                    prognosed_error_context.moveTo(x, y);
+                    prognosed_error_context.lineTo(x + dzx, y + dzy);
+                    prognosed_error_context.lineTo(x + dzx, y + dzy + dy);
+                    prognosed_error_context.lineTo(x, y + dy);
+                    prognosed_error_context.lineTo(x, y);
+                    prognosed_error_context.fill();
+                    prognosed_error_context.closePath();
+                }
+                // top
+                if(i3 == prognosed_error_n) {
+                    prognosed_error_context.fillStyle = x_to_RRGGBB3(prognosed_relative_error[i1][i2][i3]);
+                    prognosed_error_context.beginPath();                
+                    prognosed_error_context.moveTo(x, y + dy);
+                    prognosed_error_context.lineTo(x + dzx, y + dzy + dy);
+                    prognosed_error_context.lineTo(x + dzx + dx, y + dzy + dy);
+                    prognosed_error_context.lineTo(x + dx, y + dy);
+                    prognosed_error_context.lineTo(x, y + dy);
+                    prognosed_error_context.fill();
+                    prognosed_error_context.closePath();
+                }
+            }
+        }
+    }
+    // grid
+    prognosed_error_context.beginPath();
+    prognosed_error_context.strokeStyle="#000000";
+    prognosed_error_context.fillStyle="#000000";
+    prognosed_error_context.font = "16px sans-serif";
+    prognosed_error_context.textAlign = "center";
+    prognosed_error_context.textBaseline = "middle"; 
+    // right
+    prognosed_error_context.moveTo(zero_x, zero_y);
+    prognosed_error_context.lineTo(zero_x + dx * 11, zero_y);
+    prognosed_error_context.lineTo(zero_x + dx * 11 - dx*0.8, zero_y - dy*0.2);
+    prognosed_error_context.moveTo(zero_x + dx * 11, zero_y);
+    prognosed_error_context.lineTo(zero_x + dx * 11 - dx*0.8, zero_y + dy*0.2);
+    for(var i = -10; i <= 10; i += 4) {
+        var x = zero_x + dx * (i + 10 + 1) / 2;
+        var y = zero_y + 12;
+        prognosed_error_context.fillText("e" + i, x, y);
+    }
+
+    // up
+    prognosed_error_context.moveTo(zero_x, zero_y);
+    prognosed_error_context.lineTo(zero_x, zero_y + dy*11);
+    prognosed_error_context.lineTo(zero_x - dx*0.2, zero_y  + dy*11 - dy*0.8);
+    prognosed_error_context.moveTo(zero_x, zero_y + dy*11);
+    prognosed_error_context.lineTo(zero_x + dx*0.2, zero_y  + dy*11 - dy*0.8);
+    for(var i = -6; i <= 10; i += 4) {
+        var x = zero_x - 22;
+        var y = zero_y + dy * (i + 10 + 1) / 2;
+        prognosed_error_context.fillText("e" + i, x, y);
+    }
+    
+    // away
+    prognosed_error_context.moveTo(zero_x, zero_y);
+    prognosed_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11);
+    prognosed_error_context.lineTo(zero_x + dzx*11 - dzx*0.8 - dzy*0.2, zero_y + dzy*11 - dzy*0.8 + dzx * 0.2);
+    prognosed_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11);
+    prognosed_error_context.lineTo(zero_x + dzx*11 - dzx*0.8 + dzy*0.2, zero_y + dzy*11 - dzy*0.8 - dzx * 0.2);
+    for(var i = -6; i <= 10; i += 4) {
+        var x = zero_x + dzx * (i + 10 + 1) / 2 - 20;
+        var y = zero_y + dzy * (i + 10 + 1) / 2 + 8;
+        prognosed_error_context.fillText("e" + i, x, y);
+    }
+        
+    prognosed_error_context.stroke();
+    prognosed_error_context.closePath();
+     
+    
+    // legend
+    var legend_dx = 640 / (16 + 12 + 1);
+    var legend_dy = 24;
+    for(var i = -16; i <= 12; ++i) {
+        prognosed_error_context.fillStyle = x_to_RRGGBB1(Math.pow(10, i));
+        prognosed_error_context.fillRect((16 + i) * legend_dx, 538 - legend_dy, legend_dx, legend_dy);
+    }
+    
+    prognosed_error_context.fillStyle="#000000";    
+    for(var i = -14; i <= 10; i += 4) {
+        var x = (16 + i + 0.5) * legend_dx;
+        var y = 538 - legend_dy * 0.5;
+        prognosed_error_context.fillText("e" + i, x, y);
+    }
+}
+
     </script>
   </head>
   <body>
@@ -834,6 +979,7 @@ And here is a 6-bit <b>floating point</b> number:
         init_fixed();
         init_floating();
         init_real_error();
+        init_prognosed_error();
     </script>
     
     <h2>
