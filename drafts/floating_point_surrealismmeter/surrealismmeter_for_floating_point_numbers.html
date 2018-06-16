@@ -66,6 +66,13 @@ table {
     text-align: center;
 }
 
+th {
+    vertical-align: text-top;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+    font-style: bold;
+}
+
 td {
     vertical-align: text-top;
     padding-top: 6pt;
@@ -976,6 +983,65 @@ It is simple, and it has simple limitations. You can't have numbers less than 0.
 And here is a 6-bit <b>floating point</b> number:
     </p>
     <canvas id="floating" width=640 height=200></canvas>
+    <p>
+The 6-bit fixed point number only covers positive numbers from 0.25 to 7.25<span id="shown_sidenote_1" onclick="show('sidenote_1')"><u>*</u></span><span id="hidden_sidenote_1" style="display:none">, and, of course, negative numbers from -7.25 to -0.25, and 0, but this is not important</span>, while the 6-bit floating point number covers the same subset from 0.25 to 56. It looks like the latter has a biger range, but it actually covers fewer real numbers that the former because the last part of its range in binary covers no real numbers at all.
+    </p>
+    <table>
+    <tr><th>Binary</th><th>Fixed point</th><th>Floating point</th></th> 
+    <tr><td>000001</td><td>0.25</td><td>0.25</td></tr>
+    <tr><td>000010</td><td>0.50</td><td>0.5</td></tr>
+    <tr><td>000011</td><td>0.75</td><td>0.75</td></tr>
+    <tr><td>000100</td><td>1.00</td><td>1</td></tr>
+    <tr><td>000101</td><td>1.25</td><td>1.25</td></tr>
+    <tr><td>000110</td><td>1.50</td><td>1.5</td></tr>
+    <tr><td>000111</td><td>1.75</td><td>1.75</td></tr>
+    <tr><td>001000</td><td>2.00</td><td>2</td></tr>
+    <tr><td>001001</td><td>2.25</td><td>2.5</td></tr>
+    <tr><td>001010</td><td>2.50</td><td>3</td></tr>
+    <tr><td>001011</td><td>2.75</td><td>3.5</td></tr>
+    <tr><td>001100</td><td>3.00</td><td>4</td></tr>
+    <tr><td>001101</td><td>3.25</td><td>5</td></tr>
+    <tr><td>001110</td><td>3.50</td><td>6</td></tr>
+    <tr><td>001111</td><td>3.75</td><td>7</td></tr>
+    <tr><td>010000</td><td>4.00</td><td>8</td></tr>
+    <tr><td>010001</td><td>4.25</td><td>10</td></tr>
+    <tr><td>010010</td><td>4.50</td><td>12</td></tr>
+    <tr><td>010011</td><td>4.75</td><td>14</td></tr>
+    <tr><td>010100</td><td>5.00</td><td>16</td></tr>
+    <tr><td>010101</td><td>5.25</td><td>20</td></tr>
+    <tr><td>010110</td><td>5.50</td><td>24</td></tr>
+    <tr><td>010111</td><td>5.75</td><td>28</td></tr>
+    <tr><td>011000</td><td>6.00</td><td>32</td></tr>
+    <tr><td>011001</td><td>6.25</td><td>40</td></tr>
+    <tr><td>011010</td><td>6.50</td><td>48</td></tr>    
+    <tr><td>011011</td><td>6.75</td><td>56</td></tr>
+    <tr><td>011100</td><td>7.00</td><td>positive infinite</td></tr>
+    <tr><td>011101</td><td>7.25</td><td>not a number</td></tr>
+    <tr><td>011110</td><td>7.50</td><td>not a number</td></tr>
+    <tr><td>011111</td><td>7.75</td><td>not a number</td></tr>
+    </table>
+    <p>
+With fixed point numbers we can add 4.00 and 0.25 and get 4.25. But in floating point numbers the next number is 5, so 4 + 0.25 = ... 4. And that's how we lose precision constantly. A bit here and a bit there. All because our floating point numbers are not real numbers, and not even a decent model of the real numbers. It's just a collection of real numbers that plays by its own rules.
+    </p>
+    <p>
+Rule number one: the computational error is imminent.
+    </p>
+    <p>
+The common misconception is ”we have enough bits to have this error neglectable.” Well, the problem with this point of view is that quite often it's true. Is it true or not depends on the three things:
+    <ol>
+    <li>The complexity of the operation.</li>
+    <li>The ranges of variables involved.</li>
+    <li>How much error can we tolerate?</li>
+    </ol>
+    <p>
+So, obviously enough, it can't be true all the time. And it isn't. In computational geometry, this is the source of the most unpleasant bugs. The ones that come and go. The once that don't reproduce on unit-tests and lay low through the integration phase only to bite you by the ancle as soon as you turn around to get busy with another things.
+    </p>
+    <p>
+How to protect yourself from this threat? Engineering has one ultimate answer for this kind of questions and it's: ”measurement!”
+    </p>
+    <h2>
+Measuring the floating point error with the inverse operation
+    </h2>
     <p>
 The <span id="shown_exp_2" onclick="show('exp_2')"><u>details of the experiment are</u></span><span id="hidden_exp_2" style="display:none"> details of the experiment: ..., ... which is, yet again, </span> not that important.
     </p>
