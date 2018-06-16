@@ -1034,7 +1034,7 @@ The common misconception is ”we have enough bits to have this error neglectabl
     <li>How much error can we tolerate?</li>
     </ol>
     <p>
-So, obviously enough, it can't be true all the time. And it isn't. In computational geometry, this is the source of the most unpleasant bugs. The ones that come and go. The once that don't reproduce on unit-tests and lay low through the integration phase only to bite you by the ancle as soon as you turn around to get busy with another things.
+So, obviously enough, it can't be true all the time. And it isn't. In computational geometry, this is the source of the most unpleasant bugs. The ones that come and go. The once that don't reproduce on unit-tests and lay low through the integration phase only to stab you in the back as soon as you turn around to do other things.
     </p>
     <p>
 How to protect yourself from this threat? Engineering has one ultimate answer for this kind of questions and it's: ”measurement!”
@@ -1043,11 +1043,55 @@ How to protect yourself from this threat? Engineering has one ultimate answer fo
 Measuring the floating point error with the inverse operation
     </h2>
     <p>
-The <span id="shown_exp_2" onclick="show('exp_2')"><u>details of the experiment are</u></span><span id="hidden_exp_2" style="display:none"> details of the experiment: ..., ... which is, yet again, </span> not that important.
+For example, let's take a <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/drafts/floating_point_surrealismmeter/double_interval/cubic_solver.hpp">cubic equation solver</a>. It is surprisingly computationally rich. Full of multiple multiplications, trigonometry, and square roots. But the inverse operation for solving a cubic equation, getting the coefficients from the given roots, is very simple. 
+    </p>
+    <table>
+    <tr><td>
+ax<sup>3</sup> + bx<sup>3</sup> + cx + d = 0
+    </td></tr><tr><td>
+(x - x<sub>1</sub>)(x - x<sub>2</sub>)(x - x<sub>3</sub>) = 0
+    </td></tr><tr><td>
+a = 1
+    </td></tr><tr><td>
+b = x<sub>1</sub> + x<sub>2</sub> + x<sub>3</sub>
+    </td></tr><tr><td>
+c = x<sub>1</sub>x<sub>2</sub> + x<sub>2</sub>x<sub>3</sub> + x<sub>3</sub>x<sub>1</sub>
+    </td></tr><tr><td>
+d = x<sub>1</sub>x<sub>2</sub>x<sub>3</sub>
+    </td></tr>
+    </table>
+    <p>
+This means that we can measure the error of solving the equation for every 3 roots we want. Yes, it will also have an error of the coefficients computation, but this error should be small enough to be considered a neglectable error of error measurement<span id="shown_sidenote_2" onclick="show('sidenote_2')"><u>*</u></span><span id="hidden_sidenote_2" style="display:none">, which probably deserven a measurement on it's own, but let's just skip this part</span>.
+    </p>
+    <p>
+Let's do an experiment. Let's measure the relative error for a triplet of roots defined in some exponential range.
+    </p>
+    <table>
+    <tr><td>
+x<sub>1</sub> = 1*10<sup>i<sub>1</sub></sup>, x<sub>2</sub> = 2*10<sup>i<sub>2</sub></sup>, x<sub>3</sub> = 3*10<sup>3<sub>3</sub></sup>,
+    </td></tr><tr><td>
+i<sub>1</sub> = -10, -8,... 10,
+    </td></tr><tr><td>
+i<sub>2</sub> = -10, -8,... 10,
+    </td></tr><tr><td>
+i<sub>3</sub> = -10, -8,... 10.
+    </td></tr>
+    </table>
+    <p>
+This way we will get a 3D grid of errors for different configurations of roots' orders of magnitude. Here it is. You can click on it to see what's inside of every particular layer.
     </p>
     <canvas id="real_error" width=640 height=538></canvas>
     <p>
-    ...
+The black squares are where the algorithm failed to find all three roots. The red ones are the ones with the largest error, and the green ones are the ones with the least error. All and all, the error changes from e<sup>-16</sup> to e<sup>12</sup>. Remember, this is relative error, so e<sup>12</sup> for a root of e<sup>10</sup> is actually an enormous number that looks like this: 10'000'000'000'000'000'000'000. That's our worse error.
+    </p>
+    <p>
+Do you see the pattern here? The green area shoots through the diagonal. This means that's all good when the orders of the roots are roughly the same. Whether they are e<sup>-8</sup> or e<sup>2</sup> or e<sup>+10</sup>. It's all fine as long as there is no significant difference. But when there is, he have trouble. 
+    </p>
+    <p>
+I once had a really nasty bug that eventially boiled down to the cubic solver for the equation with one root being exactly 600, and the other two at about 2e-5. I had to track it down, and it really helped me to have the error estimation. But it became really the eye opening experience because these are not astronomical numbers. That's... really visible quantities. It's like 2 cents and 600'000 euros in one equation. Not even millions.
+    </p>
+    <p>
+So here is a trivial advice: when in doubt — measure. When not in doubt — measure and be surprised.
     </p>
     <canvas id="prognosed_error" width=640 height=538></canvas>
     
