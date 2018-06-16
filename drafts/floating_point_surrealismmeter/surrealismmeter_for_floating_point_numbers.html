@@ -1040,7 +1040,7 @@ So, obviously enough, it can't be true all the time. And it isn't. In computatio
 How to protect yourself from this threat? Engineering has one ultimate answer for this kind of questions and it's: ”measurement!”
     </p>
     <h2>
-Measuring the floating point error with the inverse operation
+Measuring the floating point error using the inverse operation
     </h2>
     <p>
 For example, let's take a <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/drafts/floating_point_surrealismmeter/double_interval/cubic_solver.hpp">cubic equation solver</a>. It is surprisingly computationally rich. Full of multiple multiplications, trigonometry, and square roots. But the inverse operation for solving a cubic equation, getting the coefficients from the given roots, is very simple. 
@@ -1078,7 +1078,7 @@ i<sub>3</sub> = -10, -8,... 10.
     </td></tr>
     </table>
     <p>
-This way we will get a 3D grid of errors for different configurations of roots' orders of magnitude. Here it is. You can click on it to see what's inside of every particular layer.
+This way we will get a 3D grid of errors for different configurations of roots' orders of magnitude. Here it is. You can click on its front plane to see what's inside of every particular layer.
     </p>
     <canvas id="real_error" width=640 height=538></canvas>
     <p>
@@ -1093,6 +1093,24 @@ I once had a really nasty bug that eventially boiled down to the cubic solver fo
     <p>
 So here is a trivial advice: when in doubt — measure. When not in doubt — measure and be surprised.
     </p>
+    <h2>
+Measuring floating point error using the intervals
+    </h2>
+    <p>
+What if we don't have a reverse operation at all, or what if it introduces the greater error than the operation itself? It's problematic to estimate calculational error when we don't have a reliable way to obtain the ground truth. Can we know the error without the actual measuring?
+    </p>
+    <p>
+Well, no. But we can do some estimate without measuring an actual error, there is a way for that.
+    </p>
+    <p>
+Let's get back to our 6-bit numbers. Remember, we couldn't add 4 and 0.25 properly because 6-bit float only have 4 and 5? Now, what if we represent a real number not as the nearest or the ”floorest” value from available, but as an interval of available values written in a more powerful subset? And we'll then operate on the intevals, so when the error grows, we'll see that. Sounds promising, right? 
+    </p>
+    <p>
+For instance, in our intervals, 4.25 is now something between 4 and 5. If we sum it with 2.25 (which is 2 to 2.5), we will not get 6 and some error, we will get an interval from 6 to 7.5. It's ok, we can have 7.5 since we store interval in larger numbers, not 6-bits. Our real result is 6.5, and our real error in 6-bit numbers is 0.5. But what we get instead is interval 1.5 wide, so we can presume that the resulting value is not 6 with some unknown error, but 6.75 with 0.75 error. 
+    </p>
+    <p>
+Operating on intervals get them larger and larger, and this represents the potential error we might face. Of course, out real error should be smaller than that, so this is not the exact measurement. But this is an estimation, and the estimation for our cubic solver actaully follows the measured error rather well.
+    </p>
     <canvas id="prognosed_error" width=640 height=538></canvas>
     
     <script language="JavaScript">
@@ -1101,12 +1119,42 @@ So here is a trivial advice: when in doubt — measure. When not in doubt 
         init_real_error();
         init_prognosed_error();
     </script>
-    
+    <p>
+The great thing abouth this method is that you don't want to rewrite all your code to work on intervals instead of floats just to get these estimates. For instance, in C++ you can make <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/drafts/floating_point_surrealismmeter/double_interval/double_interval.hpp">an interval representing type</a> disguise itself as a double with a simple #define. Yes, it's a dirty hack, and you have to be careful to have all your maths functions reimplemented for the intervals, but it has its perks.
+    </p>
+    <p>
+First of all, it's simple. You just do <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/drafts/floating_point_surrealismmeter/double_interval/exp_1.cpp">something like this</a>: 
+    </p>
+    <table style="border: 1px solid black;">
+    <tr><td><pre>
+#include "double_interval.hpp"
+
+#define double DoubleInterval
+#include "cubic_solver.hpp"
+
+...
+    </pre></td></tr>
+    </table>
+    <p>
+And all your doubles acquire <i>from</i> and <i>to</i> fields automatically. You just run your tests then and check the intervals. Simple!
+    </p>
+    <p>
+Second, it's more pessimistic than the measurements. And in a good way too. The measuremetns go for a real error, this one estimates the worse case.
+    </p>
+    <p>
+Third, it enables you to do what almost nobody does but almost everbody shoud. It enables you to debug a computational error. You can see it, you can trace the execution to find it, you can make the code better. Sometimes, it's as easy as to normalize some vector just one extra time.
+    </p>
+    <h2>
+Conclusion
+    </h2>
+    <p>
+Floating point computational error is measurable and manageable. By measuring it you can make your clients happy, and yourself — free from the nights of fruitless debugging. Yes, the tools for this are not that popular as debuggers or profilers, and the methodology is not very well established. But is it really the reason not to measure the computational error at all?
+    </p>
     <h2>
 P. S.
     </h2>
     <p>
-All the <a href="https://github.com/akalenuk/wordsandbuttons">source code</a> for this site is available on GitHub. Particularly, the experiments described are there: 
+All the <a href="https://github.com/akalenuk/wordsandbuttons">source code</a> for this site is hosted on GitHub. Particularly, the experiments described along with the cubic solver and the double interval class are available there.
 <br>
 <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/drafts/floating_point_surrealismmeter/double_interval">.../drafts/floating_point_surrealismmeter/double_interval</a>. 
     </p>
