@@ -984,7 +984,7 @@ And here is a 6-bit <b>floating point</b> number:
     </p>
     <canvas id="floating" width=640 height=200></canvas>
     <p>
-The 6-bit fixed point number only covers positive numbers from 0.25 to 7.25<span id="shown_sidenote_1" onclick="show('sidenote_1')"><u>*</u></span><span id="hidden_sidenote_1" style="display:none">, and, of course, negative numbers from -7.25 to -0.25, and 0, but this is not important</span>, while the 6-bit floating point number covers the same subset from 0.25 to 56. It looks like the latter has a biger range, but it actually covers fewer real numbers that the former because the last part of its range in binary covers no real numbers at all.
+The 6-bit fixed point number only covers positive numbers from 0.25 to 7.25<span id="shown_sidenote_1" onclick="show('sidenote_1')"><u>*</u></span><span id="hidden_sidenote_1" style="display:none">, and, of course, negative numbers from -7.25 to -0.25, and 0, but this is not important</span>, while the 6-bit floating point number covers the same subset from 0.25 to 56. It looks like the latter has a larger range, but it actually covers fewer real numbers than the former because the last part of its range covers no real numbers at all.
     </p>
     <table>
     <tr><th>Binary</th><th>Fixed point</th><th>Floating point</th></th> 
@@ -1027,7 +1027,7 @@ With fixed point numbers we can add 4.00 and 0.25 and get 4.25. But in floating 
 Rule number one: the computational error is imminent.
     </p>
     <p>
-The common misconception is ”we have enough bits to have this error neglectable.” Well, the problem with this point of view is that quite often it's true. Is it true or not depends on the three things:
+The common misconception is ”we have enough bits to have this error negligible.” Well, the problem with this point of view is that quite often it's true. But really is it true or not depends on these three things:
     <ol>
     <li>The complexity of the operation.</li>
     <li>The ranges of variables involved.</li>
@@ -1039,8 +1039,9 @@ So, obviously enough, it can't be true all the time. And it isn't. In computatio
     <p>
 How to protect yourself from this threat? Engineering has one ultimate answer for this kind of questions and it's: ”measurement!”
     </p>
+    
     <h2>
-Measuring the floating point error using the inverse operation
+Measuring the floating point error using an inverse operation
     </h2>
     <p>
 For example, let's take a <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/drafts/floating_point_surrealismmeter/double_interval/cubic_solver.hpp">cubic equation solver</a>. It is surprisingly computationally rich. Full of multiple multiplications, trigonometry, and square roots. But the inverse operation for solving a cubic equation, getting the coefficients from the given roots, is very simple. 
@@ -1061,14 +1062,14 @@ d = x<sub>1</sub>x<sub>2</sub>x<sub>3</sub>
     </td></tr>
     </table>
     <p>
-This means that we can measure the error of solving the equation for every 3 roots we want. Yes, it will also have an error of the coefficients computation, but this error should be small enough to be considered a neglectable error of error measurement<span id="shown_sidenote_2" onclick="show('sidenote_2')"><u>*</u></span><span id="hidden_sidenote_2" style="display:none">, which probably deserven a measurement on it's own, but let's just skip this part</span>.
+This means that we can measure the error of solving the equation for every 3 roots we want. Yes, it will also have an error of the coefficients computation, but this error should be small enough to be considered a negligible error of error measurement<span id="shown_sidenote_2" onclick="show('sidenote_2')"><u>*</u></span><span id="hidden_sidenote_2" style="display:none">, which probably deserves a measurement on it's own, but let's just skip this part</span>.
     </p>
     <p>
 Let's do an experiment. Let's measure the relative error for a triplet of roots defined in some exponential range.
     </p>
     <table>
     <tr><td>
-x<sub>1</sub> = 1*10<sup>i<sub>1</sub></sup>, x<sub>2</sub> = 2*10<sup>i<sub>2</sub></sup>, x<sub>3</sub> = 3*10<sup>3<sub>3</sub></sup>,
+x<sub>1</sub> = 1*10<sup>i<sub>1</sub></sup>, x<sub>2</sub> = 2*10<sup>i<sub>2</sub></sup>, x<sub>3</sub> = 3*10<sup>i<sub>3</sub></sup>,
     </td></tr><tr><td>
 i<sub>1</sub> = -10, -8,... 10,
     </td></tr><tr><td>
@@ -1078,26 +1079,26 @@ i<sub>3</sub> = -10, -8,... 10.
     </td></tr>
     </table>
     <p>
-This way we will get a 3D grid of errors for different configurations of roots' orders of magnitude. Here it is. You can click on it to see what's inside of every particular layer.
+We get a 3D grid of errors for different configurations of roots' orders of magnitude. Here it is. You can click on it to see what's inside of every particular layer.
     </p>
     <canvas id="real_error" width=640 height=538></canvas>
     <p class="comment">
 Click on the front side or on the left side of the cube.
     </p>
     <p>
-The black squares are where the algorithm failed to find all three roots. The red ones are the ones with the largest error, and the green ones are the ones with the least error. All and all, the error changes from e<sup>-16</sup> to e<sup>12</sup>. Remember, this is relative error, so e<sup>12</sup> for a root of e<sup>10</sup> is actually an enormous number that looks like this: 10'000'000'000'000'000'000'000. That's our worse error.
+The black cells are where the algorithm failed to find all three roots. The red ones are the ones with the largest error, and the green ones are the ones with the least error. All and all, the error changes from e<sup>-16</sup> to e<sup>12</sup>. Remember, this is relative error, so e<sup>12</sup> for a root of e<sup>10</sup> is actually an enormous number that looks like this: 10'000'000'000'000'000'000'000. That's our worse error.
     </p>
     <p>
-Do you see the pattern here? The green area shoots through the diagonal. This means that's all good when the orders of the roots are roughly the same. Whether they are e<sup>-8</sup> or e<sup>2</sup> or e<sup>+10</sup>. It's all fine as long as there is no significant difference. But when there is, he have trouble. 
+Do you see the pattern here? The green area shoots through the diagonal. This means that it's all good when the orders of the roots are roughly the same. Whether they are e<sup>-8</sup> or e<sup>2</sup> or e<sup>+10</sup>. It's all fine as long as there is no significant difference. But when there is, he have trouble. 
     </p>
     <p>
-I once had a really nasty bug that eventially boiled down to the cubic solver for the equation with one root being exactly 600, and the other two at about 2e-5. I had to track it down, and it really helped me to have the error estimation. But it became really the eye opening experience because these are not astronomical numbers. That's... really visible quantities. It's like 2 cents and 600'000 euros in one equation. Not even millions.
+I once had a really nasty bug that eventially boiled down to the cubic solver for the equation with one root being exactly 600, and the other two at about 2e-5. I had to track it down, and, of course, it really helped me to have the error measured. But it also became the eye opening experience because these are not astronomical numbers. That's... really visible quantities. It's like 2 cents and 600'000 euros in one equation. Not even millions.
     </p>
     <p>
 So here is a trivial advice: when in doubt — measure. When not in doubt — measure and be surprised.
     </p>
     <h2>
-Measuring floating point error using the intervals
+Estimating the floating point error using intervals
     </h2>
     <p>
 What if we don't have a reverse operation at all, or what if it introduces the greater error than the operation itself? It's problematic to estimate calculational error when we don't have a reliable way to obtain the ground truth. Can we know the error without the actual measuring?
@@ -1144,10 +1145,10 @@ First of all, it's simple. You do <a href="https://github.com/akalenuk/wordsandb
 And all your doubles acquire <i>from</i> and <i>to</i> fields automatically. You just run your tests then and check the intervals. Simple!
     </p>
     <p>
-Second, it's more pessimistic than the measurements. And in a good way too. The measuremetns go for a real error, this one estimates the worse case.
+Second, it's more pessimistic than the measurements. And in a good way too. The measurements go for a real error, this one estimates the worse case. Since you can't measure the error for all the possible input, some imprecision is expected anyway. It's better to have it more on the pessimistic side.
     </p>
     <p>
-Third, it enables you to do what almost nobody does but almost everbody shoud. It enables you to debug a computational error. You can see it, you can trace the execution to find it, you can make the code better. Sometimes, it's as easy as to normalize some vector just one extra time.
+Third, it enables you to do what almost nobody does but almost everybody should. It enables you to debug a computational error. You can see it, you can trace the execution to find it, you can make the code better. Sometimes, it's as easy as to normalize some vector just one extra time.
     </p>
     <h2>
 Conclusion
@@ -1159,7 +1160,7 @@ Floating point computational error is measurable and manageable. By measuring it
 P. S.
     </h2>
     <p>
-All the <a href="https://github.com/akalenuk/wordsandbuttons">source code</a> for this site is hosted on GitHub. Particularly, the experiments described along with the cubic solver and the double interval class are available there.
+All the <a href="https://github.com/akalenuk/wordsandbuttons">source code</a> for this site is hosted on GitHub. Particularly, the experiments described along with the cubic solver and the double interval class are available there:
 <br>
 <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/drafts/floating_point_surrealismmeter/double_interval">.../drafts/floating_point_surrealismmeter/double_interval</a>. 
     </p>
