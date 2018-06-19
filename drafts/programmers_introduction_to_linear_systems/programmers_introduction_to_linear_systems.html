@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Programmer's introduction to linear systems</title>
+    <meta name="keywords" content="programming,linear equations,linear systems,tutorial,guide,learning">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.comment {
+    font-size: 12pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
+
+.formula {
+    font-family: sans-serif;
+    font-size: 15pt;
+    font-style: italic;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+.footer {
+    margin-top: 64pt;
+    padding-bottom: 32pt;
+    font-family: sans-serif;
+    font-size: 16pt;
+    text-align: left;
+}
+
+table {
+    font-family: sans-serif;
+    font-size: 13pt;
+    font-style: italic;
+    width: 505pt;
+    text-align: center;
+}
+
+td {
+    vertical-align: text-top;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+}
+
+input[type="text"] {
+    width: 32pt;
+    height: 22pt;
+    font-size: 16pt;
+    text-align: center;
+}
+
+button {
+    width: 32pt;
+    height: 26pt;
+    font-size: 16pt;
+    text-align: center;
+}
+
+pre {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 12pt;
+    text-align: left;
+    width: 505pt;
+}
+    </style>
+    <script language="JavaScript">
+
+// client
+var w = 640.0;
+var h = 512.0;
+
+// visible region
+var x_min = -1.0;
+var y_min = -1.0;
+var x_max = 9.0;
+var y_max = 7.0;
+
+var client_x_center = w*(0-x_min)/(x_max-x_min);
+var client_x_step = (w/(x_max-x_min));
+
+var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+var client_y_step = (h/(y_max-y_min));
+
+function client_to_x(client_x){
+    return (client_x - client_x_center) / client_x_step;
+}
+
+function client_to_y(client_y){
+    return (client_y_center - client_y) / client_y_step;
+}
+
+function x_to_client(x){
+    return x * client_x_step + client_x_center;
+}
+
+function y_to_client(y){
+    return client_y_center - y * client_y_step;
+}
+
+
+function draw_grid_on(context){
+    // grid
+    context.beginPath();
+    context.moveTo(0, client_y_center);
+    context.lineTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center - 5);
+    context.moveTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center + 5);
+    context.moveTo(client_x_center, h);
+    context.lineTo(client_x_center, 0);
+    context.lineTo(client_x_center - 5, 12);
+    context.moveTo(client_x_center, 0);
+    context.lineTo(client_x_center + 5, 12);
+    context.fillStyle="#000000";
+    for(var i = x_min + 1; i <= x_max - 1; i++){
+        context.moveTo(client_x_center + i*client_x_step, client_y_center);
+        context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+        context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+    }
+    for(var i = y_min + 1; i <= y_max - 1; i++){
+        context.moveTo(client_x_center, client_y_center - i*client_y_step);
+        context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+        context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+    }
+    context.strokeStyle = "#000000";
+    context.stroke();
+    context.closePath();
+}
+
+function draw_dots_and_guides_on(context, grid_xs, grid_ys, grid_n, do_guides, client_x, client_y){
+    // dots
+    context.beginPath();
+    for(var i = 0; i < grid_n; ++i){
+        context.moveTo(x_to_client(grid_xs[i])-5.5, y_to_client(grid_ys[i])+5.5);
+        context.lineTo(x_to_client(grid_xs[i])+5.5, y_to_client(grid_ys[i])-5.5);
+        context.moveTo(x_to_client(grid_xs[i])+5.5, y_to_client(grid_ys[i])+5.5);
+        context.lineTo(x_to_client(grid_xs[i])-5.5, y_to_client(grid_ys[i])-5.5);
+    }
+    context.strokeStyle = "#BB6644";
+    context.stroke();
+    context.closePath();
+
+    // closest point
+    var closest_i = 0;
+    min_d = Math.pow(grid_xs[0] - client_to_x(client_x), 2) + Math.pow(grid_ys[0] - client_to_y(client_y), 2);
+    for(var i = 1; i < grid_n; ++i){
+        var di = Math.pow(grid_xs[i] - client_to_x(client_x), 2) + Math.pow(grid_ys[i] - client_to_y(client_y), 2);
+        if(di < min_d){
+            min_d = di;
+            closest_i = i;
+        }
+    }
+    
+    // guides
+    if(do_guides){        
+        context.setLineDash([4, 4]);
+        context.beginPath();
+        context.moveTo(x_to_client(grid_xs[closest_i]), y_to_client(grid_ys[closest_i]));
+        context.lineTo(client_x, client_y);
+        context.strokeStyle="#AA3311";
+        context.stroke();
+        context.closePath();
+        context.setLineDash([]);
+    }
+    
+    return closest_i;
+}
+
+
+// stub
+var stub_i = 0;
+
+function init_stub(){
+    var nurbs = document.getElementById("stub");
+    var canvas_rect = nurbs.getBoundingClientRect();
+    draw_stub(0, 0, false);
+
+    nurbs.addEventListener('mousemove', function(e){
+        var canvas_rect = nurbs.getBoundingClientRect();
+        draw_stub(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+            nurbs_control_xs[stub_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[stub_i];
+            nurbs_control_ys[stub_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[stub_i];
+            draw_stub(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+        }
+    }, false);
+
+    nurbs.addEventListener('mousedown', function(e){
+        var canvas_rect = nurbs.getBoundingClientRect();
+        nurbs_control_xs[stub_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[stub_i];
+        nurbs_control_ys[stub_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[stub_i];
+        draw_stub(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    nurbs.addEventListener('mouseleave', function(e){
+        draw_stub(0, 0, false);
+    }, false);
+}
+
+function draw_stub(client_x, client_y, do_guides){
+    var stub = document.getElementById("stub");
+    var stub_context = stub.getContext("2d");
+    stub_context.font = "16px sans-serif";
+    // background
+    stub_context.fillStyle="#eeeeee";
+    stub_context.fillRect(0, 0, w, h);
+
+    // grid
+    draw_grid_on(stub_context);
+
+    // ...
+    
+    // dots and guides
+    stub_i = draw_dots_and_guides_on(stub_context, 
+        [], [], 0, 
+        do_guides, client_x, client_y);
+}
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+Programmer's introduction to linear systems
+    </h1>
+    <p>
+...
+    </p>
+
+    <canvas id="stub" width=640 height=512></canvas>
+    <script language="JavaScript">
+        init_stub();
+    </script>
+
+
+    <p class="footer">
+    <a class="twitter-share-button"
+  href="https://twitter.com/intent/tweet?text=text&url=https://wordsandbuttons.online/programmers_introduction_to_linear_systems.html&hashtags=linear,systems,guide&via=wordsandbuttons"
+  data-size="large">
+Tweet</a>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    <br>     
+There are more words and buttons on <a href="index.html">wordsandbuttons.online</a>.
+    </p>
+    </center>
+  </body>
+</html>
