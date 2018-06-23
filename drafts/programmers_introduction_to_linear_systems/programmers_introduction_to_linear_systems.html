@@ -238,6 +238,12 @@ function new_equation_for_one_point(a1, a2, b, x, y) {
     }
 }
 
+function solve_2(a11, a12, b1, a21, a22, b2) {
+    sx = (-a12*b2 + a22*b1)/(a11*a22 - a12*a21);
+    sy = (a11*b2 - a21*b1)/(a11*a22 - a12*a21);
+    return [sx, sy];
+}
+
 //////
 /// simple plots
 const system_1_eqs = 2;
@@ -565,12 +571,11 @@ function solver_draw(client_x, client_y, do_guides){
     }
     last_iterations = i;
     // solution
-    sx = (-a12*b2 + a22*b1)/(a11*a22 - a12*a21);
-    sy = (a11*b2 - a21*b1)/(a11*a22 - a12*a21);
+    sxy = solve_2(a11, a12, b1, a21, a22, b2);
     results.innerHTML += "<br>";
     results.innerHTML += "Solution found: (" + cur_x.toFixed(3) + "; " + cur_y.toFixed(3) + "), ";
-    results.innerHTML += "<i>actual solution: (" + sx.toFixed(3) + "; " + sy.toFixed(3) + ")</i>";
-    error = length_of(sx-cur_x, sy-cur_y);
+    results.innerHTML += "<i>actual solution: (" + sxy[0].toFixed(3) + "; " + sxy[1].toFixed(3) + ")</i>";
+    error = length_of(sxy[0] - cur_x, sxy[1] - cur_y);
     results.innerHTML += "<br>";
     results.innerHTML += "Tolerance: " + end_step_length.toFixed(3) + ", real error: " + error.toFixed(3);
     last_error = error;
