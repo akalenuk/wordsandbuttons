@@ -106,6 +106,9 @@ var y_min = -1.0;
 var x_max = 9.0;
 var y_max = 7.0;
 
+// colors
+var line_colors = ["#d64562", "#457fd6", "#62d645", "#d98146"];
+
 var client_x_center = w*(0-x_min)/(x_max-x_min);
 var client_x_step = (w/(x_max-x_min));
 
@@ -129,30 +132,30 @@ function y_to_client(y){
 }
 
 function draw_grid_on(context){
-	// grid
- 	context.beginPath();
-	context.moveTo(0, client_y_center);
-	context.lineTo(w, client_y_center);
-	context.lineTo(w - 12, client_y_center - 5);
-	context.moveTo(w, client_y_center);
-	context.lineTo(w - 12, client_y_center + 5);
-	context.moveTo(client_x_center, h);
-	context.lineTo(client_x_center, 0);
-	context.lineTo(client_x_center - 5, 12);
-	context.moveTo(client_x_center, 0);
-	context.lineTo(client_x_center + 5, 12);
+    // grid
+     context.beginPath();
+    context.moveTo(0, client_y_center);
+    context.lineTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center - 5);
+    context.moveTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center + 5);
+    context.moveTo(client_x_center, h);
+    context.lineTo(client_x_center, 0);
+    context.lineTo(client_x_center - 5, 12);
+    context.moveTo(client_x_center, 0);
+    context.lineTo(client_x_center + 5, 12);
     context.fillStyle="#000000";
-	for(var i = x_min + 1; i <= x_max - 1; i++){
-	    context.moveTo(client_x_center + i*client_x_step, client_y_center);
-		context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
-		context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
-	}
-	for(var i = y_min + 1; i <= y_max - 1; i++){
-	    context.moveTo(client_x_center, client_y_center - i*client_y_step);
-		context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
-		context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
-	}
-	context.strokeStyle="#000000";
+    for(var i = x_min + 1; i <= x_max - 1; i++){
+        context.moveTo(client_x_center + i*client_x_step, client_y_center);
+        context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+        context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+    }
+    for(var i = y_min + 1; i <= y_max - 1; i++){
+        context.moveTo(client_x_center, client_y_center - i*client_y_step);
+        context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+        context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+    }
+    context.strokeStyle="#000000";
     context.stroke();
     context.closePath();
 }
@@ -236,40 +239,102 @@ function new_equation_for_one_point(a1, a2, b, x, y) {
 //////
 /// simple plots
 const system_1_eqs = 2;
-var system_1_eq_1 = [1.0, 1.0, 1.0];
-var system_1_eq_2 = [-1.0, 1.0, 6.0];
-var system_1_eq_1_temp;
-var system_1_eq_2_temp;
+var system_1_eq_1 = [-1.0, 1.0, 1.0];
+var system_1_eq_2 = [1.0, 1.0, 6.0];
 
-function init_plot_named(name){
+var system_1_eq_temp_id = 1;
+var system_1_eq_1_temp = system_1_eq_1;
+var system_1_eq_2_temp = system_1_eq_2;
+
+
+function invalidate_plot_named(name) {
+    eval(name + "_eq_" + system_1_eq_temp_id + " = Array.from(" + name + "_eq_" + system_1_eq_temp_id + "_temp);");
+    draw_plot_named(name, 0, 0, false);
+}
+
+function init_plot_named(name) {
     plot = document.getElementById(name);
     var canvas_rect = plot.getBoundingClientRect();
     draw_plot_named(name, 0, 0, false);
 
     plot.addEventListener('mousemove', function(e){
-        var canvas_rect = plot.getBoundingClientRect();
-   	    draw_plot_named(name, e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-   	    if(e.buttons == 1){
-   	        invalidate_plot_named(name, e.clientX, e.clientY);
-   	    }
+       var canvas_rect = plot.getBoundingClientRect();
+       draw_plot_named(name, e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+       if(e.buttons == 1){
+           invalidate_plot_named(name);
+       }
     }, false);
 
     plot.addEventListener('mouseup', function(e){
-        invalidate_plot_named(name, e.clientX, e.clientY);
+        invalidate_plot_named(name);
     }, false);
 
     plot.addEventListener('mouseleave', function(e){
-	   draw_plot_named(name, 0, 0, false);
+       draw_plot_named(name, 0, 0, false);
     }, false);
 }
 
-function draw_plot_named(name, client_x, client_y, do_guides){
+function draw_plot_named(name, client_x, client_y, do_guides) {
     plot = document.getElementById(name);
     var context = plot.getContext("2d");
     context.font = "16px sans-serif";
     // background
     context.fillStyle="#eeeeee";
-	context.fillRect(0, 0, w, h);
+    context.fillRect(0, 0, w, h);
+    
+    // equations
+    for(var i = 0; i < eval(name + "_eqs"); ++i) {
+        context.beginPath();
+        var eq = eval(name + "_eq_" + (i+1));
+        var xys = get_points_on_the_ends(eq[0], eq[1], eq[2]);
+        context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
+        context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
+        context.strokeStyle = line_colors[i];
+        context.lineWidth = 2;
+        context.stroke();
+        context.closePath();
+        context.lineWidth = 1;
+    }
+    
+    // grid
+    draw_grid_on(context);
+    
+    if(do_guides){
+        var x = client_to_x(client_x);
+        var y = client_to_y(client_y);
+              
+        // find the nearest equation
+        var closest_eq_i = 0;
+        var eq0 = eval(name + "_eq_1");
+        var x0 = projected_x(x, y, eq0[0], eq0[1], eq0[2]);
+        var y0 = projected_y(x, y, eq0[0], eq0[1], eq0[2]);
+        var closest_distance = length_of(x - x0, y - y0);
+        for(var i = 1; i < eval(name + "_eqs"); ++i) {
+            var eq = eval(name + "_eq_" + (i+1));
+            var xi = projected_x(x, y, eq[0], eq[1], eq[2]);
+            var yi = projected_y(x, y, eq[0], eq[1], eq[2]);
+            var distancei = length_of(x - xi, y - yi);
+            if (distancei < closest_distance) {
+                closest_distance = distancei;
+                closest_eq_i = i;
+            }
+        }        
+        eval(name + "_eq_temp_id = closest_eq_i + 1;");
+        
+        // draw the quide
+        var closest_eq = eval(name + "_eq_" + (closest_eq_i + 1));
+        var temp_eq = new_equation_for_one_point(closest_eq[0], closest_eq[1], closest_eq[2], x, y);
+        eval(name + "_eq_" + (closest_eq_i + 1) + "_temp = Array.from(temp_eq);");
+        context.beginPath();
+        var xys = get_points_on_the_ends(temp_eq[0], temp_eq[1], temp_eq[2]);
+        context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
+        context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
+        context.strokeStyle = line_colors[closest_eq_i];
+        context.setLineDash([4, 4]);
+        context.stroke();
+        context.setLineDash([]);
+        context.closePath();
+    }
 }
 
 //////
@@ -277,19 +342,19 @@ function draw_plot_named(name, client_x, client_y, do_guides){
 function invalidate_solver(client_x, client_y){
     var canvas_rect = solver.getBoundingClientRect();
     if(document.getElementById("button_1").disabled){
-   	    a11 = temp_a11;
-   	    a12 = temp_a12;
-   	    b1 = temp_b1;
-   	}else if(document.getElementById("button_2").disabled){
-   	    a21 = temp_a21;
-   	    a22 = temp_a22;
-   	    b2 = temp_b2;
-   	}else if(document.getElementById("button_3").disabled){
-   	    start_x = client_to_x(client_x - canvas_rect.left);
-   	    start_y = client_to_y(client_y - canvas_rect.top);
-   	}else if(document.getElementById("button_4").disabled){
-   	    end_step_length = temp_end_step_length;
-   	}
+           a11 = temp_a11;
+           a12 = temp_a12;
+           b1 = temp_b1;
+       }else if(document.getElementById("button_2").disabled){
+           a21 = temp_a21;
+           a22 = temp_a22;
+           b2 = temp_b2;
+       }else if(document.getElementById("button_3").disabled){
+           start_x = client_to_x(client_x - canvas_rect.left);
+           start_y = client_to_y(client_y - canvas_rect.top);
+       }else if(document.getElementById("button_4").disabled){
+           end_step_length = temp_end_step_length;
+       }
     solver_draw(0, 0, false);
     check_ex();
 }
@@ -301,10 +366,10 @@ function init_solver(){
 
     solver.addEventListener('mousemove', function(e){
         var canvas_rect = solver.getBoundingClientRect();
-   	    solver_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-   	    if(e.buttons == 1){
-   	        invalidate_solver(e.clientX, e.clientY);
-   	    }
+        solver_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+            invalidate_solver(e.clientX, e.clientY);
+        }
     }, false);
 
     solver.addEventListener('mouseup', function(e){
@@ -312,7 +377,7 @@ function init_solver(){
     }, false);
 
     solver.addEventListener('mouseleave', function(e){
-	    solver_draw(0, 0, false);
+        solver_draw(0, 0, false);
     }, false);
 }
 
@@ -324,16 +389,16 @@ function solver_draw(client_x, client_y, do_guides){
     solver_context.font = "16px sans-serif";
     // background
     solver_context.fillStyle="#eeeeee";
-	solver_context.fillRect(0, 0, w, h);
+    solver_context.fillRect(0, 0, w, h);
 
     // red margin
-	solver_context.beginPath();
-	var db1 = end_step_length * length_of(a11, a12);
-	solver_context.moveTo(x_to_client(x_min), y_to_client((b1 - db1 - a11*(x_min))/a12));
-	solver_context.lineTo(x_to_client(x_max), y_to_client((b1 - db1 - a11*(x_max))/a12));
-	solver_context.lineTo(x_to_client(x_max), y_to_client((b1 + db1 - a11*(x_max))/a12));
-	solver_context.lineTo(x_to_client(x_min), y_to_client((b1 + db1 - a11*(x_min))/a12));
-	solver_context.lineTo(x_to_client(x_min), y_to_client((b1 - db1 - a11*(x_min))/a12));
+    solver_context.beginPath();
+    var db1 = end_step_length * length_of(a11, a12);
+    solver_context.moveTo(x_to_client(x_min), y_to_client((b1 - db1 - a11*(x_min))/a12));
+    solver_context.lineTo(x_to_client(x_max), y_to_client((b1 - db1 - a11*(x_max))/a12));
+    solver_context.lineTo(x_to_client(x_max), y_to_client((b1 + db1 - a11*(x_max))/a12));
+    solver_context.lineTo(x_to_client(x_min), y_to_client((b1 + db1 - a11*(x_min))/a12));
+    solver_context.lineTo(x_to_client(x_min), y_to_client((b1 - db1 - a11*(x_min))/a12));
     solver_context.strokeStyle="#ff8866";
     solver_context.stroke();
     solver_context.closePath();
@@ -341,110 +406,110 @@ function solver_draw(client_x, client_y, do_guides){
     solver_context.fill();
 
     // blue margin
-   	solver_context.beginPath();
-   	var db2 = end_step_length * length_of(a21, a22);
-	solver_context.moveTo(x_to_client(x_min), y_to_client((b2 - db2 - a21*(x_min))/a22));
-	solver_context.lineTo(x_to_client(x_max), y_to_client((b2 - db2 - a21*(x_max))/a22));
-	solver_context.lineTo(x_to_client(x_max), y_to_client((b2 + db2 - a21*(x_max))/a22));
-	solver_context.lineTo(x_to_client(x_min), y_to_client((b2 + db2 - a21*(x_min))/a22));
-	solver_context.lineTo(x_to_client(x_min), y_to_client((b2 - db2 - a21*(x_min))/a22));
+    solver_context.beginPath();
+    var db2 = end_step_length * length_of(a21, a22);
+    solver_context.moveTo(x_to_client(x_min), y_to_client((b2 - db2 - a21*(x_min))/a22));
+    solver_context.lineTo(x_to_client(x_max), y_to_client((b2 - db2 - a21*(x_max))/a22));
+    solver_context.lineTo(x_to_client(x_max), y_to_client((b2 + db2 - a21*(x_max))/a22));
+    solver_context.lineTo(x_to_client(x_min), y_to_client((b2 + db2 - a21*(x_min))/a22));
+    solver_context.lineTo(x_to_client(x_min), y_to_client((b2 - db2 - a21*(x_min))/a22));
     solver_context.strokeStyle="#6699ff";
     solver_context.stroke();
     solver_context.closePath();
     solver_context.fillStyle="#bbddff";
     solver_context.fill();
 
-	// red line
-	solver_context.beginPath();
-    var	xys = get_points_on_the_ends(a11, a12, b1);
-	solver_context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
-	solver_context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
-	solver_context.strokeStyle="#dd6644";
+    // red line
+    solver_context.beginPath();
+    var xys = get_points_on_the_ends(a11, a12, b1);
+    solver_context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
+    solver_context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
+    solver_context.strokeStyle="#dd6644";
     solver_context.stroke();
     solver_context.closePath();
 
-	// blue line
-	solver_context.beginPath();
-	var	xys = get_points_on_the_ends(a21, a22, b2);
-	solver_context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
-	solver_context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
-	solver_context.strokeStyle="#3366dd";
+    // blue line
+    solver_context.beginPath();
+    var xys = get_points_on_the_ends(a21, a22, b2);
+    solver_context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
+    solver_context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
+    solver_context.strokeStyle="#3366dd";
     solver_context.stroke();
     solver_context.closePath();
 
     // solver
     solver_context.beginPath();
-	solver_context.moveTo(x_to_client(start_x), y_to_client(start_y));
-	var prev_x = start_x + end_step_length + 1.;    // not to fall as done
-	var prev_y = start_y;
-	var cur_x = start_x;
-	var cur_y = start_y;
-	var i;
-	for(i = 0; i <= 100; i++) // max iterations = 100
-	{
-	    if(length_of(prev_x - cur_x, prev_y - cur_y) < end_step_length)
-	        break;  // done
-	    prev_x = cur_x;
-	    prev_y = cur_y;
-	    if(i % 2 == 0){
-    	    cur_x = projected_x(prev_x, prev_y, a11, a12, b1);
-    	    cur_y = projected_y(prev_x, prev_y, a11, a12, b1);
-    	}else{
-    	    cur_x = projected_x(prev_x, prev_y, a21, a22, b2);
-    	    cur_y = projected_y(prev_x, prev_y, a21, a22, b2);
-    	}
-    	solver_context.lineTo(x_to_client(cur_x), y_to_client(cur_y));
-	}
-	solver_context.strokeStyle="#446644";
+    solver_context.moveTo(x_to_client(start_x), y_to_client(start_y));
+    var prev_x = start_x + end_step_length + 1.;    // not to fall as done
+    var prev_y = start_y;
+    var cur_x = start_x;
+    var cur_y = start_y;
+    var i;
+    for(i = 0; i <= 100; i++) // max iterations = 100
+    {
+        if(length_of(prev_x - cur_x, prev_y - cur_y) < end_step_length)
+            break;  // done
+        prev_x = cur_x;
+        prev_y = cur_y;
+        if(i % 2 == 0){
+            cur_x = projected_x(prev_x, prev_y, a11, a12, b1);
+            cur_y = projected_y(prev_x, prev_y, a11, a12, b1);
+        }else{
+            cur_x = projected_x(prev_x, prev_y, a21, a22, b2);
+            cur_y = projected_y(prev_x, prev_y, a21, a22, b2);
+        }
+        solver_context.lineTo(x_to_client(cur_x), y_to_client(cur_y));
+    }
+    solver_context.strokeStyle="#446644";
     solver_context.stroke();
     solver_context.closePath();
 
-	// grid
-	draw_grid_on(solver_context);
+    // grid
+    draw_grid_on(solver_context);
 
 
     // mouse move
-	if(do_guides){
-    	if(document.getElementById("button_1").disabled){
+    if(do_guides){
+        if(document.getElementById("button_1").disabled){
             var x = client_to_x(client_x);
             var y = client_to_y(client_y);
             var temp_eq = new_equation_for_one_point(a11, a12, b1, x, y);
             temp_a11 = temp_eq[0];
             temp_a12 = temp_eq[1];
             temp_b1 = temp_eq[2];
-   	        solver_context.beginPath();
-   	        solver_context.setLineDash([4, 4]);
-	        solver_context.moveTo(x_to_client(x_min), y_to_client((temp_b1 - temp_a11*(x_min))/temp_a12));
-	        solver_context.lineTo(x_to_client(x_max), y_to_client((temp_b1 - temp_a11*(x_max))/temp_a12));
+            solver_context.beginPath();
+            solver_context.setLineDash([4, 4]);
+            solver_context.moveTo(x_to_client(x_min), y_to_client((temp_b1 - temp_a11*(x_min))/temp_a12));
+            solver_context.lineTo(x_to_client(x_max), y_to_client((temp_b1 - temp_a11*(x_max))/temp_a12));
             solver_context.strokeStyle="#dd6644";
             solver_context.stroke();
             solver_context.setLineDash([]);
             solver_context.closePath();
-    	}else if(document.getElementById("button_2").disabled){
+        }else if(document.getElementById("button_2").disabled){
             var x = client_to_x(client_x);
             var y = client_to_y(client_y);
             var temp_eq = new_equation_for_one_point(a21, a22, b2, x, y);
             temp_a21 = temp_eq[0];
             temp_a22 = temp_eq[1];
             temp_b2 = temp_eq[2];
-   	        solver_context.beginPath();
-   	        solver_context.setLineDash([4, 4]);
-	        solver_context.moveTo(x_to_client(x_min), y_to_client((temp_b2 - temp_a21*(x_min))/temp_a22));
-	        solver_context.lineTo(x_to_client(x_max), y_to_client((temp_b2 - temp_a21*(x_max))/temp_a22));
+            solver_context.beginPath();
+            solver_context.setLineDash([4, 4]);
+            solver_context.moveTo(x_to_client(x_min), y_to_client((temp_b2 - temp_a21*(x_min))/temp_a22));
+            solver_context.lineTo(x_to_client(x_max), y_to_client((temp_b2 - temp_a21*(x_max))/temp_a22));
             solver_context.strokeStyle="#3366dd";
             solver_context.stroke();
             solver_context.setLineDash([]);
             solver_context.closePath();
-	    }else if(document.getElementById("button_3").disabled){
-	        solver_context.beginPath();
-	        solver_context.setLineDash([4, 4]);
-        	solver_context.moveTo(x_to_client(start_x), y_to_client(start_y));
-        	solver_context.lineTo(client_x, client_y);
+        }else if(document.getElementById("button_3").disabled){
+            solver_context.beginPath();
+            solver_context.setLineDash([4, 4]);
+            solver_context.moveTo(x_to_client(start_x), y_to_client(start_y));
+            solver_context.lineTo(client_x, client_y);
             solver_context.strokeStyle="#557755";
             solver_context.stroke();
             solver_context.setLineDash([]);
             solver_context.closePath();
-   	    }else if(document.getElementById("button_4").disabled){
+           }else if(document.getElementById("button_4").disabled){
             var x = client_to_x(client_x);
             var y = client_to_y(client_y);
             var x1 = projected_x(x, y, a11, a12, b1);
@@ -458,14 +523,14 @@ function solver_draw(client_x, client_y, do_guides){
             }else{
                 temp_end_step_length = d2;
             }
-       	    // red
-   	    	solver_context.beginPath();
+               // red
+               solver_context.beginPath();
             solver_context.setLineDash([4, 4]);
             var db1 = temp_end_step_length * length_of(a11, a12);
-	        solver_context.moveTo(x_to_client(x_min), y_to_client((b1 - db1 - a11*(x_min))/a12));
-	        solver_context.lineTo(x_to_client(x_max), y_to_client((b1 - db1 - a11*(x_max))/a12));
-	        solver_context.moveTo(x_to_client(x_min), y_to_client((b1 + db1 - a11*(x_min))/a12));
-	        solver_context.lineTo(x_to_client(x_max), y_to_client((b1 + db1 - a11*(x_max))/a12));
+            solver_context.moveTo(x_to_client(x_min), y_to_client((b1 - db1 - a11*(x_min))/a12));
+            solver_context.lineTo(x_to_client(x_max), y_to_client((b1 - db1 - a11*(x_max))/a12));
+            solver_context.moveTo(x_to_client(x_min), y_to_client((b1 + db1 - a11*(x_min))/a12));
+            solver_context.lineTo(x_to_client(x_max), y_to_client((b1 + db1 - a11*(x_max))/a12));
             solver_context.strokeStyle="#ff8866";
             solver_context.stroke();
             solver_context.setLineDash([]);
@@ -474,21 +539,21 @@ function solver_draw(client_x, client_y, do_guides){
             solver_context.beginPath();
             solver_context.setLineDash([4, 4]);
             var db2 = temp_end_step_length * length_of(a21, a22);
-	        solver_context.moveTo(x_to_client(x_min), y_to_client((b2 - db2 - a21*(x_min))/a22));
-	        solver_context.lineTo(x_to_client(x_max), y_to_client((b2 - db2 - a21*(x_max))/a22));
-	        solver_context.moveTo(x_to_client(x_min), y_to_client((b2 + db2 - a21*(x_min))/a22));
-	        solver_context.lineTo(x_to_client(x_max), y_to_client((b2 + db2 - a21*(x_max))/a22));
+            solver_context.moveTo(x_to_client(x_min), y_to_client((b2 - db2 - a21*(x_min))/a22));
+            solver_context.lineTo(x_to_client(x_max), y_to_client((b2 - db2 - a21*(x_max))/a22));
+            solver_context.moveTo(x_to_client(x_min), y_to_client((b2 + db2 - a21*(x_min))/a22));
+            solver_context.lineTo(x_to_client(x_max), y_to_client((b2 + db2 - a21*(x_max))/a22));
             solver_context.strokeStyle="#6699ff";
             solver_context.stroke();
             solver_context.setLineDash([]);
             solver_context.closePath();
         }
-	}
+    }
 
-	// iteration count
-	results = document.getElementById("results");
-	if(i > 100){
-    	results.innerHTML = "Iterations > 100";
+    // iteration count
+    results = document.getElementById("results");
+    if(i > 100){
+        results.innerHTML = "Iterations > 100";
     }else{
         results.innerHTML = "Iterations = " + i;
     }
