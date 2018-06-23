@@ -198,6 +198,28 @@ function projected_y(x, y, a1, a2, b){
     return y + a2 * (b - dot_of(x, y, a1, a2)) / dot_of(a1, a2, a1, a2);
 }
 
+function get_points_on_the_ends(a1, a2, b) {
+    var xys = []
+    
+    var x_in_y_min = (b - a2 * y_min)/ a1;
+    if(x_in_y_min >= x_min && x_in_y_min < x_max)
+        xys.push([x_in_y_min, y_min]);
+      
+    var x_in_y_max = (b - a2 * y_max)/ a1;
+    if(x_in_y_max >= x_min && x_in_y_max < x_max)
+        xys.push([x_in_y_max, y_max]);
+      
+    var y_in_x_min = (b - a1 * x_min) / a2;
+    if(y_in_x_min >= y_min && y_in_x_min < y_max)
+        xys.push([x_min, y_in_x_min]);
+
+    var y_in_x_max = (b - a1 * x_max) / a2;
+    if(y_in_x_max >= y_min && y_in_x_max < y_max)
+        xys.push([x_max, y_in_x_max]);
+        
+    return xys;
+}
+
 function invalidate_solver(client_x, client_y){
     var canvas_rect = solver.getBoundingClientRect();
     if(document.getElementById("button_1").disabled){
@@ -330,8 +352,16 @@ function solver_draw(client_x, client_y, do_guides){
     	if(document.getElementById("button_1").disabled){
             var x = client_to_x(client_x);
             var y = client_to_y(client_y);
-            var x0 = x_max - (x-x_min) - 0.001;
-            var y0 = (b1 - a11*x0/a12);
+            var xys = get_points_on_the_ends(a11, a12, b1);
+            var x0;
+            var y0;
+            if(length_of(x - xys[0][0], y - xys[0][1]) > length_of(x - xys[1][0], y - xys[1][1])) {
+                x0 = xys[0][0];
+                y0 = xys[0][1];
+            } else {
+                x0 = xys[1][0];
+                y0 = xys[1][1];
+            }
             temp_a11 = (y - y0)/(-x + x0);
             temp_a12 = 1.0;
             temp_b1 = (x*y0 - x0*y)/(x - x0);
@@ -346,8 +376,16 @@ function solver_draw(client_x, client_y, do_guides){
     	}else if(document.getElementById("button_2").disabled){
             var x = client_to_x(client_x);
             var y = client_to_y(client_y);
-            var x0 = x_max - (x-x_min) - 0.001;
-            var y0 = (b2 - a21*x0/a22);
+            var xys = get_points_on_the_ends(a21, a22, b2);
+            var x0;
+            var y0;
+            if(length_of(x - xys[0][0], y - xys[0][1]) > length_of(x - xys[1][0], y - xys[1][1])) {
+                x0 = xys[0][0];
+                y0 = xys[0][1];
+            } else {
+                x0 = xys[1][0];
+                y0 = xys[1][1];
+            }
             temp_a21 = (y - y0)/(-x + x0);
             temp_a22 = 1.0;
             temp_b2 = (x*y0 - x0*y)/(x - x0);
