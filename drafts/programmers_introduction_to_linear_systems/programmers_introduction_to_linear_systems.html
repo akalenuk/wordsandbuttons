@@ -233,6 +233,47 @@ function new_equation_for_one_point(a1, a2, b, x, y) {
     }
 }
 
+//////
+/// simple plots
+const system_1_eqs = 2;
+var system_1_eq_1 = [1.0, 1.0, 1.0];
+var system_1_eq_2 = [-1.0, 1.0, 6.0];
+var system_1_eq_1_temp;
+var system_1_eq_2_temp;
+
+function init_plot_named(name){
+    plot = document.getElementById(name);
+    var canvas_rect = plot.getBoundingClientRect();
+    draw_plot_named(name, 0, 0, false);
+
+    plot.addEventListener('mousemove', function(e){
+        var canvas_rect = plot.getBoundingClientRect();
+   	    draw_plot_named(name, e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+   	    if(e.buttons == 1){
+   	        invalidate_plot_named(name, e.clientX, e.clientY);
+   	    }
+    }, false);
+
+    plot.addEventListener('mouseup', function(e){
+        invalidate_plot_named(name, e.clientX, e.clientY);
+    }, false);
+
+    plot.addEventListener('mouseleave', function(e){
+	   draw_plot_named(name, 0, 0, false);
+    }, false);
+}
+
+function draw_plot_named(name, client_x, client_y, do_guides){
+    plot = document.getElementById(name);
+    var context = plot.getContext("2d");
+    context.font = "16px sans-serif";
+    // background
+    context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+}
+
+//////
+/// solver
 function invalidate_solver(client_x, client_y){
     var canvas_rect = solver.getBoundingClientRect();
     if(document.getElementById("button_1").disabled){
@@ -538,7 +579,12 @@ Programmer's introduction to linear systems
     <p>
 ...
     </p>
-
+    <canvas id="system_1" width=640 height=512></canvas>
+    
+    <p>
+...    
+    </p>
+    
     <canvas id="solver" width=640 height=512></canvas>
     <p class="results" id="results">
     </p>
@@ -552,13 +598,15 @@ Programmer's introduction to linear systems
         </center>
         </div>
     </form>
-    <script language="JavaScript">
-        init_solver();
-    </script>
+
     <p>
 ...
     </p>
 
+    <script language="JavaScript">
+        init_plot_named('system_1');
+        init_solver();        
+    </script>
 
     <p class="footer">
 <a class="twitter-share-button"
