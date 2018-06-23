@@ -220,6 +220,19 @@ function get_points_on_the_ends(a1, a2, b) {
     return xys;
 }
 
+function equation_for_two_points(x1, y1, x2, y2) {
+    return [(y2 - y1)/(-x2 + x1), 1.0, (x2*y1 - x1*y2)/(x2 - x1)];
+}
+
+function new_equation_for_one_point(a1, a2, b, x, y) {
+    var xys = get_points_on_the_ends(a1, a2, b);
+    if(length_of(x - xys[0][0], y - xys[0][1]) > length_of(x - xys[1][0], y - xys[1][1])) {
+        return equation_for_two_points(x, y, xys[0][0], xys[0][1]);
+    } else {
+        return equation_for_two_points(x, y, xys[1][0], xys[1][1]);
+    }
+}
+
 function invalidate_solver(client_x, client_y){
     var canvas_rect = solver.getBoundingClientRect();
     if(document.getElementById("button_1").disabled){
@@ -346,25 +359,15 @@ function solver_draw(client_x, client_y, do_guides){
 	// grid
 	draw_grid_on(solver_context);
 
-
 	// mouse move
 	if(do_guides){
     	if(document.getElementById("button_1").disabled){
             var x = client_to_x(client_x);
             var y = client_to_y(client_y);
-            var xys = get_points_on_the_ends(a11, a12, b1);
-            var x0;
-            var y0;
-            if(length_of(x - xys[0][0], y - xys[0][1]) > length_of(x - xys[1][0], y - xys[1][1])) {
-                x0 = xys[0][0];
-                y0 = xys[0][1];
-            } else {
-                x0 = xys[1][0];
-                y0 = xys[1][1];
-            }
-            temp_a11 = (y - y0)/(-x + x0);
-            temp_a12 = 1.0;
-            temp_b1 = (x*y0 - x0*y)/(x - x0);
+            var temp_eq = new_equation_for_one_point(a11, a12, b1, x, y);
+            temp_a11 = temp_eq[0];
+            temp_a12 = temp_eq[1];
+            temp_b1 = temp_eq[2];
    	        solver_context.beginPath();
    	        solver_context.setLineDash([4, 4]);
 	        solver_context.moveTo(x_to_client(x_min), y_to_client((temp_b1 - temp_a11*(y_min))/temp_a12));
@@ -376,19 +379,10 @@ function solver_draw(client_x, client_y, do_guides){
     	}else if(document.getElementById("button_2").disabled){
             var x = client_to_x(client_x);
             var y = client_to_y(client_y);
-            var xys = get_points_on_the_ends(a21, a22, b2);
-            var x0;
-            var y0;
-            if(length_of(x - xys[0][0], y - xys[0][1]) > length_of(x - xys[1][0], y - xys[1][1])) {
-                x0 = xys[0][0];
-                y0 = xys[0][1];
-            } else {
-                x0 = xys[1][0];
-                y0 = xys[1][1];
-            }
-            temp_a21 = (y - y0)/(-x + x0);
-            temp_a22 = 1.0;
-            temp_b2 = (x*y0 - x0*y)/(x - x0);
+            var temp_eq = new_equation_for_one_point(a21, a22, b2, x, y);
+            temp_a21 = temp_eq[0];
+            temp_a22 = temp_eq[1];
+            temp_b2 = temp_eq[2];
    	        solver_context.beginPath();
    	        solver_context.setLineDash([4, 4]);
 	        solver_context.moveTo(x_to_client(x_min), y_to_client((temp_b2 - temp_a21*(y_min))/temp_a22));
