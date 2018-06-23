@@ -219,7 +219,9 @@ function get_points_on_the_ends(a1, a2, b) {
     var y_in_x_max = (b - a1 * x_max) / a2;
     if(y_in_x_max >= y_min && y_in_x_max < y_max)
         xys.push([x_max, y_in_x_max]);
-        
+    
+    if(xys.length < 2)
+        return get_points_on_the_ends(a1, a2, b + 0.01);
     return xys;
 }
 
@@ -265,6 +267,10 @@ function init_plot_named(name) {
        }
     }, false);
 
+    plot.addEventListener('mousedown', function(e){
+        invalidate_plot_named(name);
+    }, false);
+    
     plot.addEventListener('mouseup', function(e){
         invalidate_plot_named(name);
     }, false);
