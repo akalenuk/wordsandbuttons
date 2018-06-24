@@ -288,17 +288,14 @@ var system_1_eq_2_temp = system_1_eq_2;
 function invalidate_plot_named(name) {
     eval(name + "_eq_" + system_1_eq_temp_id + " = Array.from(" + name + "_eq_" + system_1_eq_temp_id + "_temp);");
     draw_plot_named(name, 0, 0, false);
-    
-    if(name == "system_1") {
-        update_system();
-        update_matrix();
-    }
+    update_system(name);
+    update_matrix(name);
 }
 
 function init_plot_named(name) {
     plot = document.getElementById(name);
     var canvas_rect = plot.getBoundingClientRect();
-    draw_plot_named(name, 0, 0, false);
+    invalidate_plot_named(name);
 
     plot.addEventListener('mousemove', function(e){
        var canvas_rect = plot.getBoundingClientRect();
@@ -403,21 +400,27 @@ function coefficient(a, x) {
     return printable(a) + x;
 }
 
-function update_matrix() {
-    document.getElementById("matrix_col1").innerHTML = 
+function update_matrix(name) {
+    if(document.getElementById(name + "_matrix_col1") == null)
+        return;
+        
+    document.getElementById(name + "_matrix_col1").innerHTML = 
         printable(system_1_eq_1[0]) + "<br>" + printable(system_1_eq_2[0]);
-    document.getElementById("matrix_col2").innerHTML = 
+    document.getElementById(name + "_matrix_col2").innerHTML = 
         printable(system_1_eq_1[1]) + "<br>" + printable(system_1_eq_2[1]);
-    document.getElementById("matrix_col3").innerHTML = 
+    document.getElementById(name + "_matrix_col3").innerHTML = 
         printable(system_1_eq_1[2]) + "<br>" + printable(system_1_eq_2[2]);
 }
 
-function update_system() {
-    document.getElementById("system_row1").innerHTML = 
+function update_system(name) {
+    if(document.getElementById(name + "_system_row1") == null)
+        return;
+        
+    document.getElementById(name + "_system_row1").innerHTML = 
         coefficient(system_1_eq_1[0], "x<sub>1</sub>") + " + " +
         coefficient(system_1_eq_1[1], "x<sub>2</sub>") + " = " +
         printable(system_1_eq_1[2]);
-    document.getElementById("system_row2").innerHTML = 
+    document.getElementById(name + "_system_row2").innerHTML = 
         coefficient(system_1_eq_2[0], "x<sub>1</sub>") + " + " +
         coefficient(system_1_eq_2[1], "x<sub>2</sub>") + " = " +
         printable(system_1_eq_2[2]);
@@ -736,11 +739,11 @@ Programmer's introduction to linear systems
     <table class="formula">
     <tr>
     <td rowspan=2 class="brackets">{</td>
-    <td id="system_row1">
+    <td id="system_1_system_row1">
     a11x1 + a12x2 = b1
     </td>
     </tr><tr>
-    <td id="system_row2">
+    <td id="system_1_system_row2">
     a21x1 + a22x2 = b2
     </td>
     </tr>
@@ -752,10 +755,10 @@ Programmer's introduction to linear systems
     <table class="formula">
     <tr>
     <td class="brackets">[</td>
-    <td id="matrix_col1">
+    <td id="system_1_matrix_col1">
 1<br>0
     </td>
-    <td id="matrix_col2">
+    <td id="system_1_matrix_col2">
 0<br>1
     </td>
     <td class="brackets">]</td>
@@ -766,7 +769,7 @@ x<sub>1</sub> <br> x<sub>2</sub>
     <td class="brackets">]</td>
     <td> = </td>
     <td class="brackets">[</td>
-    <td id="matrix_col3">
+    <td id="system_1_matrix_col3">
 0<br>1
     </td>
     <td class="brackets">]</td>      
@@ -803,8 +806,8 @@ x<sub>1</sub> <br> x<sub>2</sub>
     <script language="JavaScript">
         init_plot_named('system_1');
         init_solver();
-        update_system();
-        update_matrix();
+        /*update_system();
+        update_matrix();*/
     </script>
 
     <p class="footer">
