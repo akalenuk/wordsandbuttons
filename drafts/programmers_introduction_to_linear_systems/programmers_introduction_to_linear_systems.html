@@ -132,8 +132,9 @@ function y_to_client(y){
 }
 
 function draw_grid_on(context){
-    // grid
-     context.beginPath();
+    context.font = "16px sans-serif";
+    // axes
+    context.beginPath();
     context.moveTo(0, client_y_center);
     context.lineTo(w, client_y_center);
     context.lineTo(w - 12, client_y_center - 5);
@@ -145,6 +146,7 @@ function draw_grid_on(context){
     context.moveTo(client_x_center, 0);
     context.lineTo(client_x_center + 5, 12);
     context.fillStyle="#000000";
+    // numbers
     for(var i = x_min + 1; i <= x_max - 1; i++){
         context.moveTo(client_x_center + i*client_x_step, client_y_center);
         context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
@@ -155,6 +157,10 @@ function draw_grid_on(context){
         context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
         context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
     }
+    // letters
+    context.fillText("X1", client_x_center + x_max*client_x_step - 24, client_y_center - 16);
+    context.fillText("X2", client_x_center - 30, client_y_center - y_max*client_y_step + 16);
+    
     context.strokeStyle="#000000";
     context.stroke();
     context.closePath();
@@ -289,7 +295,7 @@ function init_plot_named(name) {
 function draw_plot_named(name, client_x, client_y, do_guides) {
     plot = document.getElementById(name);
     var context = plot.getContext("2d");
-    context.font = "16px sans-serif";
+
     // background
     context.fillStyle="#eeeeee";
     context.fillRect(0, 0, w, h);
