@@ -127,8 +127,8 @@ var h = 512.0;
 // visible region
 var x_min = -1.0;
 var y_min = -1.0;
-var x_max = 9.0;
-var y_max = 7.0;
+var x_max = 5.0;
+var y_max = 4.0;
 
 // colors
 var line_colors = ["#d64562", "#457fd6", "#62d645", "#d98146"];
@@ -251,15 +251,6 @@ function solve_2(a11, a12, b1, a21, a22, b2) {
 
 //////
 /// simple plots
-const system_1_eqs = 2;
-var system_1_eq_1 = [1.0, -1.45, 0.0];
-var system_1_eq_2 = [1.0, 3.0, 18.0];
-
-var system_1_eq_temp_id = 1;
-var system_1_eq_1_temp = system_1_eq_1;
-var system_1_eq_2_temp = system_1_eq_2;
-
-
 function invalidate_plot_named(name) {
     eval(name + "_eq_" + system_1_eq_temp_id + " = Array.from(" + name + "_eq_" + system_1_eq_temp_id + "_temp);");
     draw_plot_named(name, 0, 0, false);
@@ -407,6 +398,47 @@ function update_system(name) {
 
 
 
+//////
+/// systems
+const system_1_eqs = 2;
+var system_1_eq_1;
+var system_1_eq_2;
+
+var system_1_eq_temp_id = 1;
+var system_1_eq_1_temp = system_1_eq_1;
+var system_1_eq_2_temp = system_1_eq_2;
+
+function set_system_1() {
+    system_1_eq_1 = [1.0, -1.45, 3.0];
+    system_1_eq_2 = [1.0, 3.0, 7.0];
+
+    system_1_eq_temp_id = 1;
+    system_1_eq_1_temp = system_1_eq_1;
+    system_1_eq_2_temp = system_1_eq_2;
+}
+set_system_1();
+
+function reset_system_1() {
+    set_system_1();
+    draw_plot_named('system_1', 0, 0, false);
+}
+
+function done_system_1_quest_1() {
+    var xy = solve_2(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2], system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
+    if(Math.abs(xy[0]) > 0.25 || Math.abs(xy[1]) > 0.25) {
+        document.getElementById("reply_system_1").innerHTML = "Sorry, please try again.";
+    } else if(Math.abs(xy[0]) >= 0.01 || Math.abs(xy[1]) >= 0.01) {
+        document.getElementById("reply_system_1").innerHTML = "Close enough! Yes!";
+        document.getElementById("buttons_system_1").style.display = 'none';        
+    } else {
+        document.getElementById("reply_system_1").innerHTML = "Excellent!";
+        document.getElementById("buttons_system_1").style.display = 'none';
+    }
+    draw_plot_named('system_1', 0, 0, false);
+}
+
+
+
 
 //////
 /// solver
@@ -415,16 +447,16 @@ function update_system(name) {
 var a11 = -0.9;
 var a12 = 1.0;
 var b1 = -1.0;
-var a21 = -0.25;
+var a21 = -0.15;
 var a22 = 1.0;
-var b2 = 4.0;
+var b2 = 2.5;
 
 // start
 var start_x = 1.0;
 var start_y = 1.0;
 
 // margin
-var end_step_length = 0.5;
+var end_step_length = 0.3;
 
 // temps
 var temp_a11 = 0.0;
@@ -785,10 +817,14 @@ x<sub>1</sub> <br> x<sub>2</sub>
 ...
     </p>
     <canvas id="system_1" width=640 height=512></canvas>
+    <div style="text-align:right; width:640px; padding-bottom:12pt;">
+        <button type="button" id="button_1_reset" onclick="reset_system_1()">Reset</button>
+    </div>
     <form>
+        Quest 1. Using the plot above, please make a system that has its solution in (0, 0).
+        <div id="reply_system_1" style="padding-top:6pt;"></div>
         <div id="buttons_system_1" style="text-align:right;">
-            <button type="button" id="button_1_1_1" onclick="reset_system_1()">Reset</button>
-            <button type="button" id="button_1_1_2" onclick="done_system_1_quest_1()">Check!</button>
+            <button type="button" id="button_1_1" onclick="done_system_1_quest_1()">Check!</button>
         </div>
     </form>
         
@@ -817,8 +853,6 @@ x<sub>1</sub> <br> x<sub>2</sub>
     <script language="JavaScript">
         init_plot_named('system_1');
         init_solver();
-        /*update_system();
-        update_matrix();*/
     </script>
 
     <p class="footer">
