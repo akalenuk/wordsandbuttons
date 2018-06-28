@@ -692,6 +692,7 @@ function draw_solver(client_x, client_y, do_guides){
         }
         context.lineTo(x_to_client(cur_x), y_to_client(cur_y));
     }
+    last_iterations = i;
     context.strokeStyle="#446644";
     context.stroke();
     context.closePath();
@@ -798,9 +799,8 @@ function draw_solver(client_x, client_y, do_guides){
     if(i > 100){
         results.innerHTML = "Iterations > 100";
     }else{
-        results.innerHTML = "Iterations = " + i;
+        results.innerHTML = "Iterations = " + last_iterations;
     }
-    last_iterations = i;
     // solution
     sxy = solve_2(solver_1_eq_1[0], solver_1_eq_1[1], solver_1_eq_1[2],  solver_1_eq_2[0], solver_1_eq_2[1], solver_1_eq_2[2]);
     results.innerHTML += "<br>";
@@ -812,7 +812,12 @@ function draw_solver(client_x, client_y, do_guides){
     last_error = error;
 }
 
-function radio(n){
+function reset_solver() {
+    set_solver_1();
+    draw_solver(0, 0, false);
+}
+
+function radio(n) {
     for(var i = 1; i <= 3; i++){
         radio_i = document.getElementById("button_" + i);
         radio_i.disabled = false;
@@ -869,7 +874,7 @@ Being a practicing programmer, you are very unlikely to implement yet another li
 And even if you are not interested in linear algebra at all, you might still find this tutorial interesting. Things as convergence, computational error, algorithmic complexity, — are all easy to show on a task as intuitive and visual as solving a simple linear system.
     </p>
     <h2>
-Part 2. Can I solve this?
+Part 1. Can I solve this?
     </h2>
     <p>
 Linear system is a system of linear equations. Linear equation is a sum of weighted variables that equals a constant. In two-dimensional space, it is also an equation for an actual line. In 3 dimensions it's a plane, in 4 — a hyperplane, and so on.
@@ -1056,7 +1061,7 @@ Of course, in 2-dimensional case they only have one equation, and the infinite n
     </form>       
     
     <h2>
-How do I solve this?
+Part 2. How do I solve this?
     </h2>
     <p>
 There are two classes of linear system solvers: iterative and direct.
@@ -1084,18 +1089,20 @@ And we can leave the question “where to start” unanswered. Of course, it wou
     <p>
 It works somehow like this. 
     </p>
+    <div id="solver_buttons">
+    <center>
+        <button type="button" id="button_1" style="width: 180px;" onclick="radio(1)" disabled="true">Lines</button>
+        <button type="button" id="button_2" style="width: 180px;" onclick="radio(2)">Start point</button>
+        <button type="button" id="button_3" style="width: 180px;" onclick="radio(3)">Stop distance</button>
+    </center>
+    </div>    
     <canvas id="solver" width=640 height=512></canvas>
+    <div style="text-align:right; width:640px; padding-bottom:12pt;">
+        <button type="button" id="reset_solver" onclick="reset_solver()">Reset</button>
+    </div>
+
     <p class="results" id="results">
-    </p>
-    <form>
-        <div id="buttons">
-        <center>
-            <button type="button" id="button_1" style="width: 180px;" onclick="radio(1)" disabled="true">Lines</button>
-            <button type="button" id="button_2" style="width: 180px;" onclick="radio(2)">Start point</button>
-            <button type="button" id="button_3" style="width: 180px;" onclick="radio(3)">Stop distance</button>
-        </center>
-        </div>
-    </form>
+    </p>    
 
     <p>
 ...
