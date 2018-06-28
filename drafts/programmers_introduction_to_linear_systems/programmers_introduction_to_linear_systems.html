@@ -41,6 +41,13 @@ p {
     text-align: left;
 }
 
+.comment {
+    font-size: 12pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
+
 .formula {
     font-family: monospace;
     font-size: 16pt;
@@ -421,6 +428,8 @@ set_system_1();
 function reset_system_1() {
     set_system_1();
     draw_plot_named('system_1', 0, 0, false);
+    update_matrix('system_1');
+    update_system('system_1');
 }
 
 function done_system_1_quest_1() {
@@ -770,9 +779,20 @@ function show_the_rest(){
 Programmer's introduction to linear systems
     </h1>
     <p>
-...
+Being a practicing programmer, you are very unlikely to implement yet another linear system solving algorithm. This tutorial doesn't cover the implementation details therefore. Although, you will probably face the problems that may be solved in a form of linear systems, and often more elegantly than by any other means. This tutorial is all about the concepts that should help you recognize these problems and find the best solution for them.
     </p>
-
+    <p>
+And even if you are not interested in linear algebra at all, you might still find this tutorial interesting. Things as convergence, computational error, algorithmic complexity, — are all easy to show on a task as intuitive and visual as solving a simple linear system.
+    </p>
+    <h2>
+Representation
+    </h2>
+    <p>
+Linear system is a system of linear equations. Linear equation is a sum of weighted variables that equals a constant. In two-dimensional space, it is also an equation for an actual line. In 3 dimensions it's a plane, in 4 — a hyperplane, and so on.
+    </p>
+    <p>
+The system may be represented as an array of equations.
+    </p>
     <table class="formula">
     <tr>
     <td rowspan=2 class="brackets">{</td>
@@ -786,7 +806,7 @@ Programmer's introduction to linear systems
     </tr>
     </table>
     <p>
-...
+The very same array of equations constitutes the matrix equation.
     </p>
     
     <table class="formula">
@@ -814,12 +834,20 @@ x<sub>1</sub> <br> x<sub>2</sub>
     </table>
         
     <p>
-...
+And in the simplest case it may also have a graphic form.
     </p>
     <canvas id="system_1" width=640 height=512></canvas>
+    <p class="comment">
+You can drag the lines and see how the equations from above change.
+    </p>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" id="button_1_reset" onclick="reset_system_1()">Reset</button>
     </div>
+    
+    <p>
+Graphic form is a useful mental model because it makes the solution visual. The solution is merely an intersecion of lines.
+    </p>    
+    
     <form>
         <b>Quest 1.</b> Using the plot above, please make a system that has a solution: <i>x<sub>1</sub> = 0, x<sub>2</sub> = 0</i>.
         <div id="reply_system_1" style="padding-top:6pt;"></div>
@@ -828,9 +856,7 @@ x<sub>1</sub> <br> x<sub>2</sub>
         </div>
     </form>
         
-    <p>
-...    
-    </p>
+
     
     <canvas id="solver" width=640 height=512></canvas>
     <p class="results" id="results">
