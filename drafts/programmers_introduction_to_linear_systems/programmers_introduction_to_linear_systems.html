@@ -796,6 +796,29 @@ function show_the_rest(){
     document.getElementById("ex_choice").style.display = "none";
 }
 
+
+///////
+/// linear multiplier
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) + 1;
+    eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) - 1;
+    eval('change_' + counter_name + '()');
+}
+
+function change_linear_multiplier() {
+    var multiplier = Number(document.getElementById('linear_multiplier').value);
+    var row = document.getElementById('linear_row2');
+    if(multiplier != 0)
+        row.innerHTML = coefficient(multiplier, "x<sub>1</sub>") + " + " +  coefficient(2 * multiplier, "x<sub>2</sub>") + " = " + printable(3 * multiplier);
+    else
+        row.innerHTML = "Except for 0, yes.";
+}
     </script>
   </head>
   <body>
@@ -908,6 +931,26 @@ And sometimes it may have not a single, but an infinite number of solutions.
     <p>
 This may be a problem for numeric methods aimed to find a single solution. They may report an error or, even worse, supply you with a first best solution they find. In this case you better check your equations for linear dependency.
     </p>
+    <p>
+You see, when you multiply every coefiicient of an equation, and the constant, to the same number, all the facts about the points it describes remain intact. It's still the same equation, it's still the same line.
+    </p>
+    <table class="formula">
+    <tr>
+    <td id="linear_row1">
+    x<sub>1</sub> + 2x<sub>2</sub> = 3
+    </td>
+    </tr><tr>
+    <td>
+    <button type="button" style="width: 32pt;" onclick="dec('linear_multiplier')">-</button><input type="text" style="width: 32pt;" id="linear_multiplier" value="2" oninput="change_linear_multiplier();"><button type="button" style="width: 32pt;" onclick="inc('linear_multiplier')">+</button> 
+    </td>
+    </tr><tr>
+    <td id="linear_row2">
+    2x<sub>1</sub> + 4x<sub>2</sub> = 6
+    </td>
+    </tr>
+    </table>
+  
+    
     
     <canvas id="solver" width=640 height=512></canvas>
     <p class="results" id="results">
@@ -929,6 +972,7 @@ This may be a problem for numeric methods aimed to find a single solution. They 
 
     <script language="JavaScript">
         init_plot_named('system_1');
+        change_linear_multiplier();
         init_solver();
     </script>
 
