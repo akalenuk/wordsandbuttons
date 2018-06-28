@@ -435,18 +435,43 @@ function reset_system_1() {
 function done_system_1_quest_1() {
     var xy = solve_2(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2], system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
     if(Math.abs(xy[0]) > 0.25 || Math.abs(xy[1]) > 0.25) {
-        document.getElementById("reply_system_1").innerHTML = "Sorry, please try again.";
+        document.getElementById("reply_quest_1").innerHTML = "Sorry, please try again.";
     } else if(Math.abs(xy[0]) >= 0.01 || Math.abs(xy[1]) >= 0.01) {
-        document.getElementById("reply_system_1").innerHTML = "Close enough! Yes!";
-        document.getElementById("buttons_system_1").style.display = 'none';        
+        document.getElementById("reply_quest_1").innerHTML = "Close enough! Yes!";
+        document.getElementById("buttons_quest_1").style.display = 'none';        
     } else {
-        document.getElementById("reply_system_1").innerHTML = "Excellent!";
-        document.getElementById("buttons_system_1").style.display = 'none';
+        document.getElementById("reply_quest_1").innerHTML = "Excellent!";
+        document.getElementById("buttons_quest_1").style.display = 'none';
     }
     draw_plot_named('system_1', 0, 0, false);
 }
 
+function done_system_1_quest_2() {
+    var xy = solve_2(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2], system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
+    if(Math.abs(xy[0]) < 50 && Math.abs(xy[1]) < 50) {
+        document.getElementById("reply_quest_2").innerHTML = "Sorry, it still has a solution in <i>x<sub>1</sub> =" + printable(xy[0]) + ", x<sub>2</sub> = " + printable(xy[1]) + "</i>. Please try again.";
+    } else {
+        document.getElementById("reply_quest_2").innerHTML = "Yes! When the lines are parallel, there is no solution";
+        document.getElementById("buttons_quest_2").style.display = 'none';
+    }
+    draw_plot_named('system_1', 0, 0, false);
+}
 
+function done_system_1_quest_3() {
+    xyxy1 = get_points_on_the_ends(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2]);
+    xyxy2 = get_points_on_the_ends(system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
+    if(Math.abs(xyxy1[0][0] - xyxy2[0][0]) > 0.1 || 
+       Math.abs(xyxy1[0][1] - xyxy2[0][1]) > 0.1 || 
+       Math.abs(xyxy1[1][0] - xyxy2[1][0]) > 0.1 ||
+       Math.abs(xyxy1[1][1] - xyxy2[1][1]) > 0.1) {
+        var xy = solve_2(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2], system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
+        document.getElementById("reply_quest_3").innerHTML = "Sorry, it still has a single solution in <i>x<sub>1</sub> =" + printable(xy[0]) + ", x<sub>2</sub> = " + printable(xy[1]) + "</i>. Please try again.";
+    } else {
+        document.getElementById("reply_quest_3").innerHTML = "Yes! When the lines coincide, the solutions are infinite.";
+        document.getElementById("buttons_quest_3").style.display = 'none';
+    }
+    draw_plot_named('system_1', 0, 0, false);
+}
 
 
 //////
@@ -849,14 +874,40 @@ Graphic form is a useful mental model because it makes the solution visual. The 
     </p>    
     
     <form>
-        <b>Quest 1.</b> Using the plot above, please make a system that has a solution: <i>x<sub>1</sub> = 0, x<sub>2</sub> = 0</i>.
-        <div id="reply_system_1" style="padding-top:6pt;"></div>
-        <div id="buttons_system_1" style="text-align:right;">
+        <b>Quest 1.</b> Using the plot above, please make a system that has a solution: <i>x<sub>1</sub> = 0, x<sub>2</sub> = 0</i>. Then press the “Check!” button.
+        <div id="reply_quest_1" style="padding-top:6pt;"></div>
+        <div id="buttons_quest_1" style="text-align:right;">
             <button type="button" id="button_1_1" onclick="done_system_1_quest_1()">Check!</button>
         </div>
     </form>
         
+    <p>
+Even a well specified system may not have a solution (an intersection).
+    </p> 
 
+    <form>
+        <b>Quest 2.</b> Using the same plot above, please make a system with no solution.
+        <div id="reply_quest_2" style="padding-top:6pt;"></div>
+        <div id="buttons_quest_2" style="text-align:right;">
+            <button type="button" id="button_1_2" onclick="done_system_1_quest_2()">Check!</button>
+        </div>
+    </form>
+    
+    <p>
+And sometimes it may have not a single, but an infinite number of solutions. 
+    </p>    
+
+    <form>
+        <b>Quest 3.</b> Using the same plot above, please make a system with infinite solutions.
+        <div id="reply_quest_3" style="padding-top:6pt;"></div>
+        <div id="buttons_quest_3" style="text-align:right;">
+            <button type="button" id="button_1_3" onclick="done_system_1_quest_3()">Check!</button>
+        </div>
+    </form>
+        
+    <p>
+This may be a problem for numeric methods aimed to find a single solution. They may report an error or, even worse, supply you with a first best solution they find. In this case you better check your equations for linear dependency.
+    </p>
     
     <canvas id="solver" width=640 height=512></canvas>
     <p class="results" id="results">
