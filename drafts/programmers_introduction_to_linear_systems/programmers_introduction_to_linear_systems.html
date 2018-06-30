@@ -84,6 +84,14 @@ form {
     background-color: #eeee99;
 }
 
+pre {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-bottom: 12pt;
+    font-size: 12pt;
+    text-align: left;
+}
+
 table {
     border-width: 0pt;
     padding-top: 12pt;
@@ -585,6 +593,21 @@ function done_system_4_quest_8() {
         document.getElementById("reply_quest_8").innerHTML = "Well, it still might take more than 3 iterations if you move your starting point.";
     } else {
         document.getElementById("reply_quest_8").innerHTML = "Sorry, please try again.";
+    }
+}
+
+function done_quest_9() {
+    if(document.getElementById("aq8_1").checked) {
+        document.getElementById("reply_quest_9").innerHTML = "Sorry, it's much more complex.";
+    }else if(document.getElementById("aq8_2").checked) {
+        document.getElementById("reply_quest_9").innerHTML = "No, not really. Have you missed the for loop in the solver itself?";
+    }else if(document.getElementById("aq8_3").checked) {
+        document.getElementById("reply_quest_9").innerHTML = "Exactly! It has 4 nested loops that depend on the number of equations.";
+        document.getElementById("buttons_quest_9").style.display = 'none';
+    }else if(document.getElementById("aq8_4").checked) {
+        document.getElementById("reply_quest_9").innerHTML = "Almost. Note that the two last loops from the cross are not really nested.";
+    }else {
+        document.getElementById("reply_quest_9").innerHTML = "You have to chose some answer first.";
     }
 }
 //////
@@ -1313,6 +1336,72 @@ Previously we did every leap by doing an orthogonal projection to a respective l
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" id="reset_solver" onclick="reset_solver()">Reset</button>
     </div>    
+    <p>
+Since the algorithm is now direct, it doesn't need an exit criteria. Also, since it has “an ultimate convergence”, starting point selection doesn't matter. That's brilliant! Why do we need iterative algorithms at all?
+    </p>
+    <p>
+There is, of course, a catch. When iterative algorithm's speed depends on convergence, direct algoritm's speed depends on its complexity. This particular algorithm is rather complex.
+    </p>
+    <p>
+<b>Complexity</b> itself is not a quantity. It's not just a constant number of operations to get things done. Just like with convergence, this number depends on things. In our case it depends on the number of equations. This makes it a function, and we usually use big-O notation to characterize it. Big-O sets the form of a limiting function — a function our complexity has no right to overtake for any number of equations.
+    </p>
+    <p>
+If you have something simple, like a single for loop, its complexity is linear: <i>O(n)</i>. If you have a loop inside a loop, then it's <i>O(n<sup>2</sup>)</i>. This complexity is called <b>polynomial</b>, and it's quite common in the wild. For instance, our projective solver has polynomial complexity.
+    </p>
+    <div style="width:505pt;">
+    <pre>
+def cross_of(A):
+  ''' n-dimensional cross product on (n-1) vectors in list A '''
+  D = len(A[0])
+  N = len(A)
+
+  v_res = [0.] * D
+  <b>for</b> i in xrange(0, D):
+    <b>for</b> jk in xrange(0, D ** N):
+      v_ijk = [i] + [(jk/(D ** (N-j-1))) % D <b>for</b> j in xrange(0, N)]
+      t_res = v__E(v_ijk)
+      if t_res != 0:
+        <b>for</b> k in xrange(0, N):
+          t_res *= A[k][v_ijk[k + 1]]
+        v_res[i] += t_res
+  return v_res
+  
+
+def solution_for(A, B):
+  p = [0. for each in B]
+  <b>for</b> i in xrange(len(A)):
+    plane_n = A[i]
+    plane_d = -B[i]
+    other_planes_ns = A[:i] + A[i+1:]
+    projection_vector = cross_of(other_planes_ns)
+    p = project_by_vector(p, projection_vector, plane_n, plane_d)
+  return p
+    </pre>
+    </div>
+
+    <form>
+        <b>Quest 9.</b> Please estimate the complexity of the algorithm above in big-O.<br>
+        <div id="complexity_buttons" style="font-family:sans-serif; font-style:italic;"><i>
+        <input type="radio" name="q8" id="aq8_1" value="A">O(n<sup>2</sup>)<br>
+        <input type="radio" name="q8" id="aq8_2" value="B">O(n<sup>3</sup>)<br>
+        <input type="radio" name="q8" id="aq8_3" value="C">O(n<sup>4</sup>)<br>
+        <input type="radio" name="q8" id="aq8_4" value="D">O(n<sup>5</sup>)<br>
+        </i>
+        </div>
+        <div id="reply_quest_9" style="padding-top:6pt;"></div>
+        <div id="buttons_quest_9" style="text-align:right;">
+            <button type="button" id="button_5_9" onclick="done_quest_9()">Check!</button>
+        </div>
+    </form>    
+    <p>
+Of cource the real performance depends on the hardware and the specific machine code generated, so this measure is not synonimous to perfromance. But it often representative on large numbers.
+    </p>
+    <p>
+Speaking of which. You might imagine that with polynomial complexity using a direct algorithm on massive systems of equations is not really plausible. Our algorithm is particularly heavy, but even the theoretical best for the LU decomposition, that unlike ours is often used in practice, is still <a href="https://en.wikipedia.org/wiki/LU_decomposition#Theoretical_complexity"><i>O(n<sup>2.376</sup>)</i></a>.
+    </p>
+    <p>
+
+    </p>
 
     <script language="JavaScript">
         init_plot_named('system_1');
