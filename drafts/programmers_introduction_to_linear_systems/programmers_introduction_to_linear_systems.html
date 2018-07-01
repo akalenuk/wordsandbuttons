@@ -451,48 +451,7 @@ function reset_system_1() {
     update_system('system_1');
 }
 
-function done_system_1_quest_1() {
-    var xy = solve_2(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2], system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
-    if(Math.abs(xy[0]) > 0.25 || Math.abs(xy[1]) > 0.25) {
-        document.getElementById("reply_quest_1").innerHTML = "Sorry, please try again.";
-    } else if(Math.abs(xy[0]) >= 0.01 || Math.abs(xy[1]) >= 0.01) {
-        document.getElementById("reply_quest_1").innerHTML = "Close enough! Yes!";
-        document.getElementById("buttons_quest_1").style.display = 'none';        
-    } else {
-        document.getElementById("reply_quest_1").innerHTML = "Excellent!";
-        document.getElementById("buttons_quest_1").style.display = 'none';
-    }
-    draw_plot_named('system_1', 0, 0, false);
-}
-
-function done_system_1_quest_2() {
-    var xy = solve_2(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2], system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
-    if(Math.abs(xy[0]) < 50 && Math.abs(xy[1]) < 50) {
-        document.getElementById("reply_quest_2").innerHTML = "Sorry, it still has a solution in <i>x<sub>1</sub> =" + printable(xy[0]) + ", x<sub>2</sub> = " + printable(xy[1]) + "</i>. Please try again.";
-    } else {
-        document.getElementById("reply_quest_2").innerHTML = "Yes! When the lines are parallel, there is no solution";
-        document.getElementById("buttons_quest_2").style.display = 'none';
-    }
-    draw_plot_named('system_1', 0, 0, false);
-}
-
-function done_system_1_quest_3() {
-    xyxy1 = get_points_on_the_ends(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2]);
-    xyxy2 = get_points_on_the_ends(system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
-    if(Math.abs(xyxy1[0][0] - xyxy2[0][0]) > 0.1 || 
-       Math.abs(xyxy1[0][1] - xyxy2[0][1]) > 0.1 || 
-       Math.abs(xyxy1[1][0] - xyxy2[1][0]) > 0.1 ||
-       Math.abs(xyxy1[1][1] - xyxy2[1][1]) > 0.1) {
-        var xy = solve_2(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2], system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
-        document.getElementById("reply_quest_3").innerHTML = "Sorry, it still has a single solution in <i>x<sub>1</sub> =" + printable(xy[0]) + ", x<sub>2</sub> = " + printable(xy[1]) + "</i>. Please try again.";
-    } else {
-        document.getElementById("reply_quest_3").innerHTML = "Yes! When the lines coincide, the solutions are infinite.";
-        document.getElementById("buttons_quest_3").style.display = 'none';
-    }
-    draw_plot_named('system_1', 0, 0, false);
-}
-
-
+// system 2
 const system_2_eqs = 3;
 var system_2_eq_1;
 var system_2_eq_2;
@@ -520,96 +479,7 @@ function reset_system_2() {
     draw_plot_named('system_2', 0, 0, false);
 }
 
-function done_system_2_quest_4() {
-    var xy1 = solve_2(system_2_eq_1[0], system_2_eq_1[1], system_2_eq_1[2], system_2_eq_2[0], system_2_eq_2[1], system_2_eq_2[2]);
-    var xy2 = solve_2(system_2_eq_2[0], system_2_eq_2[1], system_2_eq_2[2], system_2_eq_3[0], system_2_eq_3[1], system_2_eq_3[2]);
-    var xy3 = solve_2(system_2_eq_3[0], system_2_eq_3[1], system_2_eq_3[2], system_2_eq_1[0], system_2_eq_1[1], system_2_eq_1[2]);    
-    if(Math.abs(xy1[0] - xy2[0]) > 0.1 || 
-       Math.abs(xy1[1] - xy2[1]) > 0.1){
-        document.getElementById("reply_quest_4").innerHTML = "It has intersections, but not a solution. Please try again.";
-    } else {
-        document.getElementById("reply_quest_4").innerHTML = "Yes! The solution is when all the three lines intersect in the same point.";
-        document.getElementById("buttons_quest_4").style.display = 'none';
-    }
-    draw_plot_named('system_2', 0, 0, false);
-}
 
-function almost(a, b) {
-    return Math.abs(a-b) < 1.e-5;
-}
-
-function done_system_3_quest_5() {
-    var a11 =  Number(document.getElementById("s3_1_1").value);
-    var a12 =  Number(document.getElementById("s3_1_2").value);
-    var a13 =  Number(document.getElementById("s3_1_3").value);
-    var b1 =  Number(document.getElementById("s3_1_4").value);
-    var a21 =  Number(document.getElementById("s3_2_1").value);
-    var a22 =  Number(document.getElementById("s3_2_2").value);
-    var a23 =  Number(document.getElementById("s3_2_3").value);
-    var b2 =  Number(document.getElementById("s3_2_4").value);
-
-    if(almost(a11 / a21, a12 / a22) && almost(a11 / a21, a13 / a23))
-    {
-        if(almost(a11 / a21, b1 / b2))
-        {
-            document.getElementById("reply_quest_5").innerHTML = "Well, they are linerly dependant, this means they are the same plane. Still, any point on this plane is a solution.";
-        } else {
-            document.getElementById("reply_quest_5").innerHTML = "Exactly! Parallel planes in a system have their matrix part linear dependent and the vector part — not.";
-            document.getElementById("buttons_quest_5").style.display = 'none';
-        }
-    } else {
-        document.getElementById("reply_quest_5").innerHTML = "It has an infinite number of solutions. Planes instersection is a line. Every point in this line is a valid solution.";
-    }
-}
-
-function done_system_4_quest_6() {
-    if(last_iterations == 58) {
-        document.getElementById("reply_quest_6").innerHTML = "Right! You have to worsen the convergence or make a stop criteria more strict. Moving the starting point also helps to fine tune the setup.";
-        document.getElementById("buttons_quest_6").style.display = 'none';
-    } else {
-        document.getElementById("reply_quest_6").innerHTML = "That's not exactly 58 iterations.";
-    }
-}
-
-function done_system_4_quest_7() {
-    if(last_error >= 6.0) {
-        document.getElementById("reply_quest_7").innerHTML = "Of course! The error doesn't depend on the exit condition solely. The more acute the angle between lines, the worse the possible error would be.";
-        document.getElementById("buttons_quest_7").style.display = 'none';
-    } else {
-        document.getElementById("reply_quest_7").innerHTML = "That's still less than 6.0.";
-    }
-}
-
-function done_system_4_quest_8() {
-    var q101 = Math.abs(solver_1_eq_1[0] / solver_1_eq_1[1]);
-    var q110 = Math.abs(solver_1_eq_1[1] / solver_1_eq_1[0]);
-    var q201 = Math.abs(solver_1_eq_2[0] / solver_1_eq_2[1]);
-    var q210 = Math.abs(solver_1_eq_2[1] / solver_1_eq_2[0]);    
-    alert(q101 - q210);alert(q110 - q201);
-    if(Math.abs(q101 - q210) < 0.1 || Math.abs(q110 - q201) < 0.1) {
-        document.getElementById("reply_quest_8").innerHTML = "Sure! When lines are orthogonal, the solution always comes in one or two jumps. Plus one iteration to see if we're there.";
-        document.getElementById("buttons_quest_8").style.display = 'none';
-    } else if(last_iterations <= 3){
-        document.getElementById("reply_quest_8").innerHTML = "Well, it still might take more than 3 iterations if you move your starting point.";
-    } else {
-        document.getElementById("reply_quest_8").innerHTML = "Sorry, please try again.";
-    }
-}
-
-function done_quest_9() {
-    if(document.getElementById("aq8_1").checked) {
-        document.getElementById("reply_quest_9").innerHTML = "Sorry, it's much more complex.";
-    }else if(document.getElementById("aq8_2").checked) {
-        document.getElementById("reply_quest_9").innerHTML = "No, not really. Have you missed the for loop in the solver itself?";
-    }else if(document.getElementById("aq8_3").checked) {
-        document.getElementById("reply_quest_9").innerHTML = "Exactly! It has 4 nested loops that depend on the number of equations.";
-        document.getElementById("buttons_quest_9").style.display = 'none';
-    }else if(document.getElementById("aq8_4").checked) {
-        document.getElementById("reply_quest_9").innerHTML = "Almost. Note that the two last loops from the cross are not really nested.";
-    }else {
-        document.getElementById("reply_quest_9").innerHTML = "You have to chose some answer first.";
-    }
-}
 //////
 /// solver
 
@@ -1046,6 +916,139 @@ function change_s3_2_1() {}
 function change_s3_2_2() {}
 function change_s3_2_3() {}
 function change_s3_2_4() {}
+
+//////
+/// quests
+function done_system_1_quest_1() {
+    var xy = solve_2(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2], system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
+    if(Math.abs(xy[0]) > 0.25 || Math.abs(xy[1]) > 0.25) {
+        document.getElementById("reply_quest_1").innerHTML = "Sorry, please try again.";
+    } else if(Math.abs(xy[0]) >= 0.01 || Math.abs(xy[1]) >= 0.01) {
+        document.getElementById("reply_quest_1").innerHTML = "Close enough! Yes!";
+        document.getElementById("buttons_quest_1").style.display = 'none';        
+    } else {
+        document.getElementById("reply_quest_1").innerHTML = "Excellent!";
+        document.getElementById("buttons_quest_1").style.display = 'none';
+    }
+    draw_plot_named('system_1', 0, 0, false);
+}
+
+function done_system_1_quest_2() {
+    var xy = solve_2(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2], system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
+    if(Math.abs(xy[0]) < 50 && Math.abs(xy[1]) < 50) {
+        document.getElementById("reply_quest_2").innerHTML = "Sorry, it still has a solution in <i>x<sub>1</sub> =" + printable(xy[0]) + ", x<sub>2</sub> = " + printable(xy[1]) + "</i>. Please try again.";
+    } else {
+        document.getElementById("reply_quest_2").innerHTML = "Yes! When the lines are parallel, there is no solution";
+        document.getElementById("buttons_quest_2").style.display = 'none';
+    }
+    draw_plot_named('system_1', 0, 0, false);
+}
+
+function done_system_1_quest_3() {
+    xyxy1 = get_points_on_the_ends(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2]);
+    xyxy2 = get_points_on_the_ends(system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
+    if(Math.abs(xyxy1[0][0] - xyxy2[0][0]) > 0.1 || 
+       Math.abs(xyxy1[0][1] - xyxy2[0][1]) > 0.1 || 
+       Math.abs(xyxy1[1][0] - xyxy2[1][0]) > 0.1 ||
+       Math.abs(xyxy1[1][1] - xyxy2[1][1]) > 0.1) {
+        var xy = solve_2(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2], system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
+        document.getElementById("reply_quest_3").innerHTML = "Sorry, it still has a single solution in <i>x<sub>1</sub> =" + printable(xy[0]) + ", x<sub>2</sub> = " + printable(xy[1]) + "</i>. Please try again.";
+    } else {
+        document.getElementById("reply_quest_3").innerHTML = "Yes! When the lines coincide, the solutions are infinite.";
+        document.getElementById("buttons_quest_3").style.display = 'none';
+    }
+    draw_plot_named('system_1', 0, 0, false);
+}
+
+function done_system_2_quest_4() {
+    var xy1 = solve_2(system_2_eq_1[0], system_2_eq_1[1], system_2_eq_1[2], system_2_eq_2[0], system_2_eq_2[1], system_2_eq_2[2]);
+    var xy2 = solve_2(system_2_eq_2[0], system_2_eq_2[1], system_2_eq_2[2], system_2_eq_3[0], system_2_eq_3[1], system_2_eq_3[2]);
+    var xy3 = solve_2(system_2_eq_3[0], system_2_eq_3[1], system_2_eq_3[2], system_2_eq_1[0], system_2_eq_1[1], system_2_eq_1[2]);    
+    if(Math.abs(xy1[0] - xy2[0]) > 0.1 || 
+       Math.abs(xy1[1] - xy2[1]) > 0.1){
+        document.getElementById("reply_quest_4").innerHTML = "It has intersections, but not a solution. Please try again.";
+    } else {
+        document.getElementById("reply_quest_4").innerHTML = "Yes! The solution is when all the three lines intersect in the same point.";
+        document.getElementById("buttons_quest_4").style.display = 'none';
+    }
+    draw_plot_named('system_2', 0, 0, false);
+}
+
+function almost(a, b) {
+    return Math.abs(a-b) < 1.e-5;
+}
+
+function done_system_3_quest_5() {
+    var a11 =  Number(document.getElementById("s3_1_1").value);
+    var a12 =  Number(document.getElementById("s3_1_2").value);
+    var a13 =  Number(document.getElementById("s3_1_3").value);
+    var b1 =  Number(document.getElementById("s3_1_4").value);
+    var a21 =  Number(document.getElementById("s3_2_1").value);
+    var a22 =  Number(document.getElementById("s3_2_2").value);
+    var a23 =  Number(document.getElementById("s3_2_3").value);
+    var b2 =  Number(document.getElementById("s3_2_4").value);
+
+    if(almost(a11 / a21, a12 / a22) && almost(a11 / a21, a13 / a23))
+    {
+        if(almost(a11 / a21, b1 / b2))
+        {
+            document.getElementById("reply_quest_5").innerHTML = "Well, they are linerly dependant, this means they are the same plane. Still, any point on this plane is a solution.";
+        } else {
+            document.getElementById("reply_quest_5").innerHTML = "Exactly! Parallel planes in a system have their matrix part linear dependent and the vector part — not.";
+            document.getElementById("buttons_quest_5").style.display = 'none';
+        }
+    } else {
+        document.getElementById("reply_quest_5").innerHTML = "It has an infinite number of solutions. Planes instersection is a line. Every point in this line is a valid solution.";
+    }
+}
+
+function done_system_4_quest_6() {
+    if(last_iterations == 58) {
+        document.getElementById("reply_quest_6").innerHTML = "Right! You have to worsen the convergence or make a stop criteria more strict. Moving the starting point also helps to fine tune the setup.";
+        document.getElementById("buttons_quest_6").style.display = 'none';
+    } else {
+        document.getElementById("reply_quest_6").innerHTML = "That's not exactly 58 iterations.";
+    }
+}
+
+function done_system_4_quest_7() {
+    if(last_error >= 6.0) {
+        document.getElementById("reply_quest_7").innerHTML = "Of course! The error doesn't depend on the exit condition solely. The more acute the angle between lines, the worse the possible error would be.";
+        document.getElementById("buttons_quest_7").style.display = 'none';
+    } else {
+        document.getElementById("reply_quest_7").innerHTML = "That's still less than 6.0.";
+    }
+}
+
+function done_system_4_quest_8() {
+    var q101 = Math.abs(solver_1_eq_1[0] / solver_1_eq_1[1]);
+    var q110 = Math.abs(solver_1_eq_1[1] / solver_1_eq_1[0]);
+    var q201 = Math.abs(solver_1_eq_2[0] / solver_1_eq_2[1]);
+    var q210 = Math.abs(solver_1_eq_2[1] / solver_1_eq_2[0]);    
+    if(Math.abs(q101 - q210) < 0.1 || Math.abs(q110 - q201) < 0.1) {
+        document.getElementById("reply_quest_8").innerHTML = "Sure! When lines are orthogonal, the solution always comes in one or two jumps. Plus one iteration to see if we're there.";
+        document.getElementById("buttons_quest_8").style.display = 'none';
+    } else if(last_iterations <= 3){
+        document.getElementById("reply_quest_8").innerHTML = "Well, it still might take more than 3 iterations if you move your starting point.";
+    } else {
+        document.getElementById("reply_quest_8").innerHTML = "Sorry, please try again.";
+    }
+}
+
+function done_quest_9() {
+    if(document.getElementById("aq8_1").checked) {
+        document.getElementById("reply_quest_9").innerHTML = "Sorry, it's much more complex.";
+    }else if(document.getElementById("aq8_2").checked) {
+        document.getElementById("reply_quest_9").innerHTML = "No, not really. Have you missed the for loop in the solver itself?";
+    }else if(document.getElementById("aq8_3").checked) {
+        document.getElementById("reply_quest_9").innerHTML = "Exactly! It has 4 nested loops that depend on the number of equations.";
+        document.getElementById("buttons_quest_9").style.display = 'none';
+    }else if(document.getElementById("aq8_4").checked) {
+        document.getElementById("reply_quest_9").innerHTML = "Almost. Note that the two last loops from the cross are not really nested.";
+    }else {
+        document.getElementById("reply_quest_9").innerHTML = "You have to chose some answer first.";
+    }
+}
     </script>
   </head>
   <body>
