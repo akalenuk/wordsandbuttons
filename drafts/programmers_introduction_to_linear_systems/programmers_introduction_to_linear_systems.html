@@ -492,7 +492,7 @@ var system_3_eq_1_temp;
 var system_3_eq_2_temp;
 
 function set_system_3() {
-    system_3_eq_1 = [1.0, 1.0, 4.0];
+    system_3_eq_1 = [1.0, 1.5, 4.0];
     system_3_eq_2 = [1.0, -3.0, -3.0];
 
     system_3_eq_temp_id = 1;
@@ -944,6 +944,24 @@ function change_s3_2_1() {}
 function change_s3_2_2() {}
 function change_s3_2_3() {}
 function change_s3_2_4() {}
+
+
+//////
+/// elimination
+function do_one_elimination_step() {
+    if (system_3_eq_2[1] != system_3_eq_1[1] && system_3_eq_2[1] != 1.0) {
+        system_3_eq_2[0] /= system_3_eq_2[1];
+        system_3_eq_2[1] = 1.0;
+        system_3_eq_2[2] /= system_3_eq_2[1];
+    } else if (system_3_eq_2[1] != system_3_eq_1[1]) {
+        system_3_eq_2[0] *= system_3_eq_1[1];
+        system_3_eq_2[1] = system_3_eq_1[1];
+        system_3_eq_2[2] *= system_3_eq_1[1];
+    }
+
+    draw_plot_named("system_3");
+    update_system("system_3");
+}
 
 //////
 /// quests
@@ -1453,6 +1471,7 @@ Doing these operations alone we can turn our system into a trivial one.
     </td>
     </tr>
     </table>
+    <button type="button" id="elimination" onclick="do_one_elimination_step()">One step</button>
     
     <script language="JavaScript">
         init_plot_named('system_1');
