@@ -383,7 +383,7 @@ function printable(a) {
     return a.toFixed(2);
 }
 
-function coefficient(a, x) {
+function coefficient1(a, x) {
     a_trimmed = Number(a.toFixed(2));
     if (a_trimmed == 1)
         return x;
@@ -392,6 +392,28 @@ function coefficient(a, x) {
     if (a_trimmed == 0)
         return "";
     return printable(a) + x;
+}
+
+function coefficient2(a, x) {
+    a_trimmed = Number(a.toFixed(2));
+    if (a_trimmed == 1)
+        return " + " + x;
+    if (a_trimmed == -1)
+        return " - " + x;
+    if (a_trimmed == 0)
+        return "";
+    if (a_trimmed > 0)    
+        return " + " + printable(a) + x;
+    if (a_trimmed < 0)    
+        return " - " + -printable(a) + x;
+}
+
+function printable_eq(a1, x1, a2, x2, b) {
+    if (Number(a1.toFixed(2)) == 0.0 && Number(a2.toFixed(2)) == 0.0)
+        return "Not a valid equation; both coefficients are 0."
+    if (Number(a1.toFixed(2)) == 0.0)
+        return coefficient1(a2, x2) + " = " + printable(b);
+    return coefficient1(a1, x1) + coefficient2(a2, x2) + " = " + printable(b);
 }
 
 function update_matrix(name) {
@@ -415,13 +437,9 @@ function update_system(name) {
     var eq1 = eval(name + "_eq_1");
     var eq2 = eval(name + "_eq_2");
     document.getElementById(name + "_system_row1").innerHTML = 
-        coefficient(eq1[0], "x<sub>1</sub>") + " + " +
-        coefficient(eq1[1], "x<sub>2</sub>") + " = " +
-        printable(eq1[2]);
+        printable_eq(eq1[0], "x<sub>1</sub>", eq1[1], "x<sub>2</sub>", eq1[2]);
     document.getElementById(name + "_system_row2").innerHTML = 
-        coefficient(eq2[0], "x<sub>1</sub>") + " + " +
-        coefficient(eq2[1], "x<sub>2</sub>") + " = " +
-        printable(eq2[2]);
+        printable_eq(eq2[0], "x<sub>1</sub>", eq2[1], "x<sub>2</sub>", eq2[2]);
 }
 
 
@@ -928,7 +946,7 @@ function change_linear_multiplier() {
     var multiplier = Number(document.getElementById('linear_multiplier').value);
     var row = document.getElementById('linear_row2');
     if(multiplier != 0)
-        row.innerHTML = coefficient(multiplier, "x<sub>1</sub>") + " + " +  coefficient(2 * multiplier, "x<sub>2</sub>") + " = " + printable(3 * multiplier);
+        row.innerHTML = printable_eq(multiplier, "x<sub>1</sub>", 2 * multiplier, "x<sub>2</sub>", 3 * multiplier);
     else
         row.innerHTML = "Except for 0, yes.";
 }
