@@ -966,22 +966,45 @@ function change_s3_2_4() {}
 //////
 /// elimination
 function do_one_elimination_step() {
-    if (system_3_eq_2[1] != system_3_eq_1[1] && system_3_eq_2[1] != 1.0) {
+    if (system_3_eq_1[0] == 1.0 && system_3_eq_1[1] == 0.0 && system_3_eq_2[0] == 0.0 && system_3_eq_2[1] == 1.0) {
+        document.getElementById('step_name').innerHTML = "It's already solved!";
+    } else if (system_3_eq_2[1] != system_3_eq_1[1] && system_3_eq_2[1] != 1.0 && system_3_eq_1[1] != 0) {
+        document.getElementById('step_name').innerHTML = "Divided the 2nd equation by its 2nd coefficient.";
         system_3_eq_2[0] /= system_3_eq_2[1];
         system_3_eq_2[1] = 1.0;
         system_3_eq_2[2] /= system_3_eq_2[1];
-    } else if (system_3_eq_2[1] != system_3_eq_1[1]) {
+    } else if (system_3_eq_2[1] != system_3_eq_1[1] && system_3_eq_1[1] != 0) {
+        document.getElementById('step_name').innerHTML = "Multiplied the 2nd equation by the 2nd coefficient from the 1st.";
         system_3_eq_2[0] *= system_3_eq_1[1];
         system_3_eq_2[1] = system_3_eq_1[1];
         system_3_eq_2[2] *= system_3_eq_1[1];
-    } else if (system_3_eq_2[1] == system_3_eq_1[1]) {
+    } else if (system_3_eq_2[1] == system_3_eq_1[1] && system_3_eq_1[1] != 0) {
+        document.getElementById('step_name').innerHTML = "Subtracted the 2nd equation from the first";
         system_3_eq_1[0] -= system_3_eq_2[0];
-        system_3_eq_1[1] -= system_3_eq_2[1];
+        system_3_eq_1[1] = 0.0;
         system_3_eq_1[2] -= system_3_eq_2[2];
+    } else if (system_3_eq_1[1] == 0.0 && system_3_eq_1[0] != 1.0 && system_3_eq_1[0] != system_3_eq_2[0] && system_3_eq_2[0] != 0.0 ) {
+        document.getElementById('step_name').innerHTML = "Divided the 1st eqaution by its 1st coefficient.";
+        system_3_eq_1[2] /= system_3_eq_1[0];
+        system_3_eq_1[0] = 1.0;
+    } else if (system_3_eq_1[1] == 0.0 && system_3_eq_1[0] == 1.0) {
+        document.getElementById('step_name').innerHTML = "Multiplied the 1st eqaution by the 1st coefficient from the 2nd.";    
+        system_3_eq_1[2] *= system_3_eq_2[0];
+        system_3_eq_1[0] = system_3_eq_2[0];
+    } else if (system_3_eq_1[1] == 0.0 && system_3_eq_1[0] == system_3_eq_2[0]) {
+        document.getElementById('step_name').innerHTML = "Subtracted the 1st eqaution from the 2nd.";
+        system_3_eq_2[0] = 0.0;
+        system_3_eq_2[1] -= system_3_eq_1[1];
+        system_3_eq_2[2] -= system_3_eq_2[2];
+    } else if (system_3_eq_1[1] == 0.0 && system_3_eq_2[0] == 0.0) {
+        document.getElementById('step_name').innerHTML = "Divided the equations by the respecting coefficients.";
+        system_3_eq_1[2] /= system_3_eq_1[0];
+        system_3_eq_1[0] = 1.0;
+        system_3_eq_2[2] /= system_3_eq_2[1];
+        system_3_eq_2[1] = 1.0;
     }
-
+    update_system("system_3");        
     draw_plot_named("system_3");
-    update_system("system_3");
 }
 
 //////
@@ -1487,6 +1510,9 @@ Doing these operations alone we can turn almost any system into the trivial one.
     </tr>
     </table>
     <button type="button" id="elimination" onclick="do_one_elimination_step()">One step</button>
+    <p class="comment" id="step_name">
+    </p>
+    </p>
     
     <script language="JavaScript">
         init_plot_named('system_1');
