@@ -230,17 +230,22 @@ function projected_y(x, y, a1, a2, b){
     return y + a2 * (b - dot_of(x, y, a1, a2)) / dot_of(a1, a2, a1, a2);
 }
 
-function get_points_on_the_ends(a1, a2, b) {
+function get_points_on_the_ends(a1, a2, b) {    // I need a beter algo (classifier) for this
     var xys = []
     
-    var x_in_y_min = (b - a2 * y_min)/ a1;
+    if(a1 == 0.0) 
+        return [[x_min, b / a2], [x_max, b / a2]];
+    if(a2 == 0.0) 
+        return [[b / a1, y_min], [b / a1, y_max]];
+        
+    var x_in_y_min = (b - a2 * y_min) / a1;
     if(x_in_y_min >= x_min && x_in_y_min < x_max)
         xys.push([x_in_y_min, y_min]);
       
-    var x_in_y_max = (b - a2 * y_max)/ a1;
+    var x_in_y_max = (b - a2 * y_max) / a1;
     if(x_in_y_max >= x_min && x_in_y_max < x_max)
         xys.push([x_in_y_max, y_max]);
-      
+            
     var y_in_x_min = (b - a1 * x_min) / a2;
     if(y_in_x_min >= y_min && y_in_x_min < y_max)
         xys.push([x_min, y_in_x_min]);
@@ -322,6 +327,10 @@ function draw_plot_named(name, client_x, client_y, do_guides) {
         context.beginPath();
         var eq = eval(name + "_eq_" + (i+1));
         var xys = get_points_on_the_ends(eq[0], eq[1], eq[2]);
+        
+        context.fillStyle="#00000e";
+        context.fillText(xys[0] + '    ' + xys[1], 140, 100 + 40 * i);
+        
         context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
         context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
         context.strokeStyle = line_colors[i];
@@ -509,8 +518,8 @@ var system_3_eq_1_temp;
 var system_3_eq_2_temp;
 
 function set_system_3() {
-    system_3_eq_1 = [1.0, 1.5, 4.0];
-    system_3_eq_2 = [1.0, -3.0, -3.0];
+    system_3_eq_1 = [1.0, 1.5, 4.5];
+    system_3_eq_2 = [1.0, -3.5, -3.0];
 
     system_3_eq_temp_id = 1;
     system_3_eq_1_temp = system_3_eq_1;
