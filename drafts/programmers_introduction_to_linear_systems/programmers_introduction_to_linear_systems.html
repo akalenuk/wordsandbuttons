@@ -971,7 +971,9 @@ function change_s3_2_4() {}
 //////
 /// elimination
 function do_one_elimination_step() {
-    if (system_3_eq_1[0] == 1.0 && system_3_eq_1[1] == 0.0 && system_3_eq_2[0] == 0.0 && system_3_eq_2[1] == 1.0) {
+    if(Math.abs(system_3_eq_1[1] / system_3_eq_1[0] - system_3_eq_2[1] / system_3_eq_2[0]) < 0.05) {
+        document.getElementById('step_name').innerHTML = "Of course, this method wouldn't work on parallel lines. Kudos for finding this!";
+    } else if (system_3_eq_1[0] == 1.0 && system_3_eq_1[1] == 0.0 && system_3_eq_2[0] == 0.0 && system_3_eq_2[1] == 1.0) {
         document.getElementById('step_name').innerHTML = "It's already solved!";
     } else if (system_3_eq_2[1] != system_3_eq_1[1] && system_3_eq_2[1] != 1.0 && system_3_eq_1[1] != 0) {
         document.getElementById('step_name').innerHTML = "Divided the 2nd equation by its 2nd coefficient.";
@@ -992,7 +994,7 @@ function do_one_elimination_step() {
         document.getElementById('step_name').innerHTML = "Divided the 1st eqaution by its 1st coefficient.";
         system_3_eq_1[2] /= system_3_eq_1[0];
         system_3_eq_1[0] = 1.0;
-    } else if (system_3_eq_1[1] == 0.0 && system_3_eq_1[0] == 1.0) {
+    } else if (system_3_eq_1[1] == 0.0 && system_3_eq_1[0] == 1.0 && system_3_eq_2[0] != 1.0 && system_3_eq_2[0] != 0.0) {
         document.getElementById('step_name').innerHTML = "Multiplied the 1st eqaution by the 1st coefficient from the 2nd.";    
         system_3_eq_1[2] *= system_3_eq_2[0];
         system_3_eq_1[0] = system_3_eq_2[0];
@@ -1070,7 +1072,7 @@ function done_system_2_quest_4() {
 }
 
 function almost(a, b) {
-    return Math.abs(a-b) < 1.e-5;
+    return Math.abs(a-b) < 1.e-4;
 }
 
 function done_system_3_quest_5() {
