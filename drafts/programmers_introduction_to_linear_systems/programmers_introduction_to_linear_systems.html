@@ -1271,7 +1271,7 @@ And sometimes it may have not a single, but an infinite number of solutions.
     </form>
         
     <p>
-This may be a problem for numeric methods aimed to find a single solution. They may report an error or, even worse, supply you with a first best solution they find. In this case you better check your equations for linear dependency.
+This may be a problem for numeric methods aimed to find a single solution. They may report an error or, even worse, supply you with a first best solution they find. In this case you should check your equations for linear dependency.
     </p>
     <p>
 You see, when you multiply every coefiicient of an equation, and the constant, to the same number, all the facts about the points it describes remain intact. It's still the same equation, it's still the same line.
@@ -1535,7 +1535,23 @@ Doing these operations alone we can turn almost any system into the trivial one.
     <button type="button" id="elimination" onclick="do_one_elimination_step()">One step</button>
     <p class="comment" id="step_name">
     </p>
-    
+    <p>
+...
+    </p>
+    <p>
+That's all fine, but how do you choose a method to solve your particular case? There are a couple of hints.    
+    </p>
+    <ol>
+    <li>
+If your system is sparce, meaning most of the coefficients are zeroes, you can exploit this with any <a href="https://en.wikipedia.org/wiki/LU_decomposition">decomposition</a> (factorization) or <a href="https://en.wikipedia.org/wiki/System_of_linear_equations#Elimination_of_variables">elimination</a> based method that works on sparce structures.
+    </li>
+    <li>
+If your matrix is diagonally dominant, meaning that largest elements in every equation tend to land on the diagonal, then iterative methods such as <a href="https://en.wikipedia.org/wiki/Jacobi_method">Jacobi</a> or <a href="https://en.wikipedia.org/wiki/Gauss%E2%80%93Seidel_method">Gauss-Seidel</a> should work best for you.
+    </li>
+    <li>
+And if your system is very small, like 2 to 4 equations, you're better off without any solver at all. Just solve it symbolically with a <a href="http://live.sympy.org/">SymPy</a> and copy-paste the symbolic solution back to your code. Yes, this will outperform any external solver. And no, it's not against the law to do so.
+    </li>
+    </ol>
     <script language="JavaScript">
         init_plot_named('system_1');
         init_plot_named('system_2');
