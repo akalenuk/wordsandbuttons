@@ -17,7 +17,6 @@ h1 {
     padding-top: 32pt;
     font-size: 24pt;
     width: 600pt;
-    text-align: left;
 }
 
 h2 {
@@ -179,6 +178,8 @@ function fixed_draw() {
     // the number
     var sign = fixed_cell_bits[0] ? -1.0 : 1.0;    
     var n = fixed_cell_bits[5] + 2*fixed_cell_bits[4] + 4*fixed_cell_bits[3] + 8*fixed_cell_bits[2] + 16*fixed_cell_bits[1];
+    if(sign == -1.0)
+        n = 32 - n;
     
     // explicit point
     fixed_context.fillStyle = "#597052";
@@ -196,102 +197,11 @@ function fixed_draw() {
     fixed_context.fillText("which is " + sign * (n / 4.0).toFixed(2) + " in real numbers.", 20, 170);
 }
 
-// floating point
-floating_cell_xs = [20, 20 + 90 + 43 - 32, 20 + 90*2 + 43 - 32, 20 + 90*3 + 43 - 32, 20 + 90*4 + 43*2, 20 + 90*5 + 43*2];
-floating_cell_colors = ["#dba0ac", "#acdba0", "#acdba0", "#acdba0", "#cfa0db", "#cfa0db"];
-floating_cell_bits = [0, 0, 0, 1, 1, 0];
-
-function init_floating() {
-    var floating = document.getElementById("floating");
-    floating_draw();
-    
-    floating.addEventListener('click', function(e){
-        var canvas_rect = floating.getBoundingClientRect();
-        var x = e.clientX - canvas_rect.left;
-        var y = e.clientY - canvas_rect.top;
-        for(var i = 0; i < floating_cell_xs.length; ++i) {
-            if (x > floating_cell_xs[i] && x < floating_cell_xs[i] + cell_width && y > cell_y && y < cell_y + cell_height)
-                floating_cell_bits[i] = 1 - floating_cell_bits[i];
-        }
-        floating_draw();
-    }, false);
-}
-
-function floating_draw() {
-    var floating = document.getElementById("floating");
-    var floating_context = floating.getContext("2d");
-
-    // background
-    floating_context.fillStyle="#dbd5a0";
-    floating_context.fillRect(0, 0, w, h);
-    
-    // cells
-    for(var i = 0; i < floating_cell_xs.length; ++i) {
-        floating_context.fillStyle = floating_cell_colors[i];
-        floating_context.fillRect(floating_cell_xs[i], cell_y, cell_width, cell_height);
-        
-        floating_context.textAlign = "center";
-        floating_context.textBaseline = "middle"; 
-        floating_context.font = "48px sans-serif";
-        floating_context.fillStyle = "#222222";        
-        floating_context.fillText(floating_cell_bits[i], floating_cell_xs[i] + cell_width / 2.0, cell_y + cell_height / 2.0 + 4);
-    }
-    
-    // the number
-    var sign = floating_cell_bits[0] ? -1.0 : 1.0;
-    var e = floating_cell_bits[3] + floating_cell_bits[2] * 2 + floating_cell_bits[1] * 4;
-    var n = floating_cell_bits[5] + floating_cell_bits[4] * 2 + ((e != 0 && e != 7) ? 4 : 0);
-    
-    // explicit point
-    if (e != 0 && e != 7) {
-        floating_context.fillStyle = "#673670";
-        floating_context.fillText("1", 420, cell_y + cell_height / 2.0 + 4);    
-    }
-    
-    // comment
-    floating_context.textAlign = "left";
-    floating_context.textBaseline = "alphabetic"; 
-    floating_context.font = "20px sans-serif";
-            
-    if( e == 7 ) {
-        if ( n == 0 ) {
-            floating_context.fillStyle = "#914853";
-            floating_context.fillText(sign == -1.0 ? "Negative" : "Positive", 20, 120);
-            floating_context.fillStyle = "#673670";
-            floating_context.fillText("infinite number.", 20, 145);
-        } else {
-            floating_context.fillStyle = "#673670";
-            floating_context.fillText("Not a number.", 20, 120);
-        }
-    } else {
-        floating_context.fillStyle = "#914853";
-        floating_context.fillText(sign == -1.0 ? "Negative number" : "Positive number", 20, 120);
-        
-        floating_context.fillStyle = "#673670"
-        floating_context.fillText("of " + n, 20, 145);
-        floating_context.fillStyle = "#597052";
-        var measures = "quarters,";
-        if(e == 2)
-            measures = "halves,";
-        if(e == 3)
-            measures = "wholes,";
-        if(e == 4)
-            measures = "pairs,";
-        if(e == 5)
-            measures = "four-packs,";
-        if(e == 6)
-            measures = "eight-packs,";
-        floating_context.fillText(measures, 64, 145);
-        
-        floating_context.fillStyle = "#673670"
-        floating_context.fillText("which is " + sign * (n * Math.pow(2, e - 2 - (e > 0 ? 1 : 0))).toFixed(2) + " in real numbers", 20, 170);
-    }
-}
-
     </script>
   </head>
   <body>
     <center>
+    <p class="formula"><a href="integer.html">Integer</a>; fixed point;  <a href="floating_point.html">floating point</a>.</p>
     <h1>
 6-bit fixed point number
     </h1>
