@@ -288,8 +288,30 @@ function solve_2(a11, a12, b1, a21, a22, b2) {
     return [sx, sy];
 }
 
+
 //////
 /// simple plots
+function find_nearest_eqution_id(name, client_x, client_y) {
+    var x = client_to_x(client_x);
+    var y = client_to_y(client_y);
+    var closest_eq_i = 0;
+    var eq0 = eval(name + "_eq_1");
+    var x0 = projected_x(x, y, eq0[0], eq0[1], eq0[2]);
+    var y0 = projected_y(x, y, eq0[0], eq0[1], eq0[2]);
+    var closest_distance = length_of(x - x0, y - y0);
+    for(var i = 1; i < eval(name + "_eqs"); ++i) {
+        var eq = eval(name + "_eq_" + (i+1));
+        var xi = projected_x(x, y, eq[0], eq[1], eq[2]);
+        var yi = projected_y(x, y, eq[0], eq[1], eq[2]);
+        var distancei = length_of(x - xi, y - yi);
+        if (distancei < closest_distance) {
+            closest_distance = distancei;
+            closest_eq_i = i;
+        }
+    }
+    return closest_eq_i + 1;
+}
+    
 function invalidate_plot_named(name) {
     var temp_id = eval(name + "_eq_temp_id");
     eval(name + "_eq_" + temp_id + " = Array.from(" + name + "_eq_" + temp_id + "_temp);");
@@ -308,11 +330,17 @@ function init_plot_named(name) {
        draw_plot_named(name, e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
        if(e.buttons == 1){
            invalidate_plot_named(name);
+       } else if(e.buttons == 0){
+            nearest_eq_id = find_nearest_eqution_id(name, e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+            eval(name + "_eq_temp_id = nearest_eq_id;");
        }
     }, false);
 
     plot.addEventListener('mousedown', function(e){
         invalidate_plot_named(name);
+        var canvas_rect = plot.getBoundingClientRect();
+        nearest_eq_id = find_nearest_eqution_id(name, e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+        eval(name + "_eq_temp_id = nearest_eq_id;");
     }, false);
     
     plot.addEventListener('mouseup', function(e){
@@ -350,36 +378,18 @@ function draw_plot_named(name, client_x, client_y, do_guides) {
     draw_grid_on(context);
     
     if(do_guides){
+        // draw the quide
+        var closest_eq_id = eval(name + "_eq_temp_id");
+        var closest_eq = eval(name + "_eq_" + closest_eq_id);
         var x = client_to_x(client_x);
         var y = client_to_y(client_y);
-              
-        // find the nearest equation
-        var closest_eq_i = 0;
-        var eq0 = eval(name + "_eq_1");
-        var x0 = projected_x(x, y, eq0[0], eq0[1], eq0[2]);
-        var y0 = projected_y(x, y, eq0[0], eq0[1], eq0[2]);
-        var closest_distance = length_of(x - x0, y - y0);
-        for(var i = 1; i < eval(name + "_eqs"); ++i) {
-            var eq = eval(name + "_eq_" + (i+1));
-            var xi = projected_x(x, y, eq[0], eq[1], eq[2]);
-            var yi = projected_y(x, y, eq[0], eq[1], eq[2]);
-            var distancei = length_of(x - xi, y - yi);
-            if (distancei < closest_distance) {
-                closest_distance = distancei;
-                closest_eq_i = i;
-            }
-        }        
-        eval(name + "_eq_temp_id = closest_eq_i + 1;");
-        
-        // draw the quide
-        var closest_eq = eval(name + "_eq_" + (closest_eq_i + 1));
         var temp_eq = new_equation_for_one_point(closest_eq[0], closest_eq[1], closest_eq[2], x, y);
-        eval(name + "_eq_" + (closest_eq_i + 1) + "_temp = Array.from(temp_eq);");
+        eval(name + "_eq_" + closest_eq_id + "_temp = Array.from(temp_eq);");
         context.beginPath();
         var xys = get_points_on_the_ends(temp_eq[0], temp_eq[1], temp_eq[2]);
         context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
         context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
-        context.strokeStyle = line_colors[closest_eq_i];
+        context.strokeStyle = line_colors[closest_eq_id - 1];
         context.setLineDash([4, 4]);
         context.stroke();
         context.setLineDash([]);
