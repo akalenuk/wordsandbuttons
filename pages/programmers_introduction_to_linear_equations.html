@@ -818,6 +818,7 @@ function radio(n) {
 
 ///////
 /// solver 2
+var solver_2_eqs = 2;
 var solver_2_eq_1_temp;
 var solver_2_eq_2_temp;
 function set_solver_2() {
@@ -851,14 +852,14 @@ function init_solver_2(){
         if(e.buttons == 1) {
             invalidate_solver_2(e.clientX, e.clientY);
         } else if(e.buttons == 0) {
-            solver_2_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+            solver_1_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
         }
     }, false);
 
     solver.addEventListener('mousedown', function(e){
         invalidate_solver_2(e.clientX, e.clientY);
         var canvas_rect = solver.getBoundingClientRect();
-        solver_2_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+        solver_1_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
     }, false);
     
     solver.addEventListener('mouseup', function(e){
@@ -914,24 +915,6 @@ function draw_solver_2(client_x, client_y, do_guides){
     if(do_guides){
         var x = client_to_x(client_x);
         var y = client_to_y(client_y);
-        
-        // find the nearest equation
-        var closest_eq_i = 0;
-        var eq0 = solver_1_eq_1;
-        var x0 = projected_x(x, y, eq0[0], eq0[1], eq0[2]);
-        var y0 = projected_y(x, y, eq0[0], eq0[1], eq0[2]);
-        var closest_distance = length_of(x - x0, y - y0);
-        for(var i = 1; i < solver_1_eqs; ++i) {
-            var eq = eval("solver_1_eq_" + (i+1));
-            var xi = projected_x(x, y, eq[0], eq[1], eq[2]);
-            var yi = projected_y(x, y, eq[0], eq[1], eq[2]);
-            var distancei = length_of(x - xi, y - yi);
-            if (distancei < closest_distance) {
-                closest_distance = distancei;
-                closest_eq_i = i;
-            }
-        }        
-        solver_1_eq_temp_id = closest_eq_i + 1;
         var eq = eval("solver_1_eq_" + solver_1_eq_temp_id);
         
         var temp_eq = new_equation_for_one_point(eq[0], eq[1], eq[2], x, y);
@@ -941,7 +924,7 @@ function draw_solver_2(client_x, client_y, do_guides){
         var xys = get_points_on_the_ends(temp_eq[0], temp_eq[1], temp_eq[2]);
         context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
         context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
-        context.strokeStyle = line_colors[closest_eq_i];
+        context.strokeStyle = line_colors[solver_1_eq_temp_id - 1];
         context.setLineDash([4, 4]);
         context.stroke();
         context.setLineDash([]);
