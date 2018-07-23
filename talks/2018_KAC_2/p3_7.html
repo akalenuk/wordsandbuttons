@@ -1,0 +1,1221 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Gaussian Elimination</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: center;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: center;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.results {
+    font-family: sans-serif;
+    font-size: 14pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.comment {
+    font-size: 12pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
+
+.formula {
+    font-family: monospace;
+    font-size: 16pt;
+    font-style: italic;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+}
+
+pre {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-bottom: 12pt;
+    font-size: 12pt;
+    text-align: left;
+}
+
+table {
+    border-width: 0pt;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    font-family: monospace;
+    text-align: center;
+}
+
+table td {
+    padding: 0pt 3pt 0pt 3pt;
+    margin: 0 0 0 0;
+    border-width: 0pt;
+}
+
+.brackets {
+    font-size:32pt;
+    padding-bottom:2pt;
+    font-family: sans-serif;
+    font-weight: 100;
+    font-style: normal;
+}
+
+input[type="text"] {
+    width: 20pt;
+    height: 22pt;
+    margin: 0;
+    padding-left: 1pt;
+    font-size: 14pt;
+}
+
+button {
+    width: 108pt;
+    height: 28pt;
+    margin-left:4pt;
+    margin-right:4pt;
+    font-size: 16pt;
+}
+
+.incdec {
+    width: 22pt;
+    height: 22pt;
+    margin-left: 1pt;
+    margin-right: 1pt;
+    font-size: 14pt;
+}
+    </style>
+    <script language="JavaScript">
+// quest count
+var quests = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+var hidden_quests = [0, 0, 0];
+
+// client
+var w = 640.0;
+var h = 512.0;
+
+// visible region
+var x_min = -1.0;
+var y_min = -1.0;
+var x_max = 5.0;
+var y_max = 4.0;
+
+// colors
+var line_colors = ["#d64562", "#457fd6", "#62d645"];
+var fill_colors = ["#e3bfc3", "#bfc7e3", "#c4e3bf"];
+
+
+var client_x_center = w*(0-x_min)/(x_max-x_min);
+var client_x_step = (w/(x_max-x_min));
+
+var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+var client_y_step = (h/(y_max-y_min));
+
+function client_to_x(client_x){
+    return (client_x - client_x_center) / client_x_step;
+}
+
+function client_to_y(client_y){
+    return (client_y_center - client_y) / client_y_step;
+}
+
+function x_to_client(x){
+    return x * client_x_step + client_x_center;
+}
+
+function y_to_client(y){
+    return client_y_center - y * client_y_step;
+}
+
+function draw_grid_on(context){
+    context.font = "16px sans-serif";
+    // axes
+    context.beginPath();
+    context.moveTo(0, client_y_center);
+    context.lineTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center - 5);
+    context.moveTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center + 5);
+    context.moveTo(client_x_center, h);
+    context.lineTo(client_x_center, 0);
+    context.lineTo(client_x_center - 5, 12);
+    context.moveTo(client_x_center, 0);
+    context.lineTo(client_x_center + 5, 12);
+    context.fillStyle="#000000";
+    // numbers
+    for(var i = x_min + 1; i <= x_max - 1; i++){
+        context.moveTo(client_x_center + i*client_x_step, client_y_center);
+        context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+        context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+    }
+    for(var i = y_min + 1; i <= y_max - 1; i++){
+        context.moveTo(client_x_center, client_y_center - i*client_y_step);
+        context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+        context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+    }
+    // letters
+    context.fillText("X1", client_x_center + x_max*client_x_step - 24, client_y_center - 16);
+    context.fillText("X2", client_x_center - 30, client_y_center - y_max*client_y_step + 16);
+    
+    context.strokeStyle="#000000";
+    context.stroke();
+    context.closePath();
+}
+
+function dot_of(a11, a12, a21, a22){
+    return a11*a21 + a12*a22;
+}
+
+function length_of(a1, a2){
+    return Math.sqrt(dot_of(a1, a2, a1, a2));
+}
+
+function projected_x(x, y, a1, a2, b){
+    return x + a1 * (b - dot_of(x, y, a1, a2)) / dot_of(a1, a2, a1, a2);
+}
+
+function projected_y(x, y, a1, a2, b){
+    return y + a2 * (b - dot_of(x, y, a1, a2)) / dot_of(a1, a2, a1, a2);
+}
+
+function get_points_on_the_ends(a1, a2, b) {    // I need a beter algo (classifier) for this
+    var xys = []
+    
+    if(a1 == 0.0) 
+        return [[x_min, b / a2], [x_max, b / a2]];
+    if(a2 == 0.0) 
+        return [[b / a1, y_min], [b / a1, y_max]];
+        
+    var x_in_y_min = (b - a2 * y_min) / a1;
+    if(x_in_y_min >= x_min && x_in_y_min < x_max)
+        xys.push([x_in_y_min, y_min]);
+      
+    var x_in_y_max = (b - a2 * y_max) / a1;
+    if(x_in_y_max >= x_min && x_in_y_max < x_max)
+        xys.push([x_in_y_max, y_max]);
+            
+    var y_in_x_min = (b - a1 * x_min) / a2;
+    if(y_in_x_min >= y_min && y_in_x_min < y_max)
+        xys.push([x_min, y_in_x_min]);
+
+    var y_in_x_max = (b - a1 * x_max) / a2;
+    if(y_in_x_max >= y_min && y_in_x_max < y_max)
+        xys.push([x_max, y_in_x_max]);
+    
+    if(xys.length < 2)
+        return get_points_on_the_ends(a1 + 0.001, a2 - 0.001, b + 0.001);
+    return xys;
+}
+
+function equation_for_two_points(x1, y1, x2, y2) {
+    return [1.0, (-x1 + x2)/(y1 - y2), (-x1*y2 + x2*y1)/(y1 - y2)];
+}
+
+function new_equation_for_one_point(a1, a2, b, x, y) {
+    var xys = get_points_on_the_ends(a1, a2, b);
+    if(length_of(x - xys[0][0], y - xys[0][1]) > length_of(x - xys[1][0], y - xys[1][1])) {
+        return equation_for_two_points(x, y, xys[0][0], xys[0][1]);
+    } else {
+        return equation_for_two_points(x, y, xys[1][0], xys[1][1]);
+    }
+}
+
+function solve_2(a11, a12, b1, a21, a22, b2) {
+    sx = (-a12*b2 + a22*b1)/(a11*a22 - a12*a21);
+    sy = (a11*b2 - a21*b1)/(a11*a22 - a12*a21);
+    return [sx, sy];
+}
+
+
+//////
+/// simple plots
+function find_nearest_eqution_id(name, client_x, client_y) {
+    var x = client_to_x(client_x);
+    var y = client_to_y(client_y);
+    var closest_eq_i = 0;
+    var eq0 = eval(name + "_eq_1");
+    var x0 = projected_x(x, y, eq0[0], eq0[1], eq0[2]);
+    var y0 = projected_y(x, y, eq0[0], eq0[1], eq0[2]);
+    var closest_distance = length_of(x - x0, y - y0);
+    for(var i = 1; i < eval(name + "_eqs"); ++i) {
+        var eq = eval(name + "_eq_" + (i+1));
+        var xi = projected_x(x, y, eq[0], eq[1], eq[2]);
+        var yi = projected_y(x, y, eq[0], eq[1], eq[2]);
+        var distancei = length_of(x - xi, y - yi);
+        if (distancei < closest_distance) {
+            closest_distance = distancei;
+            closest_eq_i = i;
+        }
+    }
+    return closest_eq_i + 1;
+}
+    
+function invalidate_plot_named(name) {
+    var temp_id = eval(name + "_eq_temp_id");
+    eval(name + "_eq_" + temp_id + " = Array.from(" + name + "_eq_" + temp_id + "_temp);");
+    draw_plot_named(name, 0, 0, false);
+    update_system(name);
+    update_matrix(name);
+}
+
+function init_plot_named(name) {
+    plot = document.getElementById(name);
+    var canvas_rect = plot.getBoundingClientRect();
+    invalidate_plot_named(name);
+
+    plot.addEventListener('mousemove', function(e){
+       var canvas_rect = plot.getBoundingClientRect();
+       draw_plot_named(name, e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+       if(e.buttons == 1){
+           invalidate_plot_named(name);
+       } else if(e.buttons == 0){
+            nearest_eq_id = find_nearest_eqution_id(name, e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+            eval(name + "_eq_temp_id = nearest_eq_id;");
+       }
+    }, false);
+
+    plot.addEventListener('mousedown', function(e){
+        invalidate_plot_named(name);
+        var canvas_rect = plot.getBoundingClientRect();
+        nearest_eq_id = find_nearest_eqution_id(name, e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+        eval(name + "_eq_temp_id = nearest_eq_id;");
+    }, false);
+    
+    plot.addEventListener('mouseup', function(e){
+        invalidate_plot_named(name);
+    }, false);
+
+    plot.addEventListener('mouseleave', function(e){
+       draw_plot_named(name, 0, 0, false);
+    }, false);
+}
+
+function draw_plot_named(name, client_x, client_y, do_guides) {
+    plot = document.getElementById(name);
+    var context = plot.getContext("2d");
+
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    
+    // equations
+    for(var i = 0; i < eval(name + "_eqs"); ++i) {
+        context.beginPath();
+        var eq = eval(name + "_eq_" + (i+1));
+        var xys = get_points_on_the_ends(eq[0], eq[1], eq[2]);
+        context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
+        context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
+        context.strokeStyle = line_colors[i];
+        context.lineWidth = 2;
+        context.stroke();
+        context.closePath();
+        context.lineWidth = 1;
+    }
+    
+    // grid
+    draw_grid_on(context);
+    
+    if(do_guides){
+        // draw the quide
+        var closest_eq_id = eval(name + "_eq_temp_id");
+        var closest_eq = eval(name + "_eq_" + closest_eq_id);
+        var x = client_to_x(client_x);
+        var y = client_to_y(client_y);
+        var temp_eq = new_equation_for_one_point(closest_eq[0], closest_eq[1], closest_eq[2], x, y);
+        eval(name + "_eq_" + closest_eq_id + "_temp = Array.from(temp_eq);");
+        context.beginPath();
+        var xys = get_points_on_the_ends(temp_eq[0], temp_eq[1], temp_eq[2]);
+        context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
+        context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
+        context.strokeStyle = line_colors[closest_eq_id - 1];
+        context.setLineDash([4, 4]);
+        context.stroke();
+        context.setLineDash([]);
+        context.closePath();
+    }
+}
+
+
+
+//////
+/// equations and matrix
+function printable(a) {
+    a_trimmed = Number(a.toFixed(2));
+    if (Number.isInteger(a_trimmed))
+        return a_trimmed;
+    return a.toFixed(2);
+}
+
+function coefficient1(a, x) {
+    a_trimmed = Number(a.toFixed(2));
+    if (a_trimmed == 1)
+        return x;
+    if (a_trimmed == -1)
+        return "-" + x;
+    if (a_trimmed == 0)
+        return "";
+    return printable(a) + x;
+}
+
+function coefficient2(a, x) {
+    a_trimmed = Number(a.toFixed(2));
+    if (a_trimmed == 1)
+        return " + " + x;
+    if (a_trimmed == -1)
+        return " - " + x;
+    if (a_trimmed == 0)
+        return "";
+    if (a_trimmed > 0)    
+        return " + " + printable(a) + x;
+    if (a_trimmed < 0)    
+        return " - " + -printable(a) + x;
+}
+
+function printable_eq(a1, x1, a2, x2, b) {
+    if (Number(a1.toFixed(2)) == 0.0 && Number(a2.toFixed(2)) == 0.0)
+        return "Not a valid equation; both coefficients are 0."
+    if (Number(a1.toFixed(2)) == 0.0)
+        return coefficient1(a2, x2) + " = " + printable(b);
+    return coefficient1(a1, x1) + coefficient2(a2, x2) + " = " + printable(b);
+}
+
+function update_matrix(name) {
+    if(document.getElementById(name + "_matrix_col1") == null)
+        return;
+    
+    var eq1 = eval(name + "_eq_1");
+    var eq2 = eval(name + "_eq_2");    
+    document.getElementById(name + "_matrix_col1").innerHTML = 
+        printable(eq1[0]) + "<br>" + printable(eq2[0]);
+    document.getElementById(name + "_matrix_col2").innerHTML = 
+        printable(eq1[1]) + "<br>" + printable(eq2[1]);
+    document.getElementById(name + "_matrix_col3").innerHTML = 
+        printable(eq1[2]) + "<br>" + printable(eq2[2]);
+}
+
+function update_system(name) {
+    if(document.getElementById(name + "_system_row1") == null)
+        return;
+        
+    var eq1 = eval(name + "_eq_1");
+    var eq2 = eval(name + "_eq_2");
+    document.getElementById(name + "_system_row1").innerHTML = 
+        printable_eq(eq1[0], "x<sub>1</sub>", eq1[1], "x<sub>2</sub>", eq1[2]);
+    document.getElementById(name + "_system_row2").innerHTML = 
+        printable_eq(eq2[0], "x<sub>1</sub>", eq2[1], "x<sub>2</sub>", eq2[2]);
+}
+
+
+
+//////
+/// systems
+const system_1_eqs = 2;
+var system_1_eq_1;
+var system_1_eq_2;
+
+var system_1_eq_temp_id = 1;
+var system_1_eq_1_temp;
+var system_1_eq_2_temp;
+
+function set_system_1() {
+    system_1_eq_1 = [1.0, -1.35, 0.4];
+    system_1_eq_2 = [1.0, 2.0, 7.0];
+
+    system_1_eq_temp_id = 1;
+    system_1_eq_1_temp = system_1_eq_1;
+    system_1_eq_2_temp = system_1_eq_2;
+}
+set_system_1();
+
+function reset_system_1() {
+    set_system_1();
+    draw_plot_named('system_1', 0, 0, false);
+    update_matrix('system_1');
+    update_system('system_1');
+}
+
+// system 2
+const system_2_eqs = 3;
+var system_2_eq_1;
+var system_2_eq_2;
+var system_2_eq_3;
+
+var system_2_eq_temp_id = 1;
+var system_2_eq_1_temp;
+var system_2_eq_2_temp;
+var system_2_eq_3_temp;
+
+function set_system_2() {
+    system_2_eq_1 = [1.0, -1.35, 0.4];
+    system_2_eq_2 = [1.0, 2.0, 7.0];
+    system_2_eq_3 = [1.0, 0.3, 1.6];
+
+    system_2_eq_temp_id = 1;
+    system_2_eq_1_temp = system_2_eq_1;
+    system_2_eq_2_temp = system_2_eq_2;
+    system_2_eq_3_temp = system_2_eq_3;
+}
+set_system_2();
+
+function reset_system_2() {
+    set_system_2();
+    draw_plot_named('system_2', 0, 0, false);
+}
+
+// system 3
+const system_3_eqs = 2;
+var system_3_eq_1;
+var system_3_eq_2;
+
+var system_3_eq_temp_id = 1;
+var system_3_eq_1_temp;
+var system_3_eq_2_temp;
+
+function set_system_3() {
+    system_3_eq_1 = [1.0, 1.5, 4.5];
+    system_3_eq_2 = [1.0, -3.5, -3.0];
+
+    system_3_eq_temp_id = 1;
+    system_3_eq_1_temp = system_3_eq_1;
+    system_3_eq_2_temp = system_3_eq_2;
+}
+set_system_3();
+
+function reset_system_3() {
+    set_system_3();
+    draw_plot_named('system_3', 0, 0, false);
+    update_system('system_3');
+}
+
+
+//////
+/// solver
+
+// lines
+var solver_1_eqs = 2;
+var solver_1_eq_1;
+var solver_1_eq_2;
+
+// start
+var start_x;
+var start_y;
+
+// margin
+var end_step_length;
+
+// current id
+var solver_1_eq_temp_id = 1;
+
+// temps
+var solver_1_eq_1_temp;
+var solver_1_eq_2_temp;
+var end_step_length_temp;
+
+function set_solver_1() {
+    solver_1_eq_1 = [-0.9, 1.0, -1.0]
+    solver_1_eq_2 = [-0.15, 1.0, 2.5]
+    start_x = 1.0;
+    start_y = 1.0;
+    end_step_length = 0.3
+    
+    solver_1_eq_2_temp = solver_1_eq_2;
+    solver_1_eq_1_temp = solver_1_eq_1;    
+    end_step_length_temp = end_step_length;
+}
+set_solver_1();
+
+function invalidate_solver_1(client_x, client_y){
+    var solver = document.getElementById("solver_1");
+    var canvas_rect = solver.getBoundingClientRect();
+    if(document.getElementById("button_1").disabled) {
+           eval("solver_1_eq_" + solver_1_eq_temp_id + " = Array.from(" + name + "solver_1_eq_" + solver_1_eq_temp_id + "_temp);");
+    } else if(document.getElementById("button_2").disabled) {
+        start_x = client_to_x(client_x - canvas_rect.left);
+        start_y = client_to_y(client_y - canvas_rect.top);
+    } else if(document.getElementById("button_3").disabled) {
+        end_step_length = temp_end_step_length;
+    }
+    draw_solver_1(0, 0, false);
+    draw_solver_2(0, 0, false);
+}
+
+function init_solver_1(){
+    var solver = document.getElementById("solver_1");
+    var canvas_rect = solver.getBoundingClientRect();
+    draw_solver_1(0, 0, false);
+
+    solver.addEventListener('mousemove', function(e){
+        var canvas_rect = solver.getBoundingClientRect();
+        draw_solver_1(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1) {
+            invalidate_solver_1(e.clientX, e.clientY);
+        } else if(e.buttons == 0) {
+            solver_1_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+        }
+    }, false);
+
+    solver.addEventListener('mousedown', function(e){
+        invalidate_solver_1(e.clientX, e.clientY);
+        var canvas_rect = solver.getBoundingClientRect();
+        solver_1_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+    }, false);
+    
+    solver.addEventListener('mouseup', function(e){
+        invalidate_solver_1(e.clientX, e.clientY);
+    }, false);
+
+    solver.addEventListener('mouseleave', function(e){
+        draw_solver_1(0, 0, false);
+    }, false);
+}
+
+var last_iterations = 100;
+var last_error = 100.;
+function draw_solver_1(client_x, client_y, do_guides){
+    var solver = document.getElementById("solver_1");
+    var context = solver.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+
+    // lines and stop criterias
+    context.globalAlpha = 0.6;
+    for(var i = 0; i < solver_1_eqs; ++i){
+        var eq = eval("solver_1_eq_" + (i + 1));        
+        // stop
+        context.beginPath();
+        var db2 = end_step_length * length_of(eq[0], eq[1]);
+        context.moveTo(x_to_client(x_min), y_to_client((eq[2] - db2 - eq[0]*(x_min))/eq[1]));
+        context.lineTo(x_to_client(x_max), y_to_client((eq[2] - db2 - eq[0]*(x_max))/eq[1]));
+        context.lineTo(x_to_client(x_max), y_to_client((eq[2] + db2 - eq[0]*(x_max))/eq[1]));
+        context.lineTo(x_to_client(x_min), y_to_client((eq[2] + db2 - eq[0]*(x_min))/eq[1]));
+        context.lineTo(x_to_client(x_min), y_to_client((eq[2] - db2 - eq[0]*(x_min))/eq[1]));
+        context.strokeStyle = line_colors[i];
+        context.stroke();
+        context.closePath();
+        context.fillStyle = fill_colors[i];
+        context.fill();
+    }
+    context.globalAlpha = 1.0;
+    for(var i = 0; i < solver_1_eqs; ++i){
+        var eq = eval("solver_1_eq_" + (i + 1));     
+        // line
+        context.beginPath();
+        context.lineWidth = 2;
+        var xys = get_points_on_the_ends(eq[0], eq[1], eq[2]);
+        context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
+        context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
+        context.strokeStyle = line_colors[i];
+        context.stroke();
+        context.lineWidth = 1;
+        context.closePath();
+    }
+
+    // solver
+    context.beginPath();
+    context.moveTo(x_to_client(start_x), y_to_client(start_y));
+    var prev_x = start_x + end_step_length + 1.;    // not to fall as done
+    var prev_y = start_y;
+    var cur_x = start_x;
+    var cur_y = start_y;
+    var i;
+    for(i = 0; i <= 100; i++) // max iterations = 100
+    {
+        if(length_of(prev_x - cur_x, prev_y - cur_y) < end_step_length)
+            break;  // done
+        prev_x = cur_x;
+        prev_y = cur_y;
+        if(i % 2 == 0){
+            cur_x = projected_x(prev_x, prev_y, solver_1_eq_1[0], solver_1_eq_1[1], solver_1_eq_1[2]);
+            cur_y = projected_y(prev_x, prev_y, solver_1_eq_1[0], solver_1_eq_1[1], solver_1_eq_1[2]);
+        }else{
+            cur_x = projected_x(prev_x, prev_y, solver_1_eq_2[0], solver_1_eq_2[1], solver_1_eq_2[2]);
+            cur_y = projected_y(prev_x, prev_y, solver_1_eq_2[0], solver_1_eq_2[1], solver_1_eq_2[2]);
+        }
+        context.lineTo(x_to_client(cur_x), y_to_client(cur_y));
+    }
+    last_iterations = i;
+    context.strokeStyle="#002200";
+    context.setLineDash([2, 2]);
+    context.stroke();
+    context.setLineDash([]);
+    context.closePath();
+
+    // grid
+    draw_grid_on(context);
+
+    // mouse move
+    if(do_guides){
+        if(document.getElementById("button_1").disabled){
+            var eq = eval("solver_1_eq_" + solver_1_eq_temp_id);
+            var x = client_to_x(client_x);
+            var y = client_to_y(client_y);            
+            var temp_eq = new_equation_for_one_point(eq[0], eq[1], eq[2], x, y);
+            eval("solver_1_eq_" + solver_1_eq_temp_id + "_temp = Array.from(temp_eq);");
+            
+            context.beginPath();
+            var xys = get_points_on_the_ends(temp_eq[0], temp_eq[1], temp_eq[2]);
+            context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
+            context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
+            context.strokeStyle = line_colors[solver_1_eq_temp_id - 1];
+            context.setLineDash([4, 4]);
+            context.stroke();
+            context.setLineDash([]);
+            context.closePath();
+            
+        }else if(document.getElementById("button_2").disabled){
+            context.beginPath();
+            context.setLineDash([4, 4]);
+            context.moveTo(x_to_client(start_x), y_to_client(start_y));
+            context.lineTo(client_x, client_y);
+            context.strokeStyle="#557755";
+            context.stroke();
+            context.setLineDash([]);
+            context.closePath();
+        }else if(document.getElementById("button_3").disabled){
+            var a11 = solver_1_eq_1[0];
+            var a12 = solver_1_eq_1[1];
+            var b1 = solver_1_eq_1[2];
+            var a21 = solver_1_eq_2[0];
+            var a22 = solver_1_eq_2[1];
+            var b2 = solver_1_eq_2[2];
+            var x = client_to_x(client_x);
+            var y = client_to_y(client_y);
+            var x1 = projected_x(x, y, a11, a12, b1);
+            var y1 = projected_y(x, y, a11, a12, b1);
+            var x2 = projected_x(x, y, a21, a22, b2);
+            var y2 = projected_y(x, y, a21, a22, b2);
+            var d1 = length_of(x-x1, y-y1);
+            var d2 = length_of(x-x2, y-y2);
+            if(d1<d2){
+                temp_end_step_length = d1;
+            }else{
+                temp_end_step_length = d2;
+            }
+            // red
+            context.beginPath();
+            context.setLineDash([4, 4]);
+            var db1 = temp_end_step_length * length_of(a11, a12);
+            context.moveTo(x_to_client(x_min), y_to_client((b1 - db1 - a11*(x_min))/a12));
+            context.lineTo(x_to_client(x_max), y_to_client((b1 - db1 - a11*(x_max))/a12));
+            context.moveTo(x_to_client(x_min), y_to_client((b1 + db1 - a11*(x_min))/a12));
+            context.lineTo(x_to_client(x_max), y_to_client((b1 + db1 - a11*(x_max))/a12));
+            context.strokeStyle="#ff8866";
+            context.stroke();
+            context.setLineDash([]);
+            context.closePath();
+            // blue
+            context.beginPath();
+            context.setLineDash([4, 4]);
+            var db2 = temp_end_step_length * length_of(a21, a22);
+            context.moveTo(x_to_client(x_min), y_to_client((b2 - db2 - a21*(x_min))/a22));
+            context.lineTo(x_to_client(x_max), y_to_client((b2 - db2 - a21*(x_max))/a22));
+            context.moveTo(x_to_client(x_min), y_to_client((b2 + db2 - a21*(x_min))/a22));
+            context.lineTo(x_to_client(x_max), y_to_client((b2 + db2 - a21*(x_max))/a22));
+            context.strokeStyle="#6699ff";
+            context.stroke();
+            context.setLineDash([]);
+            context.closePath();
+        }
+    }
+
+    // iteration count
+    results = document.getElementById("results");
+    if(last_iterations > 100){
+        results.innerHTML = "Iterations > 100";
+    }else{
+        results.innerHTML = "Iterations = " + last_iterations;
+    }
+    // solution
+    var sxy = solve_2(solver_1_eq_1[0], solver_1_eq_1[1], solver_1_eq_1[2],  solver_1_eq_2[0], solver_1_eq_2[1], solver_1_eq_2[2]);
+    results.innerHTML += "<br>";
+    results.innerHTML += "Solution found: (" + cur_x.toFixed(3) + "; " + cur_y.toFixed(3) + "), ";
+    results.innerHTML += "<i>actual solution: (" + sxy[0].toFixed(3) + "; " + sxy[1].toFixed(3) + ")</i>";
+    error = length_of(sxy[0] - cur_x, sxy[1] - cur_y);
+    results.innerHTML += "<br>";
+    results.innerHTML += "Tolerance: " + end_step_length.toFixed(3) + ", real error: " + error.toFixed(3);
+    last_error = error;
+}
+
+function reset_solver() {
+    set_solver_1();
+    set_solver_2();
+    draw_solver_1(0, 0, false);
+    draw_solver_2(0, 0, false);
+}
+
+function radio(n) {
+    for(var i = 1; i <= 3; i++){
+        radio_i = document.getElementById("button_" + i);
+        radio_i.disabled = false;
+    }
+    radio_n = document.getElementById("button_" + n);
+    radio_n.disabled = true;
+}
+
+///////
+/// solver 2
+var solver_2_eq_1_temp;
+var solver_2_eq_2_temp;
+function set_solver_2() {
+    solver_2_eq_2_temp = solver_1_eq_2;
+    solver_2_eq_1_temp = solver_1_eq_1;  
+}
+
+function invalidate_solver_2(client_x, client_y) {
+    var solver = document.getElementById("solver_2");
+    var canvas_rect = solver.getBoundingClientRect();
+    if(document.getElementById("button_1").disabled){
+           eval("solver_1_eq_" + solver_1_eq_temp_id + " = Array.from(" + name + "solver_2_eq_" + solver_1_eq_temp_id + "_temp);");
+       }else if(document.getElementById("button_2").disabled){
+           start_x = client_to_x(client_x - canvas_rect.left);
+           start_y = client_to_y(client_y - canvas_rect.top);
+       }else if(document.getElementById("button_3").disabled){
+           end_step_length = temp_end_step_length;
+       }
+    draw_solver_1(0, 0, false);
+    draw_solver_2(0, 0, false);
+}
+
+function init_solver_2(){
+    var solver = document.getElementById("solver_2");
+    var canvas_rect = solver.getBoundingClientRect();
+    draw_solver_2(0, 0, false);
+
+    solver.addEventListener('mousemove', function(e){
+        var canvas_rect = solver.getBoundingClientRect();
+        draw_solver_2(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1) {
+            invalidate_solver_2(e.clientX, e.clientY);
+        } else if(e.buttons == 0) {
+            solver_2_eq_temp_id = find_nearest_eqution_id("solver_2", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+        }
+    }, false);
+
+    solver.addEventListener('mousedown', function(e){
+        invalidate_solver_2(e.clientX, e.clientY);
+        var canvas_rect = solver.getBoundingClientRect();
+        solver_2_eq_temp_id = find_nearest_eqution_id("solver_2", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+    }, false);
+    
+    solver.addEventListener('mouseup', function(e){
+        invalidate_solver_2(e.clientX, e.clientY);
+    }, false);
+
+    solver.addEventListener('mouseleave', function(e){
+        draw_solver_2(0, 0, false);
+    }, false);
+}
+
+function draw_solver_2(client_x, client_y, do_guides){
+    var solver = document.getElementById("solver_2");
+    var context = solver.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // only lines now
+    for(var i = 0; i < solver_1_eqs; ++i){
+        var eq = eval("solver_1_eq_" + (i + 1));     
+        // line
+        context.beginPath();
+        context.lineWidth = 2;
+        var xys = get_points_on_the_ends(eq[0], eq[1], eq[2]);
+        context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
+        context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
+        context.strokeStyle = line_colors[i];
+        context.stroke();
+        context.lineWidth = 1;
+        context.closePath();
+    }
+
+    // solver
+    context.beginPath();
+    context.moveTo(x_to_client(0), y_to_client(0));
+    var ixy = solve_2(solver_1_eq_1[0], solver_1_eq_1[1], 0,  solver_1_eq_2[0], solver_1_eq_2[1], solver_1_eq_2[2]);
+    context.lineTo(x_to_client(ixy[0]), y_to_client(ixy[1]));
+    var sxy = solve_2(solver_1_eq_1[0], solver_1_eq_1[1], solver_1_eq_1[2],  solver_1_eq_2[0], solver_1_eq_2[1], solver_1_eq_2[2]);
+    context.lineTo(x_to_client(sxy[0]), y_to_client(sxy[1]));
+    context.strokeStyle="#002200";
+    context.lineWidth = 2;
+    context.setLineDash([2, 2]);
+    context.stroke();
+    context.lineWidth = 1;
+    context.setLineDash([]);
+    context.closePath();
+
+    // grid
+    draw_grid_on(context);
+
+    // mouse move
+    if(do_guides){
+        var x = client_to_x(client_x);
+        var y = client_to_y(client_y);
+        
+        // find the nearest equation
+        var closest_eq_i = 0;
+        var eq0 = solver_1_eq_1;
+        var x0 = projected_x(x, y, eq0[0], eq0[1], eq0[2]);
+        var y0 = projected_y(x, y, eq0[0], eq0[1], eq0[2]);
+        var closest_distance = length_of(x - x0, y - y0);
+        for(var i = 1; i < solver_1_eqs; ++i) {
+            var eq = eval("solver_1_eq_" + (i+1));
+            var xi = projected_x(x, y, eq[0], eq[1], eq[2]);
+            var yi = projected_y(x, y, eq[0], eq[1], eq[2]);
+            var distancei = length_of(x - xi, y - yi);
+            if (distancei < closest_distance) {
+                closest_distance = distancei;
+                closest_eq_i = i;
+            }
+        }        
+        solver_1_eq_temp_id = closest_eq_i + 1;
+        var eq = eval("solver_1_eq_" + solver_1_eq_temp_id);
+        
+        var temp_eq = new_equation_for_one_point(eq[0], eq[1], eq[2], x, y);
+        eval("solver_2_eq_" + solver_1_eq_temp_id + "_temp = Array.from(temp_eq);");
+        
+        context.beginPath();
+        var xys = get_points_on_the_ends(temp_eq[0], temp_eq[1], temp_eq[2]);
+        context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
+        context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
+        context.strokeStyle = line_colors[closest_eq_i];
+        context.setLineDash([4, 4]);
+        context.stroke();
+        context.setLineDash([]);
+        context.closePath();
+    }
+}
+
+
+///////
+/// linear multiplier
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) + 1;
+    eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) - 1;
+    eval('change_' + counter_name + '()');
+}
+
+function change_linear_multiplier() {
+    var multiplier = Number(document.getElementById('linear_multiplier').value);
+    var row = document.getElementById('linear_row2');
+    if(multiplier != 0) {
+        row.innerHTML = printable_eq(multiplier, "x<sub>1</sub>", 2 * multiplier, "x<sub>2</sub>", 3 * multiplier);
+    } else {
+        row.innerHTML = "Except for 0, yes.";
+        hidden_quests[0] = 1;
+    }
+}
+
+//////
+/// underspecified
+function change_s3_1_1() {}
+function change_s3_1_2() {}
+function change_s3_1_3() {}
+function change_s3_1_4() {}
+function change_s3_2_1() {}
+function change_s3_2_2() {}
+function change_s3_2_3() {}
+function change_s3_2_4() {}
+
+
+//////
+/// elimination
+function do_one_elimination_step() {
+    if(Math.abs(system_3_eq_1[1] / system_3_eq_1[0] - system_3_eq_2[1] / system_3_eq_2[0]) < 0.05) {
+        document.getElementById('step_name').innerHTML = "Of course, this method wouldn't work on parallel lines. Kudos for finding this!";
+        hidden_quests[1] = 1;
+    } else if (system_3_eq_1[0] == 1.0 && system_3_eq_1[1] == 0.0 && system_3_eq_2[0] == 0.0 && system_3_eq_2[1] == 1.0) {
+        document.getElementById('step_name').innerHTML = "It's already solved!";
+    } else if (system_3_eq_2[1] != system_3_eq_1[1] && system_3_eq_2[1] != 1.0 && system_3_eq_1[1] != 0) {
+        document.getElementById('step_name').innerHTML = "Divided the 2nd equation by its 2nd coefficient.";
+        system_3_eq_2[0] /= system_3_eq_2[1];
+        system_3_eq_2[2] /= system_3_eq_2[1];
+        system_3_eq_2[1] = 1.0;
+    } else if (system_3_eq_2[1] != system_3_eq_1[1] && system_3_eq_1[1] != 0) {
+        document.getElementById('step_name').innerHTML = "Multiplied the 2nd equation by the 2nd coefficient from the 1st.";
+        system_3_eq_2[0] *= system_3_eq_1[1];
+        system_3_eq_2[1] = system_3_eq_1[1];
+        system_3_eq_2[2] *= system_3_eq_1[1];
+    } else if (system_3_eq_2[1] == system_3_eq_1[1] && system_3_eq_1[1] != 0) {
+        document.getElementById('step_name').innerHTML = "Subtracted the 2nd equation from the first";
+        system_3_eq_1[0] -= system_3_eq_2[0];
+        system_3_eq_1[1] = 0.0;
+        system_3_eq_1[2] -= system_3_eq_2[2];
+    } else if (system_3_eq_1[1] == 0.0 && system_3_eq_1[0] != 1.0 && system_3_eq_1[0] != system_3_eq_2[0] && system_3_eq_2[0] != 0.0 ) {
+        document.getElementById('step_name').innerHTML = "Divided the 1st equation by its 1st coefficient.";
+        system_3_eq_1[2] /= system_3_eq_1[0];
+        system_3_eq_1[0] = 1.0;
+    } else if (system_3_eq_1[1] == 0.0 && system_3_eq_1[0] == 1.0 && system_3_eq_2[0] != 1.0 && system_3_eq_2[0] != 0.0) {
+        document.getElementById('step_name').innerHTML = "Multiplied the 1st equation by the 1st coefficient from the 2nd.";    
+        system_3_eq_1[2] *= system_3_eq_2[0];
+        system_3_eq_1[0] = system_3_eq_2[0];
+    } else if (system_3_eq_1[1] == 0.0 && system_3_eq_1[0] == system_3_eq_2[0]) {
+        document.getElementById('step_name').innerHTML = "Subtracted the 1st equation from the 2nd.";
+        system_3_eq_2[0] = 0.0;
+        system_3_eq_2[1] -= system_3_eq_1[1];
+        system_3_eq_2[2] -= system_3_eq_1[2];
+    } else if (system_3_eq_1[1] == 0.0 && system_3_eq_2[0] == 0.0) {
+        document.getElementById('step_name').innerHTML = "Divided the equations by the respecting coefficients.";
+        system_3_eq_1[2] /= system_3_eq_1[0];
+        system_3_eq_1[0] = 1.0;
+        system_3_eq_2[2] /= system_3_eq_2[1];
+        system_3_eq_2[1] = 1.0;
+    }
+    update_system("system_3");        
+    draw_plot_named("system_3");
+}
+
+//////
+/// quests
+function done_system_1_quest_1() {
+    var xy = solve_2(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2], system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
+    if(Math.abs(xy[0]) > 0.25 || Math.abs(xy[1]) > 0.25) {
+        document.getElementById("reply_quest_1").innerHTML = "Sorry, please try again.";
+    } else if(Math.abs(xy[0]) >= 0.01 || Math.abs(xy[1]) >= 0.01) {
+        document.getElementById("reply_quest_1").innerHTML = "Close enough! Yes!";
+        document.getElementById("buttons_quest_1").style.display = 'none';
+        quests[0] = 1; 
+    } else {
+        document.getElementById("reply_quest_1").innerHTML = "Excellent!";
+        document.getElementById("buttons_quest_1").style.display = 'none';
+        quests[0] = 1;
+    }
+    draw_plot_named('system_1', 0, 0, false);
+}
+
+function done_system_1_quest_2() {
+    var xy = solve_2(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2], system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
+    if(Math.abs(xy[0]) < 25 && Math.abs(xy[1]) < 25) {
+        document.getElementById("reply_quest_2").innerHTML = "Sorry, it still has a solution in <i>x<sub>1</sub> =" + printable(xy[0]) + ", x<sub>2</sub> = " + printable(xy[1]) + "</i>. Please try again.";
+    } else {
+        document.getElementById("reply_quest_2").innerHTML = "Yes! When the lines are parallel, there is no solution.";
+        document.getElementById("buttons_quest_2").style.display = 'none';
+        quests[1] = 1;
+    }
+    draw_plot_named('system_1', 0, 0, false);
+}
+
+function done_system_1_quest_3() {
+    xyxy1 = get_points_on_the_ends(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2]);
+    xyxy2 = get_points_on_the_ends(system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
+    if(Math.abs(xyxy1[0][0] - xyxy2[0][0]) > 0.1 || 
+       Math.abs(xyxy1[0][1] - xyxy2[0][1]) > 0.1 || 
+       Math.abs(xyxy1[1][0] - xyxy2[1][0]) > 0.1 ||
+       Math.abs(xyxy1[1][1] - xyxy2[1][1]) > 0.1) {
+        var xy = solve_2(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2], system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
+        document.getElementById("reply_quest_3").innerHTML = "Sorry, it still has a single solution in <i>x<sub>1</sub> =" + printable(xy[0]) + ", x<sub>2</sub> = " + printable(xy[1]) + "</i>. Please try again.";
+    } else {
+        document.getElementById("reply_quest_3").innerHTML = "Yes! When the lines coincide, the solutions are infinite.";
+        document.getElementById("buttons_quest_3").style.display = 'none';
+        quests[2] = 1;
+    }
+    draw_plot_named('system_1', 0, 0, false);
+}
+
+function done_system_2_quest_4() {
+    var xy1 = solve_2(system_2_eq_1[0], system_2_eq_1[1], system_2_eq_1[2], system_2_eq_2[0], system_2_eq_2[1], system_2_eq_2[2]);
+    var xy2 = solve_2(system_2_eq_2[0], system_2_eq_2[1], system_2_eq_2[2], system_2_eq_3[0], system_2_eq_3[1], system_2_eq_3[2]);
+    var xy3 = solve_2(system_2_eq_3[0], system_2_eq_3[1], system_2_eq_3[2], system_2_eq_1[0], system_2_eq_1[1], system_2_eq_1[2]);    
+    if(Math.abs(xy1[0] - xy2[0]) > 0.1 || 
+       Math.abs(xy1[1] - xy2[1]) > 0.1){
+        document.getElementById("reply_quest_4").innerHTML = "It has intersections, but not a solution. Please try again.";
+    } else {
+        document.getElementById("reply_quest_4").innerHTML = "Yes! The solution is when all the three lines intersect in the same point.";
+        document.getElementById("buttons_quest_4").style.display = 'none';
+        quests[3] = 1;
+    }
+    draw_plot_named('system_2', 0, 0, false);
+}
+
+function almost(a, b) {
+    return Math.abs(a-b) < 1.e-5;
+}
+
+function done_system_3_quest_5() {
+    var a11 =  Number(document.getElementById("s3_1_1").value);
+    var a12 =  Number(document.getElementById("s3_1_2").value);
+    var a13 =  Number(document.getElementById("s3_1_3").value);
+    var b1 =  Number(document.getElementById("s3_1_4").value);
+    var a21 =  Number(document.getElementById("s3_2_1").value);
+    var a22 =  Number(document.getElementById("s3_2_2").value);
+    var a23 =  Number(document.getElementById("s3_2_3").value);
+    var b2 =  Number(document.getElementById("s3_2_4").value);
+
+    if(almost(a11 / a21, a12 / a22) && almost(a11 / a21, a13 / a23))
+    {
+        if(almost(a11 / a21, b1 / b2))
+        {
+            document.getElementById("reply_quest_5").innerHTML = "Well, they are linearly dependent, this means they are the same plane. Still, any point on this plane is a solution.";
+        } else {
+            document.getElementById("reply_quest_5").innerHTML = "Exactly! Parallel planes in a system have their matrix part linear dependent and the vector part — not.";
+            document.getElementById("buttons_quest_5").style.display = 'none';
+            document.getElementById("quest_5_formula").style.display = 'none';
+            quests[4] = 1;
+        }
+    } else {
+        document.getElementById("reply_quest_5").innerHTML = "It has an infinite number of solutions. Planes' intersection is a line. Every point in this line is a valid solution.";
+    }
+}
+
+function done_system_4_quest_6() {
+    if(last_iterations == 58) {
+        document.getElementById("reply_quest_6").innerHTML = "Right! You have to worsen the convergence or make a stop criteria more strict. Moving the starting point also helps to fine tune the setup.";
+        document.getElementById("buttons_quest_6").style.display = 'none';
+        quests[5] = 1;
+    } else {
+        document.getElementById("reply_quest_6").innerHTML = "That's not exactly 58 iterations.";
+    }
+}
+
+function done_system_4_quest_7() {
+    if(last_error >= 6.0) {
+        document.getElementById("reply_quest_7").innerHTML = "Of course! The error doesn't depend on the exit condition solely. The more acute the angle between lines, the worse the possible error would be.";
+        document.getElementById("buttons_quest_7").style.display = 'none';
+        quests[6] = 1;
+    } else {
+        document.getElementById("reply_quest_7").innerHTML = "That's still less than 6.0.";
+    }
+}
+
+function done_system_4_quest_8() {
+    var q101 = Math.abs(solver_1_eq_1[0] / solver_1_eq_1[1]);
+    var q110 = Math.abs(solver_1_eq_1[1] / solver_1_eq_1[0]);
+    var q201 = Math.abs(solver_1_eq_2[0] / solver_1_eq_2[1]);
+    var q210 = Math.abs(solver_1_eq_2[1] / solver_1_eq_2[0]);    
+    if(Math.abs(q101 - q210) < 0.1 || Math.abs(q110 - q201) < 0.1) {
+        document.getElementById("reply_quest_8").innerHTML = "Sure! When lines are orthogonal, the solution always comes in one or two jumps. Plus one iteration to see if we're there.";
+        document.getElementById("buttons_quest_8").style.display = 'none';
+        quests[7] = 1;
+    } else if(last_iterations <= 3){
+        document.getElementById("reply_quest_8").innerHTML = "Well, it still might take more than 3 iterations if you move your starting point.";
+    } else {
+        document.getElementById("reply_quest_8").innerHTML = "Sorry, please try again.";
+    }
+}
+
+function done_quest_9() {
+    if(document.getElementById("aq8_1").checked) {
+        document.getElementById("reply_quest_9").innerHTML = "Sorry, it's much more complex.";
+    }else if(document.getElementById("aq8_2").checked) {
+        document.getElementById("reply_quest_9").innerHTML = "No, not really. Have you missed the for loop in the solver itself?";
+    }else if(document.getElementById("aq8_3").checked) {
+        document.getElementById("reply_quest_9").innerHTML = "Exactly! It has 4 nested loops that depend on the number of equations, so the complexity is <i>O(n<sup>4</sup>)</i>.";
+        document.getElementById("complexity_buttons").style.display = 'none';
+        document.getElementById("buttons_quest_9").style.display = 'none';
+        quests[8] = 1;
+    }else if(document.getElementById("aq8_4").checked) {
+        document.getElementById("reply_quest_9").innerHTML = "Almost. Note that the two last loops from the cross are not really nested.";
+    }else {
+        document.getElementById("reply_quest_9").innerHTML = "You have to chose some answer first.";
+    }
+}
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+Gaussian Elimination
+    </h1>
+
+    <canvas id="system_3" width=640 height=512></canvas>
+    <div style="text-align:right; width:640px; padding-bottom:12pt;">
+        <button type="button" id="button_3_reset" onclick="reset_system_3()">Reset</button>
+    </div>         
+    <table class="formula">
+    <tr>
+    <td rowspan=2 class="brackets">{</td>
+    <td id="system_3_system_row1">
+    a11x1 + a12x2 = b1
+    </td>
+    </tr><tr>
+    <td id="system_3_system_row2">
+    a21x1 + a22x2 = b2
+    </td>
+    </tr>
+    </table>
+    <button type="button" id="elimination" onclick="do_one_elimination_step()">One step</button>
+    <p class="comment" id="step_name">
+    </p>
+
+    <script language="JavaScript">
+        init_plot_named('system_3');
+    </script>
+
+    <table class="footer">
+    <tr>
+    <td class="footer" align="left"><a href="">&larr;</a></td>
+    <td class="footer" align="center"><a href="index.html">Home</a></td>
+    <td class="footer" align="right"><a href="">&rarr;</a></td>
+    </tr>
+    </table>
+    </center>
+  </body>
+</html>
