@@ -13,6 +13,9 @@ int main() {
 
     for(const auto& s : unsorteds)
         std::cout << trie.retrieve(s.c_str()).second << "\n";
+    
+    auto none = trie.retrieve("not");
+    std::cout << none.first << " " << none.second << "\n";
     return 0;
 }
 
