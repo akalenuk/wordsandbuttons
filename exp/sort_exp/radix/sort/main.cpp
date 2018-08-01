@@ -6,12 +6,18 @@
 #include <cassert>
 
 int main() {
-    std::vector<std::string> unsorteds = {"cat", "pat", "bed"};
-    // primitive tests for set
+    std::vector<std::string> unsorteds = {"cat", "pat", "bed", "test", "test but longer"};
     Trie::Set<4> trie_set;
     for(const auto& s : unsorteds)
         trie_set.store(s.c_str());
 
+    // sort test
+    std::vector<std::string> sorted;
+    Trie::Set<4>::fill_vector_sorted(&trie_set, sorted);
+    for(const auto& s : sorted)
+        std::cout << "[" << s << "]\n";
+
+    // primitive tests for set
     for(const auto& s : unsorteds)
         assert(trie_set.contains(s.c_str()));
 
@@ -28,11 +34,6 @@ int main() {
     assert(! trie_map.retrieve("not").first);
     assert( trie_map.retrieve("not").second == "");
 
-    // sort test
-    std::vector<std::string> sorted;
-    Trie::Set<4>::fill_vector_sorted(&trie_set, sorted);
-    for(const auto& s : sorted)
-        std::cout << s << "\n";
     return 0;
 }
 

@@ -63,22 +63,25 @@ namespace Trie {
         }
 
         static void fill_vector_sorted(Set* trie, std::vector<std::string>& sorted, std::vector<char> long_key = std::vector<char>() ) {
+            bool this_is_the_end = true;
             for(auto i = 0u; i < ConstantsFor<RADIX_BITS>::subtrie_size; ++i) {
                 if(trie->subtries[i] != nullptr) {
                     long_key.push_back(static_cast<char>(i));
                     fill_vector_sorted(trie->subtries[i], sorted, long_key);
-                } else {
-                    std::string short_key;
-                    for(auto j = 0u; j < long_key.size() / ConstantsFor<RADIX_BITS>::steps_in_byte; ++j) {
-                        char c = 0;
-                        for(auto k = 0u; k < ConstantsFor<RADIX_BITS>::steps_in_byte; ++k) {
-                            c <<= RADIX_BITS;
-                            c |= long_key[j * ConstantsFor<RADIX_BITS>::steps_in_byte + k];
-                        }
-                        short_key += c;
-                    }
-                    sorted.push_back(short_key);
+                    this_is_the_end = false;
                 }
+            } 
+            if( this_is_the_end ) {
+                std::string short_key;
+                for(auto j = 0u; j < long_key.size() / ConstantsFor<RADIX_BITS>::steps_in_byte; ++j) {
+                    char c = 0;
+                    for(auto k = ConstantsFor<RADIX_BITS>::steps_in_byte; k > 0; --k) {
+                        c <<= RADIX_BITS;
+                        c |= long_key[j * ConstantsFor<RADIX_BITS>::steps_in_byte + k - 1];
+                    }
+                    short_key += c;
+                }
+                sorted.push_back(short_key);
             }
         }
     };
