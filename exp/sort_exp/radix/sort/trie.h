@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <vector>
 
 namespace Trie {
     template <unsigned int RADIX_BITS> 
@@ -14,14 +15,14 @@ namespace Trie {
         }
         constexpr static unsigned int radix_mask = mask(RADIX_BITS);
         constexpr static unsigned int steps_in_byte = 8 / RADIX_BITS;
-        constexpr static unsigned int subtree_size = pow_of_2(RADIX_BITS);
+        constexpr static unsigned int subtrie_size = pow_of_2(RADIX_BITS);
     };
 
 
 
     template <unsigned int RADIX_BITS> 
     struct Set : public ConstantsFor <RADIX_BITS>{
-        std::array<Set*, ConstantsFor<RADIX_BITS>::subtree_size> subtries{nullptr};
+        std::array<Set*, ConstantsFor<RADIX_BITS>::subtrie_size> subtries{nullptr};
 
         ~Set(){
             for(auto trie : subtries)
@@ -60,13 +61,33 @@ namespace Trie {
             }
             return true;
         }
+
+        static void fill_vector_sorted(Set* trie, std::vector<std::string>& sorted, std::vector<char> long_key = std::vector<char>() ) {
+            for(auto i = 0u; i < ConstantsFor<RADIX_BITS>::subtrie_size; ++i) {
+                if(trie->subtries[i] != nullptr) {
+                    long_key.push_back(static_cast<char>(i));
+                    fill_vector_sorted(trie->subtries[i], sorted, long_key);
+                } else {
+                    std::string short_key;
+                    for(auto j = 0u; j < long_key / ConstantsFor<RADIX_BITS>::steps_in_byte; ++j) {
+                        char c = 0;
+                        for(auto k = 0u; k < ConstantsFor<RADIX_BITS>::steps_in_byte; ++k) {
+                            c <<= RADIX_BITS;
+                            c |= long_key[j * ConstantsFor<RADIX_BITS>::steps_in_byte + k];
+                        }
+                        short_key += c;
+                    }
+                    sorted.push_back(short_key);
+                }
+            }
+        }
     };
 
 
 
     template <class T, unsigned int RADIX_BITS> 
     struct Map : public ConstantsFor <RADIX_BITS>{
-        std::array<Map*, ConstantsFor<RADIX_BITS>::subtree_size> subtries{nullptr};
+        std::array<Map*, ConstantsFor<RADIX_BITS>::subtrie_size> subtries{nullptr};
         T value;
 
         ~Map(){
