@@ -69,7 +69,7 @@ namespace Trie {
                     fill_vector_sorted(trie->subtries[i], sorted, long_key);
                 } else {
                     std::string short_key;
-                    for(auto j = 0u; j < long_key / ConstantsFor<RADIX_BITS>::steps_in_byte; ++j) {
+                    for(auto j = 0u; j < long_key.size() / ConstantsFor<RADIX_BITS>::steps_in_byte; ++j) {
                         char c = 0;
                         for(auto k = 0u; k < ConstantsFor<RADIX_BITS>::steps_in_byte; ++k) {
                             c <<= RADIX_BITS;

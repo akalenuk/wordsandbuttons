@@ -27,6 +27,12 @@ int main() {
     
     assert(! trie_map.retrieve("not").first);
     assert( trie_map.retrieve("not").second == "");
+
+    // sort test
+    std::vector<std::string> sorted;
+    Trie::Set<4>::fill_vector_sorted(&trie_set, sorted);
+    for(const auto& s : sorted)
+        std::cout << s << "\n";
     return 0;
 }
 
