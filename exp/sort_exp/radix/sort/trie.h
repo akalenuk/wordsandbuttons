@@ -57,7 +57,6 @@ namespace Trie {
                     int radix0 = shifted_c & ConstantsFor<RADIX_BITS>::radix_mask;
                     if (trie->subtries[radix0] == nullptr)
                         return false;
-                    c = c >> RADIX_BITS;
                     trie = trie->subtries[radix0];
                 }
                 key++;
