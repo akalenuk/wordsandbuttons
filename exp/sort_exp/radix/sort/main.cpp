@@ -3,19 +3,30 @@
 #include <iostream>
 #include <vector>
 #include <string>
-
+#include <cassert>
 
 int main() {
     std::vector<std::string> unsorteds = {"cat", "pat", "bed"};
-    Trie::Map<std::string, 4> trie;
+    // primitive tests for set
+    Trie::Set<4> trie_set;
     for(const auto& s : unsorteds)
-        trie.store(s.c_str(), s);
+        trie_set.store(s.c_str());
 
     for(const auto& s : unsorteds)
-        std::cout << trie.retrieve(s.c_str()).second << "\n";
+        assert(trie_set.contains(s.c_str()));
+
+    assert(! trie_set.contains("not"));
+
+    // primitive tests for map
+    Trie::Map<std::string, 4> trie_map;
+    for(const auto& s : unsorteds)
+        trie_map.store(s.c_str(), s);
+
+    for(const auto& s : unsorteds)
+        assert(s == trie_map.retrieve(s.c_str()).second);
     
-    auto none = trie.retrieve("not");
-    std::cout << none.first << " " << none.second << "\n";
+    assert(! trie_map.retrieve("not").first);
+    assert( trie_map.retrieve("not").second == "");
     return 0;
 }
 

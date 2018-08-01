@@ -17,6 +17,53 @@ namespace Trie {
         constexpr static unsigned int subtree_size = pow_of_2(RADIX_BITS);
     };
 
+
+
+    template <unsigned int RADIX_BITS> 
+    struct Set : public ConstantsFor <RADIX_BITS>{
+        std::array<Set*, ConstantsFor<RADIX_BITS>::subtree_size> subtries{nullptr};
+
+        ~Set(){
+            for(auto trie : subtries)
+                if(trie != nullptr)
+                    delete trie;
+        }
+
+        void store(const char* key){
+            Set* trie = this;
+            while(key[0] != '\0'){
+                char c = key[0];
+                for(unsigned int i = 0; i < ConstantsFor<RADIX_BITS>::steps_in_byte; i++){
+                    int radix0 = c & ConstantsFor<RADIX_BITS>::radix_mask;
+                    c = c >> RADIX_BITS;
+                    if(trie->subtries[radix0] == nullptr){
+                        trie->subtries[radix0] = new Set();
+                    }
+                    trie = trie->subtries[radix0];
+                }
+                key++;
+            }
+        }
+
+        bool contains(const char* key){
+            Set* trie = this;
+            while(key[0] != '\0'){
+                char c = key[0];
+                for(unsigned int i = 0; i < ConstantsFor<RADIX_BITS>::steps_in_byte; i++){
+                    int radix0 = c & ConstantsFor<RADIX_BITS>::radix_mask;
+                    if (trie->subtries[radix0] == nullptr)
+                        return false;
+                    c = c >> RADIX_BITS;
+                    trie = trie->subtries[radix0];
+                }
+                key++;
+            }
+            return true;
+        }
+    };
+
+
+
     template <class T, unsigned int RADIX_BITS> 
     struct Map : public ConstantsFor <RADIX_BITS>{
         std::array<Map*, ConstantsFor<RADIX_BITS>::subtree_size> subtries{nullptr};
