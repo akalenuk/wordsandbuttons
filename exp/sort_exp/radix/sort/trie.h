@@ -30,7 +30,7 @@ namespace Trie {
             }
         }
 
-        void set(const char* key, T value){
+        void store(const char* key, T value){
             Map* trie = this;
             while(key[0] != '\0'){
                 char c = key[0];
@@ -47,18 +47,20 @@ namespace Trie {
             trie->value = value;
         }
 
-        T get(const char* key){
+        std::pair<bool, T> retrieve(const char* key){
             Map* trie = this;
             while(key[0] != '\0'){
                 char c = key[0];
                 for(unsigned int i = 0; i < ConstantsFor<RADIX_BITS>::steps_in_byte; i++){
                     int radix0 = c & ConstantsFor<RADIX_BITS>::radix_mask;
+                    if (trie->subtries[radix0] == nullptr)
+                        return {false, T()};
                     c = c >> RADIX_BITS;
                     trie = trie->subtries[radix0];
                 }
                 key++;
             }
-            return trie->value;
+            return {true, trie->value};
         }
     };
 }

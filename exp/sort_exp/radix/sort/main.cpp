@@ -9,10 +9,10 @@ int main() {
     std::vector<std::string> unsorteds = {"cat", "pat", "bed"};
     Trie::Map<std::string, 4> trie;
     for(const auto& s : unsorteds)
-        trie.set(s.c_str(), s);
+        trie.store(s.c_str(), s);
 
     for(const auto& s : unsorteds)
-        std::cout << trie.get(s.c_str()) << "\n";
+        std::cout << trie.retrieve(s.c_str()).second << "\n";
     return 0;
 }
 
