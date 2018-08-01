@@ -23,6 +23,7 @@ namespace Trie {
     template <unsigned int RADIX_BITS> 
     struct Set : public ConstantsFor <RADIX_BITS>{
         std::array<Set*, ConstantsFor<RADIX_BITS>::subtrie_size> subtries{nullptr};
+        bool contains_element = false;
 
         ~Set(){
             for(auto trie : subtries)
@@ -44,6 +45,7 @@ namespace Trie {
                 }
                 key++;
             }
+            trie->contains_element = true;
         }
 
         bool contains(const char* key){
@@ -62,16 +64,15 @@ namespace Trie {
             return true;
         }
 
-        static void fill_vector_sorted(Set* trie, std::vector<std::string>& sorted, std::vector<char> long_key = std::vector<char>() ) {
-            bool this_is_the_end = true;
+        static void fill_vector_sorted(Set* trie, std::vector<std::string>& sorted, const std::vector<char>& long_key = std::vector<char>() ) {
             for(auto i = 0u; i < ConstantsFor<RADIX_BITS>::subtrie_size; ++i) {
                 if(trie->subtries[i] != nullptr) {
-                    long_key.push_back(static_cast<char>(i));
-                    fill_vector_sorted(trie->subtries[i], sorted, long_key);
-                    this_is_the_end = false;
+                    std::vector<char> new_long_key(long_key.begin(), long_key.end());
+                    new_long_key.push_back(static_cast<char>(i));
+                    fill_vector_sorted(trie->subtries[i], sorted, new_long_key);
                 }
             } 
-            if( this_is_the_end ) {
+            if(trie->contains_element) {
                 std::string short_key;
                 for(auto j = 0u; j < long_key.size() / ConstantsFor<RADIX_BITS>::steps_in_byte; ++j) {
                     char c = 0;
