@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <array>
 
 template <class T, unsigned int RADIX_BITS> class Trie{
 private:
@@ -14,12 +14,11 @@ private:
     constexpr static unsigned int steps_in_byte = 8 / RADIX_BITS;
 
 public:
-    std::vector<Trie*> subtries;
+    std::array<Trie*, pow_of_2(RADIX_BITS)> subtries{nullptr};
     T value;
 
     Trie(){
         static_assert(RADIX_BITS == 1 || RADIX_BITS == 2 || RADIX_BITS == 4 || RADIX_BITS == 8, "Radix size should be power of 2 and not bigger than 8");
-        subtries.resize( pow_of_2(RADIX_BITS), nullptr );
     }
 
     ~Trie(){
