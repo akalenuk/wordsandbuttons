@@ -5,6 +5,7 @@
 namespace Trie {
     template <unsigned int RADIX_BITS> 
     struct ConstantsFor {
+        static_assert(RADIX_BITS == 1 || RADIX_BITS == 2 || RADIX_BITS == 4 || RADIX_BITS == 8, "Radix size should be power of 2 and not bigger than 8");
         constexpr static unsigned int mask(unsigned int radix_bits){
             return (radix_bits == 1) ? 1 : (1 + (mask(radix_bits - 1) << 1));
         }
@@ -20,10 +21,6 @@ namespace Trie {
     struct Map : public ConstantsFor <RADIX_BITS>{
         std::array<Map*, ConstantsFor<RADIX_BITS>::subtree_size> subtries{nullptr};
         T value;
-
-        Map(){
-            static_assert(RADIX_BITS == 1 || RADIX_BITS == 2 || RADIX_BITS == 4 || RADIX_BITS == 8, "Radix size should be power of 2 and not bigger than 8");
-        }
 
         ~Map(){
             for(auto trie : subtries){
