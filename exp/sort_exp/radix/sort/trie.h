@@ -36,8 +36,8 @@ namespace Trie {
             while(key[0] != '\0'){
                 char c = key[0];
                 for(unsigned int i = 0; i < ConstantsFor<RADIX_BITS>::steps_in_byte; i++){
-                    int radix0 = c & ConstantsFor<RADIX_BITS>::radix_mask;
-                    c = c >> RADIX_BITS;
+                    int shifted_c = c >> (8 - (i + 1) * RADIX_BITS);
+                    int radix0 = shifted_c & ConstantsFor<RADIX_BITS>::radix_mask;
                     if(trie->subtries[radix0] == nullptr){
                         trie->subtries[radix0] = new Set();
                     }
@@ -53,7 +53,8 @@ namespace Trie {
             while(key[0] != '\0'){
                 char c = key[0];
                 for(unsigned int i = 0; i < ConstantsFor<RADIX_BITS>::steps_in_byte; i++){
-                    int radix0 = c & ConstantsFor<RADIX_BITS>::radix_mask;
+                    int shifted_c = c >> (8 - (i + 1) * RADIX_BITS);
+                    int radix0 = shifted_c & ConstantsFor<RADIX_BITS>::radix_mask;
                     if (trie->subtries[radix0] == nullptr)
                         return false;
                     c = c >> RADIX_BITS;
@@ -65,6 +66,18 @@ namespace Trie {
         }
 
         static void fill_vector_sorted(Set* trie, std::vector<std::string>& sorted, const std::vector<char>& long_key = std::vector<char>() ) {
+            if(trie->contains_element) {
+                std::string short_key;
+                for(auto j = 0u; j < long_key.size() / ConstantsFor<RADIX_BITS>::steps_in_byte; ++j) {
+                    char c = 0;
+                    for(auto k = 0u; k < ConstantsFor<RADIX_BITS>::steps_in_byte; ++k) {
+                        c <<= RADIX_BITS;
+                        c |= long_key[j * ConstantsFor<RADIX_BITS>::steps_in_byte + k];
+                    }
+                    short_key += c;
+                }
+                sorted.push_back(short_key);
+            }
             for(auto i = 0u; i < ConstantsFor<RADIX_BITS>::subtrie_size; ++i) {
                 if(trie->subtries[i] != nullptr) {
                     std::vector<char> new_long_key(long_key.begin(), long_key.end());
@@ -72,18 +85,6 @@ namespace Trie {
                     fill_vector_sorted(trie->subtries[i], sorted, new_long_key);
                 }
             } 
-            if(trie->contains_element) {
-                std::string short_key;
-                for(auto j = 0u; j < long_key.size() / ConstantsFor<RADIX_BITS>::steps_in_byte; ++j) {
-                    char c = 0;
-                    for(auto k = ConstantsFor<RADIX_BITS>::steps_in_byte; k > 0; --k) {
-                        c <<= RADIX_BITS;
-                        c |= long_key[j * ConstantsFor<RADIX_BITS>::steps_in_byte + k - 1];
-                    }
-                    short_key += c;
-                }
-                sorted.push_back(short_key);
-            }
         }
     };
 
