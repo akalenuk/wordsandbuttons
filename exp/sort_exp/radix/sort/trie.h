@@ -34,10 +34,9 @@ namespace Trie {
         void store(const char* key){
             Set* trie = this;
             while(key[0] != '\0'){
-                char c = key[0];
-                for(unsigned int i = 0; i < ConstantsFor<RADIX_BITS>::steps_in_byte; i++){
-                    int shifted_c = c >> (8 - (i + 1) * RADIX_BITS);
-                    int radix0 = shifted_c & ConstantsFor<RADIX_BITS>::radix_mask;
+                for(auto i = 0u; i < ConstantsFor<RADIX_BITS>::steps_in_byte; ++i){
+                    const int shifted_c = key[0] >> (8 - (i + 1) * RADIX_BITS);
+                    const int radix0 = shifted_c & ConstantsFor<RADIX_BITS>::radix_mask;
                     if(trie->subtries[radix0] == nullptr){
                         trie->subtries[radix0] = new Set();
                     }
@@ -51,10 +50,9 @@ namespace Trie {
         bool contains(const char* key){
             Set* trie = this;
             while(key[0] != '\0'){
-                char c = key[0];
-                for(unsigned int i = 0; i < ConstantsFor<RADIX_BITS>::steps_in_byte; i++){
-                    int shifted_c = c >> (8 - (i + 1) * RADIX_BITS);
-                    int radix0 = shifted_c & ConstantsFor<RADIX_BITS>::radix_mask;
+                for(auto i = 0u; i < ConstantsFor<RADIX_BITS>::steps_in_byte; ++i){
+                    const int shifted_c = key[0] >> (8 - (i + 1) * RADIX_BITS);
+                    const int radix0 = shifted_c & ConstantsFor<RADIX_BITS>::radix_mask;
                     if (trie->subtries[radix0] == nullptr)
                         return false;
                     trie = trie->subtries[radix0];
@@ -106,8 +104,8 @@ namespace Trie {
             Map* trie = this;
             while(key[0] != '\0'){
                 char c = key[0];
-                for(unsigned int i = 0; i < ConstantsFor<RADIX_BITS>::steps_in_byte; i++){
-                    int radix0 = c & ConstantsFor<RADIX_BITS>::radix_mask;
+                for(auto i = 0; i < ConstantsFor<RADIX_BITS>::steps_in_byte; ++i){
+                    const int radix0 = c & ConstantsFor<RADIX_BITS>::radix_mask;
                     c = c >> RADIX_BITS;
                     if(trie->subtries[radix0] == nullptr){
                         trie->subtries[radix0] = new Map();
@@ -123,8 +121,8 @@ namespace Trie {
             Map* trie = this;
             while(key[0] != '\0'){
                 char c = key[0];
-                for(unsigned int i = 0; i < ConstantsFor<RADIX_BITS>::steps_in_byte; i++){
-                    int radix0 = c & ConstantsFor<RADIX_BITS>::radix_mask;
+                for(auto i = 0; i < ConstantsFor<RADIX_BITS>::steps_in_byte; ++i){
+                    const int radix0 = c & ConstantsFor<RADIX_BITS>::radix_mask;
                     if (trie->subtries[radix0] == nullptr)
                         return {false, T()};
                     c = c >> RADIX_BITS;
