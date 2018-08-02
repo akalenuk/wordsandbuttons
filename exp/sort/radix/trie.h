@@ -66,10 +66,7 @@ namespace Trie {
         static void fill_vector_sorted(Set* trie, std::vector<std::string>& sorted) {
             std::string key;
             key.resize(256);
-            if(RADIX_BITS == 8)
-                fill_vector_sorted_8bit(trie, sorted, key, 0);
-            else
-                fill_vector_sorted(trie, sorted, key, 0);
+            fill_vector_sorted(trie, sorted, key, 0);
         }
 
 private:
@@ -87,18 +84,6 @@ private:
                     c |= i;
                     c <<= (ConstantsFor<RADIX_BITS>::steps_in_byte - radix_idx - 1) * RADIX_BITS;
                     key[byte_idx] = static_cast<char>(c);
-                    fill_vector_sorted(trie->subtries[i], sorted, key, depth + 1);
-                }
-            }
-        }
-
-        static void fill_vector_sorted_8bit(Set* trie, std::vector<std::string>& sorted, std::string& key, int depth) {
-            for(auto i = 0u; i < trie->elements_counter; ++i) {
-                sorted.emplace_back(key.begin(), key.begin() + depth);
-            }
-            for(auto i = 0u; i < ConstantsFor<RADIX_BITS>::subtrie_size; ++i) {
-                if(trie->subtries[i] != nullptr) {
-                    key[depth] = static_cast<char>(i);
                     fill_vector_sorted(trie->subtries[i], sorted, key, depth + 1);
                 }
             }
