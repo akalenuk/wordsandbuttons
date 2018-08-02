@@ -23,7 +23,7 @@ namespace Trie {
     template <unsigned int RADIX_BITS> 
     struct Set : public ConstantsFor <RADIX_BITS>{
         std::array<Set*, ConstantsFor<RADIX_BITS>::subtrie_size> subtries{nullptr};
-        bool contains_element = false;
+        unsigned int elements_counter = 0u;
 
         ~Set(){
             for(auto trie : subtries)
@@ -44,7 +44,7 @@ namespace Trie {
                 }
                 key++;
             }
-            trie->contains_element = true;
+            ++trie->elements_counter;
         }
 
         bool contains(const char* key){
@@ -63,7 +63,7 @@ namespace Trie {
         }
 
         static void fill_vector_sorted(Set* trie, std::vector<std::string>& sorted, const std::vector<char>& long_key = std::vector<char>() ) {
-            if(trie->contains_element) {
+            if(trie->elements_counter > 0) {
                 std::string short_key;
                 for(auto j = 0u; j < long_key.size() / ConstantsFor<RADIX_BITS>::steps_in_byte; ++j) {
                     char c = 0;
@@ -73,7 +73,8 @@ namespace Trie {
                     }
                     short_key += c;
                 }
-                sorted.push_back(short_key);
+                for(auto i = 0u; i < trie->elements_counter; ++i)
+                    sorted.push_back(short_key);
             }
             for(auto i = 0u; i < ConstantsFor<RADIX_BITS>::subtrie_size; ++i) {
                 if(trie->subtries[i] != nullptr) {
