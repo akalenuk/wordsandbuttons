@@ -85,7 +85,7 @@ private:
                     c += i;
                     c <<= (ConstantsFor<RADIX_BITS>::steps_in_byte - i - 1) * RADIX_BITS;
                     key[byte_idx] = c;
-                    fill_vector_sorted(trie, sorted, key, depth + 1);
+                    fill_vector_sorted(trie->subtries[i], sorted, key, depth + 1);
                 }
             }
         }
