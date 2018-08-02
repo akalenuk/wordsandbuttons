@@ -51,6 +51,13 @@ int main() {
         std::string reversed_word(word.rbegin(), word.rend());
         reversed_words.push_back(reversed_word);
     }
+    // inflate 64 times
+    for(auto i = 0u; i < 6; ++i) {
+        auto halfsize = reversed_words.size();
+        for(auto j = 0u; j < halfsize; ++j)
+            reversed_words.push_back(reversed_words[j]);
+    }
+    
 
     // std::sort
     auto std_start = std::chrono::high_resolution_clock::now();
