@@ -7,7 +7,7 @@
 #include <cassert>
 
 int main() {
-    std::vector<std::string> unsorted = {"cat", "pat", "bed", "test", "test but longer"};
+    std::vector<std::string> unsorted = {"cat", "pat", "bed", "test", "test but longer", "test"};
     std::vector<std::string> std_sorted(unsorted.begin(), unsorted.end());
     std::sort(std_sorted.begin(), std_sorted.end());
     Trie::Set<4> trie_set;
