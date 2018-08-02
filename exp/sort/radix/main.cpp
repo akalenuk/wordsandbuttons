@@ -5,6 +5,9 @@
 #include <vector>
 #include <string>
 #include <cassert>
+#include <fstream>
+#include <chrono>
+
 
 int main() {
     std::vector<std::string> unsorted = {"cat", "pat", "bed", "test", "test but longer", "test"};
@@ -37,6 +40,28 @@ int main() {
     assert(! trie_map.retrieve("not").first);
     assert( trie_map.retrieve("not").second == "");
 
+
+    //
+    // performance
+    std::ifstream dict("en-US.dic");
+    std::vector<std::string> reversed_words;
+    std::string word;
+    while (std::getline(dict, word)) {
+        std::string reversed_word(word.rbegin(), word.rend());
+        reversed_words.push_back(reversed_word);
+    }
+
+    // std::sort
+    auto std_start = std::chrono::high_resolution_clock::now();
+    std::vector<std::string> std_sorted_reversed_words(reversed_words.begin(), reversed_words.end());
+    std::sort(std_sorted_reversed_words.begin(), std_sorted_reversed_words.end());
+    auto std_duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - std_start).count();
+    std::cout << "   std::sort - " << std_duration << "\n";
+
+    // radix sort
+    auto radix_start = std::chrono::high_resolution_clock::now();
+    auto radix_duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - radix_start).count();
+    std::cout << "   radix sort - " << radix_duration << "\n";
     return 0;
 }
 
