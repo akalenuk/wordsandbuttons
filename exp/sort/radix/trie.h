@@ -62,6 +62,34 @@ namespace Trie {
             return true;
         }
 
+
+
+        static void fill_vector_sorted(Set* trie, std::vector<std::string>& sorted) {
+            std::string key;
+            key.resize(256);
+            fill_vector_sorted(trie, sorted, key, 0);
+        }
+
+private:
+        static void fill_vector_sorted(Set* trie, std::vector<std::string>& sorted, std::string& key, int depth) {
+            const auto byte_idx = depth / ConstantsFor<RADIX_BITS>::steps_in_byte;
+            const auto radix_idx = depth % ConstantsFor<RADIX_BITS>::steps_in_byte;
+            for(auto i = 0u; i < trie->elements_counter; ++i) {
+                sorted.emplace_back(key.begin(), key.begin() + byte_idx);
+            }
+            for(auto i = 0u; i < ConstantsFor<RADIX_BITS>::subtrie_size; ++i) {
+                if(trie->subtries[i] != nullptr) {
+                    auto c = key[byte_idx];
+                    c  >>= ((ConstantsFor<RADIX_BITS>::steps_in_byte - i) * RADIX_BITS);
+                    c <<= RADIX_BITS;
+                    c += i;
+                    c <<= (ConstantsFor<RADIX_BITS>::steps_in_byte - i - 1) * RADIX_BITS;
+                    key[byte_idx] = c;
+                    fill_vector_sorted(trie, sorted, key, depth + 1);
+                }
+            }
+        }
+/*
         static void fill_vector_sorted(Set* trie, std::vector<std::string>& sorted, const std::vector<char>& long_key = std::vector<char>() ) {
             if(trie->elements_counter > 0) {
                 std::string short_key;
@@ -83,7 +111,7 @@ namespace Trie {
                     fill_vector_sorted(trie->subtries[i], sorted, new_long_key);
                 }
             } 
-        }
+        }*/
     };
 
 
