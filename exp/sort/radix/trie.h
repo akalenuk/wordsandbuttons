@@ -22,7 +22,7 @@ namespace Trie {
 
     template <unsigned int RADIX_BITS> 
     struct Set : public ConstantsFor <RADIX_BITS>{
-        std::array<Set*, ConstantsFor<RADIX_BITS>::subtrie_size> subtries{nullptr};
+        std::array<Set*, ConstantsFor<RADIX_BITS>::subtrie_size> subtries = {{nullptr}};
         unsigned int elements_counter = 0u;
 
         ~Set(){
@@ -63,7 +63,6 @@ namespace Trie {
         }
 
 
-
         static void fill_vector_sorted(Set* trie, std::vector<std::string>& sorted) {
             std::string key;
             key.resize(256);
@@ -95,7 +94,7 @@ private:
 
     template <class T, unsigned int RADIX_BITS> 
     struct Map : public ConstantsFor <RADIX_BITS>{
-        std::array<Map*, ConstantsFor<RADIX_BITS>::subtrie_size> subtries{nullptr};
+        std::array<Map*, ConstantsFor<RADIX_BITS>::subtrie_size> subtries = {{nullptr}};
         T value;
 
         ~Map(){
