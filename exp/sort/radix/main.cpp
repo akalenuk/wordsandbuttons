@@ -60,6 +60,11 @@ int main() {
 
     // radix sort
     auto radix_start = std::chrono::high_resolution_clock::now();
+    Trie::Set<4> reversed_words_trie;
+    for(const auto& reversed_word : reversed_words)
+        reversed_words_trie.store(reversed_word.c_str());
+    std::vector<std::string> radix_sorted_reversed_words;
+    Trie::Set<4>::fill_vector_sorted(&reversed_words_trie, radix_sorted_reversed_words);
     auto radix_duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - radix_start).count();
     std::cout << "   radix sort - " << radix_duration << "\n";
     return 0;
