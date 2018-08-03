@@ -71,11 +71,13 @@ void radix_sort_performance_print(const vector<string>& words) {
     vector<string> sorted_words;
     sorted_words.reserve(words.size());
     Trie::Set<RADIX_BITS>::fill_vector_sorted(&trie, sorted_words);
-    auto radix_sort_duration = duration_cast<microseconds>(high_resolution_clock::now() - radix_start).count();
+    auto radix_sort_duration = duration_cast<milliseconds>(high_resolution_clock::now() - radix_start).count();
     cout << "   radix " << RADIX_BITS << " sort - " << radix_sort_duration << "\n";
  }
 
 void sort_performance_prints() {
+    cout << "Sorting performance\n";
+
     // load a dictionary
     ifstream dict("en-US.dic");
     vector<string> reversed_words;
@@ -95,7 +97,7 @@ void sort_performance_prints() {
     auto std_start = high_resolution_clock::now();
     vector<string> std_sorted_reversed_words(reversed_words.begin(), reversed_words.end());
     sort(std_sorted_reversed_words.begin(), std_sorted_reversed_words.end());
-    auto std_duration = duration_cast<microseconds>(high_resolution_clock::now() - std_start).count();
+    auto std_duration = duration_cast<milliseconds>(high_resolution_clock::now() - std_start).count();
     cout << "   std::sort - " << std_duration << "\n";
 
     // radix sort
@@ -103,6 +105,8 @@ void sort_performance_prints() {
     radix_sort_performance_print<2>(reversed_words);
     radix_sort_performance_print<4>(reversed_words);
     radix_sort_performance_print<8>(reversed_words);
+
+    cout << "\n";
 }
 
 
