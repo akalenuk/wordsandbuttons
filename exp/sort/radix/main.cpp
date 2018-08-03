@@ -15,6 +15,14 @@
 using namespace std::chrono;
 using namespace std;
 
+constexpr unsigned int sort_words = 10'000'000;
+constexpr unsigned int sort_smallest = 3;
+constexpr unsigned int sort_largest = 5;
+
+constexpr unsigned int map_words = 1'000'000;
+constexpr unsigned int map_smallest = 2;
+constexpr unsigned int map_largest = 8;
+
 vector<string> made_up_words(unsigned int how_much, unsigned int smallest, unsigned int largest) {
     vector<string> words;
     std::mt19937 rng(0);
@@ -187,9 +195,9 @@ void map_performance_prints(vector<string>& dic) {
 
 int main() {
     functional_tests();
-    auto words_to_sort = made_up_words(10'000'000, 2, 5);
+    auto words_to_sort = made_up_words(sort_words, sort_smallest, sort_largest);
     sort_performance_prints(words_to_sort);
-    auto words_to_store = made_up_words(1'000'000, 2, 8);
+    auto words_to_store = made_up_words(map_words, map_smallest, map_largest);
     sort(words_to_store.begin(), words_to_store.end());
     words_to_store.erase(unique(words_to_store.begin(), words_to_store.end()), words_to_store.end());
     map_performance_prints(words_to_store);
