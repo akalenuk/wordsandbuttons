@@ -187,9 +187,9 @@ void map_performance_prints(vector<string>& dic) {
 
 int main() {
     functional_tests();
-    auto words = made_up_words(1'000'000, 3, 6);
+    auto words = made_up_words(10'000'000, 2, 5);
     sort_performance_prints(words);
-    map_performance_prints(words);
+//    map_performance_prints(words);
     return 0;
 }
 
