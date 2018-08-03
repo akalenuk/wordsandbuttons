@@ -187,9 +187,12 @@ void map_performance_prints(vector<string>& dic) {
 
 int main() {
     functional_tests();
-    auto words = made_up_words(10'000'000, 2, 5);
-    sort_performance_prints(words);
-//    map_performance_prints(words);
+    auto words_to_sort = made_up_words(10'000'000, 2, 5);
+    sort_performance_prints(words_to_sort);
+    auto words_to_store = made_up_words(1000, 2, 8);
+    sort(words_to_store.begin(), words_to_store.end());
+    words_to_store.erase(unique(words_to_store.begin(), words_to_store.end()), words_to_store.end());
+    map_performance_prints(words_to_store);
     return 0;
 }
 
