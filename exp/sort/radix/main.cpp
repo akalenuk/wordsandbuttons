@@ -10,7 +10,7 @@
 #include <chrono>
 
 
-int main() {
+void functional_tests() {
     std::vector<std::string> unsorted = {"cat", "pat", "bed", "test", "test but longer", "test"};
     std::vector<std::string> std_sorted(unsorted.begin(), unsorted.end());
     std::sort(std_sorted.begin(), std_sorted.end());
@@ -40,10 +40,24 @@ int main() {
     
     assert(! trie_map.retrieve("not").first);
     assert( trie_map.retrieve("not").second == "");
+}
+
+template <unsigned int RADIX_BITS> 
+void radix_sort_performance_print(const std::vector<std::string>& words) {
+    auto radix_start = std::chrono::high_resolution_clock::now();
+    Trie::Set<RADIX_BITS> trie;
+    for(const auto& word : words)
+        trie.store(word.c_str());
+    std::vector<std::string> sorted_words;
+    sorted_words.reserve(words.size());
+    Trie::Set<RADIX_BITS>::fill_vector_sorted(&trie, sorted_words);
+    auto radix_sort_duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - radix_start).count();
+    std::cout << "   radix " << RADIX_BITS << " sort - " << radix_sort_duration << "\n";
+ }
 
 
-    //
-    // performance
+void sort_performance_prints() {
+    // load a dictionary
     std::ifstream dict("en-US.dic");
     std::vector<std::string> reversed_words;
     std::string word;
@@ -67,55 +81,15 @@ int main() {
     std::cout << "   std::sort - " << std_duration << "\n";
 
     // radix sort
-    {
-        constexpr unsigned int i = 1;
-        auto radix_start = std::chrono::high_resolution_clock::now();
-        Trie::Set<i> reversed_words_trie;
-        for(const auto& reversed_word : reversed_words)
-            reversed_words_trie.store(reversed_word.c_str());
-        std::vector<std::string> radix_sorted_reversed_words;
-        radix_sorted_reversed_words.reserve(reversed_words.size());
-        Trie::Set<i>::fill_vector_sorted(&reversed_words_trie, radix_sorted_reversed_words);
-        auto radix_duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - radix_start).count();
-        std::cout << "   radix " << i << " sort - " << radix_duration << "\n";
-    }
-    {
-        constexpr unsigned int i = 2;
-        auto radix_start = std::chrono::high_resolution_clock::now();
-        Trie::Set<i> reversed_words_trie;
-        for(const auto& reversed_word : reversed_words)
-            reversed_words_trie.store(reversed_word.c_str());
-        std::vector<std::string> radix_sorted_reversed_words;
-        radix_sorted_reversed_words.reserve(reversed_words.size());
-        Trie::Set<i>::fill_vector_sorted(&reversed_words_trie, radix_sorted_reversed_words);
-        auto radix_duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - radix_start).count();
-        std::cout << "   radix " << i << " sort - " << radix_duration << "\n";
-    }
-    {
-        constexpr unsigned int i = 4;
-        auto radix_start = std::chrono::high_resolution_clock::now();
-        Trie::Set<i> reversed_words_trie;
-        for(const auto& reversed_word : reversed_words)
-            reversed_words_trie.store(reversed_word.c_str());
-        std::vector<std::string> radix_sorted_reversed_words;
-        radix_sorted_reversed_words.reserve(reversed_words.size());
-        Trie::Set<i>::fill_vector_sorted(&reversed_words_trie, radix_sorted_reversed_words);
-        auto radix_duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - radix_start).count();
-        std::cout << "   radix " << i << " sort - " << radix_duration << "\n";
-    }
+    radix_sort_performance_print<1>(reversed_words);
+    radix_sort_performance_print<2>(reversed_words);
+    radix_sort_performance_print<4>(reversed_words);
+    radix_sort_performance_print<8>(reversed_words);
+}
 
-    {
-        constexpr unsigned int i = 8;
-        auto radix_start = std::chrono::high_resolution_clock::now();
-        Trie::Set<i> reversed_words_trie;
-        for(const auto& reversed_word : reversed_words)
-            reversed_words_trie.store(reversed_word.c_str());
-        std::vector<std::string> radix_sorted_reversed_words;
-        radix_sorted_reversed_words.reserve(reversed_words.size());
-        Trie::Set<i>::fill_vector_sorted(&reversed_words_trie, radix_sorted_reversed_words);
-        auto radix_duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - radix_start).count();
-        std::cout << "   radix " << i << " sort - " << radix_duration << "\n";
-    }
+int main() {
+    functional_tests();
+    sort_performance_prints();
       
     return 0;
 }
