@@ -19,7 +19,7 @@ vector<string> made_up_words(unsigned int how_much, unsigned int smallest, unsig
     vector<string> words;
     std::mt19937 rng(0);
     std::uniform_int_distribution<unsigned int> word_sizes(smallest, largest);
-    std::uniform_int_distribution<char> word_letter(' ', 'z');
+    std::uniform_int_distribution<char> word_letter('a', 'z');
     for(auto i = 0u; i < how_much; ++i) {
         auto word_size = word_sizes(rng);
         string word;
@@ -124,7 +124,8 @@ void radix_map_performance_print(vector<string>& dic) {
 
 void map_performance_prints(vector<string>& dic) {
     auto dic_size = dic.size();
-   
+  
+    // trie as a map 
     radix_map_performance_print<1>(dic);
     radix_map_performance_print<2>(dic);
     radix_map_performance_print<4>(dic);
@@ -132,6 +133,7 @@ void map_performance_prints(vector<string>& dic) {
 
     cout << "std::map\n";
 
+    // map (as binary tree representative)
     map<string, string*> test_map;
 
     auto start = high_resolution_clock::now();
@@ -155,7 +157,7 @@ void map_performance_prints(vector<string>& dic) {
     duration = duration_cast<milliseconds>(high_resolution_clock::now() - start).count();
     cout << "   Reading: " << duration << "\n\n";
 
-
+    // unordered map as hash-table representative
     cout << "std::unordered_map\n";
 
     unordered_map<string, string*> test_unordered_map;
