@@ -75,7 +75,6 @@ void radix_sort_performance_print(const vector<string>& words) {
     cout << "   radix " << RADIX_BITS << " sort - " << radix_sort_duration << "\n";
  }
 
-
 void sort_performance_prints() {
     // load a dictionary
     ifstream dict("en-US.dic");
@@ -106,20 +105,15 @@ void sort_performance_prints() {
     radix_sort_performance_print<8>(reversed_words);
 }
 
-void map_performance_prints() {
-    // load a dictionary
-    ifstream dict("en-US.dic");
-    vector<string> dic;
-    string word;
-    while (getline(dict, word))
-        dic.push_back(word);
-    auto dic_length = dic.size();
-    
-    cout << "Trie::Map\n";
-    Trie::Map<string*, 4> test_trie;
+
+template <unsigned int RADIX_BITS> 
+void radix_map_performance_print(vector<string>& dic) {
+    auto dic_size = dic.size();
+    cout << "Trie::Map with " << RADIX_BITS << "-bits radix\n";
+    Trie::Map<string*, RADIX_BITS> test_trie;
     auto start = high_resolution_clock::now();
     for(int j = 0; j < 100; j++){
-        for(int i = 0; i < dic_length; i++){
+        for(int i = 0; i < dic_size; i++){
             test_trie.store(dic[i].c_str(), &dic[i]);
         }
     }
@@ -128,7 +122,7 @@ void map_performance_prints() {
 
     start = high_resolution_clock::now();
     for(int j = 0; j < 100; j++){
-        for(int i = 0; i < dic_length; i++){
+        for(int i = 0; i < dic_size; i++){
             string* back = test_trie.retrieve(dic[i].c_str()).second;
             if(back != &dic[i]){
                 cout << "error with " << dic[i] << "\n";
@@ -137,24 +131,38 @@ void map_performance_prints() {
     }
     duration = duration_cast<milliseconds>(high_resolution_clock::now() - start).count();
     cout << "   Reading: " << duration << "\n\n";
+}
 
+void map_performance_prints() {
+    // load a dictionary
+    ifstream dict("en-US.dic");
+    vector<string> dic;
+    string word;
+    while (getline(dict, word))
+        dic.push_back(word);
+    auto dic_size = dic.size();
+    
+    radix_map_performance_print<1>(dic);
+    radix_map_performance_print<2>(dic);
+    radix_map_performance_print<4>(dic);
+    radix_map_performance_print<8>(dic);
 
     cout << "std::map\n";
 
     map<string, string*> test_map;
 
-    start = high_resolution_clock::now();
+    auto start = high_resolution_clock::now();
     for(int j = 0; j < 100; j++){
-        for(int i = 0; i < dic_length; i++){
+        for(int i = 0; i < dic_size; i++){
             test_map[dic[i]] = &dic[i];
         }
     }
-    duration = duration_cast<milliseconds>(high_resolution_clock::now() - start).count();
+    auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - start).count();
     cout << "   Writing: " << duration << "\n";
 
     start = high_resolution_clock::now();
     for(int j = 0; j < 100; j++){
-        for(int i = 0; i < dic_length; i++){
+        for(int i = 0; i < dic_size; i++){
             string* back = test_map[dic[i]];
             if(back != &dic[i]){
                 cout << "error with " << dic[i] << "\n";
@@ -171,7 +179,7 @@ void map_performance_prints() {
 
     start = high_resolution_clock::now();
     for(int j = 0; j < 100; j++){
-        for(int i = 0; i < dic_length; i++){
+        for(int i = 0; i < dic_size; i++){
             test_unordered_map[dic[i]] = &dic[i];
         }
     }
@@ -180,7 +188,7 @@ void map_performance_prints() {
 
     start = high_resolution_clock::now();
     for(int j = 0; j < 100; j++){
-        for(int i = 0; i < dic_length; i++){
+        for(int i = 0; i < dic_size; i++){
             string* back = test_unordered_map[dic[i]];
             if(back != &dic[i]){
                 cout << "error with " << dic[i] << "\n";
