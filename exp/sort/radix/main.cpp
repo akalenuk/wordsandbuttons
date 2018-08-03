@@ -75,36 +75,21 @@ void radix_sort_performance_print(const vector<string>& words) {
     cout << "   radix " << RADIX_BITS << " sort - " << radix_sort_duration << "\n";
  }
 
-void sort_performance_prints() {
+void sort_performance_prints(vector<string>& words) {
     cout << "Sorting performance\n";
-
-    // load a dictionary
-    ifstream dict("en-US.dic");
-    vector<string> reversed_words;
-    string word;
-    while (getline(dict, word)) {
-        string reversed_word(word.rbegin(), word.rend());
-        reversed_words.push_back(reversed_word);
-    }
-    // inflate 64 times
-    for(auto i = 0u; i < 6; ++i) {
-        auto halfsize = reversed_words.size();
-        for(auto j = 0u; j < halfsize; ++j)
-            reversed_words.push_back(reversed_words[j]);
-    }
-    
+   
     // std::sort
     auto std_start = high_resolution_clock::now();
-    vector<string> std_sorted_reversed_words(reversed_words.begin(), reversed_words.end());
-    sort(std_sorted_reversed_words.begin(), std_sorted_reversed_words.end());
+    vector<string> std_sorted_words(words.begin(), words.end());
+    sort(std_sorted_words.begin(), std_sorted_words.end());
     auto std_duration = duration_cast<milliseconds>(high_resolution_clock::now() - std_start).count();
     cout << "   std::sort - " << std_duration << "\n";
 
     // radix sort
-    radix_sort_performance_print<1>(reversed_words);
-    radix_sort_performance_print<2>(reversed_words);
-    radix_sort_performance_print<4>(reversed_words);
-    radix_sort_performance_print<8>(reversed_words);
+    radix_sort_performance_print<1>(words);
+    radix_sort_performance_print<2>(words);
+    radix_sort_performance_print<4>(words);
+    radix_sort_performance_print<8>(words);
 
     cout << "\n";
 }
@@ -137,15 +122,9 @@ void radix_map_performance_print(vector<string>& dic) {
     cout << "   Reading: " << duration << "\n\n";
 }
 
-void map_performance_prints() {
-    // load a dictionary
-    ifstream dict("en-US.dic");
-    vector<string> dic;
-    string word;
-    while (getline(dict, word))
-        dic.push_back(word);
+void map_performance_prints(vector<string>& dic) {
     auto dic_size = dic.size();
-    
+   
     radix_map_performance_print<1>(dic);
     radix_map_performance_print<2>(dic);
     radix_map_performance_print<4>(dic);
@@ -206,8 +185,9 @@ void map_performance_prints() {
 
 int main() {
     functional_tests();
-    sort_performance_prints();
-    map_performance_prints(); 
+    auto words = made_up_words(1'000'000, 3, 6);
+    sort_performance_prints(words);
+    map_performance_prints(words);
     return 0;
 }
 
