@@ -15,11 +15,11 @@
 using namespace std::chrono;
 using namespace std;
 
-constexpr unsigned int sort_words = 10'000'000;
+constexpr unsigned int sort_words = 1'000'000;
 constexpr unsigned int sort_smallest = 3;
-constexpr unsigned int sort_largest = 5;
+constexpr unsigned int sort_largest = 4;
 
-constexpr unsigned int map_words = 1'000'000;
+constexpr unsigned int map_words = 100'000;
 constexpr unsigned int map_smallest = 2;
 constexpr unsigned int map_largest = 8;
 
