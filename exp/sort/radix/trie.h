@@ -32,7 +32,7 @@ namespace Trie {
                     delete trie;
         }
 
-        void store(std::string key){
+        void store(const std::string& key){
             Set* trie = this;
             for(auto i = 0u; i < key.size(); ++i) {
                 for(auto j = 0u; j < ConstantsFor<RADIX_BITS>::steps_in_byte; ++j){
@@ -47,7 +47,7 @@ namespace Trie {
             ++trie->elements_counter;
         }
 
-        bool contains(std::string key){
+        bool contains(const std::string& key){
             Set* trie = this;
             for(auto i = 0u; i < key.size(); ++i) {
                 for(auto j = 0u; j < ConstantsFor<RADIX_BITS>::steps_in_byte; ++j){
@@ -102,7 +102,7 @@ private:
                     delete trie;
         }
 
-        void store(std::string key, T value){
+        void store(const std::string& key, T value){
             Map* trie = this;
             for(auto i = 0u; i < key.size(); ++i) {
                 for(auto j = 0; j < ConstantsFor<RADIX_BITS>::steps_in_byte; ++j){
@@ -117,7 +117,7 @@ private:
             trie->value = value;
         }
 
-        std::pair<bool, T> retrieve(std::string key){
+        std::pair<bool, T> retrieve(const std::string& key){
             Map* trie = this;
             for(auto i = 0; i < key.size(); ++i){
                 for(auto j = 0; j < ConstantsFor<RADIX_BITS>::steps_in_byte; ++j){
