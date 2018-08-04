@@ -77,12 +77,9 @@ private:
             }
             for(auto i = 0u; i < ConstantsFor<RADIX_BITS>::subtrie_size; ++i) {
                 if(trie->subtries[i] != nullptr) {
-                    int c = key[byte_idx];
-                    c  >>= ((ConstantsFor<RADIX_BITS>::steps_in_byte - radix_idx) * RADIX_BITS);
-                    c <<= RADIX_BITS;
-                    c |= i;
-                    c <<= (ConstantsFor<RADIX_BITS>::steps_in_byte - radix_idx - 1) * RADIX_BITS;
-                    key[byte_idx] = static_cast<char>(c);
+                    auto shift = (ConstantsFor<RADIX_BITS>::steps_in_byte - radix_idx - 1) * RADIX_BITS;
+                    key[byte_idx] &= ~(ConstantsFor<RADIX_BITS>::radix_mask << shift);
+                    key[byte_idx] |= i << shift;
                     fill_vector_sorted(trie->subtries[i], sorted, key, depth + 1);
                 }
             }
