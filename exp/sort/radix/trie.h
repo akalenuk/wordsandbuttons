@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <string>
 #include <vector>
 
 namespace Trie {
@@ -31,33 +32,31 @@ namespace Trie {
                     delete trie;
         }
 
-        void store(const char* key){
+        void store(std::string key){
             Set* trie = this;
-            while(key[0] != '\0'){
-                for(auto i = 0u; i < ConstantsFor<RADIX_BITS>::steps_in_byte; ++i){
-                    const int shifted_c = key[0] >> (8 - (i + 1) * RADIX_BITS);
+            for(auto i = 0u; i < key.size(); ++i) {
+                for(auto j = 0u; j < ConstantsFor<RADIX_BITS>::steps_in_byte; ++j){
+                    const int shifted_c = key[i] >> (8 - (j + 1) * RADIX_BITS);
                     const int radix0 = shifted_c & ConstantsFor<RADIX_BITS>::radix_mask;
                     if(trie->subtries[radix0] == nullptr){
                         trie->subtries[radix0] = new Set();
                     }
                     trie = trie->subtries[radix0];
                 }
-                key++;
             }
             ++trie->elements_counter;
         }
 
-        bool contains(const char* key){
+        bool contains(std::string key){
             Set* trie = this;
-            while(key[0] != '\0'){
-                for(auto i = 0u; i < ConstantsFor<RADIX_BITS>::steps_in_byte; ++i){
-                    const int shifted_c = key[0] >> (8 - (i + 1) * RADIX_BITS);
+            for(auto i = 0u; i < key.size(); ++i) {
+                for(auto j = 0u; j < ConstantsFor<RADIX_BITS>::steps_in_byte; ++j){
+                    const int shifted_c = key[i] >> (8 - (j + 1) * RADIX_BITS);
                     const int radix0 = shifted_c & ConstantsFor<RADIX_BITS>::radix_mask;
                     if (trie->subtries[radix0] == nullptr)
                         return false;
                     trie = trie->subtries[radix0];
                 }
-                key++;
             }
             return true;
         }
