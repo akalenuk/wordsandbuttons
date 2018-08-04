@@ -102,33 +102,31 @@ private:
                     delete trie;
         }
 
-        void store(const char* key, T value){
+        void store(std::string key, T value){
             Map* trie = this;
-            while(key[0] != '\0'){
-                for(auto i = 0; i < ConstantsFor<RADIX_BITS>::steps_in_byte; ++i){
-                    const int shifted_c = key[0] >> (8 - (i + 1) * RADIX_BITS);
+            for(auto i = 0u; i < key.size(); ++i) {
+                for(auto j = 0; j < ConstantsFor<RADIX_BITS>::steps_in_byte; ++j){
+                    const int shifted_c = key[i] >> (8 - (j + 1) * RADIX_BITS);
                     const int radix0 = shifted_c & ConstantsFor<RADIX_BITS>::radix_mask;
                     if(trie->subtries[radix0] == nullptr){
                         trie->subtries[radix0] = new Map();
                     }
                     trie = trie->subtries[radix0];
                 }
-                key++;
             }
             trie->value = value;
         }
 
-        std::pair<bool, T> retrieve(const char* key){
+        std::pair<bool, T> retrieve(std::string key){
             Map* trie = this;
-            while(key[0] != '\0'){
-                for(auto i = 0; i < ConstantsFor<RADIX_BITS>::steps_in_byte; ++i){
-                    const int shifted_c = key[0] >> (8 - (i + 1) * RADIX_BITS);
+            for(auto i = 0; i < key.size(); ++i){
+                for(auto j = 0; j < ConstantsFor<RADIX_BITS>::steps_in_byte; ++j){
+                    const int shifted_c = key[i] >> (8 - (j + 1) * RADIX_BITS);
                     const int radix0 = shifted_c & ConstantsFor<RADIX_BITS>::radix_mask;
                     if (trie->subtries[radix0] == nullptr)
                         return {false, T()};
                     trie = trie->subtries[radix0];
                 }
-                key++;
             }
             return {true, trie->value};
         }

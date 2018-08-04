@@ -61,10 +61,10 @@ void functional_tests() {
     // primitive tests for map
     Trie::Map<string, 4> trie_map;
     for(const auto& s : unsorted)
-        trie_map.store(s.c_str(), s);
+        trie_map.store(s, s);
 
     for(const auto& s : unsorted)
-        assert(s == trie_map.retrieve(s.c_str()).second);
+        assert(s == trie_map.retrieve(s).second);
     
     assert(! trie_map.retrieve("not").first);
     assert( trie_map.retrieve("not").second == "");
@@ -75,7 +75,7 @@ void radix_sort_performance_print(const vector<string>& words) {
     auto radix_start = high_resolution_clock::now();
     Trie::Set<RADIX_BITS> trie;
     for(const auto& word : words)
-        trie.store(word.c_str());
+        trie.store(word);
     vector<string> sorted_words;
     sorted_words.reserve(words.size());
     Trie::Set<RADIX_BITS>::fill_vector_sorted(&trie, sorted_words);
@@ -111,7 +111,7 @@ void radix_map_performance_print(vector<string>& dic) {
     auto start = high_resolution_clock::now();
     for(int j = 0; j < 100; j++){
         for(int i = 0; i < dic_size; i++){
-            test_trie.store(dic[i].c_str(), &dic[i]);
+            test_trie.store(dic[i], &dic[i]);
         }
     }
     auto duration = duration_cast<milliseconds>(high_resolution_clock::now() - start).count();
@@ -120,7 +120,7 @@ void radix_map_performance_print(vector<string>& dic) {
     start = high_resolution_clock::now();
     for(int j = 0; j < 100; j++){
         for(int i = 0; i < dic_size; i++){
-            string* back = test_trie.retrieve(dic[i].c_str()).second;
+            string* back = test_trie.retrieve(dic[i]).second;
             if(back != &dic[i]){
                 cout << "error with " << dic[i] << "\n";
             }
