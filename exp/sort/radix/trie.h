@@ -7,7 +7,7 @@
 namespace Trie {
     template <unsigned int RADIX_BITS> 
     struct ConstantsFor {
-        static_assert(RADIX_BITS == 1 || RADIX_BITS == 2 || RADIX_BITS == 4 || RADIX_BITS == 8, "Radix size should be power of 2 and not bigger than 8");
+        static_assert(RADIX_BITS == 1 || RADIX_BITS == 2 || RADIX_BITS == 4 || RADIX_BITS == 8, "Radix sizes supported: 1, 2, 4, 8.");
         constexpr static unsigned int mask(unsigned int radix_bits){
             return (radix_bits == 1) ? 1 : (1 + (mask(radix_bits - 1) << 1));
         }
@@ -20,7 +20,7 @@ namespace Trie {
     };
 
 
-
+    // Set-like structure illustrating radix sort.
     template <unsigned int RADIX_BITS> 
     struct Set : public ConstantsFor <RADIX_BITS>{
         std::array<Set*, ConstantsFor<RADIX_BITS>::subtrie_size> subtries = {{nullptr}};
@@ -90,7 +90,7 @@ private:
     };
 
 
-
+    // Map-like structure to store and retrieve data.
     template <class T, unsigned int RADIX_BITS> 
     struct Map : public ConstantsFor <RADIX_BITS>{
         std::array<Map*, ConstantsFor<RADIX_BITS>::subtrie_size> subtries = {{nullptr}};
