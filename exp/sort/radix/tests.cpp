@@ -127,7 +127,8 @@ void radix_map_performance_print(vector<string>& dic) {
         }
     }
     duration = duration_cast<milliseconds>(high_resolution_clock::now() - start).count();
-    cout << "   Reading: " << duration << "\n\n";
+    cout << "   Reading: " << duration << "\n";
+    cout << "   Size in bytes: " << test_trie.size_in_bytes() << "\n\n";
 }
 
 void map_performance_prints(vector<string>& dic) {
