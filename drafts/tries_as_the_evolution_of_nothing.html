@@ -78,24 +78,23 @@ button{
     <script language="JavaScript">
 const FPS = 2.0;
 
-function next(slides){
+function next(slides, disable_the_button){
     // show the next slide
     var first_slide = document.getElementById(slides + "_" + 1);
     for(var i = 1; i < 99; ++i)
     {
         var this_slide = document.getElementById(slides + "_" + i);
         var next_slide = document.getElementById(slides + "_" + (i+1));
-        if(this_slide)
-            if(this_slide.style.display == "block") {
-                this_slide.style.display = "none";
-                if(next_slide) 
-                    next_slide.style.display = "block";
-                else 
-                    first_slide.style.display = "block";
-                break;
-            }
+        if(this_slide && this_slide.style.display == "block") { // the visible one
+            this_slide.style.display = "none";
+            if(next_slide) 
+                next_slide.style.display = "block";
+            else 
+                first_slide.style.display = "block";
+            break;
+        }
     }
-    // name and en/disable the button
+    // name and en/disable the button. After the slides are set
     var button = document.getElementById(slides + "_button");
     for(var i = 1; i < 99; ++i)
     {
@@ -107,7 +106,7 @@ function next(slides){
                 button.disabled = false;
             } else {
                 button.innerHTML = "Run demo";
-                if(i != 1)
+                if(i != 1 && disable_the_button)
                     button.disabled = true;
             }
             break;
@@ -118,7 +117,7 @@ function next(slides){
 function run(frames) {
     var button = document.getElementById(frames + "_button");
     var was_last_frame = button.innerHTML != "Run demo";
-    next(frames);
+    next(frames, true);
     var now_last_frame = button.innerHTML != "Run demo";
     if(!was_last_frame && ! now_last_frame)
         setTimeout( function(){run(frames);}, 1000.0 / FPS);
