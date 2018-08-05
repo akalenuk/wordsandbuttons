@@ -89,38 +89,53 @@ li {
 }
     </style>
     <script language="JavaScript">
+const FPS = 2.0;
+
 function next(slides){
     // show the next slide
     var first_slide = document.getElementById(slides + "_" + 1);
+    var button = document.getElementById(slides + "_button");
     for(var i = 1; i < 99; ++i)
     {
         var this_slide = document.getElementById(slides + "_" + i);
         var next_slide = document.getElementById(slides + "_" + (i+1));
         if(this_slide)
-            if(this_slide.style.display == "block")
-                {
+            if(this_slide.style.display == "block") {
                 this_slide.style.display = "none";
-                if(next_slide)
+                if(next_slide) {
                     next_slide.style.display = "block";
-                else
+                    button.disabled = true;
+                } else {
                     first_slide.style.display = "block";
-                break;
+                    button.disabled = false;
                 }
+                break;
+            }
     }
     // name the button
-    var button = document.getElementById(slides + "_button")
     for(var i = 1; i < 99; ++i)
     {
         var this_slide = document.getElementById(slides + "_" + i);
         var next_slide = document.getElementById(slides + "_" + (i+1));
         if (this_slide && !next_slide && this_slide.style.display == "block") {
-            button.innerHTML = "Back to the 1-st step";
+            button.innerHTML = "Back to the 1-st frame";
+            button.disabled = false;
             break;
         }
         else
-            button.innerHTML = "Next step";
+            button.innerHTML = "Run demo";
     }
 }
+
+function run(frames) {
+    var button = document.getElementById(frames + "_button");
+    var was_last_frame = button.innerHTML != "Run demo";
+    next(frames);
+    var now_last_frame = button.innerHTML != "Run demo";
+    if(!was_last_frame && ! now_last_frame)
+        setTimeout( function(){run(frames);}, 1000.0 / FPS);
+}
+
     </script>
   </head>
   <body>
@@ -148,7 +163,7 @@ Tries as the evolution of nothing
 </span></pre>
     </td></tr></table>
     <p style="text-align:right">
-    <button type="button" id="no_sort_button" onclick="next('no_sort')">Next step</button>
+    <button type="button" id="no_sort_button" onclick="run('no_sort')">Run demo</button>
     </p>
 
     <p>
