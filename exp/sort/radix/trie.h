@@ -127,6 +127,14 @@ private:
             }
             return {true, trie->value};
         }
+
+        size_t size_in_bytes() {
+            size_t bytes = sizeof(Map<T, RADIX_BITS>);
+            for(auto i = 0u; i < ConstantsFor<RADIX_BITS>::subtrie_size; ++i) 
+                if(subtries[i] != nullptr) 
+                    bytes += subtries[i]->size_in_bytes();
+            return bytes;
+        }
     };
 }
 
