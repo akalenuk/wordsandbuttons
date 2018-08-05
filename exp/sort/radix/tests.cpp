@@ -70,6 +70,8 @@ void functional_tests() {
     assert( trie_map.retrieve("not").second == "");
 }
 
+
+// prints out timings for different radix sizes
 template <unsigned int RADIX_BITS> 
 void radix_sort_performance_print(const vector<string>& words) {
     auto radix_start = high_resolution_clock::now();
@@ -103,6 +105,7 @@ void sort_performance_prints(vector<string>& words) {
 }
 
 
+// prints out timings and memory intakes for different radix sizes
 template <unsigned int RADIX_BITS> 
 void radix_map_performance_print(vector<string>& dic) {
     auto dic_size = dic.size();
@@ -196,8 +199,10 @@ void map_performance_prints(vector<string>& dic) {
 
 int main() {
     functional_tests();
+
     auto words_to_sort = made_up_words(sort_words, sort_smallest, sort_largest);
     sort_performance_prints(words_to_sort);
+
     auto words_to_store = made_up_words(map_words, map_smallest, map_largest);
     sort(words_to_store.begin(), words_to_store.end());
     words_to_store.erase(unique(words_to_store.begin(), words_to_store.end()), words_to_store.end());
