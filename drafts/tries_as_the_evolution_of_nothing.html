@@ -166,9 +166,138 @@ Nothing! Nothing at all. Since it's all the numbers in the range [0..9], we can 
     <p style="text-align:right">
     <button type="button" id="no_sort_button" onclick="run('no_sort')">Run demo</button>
     </p>
+    <p>
+This is simple and super-effective, since the complexity of the operation is only O(n).
+    </p>
 
+    <p>
+Now let's say some of the digits are missing. 
+    </p>
+    <table><tr>
+    <td>        
+    <pre>
+8 3 5 2 1 9 7 6</pre>
+    </td>
+    </tr></table>
+    <p>
+What do we do now?
+    </p>
+    
+    <p>
+One answer could be, we would just make an array of flags, and every digit will raise a flag when occured. Then we'll traverse the flags and recreate only the elements that occured.
+    </p>
+    <table><tr>
+    <td>        
+    <pre>
+<span id="flags_1" style="display:block">8 3 5 2 1 9 7 6
 
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ F   F   F   F   F   F   F   F   F   F
+</span><span id="flags_2" style="display:none"><b>8</b> 3 5 2 1 9 7 6
 
+[0] [1] [2] [3] [4] [5] [6] [7] <b>[8]</b> [9]
+ F   F   F   F   F   F   F   F   <b>T</b>   F
+</span><span id="flags_3" style="display:none">8 <b>3</b> 5 2 1 9 7 6
+
+[0] [1] [2] <b>[3]</b> [4] [5] [6] [7] [8] [9]
+ F   F   F   <b>T</b>   F   F   F   F   T   F
+</span><span id="flags_4" style="display:none">8 3 <b>5</b> 2 1 9 7 6
+
+[0] [1] [2] [3] [4] <b>[5]</b> [6] [7] [8] [9]
+ F   F   F   T   F   <b>T</b>   F   F   T   F
+</span><span id="flags_5" style="display:none">8 3 5 <b>2</b> 1 9 7 6
+
+[0] [1] <b>[2]</b> [3] [4] [5] [6] [7] [8] [9]
+ F   F   <b>T</b>   T   F   T   F   F   T   F
+</span><span id="flags_6" style="display:none">8 3 5 2 <b>1</b> 9 7 6
+
+[0] <b>[1]</b> [2] [3] [4] [5] [6] [7] [8] [9]
+ F   <b>T</b>   T   T   F   T   F   F   T   F
+</span><span id="flags_7" style="display:none">8 3 5 2 1 <b>9</b> 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] <b>[9]</b>
+ F   T   T   T   F   T   F   F   T   <b>T</b>
+</span><span id="flags_8" style="display:none">8 3 5 2 1 9 <b>7</b> 6
+
+[0] [1] [2] [3] [4] [5] [6] <b>[7]</b> [8] [9]
+ F   T   T   T   F   T   F   <b>T</b>   T   T
+</span><span id="flags_9" style="display:none">8 3 5 2 1 9 7 <b>6</b>
+
+[0] [1] [2] [3] [4] [5] <b>[6]</b> [7] [8] [9]
+ F   T   T   T   F   T   <b>T</b>   T   T   T
+</span><span id="flags_10" style="display:none">8 3 5 2 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+<b> F   T   T   T   F   T   T   T   T   T </b>
+</span><span id="flags_11" style="display:none">8 3 5 2 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ F   T   T   T   F   T   T   T   T   T
+</span><span id="flags_12" style="display:none">8 3 5 2 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+<b> F   T   T   T   F   T   T   T   T   T </b>
+</span><span id="flags_13" style="display:none">8 3 5 2 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ F   T   T   T   F   T   T   T   T   T 
+</span><span id="flags_14" style="display:none">8 3 5 2 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+<b> F   T   T   T   F   T   T   T   T   T </b>
+</span><span id="flags_15" style="display:none">8 3 5 2 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ F   T   T   T   F   T   T   T   T   T 
+</span><span id="flags_16" style="display:none">8 3 5 2 1 9 7 6
+
+<b>[0]</b> [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ <b>F</b>   T   T   T   F   T   T   T   T   T  
+</span><span id="flags_17" style="display:none"><b>1</b> 3 5 2 1 9 7 6
+
+[0] <b>[1]</b> [2] [3] [4] [5] [6] [7] [8] [9]
+ F   <b>T</b>   T   T   F   T   T   T   T   T 
+</span><span id="flags_18" style="display:none"><b>1 2</b> 5 2 1 9 7 6
+
+[0] [1] <b>[2]</b> [3] [4] [5] [6] [7] [8] [9]
+ F   T   <b>T</b>   T   F   T   T   T   T   T  
+</span><span id="flags_19" style="display:none"><b>1 2 3</b> 2 1 9 7 6
+
+[0] [1] [2] <b>[3]</b> [4] [5] [6] [7] [8] [9]
+ F   T   T   <b>T</b>   F   T   T   T   T   T  
+</span><span id="flags_20" style="display:none"><b>1 2 3</b> 2 1 9 7 6
+
+[0] [1] [2] [3] <b>[4]</b> [5] [6] [7] [8] [9]
+ F   T   T   T   <b>F</b>   T   T   T   T   T  
+</span><span id="flags_21" style="display:none"><b>1 2 3 5</b> 1 9 7 6
+
+[0] [1] [2] [3] [4] <b>[5]</b> [6] [7] [8] [9]
+ F   T   T   T   F   <b>T</b>   T   T   T   T  
+</span><span id="flags_22" style="display:none"><b>1 2 3 5 6</b> 9 7 6
+
+[0] [1] [2] [3] [4] [5] <b>[6]</b> [7] [8] [9]
+ F   T   T   T   F   T   <b>T</b>   T   T   T  
+</span><span id="flags_23" style="display:none"><b>1 2 3 5 6 7</b> 7 6
+
+[0] [1] [2] [3] [4] [5] [6] <b>[7]</b> [8] [9]
+ F   T   T   T   F   T   T   <b>T</b>   T   T  
+</span><span id="flags_24" style="display:none"><b>1 2 3 5 6 7 8</b> 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] <b>[8]</b> [9]
+ F   T   T   T   F   T   T   T   <b>T</b>   T  
+</span><span id="flags_25" style="display:none"><b>1 2 3 5 6 7 8 9</b>
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] <b>[9]</b>
+ F   T   T   T   F   T   T   T   T   <b>T</b>
+</span><span id="flags_26" style="display:none"><b>1 2 3 5 6 7 8 9</b>
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ F   T   T   T   F   T   T   T   T   T
+</span></pre>
+    </td></tr></table>
+    <p style="text-align:right">
+    <button type="button" id="flags_button" onclick="run('flags')">Run demo</button>
+    </p>
 
     
     <table><tr>
