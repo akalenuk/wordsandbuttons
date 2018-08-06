@@ -457,7 +457,7 @@ The idea here is simple. Of course, we can't just allocate trillions of counters
     <table><tr>
     <td>        
     <pre>
-allocated for 14:    [0][1][2][3][4][5][6]<b>[7]</b>[8][9]
+allocated for 41:    [0][1][2][3][4][5][6]<b>[7]</b>[8][9]
                       0  0  0  0  0  0  0  <b>1</b>  0  0
                       :
 allocated for 4:  [0]<b>[1]</b>[2][3][4][5][6][7][8][9]
@@ -469,12 +469,60 @@ root: [0][1][2][3]<b>[4]</b>[5][6][7][8][9]
     </td>
     </tr></table>
     <p>
-We stored a 3-digit nunmber using 30 counters. And they are shared. It would cost nothing to store another 417 or 418 or even 41 or 4. We're not really constrained by the size of a number either, we can do as many digits as fits in our memory by attaching the trie as a subtrie to a largerr trie.
+We stored a 3-digit nunmber using 30 counters. And they are shared. It would cost nothing to store another 417 or 418, and 427 would only require 10 more counters. We're not really constrained by the size of a number either, we can do as many digits as fits in our memory by attaching the trie as a subtrie to a largerr trie.
     </p>
     <p>
 Sorting in this structure is fairly trivial, you just traverse the trie from lower digit to higher entering the subtrees if there is something of interest there. 
     </p>
-    
+    <p>
+Let's sort this:
+    <table><tr>
+    <td>        
+    <pre>
+418 7 1 30 7 34 30 7 417 
+    </pre>
+    </td>
+    </tr></table>
+    </p>
+    <p>
+To put this in a trie, we only need n*l operations, where l is the number of digits in a number including trailing zeroes. 
+    </p>
+    <table><tr>
+    <td>    
+    <pre>
+<span id="trie_1" style="display:block">
+[0][1][2][3][4][5][6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :  
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+[0][1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0 
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+[0][1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+</span><span id="trie_2" style="display:none"><b>2. </b>
+</span><span id="trie_3" style="display:none"><b>3. </b>
+</span><span id="trie_4" style="display:none"><b>4. </b>
+</span><span id="trie_5" style="display:none"><b>5. </b>
+</span><span id="trie_6" style="display:none"><b>6. </b>
+</span><span id="trie_7" style="display:none"><b>7. </b>
+</span><span id="trie_8" style="display:none"><b>8. </b>
+</span><span id="trie_9" style="display:none"><b>9. </b>
+</span><span id="trie_10" style="display:none"><b>Last. </b>
+</span></pre>
+    </td></tr></table>
+    <p style="text-align:right">
+    <button type="button" id="trie_button" onclick="run('trie')">Run demo</button>
+    </p>
+        
     
     
     <table><tr>
