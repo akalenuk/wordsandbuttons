@@ -926,10 +926,17 @@ It's not that effective as no sorting at all or as a single-digit radix sort. It
 Standard sorting algorithms have O(n log(n)) complexity, so the competition is really between m and log(n). As we established earlier, log(4 294 967 296) is 32, so if you want to sort some 32-bit numbers, you should have your array larger than 4B to make radix sort justified. Unless your data is huge, or the numbers are really small, it is best to let radix sort be.
     </p>    
     <p>
-The same goes for the data structure itself. It also has O(m) retrieval complexity.
+The same goes for the data structure itself. It also has O(m) retrieval complexity, and it's also justified on big data or shorter keys.
     </p>
     <p>
-
+Radix trees are used in the most unexpected application like in <a href="https://vincent.bernat.im/en/blog/2017-ipv4-route-lookup-linux">IP routing</a> or as a <a href="https://lwn.net/Articles/175432/">pointer to index array</a> in the Linux kernel. But the most common application for them is text processing, although, to enjoy all the benefits we have to modify our structure a bit.
+    </p>
+    
+    <p>
+So far we were talking about digital trees where every digit is a node. The problem with this system is that the digits are positional, and we want out tree to be ordered. With numbers, 2 &lt; 12, so we have to store 2 as 02. But this is not so with strings in alphabetical order. Letter 'a' comes before letter 'b', but so it the word 'at' comes before 'attractive'.
+    </p>
+    <p>
+This means that instead of a digital tree, we might use a prefix tree that looks like this:
     </p>
     
     <table><tr>
