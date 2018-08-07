@@ -145,17 +145,17 @@ Let's say we have an array of digits. There are 10 digits, and every one occurs 
     </td>
     </tr></table>
     <p>
-What should we do with it to make it sorted?
+What should we do to have it sorted?
     </p>
     <img style="width: 505pt;" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/20161226_Alfter_6.jpg/768px-20161226_Alfter_6.jpg">
     <p class="comment">
 By Bungert55 [<a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a>], from Wikimedia Commons
     </p>
     <p>
-Nothing! Nothing at all. Since it's all the numbers in the range [0..9], we can simply treat it as a range.
+Nothing! Nothing at all. Since it's all the numbers in the range [0...9], we can simply treat it as a range.
     </p>
     <p>
-If you want to know if an element belongs the sorted array, you just check if it's a single digit. If you want to find an index of an element, the element is the index. You don't even have to store it as a sorted array, but if you want, you can make is a sorted array simply by traversing the interval over the initial array.    
+If you want to know, if an element belongs the sorted array, you just check if it's a single digit. If you want to find an index of an element, the element <i>is</i> the index. You don't even have to store it as a separete sorted array but if you want, you can make it simply by traversing the interval over the initial array.
     </p>
 
     <table><tr>
@@ -178,7 +178,7 @@ If you want to know if an element belongs the sorted array, you just check if it
     <button type="button" id="no_sort_button" onclick="run('no_sort')">Run demo</button>
     </p>
     <p>
-This is simple and super-effective, since the complexity of the operation is only O(n) (where the n is the number of elements).
+This is simple and super-effective, since the complexity of the operation is only <i>O(n)</i> where the <i>n</i> is the number of elements.
     </p>
 
     <p>
@@ -198,7 +198,7 @@ What do we do now?
 By StoffelLombard [<a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>], from Wikimedia Commons    
     </p>
     <p>
-One answer could be, we would just make an array of flags, and every digit will raise a flag when occured. Then we'll traverse the flags and recreate only the elements that occured.
+One answer could be, we just make an array of flags, traverse the initial array, and every digit will raise a flag when occured. Then we'll traverse the flags and recreate only the elements that occured.
     </p>
     <table><tr>
     <td>        
@@ -313,7 +313,7 @@ One answer could be, we would just make an array of flags, and every digit will 
     <button type="button" id="flags_button" onclick="run('flags')">Run demo</button>
     </p>
     <p>
-This has two traversals with the respecting complexity of O(n) and O(k) (where the k is the number of possible digits).
+This has two traversals with the respecting complexity of O(n) and O(k) where the k is the number of all the possible digits.
     </p>
     
     <p>
@@ -454,7 +454,7 @@ Well, we can just make our flags into counters.
     <button type="button" id="counters_button" onclick="run('counters')">Run demo</button>
     </p>
     <p>
-It's still rather effective, it's still O(n) and O(k). This is the sorting algorithm with linear complexity. The problem is, you probably want to sort something other than single-digit numbers, so your k might grow a little bit.
+It's still rather effective, it's still <i>O(n)</i> and <i>O(k)</i>. It is still the sorting algorithm with linear complexity. The problem is, normally you want to sort something other than single-digit numbers, so your <i>k</i> grows quite a bit.
     </p>
     <p>
 If you want to sort 16-bit integer numbers, you would need to allocate 65 536 counters. If it's 32-bit, then it's 4 294 967 296. And it's even impossible to count the counters if you want to sort something of dynamic length, like strings or arbitrary length numbers.
@@ -463,7 +463,7 @@ If you want to sort 16-bit integer numbers, you would need to allocate 65 536 co
 And that's when we need the trees. Radix trees, also known as <i>tries</i> as in re<i>trie</i>val.
     </p>
     <p>
-The idea here is simple. Of course, we can't just allocate trillions of counters, but the chances are we wouldn't even need most of them. So instead of laying them in a plane structure, why don't we organize them as a tree. Just split a number into digits, and every digit, when being addressed, will allocate another set of digits. The number 417 then will be then denoted as this:
+The idea here is simple. Of course, we can't just allocate trillions of counters but the chances are, we wouldn't even need most of them. So instead of laying them in a linear way, why don't we organize them as a tree. Just split a number into digits, and every digit, when being addressed, will allocate another set of digits. The number 417 then will be then denoted as this:
     </p>
     <table><tr>
     <td>        
@@ -483,10 +483,14 @@ root: [0][1][2][3]<b>[4]</b>[5][6][7][8][9]
 We stored a 3-digit nunmber using 30 counters. And they are shared. It would cost nothing to store another 417 or 418, and 427 would only require 10 more counters. We're not really constrained by the size of a number either, we can do as many digits as fits in our memory by attaching the trie as a subtrie to a largerr trie.
     </p>
     <p>
+To put an array in a trie, we only need <i>n*l</i> operations, where <i>l</i> is the number of digits in a number including trailing zeroes. 
+    </p>    
+    <p>
 Sorting in this structure is fairly trivial, you just traverse the trie from lower digit to higher entering the subtrees if there is something of interest there. 
     </p>
     <p>
 Let's sort this:
+    </p>
     <table><tr>
     <td>        
     <pre>
@@ -494,10 +498,7 @@ Let's sort this:
     </pre>
     </td>
     </tr></table>
-    </p>
-    <p>
-To put this in a trie, we only need n*l operations, where l is the number of digits in a number including trailing zeroes. 
-    </p>
+    
     <table><tr>
     <td>    
     <pre>
@@ -928,23 +929,23 @@ To put this in a trie, we only need n*l operations, where l is the number of dig
     </p>
     
     <p>
-This is digital tree also known as radix tree, and this is how radix sort works. Of course, in practice the digits are usualy binary not decimal. 
+This is a digital tree also known as radix tree, and this is how radix sort works. Of course, in practice the digits are usualy binary not decimal. 
     </p>
     <p>
-It's not that effective as no sorting at all or as a single-digit radix sort. It has O(n*m) complexity where m is the length of sorted numbers in digits. For binary digits it's basically a size of domain in bits. 
+It's not that effective as no sorting at all or as a single-digit radix sort. It has <i>O(n*m)</i> complexity where <i>m</i> is the length of sorted numbers in digits multiplied by the size of a radix. For binary digits it's basically a size of domain in bits. 
     </p>
     <p>
-Standard sorting algorithms have O(n log(n)) complexity, so the competition is really between m and log(n). As we established earlier, log(4 294 967 296) is 32, so if you want to sort some 32-bit numbers, you should have your array larger than 4B to make radix sort justified. Unless your data is huge, or the numbers are really small, it is best to let radix sort be.
+Standard sorting algorithms have <i>O(n log(n))</i> complexity, so the competition is really between <i>m</i> and <i>log(n)</i>. As we established earlier, log(4 294 967 296) is 32, so if you want to sort some 32-bit numbers, you should have your array larger than 4B to make radix sort justified. Unless your data is huge, or the numbers are really small, the standard sort will do the job better.
     </p>    
     <p>
-The same goes for the data structure itself. It also has O(m) retrieval complexity, and it's also justified on big data or shorter keys.
+The same goes for the data structure itself. It also has <i>O(m)</i> retrieval complexity, and it's also justified on big data or shorter keys.
     </p>
     <p>
 Radix trees are used in the most unexpected application like in <a href="https://vincent.bernat.im/en/blog/2017-ipv4-route-lookup-linux">IP routing</a> or as a <a href="https://lwn.net/Articles/175432/">pointer to index array</a> in the Linux kernel. But the most common application for them is text processing, although, to enjoy all the benefits we have to modify our structure a bit.
     </p>
     
     <p>
-So far we were talking about digital trees where every digit is a node. The problem with this system is that the digits are positional, and we want out tree to be ordered. With numbers, 2 &lt; 12, so we have to store 2 as 02 to keep the order when traversing. But this is not so with strings in alphabetical order. Letter 'a' comes before letter 'b', but so it the word 'at' comes before 'attractive'.
+So far we were talking about digital trees where every digit is a node. The problem with this system is that the digits are positional, and we want out tree to be ordered. With numbers, 2 &lt; 12, so we have to store 2 as 02 to keep the order when traversing. But this is not so with strings in alphabetical order. Letter 'a' comes before letter 'b', and the word 'add' still preceeds 'be' while being longer.
     </p>
     <p>
 This means that instead of a digital tree, we might use a prefix tree that conceptually looks like this:
@@ -986,7 +987,7 @@ The numbers
 To see how the tries perfrom in reality, I've made a simple benchmark: <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/sort/radix">https://github.com/akalenuk/wordsandbuttons/tree/master/exp/sort/radix</a>.
     </p>
     <p>
-My tries are prefix tries that work on standard strings. I try them with different radix size from 1 to 8 bits. The larger the radix, the shorter is the lookup, but also the more memory it takes to build a trie. This things should be kept in ballance. As the experimets show, data scattering may be more harmful to perfromance than extra lookups.
+My tries are prefix tries of standard strings. I try them with different radix size from 1 to 8 bits. The larger the radix, the shorter is the lookup but also the more memory it takes to build a trie. This things should be kept in ballance. As the experimets show, extra data allocations may be more harmful to perfromance than extra lookups.
     </p>
     <p>
 On my machine it goes like this. Sorting a million quazi-words 3 to 4 letters long:
@@ -1003,7 +1004,7 @@ On my machine it goes like this. Sorting a million quazi-words 3 to 4 letters lo
     </td>
     </tr></table>
     <p>
-As you can see, radix 8 is way less effective than radix 4, and even worse than the standard sort.
+These are the timings measured in milliseconds. As you can see, on these data radix 8 is way less effective than radix 4, and even worse than the standard sort.
     </p>
     <p>
 Writing and reading 100 000 quazi-words of legth 2 to 8 with a trie:
@@ -1042,10 +1043,10 @@ std::unordered_map
     </td>
     </tr></table>
     <p>
-Please note, that my implementation is rather crude. Normally, it is not a good idea to allocate small bits of memory with the standard new and delete operators.
+Please note, that my implementation is rather crude. Normally, it is not a good idea to allocate small bits of memory with the standard <i>new</i> and <i>delete</i> operators.
     </p>
     <p>
-My experiments are aimed to show that even with ineffective implementation they can outperfrom the standard containers and algortihms on the specific data.
+My experiments are aimed to show that even with ineffective implementation tries can outperfrom the standard containers and algortihms on the specific data.
     </p>
     <p>
 I encourage you to conduct your own experiments on your own data to see if you're using the best structures posible.
@@ -1055,7 +1056,7 @@ I encourage you to conduct your own experiments on your own data to see if you'r
 Conclusion
     </h2>
     <p>
-The idea behind the tries evolves from doing nothing for the unordered digits to the elaborate data structures that excell in big data storage. It is still the same idea, the same principle. Knowing this principle should help you understand the tries, and add them to your arsenal of data structures and algorithms.
+The idea behind the tries evolves from doing nothing with unordered digits to the elaborate data structures that excell in big data storage. It is still the same idea, the same principle. Knowing this principle should help you understand the tries, and add them to your arsenal of data structures and algorithms.
     </p>   
 
     <table class="footer">
