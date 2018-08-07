@@ -972,30 +972,69 @@ This tree can have elements on every node not only the leafs.
 The numbers
     </h2>
     <p>
-
+To see how the tries perfrom in reality, I've made a simple benchmark: <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/sort/radix">https://github.com/akalenuk/wordsandbuttons/tree/master/exp/sort/radix</a>.
     </p>
-    
-    <table><tr>
-    <td>    
-    <pre>
-<span id="example_1" style="display:block"><b>1. </b>
-</span><span id="example_2" style="display:none"><b>2. </b>
-</span><span id="example_3" style="display:none"><b>3. </b>
-</span><span id="example_4" style="display:none"><b>4. </b>
-</span><span id="example_5" style="display:none"><b>5. </b>
-</span><span id="example_6" style="display:none"><b>6. </b>
-</span><span id="example_7" style="display:none"><b>7. </b>
-</span><span id="example_8" style="display:none"><b>8. </b>
-</span><span id="example_9" style="display:none"><b>9. </b>
-</span><span id="example_10" style="display:none"><b>Last. </b>
-</span></pre>
-    </td></tr></table>
-    <p style="text-align:right">
-    <button type="button" id="example_button" onclick="run('example')">Run demo</button>
-    </p>
-
     <p>
-...
+My tries are prefix tries that work on standard strings. I try them with different radix size from 1 to 8 bits. The larger the radix, the shorter is the lookup, but also the more memory it takes to build a trie. This things should be kept in ballance. As the experimets show, data scattering may be more harmful to perfromance than extra lookups.
+    </p>
+    <p>
+On my machine it goes like this. Sorting a million quazi-words 3 to 4 letters long:
+    </p>
+    <table><tr>
+    <td>        
+    <pre>
+   std::sort - 240
+   radix 1 sort - 221
+   radix 2 sort - 180
+   radix 4 sort - 146
+   radix 8 sort - 410
+    </pre>
+    </td>
+    </tr></table>
+    <p>
+As you can see, radix 8 is way less effective than radix 4, and even worse than the standard sort.
+    </p>
+    <p>
+Writing and reading 100 000 quazi-words of legth 2 to 8 with a trie:
+    </p>
+    <table><tr>
+    <td>        
+    <pre>
+Trie::Map with 1-bits radix
+   Writing: 602
+   Reading: 636
+   Size in bytes: 35 434 704
+
+Trie::Map with 2-bits radix
+   Writing: 411
+   Reading: 404
+   Size in bytes: 30 357 520
+
+Trie::Map with 4-bits radix
+   Writing: 714
+   Reading: 727
+   Size in bytes: 54 409 656
+
+Trie::Map with 8-bits radix
+   Writing: 1156
+   Reading: 599
+   Size in bytes: 466 866 200
+
+std::map
+   Writing: 1404
+   Reading: 1408
+
+std::unordered_map
+   Writing: 479
+   Reading: 466
+    </pre>
+    </td>
+    </tr></table>
+    <p>
+Please note, that my implementation is rather crude. Normally, it is not a good idea to allocate small bits of memory with the standard new and delete operators.
+    </p>
+    <p>
+My experiments are aimed to show that even with ineffective implementation, radix trees have their domain where they excell.
     </p>
 
     <table class="footer">
