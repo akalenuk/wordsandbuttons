@@ -64,20 +64,9 @@ int main(int argc, char **argv)
   static struct sockaddr_in cli_addr; /* static = initialised to zeros */
   static struct sockaddr_in serv_addr; /* static = initialised to zeros */
 
-  if( argc < 3  || argc > 3 || !strcmp(argv[1], "-?") ) {
+  if( argc < 2  || argc > 2) {
     (void)printf("hint: webserver Port-Number Top-Directory\t\tversion %d\n\n", VERSION);
     exit(0);
-  }
-  if( !strncmp(argv[2],"/"   ,2 ) || !strncmp(argv[2],"/etc", 5 ) ||
-      !strncmp(argv[2],"/bin",5 ) || !strncmp(argv[2],"/lib", 5 ) ||
-      !strncmp(argv[2],"/tmp",5 ) || !strncmp(argv[2],"/usr", 5 ) ||
-      !strncmp(argv[2],"/dev",5 ) || !strncmp(argv[2],"/sbin",6) ){
-    (void)printf("ERROR: Bad top directory %s, see nweb -?\n",argv[2]);
-    exit(3);
-  }
-  if(chdir(argv[2]) == -1){
-    (void)printf("ERROR: Can't Change to directory %s\n",argv[2]);
-    exit(4);
   }
   /* Become deamon + unstopable and no zombies children (= no wait()) */
   if(fork() != 0)
