@@ -24,36 +24,31 @@
 /* this is a child web server process, so we can exit on errors */
 void web(int fd)
 {
-  int j, file_fd, buflen;
-  long i, ret, len;
-  char * fstr;
   static char request[BUFSIZE+1]; 
   static char response[BUFSIZE+1]; 
 
-  ret =read(fd,request,BUFSIZE);   /* read Web request in one go */
+  ssize_t ret = read(fd,request,BUFSIZE);   /* read Web request in one go */
   if(ret == 0 || ret == -1) {  /* read failure stop now */
     return;
   }
   if(ret > 0 && ret < BUFSIZE)  /* return code is valid chars */
-    request[ret]=0;    /* terminate the buffer */
+    request[ret] = 0;    /* terminate the buffer */
   else 
-    request[0]=0;
+    request[0] = 0;
 
   if( strncmp(request,"GET ",4) && strncmp(request,"get ",4) ) {
     return;
   }
-  int request_size = 0;
-  for(i=4;i<BUFSIZE;i++) { /* null terminate after the second space to ignore extra stuff */
+  ssize_t request_size = 0;
+  for(ssize_t i = 4; i < BUFSIZE; i++) { /* null terminate after the second space to ignore extra stuff */
     if(request[i] == ' ') { /* string is "GET URL " +lots of other stuff */
       request[i] = 0;
       request_size = i;
       break;
     }
   }
-  if( !strncmp(&request[0],"GET /\0",6) || !strncmp(&request[0],"get /\0",6) ) /* convert no filename to index file */
-    (void)strcpy(request,"GET /index.html");
 
-  (void)sprintf(response,"HTTP/1.1 200 OK\nServer: webserver/%d.0\nContent-Length: %d\nConnection: close\nContent-Type: text/html\n\n", VERSION, request_size); /* Header + a blank line */
+  (void)sprintf(response,"HTTP/1.1 200 OK\nServer: webserver/%d.0\nContent-Length: %ld\nConnection: close\nContent-Type: text/html\n\n", VERSION, request_size); /* Header + a blank line */
   (void)strcat(response, request);
   (void)write(fd, response, strlen(response));
 
