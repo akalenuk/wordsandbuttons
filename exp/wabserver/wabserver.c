@@ -48,7 +48,7 @@ void web(int fd)
     }
   }
 
-  (void)sprintf(response,"HTTP/1.1 200 OK\nServer: webserver/%d.0\nContent-Length: %ld\nConnection: close\nContent-Type: text/html\n\n", VERSION, request_size); /* Header + a blank line */
+  (void)sprintf(response,"HTTP/1.1 200 OK\nServer: wabserver/%d.0\nContent-Length: %ld\nConnection: close\nContent-Type: text/html\n\n", VERSION, request_size); /* Header + a blank line */
   (void)strcat(response, request);
   (void)write(fd, response, strlen(response));
 
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
   static struct sockaddr_in serv_addr; /* static = initialised to zeros */
 
   if( argc < 2  || argc > 2) {
-    (void)printf("hint: webserver Port-Number Top-Directory\t\tversion %d\n\n", VERSION);
+    (void)printf("Usage: wabserver port_number\n\n");
     exit(0);
   }
   /* Become deamon + unstopable and no zombies children (= no wait()) */
