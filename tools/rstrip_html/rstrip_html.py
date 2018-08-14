@@ -1,12 +1,14 @@
 import os
 
-for file_name in os.listdir('.'):
-    if os.path.isfile(file_name):
+path = '../../pages/'
+for file_name in os.listdir(path):
+    if os.path.isfile(path + file_name):
         if file_name.endswith('.html'):
-            html = open(file_name, 'r')
+            print file_name
+            html = open(path + file_name, 'r')
             lines = html.readlines()
             html.close()
             rstripped = [line.rstrip() + '\n' for line in lines]
-            _html = open('_' + file_name, 'w')
-            _html.writelines(rstripped)
-            _html.close()
+            html = open(path + file_name, 'w')
+            html.writelines(rstripped)
+            html.close()
