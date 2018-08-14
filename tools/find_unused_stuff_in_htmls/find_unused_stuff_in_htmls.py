@@ -1,10 +1,11 @@
 import os
 
-for file in os.listdir('.'):
+path = '../../pages/'
+for file in os.listdir(path):
 	if file.endswith('.html'):
 		styles = []
 		functions = []
-		f = open(file, 'r')
+		f = open(path + file, 'r')
 		text = f.read()
 		if text.find('</style>') != -1:
 			styles = text.split('</style>')[0].split('<style>')[1]
