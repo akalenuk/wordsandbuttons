@@ -218,7 +218,7 @@ function draw_grid_on(context){
     // letters
     context.fillText("X1", client_x_center + x_max*client_x_step - 24, client_y_center - 16);
     context.fillText("X2", client_x_center - 30, client_y_center - y_max*client_y_step + 16);
-    
+
     context.strokeStyle="#000000";
     context.stroke();
     context.closePath();
@@ -242,20 +242,20 @@ function projected_y(x, y, a1, a2, b){
 
 function get_points_on_the_ends(a1, a2, b) {    // I need a beter algo (classifier) for this
     var xys = []
-    
-    if(a1 == 0.0) 
+
+    if(a1 == 0.0)
         return [[x_min, b / a2], [x_max, b / a2]];
-    if(a2 == 0.0) 
+    if(a2 == 0.0)
         return [[b / a1, y_min], [b / a1, y_max]];
-        
+
     var x_in_y_min = (b - a2 * y_min) / a1;
     if(x_in_y_min >= x_min && x_in_y_min < x_max)
         xys.push([x_in_y_min, y_min]);
-      
+
     var x_in_y_max = (b - a2 * y_max) / a1;
     if(x_in_y_max >= x_min && x_in_y_max < x_max)
         xys.push([x_in_y_max, y_max]);
-            
+
     var y_in_x_min = (b - a1 * x_min) / a2;
     if(y_in_x_min >= y_min && y_in_x_min < y_max)
         xys.push([x_min, y_in_x_min]);
@@ -263,7 +263,7 @@ function get_points_on_the_ends(a1, a2, b) {    // I need a beter algo (classifi
     var y_in_x_max = (b - a1 * x_max) / a2;
     if(y_in_x_max >= y_min && y_in_x_max < y_max)
         xys.push([x_max, y_in_x_max]);
-    
+
     if(xys.length < 2)
         return get_points_on_the_ends(a1 + 0.001, a2 - 0.001, b + 0.001);
     return xys;
@@ -311,7 +311,7 @@ function find_nearest_eqution_id(name, client_x, client_y) {
     }
     return closest_eq_i + 1;
 }
-    
+
 function invalidate_plot_named(name) {
     var temp_id = eval(name + "_eq_temp_id");
     eval(name + "_eq_" + temp_id + " = " + name + "_eq_" + temp_id + "_temp;");
@@ -342,7 +342,7 @@ function init_plot_named(name) {
         nearest_eq_id = find_nearest_eqution_id(name, e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
         eval(name + "_eq_temp_id = nearest_eq_id;");
     }, false);
-    
+
     plot.addEventListener('mouseup', function(e){
         invalidate_plot_named(name);
     }, false);
@@ -359,7 +359,7 @@ function draw_plot_named(name, client_x, client_y, do_guides) {
     // background
     context.fillStyle="#eeeeee";
     context.fillRect(0, 0, w, h);
-    
+
     // equations
     for(var i = 0; i < eval(name + "_eqs"); ++i) {
         context.beginPath();
@@ -373,10 +373,10 @@ function draw_plot_named(name, client_x, client_y, do_guides) {
         context.closePath();
         context.lineWidth = 1;
     }
-    
+
     // grid
     draw_grid_on(context);
-    
+
     if(do_guides){
         // draw the quide
         var closest_eq_id = eval(name + "_eq_temp_id");
@@ -427,9 +427,9 @@ function coefficient2(a, x) {
         return " - " + x;
     if (a_trimmed == 0)
         return "";
-    if (a_trimmed > 0)    
+    if (a_trimmed > 0)
         return " + " + printable(a) + x;
-    if (a_trimmed < 0)    
+    if (a_trimmed < 0)
         return " - " + -printable(a) + x;
 }
 
@@ -444,26 +444,26 @@ function printable_eq(a1, x1, a2, x2, b) {
 function update_matrix(name) {
     if(document.getElementById(name + "_matrix_col1") == null)
         return;
-    
+
     var eq1 = eval(name + "_eq_1");
-    var eq2 = eval(name + "_eq_2");    
-    document.getElementById(name + "_matrix_col1").innerHTML = 
+    var eq2 = eval(name + "_eq_2");
+    document.getElementById(name + "_matrix_col1").innerHTML =
         printable(eq1[0]) + "<br>" + printable(eq2[0]);
-    document.getElementById(name + "_matrix_col2").innerHTML = 
+    document.getElementById(name + "_matrix_col2").innerHTML =
         printable(eq1[1]) + "<br>" + printable(eq2[1]);
-    document.getElementById(name + "_matrix_col3").innerHTML = 
+    document.getElementById(name + "_matrix_col3").innerHTML =
         printable(eq1[2]) + "<br>" + printable(eq2[2]);
 }
 
 function update_system(name) {
     if(document.getElementById(name + "_system_row1") == null)
         return;
-        
+
     var eq1 = eval(name + "_eq_1");
     var eq2 = eval(name + "_eq_2");
-    document.getElementById(name + "_system_row1").innerHTML = 
+    document.getElementById(name + "_system_row1").innerHTML =
         printable_eq(eq1[0], "x<sub>1</sub>", eq1[1], "x<sub>2</sub>", eq1[2]);
-    document.getElementById(name + "_system_row2").innerHTML = 
+    document.getElementById(name + "_system_row2").innerHTML =
         printable_eq(eq2[0], "x<sub>1</sub>", eq2[1], "x<sub>2</sub>", eq2[2]);
 }
 
@@ -579,9 +579,9 @@ function set_solver_1() {
     start_x = 1.0;
     start_y = 1.0;
     end_step_length = 0.3
-    
+
     solver_1_eq_2_temp = solver_1_eq_2;
-    solver_1_eq_1_temp = solver_1_eq_1;    
+    solver_1_eq_1_temp = solver_1_eq_1;
     end_step_length_temp = end_step_length;
 }
 set_solver_1();
@@ -621,7 +621,7 @@ function init_solver_1(){
         var canvas_rect = solver.getBoundingClientRect();
         solver_1_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
     }, false);
-    
+
     solver.addEventListener('mouseup', function(e){
         invalidate_solver_1(e.clientX, e.clientY);
     }, false);
@@ -644,7 +644,7 @@ function draw_solver_1(client_x, client_y, do_guides){
     // lines and stop criterias
     context.globalAlpha = 0.6;
     for(var i = 0; i < solver_1_eqs; ++i){
-        var eq = eval("solver_1_eq_" + (i + 1));        
+        var eq = eval("solver_1_eq_" + (i + 1));
         // stop
         context.beginPath();
         var db2 = end_step_length * length_of(eq[0], eq[1]);
@@ -661,7 +661,7 @@ function draw_solver_1(client_x, client_y, do_guides){
     }
     context.globalAlpha = 1.0;
     for(var i = 0; i < solver_1_eqs; ++i){
-        var eq = eval("solver_1_eq_" + (i + 1));     
+        var eq = eval("solver_1_eq_" + (i + 1));
         // line
         context.beginPath();
         context.lineWidth = 2;
@@ -712,10 +712,10 @@ function draw_solver_1(client_x, client_y, do_guides){
         if(document.getElementById("button_1").disabled){
             var eq = eval("solver_1_eq_" + solver_1_eq_temp_id);
             var x = client_to_x(client_x);
-            var y = client_to_y(client_y);            
+            var y = client_to_y(client_y);
             var temp_eq = new_equation_for_one_point(eq[0], eq[1], eq[2], x, y);
             eval("solver_1_eq_" + solver_1_eq_temp_id + "_temp = temp_eq;");
-            
+
             context.beginPath();
             var xys = get_points_on_the_ends(temp_eq[0], temp_eq[1], temp_eq[2]);
             context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
@@ -725,7 +725,7 @@ function draw_solver_1(client_x, client_y, do_guides){
             context.stroke();
             context.setLineDash([]);
             context.closePath();
-            
+
         }else if(document.getElementById("button_2").disabled){
             context.beginPath();
             context.setLineDash([4, 4]);
@@ -823,7 +823,7 @@ var solver_2_eq_1_temp;
 var solver_2_eq_2_temp;
 function set_solver_2() {
     solver_2_eq_2_temp = solver_1_eq_2;
-    solver_2_eq_1_temp = solver_1_eq_1;  
+    solver_2_eq_1_temp = solver_1_eq_1;
 }
 
 function invalidate_solver_2(client_x, client_y) {
@@ -854,7 +854,7 @@ function init_solver_2(){
         var canvas_rect = solver.getBoundingClientRect();
         solver_1_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
     }, false);
-    
+
     solver.addEventListener('mouseup', function(e){
         invalidate_solver_2(e.clientX, e.clientY);
     }, false);
@@ -873,7 +873,7 @@ function draw_solver_2(client_x, client_y, do_guides){
 
     // only lines now
     for(var i = 0; i < solver_1_eqs; ++i){
-        var eq = eval("solver_1_eq_" + (i + 1));     
+        var eq = eval("solver_1_eq_" + (i + 1));
         // line
         context.beginPath();
         context.lineWidth = 2;
@@ -909,10 +909,10 @@ function draw_solver_2(client_x, client_y, do_guides){
         var x = client_to_x(client_x);
         var y = client_to_y(client_y);
         var eq = eval("solver_1_eq_" + solver_1_eq_temp_id);
-        
+
         var temp_eq = new_equation_for_one_point(eq[0], eq[1], eq[2], x, y);
         eval("solver_2_eq_" + solver_1_eq_temp_id + "_temp = temp_eq;");
-        
+
         context.beginPath();
         var xys = get_points_on_the_ends(temp_eq[0], temp_eq[1], temp_eq[2]);
         context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
@@ -991,7 +991,7 @@ function do_one_elimination_step() {
         system_3_eq_1[2] /= system_3_eq_1[0];
         system_3_eq_1[0] = 1.0;
     } else if (system_3_eq_1[1] == 0.0 && system_3_eq_1[0] == 1.0 && system_3_eq_2[0] != 1.0 && system_3_eq_2[0] != 0.0) {
-        document.getElementById('step_name').innerHTML = "Multiplied the 1st equation by the 1st coefficient from the 2nd.";    
+        document.getElementById('step_name').innerHTML = "Multiplied the 1st equation by the 1st coefficient from the 2nd.";
         system_3_eq_1[2] *= system_3_eq_2[0];
         system_3_eq_1[0] = system_3_eq_2[0];
     } else if (system_3_eq_1[1] == 0.0 && system_3_eq_1[0] == system_3_eq_2[0]) {
@@ -1006,7 +1006,7 @@ function do_one_elimination_step() {
         system_3_eq_2[2] /= system_3_eq_2[1];
         system_3_eq_2[1] = 1.0;
     }
-    update_system("system_3");        
+    update_system("system_3");
     draw_plot_named("system_3");
 }
 
@@ -1019,7 +1019,7 @@ function done_system_1_quest_1() {
     } else if(Math.abs(xy[0]) >= 0.01 || Math.abs(xy[1]) >= 0.01) {
         document.getElementById("reply_quest_1").innerHTML = "Close enough! Yes!";
         document.getElementById("buttons_quest_1").style.display = 'none';
-        quests[0] = 1; 
+        quests[0] = 1;
     } else {
         document.getElementById("reply_quest_1").innerHTML = "Excellent!";
         document.getElementById("buttons_quest_1").style.display = 'none';
@@ -1043,8 +1043,8 @@ function done_system_1_quest_2() {
 function done_system_1_quest_3() {
     xyxy1 = get_points_on_the_ends(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2]);
     xyxy2 = get_points_on_the_ends(system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
-    if(Math.abs(xyxy1[0][0] - xyxy2[0][0]) > 0.1 || 
-       Math.abs(xyxy1[0][1] - xyxy2[0][1]) > 0.1 || 
+    if(Math.abs(xyxy1[0][0] - xyxy2[0][0]) > 0.1 ||
+       Math.abs(xyxy1[0][1] - xyxy2[0][1]) > 0.1 ||
        Math.abs(xyxy1[1][0] - xyxy2[1][0]) > 0.1 ||
        Math.abs(xyxy1[1][1] - xyxy2[1][1]) > 0.1) {
         var xy = solve_2(system_1_eq_1[0], system_1_eq_1[1], system_1_eq_1[2], system_1_eq_2[0], system_1_eq_2[1], system_1_eq_2[2]);
@@ -1060,8 +1060,8 @@ function done_system_1_quest_3() {
 function done_system_2_quest_4() {
     var xy1 = solve_2(system_2_eq_1[0], system_2_eq_1[1], system_2_eq_1[2], system_2_eq_2[0], system_2_eq_2[1], system_2_eq_2[2]);
     var xy2 = solve_2(system_2_eq_2[0], system_2_eq_2[1], system_2_eq_2[2], system_2_eq_3[0], system_2_eq_3[1], system_2_eq_3[2]);
-    var xy3 = solve_2(system_2_eq_3[0], system_2_eq_3[1], system_2_eq_3[2], system_2_eq_1[0], system_2_eq_1[1], system_2_eq_1[2]);    
-    if(Math.abs(xy1[0] - xy2[0]) > 0.1 || 
+    var xy3 = solve_2(system_2_eq_3[0], system_2_eq_3[1], system_2_eq_3[2], system_2_eq_1[0], system_2_eq_1[1], system_2_eq_1[2]);
+    if(Math.abs(xy1[0] - xy2[0]) > 0.1 ||
        Math.abs(xy1[1] - xy2[1]) > 0.1){
         document.getElementById("reply_quest_4").innerHTML = "It has intersections, but not a solution. Please try again.";
     } else {
@@ -1126,7 +1126,7 @@ function done_system_4_quest_8() {
     var q101 = Math.abs(solver_1_eq_1[0] / solver_1_eq_1[1]);
     var q110 = Math.abs(solver_1_eq_1[1] / solver_1_eq_1[0]);
     var q201 = Math.abs(solver_1_eq_2[0] / solver_1_eq_2[1]);
-    var q210 = Math.abs(solver_1_eq_2[1] / solver_1_eq_2[0]);    
+    var q210 = Math.abs(solver_1_eq_2[1] / solver_1_eq_2[0]);
     if(Math.abs(q101 - q210) < 0.1 || Math.abs(q110 - q201) < 0.1) {
         document.getElementById("reply_quest_8").innerHTML = "Sure! When lines are orthogonal, the solution always comes in one or two jumps. Plus one iteration to see if we're there.";
         document.getElementById("buttons_quest_8").style.display = 'none';
@@ -1188,7 +1188,7 @@ The system may be represented as an array of equations.
     <p>
 The very same array of equations constitutes the matrix equation.
     </p>
-    
+
     <table class="formula">
     <tr>
     <td class="brackets">[</td>
@@ -1209,10 +1209,10 @@ x<sub>1</sub> <br> x<sub>2</sub>
     <td id="system_1_matrix_col3">
 0<br>1
     </td>
-    <td class="brackets">]</td>      
+    <td class="brackets">]</td>
     </tr>
     </table>
-        
+
     <p>
 And in the simplest case, it may also have a graphic form.
     </p>
@@ -1223,11 +1223,11 @@ You can drag the lines and see how the equations from the above change.
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" id="button_1_reset" onclick="reset_system_1()">Reset</button>
     </div>
-    
+
     <p>
 The graphic form is a useful mental model because it makes the solution visual. The solution is merely an intersection of lines.
-    </p>    
-    
+    </p>
+
     <form>
         <b>Quest 1.</b> Using the plot above, please make a system that has a solution: <i>x<sub>1</sub> = 0, x<sub>2</sub> = 0</i>. Then press the “Check!” button.
         <div id="reply_quest_1" style="padding-top:6pt;"></div>
@@ -1235,10 +1235,10 @@ The graphic form is a useful mental model because it makes the solution visual. 
             <button type="button" id="button_1_1" onclick="done_system_1_quest_1()">Check!</button>
         </div>
     </form>
-        
+
     <p>
 But even a well-specified system may lack a solution (an intersection).
-    </p> 
+    </p>
 
     <form>
         <b>Quest 2.</b> Using the same plot above, please make a system with no solution.
@@ -1247,10 +1247,10 @@ But even a well-specified system may lack a solution (an intersection).
             <button type="button" id="button_1_2" onclick="done_system_1_quest_2()">Check!</button>
         </div>
     </form>
-    
+
     <p>
 And sometimes it may have not a single, but an infinite number of solutions.
-    </p>    
+    </p>
 
     <form>
         <b>Quest 3.</b> Using the same plot above, please make a system with infinite solutions.
@@ -1259,7 +1259,7 @@ And sometimes it may have not a single, but an infinite number of solutions.
             <button type="button" id="button_1_3" onclick="done_system_1_quest_3()">Check!</button>
         </div>
     </form>
-        
+
     <p>
 This may be a problem for numeric methods aimed to find a single solution. They may report an error or, even worse, supply you with a first-best solution they find. In this case, you should check your equations for linear dependency.
     </p>
@@ -1273,7 +1273,7 @@ You see, when you multiply every coefficient of an equation, and the constant, t
     </td>
     </tr><tr>
     <td>
-    <button type="button" class="incdec" onclick="dec('linear_multiplier')">-</button><input type="text" style="width: 32pt;" id="linear_multiplier" value="2" oninput="change_linear_multiplier();"><button type="button" class="incdec" onclick="inc('linear_multiplier')">+</button> 
+    <button type="button" class="incdec" onclick="dec('linear_multiplier')">-</button><input type="text" style="width: 32pt;" id="linear_multiplier" value="2" oninput="change_linear_multiplier();"><button type="button" class="incdec" onclick="inc('linear_multiplier')">+</button>
     </td>
     </tr><tr>
     <td id="linear_row2">
@@ -1281,36 +1281,36 @@ You see, when you multiply every coefficient of an equation, and the constant, t
     </td>
     </tr>
     </table>
-  
+
     <p>
 Sometimes, systems have more equations than the variables. These systems are called <b>overspecified</b>.
     </p>
-    <canvas id="system_2" width=640 height=512></canvas> 
+    <canvas id="system_2" width=640 height=512></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" id="button_2_reset" onclick="reset_system_2()">Reset</button>
-    </div>    
+    </div>
     <p>
 In the general case, these systems don't have a solution, but in some rare cases, they do.
     </p>
-    
+
     <form>
         <b>Quest 4.</b> Using the 3-lines plot, please make a system with a single solution.
         <div id="reply_quest_4" style="padding-top:6pt;"></div>
         <div id="buttons_quest_4" style="text-align:right;">
             <button type="button" id="button_2_4" onclick="done_system_2_quest_4()">Check!</button>
         </div>
-    </form>    
-    
+    </form>
+
     <p>
 Sometimes, systems have more variables than the equations. These systems are called <b>underspecified</b>.
-    </p>   
+    </p>
     <p>
 Of course, in 2-dimensional case, they only have one equation, and the infinite number of solutions. Every point that lies on the equation's line is a solution. But in more-dimensional cases, underspecified systems might not have any solutions at all.
     </p>
-    
+
      <form>
         <b>Quest 5.</b> Using the matrix form below, please make an underspecified system of 3 equations that don't have a solution.
-        
+
         <div id="reply_quest_5" style="padding-top:6pt;"></div>
         <div id="quest_5_formula">
             <table class="formula" style="padding:0 0 6pt 0;">
@@ -1336,15 +1336,15 @@ x<sub>1</sub><br>x<sub>2</sub><br>x<sub>3</sub>
             <td id="system_3_matrix_col4">
 <nobr><button type="button" class="incdec" onclick="dec('s3_1_4')">-</button><input type="text" id="s3_1_4" value="4" oninput=""><button type="button" class="incdec" onclick="inc('s3_1_4')">+</button></nobr><br><nobr><button type="button" class="incdec" onclick="dec('s3_2_4')">-</button><input type="text" id="s3_2_4" value="5" oninput=""><button type="button" class="incdec" onclick="inc('s3_2_4')">+</button></nobr>
             </td>
-            <td class="brackets">]</td>      
+            <td class="brackets">]</td>
             </tr>
             </table>
         </div>
         <div id="buttons_quest_5" style="text-align:right;">
             <button type="button" id="button_3_5" onclick="done_system_3_quest_5()">Check!</button>
         </div>
-    </form>       
-    
+    </form>
+
     <p>
 There are two major classes of linear system solvers: iterative and direct.
     </p>
@@ -1369,7 +1369,7 @@ As for exit criteria, we can simply measure how far we have to travel to make an
 And we can leave the question “where to start” unanswered. Of course, it would be fantastic to start right at the solution point, but generally, our algorithm should work for any starting point we choose.
     </p>
     <p>
-Here is the interactive illustration of it. 
+Here is the interactive illustration of it.
     </p>
     <div id="solver_buttons">
     <center>
@@ -1377,14 +1377,14 @@ Here is the interactive illustration of it.
         <button type="button" id="button_2" style="width: 180px;" onclick="radio(2)">Start point</button>
         <button type="button" id="button_3" style="width: 180px;" onclick="radio(3)">Stop distance</button>
     </center>
-    </div>    
+    </div>
     <canvas id="solver_1" width=640 height=512></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" id="reset_solver" onclick="reset_solver()">Reset</button>
     </div>
 
     <p class="results" id="results">
-    </p>    
+    </p>
 
     <p>
 When an algorithm just like this gets closer to the solution with every iteration, it is said it converges. When it gets further from the point, it diverges. <b>Convergence</b> is the second most important property of the iterative algorithm. It is basically its speed.
@@ -1393,7 +1393,7 @@ When an algorithm just like this gets closer to the solution with every iteratio
 And the first most important property of an algorithm is its <b>stability</b>. Usually, the more mathematical operations you do, the more error you gather. But stable algorithms have a property of reducing the error automatically. It gathers some error on every iteration, sure, but it doesn't accumulate it into anything ugly.
     </p>
     <p>
-This particular algorithm is stable and geometrically incapable of divergence. Moreover, it's convergence is directly linked to the angle between the lines. 
+This particular algorithm is stable and geometrically incapable of divergence. Moreover, it's convergence is directly linked to the angle between the lines.
     </p>
     <form>
         <b>Quest 6.</b> Using the plot from above, please make a system and setup conditions to solve it in exactly 58 iterations.
@@ -1431,7 +1431,7 @@ Previously we did every leap by doing an orthogonal projection to a respective l
     <canvas id="solver_2" width=640 height=512></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" id="reset_solver" onclick="reset_solver()">Reset</button>
-    </div>    
+    </div>
     <p>
 Since the algorithm is now direct, it doesn't need exit criteria. Also, since it has “an ultimate convergence” starting point selection doesn't matter. That's brilliant! Why do we need iterative algorithms at all?
     </p>
@@ -1461,7 +1461,7 @@ def cross_of(A):
           t_res *= A[k][v_ijk[k + 1]]
         v_res[i] += t_res
   return v_res
-  
+
 
 def solution_for(A, B):
   p = [0. for each in B]
@@ -1488,7 +1488,7 @@ def solution_for(A, B):
         <div id="buttons_quest_9" style="text-align:right;">
             <button type="button" id="button_5_9" onclick="done_quest_9()">Check!</button>
         </div>
-    </form>    
+    </form>
     <p>
 You might imagine that with polynomial complexity using a direct algorithm on massive systems is not really plausible. Solving a 1000 equation system with our algorithm requires a trillion operations. In this regard, iterative algorithms are the worthy alternative. Not that they are generally faster, but it's all about balancing between convergence and complexity.
     </p>
@@ -1504,7 +1504,7 @@ Doing these operations alone we can turn almost any system into the trivial one.
     <canvas id="system_3" width=640 height=512></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" id="button_3_reset" onclick="reset_system_3()">Reset</button>
-    </div>         
+    </div>
     <table class="formula">
     <tr>
     <td rowspan=2 class="brackets">{</td>
@@ -1524,7 +1524,7 @@ Doing these operations alone we can turn almost any system into the trivial one.
 P. S.
     </h2>
     <p>
-That's all fine, but how do you choose a method to solve your particular case? There are a couple of hints.   
+That's all fine, but how do you choose a method to solve your particular case? There are a couple of hints.
     </p>
     <ol>
     <li>

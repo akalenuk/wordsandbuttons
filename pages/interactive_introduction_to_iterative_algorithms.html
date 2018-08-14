@@ -187,15 +187,15 @@ function projected_y(x, y, a1, a2, b){
 
 function get_points_on_the_ends(a1, a2, b) {
     var xys = []
-    
+
     var x_in_y_min = (b - a2 * y_min)/ a1;
     if(x_in_y_min >= x_min && x_in_y_min < x_max)
         xys.push([x_in_y_min, y_min]);
-      
+
     var x_in_y_max = (b - a2 * y_max)/ a1;
     if(x_in_y_max >= x_min && x_in_y_max < x_max)
         xys.push([x_in_y_max, y_max]);
-      
+
     var y_in_x_min = (b - a1 * x_min) / a2;
     if(y_in_x_min >= y_min && y_in_x_min < y_max)
         xys.push([x_min, y_in_x_min]);
@@ -203,7 +203,7 @@ function get_points_on_the_ends(a1, a2, b) {
     var y_in_x_max = (b - a1 * x_max) / a2;
     if(y_in_x_max >= y_min && y_in_x_max < y_max)
         xys.push([x_max, y_in_x_max]);
-        
+
     return xys;
 }
 
@@ -276,9 +276,9 @@ function set_solver_1() {
     start_x = 1.0;
     start_y = 1.0;
     end_step_length = 0.3
-    
+
     solver_1_eq_2_temp = solver_1_eq_2;
-    solver_1_eq_1_temp = solver_1_eq_1;    
+    solver_1_eq_1_temp = solver_1_eq_1;
     end_step_length_temp = end_step_length;
 }
 set_solver_1();
@@ -317,7 +317,7 @@ function init_solver_1(){
         var canvas_rect = solver.getBoundingClientRect();
         solver_1_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
     }, false);
-    
+
     solver.addEventListener('mouseup', function(e){
         invalidate_solver_1(e.clientX, e.clientY);
     }, false);
@@ -340,7 +340,7 @@ function draw_solver_1(client_x, client_y, do_guides){
     // lines and stop criterias
     context.globalAlpha = 0.6;
     for(var i = 0; i < solver_1_eqs; ++i){
-        var eq = eval("solver_1_eq_" + (i + 1));        
+        var eq = eval("solver_1_eq_" + (i + 1));
         // stop
         context.beginPath();
         var db2 = end_step_length * length_of(eq[0], eq[1]);
@@ -357,7 +357,7 @@ function draw_solver_1(client_x, client_y, do_guides){
     }
     context.globalAlpha = 1.0;
     for(var i = 0; i < solver_1_eqs; ++i){
-        var eq = eval("solver_1_eq_" + (i + 1));     
+        var eq = eval("solver_1_eq_" + (i + 1));
         // line
         context.beginPath();
         context.lineWidth = 2;
@@ -408,10 +408,10 @@ function draw_solver_1(client_x, client_y, do_guides){
         if(document.getElementById("button_1").disabled){
             var eq = eval("solver_1_eq_" + solver_1_eq_temp_id);
             var x = client_to_x(client_x);
-            var y = client_to_y(client_y);            
+            var y = client_to_y(client_y);
             var temp_eq = new_equation_for_one_point(eq[0], eq[1], eq[2], x, y);
             eval("solver_1_eq_" + solver_1_eq_temp_id + "_temp = temp_eq;");
-            
+
             context.beginPath();
             var xys = get_points_on_the_ends(temp_eq[0], temp_eq[1], temp_eq[2]);
             context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
@@ -421,7 +421,7 @@ function draw_solver_1(client_x, client_y, do_guides){
             context.stroke();
             context.setLineDash([]);
             context.closePath();
-            
+
         }else if(document.getElementById("button_2").disabled){
             context.beginPath();
             context.setLineDash([4, 4]);
@@ -570,7 +570,7 @@ The plot below is the interactive illustration of the algorithm. You can move th
         <button type="button" id="button_2" style="width: 180px;" onclick="radio(2)">Start point</button>
         <button type="button" id="button_3" style="width: 180px;" onclick="radio(3)">Stop distance</button>
     </center>
-    </div>    
+    </div>
     <canvas id="solver_1" width=640 height=512></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" id="reset_solver" onclick="reset_solver()">Reset</button>
@@ -580,15 +580,15 @@ The plot below is the interactive illustration of the algorithm. You can move th
     <script language="JavaScript">
     init_solver_1();
     </script>
-    
-    
+
+
     <p>
 As you can see, everything matters.
     </p>
     <p>
 You can get some more precise solution with more iterations, but sometimes you'd need too many. <i>(This particular algorithm doesn't go past 100)</i> Some systems can be solved very fast and some can't be solved at all. And sometimes you can solve an unpleasant system simply by taking a lucky guess with a starting point.
     </p>
- 
+
     <p>
 This was probably the simplest iterative algorithm ever. It has no much use in the “real life” though. Real iterative algorithms for solving systems of linear equations look like this:
     </p>

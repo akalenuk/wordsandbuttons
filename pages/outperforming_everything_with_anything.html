@@ -141,7 +141,7 @@ function draw_results(){
     // background
     d_context.fillStyle="#eeeeee";
 	d_context.fillRect(0, 0, 702, 500);
-	
+
 	var x = 0.0;
 	var y = 0.0;
 	// C metaprogramming
@@ -156,7 +156,7 @@ function draw_results(){
 	d_context.lineWidth=2;
 	d_context.stroke();
 	d_context.closePath();
-	
+
 	// C++ metaprogramming
 	x = 234.5;
 	y = 499.5 - Math.floor(499 * 60/ 70);
@@ -169,7 +169,7 @@ function draw_results(){
 	d_context.lineWidth=2;
 	d_context.stroke();
 	d_context.closePath();
-	
+
 	// Python + LLVM
 	x = 498.5;
 	y = 499.5 - Math.floor(499 * 55 / 70);
@@ -181,7 +181,7 @@ function draw_results(){
 	d_context.lineTo(x+233, y);
 	d_context.lineWidth=2;
 	d_context.stroke();
-	d_context.closePath();	
+	d_context.closePath();
 }
 
 function init_results(){
@@ -232,7 +232,7 @@ What I want to do here is to repeat the same experiment I did with C and C++ in 
 Use Clang to generate LLVM intermediate code for a benchmark that is supposed to measure yet non-existent function named <i>solve_5</i>
     </li>
     <li>
-Hijack a benchmark with a Python script meaning replacing <i>solve_5</i> call with a completely auto-generated solution and updating all the instructions' numbers after it. 
+Hijack a benchmark with a Python script meaning replacing <i>solve_5</i> call with a completely auto-generated solution and updating all the instructions' numbers after it.
     </li>
     <li>
 Use the LLVM static compiler LLC to turn the intermediate code into the machine code.
@@ -267,15 +267,15 @@ int main() {
         double x[5];
 
         <b>solve_5(a, b, x);</b> // this will get replaced later
-         
+
         for(int j = 0; j &lt; 5; ++j){
             sum_x[j] += x[j];
         }
     }
-    printf("%f, %f, %f, %f, %f\n", 
+    printf("%f, %f, %f, %f, %f\n",
         sum_x[0], sum_x[1], sum_x[2], sum_x[3], sum_x[4]);
     return 0;
-}    
+}
 
 </span><span id="slides_recursive_2" style="display:none"><div style="color:#992244"><b>Step 2. LLVM assembly language</b></div>
 ... 27 lines before...
@@ -405,7 +405,7 @@ Details on implementation
 The script that does the substitution, implements an algorithm, and, most importantly, provides a Python to LLVM layer, is only 100 lines long! You can see it in <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/python_to_llvm/exp_embed_on_call/substitute_solver_call.py">one piece on GitHub</a>.
     </p>
     <p>
-The most fascinating is the <i>LLVMCode</i> object. It is something that pretends to be a mere array, it looks like it can provide data by the index, accept data by the index, and be a subject of some simple arithmetic operators. But actually, what it does undercover is it logs the history of all operations performed with it or its quasi-co-operands or its quasi-data. The log is being written in the form of LLVM intermediate representation. 
+The most fascinating is the <i>LLVMCode</i> object. It is something that pretends to be a mere array, it looks like it can provide data by the index, accept data by the index, and be a subject of some simple arithmetic operators. But actually, what it does undercover is it logs the history of all operations performed with it or its quasi-co-operands or its quasi-data. The log is being written in the form of LLVM intermediate representation.
     </p>
     <p>
 So if you have some perfectly Python-ish algorithm that operates on lists, you can feed it with <i>LLVMCode</i> objects and what you get in return is the log of all LLVM operations required to achieve a result of the initial algorithm. Which is LLVM code. <i>LLVMCode</i> objects turn everyday Python code into LLVM code-generators.

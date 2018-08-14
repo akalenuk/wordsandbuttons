@@ -245,7 +245,7 @@ function pick_a_point_draw(client_x, client_y, do_guides){
     pick_a_point_context.fillText(point_x.toFixed(1) + ", " + point_y.toFixed(1), x_to_client(point_x) + 4, y_to_client(point_y) + 16);
     pick_a_point_context.setLineDash([]);
     pick_a_point_context.closePath();
-    
+
     if(do_guides){
         pick_a_point_context.beginPath();
         pick_a_point_context.setLineDash([4, 4]);
@@ -288,7 +288,7 @@ function init_slide_a_w(){
         slide_a_w_draw(e.clientX - canvas_rect.left, true);
         if(e.buttons == 1){
             slide_w = point_x / client_to_x(e.clientX - canvas_rect.left);
-            slide_a_w_draw(0, false);            
+            slide_a_w_draw(0, false);
         }
     }, false);
 
@@ -297,7 +297,7 @@ function init_slide_a_w(){
         slide_w = point_x / client_to_x(e.clientX - canvas_rect.left);
         slide_a_w_draw(0, false);
     }, false);
-    
+
     slide_a_w.addEventListener('mouseleave', function(e){
         var canvas_rect = slide_a_w.getBoundingClientRect();
         slide_a_w_draw(0, false);
@@ -318,22 +318,22 @@ function slide_a_w_draw(client_x, is_moving){
     }else{
         w = slide_w;
     }
-    
+
     var canvas_x = x_to_client(point_x / w);
     var canvas_y = y_to_client(point_y / w);
-      
+
     slide_a_w_context.beginPath();
 
     slide_a_w_context.moveTo(x_to_client(point_x * 100), y_to_client(point_y * 100));
     slide_a_w_context.lineTo(x_to_client(point_x * -100), y_to_client(point_y * -100));
-    
+
     if(is_moving){
         slide_a_w_context.moveTo(x_to_client(point_x / w) - 10, y_to_client(point_y / w));
         slide_a_w_context.lineTo(x_to_client(point_x / w) + 10, y_to_client(point_y / w));
         slide_a_w_context.moveTo(x_to_client(point_x / w), y_to_client(point_y / w) - 10);
         slide_a_w_context.lineTo(x_to_client(point_x / w), y_to_client(point_y / w) + 10);
     }
-    
+
     slide_a_w_context.moveTo(x_to_client(point_x / slide_w) - 10, y_to_client(point_y / slide_w));
     slide_a_w_context.lineTo(x_to_client(point_x / slide_w) + 10, y_to_client(point_y / slide_w));
     slide_a_w_context.moveTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w) - 10);
@@ -369,14 +369,14 @@ var dy = 0.3;
 function init_translation(){
     translation = document.getElementById("translation");
     translation_draw(0, 0, false);
-        
+
     translation.addEventListener('mousedown', function(e){
         var canvas_rect = translation.getBoundingClientRect();
         dx = client_to_x(e.clientX - canvas_rect.left);
         dy = client_to_y(e.clientY - canvas_rect.top);
         translation_draw(0, 0, false);
     }, false);
-    
+
     translation.addEventListener('mousemove', function(e){
         var canvas_rect = translation.getBoundingClientRect();
         if(e.buttons == 1){
@@ -400,7 +400,7 @@ function translation_draw(client_x, client_y, do_new){
         var y = client_to_y(client_y);
     }else{
         var x = dx;
-        var y = dy;    
+        var y = dy;
     }
 
     var translation_context = translation.getContext("2d");
@@ -428,7 +428,7 @@ function translation_draw(client_x, client_y, do_new){
         translation_context.stroke();
         translation_context.setLineDash([]);
         translation_context.closePath();
-        
+
         // dx-dy cube
         translation_context.beginPath();
         translation_context.moveTo(x_to_client(dx), y_to_client(dy));
@@ -488,7 +488,7 @@ function init_rotation(){
         rotation_a = client_to_x(client_x) / 2;
         rotation_draw(rotation_a, false);
     }, false);
-    
+
     rotation.addEventListener('mouseleave', function(e){
         var canvas_rect = translation.getBoundingClientRect();
         rotation_draw(rotation_a, false);
@@ -517,7 +517,7 @@ function rotation_draw(a, do_new){
       new_saved_xs[i] = rotated_x(rotation_a, xs[i], ys[i]);
       new_saved_ys[i] = rotated_y(rotation_a, xs[i], ys[i]);
     }
-    
+
     if(do_new){
         // the connection
         rotation_context.beginPath();
@@ -583,7 +583,7 @@ function init_scale(){
             scale_draw(new_scale_x, new_scale_y, true);
         }
     }, false);
-    
+
     scale.addEventListener('mousedown', function(e){
         var canvas_rect = scale.getBoundingClientRect();
         scale_x = client_to_x(e.clientX - canvas_rect.left);
@@ -618,7 +618,7 @@ function scale_draw(a, b, do_new){
         new_saved_xs[i] = scale_x * xs[i];
         new_saved_ys[i] = scale_y * ys[i];
     }
-    
+
     if(do_new){
         // the connection
         scale_context.beginPath();
@@ -635,7 +635,7 @@ function scale_draw(a, b, do_new){
 
     // original cube
     draw_original_cube_on(scale_context);
-    
+
     if(do_new){ // draw a saved cube
         scale_context.beginPath();
         scale_context.moveTo(x_to_client(new_saved_xs[3]), y_to_client(new_saved_ys[3]));
@@ -745,7 +745,7 @@ function affine_draw(client_x, client_y, do_new){
 
     // grid
     draw_grid_on(affine_context);
-    
+
     // x
     affine_context.beginPath();
     affine_context.moveTo(x_to_client(affine_xs[affine_i]) - 10, y_to_client(affine_ys[affine_i]));
@@ -837,7 +837,7 @@ function projective_draw(client_x, client_y, do_new){
 
     // grid
     draw_grid_on(projective_context);
-    
+
     // x
     projective_context.beginPath();
     projective_context.moveTo(x_to_client(projective_xs[projective_i]) - 10, y_to_client(projective_ys[projective_i]));
@@ -856,7 +856,7 @@ var composable_reference_y = 0.0;
 function recalculate_composable(client_x, client_y){
     var x = client_to_x(client_x);
     var y = client_to_y(client_y);
-        
+
     // new cube
     var new_xs = [1., 2., 2., 1.];
     var new_ys = [1., 1., 2., 2.];
@@ -925,13 +925,13 @@ function init_composable(){
                 composable_draw(client_x, client_y, true);
             }else if(document.getElementById("radio_r").checked){
                 composable_draw(client_x, client_y, true);
-            }else{  // rotation                
+            }else{  // rotation
                 var new_client_x = x_to_client(client_to_x(client_x) - composable_reference_x);
                 var new_client_y = y_to_client(client_to_y(client_y) - composable_reference_y);
                 recalculate_composable(new_client_x, new_client_y);
                 composable_draw(new_client_x, new_client_y, false);
                 composable_reference_x = client_to_x(client_x);
-                composable_reference_y = client_to_y(client_y); 
+                composable_reference_y = client_to_y(client_y);
             }
         }else{
             if(document.getElementById("radio_p").checked){
@@ -939,7 +939,7 @@ function init_composable(){
             }else{
                 var new_client_x = x_to_client(client_to_x(client_x) - composable_reference_x);
                 var new_client_y = y_to_client(client_to_y(client_y) - composable_reference_y);
-                composable_draw(new_client_x, new_client_y, true); 
+                composable_draw(new_client_x, new_client_y, true);
             }
         }
     }, false);
@@ -948,7 +948,7 @@ function init_composable(){
         var canvas_rect = composable.getBoundingClientRect();
         client_x = e.clientX - canvas_rect.left;
         client_y = e.clientY - canvas_rect.top;
-        if(document.getElementById("radio_p").checked){            
+        if(document.getElementById("radio_p").checked){
             recalculate_composable(client_x, client_y);
             composable_i = (composable_i + 1) % 4;
             composable_draw(client_x, client_y, false);
@@ -964,7 +964,7 @@ function init_composable(){
             recalculate_composable(new_client_x, new_client_y);
             composable_draw(new_client_x, new_client_y, false);
             composable_reference_x = client_to_x(client_x);
-            composable_reference_y = client_to_y(client_y); 
+            composable_reference_y = client_to_y(client_y);
         }
     }, false);
 
@@ -1041,7 +1041,7 @@ function composable_draw(client_x, client_y, do_new){
     }
     // grid
     draw_grid_on(composable_context);
-    
+
     // x
     if(document.getElementById("radio_p").checked){
         composable_context.beginPath();
@@ -1386,7 +1386,7 @@ This is not the case if you want to do series of transformation with the formula
 Conclusion
     </h2>
     <p>
-As you can see, you can save quite a lot of time processing millions of points with one single matrix instead of applying all the transformations separately. And you can also save lines of code by unifying all the transformations. But this is not the whole point yet. 
+As you can see, you can save quite a lot of time processing millions of points with one single matrix instead of applying all the transformations separately. And you can also save lines of code by unifying all the transformations. But this is not the whole point yet.
     </p>
     <p>
 Usually, we lose performance not because of some small computational inefficiencies but because of all the needless layering. And the layering occurs because programmers don’t always understand and don’t always trust the beauty of the plain mathematics.

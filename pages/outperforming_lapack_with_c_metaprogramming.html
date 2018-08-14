@@ -141,7 +141,7 @@ function draw_results(){
     // background
     d_context.fillStyle="#eeeeee";
 	d_context.fillRect(0, 0, 700, 500);
-	
+
 	var x = 0.0;
 	var y = 0.0;
 	// static
@@ -155,7 +155,7 @@ function draw_results(){
 	d_context.lineTo(x+99, y);
 	d_context.stroke();
 	d_context.closePath();
-	
+
 	// static A
 	x = 100.5;
 	y = 499.5 - Math.floor(499 * 0.04 / 2.10);
@@ -167,7 +167,7 @@ function draw_results(){
 	d_context.lineTo(x+99, y);
 	d_context.stroke();
 	d_context.closePath();
-	
+
 	// static B
 	x = 200.5;
 	y = 499.5 - Math.floor(499 * 0.10 / 2.10);
@@ -179,7 +179,7 @@ function draw_results(){
 	d_context.lineTo(x+99, y);
 	d_context.stroke();
 	d_context.closePath();
-	
+
 	// unrolled
 	x = 300.5;
 	y = 499.5 - Math.floor(499 * 0.10 / 2.10);
@@ -191,7 +191,7 @@ function draw_results(){
 	d_context.lineTo(x+99, y);
 	d_context.stroke();
 	d_context.closePath();
-	
+
 	// triangular
 	x = 400.5;
 	y = 499.5 - Math.floor(499 * 0.08 / 2.10);
@@ -203,7 +203,7 @@ function draw_results(){
 	d_context.lineTo(x+99, y);
 	d_context.stroke();
 	d_context.closePath();
-	
+
 	// lapack
 	x = 500.5;
 	y = 499.5 - Math.floor(499 * 0.65 / 2.10);
@@ -215,7 +215,7 @@ function draw_results(){
 	d_context.lineTo(x+99, y);
 	d_context.stroke();
 	d_context.closePath();
-	
+
 	// runtime
 	x = 600.5;
 	y = 0.05;
@@ -243,7 +243,7 @@ Outperforming LAPACK with C metaprogramming
 We don't have many tools for metaprogramming in C. We don't have templates or <a href="http://en.cppreference.com/w/cpp/language/constexpr">constexpr</a>s C++ has; we don't have <a href="https://dlang.org/mixin.html">mixins</a> like in D; and we certainly don't have <a href="https://en.wikipedia.org/wiki/Homoiconicity">homoiconicity</a> of Lisp and Julia. All we have in C is the preprocessor that supports macros. And we don't even have recursive macros neither as in macros that recurrently call themselves, nor as in macros that define macros. Apparently, you can't implement something as awesome as <a href="https://github.com/kw-udon/constexpr-8cc">a compile time compiler</a> with this.
     </p>
     <p>
-Yet with preprocessor macros only you can still explain your compiler what do you want, and the compiler, being sophisticated machine, will use this knowledge to generate better code. You can make it compute rather elaborate things statically, and more importantly you can make it generate zero-overhead code to win quite a lot in performance. 
+Yet with preprocessor macros only you can still explain your compiler what do you want, and the compiler, being sophisticated machine, will use this knowledge to generate better code. You can make it compute rather elaborate things statically, and more importantly you can make it generate zero-overhead code to win quite a lot in performance.
     </p>
     <p>
 I'll show you a pair of tricks that will turn a crude and inefficient algorithm for solving small linear systems into something that can outrun LAPACK.
@@ -261,10 +261,10 @@ Indeed, when a function calls itself simply building its body into its body will
 The trick is to promise a compiler that the recursion will soon end. You have to unroll a recursive call into a finite number of specific function calls. And you can do this with macros.
     </p>
     <p>
-Yes, the compiler would have to generate extra code on the first steps of compilation, but it will eventually eliminate the dead calls once the variables are proven to be constant during the runtime. GCC is very good in doing this. In fact, you don't even have to help it with const modifiers. If it can, it will minimize the runtime computation to the very possible extend. 
+Yes, the compiler would have to generate extra code on the first steps of compilation, but it will eventually eliminate the dead calls once the variables are proven to be constant during the runtime. GCC is very good in doing this. In fact, you don't even have to help it with const modifiers. If it can, it will minimize the runtime computation to the very possible extend.
     </p>
     <p>
-In this example we will make it compute a quasi-recursive factorial function statically. Please press the “next step” button to see how the preprocessor and the compiler work together. 
+In this example we will make it compute a quasi-recursive factorial function statically. Please press the “next step” button to see how the preprocessor and the compiler work together.
     </p>
     <table><tr>
     <td>
@@ -281,15 +281,15 @@ inline PREFIX##_1 CHUNK1##_2 SUFFIX \
 inline PREFIX##_0 CHUNK1##_1 SUFFIX </b>
 
 RECURSIVE(int f, (int i)
-  {return i == 1 
-    ? 1 
-    : i*f, (i-1);},   
+  {return i == 1
+    ? 1
+    : i*f, (i-1);},
   (int i){return 0;})
-    
+
 #include "stdio.h"
 
 int main(){
-  printf("%d", f_0(4));  
+  printf("%d", f_0(4));
 }
 
 
@@ -321,23 +321,23 @@ int main(){
     </span><span id="slides_recursive_3" style="display:none"><div style="color:#881122"><b>Step 3. Pseudo-code after inlining</b></div>
 int main(){
   printf("%d", (int i){
-  i == 1 
-    ? 1 
-    : i*(i == 1 
-      ? 1 
-      : i*(i == 1 
-        ? 1 
-        : i*(i == 1 
-          ? 1 
-          : i*(i == 1 
-            ? 1 
-            : i*(i == 1 
-              ? 1 
-              : i*(i == 1 
-                ? 1 
-                : i*(i == 1 
-                  ? 1 
-                  : i*1;);););););););}(4));  
+  i == 1
+    ? 1
+    : i*(i == 1
+      ? 1
+      : i*(i == 1
+        ? 1
+        : i*(i == 1
+          ? 1
+          : i*(i == 1
+            ? 1
+            : i*(i == 1
+              ? 1
+              : i*(i == 1
+                ? 1
+                : i*(i == 1
+                  ? 1
+                  : i*1;);););););););}(4));
 }
 
 
@@ -416,7 +416,7 @@ This is a bubble sort conducted in compile time. Once again, please use the “n
     </p>
     <table><tr>
     <td>
-    <pre><span id="unroll_1" style="display:block"><div style="color:#994466"><b>Step 1. C source code</b></div> 
+    <pre><span id="unroll_1" style="display:block"><div style="color:#994466"><b>Step 1. C source code</b></div>
 <b>#define LOOP_TO_0(ID, N, BODY) {int ID; switch(N){\
 case 4: ID=4;{BODY};\
 case 3: ID=3;{BODY};\
@@ -444,7 +444,7 @@ int main(){
 
 
 
-    </span><span id="unroll_2" style="display:none"><div style="color:#992244"><b>Step 2. C pseudo-code after preprocessing</b></div> 
+    </span><span id="unroll_2" style="display:none"><div style="color:#992244"><b>Step 2. C pseudo-code after preprocessing</b></div>
 #include "stdio.h"
 
 int main(){
@@ -452,15 +452,15 @@ int main(){
   int i; switch(2){
     case 4: i=4; {
       int j; switch(4){
-        case 4: j=4; int k=i-j; int s=a[k]+a[k+1]; 
+        case 4: j=4; int k=i-j; int s=a[k]+a[k+1];
           int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
-        case 3: j=3; int k=i-j; int s=a[k]+a[k+1]; 
+        case 3: j=3; int k=i-j; int s=a[k]+a[k+1];
           int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
-        case 2: j=2; int k=i-j; int s=a[k]+a[k+1]; 
+        case 2: j=2; int k=i-j; int s=a[k]+a[k+1];
           int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
-        case 1: j=1; int k=i-j; int s=a[k]+a[k+1]; 
+        case 1: j=1; int k=i-j; int s=a[k]+a[k+1];
           int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
-        case 0: j=0; int k=i-j; int s=a[k]+a[k+1]; 
+        case 0: j=0; int k=i-j; int s=a[k]+a[k+1];
           int d=abs(a[k]-a[k+1]); a[k] = (s-d)/2; a[k+1] = (s+d)/2;
         }
       }
@@ -472,12 +472,12 @@ int main(){
   printf("%d %d %d %d\n", a[0], a[1], a[2], a[3]);
 }
 
-    </span><span id="unroll_3" style="display:none"><div style="color:#992244"><b>Step 3. C pseudo-code after dead cases elimination</b></div>  
+    </span><span id="unroll_3" style="display:none"><div style="color:#992244"><b>Step 3. C pseudo-code after dead cases elimination</b></div>
 #include "stdio.h"
 
 int main(){
   int a[4] = {1, 5, 2, 4};
-  int i; 
+  int i;
   i = 2;
   j = 2; int k=i-j; int s=a[k]+a[k+1]; int d=abs(a[k]-a[k+1]);
     a[k] = (s-d)/2; a[k+1] = (s+d)/2;
@@ -490,7 +490,7 @@ int main(){
     a[k] = (s-d)/2; a[k+1] = (s+d)/2;
   j = 0; int k=i-j; int s=a[k]+a[k+1]; int d=abs(a[k]-a[k+1]);
     a[k] = (s-d)/2; a[k+1] = (s+d)/2;
-  i = 0;   
+  i = 0;
   j = 0; int k=i-j; int s=a[k]+a[k+1]; int d=abs(a[k]-a[k+1]);
     a[k] = (s-d)/2; a[k+1] = (s+d)/2;
   }
@@ -500,7 +500,7 @@ int main(){
 
 
 
-    </span><span id="unroll_4" style="display:none"><div style="color:#881122"><b>Step 4. Pseudo-code after constant propagation</b></div> 
+    </span><span id="unroll_4" style="display:none"><div style="color:#881122"><b>Step 4. Pseudo-code after constant propagation</b></div>
 
 
 
@@ -563,13 +563,13 @@ int main(){
     <button type="button" id="unroll_button" onclick="next('unroll')">Next step</button>
     </p>
     <p>
-Technically, one can do the very same hack with the inlined pseudo-recursion from before. But this compiles faster and it has shown itself easier to debug. 
+Technically, one can do the very same hack with the inlined pseudo-recursion from before. But this compiles faster and it has shown itself easier to debug.
     </p>
     <h2>
 Racing LAPACK
     </h2>
     <p>
-<a href="http://www.netlib.org/lapack/">LAPACK</a> is known to be a rather effective library for solving linear algebra problems. I'm going to measure how it performs on 1M small linear systems, and compare it to the brute Cramer's rule solution done with loops and recursive functions first, and with metaprogramming tricks to remove overhead then. 
+<a href="http://www.netlib.org/lapack/">LAPACK</a> is known to be a rather effective library for solving linear algebra problems. I'm going to measure how it performs on 1M small linear systems, and compare it to the brute Cramer's rule solution done with loops and recursive functions first, and with metaprogramming tricks to remove overhead then.
     </p>
     <p>
 That's exactly what I want to measure:
@@ -609,7 +609,7 @@ int main() {
             sum_x[j] += b[j];
         }
     }
-    printf("%f, %f, %f, %f, %f\n", 
+    printf("%f, %f, %f, %f, %f\n",
       sum_x[0], sum_x[1], sum_x[2], sum_x[3], sum_x[4]);
 }
     </pre>
@@ -626,19 +626,19 @@ But first, the version with all the overheads:
 #include "stdio.h"
 
 double aijn(double* a, double* b, int i, int j, int n, int m){
-  return (n == m) ? a[i*m+j] : 
-    aijn(a, b, i, j, n+1, m) * aijn(a, b, n, n, n+1, m) - 
+  return (n == m) ? a[i*m+j] :
+    aijn(a, b, i, j, n+1, m) * aijn(a, b, n, n, n+1, m) -
     aijn(a, b, i, n, n+1, m) * aijn(a, b, n, j, n+1, m);
 }
 
-double bin(double* a, double* b, int i, int n, int m){ 
-  return (n == m) ? b[i] : 
-    aijn(a, b, n, n, n+1, m) * bin(a, b, i, n+1, m) - 
+double bin(double* a, double* b, int i, int n, int m){
+  return (n == m) ? b[i] :
+    aijn(a, b, n, n, n+1, m) * bin(a, b, i, n+1, m) -
     aijn(a, b, i, n, n+1, m) * bin(a, b, n, n+1, m);
 }
 
 void solve_xi(double* a, double* b, double* x, int i, int m){
-  double d = bin(a, b, i, i+1, m); 
+  double d = bin(a, b, i, i+1, m);
   for(int j = 0; j &lt; i; ++j)
     d-=aijn(a, b, i, j, i+1, m)*x[j];
   x[i] = d / aijn(a, b, i, i, i+1, m);
@@ -662,7 +662,7 @@ int main() {
         double b[5] = {
             4.02,  6.19, -8.22, -7.57, -3.03,
         };
-        
+
         double x[5];
 
         runtime_solve(a, b, x, sizeof(x) / sizeof(x[0]));
@@ -670,11 +670,11 @@ int main() {
             sum_x[j] += x[j];
         }
     }
-    printf("%f, %f, %f, %f, %f\n", 
+    printf("%f, %f, %f, %f, %f\n",
       sum_x[0], sum_x[1], sum_x[2], sum_x[3], sum_x[4]);
 }
     </pre>
-    </td></tr></table>    
+    </td></tr></table>
     <p>
 It has a loop, a nested loop and a pair of recursive functions. Nothing we can't linearize with macros. The version with metaprogramming tricks looks like this:
     </p>
@@ -707,18 +707,18 @@ case 0: ID=0;{BODY};\
 
 #define LOOP_DOWNTO(ID, START, END, BODY) \
   LOOP_TO_0(ID, (START)-(END), ID=(END)+ID; BODY)
-  
+
 </pre></td></tr><tr><td><pre>
 <b>// from static_linear_solver.h</b>
-RECURSIVE_4_CALLS(double aijn, (double* a, double* b, int i, int j, int n, int m){ 
-  return (n == m) ? a[i*m+j] : 
-    aijn, (a, b, i, j, n+1, m) * aijn, (a, b, n, n, n+1, m) - 
-    aijn, (a, b, i, n, n+1, m) * aijn, (a, b, n, j, n+1, m); 
+RECURSIVE_4_CALLS(double aijn, (double* a, double* b, int i, int j, int n, int m){
+  return (n == m) ? a[i*m+j] :
+    aijn, (a, b, i, j, n+1, m) * aijn, (a, b, n, n, n+1, m) -
+    aijn, (a, b, i, n, n+1, m) * aijn, (a, b, n, j, n+1, m);
 }, (double* a, double* b, int i, int j, int n, int m){return a[i*m+j];})
 
-RECURSIVE_4_CALLS(double bin, (double* a, double* b, int i, int n, int m){ 
-  return (n == m) ? b[i] : 
-    aijn, (a, b, n, n, n+1, m) * bin, (a, b, i, n+1, m) - 
+RECURSIVE_4_CALLS(double bin, (double* a, double* b, int i, int n, int m){
+  return (n == m) ? b[i] :
+    aijn, (a, b, n, n, n+1, m) * bin, (a, b, i, n+1, m) -
     aijn, (a, b, i, n, n+1, m) * bin, (a, b, n, n+1, m);
 }, (double* a, double* b, int i, int n, int m){return b[i];})
 
@@ -730,7 +730,7 @@ RECURSIVE_4_CALLS(double bin, (double* a, double* b, int i, int n, int m){
 #define STATIC_SOLVE(A, B, X) \
   int m = sizeof(X) / sizeof(X[0]); \
   LOOP_TO(k, 0, m-1, SOLVE_X(A, B, X, k, m););
-  
+
 </pre></td></tr><tr><td><pre>
 <b>// and the benchmark itself</b>
 #include "stdio.h"
@@ -748,18 +748,18 @@ int main() {
         };
         double a[5*5] = {
             v_a[0+0],  v_a[0+1],  v_a[0+2],  v_a[0+3],  v_a[0+4],
-            v_a[5+0],  v_a[5+1],  v_a[5+2],  v_a[5+3],  v_a[5+4], 
+            v_a[5+0],  v_a[5+1],  v_a[5+2],  v_a[5+3],  v_a[5+4],
             v_a[10+0], v_a[10+1], v_a[10+2], v_a[10+3], v_a[10+4],
             v_a[15+0], v_a[15+1], v_a[15+2], v_a[15+3], v_a[15+4],
             v_a[20+0], v_a[20+1], v_a[20+2], v_a[20+3], v_a[20+4],
         };
         volatile double v_b[5] = {
             4.02,  6.19, -8.22, -7.57, -3.03,
-        };    
+        };
         double b[5] = {
             v_b[0],  v_b[1], v_b[2], v_b[3], v_b[4],
         };
-        
+
         double x[5];
 
         STATIC_SOLVE(a, b, x);
@@ -772,10 +772,10 @@ int main() {
     </pre>
     </td></tr></table>
     <p>
-Note that the input arrays start as volatile but then get copied to the non-modified arrays used as the STATIC_SOLVE's input. The thing is, if we don't do that, the whole thing gets solved statically for 0 runtime cost. That's not all I want to measure. I want my compiler to build a code that would work on arbitrary data, that's why the input data should be volatile. 
+Note that the input arrays start as volatile but then get copied to the non-modified arrays used as the STATIC_SOLVE's input. The thing is, if we don't do that, the whole thing gets solved statically for 0 runtime cost. That's not all I want to measure. I want my compiler to build a code that would work on arbitrary data, that's why the input data should be volatile.
     </p>
     <p>
-On the other hand, having volatile as function argument inside the macros would kill the optimization for constant data, and I want static and semi-static solutions measured as well. 
+On the other hand, having volatile as function argument inside the macros would kill the optimization for constant data, and I want static and semi-static solutions measured as well.
     </p>
     <p>
 We can have both static and runtime solution with explicit copying. This way a single macros fits every possible configuration of constant and volatile data. In this regard it makes sense to measure not only LAPACK and metaprogrammed solution, but several other things as well. Here are the measurements.
@@ -809,12 +809,12 @@ Original solution with recursion and loops. 10 KLOC, 2.10 seconds.
     </script>
     <p>
 Of course, these measurements are not at all precise but I think they still work since the numbers are so distinct.
-    </p> 
+    </p>
     <h2>
 Conclusion
     </h2>
     <p>
-You can trick the compiler into doing things it wouldn't normally do, and benefit from this performance-wise. Technically, you can even do this without macros, but macros make it easier. 
+You can trick the compiler into doing things it wouldn't normally do, and benefit from this performance-wise. Technically, you can even do this without macros, but macros make it easier.
     </p>
     <p>
 Apart from the tricks themselves there are also some things worth mentioning.

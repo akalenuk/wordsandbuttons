@@ -192,7 +192,7 @@ function do_spline2(grid_xs, grid_ys, grid_n, derivative_divisor, callback_on_se
     var d_x = 0;
     var d_y = 0;
     var ox = grid_xs[0];
-    var oy = grid_ys[0]; 
+    var oy = grid_ys[0];
     for(var T = 0.0; T <= grid_n - 1 + 0.001; T += 0.01) {
         if(T >= nT){   // spline on the new grid piece
             cx = grid_xs[nT];
@@ -207,11 +207,11 @@ function do_spline2(grid_xs, grid_ys, grid_n, derivative_divisor, callback_on_se
         var t01=T-(nT-1);
         var x=ax*t01*t01 + bx*t01 + cx;
         var y=ay*t01*t01 + by*t01 + cy;
-        
+
         callback_on_segment(ox, oy, x, y); // drawing part
         ox = x;
         oy = y;
-        
+
         // derivatives
         d_x = (2 * ax * t01 + bx) / derivative_divisor;
         d_y = (2 * ay * t01 + by) / derivative_divisor;
@@ -226,7 +226,7 @@ function do_spline3(grid_xs, grid_ys, grid_n, derivative_divisor, callback_on_se
     var dd_x = 0;
     var dd_y = 0;
     var ox = grid_xs[0];
-    var oy = grid_ys[0]; 
+    var oy = grid_ys[0];
     for(var T = 0.0; T <= grid_n - 1 + 0.001; T += 0.01) {
         if(T >= nT){   // spline on the new grid piece
             dx = grid_xs[nT];
@@ -243,11 +243,11 @@ function do_spline3(grid_xs, grid_ys, grid_n, derivative_divisor, callback_on_se
         var t01=T-(nT-1);
         var x=ax*t01*t01*t01 + bx*t01*t01 + cx*t01 + dx;
         var y=ay*t01*t01*t01 + by*t01*t01 + cy*t01 + dy;
-        
+
         callback_on_segment(ox, oy, x, y); // drawing part
         ox = x;
         oy = y;
-        
+
         // derivatives
         d_x = (3*ax*t01*t01+2*bx*t01+cx) / derivative_divisor;
         d_y = (3*ay*t01*t01+2*by*t01+cy) / derivative_divisor;
@@ -308,9 +308,9 @@ function draw_dots_and_guides(context, grid_xs, grid_ys, grid_n, do_guides, clie
             closest_i = i;
         }
     }
-    
+
     // guides
-    if(do_guides){        
+    if(do_guides){
         context.setLineDash([4, 4]);
         context.beginPath();
         context.moveTo(x_to_client(grid_xs[closest_i]), y_to_client(grid_ys[closest_i]));
@@ -320,7 +320,7 @@ function draw_dots_and_guides(context, grid_xs, grid_ys, grid_n, do_guides, clie
         context.closePath();
         context.setLineDash([]);
     }
-    
+
     return closest_i;
 }
 
@@ -380,7 +380,7 @@ function parametric_draw(client_x, client_y, do_guides){
     }
 
     Xx = solved_linear(Ax, Bx, parametric_n);
-    
+
     var Ay = [];
     var By = [];
     for(var i = 0; i < parametric_n; ++i){
@@ -392,7 +392,7 @@ function parametric_draw(client_x, client_y, do_guides){
         By[i] = parametric_ys[i];
     }
     Xy = solved_linear(Ay, By, parametric_n);
-    
+
 
     parametric_context.beginPath();
     for(var j = -0.25; j <= parametric_n - 1 + 0.25; j += 0.01){
@@ -409,8 +409,8 @@ function parametric_draw(client_x, client_y, do_guides){
 
     // dots and guides (guide sets the current point to drag)
     parametric_i = draw_dots_and_guides(
-        parametric_context, 
-        parametric_xs, parametric_ys, parametric_n, 
+        parametric_context,
+        parametric_xs, parametric_ys, parametric_n,
         do_guides, client_x, client_y);
 }
 
@@ -420,7 +420,7 @@ function splines_draw(client_x, client_y, do_guides){
     spline2_derivatives_draw(client_x, client_y, do_guides);
     spline3_draw(client_x, client_y, do_guides);
     spline3_derivatives_draw(client_x, client_y, do_guides);
-    compensated_spline3_derivatives_draw(client_x, client_y, do_guides);    
+    compensated_spline3_derivatives_draw(client_x, client_y, do_guides);
 }
 
 // splines parameters
@@ -473,15 +473,15 @@ function spline3_draw(client_x, client_y, do_guides){
         spline3_context.moveTo(x_to_client(ox), y_to_client(oy));
         spline3_context.lineTo(x_to_client(x), y_to_client(y));
     })
-    
+
     spline3_context.strokeStyle="#661100";
     spline3_context.stroke();
     spline3_context.closePath();
 
     // dots and guides
     spline2_i = draw_dots_and_guides(
-        spline3_context, 
-        spline2_xs, spline2_ys, spline2_n, 
+        spline3_context,
+        spline2_xs, spline2_ys, spline2_n,
         do_guides, client_x, client_y);
 }
 
@@ -529,15 +529,15 @@ function spline2_draw(client_x, client_y, do_guides){
         spline2_context.moveTo(x_to_client(ox), y_to_client(oy));
         spline2_context.lineTo(x_to_client(x), y_to_client(y));
     })
-    
+
     spline2_context.strokeStyle="#661100";
     spline2_context.stroke();
     spline2_context.closePath();
 
     // dots and guides
     spline2_i = draw_dots_and_guides(
-        spline2_context, 
-        spline2_xs, spline2_ys, spline2_n, 
+        spline2_context,
+        spline2_xs, spline2_ys, spline2_n,
         do_guides, client_x, client_y);
 }
 
@@ -586,26 +586,26 @@ function spline2_derivatives_draw(client_x, client_y, do_guides){
         spline2_derivatives_context.moveTo(x_to_client(x), y_to_client(y));
         spline2_derivatives_context.lineTo(x_to_client(x - 10.0*(y-oy)), y_to_client(y + 10.0*(x-ox)));
     })
-    
+
     spline2_derivatives_context.strokeStyle="#DD6644";
     spline2_derivatives_context.stroke();
     spline2_derivatives_context.closePath();
-    
+
     // spline2
     spline2_derivatives_context.beginPath();
     do_spline2(spline2_xs, spline2_ys, spline2_n, 1.0, function(ox, oy, x, y){
         spline2_derivatives_context.moveTo(x_to_client(ox), y_to_client(oy));
         spline2_derivatives_context.lineTo(x_to_client(x), y_to_client(y));
     })
-    
+
     spline2_derivatives_context.strokeStyle="#661100";
     spline2_derivatives_context.stroke();
     spline2_derivatives_context.closePath();
 
     // dots and guides
     spline2_i = draw_dots_and_guides(
-        spline2_derivatives_context, 
-        spline2_xs, spline2_ys, spline2_n, 
+        spline2_derivatives_context,
+        spline2_xs, spline2_ys, spline2_n,
         do_guides, client_x, client_y);
 }
 
@@ -654,26 +654,26 @@ function spline3_derivatives_draw(client_x, client_y, do_guides){
         spline3_derivatives_context.moveTo(x_to_client(x), y_to_client(y));
         spline3_derivatives_context.lineTo(x_to_client(x - 10.0*(y-oy)), y_to_client(y + 10.0*(x-ox)));
     })
-    
+
     spline3_derivatives_context.strokeStyle="#DD6644";
     spline3_derivatives_context.stroke();
     spline3_derivatives_context.closePath();
-    
+
     // spline2
     spline3_derivatives_context.beginPath();
     do_spline3(spline2_xs, spline2_ys, spline2_n, 1.0, function(ox, oy, x, y){
         spline3_derivatives_context.moveTo(x_to_client(ox), y_to_client(oy));
         spline3_derivatives_context.lineTo(x_to_client(x), y_to_client(y));
     })
-    
+
     spline3_derivatives_context.strokeStyle="#661100";
     spline3_derivatives_context.stroke();
     spline3_derivatives_context.closePath();
 
     // dots and guides
     spline2_i = draw_dots_and_guides(
-        spline3_derivatives_context, 
-        spline2_xs, spline2_ys, spline2_n, 
+        spline3_derivatives_context,
+        spline2_xs, spline2_ys, spline2_n,
         do_guides, client_x, client_y);
 }
 
@@ -719,31 +719,31 @@ function compensated_spline3_derivatives_draw(client_x, client_y, do_guides){
 
     // spline2 derivatives
     compensated_spline3_derivatives_context.beginPath();
-    
+
     do_spline3(spline2_xs, spline2_ys, spline2_n, compensated_spline3_derivative_divisor, function(ox, oy, x, y){
         compensated_spline3_derivatives_context.moveTo(x_to_client(x), y_to_client(y));
         compensated_spline3_derivatives_context.lineTo(x_to_client(x - 10.0*(y-oy)), y_to_client(y + 10.0*(x-ox)));
     })
-    
+
     compensated_spline3_derivatives_context.strokeStyle="#DD6644";
     compensated_spline3_derivatives_context.stroke();
     compensated_spline3_derivatives_context.closePath();
-    
+
     // spline2
     compensated_spline3_derivatives_context.beginPath();
     do_spline3(spline2_xs, spline2_ys, spline2_n, compensated_spline3_derivative_divisor, function(ox, oy, x, y){
         compensated_spline3_derivatives_context.moveTo(x_to_client(ox), y_to_client(oy));
         compensated_spline3_derivatives_context.lineTo(x_to_client(x), y_to_client(y));
     })
-    
+
     compensated_spline3_derivatives_context.strokeStyle="#661100";
     compensated_spline3_derivatives_context.stroke();
     compensated_spline3_derivatives_context.closePath();
 
     // dots and guides
     spline2_i = draw_dots_and_guides(
-        compensated_spline3_derivatives_context, 
-        spline2_xs, spline2_ys, spline2_n, 
+        compensated_spline3_derivatives_context,
+        spline2_xs, spline2_ys, spline2_n,
         do_guides, client_x, client_y);
 }
 
@@ -805,34 +805,34 @@ function animation_tick() {
         var t01 = animation_t;
         animation_x = animation_ax*t01*t01 + animation_bx*t01 + animation_cx;
         animation_y = animation_ay*t01*t01 + animation_by*t01 + animation_cy;
-        
+
         // derivatives
         animation_d_x = (2*animation_ax*t01 + animation_bx);
         animation_d_y = (2*animation_ay*t01 + animation_by);
     }
-    
+
     draw_animation();
-    
+
     animation_ox = animation_x;
     animation_oy = animation_y;
-    
+
     // derivative attenuation
     var d_length = Math.sqrt(animation_d_x*animation_d_x + animation_d_y*animation_d_y);
     if(d_length > 1.0){
         animation_d_x *= 0.95;
         animation_d_y *= 0.95;
     }
-    
+
     setTimeout(animation_tick, 40);
 }
 
 function draw_animation() {
     animation = document.getElementById("animation");
-    var animation_context = animation.getContext("2d");    
+    var animation_context = animation.getContext("2d");
     // background
     animation_context.fillStyle = "#aabbee";
     animation_context.fillRect(0, 0, 640, 640);
-    
+
     // dots
     animation_context.beginPath();
     for(var i = 1; i < animation_xs.length; ++i){
@@ -845,16 +845,16 @@ function draw_animation() {
     animation_context.strokeStyle = "#BB6644";
     animation_context.stroke();
     animation_context.closePath();
-    
+
     // thing that moves around
-   
+
     // normalized tail (we don't want in to be 0)
     var d_length = Math.sqrt(animation_d_x*animation_d_x + animation_d_y*animation_d_y);
     var tail_x = -animation_d_x / d_length;
     var tail_y = -animation_d_y / d_length;
-    // width 
+    // width
     var width = 1.0 + 15.0 / Math.max(1.0, d_length / 100);
-    
+
     // tail
     animation_context.beginPath();
     animation_context.moveTo(animation_ox + tail_x * width + 0.5, animation_oy + tail_y * width + 0.5);
@@ -862,7 +862,7 @@ function draw_animation() {
     animation_context.lineWidth = width;
     animation_context.strokeStyle = "#331100";
     animation_context.stroke();
-    animation_context.closePath();    
+    animation_context.closePath();
     // head
     for(var i = 0; i < width; ++i){
         animation_context.beginPath();
@@ -871,7 +871,7 @@ function draw_animation() {
         animation_context.lineWidth = 1.5 * (width-i);
         animation_context.strokeStyle = "#331100";
         animation_context.stroke();
-        animation_context.closePath();        
+        animation_context.closePath();
     }
 }
 
@@ -897,7 +897,7 @@ Quadratic splines are useful too
 Usually, when people talk about splines, like at a party or in a pub, they talk about polynomial cubic splines. This makes sense as it is the simplest piece of function you can link together with any other two functions and expect continuity and smoothness at the joints. But can you get it even simpler than that?
     </p>
     <p>
-Consider this. A parametric curve is a curve that has its every point defined as a function of some parameter. Let's build a polynomial curve that runs through 4 points. 
+Consider this. A parametric curve is a curve that has its every point defined as a function of some parameter. Let's build a polynomial curve that runs through 4 points.
     </p>
     <p class="formula">
 x(t) = a<sub>x</sub>t<sup>3</sup> + b<sub>x</sub>t<sup>2</sup> + c<sub>x</sub>t + d<sub>x</sub>
@@ -942,13 +942,13 @@ a<sub>yi</sub>(t+1)<sup>3</sup> + b<sub>yi</sub>(t+1)<sup>2</sup> + c<sub>yi</su
 6a<sub>yi</sub>t + 2b<sub>yi</sub> = 6a<sub>yi-1</sub>t + 2b<sub>yi-1</sub>
     </p>
     <p>
-The first and the second equations here are just the interpolation conditions. The third and the fourth are the ones that connect the derivatives of the i-th piece and of its successor's. 
+The first and the second equations here are just the interpolation conditions. The third and the fourth are the ones that connect the derivatives of the i-th piece and of its successor's.
     </p>
     <p>
 Here is an example of a 3-piece curve made of such one-sided cubic splines. Feel free to drag the points.
     </p>
-    
-    <canvas id="spline3" width=640 height=512></canvas>    
+
+    <canvas id="spline3" width=640 height=512></canvas>
     <p>
 As you can see, it is smooth and continuous, so it's kind of a win. But it is nearly impossible to make it go where you want it to. It's even worse than with the Runge effect, it starts almost immediately.
     </p>
@@ -959,7 +959,7 @@ You probably noticed that the first segment is straight. That's because both the
 Still, since we keep the second derivative continuous, we know that our first derivative is smooth. You can see it in the next plot. The “hair” is the depiction of the derivative vector's length in multiple points. And yes, since the curve is parametric, and it's formed by two functions, it has two derivatives in every point: <i>dx/dt</i> and <i>dy/dt</i>, and you can make a vector out of them.
     </p>
     <canvas id="spline3_derivatives" width=640 height=512></canvas>
-    
+
     <p>
 Now here is a trick that may help us tame the curve we got. With a function's plot, we can expect it to be smooth only if the first derivative of a function is continuous. That's true for plots. But for parametric curves, the tangent is not the same as the derivative. It's the proportion of its derivatives. It doesn't have to be like this:
     </p>
@@ -978,7 +978,7 @@ dp<sub>xi</sub>(t) / dt
     </td>
     <td rowspan=3 style="vertical-align: middle; width: 64pt; ">=</td>
     <td style="border-bottom:1px solid black">
-dp<sub>xi+1</sub>(t) / dt    
+dp<sub>xi+1</sub>(t) / dt
     </td>
     </tr>
     <tr>
@@ -989,7 +989,7 @@ dp<sub>yi</sub>(t) / dt
 dp<sub>yi+1</sub>(t) / dt
     </td>
     </tr>
-    </table>    
+    </table>
     <p>
 Simply put, this means that when your curve becomes uncontrollable, you can safely slow it down. Cut down its derivatives in every grip point to make it more like a piece-wise linear interpolation.
     </p>
@@ -1004,8 +1004,8 @@ Here is the example when in every grid point the derivative gets divided by some
     </form>
     <canvas id="compensated_spline3_derivatives" width=640 height=512></canvas>
     <p>
-Look at its hair! It's no longer continuous, it gets cut off after every grid point.    
-    </p>    
+Look at its hair! It's no longer continuous, it gets cut off after every grid point.
+    </p>
     <p>
 We also have another way to calm down our curve and it's to drop its second derivative in every grid point effectively turning it... into a quadratic spline!
     </p>
@@ -1033,7 +1033,7 @@ The first derivative is then continuous but it isn't smooth anymore. You can see
     init_spline3_derivatives();
     init_compensated_spline3_derivatives();
     </script>
-    
+
     <p>
 Now, this has all been fun, but is it really a problem to solve? I mean, why would we want to have a curve that grows as we plot it? Well, we might not want exactly that. But there is a niche for building splines on the go, and it is the animation.
     </p>
@@ -1044,7 +1044,7 @@ Here is an arrow. Just click somewhere on the canvas, and it will go there. Setu
     <script language="JavaScript">
     init_animation();
     </script>
-            
+
     <h2>
 Conclusion
     </h2>

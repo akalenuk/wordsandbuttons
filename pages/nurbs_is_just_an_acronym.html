@@ -161,7 +161,7 @@ function index_in_knots(t, nurbs_knot) {
     for(var i = 0; i < nurbs_knot.length - 1; ++i) {
         if(t >= nurbs_knot[i] && t < nurbs_knot[i+1])
             return i;
-    }    
+    }
     return -1;
 }
 
@@ -175,7 +175,7 @@ function affine(xs, ws) {
 function nurbs_in_t(t, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_knot, p){
     // de Boor
     var k = index_in_knots(t, nurbs_knot);
-     
+
     var d_x = [];
     var d_y = [];
     var d_w = [];
@@ -184,7 +184,7 @@ function nurbs_in_t(t, nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nur
         d_y.push(nurbs_control_ys[j + k - p]);
         d_w.push(nurbs_control_ws[j + k - p]);
     }
-    
+
     for(var r = 1; r < p+1; ++r){
         for(var j = p; j > r - 1; --j){
             var alpha = (t - nurbs_knot[j+k-p]) / (nurbs_knot[j+1+k-r] - nurbs_knot[j+k-p]);
@@ -249,9 +249,9 @@ function draw_dots_and_guides_on(context, grid_xs, grid_ys, grid_n, do_guides, c
             closest_i = i;
         }
     }
-    
+
     // guides
-    if(do_guides){        
+    if(do_guides){
         context.setLineDash([4, 4]);
         context.beginPath();
         context.moveTo(x_to_client(grid_xs[closest_i]), y_to_client(grid_ys[closest_i]));
@@ -261,7 +261,7 @@ function draw_dots_and_guides_on(context, grid_xs, grid_ys, grid_n, do_guides, c
         context.closePath();
         context.setLineDash([]);
     }
-    
+
     return closest_i;
 }
 
@@ -282,7 +282,7 @@ function draw_nurbs_on(context, nurbs_control_xs, nurbs_control_ys, nurbs_contro
 }
 
 
-// nurbs 
+// nurbs
 var nurbs_control_xs = [1.0, 2.5, 4.8, 6.8, 8.2];
 var nurbs_control_ys = [3.0, 2.2, 2.3, 3.5, 5.5];
 var nurbs_control_ws = [1.0, 1.0, 1.0, 1.0, 1.0];
@@ -302,7 +302,7 @@ const between_knots_colors = ["#665566", "#FF3322", "#AA5500", "#BBAA11", "#0077
 function all_nurbs_draw(client_x, client_y, do_guides){
     nurbs_draw_bs(client_x, client_y, do_guides);
     nurbs_draw_nu(client_x, client_y, do_guides);
-    nurbs_draw_r(client_x, client_y, do_guides);    
+    nurbs_draw_r(client_x, client_y, do_guides);
 }
 
 
@@ -346,12 +346,12 @@ function nurbs_draw_bs(client_x, client_y, do_guides){
     draw_grid_on(nurbs_context);
 
     // nurbs
-    draw_nurbs_on(nurbs_context, 
+    draw_nurbs_on(nurbs_context,
         nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_control_n, nurbs_knot, nurbs_degree);
-    
+
     // dots and guides
-    nurbs_bs_i = draw_dots_and_guides_on(nurbs_context, 
-        affine(nurbs_control_xs, nurbs_control_ws), affine(nurbs_control_ys, nurbs_control_ws), nurbs_control_n, 
+    nurbs_bs_i = draw_dots_and_guides_on(nurbs_context,
+        affine(nurbs_control_xs, nurbs_control_ws), affine(nurbs_control_ys, nurbs_control_ws), nurbs_control_n,
         do_guides, client_x, client_y);
 }
 
@@ -408,12 +408,12 @@ function nurbs_draw_nu(client_x, client_y, do_guides){
     draw_grid_on(nurbs_context);
 
     // nurbs
-    draw_nurbs_on(nurbs_context, 
+    draw_nurbs_on(nurbs_context,
         nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_control_n, nurbs_knot, nurbs_degree);
-    
+
     // dots and guides
-    nurbs_nu_i = draw_dots_and_guides_on(nurbs_context, 
-        affine(nurbs_control_xs, nurbs_control_ws), affine(nurbs_control_ys, nurbs_control_ws), nurbs_control_n, 
+    nurbs_nu_i = draw_dots_and_guides_on(nurbs_context,
+        affine(nurbs_control_xs, nurbs_control_ws), affine(nurbs_control_ys, nurbs_control_ws), nurbs_control_n,
         do_guides, client_x, client_y);
 }
 
@@ -424,7 +424,7 @@ function init_nurbs_nu_knots(){
 
     nurbs.addEventListener('mousemove', function(e){
         var canvas_rect = nurbs.getBoundingClientRect();
-        
+
         // closest knot
         nurbs_nu_knots_i = 0;
         min_d = Math.abs(nurbs_knot[0] - client_to_x(e.clientX - canvas_rect.left));
@@ -435,7 +435,7 @@ function init_nurbs_nu_knots(){
                 nurbs_nu_knots_i = i;
             }
         }
-    
+
         nurbs_nu_knots_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
         if(e.buttons == 1){
            nurbs_knot[nurbs_nu_knots_i] = client_to_x(e.clientX - canvas_rect.left);
@@ -511,12 +511,12 @@ function nurbs_draw_r(client_x, client_y, do_guides){
     draw_grid_on(nurbs_context);
 
     // nurbs
-    draw_nurbs_on(nurbs_context, 
+    draw_nurbs_on(nurbs_context,
         nurbs_control_xs, nurbs_control_ys, nurbs_control_ws, nurbs_control_n, nurbs_knot, nurbs_degree);
-    
+
     // dots and guides
-    nurbs_r_i = draw_dots_and_guides_on(nurbs_context, 
-        affine(nurbs_control_xs, nurbs_control_ws), affine(nurbs_control_ys, nurbs_control_ws), nurbs_control_n, 
+    nurbs_r_i = draw_dots_and_guides_on(nurbs_context,
+        affine(nurbs_control_xs, nurbs_control_ws), affine(nurbs_control_ys, nurbs_control_ws), nurbs_control_n,
         do_guides, client_x, client_y);
 }
 
@@ -631,12 +631,12 @@ function circle_draw(client_x, client_y, do_guides) {
     draw_grid_on(circle_context);
 
     // nurbs
-    draw_nurbs_on(circle_context, 
+    draw_nurbs_on(circle_context,
         circle_control_xs, circle_control_ys, circle_control_ws, circle_control_n, circle_knot, circle_degree);
-    
+
     // dots and guides
-    circle_i = draw_dots_and_guides_on(circle_context, 
-        affine(circle_control_xs, circle_control_ws), affine(circle_control_ys, circle_control_ws), circle_control_n, 
+    circle_i = draw_dots_and_guides_on(circle_context,
+        affine(circle_control_xs, circle_control_ws), affine(circle_control_ys, circle_control_ws), circle_control_n,
         do_guides, client_x, client_y);
 }
 
@@ -665,7 +665,7 @@ Previously we only talked about Bezier-like <a href="http://wordsandbuttons.onli
 Interpolation is simple. You set a number of control points and you expect a curve to run through all of them. It is intuitive. But it is also limiting. What if you want to control a curve between the control points? What if you want some points to denote a sharp angle and some not? What if you want some points to attract a curve more than the other?
     </p>
     <p>
-NURBS is one way to answer these questions. It is basically three concepts put together. Basis spline that is non-uniform and rational. 
+NURBS is one way to answer these questions. It is basically three concepts put together. Basis spline that is non-uniform and rational.
     </p>
     <p style="font-family: monospace;">
 NURBS = Non
@@ -684,7 +684,7 @@ Let's go through these concept one in a time.
 
     <h2>
 ...BS is for basis spline
-    </h2>    
+    </h2>
     <p>
 The idea here is: for each parameter <i>t</i> we can get a pair of <i>(x, y)</i>, that will form a nice continuous curve, by mixing our control points in different proportions determined by some function of <i>t</i>. For the basis spline, these proportions are determined by the basis polynomials of certain degree.
     </p>
@@ -705,10 +705,10 @@ Here is the example or NURBS-curve built by <a href="https://en.wikipedia.org/wi
     <p>
 The very basic input for NURBS is a set of <b>control points</b> and a basis polynomial <b>degree</b>. But that's not all.
     </p>
-    
+
     <h2>
 NU... is for non-uniform
-    </h2>    
+    </h2>
     <p>
 Having equal parametric pieces may not always be a good idea. That's why we need our spline to be non-uniform. Being able to select how long we want our pieces to be, and where to start, and where to end, — it all adds another level of control.
     </p>
@@ -721,7 +721,7 @@ Here is the same spline, but beneath it, there is a rainbow stripe. Every color 
     <p>
 The input for a NURBS therefore also consists of a <b>knot vector</b>. Every knot is a number in parametric space. As you can see, there are usually more knots than the control points because the higher the degree of basis polynomials, the more knots affect every single piece. Even invisible pieces of the stripe affect the visible pieces of the spline.
     </p>
-    
+
     <h2>
 ...R... is for rational
     </h2>
@@ -746,18 +746,18 @@ Not getting into the rationale for that in the general case, for us this affects
     </p>
     <canvas id="nurbs_r" width=640 height=512></canvas>
     <p>
-These are the weights of points. You can drag them up and down. 
+These are the weights of points. You can drag them up and down.
     </p>
     <canvas id="nurbs_r_weights" width=640 height=128></canvas>
-    
+
     <p>
 Of course, you don't see this, but under the hood the points' <i>x</i> and <y>y</i> coordinates are aligned with the <i>w</i> to keep the ratio. This means, if you don't want to get deep into all this homogeneous stuff, that for NURBS every point has its <b>weight</b> put into all the three coordinates.
     </p>
     <p class="formula">
-<i>w<sub>h</sub></i>: <i>(x, y) = (x<sub>h</sub>w<sub>h</sub>, y<sub>h</sub>w<sub>h</sub>, w<sub>h</sub>)</i>. 
+<i>w<sub>h</sub></i>: <i>(x, y) = (x<sub>h</sub>w<sub>h</sub>, y<sub>h</sub>w<sub>h</sub>, w<sub>h</sub>)</i>.
     </p>
     <p>
-This completes the input for NURBS.    
+This completes the input for NURBS.
     </p>
     <h2>
 Conclusion
@@ -779,7 +779,7 @@ For one, you can't do this with Bezier:
     <canvas id="circle" width=640 height=512></canvas>
     <p>
 This is a real circle, not a model. The NURBS recepie is:
-    </p>        
+    </p>
     <pre>
 degree = 2;
 
@@ -789,13 +789,13 @@ ws = [1,  √2/2,  1,  √2/2,  1,  √2/2,  1,  √2/2,  1]
 
 knots = [0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4]
     </pre>
-    <p> 
+    <p>
 Ok, I also had to scale and translate it to make it bigger and fit a plot canvas nicer. But that's irrelevant. What is important, with NURBS you can do analytical curves: lines, circles, conics, etc. And, of course, you can do Bezier curves as well. You don't need special kinds of objects for all that, they all play by the same rules, they all are representable with knots and points.
     </p>
     <p>
 That's why NURBS are so popular in CAD systems. Not because they are complicated, but because they make computational geometry simpler.
     </p>
-    
+
     <script language="JavaScript">
         init_nurbs_bs();
         init_nurbs_nu();
