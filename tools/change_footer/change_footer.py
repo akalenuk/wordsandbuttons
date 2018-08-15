@@ -1,14 +1,12 @@
 import os
 
-new_footer = """
-    <table class="footer">
+new_footer = """<table class="footer">
     <tr>
     <td class="footer" align="left"><a href="index.html">Home</a></td>
     <td class="footer" align="center"><a href="https://github.com/akalenuk/wordsandbuttons">Github</a></td>
     <td class="footer" align="right"><a href="https://twitter.com/wordsandbuttons">Twitter</a></td>
     </tr>
-    </table>
-"""
+    </table>"""
 
 path = '../../pages/'
 for file_name in os.listdir(path):
