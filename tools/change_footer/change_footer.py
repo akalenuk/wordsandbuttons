@@ -1,10 +1,19 @@
 import os
 
-new_footer = """<table class="footer">
+new_footer = """<table class="footer" style="">
     <tr>
-    <td class="footer" align="left"><a href="index.html">Home</a></td>
-    <td class="footer" align="center"><a href="https://github.com/akalenuk/wordsandbuttons">Github</a></td>
-    <td class="footer" align="right"><a href="https://twitter.com/wordsandbuttons">Twitter</a></td>
+    <td class="footer" style="vertical-align: middle; text-align: left;">
+        <a href="index.html"><img src="favicon.ico"></a> 
+    </td>
+    <td class="footer" style="vertical-align: middle; text-align: left;">
+        &larr; there's more.
+    </td>
+    <td class="footer" style="vertical-align: middle; text-align: right;">
+        + 
+        <a href="https://github.com/akalenuk/wordsandbuttons">Github</a> & 
+        <a href="https://twitter.com/wordsandbuttons">Twitter</a> & 
+        <a href="https://news.ycombinator.com/from?site=wordsandbuttons.online">Hacker News</a>
+    </td>
     </tr>
     </table>"""
 
