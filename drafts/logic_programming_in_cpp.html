@@ -185,7 +185,7 @@ So, given the following set of facts, does Alice like Bob or not?
     </pre>
     </td>
     </td></tr></table>
-        <div id="shown_prolog">
+    <div id="shown_prolog">
         <button type="button" onclick="show('prolog')">Yes</button>
         <button type="button" onclick="show('prolog')">No</button>
     </div>
@@ -199,8 +199,74 @@ Yes she does. Bob is kind, intelligent and writes in C++. According to our facts
 Analogies in C++
     </h2>
     <p>
-...
+C++ doesn't have facts deduction as a language feature. But it has something similar. It is type deduction. Now let's translate our Prolog programm into C++.
     </p>
+    <p>
+Classes will be our atoms.
+    </p>
+    <p>
+Polymorphic functions will be our facts.
+    </p>
+    <p>
+And a template function will be the rule.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+<b>// people</b>
+class Alice{};
+class Bob{};
+class George{};
+class Steven{};
+
+<b>// languages</b>
+class Cpp{};
+class Prolog{};
+class Assembly{};
+
+<b>// facts</b>
+void kind(Bob);
+void kind(George);
+void kind(Steven);
+void intelligent(Bob);
+void intelligent(Steven);
+void writes(Bob, Cpp);
+void writes(Bob, Assembly);
+void writes(George, Cpp);
+void writes(Steven, Prolog);
+
+<b>// the rule</b>
+template <typename Person> void likes(Alice, Person person)
+{
+    kind(person);
+    intelligent(person);
+    writes(person, Cpp());
+}
+
+<b>// check the rule for Bob</b>
+int main()
+{
+    likes(Alice(), Bob());
+}
+    </pre>
+    </td>
+    </td></tr></table>
+    <p>
+Type dedcuction is not entirely the same as logic programming, but in many regards it works the same. If the program compiles then the compiler could deduce all the types.
+    </p>
+    <p>
+So does Alice like Bob in C++?
+    </p>
+    <div id="shown_cpp">
+        <button type="button" onclick="show('cpp')">Yes</button>
+        <button type="button" onclick="show('cpp')">No</button>
+    </div>
+    <div id="hidden_cpp" style="display:none;">
+        <p>
+Yes she still does. The program compiles only if there is a compilable <i>likes</i> function for <i>Alice</i> and <i>Bob</i>. And our only defined <i>likes</i> is only compilable for <i>Bob</i> if there are compilable <i>kind</i>, <i>intelligent</i>, and <i>writes Cpp</i> functions for him. And there are.
+        </p>
+    </div>
+    
     <h2>
 Logic programming v.s. type deduction
     </h2>
