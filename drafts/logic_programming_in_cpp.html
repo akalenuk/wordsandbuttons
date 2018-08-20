@@ -33,6 +33,13 @@ p {
     text-align: left;
 }
 
+.comment {
+    font-size: 12pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
+
 pre {
     margin: 0 0 0 0;
     padding-top: 12pt;
@@ -43,13 +50,6 @@ pre {
     text-align: left;
     width: 300pt;
 }
-
-.code_piece {
-    font-family: monospace;
-    padding-left: 4pt;
-    padding-right: 4pt;
-}
-
 
 table {
     border-width: 0pt;
@@ -246,7 +246,7 @@ void writes(George, Cpp);
 void writes(Steven, Prolog);
 
 <b>// the rule</b>
-template <typename Person> void likes(Alice, Person person)
+template &lt;typename Person&gt; void likes(Alice, Person person)
 {
     kind(person);
     intelligent(person);
@@ -281,28 +281,171 @@ Yes she still does. The program compiles only if there is a compilable <i>likes<
 Logic programming v.s. type deduction
     </h2>
     <p>
-...
+While being similar, type deduction differs from logic programming in one crucial way. I guess it would be best to illustrate it with example. 
     </p>
-    
-       
+    <p>
+I stole this idea from Bernardo Pires. If you got interested in Prolog and logic programming in general please <a href="https://bernardopires.com/2013/10/try-logic-programming-a-gentle-introduction-to-prolog/">read his article</a>. He uses Prolog to color map of Germany in four colors. We would try to do the same with C++ and the map of Ukraine.
+    </p>
+    <img src="https://cdn-images-1.medium.com/max/800/1*hBkznn2xgarqOZN90wpPeQ.png">
+    <p class="comment">
+By Albedo-ukr [<a href="http://creativecommons.org/licenses/by-sa/2.5">CC BY-SA 2.5</a>], via Wikimedia Commons
+    </p>
+    <p>
+At first we would have to define colors.
+    </p>   
     <table><tr>
     <td>
     <pre>
-...
+<b>// colors</b>
+class Yellow{};
+class Blue{};
+class White{};
+class Green{};
+void color(Yellow);
+void color(Blue);
+void color(White);
+void color(Green);
+    </pre>
+    </td>
+    </td></tr></table>       
+    <p>
+We need to generalize them to use in our rules, and that's one possible way to do that.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+<b>// AnyColor object can be Yellow, Blue, White or Green</b>
+class AnyColor : public Yellow, Blue, White, Green {};
     </pre>
     </td>
     </td></tr></table>
     <p>
-    <div id="shown_1">
-        <button type="button" onclick="show(1)">Yes</button>
-        <button type="button" onclick="show(1)">No</button>
+Unlike C++, Prolog has an operator to declare data inequality. So when Bernardo wants to declare a rule that says that every neighboring states should have different colors, he simply writes this:
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+neighbor(StateAColor, StateBColor) :- color(StateAColor), 
+    color(StateBColor), 
+    StateAColor \= StateBColor. /* \= is the not equal operator */
+    </pre>
+    </td>
+    </td></tr></table>    
+    <p>
+We are deprived of this luxury in C++ but we have our workarounds. For instance, we can define inequality as a set of facts.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+<b>// color inequality (instead of \= orerator)</b>
+void different(Yellow, Blue);
+void different(Yellow, White);
+void different(Yellow, Green);
+void different(Blue, Yellow);
+void different(Blue, White);
+void different(Blue, Green);
+void different(White, Yellow);
+void different(White, Blue);
+void different(White, Green);
+void different(Green, Yellow);
+void different(Green, Blue);
+void different(Green, White);
+    </pre>
+    </td>
+    </td></tr></table>     
+    <p>
+We want every two adjacent regions to have different colors. Here's a rule for that.
+    <p>
+    <table><tr>
+    <td>
+    <pre>
+<b>// neighborhood rule</b>
+template &lt;typename Region1Color, typename Region2Color&gt;
+void neighbor(Region1Color, Region2Color)
+{
+    color(Region1Color());
+    color(Region2Color());
+    different(Region1Color(), Region2Color());
+}
+    </pre>
+    </td>
+    </td></tr></table>    
+    <p>
+Now we have to program the map of Ukraine as pairs of adjacent regions.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+<b>// map: neighborhood of regions</b>
+template &lt;typename ZK, typename LV, typename IF, typename VL,
+          typename CZ, typename TP, typename RV, typename KM, 
+          typename ZH, typename VN, typename OD, typename KV,
+          typename CK, typename CH, typename MK, typename KR,
+          typename PT, typename KS, typename SM, typename DR,
+          typename CR, typename ZP, typename KH, typename DN,
+          typename LH&gt;
+void ukraine(ZK zk, LV lv, IF iv, VL vl, CZ cz, TP tp, RV rv,
+             KM km, ZH zh, VN vn, OD od, KV kv, CK ck, CH ch,
+             MK mk, KR kr, PT pt, KS ks, SM sm, DR dr, CR cr,
+             ZP zp, KH kh, DN dn, LH lh)
+{
+    neighbor(zk, lv);    neighbor(zk, iv);    neighbor(lv, vl);
+    neighbor(lv, rv);    neighbor(lv, tp);    neighbor(lv, iv);
+    neighbor(iv, tp);    neighbor(iv, cz);    neighbor(vl, rv);
+    neighbor(tp, rv);    neighbor(tp, km);    neighbor(tp, cz);
+    neighbor(cz, km);    neighbor(cz, vn);    neighbor(rv, km);
+    neighbor(rv, zh);    neighbor(km, zh);    neighbor(km, vn);
+    neighbor(zh, kv);    neighbor(zh, vn);    neighbor(vn, kv);
+    neighbor(vn, ck);    neighbor(vn, kr);    neighbor(vn, od);
+    neighbor(od, kr);    neighbor(od, mk);    neighbor(kv, ch);
+    neighbor(kv, pt);    neighbor(kv, ck);    neighbor(ck, pt);
+    neighbor(ck, kr);    neighbor(ch, sm);    neighbor(ch, pt);
+    neighbor(mk, kr);    neighbor(mk, dr);    neighbor(mk, ks);
+    neighbor(kr, pt);    neighbor(kr, dr);    neighbor(pt, sm);
+    neighbor(pt, kh);    neighbor(pt, dr);    neighbor(sm, kh);
+    neighbor(ks, cr);    neighbor(ks, zp);    neighbor(dr, kh);
+    neighbor(dr, dn);    neighbor(dr, zp);    neighbor(zp, dn);
+    neighbor(kh, lh);    neighbor(kh, dn);    neighbor(dn, lh);
+}
+    </pre>
+    </td>
+    </td></tr></table>
+    <p>
+All is left is to setup the function to require all the colors deduction. Like this.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+<b>// try to color map of Ukraine</b>
+int main()
+{
+    ukraine(AnyColor(),AnyColor(),AnyColor(),AnyColor(),
+            AnyColor(),AnyColor(),AnyColor(),AnyColor(),
+            AnyColor(),AnyColor(),AnyColor(),AnyColor(),
+            AnyColor(),AnyColor(),AnyColor(),AnyColor(),
+            AnyColor(),AnyColor(),AnyColor(),AnyColor(),
+            AnyColor(),AnyColor(),AnyColor(),AnyColor(),
+            AnyColor());
+}
+    </pre>
+    </td>
+    </td></tr></table>
+    <p>
+Given that there are no typos and we wrote down all our rules and facts correct, will this program compile or not?
+    </p>
+    <div id="shown_ukraine">
+        <button type="button" onclick="show('ukraine')">Yes</button>
+        <button type="button" onclick="show('ukraine')">No</button>
     </div>
-    <div id="hidden_1" style="display:none;">
+    <div id="hidden_ukraine" style="display:none;">
         <p>
-...
+No it will not. Although there are lot of possible colorings, the compiler wouldn't find them. The crucial difference between type deduction and logic programming is that <b>type deduction is unambiguous</b>. 
+        </p>
+        <p>
+You can color map in many different ways, but the compiler has to produce one and only one program out of its source code.
         </p>
     </div>
-
+    
     <p>
 ...    
     </p>
