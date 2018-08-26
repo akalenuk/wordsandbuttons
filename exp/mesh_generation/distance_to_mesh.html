@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cubes test</title>
+    <meta name="keywords" content="iterative,algorithms,guide,tutorial,learning">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.results {
+    font-family: sans-serif;
+    font-size: 14pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.formula {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: italic;
+    width: 505pt;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+}
+
+input[type="text"] {
+    width: 32pt;
+    height: 22pt;
+    font-size: 16pt;
+    text-align: center;
+}
+
+button {
+    width: 32pt;
+    height: 26pt;
+    font-size: 16pt;
+    text-align: center;
+}
+    </style>
+    <script language="JavaScript">
+
+// client
+var w = 640.0;
+var h = 640.0;
+var step = 32.0;
+var distance = 32.0 * 3;
+
+var points = [];
+
+// animation, not essencial for the algorithm
+var animation_d = distance;
+var FPS = 8;
+
+// tri-float to RGB
+function as_XX(x) {
+    return ((x < 16) ? "0" : "") +x.toString(16);
+}
+
+function as_RRGGBB(r_01, g_01, b_01) {
+    var rgb = [r_01, g_01, b_01];
+    var RRGGBB = "#";
+    for(var i = 0; i < 3; ++i) {
+        if (rgb[i] < 0.0)
+            rgb[i] = 0.0;
+        if (rgb[i] > 255.0/256.0)
+            rgb[i] = 255.0/256;
+        RRGGBB += as_XX(Math.floor(rgb[i] * 256.0));
+    }
+    return RRGGBB;
+}
+
+function d_as_RRGGBB(d) {
+    d_0_1 = Math.atan(Math.floor(d / 64.)) / (Math.PI / 2.0);
+    return as_RRGGBB(d_0_1, d_0_1, 1.0);
+}
+
+function step_limited(x) {
+    if(x < -step)
+        return -step;
+    if(x > +step)
+        return +step;
+    return x;
+}
+
+// distance function
+function d_f(x, y) {
+    if (points.length == 0)
+        return distance + 1.0; // no distance field
+    var d = Math.sqrt((x - points[0][0]) * (x - points[0][0]) + (y - points[0][1]) * (y - points[0][1]));
+    for (var i = 1; i < points.length; ++i) {
+        var di = Math.sqrt((x - points[i][0]) * (x - points[i][0]) + (y - points[i][1]) * (y - points[i][1]));
+        if (di < d)
+            d = di;
+    }
+    return d;
+}
+
+function gsx(x, y, distance) {
+    dd = distance - d_f(x, y);
+    dx = ( d_f(x+1, y) - d_f(x, y) );
+    return step_limited(dx * dd);
+}
+
+function gsy(x, y, distance) {
+    dd = distance - d_f(x, y);
+    dy = ( d_f(x, y+1) - d_f(x, y) );
+    return step_limited(dy * dd);
+}
+
+function init_canvas(){
+    var canvas = document.getElementById("canvas");
+    canvas.addEventListener('click', function(e){
+       canvas_rect = canvas.getBoundingClientRect();
+       points.push([e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]);
+       draw_canvas(0, 0, false);
+    }, false);
+    draw_canvas(0, 0, false);
+}
+
+function draw_canvas(client_x, client_y, do_guides){
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // distance function
+    context.fillStyle = "#5555aa";
+    for(var i = 0; i <= h; i += 4.0) 
+        for(var j = 0; j <= w; j += 4.0) {
+            d = d_f(j, i);
+            if (d <= distance)
+                context.fillRect(j-0.5, i-0.5, 1.0, 1.0);
+        } 
+    
+    // grid
+    context.beginPath();
+    for(var i = 0; i <= h; i += step) {
+        context.moveTo(0.0, i);
+        context.lineTo(w, i);
+    }
+    for(var j = 0; j <= w; j += step) {
+        context.moveTo(j, 0.0);
+        context.lineTo(j, h);
+    }
+    context.strokeStyle="#000000";
+    context.lineWidth=1;
+    context.stroke();
+    context.closePath();
+ 
+    // non-shifted cubes
+    context.beginPath();
+    for(var i = 0; i <= h-2; i += step) {
+        for(var j = 0; j <= w-2; j += step) {
+            var do_horizontal = 
+		(d_f(j + 0.5 * step, i - 0.5 * step) - distance ) *
+		(d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+            var do_vertical = 
+		(d_f(j - 0.5 * step, i + 0.5 * step) - distance ) *
+		(d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+            if(do_horizontal) {
+                context.moveTo(j, i);
+                context.lineTo(j + step, i);
+            }
+            if(do_vertical) {
+                context.moveTo(j, i);
+                context.lineTo(j, i + step);                
+            }            
+        }
+    }
+    context.strokeStyle="#AA5555";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath();
+
+    // shifted cubes
+    context.beginPath();
+    for(var i = 0; i <= h-2; i += step) {
+        for(var j = 0; j <= w-2; j += step) {
+            var do_horizontal = 
+		(d_f(j + 0.5 * step, i - 0.5 * step) - distance ) *
+		(d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+            var do_vertical = 
+		(d_f(j - 0.5 * step, i + 0.5 * step) - distance ) *
+		(d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+            if(do_horizontal) {
+                context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
+                context.lineTo(j + step + gsx(j + step, i, distance), i + gsy(j + step, i, distance));
+            }
+            if(do_vertical) {
+                context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
+                context.lineTo(j + gsx(j, i + step, distance), i + step + gsy(j, i + step, distance));
+            }
+        }
+    }
+    context.strokeStyle="#33AA33";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath();
+}
+
+function change_distance() {
+    distance = Number(document.getElementById("distance").value);
+    if(isNaN(distance) || distance < step) {
+        distance = step;
+    }
+    if(distance > w) {
+        distance = w;
+    }
+    document.getElementById("distance").value = distance;
+    draw_canvas(0, 0, false);
+}
+
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) + 1;
+    eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) - 1;
+    eval('change_' + counter_name + '()');
+}
+
+function reset_points() {
+    points = [];
+    draw_canvas(0, 0, false);
+}
+
+function alter_animation_d(dd) {
+    animation_d += dd;
+    if(animation_d < step) {
+        animation_d = step;
+    }
+    if(animation_d > w) {
+        animation_d = w;
+    }
+}
+
+function tick() {
+    if(distance != animation_d) {
+        if(distance < animation_d)
+            distance += 1;
+        if(distance > animation_d)
+            distance -= 1;
+        document.getElementById("distance").value = distance;            
+        draw_canvas(0, 0, false);
+    }
+    setTimeout( function(){tick();}, 1000.0 / FPS);
+}
+
+tick(); // let it tick always
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+
+    </h1>
+    
+    <form onsubmit="return false;">
+    Distance:
+    <button type="button" onclick="alter_animation_d(-step)">&lt;&lt;</button>
+    <button type="button" onclick="dec('distance')">-</button>
+    <input type="text" id="distance" value="96" oninput="change_distance();">
+    <button type="button" onclick="inc('distance')">+</button>
+    <button type="button" onclick="alter_animation_d(+step)">&gt;&gt;</button>
+    </form>
+    <canvas id="canvas" width=640 height=640></canvas>
+    <script language="JavaScript">
+    init_canvas();
+    </script>
+    <div style="text-align:right; width:640px; padding-bottom:12pt;">
+        <button type="button" style="width: 108pt;" onclick="reset_points()">Reset</button>
+    </div>    
+
+    </center>
+  </body>
+</html>
