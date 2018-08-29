@@ -144,6 +144,10 @@ function step_limited(x) {
     return x;
 }
 
+function sign(x) {
+    return (x < 0) ? -1 : 1;
+}
+
 // distance function
 function d_f(x, y) {
     if (points.length == 0)
@@ -237,7 +241,7 @@ function draw_canvas(client_x, client_y, do_guides){
 
     // shifted cubes
     context.beginPath();
-    for(var i = 0; i <= h-2; i += step) {
+    for(var i = 0; i <= h-2; i += step) {   // todo: -2 is wrong
         for(var j = 0; j <= w-2; j += step) {
             var do_horizontal = 
 		(d_f(j + 0.5 * step, i - 0.5 * step) - distance ) *
@@ -259,6 +263,34 @@ function draw_canvas(client_x, client_y, do_guides){
     context.lineWidth=3;
     context.stroke();
     context.closePath();
+    
+    // marching cubes
+    context.beginPath();
+    for(var i = 0; i <= h-2; i += step) {
+        for(var j = 0; j <= w-2; j += step) {
+            var d00 = d_f(j, i);
+            var d01 = d_f(j, i + step);
+            var d11 = d_f(j + step, i + step);
+            var d10 = d_f(j + step, i);
+            var t00_01 = (distance - d00) / (d01 - d00);
+            var t01_11 = (distance - d01) / (d11 - d01);
+            var t11_10 = (distance - d11) / (d10 - d11);
+            var t10_00 = (distance - d10) / (d00 - d10);
+            var s00 = sign(distance - d00);
+            var s01 = sign(distance - d01);
+            var s11 = sign(distance - d11);
+            var s10 = sign(distance - d10);
+
+            if(s00 == -1 && s01 == 1 && s11 == 1 && s10 == 1) {
+                context.moveTo(j + step * (1.0 - t10_00), i);
+                context.lineTo(j, i + step * t00_01);
+            }
+        }
+    }
+    context.strokeStyle="#3333AA";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath();    
 }
 
 function change_distance() {
