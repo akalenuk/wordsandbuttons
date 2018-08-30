@@ -178,12 +178,12 @@ function init_canvas(){
     canvas.addEventListener('click', function(e){
        canvas_rect = canvas.getBoundingClientRect();
        points.push([e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]);
-       draw_canvas(0, 0, false);
+       draw_canvas();
     }, false);
-    draw_canvas(0, 0, false);
+    draw_canvas();
 }
 
-function draw_canvas(client_x, client_y, do_guides){
+function draw_canvas(){
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
     // background
@@ -216,8 +216,8 @@ function draw_canvas(client_x, client_y, do_guides){
  
     // non-shifted cubes
     context.beginPath();
-    for(var i = 0; i <= h-2; i += step) {
-        for(var j = 0; j <= w-2; j += step) {
+    for(var i = 0; i <= h - step; i += step) {
+        for(var j = 0; j <= w - step; j += step) {
             var do_horizontal = 
 		(d_f(j + 0.5 * step, i - 0.5 * step) - distance ) *
 		(d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
@@ -241,8 +241,8 @@ function draw_canvas(client_x, client_y, do_guides){
 
     // shifted cubes
     context.beginPath();
-    for(var i = 0; i <= h-2; i += step) {   // todo: -2 is wrong
-        for(var j = 0; j <= w-2; j += step) {
+    for(var i = 0; i <= h - step; i += step) {   // todo: -2 is wrong
+        for(var j = 0; j <= w - step; j += step) {
             var do_horizontal = 
 		(d_f(j + 0.5 * step, i - 0.5 * step) - distance ) *
 		(d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
@@ -266,8 +266,8 @@ function draw_canvas(client_x, client_y, do_guides){
     
     // marching cubes
     context.beginPath();
-    for(var i = 0; i <= h-2; i += step) {
-        for(var j = 0; j <= w-2; j += step) {
+    for(var i = 0; i <= h - step; i += step) {
+        for(var j = 0; j <= w - step; j += step) {
             var d00 = d_f(j, i);
             var d01 = d_f(j, i + step);
             var d11 = d_f(j + step, i + step);
@@ -359,7 +359,7 @@ function change_distance() {
     }
     animation_d = distance;
     document.getElementById("distance").value = distance;
-    draw_canvas(0, 0, false);
+    draw_canvas();
 }
 
 function inc(counter_name) {
@@ -376,7 +376,7 @@ function dec(counter_name) {
 
 function reset_points() {
     points = [];
-    draw_canvas(0, 0, false);
+    draw_canvas();
 }
 
 function alter_animation_d(dd) {
@@ -396,7 +396,7 @@ function tick() {
         if(distance > animation_d)
             distance -= 1;
         document.getElementById("distance").value = distance;            
-        draw_canvas(0, 0, false);
+        draw_canvas();
     }
     setTimeout( function(){tick();}, 1000.0 / FPS);
 }
