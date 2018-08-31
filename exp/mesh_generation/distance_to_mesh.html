@@ -214,139 +214,145 @@ function draw_canvas(){
     context.stroke();
     context.closePath();
  
-    // non-shifted cubes
-    context.beginPath();
-    for(var i = 0; i <= h - step; i += step) {
-        for(var j = 0; j <= w - step; j += step) {
-            var do_horizontal = 
-		(d_f(j + 0.5 * step, i - 0.5 * step) - distance ) *
-		(d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
-            var do_vertical = 
-		(d_f(j - 0.5 * step, i + 0.5 * step) - distance ) *
-		(d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
-            if(do_horizontal) {
-                context.moveTo(j, i);
-                context.lineTo(j + step, i);
+    // grid border
+    if(document.getElementById("do_grid").checked) {
+        context.beginPath();
+        for(var i = 0; i <= h - step; i += step) {
+            for(var j = 0; j <= w - step; j += step) {
+                var do_horizontal = 
+		    (d_f(j + 0.5 * step, i - 0.5 * step) - distance ) *
+		    (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+                var do_vertical = 
+		    (d_f(j - 0.5 * step, i + 0.5 * step) - distance ) *
+		    (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+                if(do_horizontal) {
+                    context.moveTo(j, i);
+                    context.lineTo(j + step, i);
+                }
+                if(do_vertical) {
+                    context.moveTo(j, i);
+                    context.lineTo(j, i + step);                
+                }            
             }
-            if(do_vertical) {
-                context.moveTo(j, i);
-                context.lineTo(j, i + step);                
-            }            
         }
+        context.strokeStyle="#AA5555";
+        context.lineWidth=3;
+        context.stroke();
+        context.closePath();
     }
-    context.strokeStyle="#AA5555";
-    context.lineWidth=3;
-    context.stroke();
-    context.closePath();
 
-    // shifted cubes
-    context.beginPath();
-    for(var i = 0; i <= h - step; i += step) {   // todo: -2 is wrong
-        for(var j = 0; j <= w - step; j += step) {
-            var do_horizontal = 
-		(d_f(j + 0.5 * step, i - 0.5 * step) - distance ) *
-		(d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
-            var do_vertical = 
-		(d_f(j - 0.5 * step, i + 0.5 * step) - distance ) *
-		(d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
-            if(do_horizontal) {
-                context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
-                context.lineTo(j + step + gsx(j + step, i, distance), i + gsy(j + step, i, distance));
-            }
-            if(do_vertical) {
-                context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
-                context.lineTo(j + gsx(j, i + step, distance), i + step + gsy(j, i + step, distance));
+    // optimized border
+    if(document.getElementById("do_optimized").checked) {
+        context.beginPath();
+        for(var i = 0; i <= h - step; i += step) {   // todo: -2 is wrong
+            for(var j = 0; j <= w - step; j += step) {
+                var do_horizontal = 
+		    (d_f(j + 0.5 * step, i - 0.5 * step) - distance ) *
+		    (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+                var do_vertical = 
+		    (d_f(j - 0.5 * step, i + 0.5 * step) - distance ) *
+		    (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+                if(do_horizontal) {
+                    context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
+                    context.lineTo(j + step + gsx(j + step, i, distance), i + gsy(j + step, i, distance));
+                }
+                if(do_vertical) {
+                    context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
+                    context.lineTo(j + gsx(j, i + step, distance), i + step + gsy(j, i + step, distance));
+                }
             }
         }
+        context.strokeStyle="#33AA33";
+        context.lineWidth=3;
+        context.stroke();
+        context.closePath();
     }
-    context.strokeStyle="#33AA33";
-    context.lineWidth=3;
-    context.stroke();
-    context.closePath();
     
     // marching cubes
-    context.beginPath();
-    for(var i = 0; i <= h - step; i += step) {
-        for(var j = 0; j <= w - step; j += step) {
-            var d00 = d_f(j, i);
-            var d01 = d_f(j, i + step);
-            var d11 = d_f(j + step, i + step);
-            var d10 = d_f(j + step, i);
-            var t00_01 = (distance - d00) / (d01 - d00);
-            var t01_11 = (distance - d01) / (d11 - d01);
-            var t11_10 = (distance - d11) / (d10 - d11);
-            var t10_00 = (distance - d10) / (d00 - d10);
-            var s00 = sign(distance - d00);
-            var s01 = sign(distance - d01);
-            var s11 = sign(distance - d11);
-            var s10 = sign(distance - d10);
+    if(document.getElementById("do_marching").checked) {
+        context.beginPath();
+        for(var i = 0; i <= h - step; i += step) {
+            for(var j = 0; j <= w - step; j += step) {
+                var d00 = d_f(j, i);
+                var d01 = d_f(j, i + step);
+                var d11 = d_f(j + step, i + step);
+                var d10 = d_f(j + step, i);
+                var t00_01 = (distance - d00) / (d01 - d00);
+                var t01_11 = (distance - d01) / (d11 - d01);
+                var t11_10 = (distance - d11) / (d10 - d11);
+                var t10_00 = (distance - d10) / (d00 - d10);
+                var s00 = sign(distance - d00);
+                var s01 = sign(distance - d01);
+                var s11 = sign(distance - d11);
+                var s10 = sign(distance - d10);
 
-            if(s00 == -1 && s01 == 1 && s11 == 1 && s10 == 1) {
-                context.moveTo(j + step * (1.0 - t10_00), i); // top
-                context.lineTo(j, i + step * t00_01);
-            }            
-            if(s00 == 1 && s01 == -1 && s11 == 1 && s10 == 1) {
-                context.moveTo(j, i + step * t00_01); // left
-                context.lineTo(j + step * t01_11, i + step);
-            }
-            if(s00 == -1 && s01 == -1 && s11 == 1 && s10 == 1) {
-                context.moveTo(j + step * (1.0 - t10_00), i);
-                context.lineTo(j + step * t01_11, i + step); // bottom
-            }
-            if(s00 == 1 && s01 == 1 && s11 == -1 && s10 == 1) {            
-                context.moveTo(j + step * t01_11, i + step);
-                context.lineTo(j + step, i + step * (1.0 - t11_10)); // right
-            }
-            if(s00 == -1 && s01 == 1 && s11 == -1 && s10 == 1) {  
-                context.moveTo(j + step * (1.0 - t10_00), i);
-                context.lineTo(j + step, i + step * (1.0 - t11_10));
-                context.moveTo(j, i + step * t00_01);
-                context.lineTo(j + step * t01_11, i + step);
-            }
-            if(s00 == 1 && s01 == -1 && s11 == -1 && s10 == 1) {  
-                context.moveTo(j + step, i + step * (1.0 - t11_10));
-                context.lineTo(j, i + step * t00_01);
-            }
-            if(s00 == -1 && s01 == -1 && s11 == -1 && s10 == 1) {
-                context.moveTo(j + step, i + step * (1.0 - t11_10));
-                context.lineTo(j + step * (1.0 - t10_00), i);
-            }
-            if(s00 == 1 && s01 == 1 && s11 == 1 && s10 == -1) {
-                context.moveTo(j + step * (1.0 - t10_00), i);
-                context.lineTo(j + step, i + step * (1.0 - t11_10));
-            }
-            if(s00 == -1 && s01 == 1 && s11 == 1 && s10 == -1) {
-                context.moveTo(j, i + step * t00_01);
-                context.lineTo(j + step, i + step * (1.0 - t11_10));
-            }
-            if(s00 == 1 && s01 == -1 && s11 == 1 && s10 == -1) {
-                context.moveTo(j + step, i + step * (1.0 - t11_10));
-                context.lineTo(j, i + step * t00_01);
-                context.moveTo(j + step * t01_11, i + step);
-                context.lineTo(j + step * (1.0 - t10_00), i);
-            }
-            if(s00 == -1 && s01 == -1 && s11 == 1 && s10 == -1) {
-                context.moveTo(j + step, i + step * (1.0 - t11_10));
-                context.lineTo(j + step * t01_11, i + step);
-            }
-            if(s00 == 1 && s01 == 1 && s11 == -1 && s10 == -1) {
-                context.moveTo(j + step * t01_11, i + step);
-                context.lineTo(j + step * (1.0 - t10_00), i);
-            }
-            if(s00 == -1 && s01 == 1 && s11 == -1 && s10 == -1) {
-                context.moveTo(j + step * t01_11, i + step);
-                context.lineTo(j, i + step * t00_01);
-            }
-            if(s00 == 1 && s01 == -1 && s11 == -1 && s10 == -1) {
-                context.moveTo(j, i + step * t00_01);
-                context.lineTo(j + step * (1.0 - t10_00), i);
+                if(s00 == -1 && s01 == 1 && s11 == 1 && s10 == 1) {
+                    context.moveTo(j + step * (1.0 - t10_00), i); // top
+                    context.lineTo(j, i + step * t00_01);
+                }            
+                if(s00 == 1 && s01 == -1 && s11 == 1 && s10 == 1) {
+                    context.moveTo(j, i + step * t00_01); // left
+                    context.lineTo(j + step * t01_11, i + step);
+                }
+                if(s00 == -1 && s01 == -1 && s11 == 1 && s10 == 1) {
+                    context.moveTo(j + step * (1.0 - t10_00), i);
+                    context.lineTo(j + step * t01_11, i + step); // bottom
+                }
+                if(s00 == 1 && s01 == 1 && s11 == -1 && s10 == 1) {            
+                    context.moveTo(j + step * t01_11, i + step);
+                    context.lineTo(j + step, i + step * (1.0 - t11_10)); // right
+                }
+                if(s00 == -1 && s01 == 1 && s11 == -1 && s10 == 1) {  
+                    context.moveTo(j + step * (1.0 - t10_00), i);
+                    context.lineTo(j + step, i + step * (1.0 - t11_10));
+                    context.moveTo(j, i + step * t00_01);
+                    context.lineTo(j + step * t01_11, i + step);
+                }
+                if(s00 == 1 && s01 == -1 && s11 == -1 && s10 == 1) {  
+                    context.moveTo(j + step, i + step * (1.0 - t11_10));
+                    context.lineTo(j, i + step * t00_01);
+                }
+                if(s00 == -1 && s01 == -1 && s11 == -1 && s10 == 1) {
+                    context.moveTo(j + step, i + step * (1.0 - t11_10));
+                    context.lineTo(j + step * (1.0 - t10_00), i);
+                }
+                if(s00 == 1 && s01 == 1 && s11 == 1 && s10 == -1) {
+                    context.moveTo(j + step * (1.0 - t10_00), i);
+                    context.lineTo(j + step, i + step * (1.0 - t11_10));
+                }
+                if(s00 == -1 && s01 == 1 && s11 == 1 && s10 == -1) {
+                    context.moveTo(j, i + step * t00_01);
+                    context.lineTo(j + step, i + step * (1.0 - t11_10));
+                }
+                if(s00 == 1 && s01 == -1 && s11 == 1 && s10 == -1) {
+                    context.moveTo(j + step, i + step * (1.0 - t11_10));
+                    context.lineTo(j, i + step * t00_01);
+                    context.moveTo(j + step * t01_11, i + step);
+                    context.lineTo(j + step * (1.0 - t10_00), i);
+                }
+                if(s00 == -1 && s01 == -1 && s11 == 1 && s10 == -1) {
+                    context.moveTo(j + step, i + step * (1.0 - t11_10));
+                    context.lineTo(j + step * t01_11, i + step);
+                }
+                if(s00 == 1 && s01 == 1 && s11 == -1 && s10 == -1) {
+                    context.moveTo(j + step * t01_11, i + step);
+                    context.lineTo(j + step * (1.0 - t10_00), i);
+                }
+                if(s00 == -1 && s01 == 1 && s11 == -1 && s10 == -1) {
+                    context.moveTo(j + step * t01_11, i + step);
+                    context.lineTo(j, i + step * t00_01);
+                }
+                if(s00 == 1 && s01 == -1 && s11 == -1 && s10 == -1) {
+                    context.moveTo(j, i + step * t00_01);
+                    context.lineTo(j + step * (1.0 - t10_00), i);
+                }
             }
         }
+        context.strokeStyle="#3333AA";
+        context.lineWidth=3;
+        context.stroke();
+        context.closePath();    
     }
-    context.strokeStyle="#3333AA";
-    context.lineWidth=3;
-    context.stroke();
-    context.closePath();    
 }
 
 function change_distance() {
@@ -417,6 +423,10 @@ tick(); // let it tick always
     <input type="text" id="distance" value="96" oninput="change_distance();">
     <button type="button" onclick="inc('distance')">+</button>
     <button type="button" onclick="alter_animation_d(+step)">&gt;&gt;</button>
+    <br>
+    <input type="checkbox" id="do_grid" checked="true" onclick="draw_canvas();"/><label for="do_grid">Grid border</label>
+    <input type="checkbox" id="do_optimized" checked="true" onclick="draw_canvas();"/><label for="do_optimized">Optimized border</label>
+    <input type="checkbox" id="do_marching" checked="true" onclick="draw_canvas();"/><label for="do_marching">Marching cubes</label>
     </form>
     <canvas id="canvas" width=640 height=640></canvas>
     <script language="JavaScript">
