@@ -150,25 +150,22 @@ function sign(x) {
 }
 
 function distanceSquaredToLineSegment2(lx1, ly1, ldx, ldy, lineLengthSquared, px, py) {
-   var t; // t===0 at line pt 1 and t ===1 at line pt 2
-   if (!lineLengthSquared) {
-      // 0-length line segment. Any t will return same result
-      t = 0;
-   }
-   else {
+    var t; // t===0 at line pt 1 and t ===1 at line pt 2
+    if (!lineLengthSquared) {  // 0-length line segment. Any t will return same result
+      t = 0.0;
+    } else {
       t = ((px - lx1) * ldx + (py - ly1) * ldy) / lineLengthSquared;
-
-      if (t < 0)
-         t = 0;
-      else if (t > 1)
-         t = 1;
-   }
+      if (t < 0.0)
+         t = 0.0;
+      else if (t > 1.0)
+         t = 1.0;
+    }
    
-   var lx = lx1 + t * ldx,
-       ly = ly1 + t * ldy,
-       dx = px - lx,
-       dy = py - ly;
-   return dx*dx + dy*dy;   
+    var lx = lx1 + t * ldx;
+    var ly = ly1 + t * ldy;
+    var dx = px - lx;
+    var dy = py - ly;
+    return dx*dx + dy*dy;   
 }
 
 function distanceSquaredToLineSegment(lx1, ly1, lx2, ly2, px, py) {
@@ -211,14 +208,16 @@ function gsy(x, y, distance) {
 function init_canvas(){
     var canvas = document.getElementById("canvas");
 	canvas.addEventListener('mousedown', function(e){
-	   canvas_rect = canvas.getBoundingClientRect();
-	   lines.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
+	    canvas_rect = canvas.getBoundingClientRect();
+        lines.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
 	}, false);
 	 
-	canvas.addEventListener('mouseup', function(e){
-	   canvas_rect = canvas.getBoundingClientRect();
-	   lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
-	   draw_canvas();
+	canvas.addEventListener('mousemove', function(e){
+	    if(e.buttons == 1){
+            canvas_rect = canvas.getBoundingClientRect();
+            lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+            draw_canvas();
+	    }
 	}, false);
     draw_canvas();
 }
