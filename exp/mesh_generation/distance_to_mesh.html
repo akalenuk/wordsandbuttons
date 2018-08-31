@@ -105,9 +105,10 @@ button {
 var w = 640.0;
 var h = 640.0;
 var step = 32.0;
+var min_distance = step;
 var distance = 32.0 * 3;
 
-var points = [];
+var lines = [];
 
 // animation, not essencial for the algorithm
 var animation_d = distance;
@@ -148,17 +149,51 @@ function sign(x) {
     return (x < 0) ? -1 : 1;
 }
 
+function distanceSquaredToLineSegment2(lx1, ly1, ldx, ldy, lineLengthSquared, px, py) {
+   var t; // t===0 at line pt 1 and t ===1 at line pt 2
+   if (!lineLengthSquared) {
+      // 0-length line segment. Any t will return same result
+      t = 0;
+   }
+   else {
+      t = ((px - lx1) * ldx + (py - ly1) * ldy) / lineLengthSquared;
+
+      if (t < 0)
+         t = 0;
+      else if (t > 1)
+         t = 1;
+   }
+   
+   var lx = lx1 + t * ldx,
+       ly = ly1 + t * ldy,
+       dx = px - lx,
+       dy = py - ly;
+   return dx*dx + dy*dy;   
+}
+
+function distanceSquaredToLineSegment(lx1, ly1, lx2, ly2, px, py) {
+   var ldx = lx2 - lx1,
+       ldy = ly2 - ly1,
+       lineLengthSquared = ldx*ldx + ldy*ldy;
+   return distanceSquaredToLineSegment2(lx1, ly1, ldx, ldy, lineLengthSquared, px, py);
+}
+
+function distanceToLineSegment(lx1, ly1, lx2, ly2, px, py)
+{
+   return Math.sqrt(distanceSquaredToLineSegment(lx1, ly1, lx2, ly2, px, py));
+}
+
 // distance function
 function d_f(x, y) {
-    if (points.length == 0)
-        return distance + 1.0; // no distance field
-    var d = Math.sqrt((x - points[0][0]) * (x - points[0][0]) + (y - points[0][1]) * (y - points[0][1]));
-    for (var i = 1; i < points.length; ++i) {
-        var di = Math.sqrt((x - points[i][0]) * (x - points[i][0]) + (y - points[i][1]) * (y - points[i][1]));
-        if (di < d)
-            d = di;
-    }
-    return d;
+	if (lines.length == 0)
+		return distance + 1.0; // no distance field
+	var d = distanceToLineSegment(lines[0][0][0], lines[0][0][1], lines[0][1][0], lines[0][1][1], x, y);
+	for (var i = 1; i < lines.length; ++i) {
+		var di = distanceToLineSegment(lines[i][0][0], lines[i][0][1], lines[i][1][0], lines[i][1][1], x, y);
+		if (di < d)
+			d = di;
+	}
+	return d;
 }
 
 function gsx(x, y, distance) {
@@ -175,11 +210,16 @@ function gsy(x, y, distance) {
 
 function init_canvas(){
     var canvas = document.getElementById("canvas");
-    canvas.addEventListener('click', function(e){
-       canvas_rect = canvas.getBoundingClientRect();
-       points.push([e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]);
-       draw_canvas();
-    }, false);
+	canvas.addEventListener('mousedown', function(e){
+	   canvas_rect = canvas.getBoundingClientRect();
+	   lines.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
+	}, false);
+	 
+	canvas.addEventListener('mouseup', function(e){
+	   canvas_rect = canvas.getBoundingClientRect();
+	   lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+	   draw_canvas();
+	}, false);
     draw_canvas();
 }
 
@@ -357,7 +397,7 @@ function draw_canvas(){
 
 function change_distance() {
     distance = Number(document.getElementById("distance").value);
-    if(isNaN(distance) || distance < step) {
+    if(isNaN(distance) || distance < min_distance) {
         distance = step;
     }
     if(distance > w) {
@@ -380,9 +420,14 @@ function dec(counter_name) {
     eval('change_' + counter_name + '()');
 }
 
-function reset_points() {
-    points = [];
+function reset_all() {
+	lines = [];
     draw_canvas();
+}
+
+function undo_last() {
+	lines.splice(-1,1);
+	draw_canvas();
 }
 
 function alter_animation_d(dd) {
@@ -420,7 +465,7 @@ tick(); // let it tick always
     Distance:
     <button type="button" onclick="alter_animation_d(-step)">&lt;&lt;</button>
     <button type="button" onclick="dec('distance')">-</button>
-    <input type="text" id="distance" value="96" oninput="change_distance();">
+    <input type="text" id="distance" value="96" onchange="change_distance();">
     <button type="button" onclick="inc('distance')">+</button>
     <button type="button" onclick="alter_animation_d(+step)">&gt;&gt;</button>
     <br>
@@ -433,7 +478,8 @@ tick(); // let it tick always
     init_canvas();
     </script>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
-        <button type="button" style="width: 108pt;" onclick="reset_points()">Reset</button>
+        <button type="button" style="width: 108pt;" onclick="undo_last()">Undo</button>
+        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset</button>
     </div>    
 
     </center>
