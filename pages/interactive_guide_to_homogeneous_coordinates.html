@@ -115,6 +115,14 @@ input[type="text"] {
     font-size: 16pt;
 }
 
+.incdec{
+    width: 32pt;
+    height: 26pt;
+    margin: 0 0 0 0;
+    font-size: 16pt;
+    text-align: center;
+}
+
 button {
     width: 150pt;
     height: 26pt;
@@ -275,7 +283,7 @@ function transform(){
     }else{
         document.getElementById("transformed").innerHTML =
             "<br>(" + point_x + ", " + point_y + ") = " +
-            "(" + point_x * w + ", " + point_y * w + ", " + w + ")";
+            "(" + parseFloat((point_x * w).toFixed(3)) + ", " + parseFloat((point_y * w).toFixed(3)) + ", " + parseFloat((w).toFixed(3)) + ")";
     }
 }
 
@@ -1089,6 +1097,18 @@ function setup_reference_for_scale(){
     composable_reference_x = 0.0;
     composable_reference_y = 0.0;
 }
+
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) + 1;
+    draw_series();
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) - 1;
+    draw_series();
+}
     </script>
   </head>
   <body>
@@ -1141,7 +1161,9 @@ Here is a coordinate transformer. It will transform your point into homogeneous 
     </p>
     <form id="w">
 Please enter w<sub>h</sub>:
-    <input type="text" id="proposed_w" value="1">
+    <button type="button" class="incdec" onclick="dec('proposed_w')">-</button>
+    <input type="text" class="incdec" id="proposed_w" value="1" style="width: 36pt;">
+    <button type="button" class="incdec" onclick="inc('proposed_w')">-</button>
     <button type="button" onclick="transform()">Transform</button>
     <span id="transformed">
     </span>
