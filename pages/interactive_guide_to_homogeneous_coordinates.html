@@ -292,30 +292,34 @@ var slide_w = 1.0;
 function init_slide_a_w(){
     var slide_a_w = document.getElementById("slide_a_w");
     var canvas_rect = slide_a_w.getBoundingClientRect();
-    slide_a_w_draw(canvas_rect.left + 32 + 256, false);
+    slide_a_w_draw(0, 0, false);
 
     slide_a_w.addEventListener('mousemove', function(e){
         var canvas_rect = slide_a_w.getBoundingClientRect();
-        slide_a_w_draw(e.clientX - canvas_rect.left, true);
+        slide_a_w_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
         if(e.buttons == 1){
-            slide_w = point_x / client_to_x(e.clientX - canvas_rect.left);
-            slide_a_w_draw(0, false);
+//            slide_w = point_x / client_to_x(e.clientX - canvas_rect.left);
+            var mouse_x = client_to_x(e.clientX - canvas_rect.left);        
+            var mouse_y = client_to_y(e.clientY - canvas_rect.top);
+            var t = (point_x * mouse_x + point_y * mouse_y) / (point_x * point_x + point_y * point_y);
+            slide_w = 1.0 / t;
+            slide_a_w_draw(0, 0, false);
         }
     }, false);
 
     slide_a_w.addEventListener('mousedown', function(e){
         var canvas_rect = slide_a_w.getBoundingClientRect();
         slide_w = point_x / client_to_x(e.clientX - canvas_rect.left);
-        slide_a_w_draw(0, false);
+        slide_a_w_draw(0, 0, false);
     }, false);
 
     slide_a_w.addEventListener('mouseleave', function(e){
         var canvas_rect = slide_a_w.getBoundingClientRect();
-        slide_a_w_draw(0, false);
+        slide_a_w_draw(0, 0, false);
     }, false);
 }
 
-function slide_a_w_draw(client_x, is_moving){
+function slide_a_w_draw(client_x, client_y, is_moving){
     var slide_a_w = document.getElementById("slide_a_w");
     var slide_a_w_context = slide_a_w.getContext("2d");
     slide_a_w_context.font = "16px sans-serif";
@@ -326,7 +330,10 @@ function slide_a_w_draw(client_x, is_moving){
     // selection
     var w_;
     if(is_moving){
-        w_ = point_x / client_to_x(client_x);
+        var mouse_x = client_to_x(client_x);        
+        var mouse_y = client_to_y(client_y);
+        var t = (point_x * mouse_x + point_y * mouse_y) / (point_x * point_x + point_y * point_y);
+        w_ = 1.0 / t;
     }else{
         w_ = slide_w;
     }
@@ -344,7 +351,7 @@ function slide_a_w_draw(client_x, is_moving){
         slide_a_w_context.lineTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w))
         slide_a_w_context.strokeStyle="#660000";
         slide_a_w_context.setLineDash([4, 4]);
-        slide_a_w_context.lineWidth = 3;
+        slide_a_w_context.lineWidth = 2;
         slide_a_w_context.stroke();
         slide_a_w_context.lineWidth = 1;
         slide_a_w_context.setLineDash([]);
