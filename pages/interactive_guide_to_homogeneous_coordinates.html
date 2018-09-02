@@ -331,21 +331,27 @@ function slide_a_w_draw(client_x, is_moving){
         w_ = slide_w;
     }
 
-    var canvas_x = x_to_client(point_x / w_);
-    var canvas_y = y_to_client(point_y / w_);
-
     slide_a_w_context.beginPath();
-
     slide_a_w_context.moveTo(x_to_client(point_x * 100), y_to_client(point_y * 100));
     slide_a_w_context.lineTo(x_to_client(point_x * -100), y_to_client(point_y * -100));
+    slide_a_w_context.strokeStyle="#dd6644";    
+    slide_a_w_context.stroke();
+    slide_a_w_context.closePath();
 
     if(is_moving){
-        slide_a_w_context.moveTo(x_to_client(point_x / w_) - 10, y_to_client(point_y / w_));
-        slide_a_w_context.lineTo(x_to_client(point_x / w_) + 10, y_to_client(point_y / w_));
-        slide_a_w_context.moveTo(x_to_client(point_x / w_), y_to_client(point_y / w_) - 10);
-        slide_a_w_context.lineTo(x_to_client(point_x / w_), y_to_client(point_y / w_) + 10);
+        slide_a_w_context.beginPath();
+        slide_a_w_context.moveTo(x_to_client(point_x / w_), y_to_client(point_y / w_))
+        slide_a_w_context.lineTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w))
+        slide_a_w_context.strokeStyle="#660000";
+        slide_a_w_context.setLineDash([4, 4]);
+        slide_a_w_context.lineWidth = 3;
+        slide_a_w_context.stroke();
+        slide_a_w_context.lineWidth = 1;
+        slide_a_w_context.setLineDash([]);
+        slide_a_w_context.closePath();
     }
 
+    slide_a_w_context.beginPath();
     slide_a_w_context.moveTo(x_to_client(point_x / slide_w) - 10, y_to_client(point_y / slide_w));
     slide_a_w_context.lineTo(x_to_client(point_x / slide_w) + 10, y_to_client(point_y / slide_w));
     slide_a_w_context.moveTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w) - 10);
@@ -353,8 +359,7 @@ function slide_a_w_draw(client_x, is_moving){
     slide_a_w_context.strokeStyle="#dd6644";
     slide_a_w_context.stroke();
     slide_a_w_context.fillStyle="#dd6644";
-    slide_a_w_context.fillText(point_x.toFixed(1) + ", " + point_y.toFixed(1) + ", " + w_.toFixed(3), x_to_client(point_x / w_) + 4, y_to_client(point_y / w_) + 16);
-    slide_a_w_context.fillText("w = " + w_.toFixed(3), 32, 480);
+    slide_a_w_context.fillText(point_x.toFixed(1) + ", " + point_y.toFixed(1) + ", " + slide_w.toFixed(3), x_to_client(point_x / slide_w) + 4, y_to_client(point_y / slide_w) + 16);
     slide_a_w_context.closePath();
 
     // grid
