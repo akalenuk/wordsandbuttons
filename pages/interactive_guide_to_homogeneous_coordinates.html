@@ -489,13 +489,21 @@ function rotated_y(a, x, y){
     return Math.cos(a) * x + Math.sin(a) * y;
 }
 
-var rotation_a = 0.2;
+var rotation_a = Math.PI / 2 + 0.2;
+
+function in_2_pi(x) {
+    while(x < 0.0)
+        x += 2*Math.PI;
+    while(x >= 2*Math.PI)
+        x -= 2*Math.PI;
+    return x;
+}
 
 function rotation_for(x, y) {
     if (x > 0)
-        return Math.PI * 3 / 4 - Math.atan(y / x);
+        return in_2_pi(Math.PI * 3 / 4 - Math.atan(y / x));
     else
-        return Math.PI * 7 / 4 - Math.atan(y / x);
+        return in_2_pi(Math.PI * 7 / 4 - Math.atan(y / x));
 }
 
 function init_rotation(){
@@ -552,16 +560,21 @@ function rotation_draw(a, do_new){
 
     if(do_new){
         // the connection
-        rotation_context.beginPath();
-        rotation_context.setLineDash([2, 2]);
         for(var i = 0; i < 4; i++){
-            rotation_context.moveTo(x_to_client(xs[i]), y_to_client(ys[i]));
-            rotation_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+            rotation_context.beginPath();
+            rotation_context.setLineDash([2, 2]);
+            var r = x_to_client(Math.sqrt(xs[i]*xs[i] + ys[i]*ys[i])) - x_to_client(0);
+            var a1 = in_2_pi(rotation_for(xs[i], ys[i]) - Math.PI * 3 / 4);
+            var a2 = in_2_pi(rotation_for(new_xs[i], new_ys[i]) - Math.PI * 3 / 4);
+            if(a1 < a2)
+                rotation_context.arc(x_to_client(0), y_to_client(0), r, a1, a2);
+            else
+                rotation_context.arc(x_to_client(0), y_to_client(0), r, a2, a1);
+            rotation_context.strokeStyle="#eeaa88";
+            rotation_context.stroke();
+            rotation_context.setLineDash([]);
+            rotation_context.closePath();                
         }
-        rotation_context.strokeStyle="#eeaa88";
-        rotation_context.stroke();
-        rotation_context.setLineDash([]);
-        rotation_context.closePath();
     }
 
     // original cube
@@ -590,7 +603,7 @@ function rotation_draw(a, do_new){
     rotation_context.fillStyle="#dd6644";
     rotation_context.fillText("x' = sin(a) * x + cos(a) * y", 32, 540);
     rotation_context.fillText("y' = cos(a) * x - sin(a) * y", 32, 560);
-    rotation_context.fillText("where a = " + a.toFixed(2), 32, 580);
+    rotation_context.fillText("where a = " + (a - Math.PI/2).toFixed(2), 32, 580);
 
     // grid
     draw_grid_on(rotation_context);
