@@ -949,9 +949,9 @@ function recalculate_composable(client_x, client_y){
     var a = (-x0*y2 + x0*y3 + x1*y2 - x1*y3 + x2*y0 - x2*y1 - x3*y0 + x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
     var b = (-x0*y1 + x0*y2 + x1*y0 - x1*y3 - x2*y0 + x2*y3 + x3*y1 - x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
     var c = 1.;
-    document.getElementById("matrix_col1").innerHTML = A.toFixed(3) + "<br>" + B.toFixed(3) + "<br>" + C.toFixed(3);
-    document.getElementById("matrix_col2").innerHTML = D.toFixed(3) + "<br>" + E.toFixed(3) + "<br>" + F.toFixed(3);
-    document.getElementById("matrix_col3").innerHTML = a.toFixed(3) + "<br>" + b.toFixed(3) + "<br>" + c.toFixed(3);
+    document.getElementById("matrix_col1").innerHTML = parseFloat(A.toFixed(3)) + "<br>" + parseFloat(B.toFixed(3)) + "<br>" + parseFloat(C.toFixed(3));
+    document.getElementById("matrix_col2").innerHTML = parseFloat(D.toFixed(3)) + "<br>" + parseFloat(E.toFixed(3)) + "<br>" + parseFloat(F.toFixed(3));
+    document.getElementById("matrix_col3").innerHTML = parseFloat(a.toFixed(3)) + "<br>" + parseFloat(b.toFixed(3)) + "<br>" + parseFloat(c.toFixed(3));
 }
 
 function init_composable(){
@@ -1115,23 +1115,35 @@ function composable_draw(client_x, client_y, do_new){
     }
 }
 
+function setup_reference_for_translation(){
+    composable_reference_x = composable_xs[0];
+    composable_reference_y = composable_ys[0];
+}
+
+function setup_reference_for_rotation(){
+    composable_reference_x = 0.0;
+    composable_reference_y = 0.0;
+}
+
+function setup_reference_for_scale(){
+    composable_reference_x = 0.0;
+    composable_reference_y = 0.0;
+}
+
 function revert_composable(){
     composable_xs = [1., 2., 2., 1.];
     composable_ys = [1., 1., 2., 2.];
     document.getElementById("matrix_col1").innerHTML = "1<br>0<br>0";
     document.getElementById("matrix_col2").innerHTML = "0<br>1<br>0";
     document.getElementById("matrix_col3").innerHTML = "0<br>0<br>1";
+    if(document.getElementById("radio_t").checked){
+        setup_reference_for_translation();
+    }else if(document.getElementById("radio_r").checked){
+        setup_reference_for_rotation();
+    }else if(document.getElementById("radio_s").checked){
+        setup_reference_for_scale();
+    }
     composable_draw(0, 0, false);
-}
-
-function setup_reference_for_translation(){
-    composable_reference_x = composable_xs[0];
-    composable_reference_y = composable_ys[0];
-}
-
-function setup_reference_for_scale(){
-    composable_reference_x = 0.0;
-    composable_reference_y = 0.0;
 }
 
 function inc(counter_name) {
@@ -1413,7 +1425,7 @@ It gets better. Matrices are composable. You can compose your own transformation
     </p>
     <form style="margin-bottom: 6pt;">
     <input type="radio" name="transformation_type" id="radio_t" onclick="setup_reference_for_translation()"><label for="radio_t">Translation</label>&nbsp;&nbsp;
-    <input type="radio" name="transformation_type" id="radio_r"><label for="radio_r">Rotation</label>&nbsp;&nbsp;
+    <input type="radio" name="transformation_type" id="radio_r" onclick="setup_reference_for_rotation()"><label for="radio_r">Rotation</label>&nbsp;&nbsp;
     <input type="radio" name="transformation_type" id="radio_s" onclick="setup_reference_for_scale()"><label for="radio_s">Scale</label>&nbsp;&nbsp;
     <input type="radio" name="transformation_type" id="radio_p" checked="true"><label for="radio_p">Projection</label><br>
     </form>
