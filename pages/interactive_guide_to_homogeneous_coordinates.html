@@ -262,7 +262,7 @@ function pick_a_point_draw(client_x, client_y, do_guides){
         pick_a_point_context.setLineDash([4, 4]);
         pick_a_point_context.moveTo(client_x, client_y);
         pick_a_point_context.lineTo(x_to_client(point_x), y_to_client(point_y));
-        pick_a_point_context.strokeStyle="#dd6644";
+        pick_a_point_context.strokeStyle="#992200";
         pick_a_point_context.stroke();
         pick_a_point_context.setLineDash([]);
         pick_a_point_context.closePath();
@@ -348,7 +348,7 @@ function slide_a_w_draw(client_x, client_y, is_moving){
         slide_a_w_context.beginPath();
         slide_a_w_context.moveTo(x_to_client(point_x / w_), y_to_client(point_y / w_))
         slide_a_w_context.lineTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w))
-        slide_a_w_context.strokeStyle="#660000";
+        slide_a_w_context.strokeStyle="#992200";
         slide_a_w_context.setLineDash([4, 4]);
         slide_a_w_context.lineWidth = 2;
         slide_a_w_context.stroke();
@@ -906,8 +906,8 @@ function recalculate_composable(client_x, client_y){
         }
     }else if(document.getElementById("radio_r").checked){
         for(var i = 0; i < 4; i++){
-            new_xs[i] = rotated_x(x/2, composable_xs[i], composable_ys[i]);
-            new_ys[i] = rotated_y(x/2, composable_xs[i], composable_ys[i]);
+            new_xs[i] = rotated_x(rotation_for(x, y), composable_xs[i], composable_ys[i]);
+            new_ys[i] = rotated_y(rotation_for(x, y), composable_xs[i], composable_ys[i]);
         }
     }else if(document.getElementById("radio_s").checked){
         for(var i = 0; i < 4; i++){
@@ -1050,8 +1050,8 @@ function composable_draw(client_x, client_y, do_new){
             }
         }else if(document.getElementById("radio_r").checked){
             for(var i = 0; i < 4; i++){
-                new_xs[i] = rotated_x(x/2, composable_xs[i], composable_ys[i]);
-                new_ys[i] = rotated_y(x/2, composable_xs[i], composable_ys[i]);
+                new_xs[i] = rotated_x(rotation_for(x, y), composable_xs[i], composable_ys[i]);
+                new_ys[i] = rotated_y(rotation_for(x, y), composable_xs[i], composable_ys[i]);
             }
         }else if(document.getElementById("radio_s").checked){
             for(var i = 0; i < 4; i++){
@@ -1067,7 +1067,10 @@ function composable_draw(client_x, client_y, do_new){
             composable_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
         }
         composable_context.strokeStyle="#992200";
+        if(document.getElementById("radio_p").checked)
+            composable_context.lineWidth = 2;
         composable_context.stroke();
+        composable_context.lineWidth = 1;
         composable_context.setLineDash([]);
         composable_context.closePath();
     }
