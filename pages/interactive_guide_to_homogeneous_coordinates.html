@@ -491,15 +491,23 @@ function rotated_y(a, x, y){
 
 var rotation_a = 0.2;
 
-function init_rotation(){
-    rotation = document.getElementById("rotation");
-    var canvas_rect = translation.getBoundingClientRect();
-    rotation_draw(rotation_a, false);
+function rotation_for(x, y) {
+    if (x > 0)
+        return Math.PI / 4 - Math.atan(y / x);
+    else
+        return Math.PI * 5 / 4 - Math.atan(y / x);
+}
 
+function init_rotation(){
+    rotation_draw(rotation_a, false);
+    
+    var rotation = document.getElementById("rotation");
+    
     rotation.addEventListener('mousemove', function(e){
         var canvas_rect = rotation.getBoundingClientRect();
-        client_x = e.clientX, canvas_rect.left;
-        var a = client_to_x(client_x) / 2;
+        var client_x = e.clientX - canvas_rect.left;
+        var client_y = e.clientY - canvas_rect.top;
+        var a = rotation_for(client_to_x(client_x), client_to_y(client_y));
         if(e.buttons == 1)
             rotation_a = a;
         rotation_draw(a, true);
@@ -507,8 +515,9 @@ function init_rotation(){
 
     rotation.addEventListener('mousedown', function(e){
         var canvas_rect = rotation.getBoundingClientRect();
-        client_x = e.clientX, canvas_rect.left;
-        rotation_a = client_to_x(client_x) / 2;
+        var client_x = e.clientX - canvas_rect.left;
+        var client_y = e.clientY - canvas_rect.top;
+        rotation_a = rotation_for(client_to_x(client_x), client_to_y(client_y));
         rotation_draw(rotation_a, false);
     }, false);
 
