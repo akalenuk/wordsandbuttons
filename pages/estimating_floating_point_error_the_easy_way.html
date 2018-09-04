@@ -960,10 +960,10 @@ function hide(n){
 Estimating floating point error the easy way
     </h1>
     <p>
-I hope we can all agree: floating point numbers are not real. They are just fancy integers that can't make up their mind.
+Floating point numbers are not real. You can't squeeze an infinity into a finite number of bits. You have to compromise, and it's ok as long as you are aware of the trade-offs and limitations
     </p>
     <p>
-Let me elaborate on this. For contrast, here is a 6-bit <b>fixed point</b> number. It's basically an integer number of quarters.
+There are several ways to model real numbers. For instance, here is a 6-bit <b>fixed point</b> number with a point fixed to the second position. It's basically an integer number of quarters.
     </p>
     <canvas id="fixed" width=640 height=200></canvas>
     <p class="comment">
@@ -1047,20 +1047,17 @@ The 6-bit fixed point number covers positive numbers only from 0.25 to 7.25, whi
     <tr><td>1 111 11</td><td>-7.75</td><td>not a number</td></tr>
     </table>
     <p>
-With fixed point numbers we can add 4.00 and 0.25 and get 4.25. But in floating point numbers the next number is 5, so 4 + 0.25 = ... 4. And that's how we lose precision constantly. A bit here and a bit there. All because our floating point numbers are not real numbers, and not even a decent model of the real numbers. It's just a collection of real numbers that plays by its own rules.
+With fixed point numbers, we can add 4.00 and 0.25 and get 4.25. But in floating point numbers the next number is 5, so 4 + 0.25 = ... 4. And that's how we lose precision all the time<span id="shown_sidenote_3" onclick="show('sidenote_3')"><u>*</u></span><span id="hidden_sidenote_3" style="display:none; font-size: 12pt;">. Technically, you can operate within the small safe subset of numbers and operations without losing precision. 2 + 2 is still 4 even in our model<span onclick="hide('sidenote_3')"><u>&larr;</u></span></span>.
     </p>
     <p>
-Rule number one: the computational error is imminent<span id="shown_sidenote_3" onclick="show('sidenote_3')"><u>*</u></span><span id="hidden_sidenote_3" style="display:none; font-size: 12pt;">. Technically, you can conscientiously operate within the small safe subset of numbers and operations. 2 + 2 is still 4. But this is quite another story <span onclick="hide('sidenote_3')"><u>&larr;</u></span></span>.
-    </p>
-    <p>
-The common misconception is ”in practice, we have enough bits to make this error negligible.” Well, the problem with this point of view is that quite often it's true. But really is it true or not depends on these three things:
+The common misconception is ”in practice, we have enough bits to make this error negligible.” The problem with this point of view is that quite often it's true, so it perpetuates itself until something goes horribly wrong. But really is it true or not depends on these three things:
     <ol>
     <li>The stability of the operation.</li>
     <li>The ranges of variables involved.</li>
     <li>How much error can we tolerate?</li>
     </ol>
     <p>
-So, obviously enough, it can't be true all the time. And it isn't. In computational geometry, this is the source of the most unpleasant bugs. The ones that come and go. The ones that don't reproduce on unit-tests and lay low through the integration phase only to stab you in the back as soon as you turn around to do other things.
+It can't be true all the time. And it isn't. In computational geometry, unforeseen floating point error is the source of the most unpleasant bugs. The bugs that come and go unpredictably. The bugs that don't reproduce on unit-tests and lay low through the integration phase only to be seen by your most important customer.
     </p>
     <p>
 How to protect yourself from this threat? Engineering has one ultimate answer for this kind of questions and it's: ”measurement!”
@@ -1070,7 +1067,10 @@ How to protect yourself from this threat? Engineering has one ultimate answer fo
 Measuring the floating point error using an inverse operation
     </h2>
     <p>
-For example, let's take a <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/floating_point_surrealismmeter/double_interval/cubic_solver.hpp">cubic equation solver</a>. It is surprisingly computationally rich. Full of multiple multiplications, trigonometry, and square roots. But the inverse operation for solving a cubic equation, getting the coefficients from the given roots, is very simple.
+For example, let's take a <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/floating_point_surrealismmeter/double_interval/cubic_solver.hpp">cubic equation solver</a>. It is surprisingly computationally rich for such a primitive operation. It has multiple multiplications, trigonometry, and square roots.
+    </p>
+    <p> 
+Fortunately, the inverse operation for solving a cubic equation, getting the coefficients from the given roots, is simple.
     </p>
     <table>
     <tr><td>
@@ -1105,14 +1105,14 @@ i<sub>3</sub> = -10, -8,... 10.
     </td></tr>
     </table>
     <p>
-We get a 3D grid of errors for different configurations of roots' orders of magnitude. Here it is. You can click on the left side of the cube anywhere to see what's inside.
+We get a 3D grid of errors for different configurations of roots' orders of magnitude. Here it is. 
     </p>
     <canvas id="real_error" width=640 height=538></canvas>
     <p class="comment">
-You can drag over the left side too.
+You can click or drag over the left side of the cube.
     </p>
     <p>
-The black cells are where the algorithm failed to find all three roots. The red ones are the ones with the largest error, and the green ones are the ones with the least error. All and all, the error changes from e<sup>-16</sup> to e<sup>12</sup>. Remember, this is relative error, so e<sup>12</sup> for a root of e<sup>10</sup> is actually an enormous number that looks like this: 10'000'000'000'000'000'000'000. That's our worse error.
+The black cells are where the algorithm failed to find all the roots. The red ones are the ones with the largest error, and the green ones are the ones with the least error. All and all, the error changes from e<sup>-16</sup> to e<sup>12</sup>. Remember, this is relative error, so e<sup>12</sup> for a root of e<sup>10</sup> is actually an enormous number that looks like this: 10'000'000'000'000'000'000'000. That's our worse error.
     </p>
     <p>
 Do you see the pattern here? The green area shoots through the diagonal. This means that it's all good when the orders of the roots are roughly the same. Whether they are e<sup>-8</sup> or e<sup>2</sup> or e<sup>+10</sup>. It's all fine as long as there is no significant difference. But when there is, he have trouble.
@@ -1133,16 +1133,16 @@ What if we don't have a reverse operation at all? Or what if it introduces the g
 Well, no. But we can still do some estimate without measuring an actual error, there is a way for that.
     </p>
     <p>
-Let's get back to our 6-bit numbers. Remember, we couldn't add 4 and 0.25 properly because 6-bit float only has 4 and 5? Now, what if we represent a real number not as the nearest value from available, but as an interval of available values written in a more powerful subset? And we'll then operate on the intervals, doing sums and square roots, so when the error grows, we'll see that. Sounds promising, right?
+Let's get back to our 6-bit numbers. Remember, we couldn't add 4 and 0.25 properly because 6-bit float only has 4 and 5? Now, what if we represent a real number not as the nearest value from available, but as an interval of available values written in a more powerful subset? And we'll then operate on the intervals, doing sums and square roots, so when the error grows, we'll see that.
     </p>
     <p>
 For instance, in our intervals, 4.25 is now something between 4 and 5. If we sum it with 2.25 (which is in between 2 and 2.5), we will not get 6 and some error, we will get an interval from 6 to 7.5. It's ok, we can have 7.5 since we store interval in larger numbers, not 6-bits. Our real result is 6.5, and our real error in 6-bit numbers is 0.5. But what we get instead is interval 1.5 wide, so we can presume that the resulting value is not 6 with some unknown error, but 6.75 with 0.75 error.
     </p>
     <p>
-This way we can measure how the difference between the real numbers and their floating point representation accumulates through the calculation. We measure not the actual error, but the width of the interval that definitely holds our value that itself may not be necessary represented in floating point numbers.
+This way we can measure how the difference between the real numbers and their floating point representation accumulates through the calculation. We measure not the actual error, but the width of the interval that definitely holds our value.
     </p>
     <p>
-Unless our algorithm is ultimately stable, operating on intervals make them larger and larger, and the size of each interval subsequently represents the potential error we might face. Of course, out real error should be smaller than that, so measuring interval sizes doesn't substitute the exact measurements, like what we did in the previous experiment. But this is an estimation, and for our cubic solver, <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/floating_point_surrealismmeter/double_interval/exp_3.cpp">the estimation</a> actually follows the measured numbers rather well.
+Unless our algorithm is stable, operating on intervals make them larger and larger, and the size of each interval subsequently represents the potential error we might face. Of course, out real error should be smaller than that, so measuring interval sizes doesn't substitute the exact measurements. But this is an estimation, and for our cubic solver, <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/floating_point_surrealismmeter/double_interval/exp_3.cpp">the estimation</a> actually follows the measurements rather well.
     </p>
     <canvas id="prognosed_error" width=640 height=538></canvas>
     <script language="JavaScript">
@@ -1152,7 +1152,7 @@ Unless our algorithm is ultimately stable, operating on intervals make them larg
         init_prognosed_error();
     </script>
     <p>
-The great thing about this approach is that you don't have to rewrite all your code to work on intervals instead of floats only to get these estimates. For instance, in C++ you can make <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/floating_point_surrealismmeter/double_interval/double_interval.hpp">an interval representing type</a> disguise itself as a double with a simple #define. Yes, it's a dirty hack, and you have to be careful to have all your maths functions reimplemented for the intervals, but it has its perks.
+You don't have to rewrite all your code to work on intervals instead of floats only to get these estimates. For instance, in C++ you can make <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/floating_point_surrealismmeter/double_interval/double_interval.hpp">an interval representing type</a> disguise itself as a double with a simple #define. Yes, it's a dirty hack, and you have to be careful to have all your maths functions reimplemented for the intervals, but it has its perks.
     </p>
     <p>
 First of all, it's simple. You do <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/floating_point_surrealismmeter/double_interval/exp_1.cpp">something like this</a>:
@@ -1171,16 +1171,13 @@ First of all, it's simple. You do <a href="https://github.com/akalenuk/wordsandb
 And all your doubles acquire <i>from</i> and <i>to</i> fields automatically. You just run your tests then and check the intervals. Simple!
     </p>
     <p>
-Second, it's more pessimistic than the measurements. And in a good way too. The measurements go for a real error, intervals estimate the worse case. Since you can't measure the error for all the possible input, some imprecision is expected anyway. It's better to have it more on the pessimistic side.
-    </p>
-    <p>
-Third, it enables you to do what almost nobody does but almost everybody should. It enables you to debug a computational error. You can see it, you can trace the execution to find the source of it, you can make the code better. Sometimes, it's as easy as to normalize some vector just one extra time.
+Second, it enables you to do what almost no one does but almost everyone should. It enables you to debug computational errors. You can see them, you can trace the execution to find their sources, you can make the code better.
     </p>
     <h2>
 Conclusion
     </h2>
     <p>
-Floating point computational error is measurable and manageable. By measuring it you can make your clients happy, and yourself — free from the nights of fruitless debugging. Yes, the tools for this are not that popular as debuggers or profilers, and the methodology is not very well established. But is it really the reason not to measure it at all?
+Floating point computational error is measurable and manageable. By having it under control you can make your clients happy, and yourself — free from the nights of fruitless debugging. 
     </p>
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
