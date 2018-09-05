@@ -141,14 +141,14 @@ li {
     <script language="JavaScript">
 
 // client
-var w = 512.0;
-var h = 512.0;
+const w = 640.0;
+const h = 640.0;
 
 // visible region
-var x_min = -3.0;
-var y_min = -3.0;
-var x_max = 3.0;
-var y_max = 3.0;
+const x_min = -3.0;
+const y_min = -3.0;
+const x_max = 3.0;
+const y_max = 3.0;
 
 var client_x_center = w*(0-x_min)/(x_max-x_min);
 var client_x_step = (w/(x_max-x_min));
@@ -198,7 +198,7 @@ function draw_grid_on(context){
 }
 
 function demo_f(x){
-    return 2.7 - (x - 2.5)*(x - 2.5) * 0.145;
+    return 2.5 - (x - 2.5)*(x - 2.5) * 0.105;
 }
 
 var derivative_x = 2.0;
@@ -236,9 +236,9 @@ function draw_derivative(){
     d_context.fillRect(0, 0, 640, 448);
     // function
     d_context.beginPath();
-    for(var w = 0; w < 640 - 1; ++w){
-        x1 = client_to_x(w);
-        x2 = client_to_x(w+1);
+    for(var wi = 0; wi < 640 - 1; ++wi){
+        x1 = client_to_x(wi);
+        x2 = client_to_x(wi + 1);
         y1 = demo_f(x1);
         y2 = demo_f(x2);
         d_context.moveTo(x_to_client(x1), y_to_client(y1));
@@ -319,14 +319,14 @@ function plot_draw(client_x, client_y, do_guides){
     plot_context.font = "16px sans-serif";
     // background
     plot_context.fillStyle="#eeeeee";
-    plot_context.fillRect(0,0,512,512);
+    plot_context.fillRect(0, 0, w, h);
 
     // function
     plot_context.beginPath();
     n = button_n();
-    for(var w = 0; w < 512 - 1; w++){
-        x1 = client_to_x(w);
-        x2 = client_to_x(w+1);
+    for(var wi = 0; wi < w - 1; ++wi){
+        x1 = client_to_x(wi);
+        x2 = client_to_x(wi + 1);
         y1 = the_function(n, x1);
         y2 = the_function(n, x2);
         plot_context.moveTo(x_to_client(x1), y_to_client(y1));
@@ -338,7 +338,7 @@ function plot_draw(client_x, client_y, do_guides){
 
     // derivative
     if(do_guides){
-        var    x1 = client_to_x(client_x);
+        var x1 = client_to_x(client_x);
         var y1 = the_function(n, x1);
         var x2 = x1 + 1.0;
         var y2 = y1 + d(n, x1);
@@ -444,14 +444,14 @@ function draw_series(){
     series_context.font = "16px sans-serif";
     // background
     series_context.fillStyle="#eeeeee";
-    series_context.fillRect(0,0,512,512);
+    series_context.fillRect(0, 0, w, h);
 
     // original function
     series_context.beginPath();
     var n = button2_n();
-    for(var w = 0; w < 512 - 1; w++){
-        x1 = client_to_x(w);
-        x2 = client_to_x(w+1);
+    for(var wi = 0; wi < w - 1; ++wi){
+        x1 = client_to_x(wi);
+        x2 = client_to_x(wi + 1);
         y1 = the_function(n, x1);
         y2 = the_function(n, x2);
         series_context.moveTo(x_to_client(x1), y_to_client(y1));
@@ -473,9 +473,9 @@ function draw_series(){
         document.getElementById("derivatives_n").value = 99;
     }
 
-    for(var w = 0; w < 512 - 1; w++){
-        x1 = client_to_x(w);
-        x2 = client_to_x(w+1);
+    for(var wi = 0; wi < w - 1; ++wi){
+        x1 = client_to_x(wi);
+        x2 = client_to_x(wi + 1);
         y1 = the_series(n, x1, dn);
         y2 = the_series(n, x2, dn);
         series_context.moveTo(x_to_client(x1), y_to_client(y1));
@@ -630,7 +630,7 @@ The smaller <i>d<sub>x</sub></i> is, the more accurate your measure will be. Wit
     <p>
 In any particular point the derivative of a function is a number. If the function don't change it's velocity, then this is always the same number. But if it does, and of course all the interesting functions do, then it changes from point to point forming some pattern. Here's the interactive plot that shows how it works with several popular functions.
     </p>
-    <canvas id="plot" width=512 height=512></canvas>
+    <canvas id="plot" width=640 height=640></canvas>
     <form onsubmit="return false;">
         <div id="buttons">
         <center>
@@ -828,7 +828,7 @@ And there is always the more serious problem of representability. Remember <i>(a
     <p>
 Here is a plot with some most known serializable functions. Feel free to explore.
     </p>
-    <canvas id="series" width=512 height=512></canvas>
+    <canvas id="series" width=640 height=640></canvas>
     <form onsubmit="return false;">
         <center>
 Derivatives to count:
