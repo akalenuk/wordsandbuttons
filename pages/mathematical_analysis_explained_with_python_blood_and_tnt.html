@@ -291,29 +291,30 @@ function draw_derivative(){
 function init_plot(){
     plot = document.getElementById("plot");
     var canvas_rect = plot.getBoundingClientRect();
-    plot_draw(0, 0, false);
+    plot_draw(0, 0, false, false);
 
     plot.addEventListener('mousemove', function(e){
         var canvas_rect = plot.getBoundingClientRect();
-        plot_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        plot_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true, e.buttons == 1);
     }, false);
 
     plot.addEventListener('mousedown', function(e){
-        plot_draw(0, 0, false);
+        var canvas_rect = plot.getBoundingClientRect();
+        plot_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true, true);
     }, false);
 
     plot.addEventListener('mouseleave', function(e){
-        plot_draw(0, 0, false);
+        plot_draw(0, 0, false, false);
     }, false);
 }
 
-var MAX_PTS = 256;
+var MAX_PTS = 4096;
 var pt_x = [];
 var pt_y = [];
 var pt_n = 0;
 
 
-function plot_draw(client_x, client_y, do_guides){
+function plot_draw(client_x, client_y, do_guides, add_points){
     plot = document.getElementById("plot");
     var plot_context = plot.getContext("2d");
     plot_context.font = "16px sans-serif";
@@ -337,12 +338,13 @@ function plot_draw(client_x, client_y, do_guides){
     plot_context.closePath();
 
     // derivative
-    if(do_guides){
+    if(do_guides) {
         var x1 = client_to_x(client_x);
         var y1 = the_function(n, x1);
         var x2 = x1 + 1.0;
         var y2 = y1 + d(n, x1);
-           plot_context.beginPath();
+        
+        plot_context.beginPath();
         plot_context.setLineDash([4, 4]);
         plot_context.moveTo(x_to_client(x1), y_to_client(y1));
         plot_context.lineTo(x_to_client(x2), y_to_client(y2));
@@ -350,10 +352,10 @@ function plot_draw(client_x, client_y, do_guides){
         plot_context.lineTo(x_to_client(x1), y_to_client(y1));
         plot_context.strokeStyle="#223322";
         plot_context.stroke();
-           plot_context.setLineDash([]);
+        plot_context.setLineDash([]);
         plot_context.closePath();
 
-           plot_context.beginPath();
+        plot_context.beginPath();
         plot_context.moveTo(x_to_client(x2), y_to_client(y2));
         plot_context.lineTo(x_to_client(x2), y_to_client(y1));
         var x4 = x1;
@@ -365,11 +367,14 @@ function plot_draw(client_x, client_y, do_guides){
         plot_context.strokeStyle="#008800";
         plot_context.stroke();
         plot_context.closePath();
-        // save point
-        pt_x[pt_n % MAX_PTS] = x1;
-        pt_y[pt_n % MAX_PTS] = y2-y1;
-        pt_n++;
+        if(add_points) {
+            // add point
+            pt_x[pt_n % MAX_PTS] = x1;
+            pt_y[pt_n % MAX_PTS] = y2-y1;
+            pt_n++;
+        }
     }
+        
     // points
     plot_context.beginPath();
     points_to_show = (pt_n > MAX_PTS) ? MAX_PTS : pt_n;
@@ -630,7 +635,6 @@ The smaller <i>d<sub>x</sub></i> is, the more accurate your measure will be. Wit
     <p>
 In any particular point the derivative of a function is a number. If the function don't change it's velocity, then this is always the same number. But if it does, and of course all the interesting functions do, then it changes from point to point forming some pattern. Here's the interactive plot that shows how it works with several popular functions.
     </p>
-    <canvas id="plot" width=640 height=640></canvas>
     <form onsubmit="return false;">
         <div id="buttons">
         <center>
@@ -647,7 +651,11 @@ In any particular point the derivative of a function is a number. If the functio
             <button type="button" id="button_8" onclick="radio(8)">y = cos(x)</button>
         </center>
         </div>
-    </form>
+    </form>    
+    <canvas id="plot" width=640 height=640></canvas>
+    <p class="comment">
+Select a function and drag anywhere leave marks.
+    </p>
     <script language="JavaScript">
     init_plot();
     </script>
