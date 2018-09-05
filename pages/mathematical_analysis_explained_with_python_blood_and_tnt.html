@@ -198,10 +198,10 @@ function draw_grid_on(context){
 }
 
 function demo_f(x){
-    return 1.5-(x-0.75)*(x-0.75)*0.2;
+    return 2.7 - (x - 2.5)*(x - 2.5) * 0.145;
 }
 
-var derivative_x = 3.0;
+var derivative_x = 2.0;
 
 function init_derivative(){
     var d = document.getElementById("derivative");
@@ -233,10 +233,10 @@ function draw_derivative(){
     d_context.font = "16px sans-serif";
     // background
     d_context.fillStyle="#eeeeee";
-    d_context.fillRect(0, 0, 512, 448);
+    d_context.fillRect(0, 0, 640, 448);
     // function
     d_context.beginPath();
-    for(var w = 0; w < 512 - 1; w++){
+    for(var w = 0; w < 640 - 1; ++w){
         x1 = client_to_x(w);
         x2 = client_to_x(w+1);
         y1 = demo_f(x1);
@@ -247,7 +247,6 @@ function draw_derivative(){
     d_context.strokeStyle="#660000";
     d_context.stroke();
     d_context.closePath();
-
 
     var x1 = client_to_x(0);
     var y1 = demo_f(x1);
@@ -273,8 +272,8 @@ function draw_derivative(){
     d_context.stroke();
     d_context.closePath();
     d_context.fillStyle="#003300";
-    d_context.fillText("dx", x_to_client((x1+x2)/2), y_to_client(y1) - 8);
-    d_context.fillText("f(x+dx)-f(x)", x_to_client(x2) + 8, y_to_client((y1+y2)/2));
+    d_context.fillText("dx", x_to_client((x1+x2)/2), y_to_client(y1) - 10);
+    d_context.fillText("f(x+dx)-f(x)", x_to_client(x2) + 10, y_to_client((y1+y2)/2) + 10);
 
     var d = (demo_f(x1+0.0001) - demo_f(x1))/0.0001;
     var x3 = -1;
@@ -603,10 +602,13 @@ So in function's language you do something like this:
     <p>
 The thing is, if you take your <i>d<sub>x</sub></i> big enough, the function may change its mind and go other direction. You wouldn't get the precise measure for a point then. Here is the interactive plot that explains the problem.
     </p>
-    <canvas id="derivative" width=512 height=448></canvas>
+    <canvas id="derivative" width=640 height=448></canvas>
     <script language="JavaScript">
     init_derivative();
     </script>
+    <p class="comment">
+Click anywhere to change <i>d<sub>x</sub></i>.
+    </p>
     <p>
 The smaller <i>d<sub>x</sub></i> is, the more accurate your measure will be. With the magic of <a href="https://en.wikipedia.org/wiki/Limit_(mathematics)">limits</a> you can get yourself a <i>d<sub>x</sub></i> that is virtually smaller than any number. It is not a number, but a separate operable entity so usually derivatives are written slightly different from the function's “velocity”. Like this:
     </p>
