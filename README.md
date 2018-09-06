@@ -6,7 +6,7 @@ See: https://wordsandbuttons.online/
 
 ## Some examples of interactive pieces are:
 
-![alt screenshot](mathematical_analysis_explained_with_python_blood_and_tnt.png)
+![alt screenshot](https://github.com/akalenuk/wordsandbuttons/blob/master/mathematical_analysis_explained_with_python_blood_and_tnt.png)
 https://wordsandbuttons.online/mathematical_analysis_explained_with_python_blood_and_tnt.html
 
 
