@@ -9,10 +9,12 @@ See: https://wordsandbuttons.online/
 ![alt screenshot](https://github.com/akalenuk/wordsandbuttons/blob/master/images/mathematical_analysis_explained_with_python_blood_and_tnt.png)
 https://wordsandbuttons.online/mathematical_analysis_explained_with_python_blood_and_tnt.html
 
+&nbsp;
 
 ![alt screenshot](https://github.com/akalenuk/wordsandbuttons/blob/master/images/challenge_your_performance_intuition_with_cpp_magic_squares.png)
 https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_magic_squares.html
 
+&nbsp;
 
 ![alt screenshot](https://github.com/akalenuk/wordsandbuttons/blob/master/images/learn_you_a_lisp_in_0_minutes.png)
 https://wordsandbuttons.online/learn_you_a_lisp_in_0_minutes.html
