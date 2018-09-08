@@ -104,8 +104,11 @@ button {
 // client
 var w = 640.0;
 var h = 640.0;
+
+// algorithm
 var step = 32.0;
 var distance = 32.0 * 2;
+var gradient_step = 1.0;
 
 var lines = [];
 
@@ -180,13 +183,13 @@ function d_f(x, y) {
 
 function gsx(x, y, distance) {
     dd = distance - d_f(x, y);
-    dx = ( d_f(x+1, y) - d_f(x, y) );
+    dx = ( d_f(x + gradient_step, y) - d_f(x, y) ) / gradient_step;
     return step_limited(dx * dd);
 }
 
 function gsy(x, y, distance) {
     dd = distance - d_f(x, y);
-    dy = ( d_f(x, y+1) - d_f(x, y) );
+    dy = ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
     return step_limited(dy * dd);
 }
 
@@ -456,7 +459,7 @@ tick(); // let it tick always
     Distance:
     <button type="button" onclick="alter_animation_d(-step)">&lt;&lt;</button>
     <button type="button" onclick="dec('distance')">-</button>
-    <input type="text" id="distance" value="96" onchange="change_distance();">
+    <input type="text" id="distance" value="64" onchange="change_distance();">
     <button type="button" onclick="inc('distance')">+</button>
     <button type="button" onclick="alter_animation_d(+step)">&gt;&gt;</button>
     <br>
