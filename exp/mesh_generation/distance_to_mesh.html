@@ -170,15 +170,13 @@ function distance_to_line_segment(lp1x, lp1y, lp2x, lp2y, px, py) {
 
 // distance function
 function d_f(x, y) {
-	if (lines.length == 0)
-		return distance + 1.0; // no distance field
-	var d = distance_to_line_segment(lines[0][0][0], lines[0][0][1], lines[0][1][0], lines[0][1][1], x, y);
-	for (var i = 1; i < lines.length; ++i) {
-		var di = distance_to_line_segment(lines[i][0][0], lines[i][0][1], lines[i][1][0], lines[i][1][1], x, y);
-		if (di < d)
-			d = di;
-	}
-	return d;
+    var d = Number.MAX_VALUE; // everything is out
+    for (var i = 0; i < lines.length; ++i) {
+        var di = distance_to_line_segment(lines[i][0][0], lines[i][0][1], lines[i][1][0], lines[i][1][1], x, y);
+        if (di < d)
+            d = di;
+    }
+    return d;
 }
 
 function gsx(x, y, distance) {
@@ -195,20 +193,20 @@ function gsy(x, y, distance) {
 
 function init_canvas(){
     var canvas = document.getElementById("canvas");
-	canvas.addEventListener('mousedown', function(e){
-	    canvas_rect = canvas.getBoundingClientRect();
+    canvas.addEventListener('mousedown', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
         lines.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
-	}, false);
-	 
-	canvas.addEventListener('mousemove', function(e){
-	    if(e.buttons == 1){
+    }, false);
+     
+    canvas.addEventListener('mousemove', function(e){
+        if(e.buttons == 1){
             canvas_rect = canvas.getBoundingClientRect();
             lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
             draw_canvas();
-	    }
-	}, false);
-	
-	canvas.addEventListener('mouseup', function(e){
+        }
+    }, false);
+    
+    canvas.addEventListener('mouseup', function(e){
         canvas_rect = canvas.getBoundingClientRect();
         lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
         draw_canvas();
@@ -254,11 +252,11 @@ function draw_canvas(){
         for(var i = 0; i <= h - step; i += step) {
             for(var j = 0; j <= w - step; j += step) {
                 var do_horizontal = 
-		    (d_f(j + 0.5 * step, i - 0.5 * step) - distance ) *
-		    (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+            (d_f(j + 0.5 * step, i - 0.5 * step) - distance ) *
+            (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
                 var do_vertical = 
-		    (d_f(j - 0.5 * step, i + 0.5 * step) - distance ) *
-		    (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+            (d_f(j - 0.5 * step, i + 0.5 * step) - distance ) *
+            (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
                 if(do_horizontal) {
                     context.moveTo(j, i);
                     context.lineTo(j + step, i);
@@ -269,7 +267,7 @@ function draw_canvas(){
                 }            
             }
         }
-        context.strokeStyle="#AA5555";
+        context.strokeStyle="#994444";
         context.lineWidth=3;
         context.stroke();
         context.closePath();
@@ -278,14 +276,14 @@ function draw_canvas(){
     // optimized border
     if(document.getElementById("do_optimized").checked) {
         context.beginPath();
-        for(var i = 0; i <= h - step; i += step) {   // todo: -2 is wrong
+        for(var i = 0; i <= h - step; i += step) {
             for(var j = 0; j <= w - step; j += step) {
                 var do_horizontal = 
-		    (d_f(j + 0.5 * step, i - 0.5 * step) - distance ) *
-		    (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+            (d_f(j + 0.5 * step, i - 0.5 * step) - distance ) *
+            (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
                 var do_vertical = 
-		    (d_f(j - 0.5 * step, i + 0.5 * step) - distance ) *
-		    (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+            (d_f(j - 0.5 * step, i + 0.5 * step) - distance ) *
+            (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
                 if(do_horizontal) {
                     context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
                     context.lineTo(j + step + gsx(j + step, i, distance), i + gsy(j + step, i, distance));
@@ -415,13 +413,13 @@ function dec(counter_name) {
 }
 
 function reset_all() {
-	lines = [];
+    lines = [];
     draw_canvas();
 }
 
 function undo_last() {
-	lines.splice(-1,1);
-	draw_canvas();
+    lines.splice(-1,1);
+    draw_canvas();
 }
 
 function alter_animation_d(dd) {
@@ -451,10 +449,6 @@ tick(); // let it tick always
   </head>
   <body>
     <center>
-    <h1>
-
-    </h1>
-    
     <form onsubmit="return false;">
     Distance:
     <button type="button" onclick="alter_animation_d(-step)">&lt;&lt;</button>
@@ -472,8 +466,8 @@ tick(); // let it tick always
     init_canvas();
     </script>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
-        <button type="button" style="width: 108pt;" onclick="undo_last()">Undo</button>
-        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset</button>
+        <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
+        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>    
 
     </center>
