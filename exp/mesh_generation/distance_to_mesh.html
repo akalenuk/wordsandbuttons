@@ -219,13 +219,21 @@ function draw_canvas(){
     context.fillRect(0, 0, w, h);
 
     // distance function
-    context.fillStyle = "#5555aa";
-    for(var i = 0; i <= h; i += 4.0) 
-        for(var j = 0; j <= w; j += 4.0) {
+    var distance_field = context.createImageData(w, h);
+    for (var i = 0; i < distance_field.data.length; ++i)
+        distance_field.data[i] = 0;
+        
+    for (var i = 0; i <= h; i += 2.0)
+        for (var j = 0; j <= w; j += 2.0) {
             d = d_f(j, i);
-            if (d <= distance)
-                context.fillRect(j-0.5, i-0.5, 1.0, 1.0);
-        } 
+            if (d <= distance) {
+                distance_field.data[(i*w + j) * 4 + 0] = 0x55;
+                distance_field.data[(i*w + j) * 4 + 1] = 0x55;
+                distance_field.data[(i*w + j) * 4 + 2] = 0xAA;
+                distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
+            }
+        }
+    context.putImageData(distance_field, -0.5, -0.5);
     
     // grid
     context.beginPath();
