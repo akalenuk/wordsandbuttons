@@ -106,7 +106,7 @@ var w = 640.0;
 var h = 640.0;
 
 // algorithm
-var step = 32.0;
+var grid_size = 32.0;
 var distance = 32.0 * 2;
 var gradient_step = 1.0;
 
@@ -139,11 +139,11 @@ function d_as_RRGGBB(d) {
     return as_RRGGBB(d_0_1, d_0_1, 1.0);
 }
 
-function step_limited(x) {
-    if(x < -step)
-        return -step;
-    if(x > +step)
-        return +step;
+function grid_size_limited(x) {
+    if(x < -grid_size)
+        return -grid_size;
+    if(x > +grid_size)
+        return +grid_size;
     return x;
 }
 
@@ -178,13 +178,13 @@ function d_f(x, y) {
 function gsx(x, y, distance) {
     dd = distance - d_f(x, y);
     dx = ( d_f(x + gradient_step, y) - d_f(x, y) ) / gradient_step;
-    return step_limited(dx * dd);
+    return grid_size_limited(dx * dd);
 }
 
 function gsy(x, y, distance) {
     dd = distance - d_f(x, y);
     dy = ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
-    return step_limited(dy * dd);
+    return grid_size_limited(dy * dd);
 }
 
 function init_canvas(){
@@ -229,11 +229,11 @@ function draw_canvas(){
     
     // grid
     context.beginPath();
-    for(var i = 0; i <= h; i += step) {
+    for(var i = 0; i <= h; i += grid_size) {
         context.moveTo(0.0, i);
         context.lineTo(w, i);
     }
-    for(var j = 0; j <= w; j += step) {
+    for(var j = 0; j <= w; j += grid_size) {
         context.moveTo(j, 0.0);
         context.lineTo(j, h);
     }
@@ -245,21 +245,21 @@ function draw_canvas(){
     // grid border
     if(document.getElementById("do_grid").checked) {
         context.beginPath();
-        for(var i = 0; i <= h - step; i += step) {
-            for(var j = 0; j <= w - step; j += step) {
+        for(var i = 0; i <= h - grid_size; i += grid_size) {
+            for(var j = 0; j <= w - grid_size; j += grid_size) {
                 var do_horizontal = 
-            (d_f(j + 0.5 * step, i - 0.5 * step) - distance ) *
-            (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+            (d_f(j + 0.5 * grid_size, i - 0.5 * grid_size) - distance ) *
+            (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
                 var do_vertical = 
-            (d_f(j - 0.5 * step, i + 0.5 * step) - distance ) *
-            (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+            (d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) - distance ) *
+            (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
                 if(do_horizontal) {
                     context.moveTo(j, i);
-                    context.lineTo(j + step, i);
+                    context.lineTo(j + grid_size, i);
                 }
                 if(do_vertical) {
                     context.moveTo(j, i);
-                    context.lineTo(j, i + step);                
+                    context.lineTo(j, i + grid_size);                
                 }            
             }
         }
@@ -272,21 +272,21 @@ function draw_canvas(){
     // optimized border
     if(document.getElementById("do_optimized").checked) {
         context.beginPath();
-        for(var i = 0; i <= h - step; i += step) {
-            for(var j = 0; j <= w - step; j += step) {
+        for(var i = 0; i <= h - grid_size; i += grid_size) {
+            for(var j = 0; j <= w - grid_size; j += grid_size) {
                 var do_horizontal = 
-            (d_f(j + 0.5 * step, i - 0.5 * step) - distance ) *
-            (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+            (d_f(j + 0.5 * grid_size, i - 0.5 * grid_size) - distance ) *
+            (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
                 var do_vertical = 
-            (d_f(j - 0.5 * step, i + 0.5 * step) - distance ) *
-            (d_f(j + 0.5 * step, i + 0.5 * step) - distance ) < 0 ? true : false;
+            (d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) - distance ) *
+            (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
                 if(do_horizontal) {
                     context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
-                    context.lineTo(j + step + gsx(j + step, i, distance), i + gsy(j + step, i, distance));
+                    context.lineTo(j + grid_size + gsx(j + grid_size, i, distance), i + gsy(j + grid_size, i, distance));
                 }
                 if(do_vertical) {
                     context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
-                    context.lineTo(j + gsx(j, i + step, distance), i + step + gsy(j, i + step, distance));
+                    context.lineTo(j + gsx(j, i + grid_size, distance), i + grid_size + gsy(j, i + grid_size, distance));
                 }
             }
         }
@@ -299,12 +299,12 @@ function draw_canvas(){
     // marching cubes
     if(document.getElementById("do_marching").checked) {
         context.beginPath();
-        for(var i = 0; i <= h - step; i += step) {
-            for(var j = 0; j <= w - step; j += step) {
+        for(var i = 0; i <= h - grid_size; i += grid_size) {
+            for(var j = 0; j <= w - grid_size; j += grid_size) {
                 var d00 = d_f(j, i);
-                var d01 = d_f(j, i + step);
-                var d11 = d_f(j + step, i + step);
-                var d10 = d_f(j + step, i);
+                var d01 = d_f(j, i + grid_size);
+                var d11 = d_f(j + grid_size, i + grid_size);
+                var d10 = d_f(j + grid_size, i);
                 var t00_01 = (distance - d00) / (d01 - d00);
                 var t01_11 = (distance - d01) / (d11 - d01);
                 var t11_10 = (distance - d11) / (d10 - d11);
@@ -319,64 +319,64 @@ function draw_canvas(){
                 var out_10 = !in_10;
                 
                 if(out_00 && in_01 && in_11 && in_10) {
-                    context.moveTo(j + step * (1.0 - t10_00), i); // top
-                    context.lineTo(j, i + step * t00_01);
+                    context.moveTo(j + grid_size * (1.0 - t10_00), i); // top
+                    context.lineTo(j, i + grid_size * t00_01);
                 }            
                 if(in_00 && out_01 && in_11 && in_10) {
-                    context.moveTo(j, i + step * t00_01); // left
-                    context.lineTo(j + step * t01_11, i + step);
+                    context.moveTo(j, i + grid_size * t00_01); // left
+                    context.lineTo(j + grid_size * t01_11, i + grid_size);
                 }
                 if(out_00 && out_01 && in_11 && in_10) {
-                    context.moveTo(j + step * (1.0 - t10_00), i);
-                    context.lineTo(j + step * t01_11, i + step); // bottom
+                    context.moveTo(j + grid_size * (1.0 - t10_00), i);
+                    context.lineTo(j + grid_size * t01_11, i + grid_size); // bottom
                 }
                 if(in_00 && in_01 && out_11 && in_10) {            
-                    context.moveTo(j + step * t01_11, i + step);
-                    context.lineTo(j + step, i + step * (1.0 - t11_10)); // right
+                    context.moveTo(j + grid_size * t01_11, i + grid_size);
+                    context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10)); // right
                 }
                 if(out_00 && in_01 && out_11 && in_10) {  
-                    context.moveTo(j + step * (1.0 - t10_00), i);
-                    context.lineTo(j + step, i + step * (1.0 - t11_10));
-                    context.moveTo(j, i + step * t00_01);
-                    context.lineTo(j + step * t01_11, i + step);
+                    context.moveTo(j + grid_size * (1.0 - t10_00), i);
+                    context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                    context.moveTo(j, i + grid_size * t00_01);
+                    context.lineTo(j + grid_size * t01_11, i + grid_size);
                 }
                 if(in_00 && out_01 && out_11 && in_10) {  
-                    context.moveTo(j + step, i + step * (1.0 - t11_10));
-                    context.lineTo(j, i + step * t00_01);
+                    context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                    context.lineTo(j, i + grid_size * t00_01);
                 }
                 if(out_00 && out_01 && out_11 && in_10) {
-                    context.moveTo(j + step, i + step * (1.0 - t11_10));
-                    context.lineTo(j + step * (1.0 - t10_00), i);
+                    context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                    context.lineTo(j + grid_size * (1.0 - t10_00), i);
                 }
                 if(in_00 && in_01 && in_11 && out_10) {
-                    context.moveTo(j + step * (1.0 - t10_00), i);
-                    context.lineTo(j + step, i + step * (1.0 - t11_10));
+                    context.moveTo(j + grid_size * (1.0 - t10_00), i);
+                    context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10));
                 }
                 if(out_00 && in_01 && in_11 && out_10) {
-                    context.moveTo(j, i + step * t00_01);
-                    context.lineTo(j + step, i + step * (1.0 - t11_10));
+                    context.moveTo(j, i + grid_size * t00_01);
+                    context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10));
                 }
                 if(in_00 && out_01 && in_11 && out_10) {
-                    context.moveTo(j + step, i + step * (1.0 - t11_10));
-                    context.lineTo(j, i + step * t00_01);
-                    context.moveTo(j + step * t01_11, i + step);
-                    context.lineTo(j + step * (1.0 - t10_00), i);
+                    context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                    context.lineTo(j, i + grid_size * t00_01);
+                    context.moveTo(j + grid_size * t01_11, i + grid_size);
+                    context.lineTo(j + grid_size * (1.0 - t10_00), i);
                 }
                 if(out_00 && out_01 && in_11 && out_10) {
-                    context.moveTo(j + step, i + step * (1.0 - t11_10));
-                    context.lineTo(j + step * t01_11, i + step);
+                    context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                    context.lineTo(j + grid_size * t01_11, i + grid_size);
                 }
                 if(in_00 && in_01 && out_11 && out_10) {
-                    context.moveTo(j + step * t01_11, i + step);
-                    context.lineTo(j + step * (1.0 - t10_00), i);
+                    context.moveTo(j + grid_size * t01_11, i + grid_size);
+                    context.lineTo(j + grid_size * (1.0 - t10_00), i);
                 }
                 if(out_00 && in_01 && out_11 && out_10) {
-                    context.moveTo(j + step * t01_11, i + step);
-                    context.lineTo(j, i + step * t00_01);
+                    context.moveTo(j + grid_size * t01_11, i + grid_size);
+                    context.lineTo(j, i + grid_size * t00_01);
                 }
                 if(in_00 && out_01 && out_11 && out_10) {
-                    context.moveTo(j, i + step * t00_01);
-                    context.lineTo(j + step * (1.0 - t10_00), i);
+                    context.moveTo(j, i + grid_size * t00_01);
+                    context.lineTo(j + grid_size * (1.0 - t10_00), i);
                 }
             }
         }
@@ -451,11 +451,11 @@ tick(); // let it tick always
     <center>
     <form onsubmit="return false;">
     Distance:
-    <button type="button" onclick="alter_animation_d(-step)">&lt;&lt;</button>
+    <button type="button" onclick="alter_animation_d(-grid_size)">&lt;&lt;</button>
     <button type="button" onclick="dec('distance')">-</button>
     <input type="text" id="distance" value="64" onchange="change_distance();">
     <button type="button" onclick="inc('distance')">+</button>
-    <button type="button" onclick="alter_animation_d(+step)">&gt;&gt;</button>
+    <button type="button" onclick="alter_animation_d(+grid_size)">&gt;&gt;</button>
     <br>
     <input type="checkbox" id="do_grid" checked="true" onclick="draw_canvas();"/><label for="do_grid">Grid border</label>
     <input type="checkbox" id="do_optimized" checked="true" onclick="draw_canvas();"/><label for="do_optimized">Optimized border</label>
