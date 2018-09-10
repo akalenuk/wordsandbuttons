@@ -164,6 +164,8 @@ function distance_to_line_segment(lp1x, lp1y, lp2x, lp2y, px, py) {
     return Math.sqrt(dot(p_proj_x - px, p_proj_y - py, p_proj_x - px, p_proj_y - py));
 }
 
+</script>
+<script language="JavaScript" id="d_f_function">
 // distance function
 function d_f(x, y) {
     var d = Number.MAX_VALUE; // everything is out
@@ -173,6 +175,21 @@ function d_f(x, y) {
             d = di;
     }
     return d;
+}
+</script>
+<script language="JavaScript">
+
+function eval_d_f() {
+	var df_old_script_code = document.getElementById("d_f_function");
+	if (df_old_script_code) {
+		df_old_script_code.parentNode.removeChild(df_old_script_code);
+    }
+	var df_code_textarea = document.getElementById("d_f_code");
+	var new_script_code = document.createElement('script');
+	new_script_code.id = "d_f_function";
+	new_script_code.text = df_code_textarea.value;
+	document.body.appendChild(new_script_code);
+	draw_canvas();
 }
 
 function gsx(x, y, distance) {
@@ -433,8 +450,20 @@ function draw_canvas(){
     }
 }
 
-function change_distance() {
-    distance = Number(document.getElementById("distance").value);
+function change_grid_size() {
+    grid_size = Number(document.getElementById("grid_size_input").value);
+    if(isNaN(grid_size) || grid_size < 4) {
+        grid_size = 4;
+    }
+    if(grid_size > w/8) {
+        grid_size = w/8;
+    }
+    document.getElementById("grid_size_input").value = grid_size;
+    draw_canvas();
+}
+
+function change_distance(counter) {
+    distance = Number(document.getElementById("distance_input").value);
     if(isNaN(distance) || distance < 1) {
         distance = 1;
     }
@@ -442,18 +471,18 @@ function change_distance() {
         distance = w;
     }
     animation_d = distance;
-    document.getElementById("distance").value = distance;
+    document.getElementById("distance_input").value = distance;
     draw_canvas();
 }
 
 function inc(counter_name) {
-    var counter = document.getElementById(counter_name);
+    var counter = document.getElementById(counter_name+"_input");
     counter.value = Number(counter.value) + 1;
     eval('change_' + counter_name + '()');
 }
 
 function dec(counter_name) {
-    var counter = document.getElementById(counter_name);
+    var counter = document.getElementById(counter_name+"_input");
     counter.value = Number(counter.value) - 1;
     eval('change_' + counter_name + '()');
 }
@@ -484,7 +513,7 @@ function tick() {
             distance += 1;
         if(distance > animation_d)
             distance -= 1;
-        document.getElementById("distance").value = distance;            
+        document.getElementById("distance_input").value = distance;
         draw_canvas();
     }
     setTimeout( function(){tick();}, 1000.0 / FPS);
@@ -496,10 +525,15 @@ tick(); // let it tick always
   <body>
     <center>
     <form onsubmit="return false;">
+    Grid size:
+	<button type="button" onclick="dec('grid_size')">-</button>
+	<input type="text" id="grid_size_input" value="32" onchange="change_grid_size();">
+    <button type="button" onclick="inc('grid_size')">+</button>
+	<br>
     Distance:
     <button type="button" onclick="alter_animation_d(-grid_size)">&lt;&lt;</button>
     <button type="button" onclick="dec('distance')">-</button>
-    <input type="text" id="distance" value="64" onchange="change_distance();">
+    <input type="text" id="distance_input" value="64" onchange="change_distance();">
     <button type="button" onclick="inc('distance')">+</button>
     <button type="button" onclick="alter_animation_d(+grid_size)">&gt;&gt;</button>
     <br>
@@ -515,7 +549,24 @@ tick(); // let it tick always
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
-    </div>    
+    </div>
+	<div style="text-align:right; width:640px">
+	<textarea id="d_f_code" rows = "20" style="width:100%">
+function d_f(x, y) {
+radius = 100;
+  var d = Number.MAX_VALUE; // everything is out
+  for (var i = 0; i < lines.length; ++i) {
+    var di = distance_to_line_segment(lines[i][0][0], lines[i][0][1], lines[i][1][0], lines[i][1][1], x, y);
+    if (di < d)
+      d = di;
+}
+if(d < radius)
+  return radius - d;
+return d - radius;
+}
+</textarea><br>
+<button type="button" style="width: 108pt;" onclick="eval_d_f()">Compile</button>
+	</div>
 
     </center>
   </body>
