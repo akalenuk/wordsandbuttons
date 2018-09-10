@@ -164,6 +164,8 @@ function distance_to_line_segment(lp1x, lp1y, lp2x, lp2y, px, py) {
     return Math.sqrt(dot(p_proj_x - px, p_proj_y - py, p_proj_x - px, p_proj_y - py));
 }
 
+</script>
+<script language="JavaScript" id="d_f_function">
 // distance function
 function d_f(x, y) {
     var d = Number.MAX_VALUE; // everything is out
@@ -173,6 +175,21 @@ function d_f(x, y) {
             d = di;
     }
     return d;
+}
+</script>
+<script language="JavaScript">
+
+function eval_d_f() {
+	var df_old_script_code = document.getElementById("d_f_function");
+	if (df_old_script_code) {
+		df_old_script_code.parentNode.removeChild(df_old_script_code);
+    }
+	var df_code_textarea = document.getElementById("d_f_code");
+	var new_script_code = document.createElement('script');
+	new_script_code.id = "d_f_function";
+	new_script_code.text = df_code_textarea.value;
+	document.body.appendChild(new_script_code);
+	draw_canvas();
 }
 
 function gsx(x, y, distance) {
@@ -493,7 +510,24 @@ tick(); // let it tick always
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
-    </div>    
+    </div>
+	<div style="text-align:right; width:640px">
+	<textarea id="d_f_code" rows = "20" style="width:100%">
+function d_f(x, y) {
+radius = 100;
+  var d = Number.MAX_VALUE; // everything is out
+  for (var i = 0; i < lines.length; ++i) {
+    var di = distance_to_line_segment(lines[i][0][0], lines[i][0][1], lines[i][1][0], lines[i][1][1], x, y);
+    if (di < d)
+      d = di;
+}
+if(d < radius)
+  return radius - d;
+return d - radius;
+}
+</textarea><br>
+<button type="button" style="width: 108pt;" onclick="eval_d_f()">Compile</button>
+	</div>
 
     </center>
   </body>
