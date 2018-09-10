@@ -395,8 +395,20 @@ function draw_canvas(){
     }
 }
 
-function change_distance() {
-    distance = Number(document.getElementById("distance").value);
+function change_grid_size() {
+    grid_size = Number(document.getElementById("grid_size_input").value);
+    if(isNaN(grid_size) || grid_size < 4) {
+        grid_size = 4;
+    }
+    if(grid_size > w/8) {
+        grid_size = w/8;
+    }
+    document.getElementById("grid_size_input").value = grid_size;
+    draw_canvas();
+}
+
+function change_distance(counter) {
+    distance = Number(document.getElementById("distance_input").value);
     if(isNaN(distance) || distance < 1) {
         distance = 1;
     }
@@ -404,18 +416,18 @@ function change_distance() {
         distance = w;
     }
     animation_d = distance;
-    document.getElementById("distance").value = distance;
+    document.getElementById("distance_input").value = distance;
     draw_canvas();
 }
 
 function inc(counter_name) {
-    var counter = document.getElementById(counter_name);
+    var counter = document.getElementById(counter_name+"_input");
     counter.value = Number(counter.value) + 1;
     eval('change_' + counter_name + '()');
 }
 
 function dec(counter_name) {
-    var counter = document.getElementById(counter_name);
+    var counter = document.getElementById(counter_name+"_input");
     counter.value = Number(counter.value) - 1;
     eval('change_' + counter_name + '()');
 }
@@ -446,7 +458,7 @@ function tick() {
             distance += 1;
         if(distance > animation_d)
             distance -= 1;
-        document.getElementById("distance").value = distance;            
+        document.getElementById("distance_input").value = distance;
         draw_canvas();
     }
     setTimeout( function(){tick();}, 1000.0 / FPS);
@@ -458,10 +470,15 @@ tick(); // let it tick always
   <body>
     <center>
     <form onsubmit="return false;">
+    Grid size:
+	<button type="button" onclick="dec('grid_size')">-</button>
+	<input type="text" id="grid_size_input" value="32" onchange="change_grid_size();">
+    <button type="button" onclick="inc('grid_size')">+</button>
+	<br>
     Distance:
     <button type="button" onclick="alter_animation_d(-grid_size)">&lt;&lt;</button>
     <button type="button" onclick="dec('distance')">-</button>
-    <input type="text" id="distance" value="64" onchange="change_distance();">
+    <input type="text" id="distance_input" value="64" onchange="change_distance();">
     <button type="button" onclick="inc('distance')">+</button>
     <button type="button" onclick="alter_animation_d(+grid_size)">&gt;&gt;</button>
     <br>
