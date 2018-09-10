@@ -191,12 +191,12 @@ function sign_change_in_cube(x, y) {
     var signs = 0;
     if( d_f(x, y) > distance )
         ++signs;
-    if( d_f(x + gradient_step, y) > distance )
+    if( d_f(x + grid_size, y) > distance )
         ++signs;
-    if( d_f(x + gradient_step, y + gradient_step) > distance )
+    if( d_f(x + grid_size, y + grid_size) > distance )
         ++signs;
-    if( d_f(x, y + gradient_step) > distance )
-        ++signs;        
+    if( d_f(x, y + grid_size) > distance )
+        ++signs;
     if (signs == 0 || signs == 4)
         return false;
     return true;
@@ -408,6 +408,29 @@ function draw_canvas(){
         context.stroke();
         context.closePath();    
     }
+    
+    // dual contour
+    if(document.getElementById("do_dual").checked) {
+        context.beginPath();
+        for(var i = 0; i <= h - grid_size; i += grid_size) {
+            for(var j = 0; j <= w - grid_size; j += grid_size) {
+                if(sign_change_in_cube(j, i)) {
+                    if(sign_change_in_cube(j - grid_size, i)) {              
+                        context.moveTo(j + grid_size / 2, i + grid_size / 2);
+                        context.lineTo(j - grid_size / 2, i + grid_size / 2);
+                    }
+                    if(sign_change_in_cube(j, i - grid_size)) {
+                        context.moveTo(j + grid_size / 2, i + grid_size / 2);
+                        context.lineTo(j + grid_size / 2, i - grid_size / 2);
+                    }
+                }
+            }
+        }
+        context.strokeStyle="#883388";
+        context.lineWidth=3;
+        context.stroke();
+        context.closePath();
+    }
 }
 
 function change_distance() {
@@ -481,8 +504,9 @@ tick(); // let it tick always
     <button type="button" onclick="alter_animation_d(+grid_size)">&gt;&gt;</button>
     <br>
     <input type="checkbox" id="do_grid" checked="true" onclick="draw_canvas();"/><label for="do_grid">Grid border</label>
-    <input type="checkbox" id="do_optimized" checked="true" onclick="draw_canvas();"/><label for="do_optimized">Optimized border</label>
+    <input type="checkbox" id="do_optimized" checked="true" onclick="draw_canvas();"/><label for="do_optimized">Optimized</label>
     <input type="checkbox" id="do_marching" checked="true" onclick="draw_canvas();"/><label for="do_marching">Marching cubes</label>
+    <input type="checkbox" id="do_dual" checked="true" onclick="draw_canvas();"/><label for="do_dual">Dual contour</label>
     </form>
     <canvas id="canvas" width=640 height=640></canvas>
     <script language="JavaScript">
