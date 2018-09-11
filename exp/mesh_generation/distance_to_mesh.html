@@ -451,21 +451,26 @@ function draw_canvas(){
         for(var i = 0; i <= h - grid_size; i += grid_size) {
             for(var j = 0; j <= w - grid_size; j += grid_size) {
                 if(sign_change_in_cube(j, i)) {
-                    var x1 = j + grid_size / 2;
-                    var y1 = i + grid_size / 2;
-                    var x2 = x1;
-                    var y2 = y1;
-                    if(sign_change_in_cube(j - grid_size, i)) {              
-                        x2 = j - grid_size / 2;
+                    var opt1 = optimum_in_cube_brute(j, i);
+                    /*var x1 = j + grid_size / 2;
+                    var y1 = i + grid_size / 2;*/
+                    if(sign_change_in_cube(j - grid_size, i)) {
+                        var opt2 = optimum_in_cube_brute(j - grid_size, i);
+                        context.moveTo(opt1[0], opt1[1]);
+                        context.lineTo(opt2[0], opt2[1]);
+                        /*x2 = j - grid_size / 2;
                         y2 = i + grid_size / 2;
                         context.moveTo(x1 + gsx(x1, y1, distance), y1 + gsy(x1, y1, distance));
-                        context.lineTo(x2 + gsx(x2, y2, distance), y2 + gsy(x2, y2, distance));
+                        context.lineTo(x2 + gsx(x2, y2, distance), y2 + gsy(x2, y2, distance));*/
                     }
                     if(sign_change_in_cube(j, i - grid_size)) {
-                        x2 = j + grid_size / 2;
+                        var opt2 = optimum_in_cube_brute(j, i - grid_size);
+                        context.moveTo(opt1[0], opt1[1]);
+                        context.lineTo(opt2[0], opt2[1]);
+                        /*x2 = j + grid_size / 2;
                         y2 = i - grid_size / 2;
                         context.moveTo(x1 + gsx(x1, y1, distance), y1 + gsy(x1, y1, distance));
-                        context.lineTo(x2 + gsx(x2, y2, distance), y2 + gsy(x2, y2, distance));
+                        context.lineTo(x2 + gsx(x2, y2, distance), y2 + gsy(x2, y2, distance));*/
                     }
                 }
             }
