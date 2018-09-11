@@ -151,7 +151,7 @@ function dot(a1, a2, b1, b2) {
     return a1 * b1 + a2 * b2; 
 }
 
-function distance_to_line_segment(lp1x, lp1y, lp2x, lp2y, px, py) {
+function distance_to_segment(lp1x, lp1y, lp2x, lp2y, px, py) {
     var t_proj = dot(px - lp1x, py - lp1y, lp2x - lp1x, lp2y - lp1y) / dot(lp2x - lp1x, lp2y - lp1y, lp2x - lp1x, lp2y - lp1y);
     if (isNaN(t_proj))
         t_proj = 0.0;
@@ -164,13 +164,17 @@ function distance_to_line_segment(lp1x, lp1y, lp2x, lp2y, px, py) {
     return Math.sqrt(dot(p_proj_x - px, p_proj_y - py, p_proj_x - px, p_proj_y - py));
 }
 
+function distance_to_line_segment(line, px, py) {
+    return distance_to_segment(line[0][0], line[0][1], line[1][0], line[1][1], px, py);
+}
+
 </script>
 <script language="JavaScript" id="d_f_function">
 // distance function
 function d_f(x, y) {
     var d = Number.MAX_VALUE; // everything is out
     for (var i = 0; i < lines.length; ++i) {
-        var di = distance_to_line_segment(lines[i][0][0], lines[i][0][1], lines[i][1][0], lines[i][1][1], x, y);
+        var di = distance_to_line_segment(lines[i], x, y);
         if (di < d)
             d = di;
     }
@@ -559,21 +563,21 @@ tick(); // let it tick always
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
 	<div style="text-align:right; width:640px">
-	<textarea id="d_f_code" rows = "20" style="width:100%">
+	<textarea id="d_f_code" rows="20" style="width:100%">
 function d_f(x, y) {
-radius = 100;
-  var d = Number.MAX_VALUE; // everything is out
-  for (var i = 0; i < lines.length; ++i) {
-    var di = distance_to_line_segment(lines[i][0][0], lines[i][0][1], lines[i][1][0], lines[i][1][1], x, y);
-    if (di < d)
-      d = di;
+    radius = 100;
+    var d = Number.MAX_VALUE; // everything is out
+    for (var i = 0; i &lt; lines.length; ++i) {
+        var di = distance_to_line_segment(lines[i], x, y);
+        if (di &lt; d)
+            d = di;
+    }
+    if(d &lt; radius)
+        return radius - d;
+    return d - radius;
 }
-if(d < radius)
-  return radius - d;
-return d - radius;
-}
-</textarea><br>
-<button type="button" style="width: 108pt;" onclick="eval_d_f()">Compile</button>
+    </textarea><br>
+    <button type="button" style="width: 108pt;" onclick="eval_d_f()">Compile</button>
 	</div>
 
     </center>
