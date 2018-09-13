@@ -313,6 +313,32 @@ function init_canvas(){
     draw_canvas();
 }
 
+function draw_grib_border(context, w, h, grid_size, distance) {
+    context.beginPath();
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+            var do_horizontal = 
+        (d_f(j + 0.5 * grid_size, i - 0.5 * grid_size) - distance ) *
+        (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            var do_vertical = 
+        (d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) - distance ) *
+        (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            if(do_horizontal) {
+                context.moveTo(j, i);
+                context.lineTo(j + grid_size, i);
+            }
+            if(do_vertical) {
+                context.moveTo(j, i);
+                context.lineTo(j, i + grid_size);                
+            }            
+        }
+    }
+    context.strokeStyle="#994444";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath();
+}
+
 function draw_canvas(){
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
@@ -354,29 +380,7 @@ function draw_canvas(){
  
     // grid border
     if(document.getElementById("do_grid").checked) {
-        context.beginPath();
-        for(var i = 0; i <= h - grid_size; i += grid_size) {
-            for(var j = 0; j <= w - grid_size; j += grid_size) {
-                var do_horizontal = 
-            (d_f(j + 0.5 * grid_size, i - 0.5 * grid_size) - distance ) *
-            (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
-                var do_vertical = 
-            (d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) - distance ) *
-            (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
-                if(do_horizontal) {
-                    context.moveTo(j, i);
-                    context.lineTo(j + grid_size, i);
-                }
-                if(do_vertical) {
-                    context.moveTo(j, i);
-                    context.lineTo(j, i + grid_size);                
-                }            
-            }
-        }
-        context.strokeStyle="#994444";
-        context.lineWidth=3;
-        context.stroke();
-        context.closePath();
+        draw_grib_border(context, w, h, grid_size, distance);
     }
 
     // optimized border
