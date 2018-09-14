@@ -363,7 +363,7 @@ function init_canvas(){
     draw_canvas();
 }
 
-function draw_grib_border(context, w, h, grid_size, distance) {
+function draw_grid_border(context, d_f, w, h, grid_size, distance) {
     context.beginPath();
     for(var i = 0; i <= h - grid_size; i += grid_size) {
         for(var j = 0; j <= w - grid_size; j += grid_size) {
@@ -384,6 +384,32 @@ function draw_grib_border(context, w, h, grid_size, distance) {
         }
     }
     context.strokeStyle="#994444";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath();
+}
+
+function draw_grid_border_optimized(context, d_f, w, h, grid_size, distance) {
+    context.beginPath();
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+            var do_horizontal = 
+        (d_f(j + 0.5 * grid_size, i - 0.5 * grid_size) - distance ) *
+        (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            var do_vertical = 
+        (d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) - distance ) *
+        (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            if(do_horizontal) {
+                context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
+                context.lineTo(j + grid_size + gsx(j + grid_size, i, distance), i + gsy(j + grid_size, i, distance));
+            }
+            if(do_vertical) {
+                context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
+                context.lineTo(j + gsx(j, i + grid_size, distance), i + grid_size + gsy(j, i + grid_size, distance));
+            }
+        }
+    }
+    context.strokeStyle="#33AA33";
     context.lineWidth=3;
     context.stroke();
     context.closePath();
@@ -430,34 +456,12 @@ function draw_canvas(){
  
     // grid border
     if(document.getElementById("do_grid").checked) {
-        draw_grib_border(context, w, h, grid_size, distance);
+        draw_grid_border(context, d_f, w, h, grid_size, distance);
     }
 
     // optimized border
     if(document.getElementById("do_optimized").checked) {
-        context.beginPath();
-        for(var i = 0; i <= h - grid_size; i += grid_size) {
-            for(var j = 0; j <= w - grid_size; j += grid_size) {
-                var do_horizontal = 
-            (d_f(j + 0.5 * grid_size, i - 0.5 * grid_size) - distance ) *
-            (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
-                var do_vertical = 
-            (d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) - distance ) *
-            (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
-                if(do_horizontal) {
-                    context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
-                    context.lineTo(j + grid_size + gsx(j + grid_size, i, distance), i + gsy(j + grid_size, i, distance));
-                }
-                if(do_vertical) {
-                    context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
-                    context.lineTo(j + gsx(j, i + grid_size, distance), i + grid_size + gsy(j, i + grid_size, distance));
-                }
-            }
-        }
-        context.strokeStyle="#33AA33";
-        context.lineWidth=3;
-        context.stroke();
-        context.closePath();
+        draw_grid_border_optimized(context, d_f, w, h, grid_size, distance);
     }
     
     // marching cubes
