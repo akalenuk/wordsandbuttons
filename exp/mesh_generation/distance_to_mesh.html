@@ -116,80 +116,6 @@ var lines = [];
 var animation_d = distance;
 var FPS = 8;
 
-// tri-float to RGB
-function as_XX(x) {
-    return ((x < 16) ? "0" : "") +x.toString(16);
-}
-
-function as_RRGGBB(r_01, g_01, b_01) {
-    var rgb = [r_01, g_01, b_01];
-    var RRGGBB = "#";
-    for(var i = 0; i < 3; ++i) {
-        if (rgb[i] < 0.0)
-            rgb[i] = 0.0;
-        if (rgb[i] > 255.0/256.0)
-            rgb[i] = 255.0/256;
-        RRGGBB += as_XX(Math.floor(rgb[i] * 256.0));
-    }
-    return RRGGBB;
-}
-
-function d_as_RRGGBB(d) {
-    d_0_1 = Math.atan(Math.floor(d / 64.)) / (Math.PI / 2.0);
-    return as_RRGGBB(d_0_1, d_0_1, 1.0);
-}
-
-function line_on(image_data, w, h, x1, y1, x2, y2, r, g, b) {
-    // data and flags
-    var xy1 = [];
-    var xy2 = [];
-    var points = []
-    var inverse_step = Math.abs(y2 - y1) > Math.abs(x2 - x1)
-    if(inverse_step) {
-        xy1 = [Math.floor(y1), Math.floor(x1)];
-        xy2 = [Math.floor(y2), Math.floor(x2)];
-    } else {
-        xy1 = [Math.floor(x1), Math.floor(y1)];
-        xy2 = [Math.floor(x2), Math.floor(y2)];
-    }
-    var reverse_traverse = x1 > x2;
-    if(reverse_traverse) {
-        var temp = xy1;
-        xy1 = xy2;
-        xy2 = temp;
-    }
-    var dx = Math.abs(xy2[0] - xy1[0]);
-    var dy = Math.abs(xy2[1] - xy1[1]);
-    var error = Math.floor(dx / 2);
-    
-    // traverse
-    var y = y1;
-    var ystep = xy1[1] < xy2[1] ? 1 : -1;
-    for(var x = xy1[0]; x <= xy2[0]; ++x) {
-        if(inverse_step)
-            points.push([y, x]);
-        else
-            points.push([x, y]);
-        error -= dy;
-        if(error < 0) {
-            y += ystep;
-            error += dx;
-        }
-    }
-    
-    // filling the image data
-    for(var i = 0; i < points.length; ++i) {
-        var x = points[i][0];
-        var y = points[i][1];
-        if(x >= 0 && x < w && y >= 0 && y < h) {
-            distance_field.data[(y*w + x) * 4 + 0] = r;
-            distance_field.data[(y*w + x) * 4 + 1] = g;
-            distance_field.data[(y*w + x) * 4 + 2] = b;
-            distance_field.data[(y*w + x) * 4 + 3] = 0xFF;
-        }
-    }
-}
-
 function grid_size_limited(x) {
     if(x < -grid_size)
         return -grid_size;
@@ -307,21 +233,6 @@ function gsy(x, y, distance) {
     dd = distance - d_f(x, y);
     dy = ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
     return grid_size_limited(dy * dd);
-}
-
-function sign_change_in_cube(x, y) {
-    var signs = 0;
-    if( d_f(x, y) > distance )
-        ++signs;
-    if( d_f(x + grid_size, y) > distance )
-        ++signs;
-    if( d_f(x + grid_size, y + grid_size) > distance )
-        ++signs;
-    if( d_f(x, y + grid_size) > distance )
-        ++signs;
-    if (signs == 0 || signs == 4)
-        return false;
-    return true;
 }
 
 function optimum_in_cube_brute(x, y) {
