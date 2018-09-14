@@ -415,6 +415,119 @@ function draw_grid_border_optimized(context, d_f, w, h, grid_size, distance) {
     context.closePath();
 }
 
+function draw_marching_cubes(context, d_f, w, h, grid_size, distance) {
+    context.beginPath();
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+            var d00 = d_f(j, i);
+            var d01 = d_f(j, i + grid_size);
+            var d11 = d_f(j + grid_size, i + grid_size);
+            var d10 = d_f(j + grid_size, i);
+            var t00_01 = (distance - d00) / (d01 - d00);
+            var t01_11 = (distance - d01) / (d11 - d01);
+            var t11_10 = (distance - d11) / (d10 - d11);
+            var t10_00 = (distance - d10) / (d00 - d10);
+            var in_00 = d00 < distance;
+            var out_00 = !in_00;
+            var in_01 = d01 < distance;
+            var out_01 = !in_01;
+            var in_11 = d11 < distance;
+            var out_11 = !in_11;
+            var in_10 = d10 < distance;
+            var out_10 = !in_10;
+            
+            if(out_00 && in_01 && in_11 && in_10) {
+                context.moveTo(j + grid_size * (1.0 - t10_00), i); // top
+                context.lineTo(j, i + grid_size * t00_01);
+            }            
+            if(in_00 && out_01 && in_11 && in_10) {
+                context.moveTo(j, i + grid_size * t00_01); // left
+                context.lineTo(j + grid_size * t01_11, i + grid_size);
+            }
+            if(out_00 && out_01 && in_11 && in_10) {
+                context.moveTo(j + grid_size * (1.0 - t10_00), i);
+                context.lineTo(j + grid_size * t01_11, i + grid_size); // bottom
+            }
+            if(in_00 && in_01 && out_11 && in_10) {            
+                context.moveTo(j + grid_size * t01_11, i + grid_size);
+                context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10)); // right
+            }
+            if(out_00 && in_01 && out_11 && in_10) {  
+                context.moveTo(j + grid_size * (1.0 - t10_00), i);
+                context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                context.moveTo(j, i + grid_size * t00_01);
+                context.lineTo(j + grid_size * t01_11, i + grid_size);
+            }
+            if(in_00 && out_01 && out_11 && in_10) {  
+                context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                context.lineTo(j, i + grid_size * t00_01);
+            }
+            if(out_00 && out_01 && out_11 && in_10) {
+                context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                context.lineTo(j + grid_size * (1.0 - t10_00), i);
+            }
+            if(in_00 && in_01 && in_11 && out_10) {
+                context.moveTo(j + grid_size * (1.0 - t10_00), i);
+                context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+            }
+            if(out_00 && in_01 && in_11 && out_10) {
+                context.moveTo(j, i + grid_size * t00_01);
+                context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+            }
+            if(in_00 && out_01 && in_11 && out_10) {
+                context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                context.lineTo(j, i + grid_size * t00_01);
+                context.moveTo(j + grid_size * t01_11, i + grid_size);
+                context.lineTo(j + grid_size * (1.0 - t10_00), i);
+            }
+            if(out_00 && out_01 && in_11 && out_10) {
+                context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                context.lineTo(j + grid_size * t01_11, i + grid_size);
+            }
+            if(in_00 && in_01 && out_11 && out_10) {
+                context.moveTo(j + grid_size * t01_11, i + grid_size);
+                context.lineTo(j + grid_size * (1.0 - t10_00), i);
+            }
+            if(out_00 && in_01 && out_11 && out_10) {
+                context.moveTo(j + grid_size * t01_11, i + grid_size);
+                context.lineTo(j, i + grid_size * t00_01);
+            }
+            if(in_00 && out_01 && out_11 && out_10) {
+                context.moveTo(j, i + grid_size * t00_01);
+                context.lineTo(j + grid_size * (1.0 - t10_00), i);
+            }
+        }
+    }
+    context.strokeStyle="#3333AA";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath(); 
+}
+
+function draw_double_contouring(context, d_f, w, h, grid_size, distance) {
+    context.beginPath();
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+            if(d_f(j, i) < distance != d_f(j, i + grid_size) < distance) {
+                var opt1 = optimum_in_cube_brute(j, i);
+                var opt2 = optimum_in_cube_brute(j - grid_size, i);
+                context.moveTo(opt1[0], opt1[1]);
+                context.lineTo(opt2[0], opt2[1]);
+            }
+            if(d_f(j, i) < distance != d_f(j + grid_size, i) < distance) {
+                var opt1 = optimum_in_cube_brute(j, i);
+                var opt2 = optimum_in_cube_brute(j, i - grid_size);
+                context.moveTo(opt1[0], opt1[1]);
+                context.lineTo(opt2[0], opt2[1]);
+            }
+        }
+    }
+    context.strokeStyle="#883388";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath();
+}
+
 function draw_canvas(){
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
@@ -466,117 +579,12 @@ function draw_canvas(){
     
     // marching cubes
     if(document.getElementById("do_marching").checked) {
-        context.beginPath();
-        for(var i = 0; i <= h - grid_size; i += grid_size) {
-            for(var j = 0; j <= w - grid_size; j += grid_size) {
-                var d00 = d_f(j, i);
-                var d01 = d_f(j, i + grid_size);
-                var d11 = d_f(j + grid_size, i + grid_size);
-                var d10 = d_f(j + grid_size, i);
-                var t00_01 = (distance - d00) / (d01 - d00);
-                var t01_11 = (distance - d01) / (d11 - d01);
-                var t11_10 = (distance - d11) / (d10 - d11);
-                var t10_00 = (distance - d10) / (d00 - d10);
-                var in_00 = d00 < distance;
-                var out_00 = !in_00;
-                var in_01 = d01 < distance;
-                var out_01 = !in_01;
-                var in_11 = d11 < distance;
-                var out_11 = !in_11;
-                var in_10 = d10 < distance;
-                var out_10 = !in_10;
-                
-                if(out_00 && in_01 && in_11 && in_10) {
-                    context.moveTo(j + grid_size * (1.0 - t10_00), i); // top
-                    context.lineTo(j, i + grid_size * t00_01);
-                }            
-                if(in_00 && out_01 && in_11 && in_10) {
-                    context.moveTo(j, i + grid_size * t00_01); // left
-                    context.lineTo(j + grid_size * t01_11, i + grid_size);
-                }
-                if(out_00 && out_01 && in_11 && in_10) {
-                    context.moveTo(j + grid_size * (1.0 - t10_00), i);
-                    context.lineTo(j + grid_size * t01_11, i + grid_size); // bottom
-                }
-                if(in_00 && in_01 && out_11 && in_10) {            
-                    context.moveTo(j + grid_size * t01_11, i + grid_size);
-                    context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10)); // right
-                }
-                if(out_00 && in_01 && out_11 && in_10) {  
-                    context.moveTo(j + grid_size * (1.0 - t10_00), i);
-                    context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10));
-                    context.moveTo(j, i + grid_size * t00_01);
-                    context.lineTo(j + grid_size * t01_11, i + grid_size);
-                }
-                if(in_00 && out_01 && out_11 && in_10) {  
-                    context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
-                    context.lineTo(j, i + grid_size * t00_01);
-                }
-                if(out_00 && out_01 && out_11 && in_10) {
-                    context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
-                    context.lineTo(j + grid_size * (1.0 - t10_00), i);
-                }
-                if(in_00 && in_01 && in_11 && out_10) {
-                    context.moveTo(j + grid_size * (1.0 - t10_00), i);
-                    context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10));
-                }
-                if(out_00 && in_01 && in_11 && out_10) {
-                    context.moveTo(j, i + grid_size * t00_01);
-                    context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10));
-                }
-                if(in_00 && out_01 && in_11 && out_10) {
-                    context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
-                    context.lineTo(j, i + grid_size * t00_01);
-                    context.moveTo(j + grid_size * t01_11, i + grid_size);
-                    context.lineTo(j + grid_size * (1.0 - t10_00), i);
-                }
-                if(out_00 && out_01 && in_11 && out_10) {
-                    context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
-                    context.lineTo(j + grid_size * t01_11, i + grid_size);
-                }
-                if(in_00 && in_01 && out_11 && out_10) {
-                    context.moveTo(j + grid_size * t01_11, i + grid_size);
-                    context.lineTo(j + grid_size * (1.0 - t10_00), i);
-                }
-                if(out_00 && in_01 && out_11 && out_10) {
-                    context.moveTo(j + grid_size * t01_11, i + grid_size);
-                    context.lineTo(j, i + grid_size * t00_01);
-                }
-                if(in_00 && out_01 && out_11 && out_10) {
-                    context.moveTo(j, i + grid_size * t00_01);
-                    context.lineTo(j + grid_size * (1.0 - t10_00), i);
-                }
-            }
-        }
-        context.strokeStyle="#3333AA";
-        context.lineWidth=3;
-        context.stroke();
-        context.closePath();    
+        draw_marching_cubes(context, d_f, w, h, grid_size, distance);
     }
     
     // dual contour
     if(document.getElementById("do_dual").checked) {
-        context.beginPath();
-        for(var i = 0; i <= h - grid_size; i += grid_size) {
-            for(var j = 0; j <= w - grid_size; j += grid_size) {
-                if(d_f(j, i) < distance != d_f(j, i + grid_size) < distance) {
-                    var opt1 = optimum_in_cube_brute(j, i);
-                    var opt2 = optimum_in_cube_brute(j - grid_size, i);
-                    context.moveTo(opt1[0], opt1[1]);
-                    context.lineTo(opt2[0], opt2[1]);
-                }
-                if(d_f(j, i) < distance != d_f(j + grid_size, i) < distance) {
-                    var opt1 = optimum_in_cube_brute(j, i);
-                    var opt2 = optimum_in_cube_brute(j, i - grid_size);
-                    context.moveTo(opt1[0], opt1[1]);
-                    context.lineTo(opt2[0], opt2[1]);
-                }
-            }
-        }
-        context.strokeStyle="#883388";
-        context.lineWidth=3;
-        context.stroke();
-        context.closePath();
+        draw_double_contouring(context, d_f, w, h, grid_size, distance);
     }
 }
 
