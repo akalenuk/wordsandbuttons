@@ -235,16 +235,66 @@ function d_f(x, y) {
 <script language="JavaScript">
 
 function eval_d_f() {
-	var df_old_script_code = document.getElementById("d_f_function");
-	if (df_old_script_code) {
-		df_old_script_code.parentNode.removeChild(df_old_script_code);
+    var df_old_script_code = document.getElementById("d_f_function");
+    if (df_old_script_code) {
+        df_old_script_code.parentNode.removeChild(df_old_script_code);
     }
-	var df_code_textarea = document.getElementById("d_f_code");
-	var new_script_code = document.createElement('script');
-	new_script_code.id = "d_f_function";
-	new_script_code.text = df_code_textarea.value;
-	document.body.appendChild(new_script_code);
-	draw_canvas();
+    var df_code_textarea = document.getElementById("d_f_code");
+    var new_script_code = document.createElement('script');
+    new_script_code.id = "d_f_function";
+    new_script_code.text = df_code_textarea.value;
+    document.body.appendChild(new_script_code);
+    draw_canvas();
+}
+
+function put_d_f(d_f_code_string){
+    var df_code_textarea = document.getElementById("d_f_code");
+    df_code_textarea.value = d_f_code_string;
+}
+
+function put_simple_lines_d_f() {
+    var code = `function d_f(x, y) {
+    var d = Number.MAX_VALUE; // everything is out
+    for (var i = 0; i < lines.length; ++i) {
+        var di = distance_to_line_segment(lines[i], x, y);
+        if (di < d)
+            d = di;
+    }
+    return d;
+}`;
+    put_d_f(code);
+    eval_d_f();
+}
+
+function put_hollow_lines_d_f() {
+    var code = `function d_f(x, y) {
+    radius = 90;
+    var d = Number.MAX_VALUE; // everything is out
+    for (var i = 0; i < lines.length; ++i) {
+        var di = distance_to_line_segment(lines[i], x, y);
+        if (di < d)
+            d = di;
+    }
+    if(d < radius)
+        return radius - d;
+    return d - radius;
+}`;
+    put_d_f(code);
+    eval_d_f();
+}
+
+function put_metaball_d_f() {
+    var code = `function d_f(x, y) {
+    var d = 0;
+    for (var i = 0; i < lines.length; ++i) {
+        //ignove first points d += 1/Math.sqrt((lines[i][0][0]-x)*(lines[i][0][0]-x) + (lines[i][0][1]-y)*(lines[i][0][1]-y));
+        d += 1/Math.sqrt((lines[i][1][0]-x)*(lines[i][1][0]-x) + (lines[i][1][1]-y)*(lines[i][1][1]-y));
+    }
+    return 1/d;
+}`;
+    
+    put_d_f(code);
+    eval_d_f();
 }
 
 function gsx(x, y, distance) {
@@ -602,10 +652,10 @@ tick(); // let it tick always
     <center>
     <form onsubmit="return false;">
     Grid size:
-	<button type="button" onclick="dec('grid_size')">-</button>
-	<input type="text" id="grid_size_input" value="32" onchange="change_grid_size();">
+    <button type="button" onclick="dec('grid_size')">-</button>
+    <input type="text" id="grid_size_input" value="32" onchange="change_grid_size();">
     <button type="button" onclick="inc('grid_size')">+</button>
-	<br>
+    <br>
     Distance:
     <button type="button" onclick="alter_animation_d(-grid_size)">&lt;&lt;</button>
     <button type="button" onclick="dec('distance')">-</button>
@@ -626,24 +676,15 @@ tick(); // let it tick always
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
-	<div style="text-align:right; width:640px">
-	<textarea id="d_f_code" rows="20" style="width:100%">
-function d_f(x, y) {
-    radius = 100;
-    var d = Number.MAX_VALUE; // everything is out
-    for (var i = 0; i &lt; lines.length; ++i) {
-        var di = distance_to_line_segment(lines[i], x, y);
-        if (di &lt; d)
-            d = di;
-    }
-    if(d &lt; radius)
-        return radius - d;
-    return d - radius;
-}
+    <div style="text-align:right; width:640px">
+    <textarea id="d_f_code" rows="20" style="width:100%">
     </textarea><br>
+    <button type="button" style="width: 108pt;" onclick="put_simple_lines_d_f()">Just Lines</button>
+    <button type="button" style="width: 108pt;" onclick="put_hollow_lines_d_f()">Hollow Lines</button>
+    <button type="button" style="width: 108pt;" onclick="put_metaball_d_f()">MetaBalls</button>
     <button type="button" style="width: 108pt;" onclick="eval_d_f()">Compile</button>
-	</div>
-
+    </div>
     </center>
+    
   </body>
 </html>
