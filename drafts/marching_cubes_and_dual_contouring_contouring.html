@@ -50,6 +50,14 @@ pre {
     padding-right: 4pt;
 }
 
+.formula {
+    font-family: sans-serif;
+    font-size: 15pt;
+    font-style: italic;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
 
 table {
     border-width: 0pt;
@@ -78,7 +86,54 @@ u {
 }
     </style>
     <script language="JavaScript">
+const w = 640;
+const h = 512;
 
+function draw_contour() {
+    var contour = document.getElementById("contour");
+    var context = contour.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    context.font = "16px sans-serif";
+    // grid
+    const client_y_center = h /2;
+    const client_x_center = w / 2;
+    const x_min = -4;
+    const x_max = +4;
+    const y_min = -3;
+    const y_max = +3;
+    const client_x_step = w / (x_max - x_min);
+    const client_y_step = h / (y_max - y_min);
+    context.beginPath();
+    context.moveTo(0, client_y_center);
+    context.lineTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center - 5);
+    context.moveTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center + 5);
+    context.moveTo(client_x_center, h);
+    context.lineTo(client_x_center, 0);
+    context.lineTo(client_x_center - 5, 12);
+    context.moveTo(client_x_center, 0);
+    context.lineTo(client_x_center + 5, 12);
+    context.fillStyle="#000000";
+    for(var i = x_min + 1; i <= x_max - 1; i++){
+        context.moveTo(client_x_center + i*client_x_step, client_y_center);
+        context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+        context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+    }
+    for(var i = y_min + 1; i <= y_max - 1; i++){
+        context.moveTo(client_x_center, client_y_center - i*client_y_step);
+        context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+        context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+    }
+    context.strokeStyle="#000000";
+    context.stroke();
+    context.closePath();
+}
+
+function toggle_contour() {
+}
     </script>
   </head>
   <body>
@@ -87,15 +142,31 @@ u {
 Marching cubes and dual contouring contouring
     </h1>
     <p>
-This is a basic introduction into the marching cubes and the dual contoring techniques. They are mostly known as 3D mesh generating algorithms but since it's hard to explain 3D things using 2D display, we will concentrate on planar analogue of the mesh generation which is called contouring.
+This is a basic introduction into the marching cubes and the dual contoring techniques. They are mostly known as 3D mesh generating algorithms but since it's hard to explain 3D things using 2D display, we will concentrate on planar analogue of the mesh generation which itself is called contouring.
     </p>
     <p>
-The second “contouring” in the title is not an error.
+The second “contouring” in the title is not a mistake.
     </p>
        
     <h2>
 What is contouring?
     </h2>
+    <p>
+Let's say we have a function.
+    </p>
+    <p class="formula">
+x<sup>2</sup> + y<sup>2</sup> = 2
+    </p>
+    <p>
+This function represents a circle. Now let's say we don't want a perfect circle, but its contour, — a set of line segments that represent the circle within some tolerable error. We can then do things with the contour that would be tricky to do with the circle itself. Like intersecting it with a square or storing it in the same structure as other contours regardless of their original nature. 
+    </p>
+    <canvas id="contour" width=640 height=512></canvas>
+    <div style="text-align:right; width:640px; padding-bottom:12pt;">
+        <button type="button" id="toggle_contour" onclick="toggle_contour()">Contour</button>
+    </div>
+    <script language="JavaScript">
+    draw_contour();
+    </script>
     <h2>
 Marching cubes    
     </h2>
