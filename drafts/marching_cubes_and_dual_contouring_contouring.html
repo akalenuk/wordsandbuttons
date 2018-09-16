@@ -255,6 +255,78 @@ function toggle_contour() {
     else
         toggle_contour.innerHTML = "Do contour";
 }
+
+function draw_grid_border(context, d_f, w, h, grid_size, distance) {
+    context.beginPath();
+    for(var i = 0.5; i <= h - grid_size; i += grid_size) {
+        for(var j = 0.5; j <= w - grid_size; j += grid_size) {
+            var do_horizontal = 
+        (d_f(j + 0.5 * grid_size, i - 0.5 * grid_size) - distance ) *
+        (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            var do_vertical = 
+        (d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) - distance ) *
+        (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            if(do_horizontal) {
+                context.moveTo(j, i);
+                context.lineTo(j + grid_size, i);
+            }
+            if(do_vertical) {
+                context.moveTo(j, i);
+                context.lineTo(j, i + grid_size);                
+            }            
+        }
+    }
+    context.strokeStyle="#224477";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath();
+    context.lineWidth=1;
+}
+
+function draw_grid_border_contour() {
+    var grid_border = document.getElementById("grid_border");
+    var context = grid_border.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    context.font = "16px sans-serif";
+
+    // circle function
+    var distance_field = context.createImageData(w, h);
+    for (var i = 0; i < distance_field.data.length; ++i)
+        distance_field.data[i] = 0;
+    for (var i = 0; i <= h; ++i)
+        for (var j = 0; j <= w; ++j) {
+            var d = Math.pow(Math.pow(i - h/2, 2) + Math.pow(j - w/2, 2), 0.5) - 160;
+            if (Math.abs(d) < 1.4) {
+                distance_field.data[(i*w + j) * 4 + 0] = 0xAA;
+                distance_field.data[(i*w + j) * 4 + 1] = 0x55;
+                distance_field.data[(i*w + j) * 4 + 2] = 0x55;
+                distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
+            }
+        }
+    context.putImageData(distance_field, -0.5, -0.5);
+
+    // grid
+    const grid_size = 32;
+    context.beginPath();
+    for(var i = 0; i <= h; i += grid_size) {
+        context.moveTo(0.0, i);
+        context.lineTo(w, i);
+    }
+    for(var j = 0; j <= w; j += grid_size) {
+        context.moveTo(j, 0.0);
+        context.lineTo(j, h);
+    }
+    context.strokeStyle="#000000";
+    context.lineWidth=1;
+    context.stroke();
+    context.closePath();
+    
+    draw_grid_border(context, function (x, y) {
+            return Math.pow(Math.pow(x - w/2, 2) + Math.pow(y - h/2, 2), 0.5);},
+            w, h, grid_size, 160);   
+    }
     </script>
   </head>
   <body>
@@ -279,7 +351,7 @@ Let's say we have a function.
 x<sup>2</sup> + y<sup>2</sup> = 4
     </p>
     <p>
-This function represents a circle. Now let's say we don't want a perfect circle, but its contour, — a set of line segments that represent the circle within some tolerable error. We can then do things with the contour that would be tricky to do with the circle itself. Like intersecting it with a square or storing it in the same structure as other contours regardless of their original nature. 
+This function represents a circle. Now let's say we don't want a perfect circle, but its contour, — a set of line segments that represent the circle within some tolerable error.  
     </p>
     <canvas id="contour" width=640 height=480></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
@@ -288,6 +360,28 @@ This function represents a circle. Now let's say we don't want a perfect circle,
     <script language="JavaScript">
     draw_contour();
     </script>
+    <p>
+We can then do things with the contour that would be tricky to do with the circle itself. Like intersecting it with a square or storing it in the same structure as other contours regardless of their original nature. 
+    </p>
+    <p>
+Conceptually, contouring is very easy. Let's rewrite our function:
+    </p>
+    <p class="formula">
+F(x, y) = x<sup>2</sup> + y<sup>2</sup> - 4
+    </p>
+    <p>
+Now we cover some part of a plane with a grid. For every two adjacent cells we can add their common border as a contour line segment if the function <i>F(x,y)</i> changes sign between these two cell's centers.
+    </p>
+    <canvas id="grid_border" width=640 height=480></canvas>
+    <script language="JavaScript">
+    draw_grid_border_contour();
+    </script>
+    <p>
+Well, technically it does represent the curve. And the error is predictalbe, it doesn't exceed half of the cell's diagonal. But this contour has way too many corners as for a circle.
+    </p>
+    <p>
+We need something better.
+    </p>
     <h2>
 Marching cubes    
     </h2>
