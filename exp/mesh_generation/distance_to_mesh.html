@@ -401,33 +401,35 @@ function draw_canvas(){
     for (var i = 0; i < distance_field.data.length; ++i)
         distance_field.data[i] = 0;
     
-	if(document.getElementById("draw_expected_shape").checked)
-		for (var i = 0; i <= h; i += 2.0)
-			for (var j = 0; j <= w; j += 2.0) {
-				d = d_f(j, i);
-				if (d <= distance) {
-					distance_field.data[(i*w + j) * 4 + 0] = 0x55;
-					distance_field.data[(i*w + j) * 4 + 1] = 0x55;
-					distance_field.data[(i*w + j) * 4 + 2] = 0xAA;
-					distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
-				}
-			}
-		context.putImageData(distance_field, -0.5, -0.5);
+    if(document.getElementById("draw_expected_shape").checked)
+        for (var i = 0; i <= h; i += 2.0)
+            for (var j = 0; j <= w; j += 2.0) {
+                d = d_f(j, i);
+                if (d <= distance) {
+                    distance_field.data[(i*w + j) * 4 + 0] = 0x55;
+                    distance_field.data[(i*w + j) * 4 + 1] = 0x55;
+                    distance_field.data[(i*w + j) * 4 + 2] = 0xAA;
+                    distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
+                }
+            }
+        context.putImageData(distance_field, -0.5, -0.5);
     
     // grid
-    context.beginPath();
-    for(var i = 0; i <= h; i += grid_size) {
-        context.moveTo(0.0, i);
-        context.lineTo(w, i);
+    if(document.getElementById("draw_grid").checked) {
+        context.beginPath();
+        for(var i = 0; i <= h; i += grid_size) {
+            context.moveTo(0.0, i);
+            context.lineTo(w, i);
+        }
+        for(var j = 0; j <= w; j += grid_size) {
+            context.moveTo(j, 0.0);
+            context.lineTo(j, h);
+        }
+        context.strokeStyle="#cccccc";
+        context.lineWidth=1;
+        context.stroke();
+        context.closePath();
     }
-    for(var j = 0; j <= w; j += grid_size) {
-        context.moveTo(j, 0.0);
-        context.lineTo(j, h);
-    }
-    context.strokeStyle="#cccccc";
-    context.lineWidth=1;
-    context.stroke();
-    context.closePath();
  
     // grid border
     if(document.getElementById("do_grid").checked) {
@@ -678,6 +680,7 @@ tick(); // let it tick always
     <input type="checkbox" id="do_dual" checked="true" onclick="draw_canvas();"/><label for="do_dual">Dual contour</label>
     <input type="checkbox" id="draw_distances" checked="true" onclick="draw_canvas();"/><label for="draw_distances">Show Distance</label>
     <input type="checkbox" id="draw_expected_shape" checked="true" onclick="draw_canvas();"/><label for="draw_expected_shape">Show Expected Shape</label>
+    <input type="checkbox" id="draw_grid" checked="true" onclick="draw_canvas();"/><label for="draw_grid">Show Grid</label>
     </form>
     <canvas id="canvas" width=1800 height=1000></canvas>
     <script language="JavaScript">
