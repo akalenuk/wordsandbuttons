@@ -89,6 +89,96 @@ u {
 const w = 640;
 const h = 480;
 
+function draw_marching_cubes_no_interpolation(context, d_f, w, h, grid_size, distance) {
+    context.beginPath();
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+            var d00 = d_f(j, i);
+            var d01 = d_f(j, i + grid_size);
+            var d11 = d_f(j + grid_size, i + grid_size);
+            var d10 = d_f(j + grid_size, i);
+            var t00_01 = 0.5;
+            var t01_11 = 0.5;
+            var t11_10 = 0.5;
+            var t10_00 = 0.5;
+            var in_00 = d00 < distance;
+            var out_00 = !in_00;
+            var in_01 = d01 < distance;
+            var out_01 = !in_01;
+            var in_11 = d11 < distance;
+            var out_11 = !in_11;
+            var in_10 = d10 < distance;
+            var out_10 = !in_10;
+            
+            if(out_00 && in_01 && in_11 && in_10) {
+                context.moveTo(j + grid_size * (1.0 - t10_00), i); // top
+                context.lineTo(j, i + grid_size * t00_01);
+            }            
+            if(in_00 && out_01 && in_11 && in_10) {
+                context.moveTo(j, i + grid_size * t00_01); // left
+                context.lineTo(j + grid_size * t01_11, i + grid_size);
+            }
+            if(out_00 && out_01 && in_11 && in_10) {
+                context.moveTo(j + grid_size * (1.0 - t10_00), i);
+                context.lineTo(j + grid_size * t01_11, i + grid_size); // bottom
+            }
+            if(in_00 && in_01 && out_11 && in_10) {            
+                context.moveTo(j + grid_size * t01_11, i + grid_size);
+                context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10)); // right
+            }
+            if(out_00 && in_01 && out_11 && in_10) {  
+                context.moveTo(j + grid_size * (1.0 - t10_00), i);
+                context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                context.moveTo(j, i + grid_size * t00_01);
+                context.lineTo(j + grid_size * t01_11, i + grid_size);
+            }
+            if(in_00 && out_01 && out_11 && in_10) {  
+                context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                context.lineTo(j, i + grid_size * t00_01);
+            }
+            if(out_00 && out_01 && out_11 && in_10) {
+                context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                context.lineTo(j + grid_size * (1.0 - t10_00), i);
+            }
+            if(in_00 && in_01 && in_11 && out_10) {
+                context.moveTo(j + grid_size * (1.0 - t10_00), i);
+                context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+            }
+            if(out_00 && in_01 && in_11 && out_10) {
+                context.moveTo(j, i + grid_size * t00_01);
+                context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+            }
+            if(in_00 && out_01 && in_11 && out_10) {
+                context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                context.lineTo(j, i + grid_size * t00_01);
+                context.moveTo(j + grid_size * t01_11, i + grid_size);
+                context.lineTo(j + grid_size * (1.0 - t10_00), i);
+            }
+            if(out_00 && out_01 && in_11 && out_10) {
+                context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                context.lineTo(j + grid_size * t01_11, i + grid_size);
+            }
+            if(in_00 && in_01 && out_11 && out_10) {
+                context.moveTo(j + grid_size * t01_11, i + grid_size);
+                context.lineTo(j + grid_size * (1.0 - t10_00), i);
+            }
+            if(out_00 && in_01 && out_11 && out_10) {
+                context.moveTo(j + grid_size * t01_11, i + grid_size);
+                context.lineTo(j, i + grid_size * t00_01);
+            }
+            if(in_00 && out_01 && out_11 && out_10) {
+                context.moveTo(j, i + grid_size * t00_01);
+                context.lineTo(j + grid_size * (1.0 - t10_00), i);
+            }
+        }
+    }
+    context.strokeStyle = "#3333AA";
+    context.lineWidth = 3;
+    context.stroke();
+    context.closePath(); 
+    context.lineWidth = 1;
+}
+
 function draw_marching_cubes(context, d_f, w, h, grid_size, distance) {
     context.beginPath();
     for(var i = 0; i <= h - grid_size; i += grid_size) {
@@ -327,6 +417,50 @@ function draw_grid_border_contour() {
             return Math.pow(Math.pow(x - w/2, 2) + Math.pow(y - h/2, 2), 0.5);},
             w, h, grid_size, 160);   
     }
+    
+function draw_marching_cubes_no_interpolation_contour() {
+    var context = document.getElementById("marching_cubes_no_interpolation").getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    context.font = "16px sans-serif";
+
+    // circle function
+    var distance_field = context.createImageData(w, h);
+    for (var i = 0; i < distance_field.data.length; ++i)
+        distance_field.data[i] = 0;
+    for (var i = 0; i <= h; ++i)
+        for (var j = 0; j <= w; ++j) {
+            var d = Math.pow(Math.pow(i - h/2, 2) + Math.pow(j - w/2, 2), 0.5) - 160;
+            if (Math.abs(d) < 1.4) {
+                distance_field.data[(i*w + j) * 4 + 0] = 0xAA;
+                distance_field.data[(i*w + j) * 4 + 1] = 0x55;
+                distance_field.data[(i*w + j) * 4 + 2] = 0x55;
+                distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
+            }
+        }
+    context.putImageData(distance_field, -0.5, -0.5);
+
+    // grid
+    const grid_size = 64;
+    context.beginPath();
+    for(var i = 0; i <= h; i += grid_size) {
+        context.moveTo(0.0, i);
+        context.lineTo(w, i);
+    }
+    for(var j = 0; j <= w; j += grid_size) {
+        context.moveTo(j, 0.0);
+        context.lineTo(j, h);
+    }
+    context.strokeStyle="#000000";
+    context.lineWidth=1;
+    context.stroke();
+    context.closePath();
+    
+    draw_marching_cubes_no_interpolation(context, function (x, y) {
+            return Math.pow(Math.pow(x - w/2, 2) + Math.pow(y - h/2, 2), 0.5);},
+            w, h, grid_size, 160);   
+    }
     </script>
   </head>
   <body>
@@ -389,7 +523,11 @@ Marching cubes
     <p>
 ...    
     </p>
-    
+    <canvas id="marching_cubes_no_interpolation" width=640 height=480></canvas>
+    <script language="JavaScript">
+    draw_marching_cubes_no_interpolation_contour();
+    </script>
+        
     <h2>
 Dual contouring
     </h2>
