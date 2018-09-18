@@ -452,33 +452,36 @@ function draw_canvas(){
     var distance_field = context.createImageData(w, h);
     for (var i = 0; i < distance_field.data.length; ++i)
         distance_field.data[i] = 0;
-        
-    for (var i = 0; i <= h; i += 2.0)
-        for (var j = 0; j <= w; j += 2.0) {
-            d = d_f(j, i);
-            if (d <= distance) {
-                distance_field.data[(i*w + j) * 4 + 0] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 1] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 2] = 0xAA;
-                distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
+    
+    if(document.getElementById("draw_expected_shape").checked)
+        for (var i = 0; i <= h; i += 2.0)
+            for (var j = 0; j <= w; j += 2.0) {
+                d = d_f(j, i);
+                if (d <= distance) {
+                    distance_field.data[(i*w + j) * 4 + 0] = 0x55;
+                    distance_field.data[(i*w + j) * 4 + 1] = 0x55;
+                    distance_field.data[(i*w + j) * 4 + 2] = 0xAA;
+                    distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
+                }
             }
-        }
-    context.putImageData(distance_field, -0.5, -0.5);
+        context.putImageData(distance_field, -0.5, -0.5);
     
     // grid
-    context.beginPath();
-    for(var i = 0; i <= h; i += grid_size) {
-        context.moveTo(0.0, i);
-        context.lineTo(w, i);
+    if(document.getElementById("draw_grid").checked) {
+        context.beginPath();
+        for(var i = 0; i <= h; i += grid_size) {
+            context.moveTo(0.0, i);
+            context.lineTo(w, i);
+        }
+        for(var j = 0; j <= w; j += grid_size) {
+            context.moveTo(j, 0.0);
+            context.lineTo(j, h);
+        }
+        context.strokeStyle="#cccccc";
+        context.lineWidth=1;
+        context.stroke();
+        context.closePath();
     }
-    for(var j = 0; j <= w; j += grid_size) {
-        context.moveTo(j, 0.0);
-        context.lineTo(j, h);
-    }
-    context.strokeStyle="#000000";
-    context.lineWidth=1;
-    context.stroke();
-    context.closePath();
  
     // grid border
     if(document.getElementById("do_grid").checked) {
@@ -490,6 +493,17 @@ function draw_canvas(){
         draw_grid_border_optimized(context, d_f, w, h, grid_size, distance);
     }
     
+    // distance values
+    if(document.getElementById("draw_distances").checked && lines.length > 0) {
+        context.font = "16px Arial";
+        context.fillStyle = "#000000";
+        for(var i = 0; i <= h - grid_size; i += grid_size) {
+            for(var j = 0; j <= w - grid_size; j += grid_size) {
+                context.fillText(Math.round(d_f(j, i),1).toString(), j+5, i-5);
+            }
+        }
+    }
+
     // marching cubes
     if(document.getElementById("do_marching").checked) {
         draw_marching_cubes(context, d_f, w, h, grid_size, distance);
@@ -513,13 +527,40 @@ function change_grid_size() {
     draw_canvas();
 }
 
-function change_distance(counter) {
-    distance = Number(document.getElementById("distance_input").value);
-    if(isNaN(distance) || distance < 1) {
-        distance = 1;
+function change_w() {
+    w = Number(document.getElementById("w_input").value);
+    if(isNaN(w)) {
+        w = 640;
     }
-    if(distance > w) {
-        distance = w;
+    document.getElementById("w_input").value = w;
+    document.getElementById("canvas").width = w;
+    draw_canvas();
+}
+
+function change_h() {
+    h = Number(document.getElementById("h_input").value);
+    if(isNaN(w)) {
+        h = 640;
+    }
+    document.getElementById("h_input").value = h;
+    document.getElementById("canvas").height = h;
+    draw_canvas();
+}
+
+function canvas_full_screen() {
+    var window_width = window.innerWidth;
+    var window_height = window.innerHeight;
+    document.getElementById("w_input").value = window_width;
+    document.getElementById("h_input").value = window_height;
+    change_w();
+    change_h();
+    window.scrollTo(0, document.getElementById("canvas").offsetTop);
+}
+
+function change_distance() {
+    distance = Number(document.getElementById("distance_input").value);
+    if(isNaN(distance)) {
+        distance = 1;
     }
     animation_d = distance;
     document.getElementById("distance_input").value = distance;
@@ -576,6 +617,10 @@ tick(); // let it tick always
   <body>
     <center>
     <form onsubmit="return false;">
+    Canvas size:
+    <input type="text" id="w_input" value="640" onchange="change_w();"> X 
+    <input type="text" id="h_input" value="640" onchange="change_h();">
+    <button type="button" style="width: auto;" onclick="canvas_full_screen()">Full screen</button><br>
     Grid size:
     <button type="button" onclick="dec('grid_size')">-</button>
     <input type="text" id="grid_size_input" value="32" onchange="change_grid_size();">
@@ -588,10 +633,14 @@ tick(); // let it tick always
     <button type="button" onclick="inc('distance')">+</button>
     <button type="button" onclick="alter_animation_d(+grid_size)">&gt;&gt;</button>
     <br>
-    <input type="checkbox" id="do_grid" checked="true" onclick="draw_canvas();"/><label for="do_grid">Grid border</label>
-    <input type="checkbox" id="do_optimized" checked="true" onclick="draw_canvas();"/><label for="do_optimized">Optimized</label>
-    <input type="checkbox" id="do_marching" checked="true" onclick="draw_canvas();"/><label for="do_marching">Marching cubes</label>
-    <input type="checkbox" id="do_dual" checked="true" onclick="draw_canvas();"/><label for="do_dual">Dual contour</label>
+    <input type="checkbox" id="do_grid" onclick="draw_canvas();"/><label for="do_grid">Grid border</label>
+    <input type="checkbox" id="do_optimized" onclick="draw_canvas();"/><label for="do_optimized">Optimized</label>
+    <input type="checkbox" id="do_marching" checked onclick="draw_canvas();"/><label for="do_marching">Marching cubes</label>
+    <input type="checkbox" id="do_dual" onclick="draw_canvas();"/><label for="do_dual">Dual contour</label>
+    <br>
+    <input type="checkbox" id="draw_distances"onclick="draw_canvas();"/><label for="draw_distances">Show Distance</label>
+    <input type="checkbox" id="draw_expected_shape" checked onclick="draw_canvas();"/><label for="draw_expected_shape">Show Expected Shape</label>
+    <input type="checkbox" id="draw_grid" checked onclick="draw_canvas();"/><label for="draw_grid">Show Grid</label>
     </form>
     <canvas id="canvas" width=640 height=640></canvas>
     <script language="JavaScript">
