@@ -461,6 +461,68 @@ function draw_marching_cubes_no_interpolation_contour() {
             return Math.pow(Math.pow(x - w/2, 2) + Math.pow(y - h/2, 2), 0.5);},
             w, h, grid_size, 160);   
     }
+    
+    
+var marching_cube_signs = [[0, 1], [1, 1]];
+var marching_cube_buttons_xy = [[[160, 80], [480, 80]], [[160, 400], [480, 400]]];
+var marching_cube_buttons_r = 32.0;
+function init_marching_cube() {
+    var marching_cube = document.getElementById("marching_cube");
+    draw_marching_cube(0, 0, false);
+
+    marching_cube.addEventListener('mousemove', function(e) {
+        var canvas_rect = marching_cube.getBoundingClientRect();
+        var client_x = e.clientX - canvas_rect.left;
+        var client_y = e.clientY - canvas_rect.top;
+        draw_marching_cube(client_x, e.client_y, true);
+    }, false);
+    
+    marching_cube.addEventListener('mouseup', function(e) {
+        var canvas_rect = marching_cube.getBoundingClientRect();
+        var client_x = e.clientX - canvas_rect.left;
+        var client_y = e.clientY - canvas_rect.top;
+        draw_marching_cube(client_x, e.client_y, false);
+    }, false);
+}
+
+function draw_marching_cube(client_x, client_y, do_highlight) {
+    var context = document.getElementById("marching_cube").getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    context.font = "16px sans-serif";
+    
+    // cell
+    context.beginPath();
+    context.moveTo(0.0, marching_cube_buttons_xy[0][0][1]);
+    context.lineTo(w, marching_cube_buttons_xy[0][0][1]);
+    context.moveTo(0.0, marching_cube_buttons_xy[1][0][1]);
+    context.lineTo(w, marching_cube_buttons_xy[1][0][1]);
+    
+    context.moveTo(marching_cube_buttons_xy[0][0][0], 0.0);
+    context.lineTo(marching_cube_buttons_xy[0][0][0], h);
+    context.moveTo(marching_cube_buttons_xy[0][1][0], 0.0);
+    context.lineTo(marching_cube_buttons_xy[0][1][0], h)
+    
+    context.strokeStyle="#000000";
+    context.lineWidth=1;
+    context.stroke();
+    context.closePath();
+    
+    // signs
+    for(var i = 0; i <= 1; ++i)
+        for(var j = 0; j <= 1; ++j) {
+            context.beginPath();
+            context.arc(marching_cube_buttons_xy[i][j][0], marching_cube_buttons_xy[i][j][1], marching_cube_buttons_r, 0, 2*Math.PI);
+            if(marching_cube_signs[i][j] == 1) {
+                context.fillStyle="#ee0000";
+            } else {
+                context.fillStyle="#0000ee";
+            }
+            context.closePath();
+            context.fill();
+        }
+}
     </script>
   </head>
   <body>
@@ -511,7 +573,7 @@ Now we cover some part of a plane with a grid. For every two adjacent cells we c
     draw_grid_border_contour();
     </script>
     <p>
-Well, technically it does represent the curve. And the error is predictalbe, it doesn't exceed half of the cell's diagonal. But this contour has way too many corners as for a circle.
+Well, technically it does represent the curve. And the error is predictable, it doesn't exceed half of the cell's diagonal. But this contour has way too many corners as for a circle.
     </p>
     <p>
 We need something better.
@@ -521,7 +583,14 @@ Marching cubes
     </h2>
 
     <p>
-...    
+What if we add line segments that go across the cells? we can measure a function sign in four corners of a square, and add line segments accordingly. There are 4 squares, 2 signs, there are only 16 combinations of sign change possible
+    </p>
+    <canvas id="marching_cube" width=640 height=480></canvas>
+    <script language="JavaScript">
+    init_marching_cube();
+    </script>
+    <p>
+...
     </p>
     <canvas id="marching_cubes_no_interpolation" width=640 height=480></canvas>
     <script language="JavaScript">
