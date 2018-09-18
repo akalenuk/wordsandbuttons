@@ -465,7 +465,7 @@ function draw_marching_cubes_no_interpolation_contour() {
     
 var marching_cube_signs = [[0, 1], [1, 1]];
 var marching_cube_buttons_xy = [[[160, 80], [480, 80]], [[160, 400], [480, 400]]];
-var marching_cube_buttons_r = 32.0;
+var marching_cube_buttons_r = 24.0;
 function init_marching_cube() {
     var marching_cube = document.getElementById("marching_cube");
     draw_marching_cube(0, 0, false);
@@ -474,14 +474,22 @@ function init_marching_cube() {
         var canvas_rect = marching_cube.getBoundingClientRect();
         var client_x = e.clientX - canvas_rect.left;
         var client_y = e.clientY - canvas_rect.top;
-        draw_marching_cube(client_x, e.client_y, true);
+        draw_marching_cube(client_x, client_y, true);
     }, false);
     
     marching_cube.addEventListener('mouseup', function(e) {
         var canvas_rect = marching_cube.getBoundingClientRect();
         var client_x = e.clientX - canvas_rect.left;
         var client_y = e.clientY - canvas_rect.top;
-        draw_marching_cube(client_x, e.client_y, false);
+        for(var i = 0; i <= 1; ++i)
+            for(var j = 0; j <= 1; ++j) {
+                if(Math.pow(client_x - marching_cube_buttons_xy[i][j][0], 2) 
+                 + Math.pow(client_y - marching_cube_buttons_xy[i][j][1], 2) 
+                <= Math.pow(marching_cube_buttons_r, 2)) {
+                    marching_cube_signs[i][j] = 1 - marching_cube_signs[i][j];
+                }
+            }
+        draw_marching_cube(client_x, client_y, true);
     }, false);
 }
 
@@ -514,13 +522,50 @@ function draw_marching_cube(client_x, client_y, do_highlight) {
         for(var j = 0; j <= 1; ++j) {
             context.beginPath();
             context.arc(marching_cube_buttons_xy[i][j][0], marching_cube_buttons_xy[i][j][1], marching_cube_buttons_r, 0, 2*Math.PI);
-            if(marching_cube_signs[i][j] == 1) {
-                context.fillStyle="#ee0000";
+            if(do_highlight && true && 
+               Math.pow(client_x - marching_cube_buttons_xy[i][j][0], 2) 
+             + Math.pow(client_y - marching_cube_buttons_xy[i][j][1], 2) 
+            <= Math.pow(marching_cube_buttons_r, 2)) { // highlight
+                if(marching_cube_signs[i][j] == 1) {
+                    context.fillStyle="#ff0000";
+                } else {
+                    context.fillStyle="#0000ff";
+                }
             } else {
-                context.fillStyle="#0000ee";
+                if(marching_cube_signs[i][j] == 1) {
+                    context.fillStyle="#660000";
+                } else {
+                    context.fillStyle="#000066";
+                }
             }
             context.closePath();
             context.fill();
+        
+            // function
+            /*var sample_function = function(x, y) {return w+h;} // all plus
+            
+            var sample_function_image = context.createImageData(w, h);
+            for (var i = 0; i < sample_function_image.data.length; ++i)
+                sample_function_image.data[i] = 0;
+            for (var i = 0; i <= h; ++i)
+                for (var j = 0; j <= w; ++j) {
+                    var d = sample_function(j, i);
+                    if (Math.abs(d) < 1.4) {
+                        sample_function_image.data[(i*w + j) * 4 + 0] = 0xAA;
+                        sample_function_image.data[(i*w + j) * 4 + 1] = 0x55;
+                        sample_function_image.data[(i*w + j) * 4 + 2] = 0x55;
+                        sample_function_image.data[(i*w + j) * 4 + 3] = 0xFF;
+                    }
+                }
+            context.putImageData(sample_function_image, -0.5, -0.5);*/
+        
+            // minus
+            context.fillStyle="#eeeeee";
+            context.fillRect(marching_cube_buttons_xy[i][j][0] - 12, marching_cube_buttons_xy[i][j][1] - 2, 24, 4);
+            // plus           
+            if(marching_cube_signs[i][j] == 1) {
+                context.fillRect(marching_cube_buttons_xy[i][j][0] - 2, marching_cube_buttons_xy[i][j][1] - 12, 4, 24);
+            }                        
         }
 }
     </script>
