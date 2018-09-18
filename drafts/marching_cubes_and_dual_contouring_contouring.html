@@ -495,10 +495,43 @@ function init_marching_cube() {
 
 function draw_marching_cube(client_x, client_y, do_highlight) {
     var context = document.getElementById("marching_cube").getContext("2d");
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
-    context.font = "16px sans-serif";
+    
+    // function
+    var sample_function = function(x, y) {return w+h;}; // all plus
+    
+    if(marching_cube_signs[0][0] == 0 && marching_cube_signs[0][1] == 1 && marching_cube_signs[1][0] == 1 && marching_cube_signs[1][1] == 1) 
+        sample_function = function(x, y) {return Math.sqrt((x-w*0.0)*(x-w*0.0) + (y+h*0.1)*(y+h*0.1)) - 340;};
+
+    if(marching_cube_signs[0][0] == 1 && marching_cube_signs[0][1] == 0 && marching_cube_signs[1][0] == 1 && marching_cube_signs[1][1] == 1) 
+        sample_function = function(x, y) {return Math.sqrt((x-w*1.0)*(x-w*1.0) + (y+h*0.1)*(y+h*0.1)) - 340;};
+
+    if(marching_cube_signs[0][0] == 0 && marching_cube_signs[0][1] == 0 && marching_cube_signs[1][0] == 1 && marching_cube_signs[1][1] == 1) 
+        sample_function = function(x, y) {return Math.sqrt((x-w*0.5)*(x-w*0.5) + (y+h*0.3)*(y+h*0.3)) - 440;};
+    
+    if(marching_cube_signs[0][0] == 1 && marching_cube_signs[0][1] == 1 && marching_cube_signs[1][0] == 0 && marching_cube_signs[1][1] == 1)     
+        sample_function = function(x, y) {return Math.sqrt((x-w*0.0)*(x-w*0.0) + (y-h*1.1)*(y-h*1.1)) - 340;};
+ 
+    if(marching_cube_signs[0][0] == 0 && marching_cube_signs[0][1] == 1 && marching_cube_signs[1][0] == 0 && marching_cube_signs[1][1] == 1)     
+        sample_function = function(x, y) {return Math.sqrt((x-w*0.0)*(x-w*0.0) + (y-h*0.5)*(y-h*0.5)) - 380;};
+        
+    if(marching_cube_signs[0][0] == 1 && marching_cube_signs[0][1] == 0 && marching_cube_signs[1][0] == 0 && marching_cube_signs[1][1] == 1)
+        sample_function = function(x, y) {return y < x ? Math.sqrt((x-w*1.0)*(x-w*1.0) + (y+h*0.1)*(y+h*0.1)) - 340
+                                                       : Math.sqrt((x-w*0.0)*(x-w*0.0) + (y-h*1.1)*(y-h*1.1)) - 340;};
+                            
+    var sample_function_image = context.createImageData(w, h);
+    for (var i = 0; i < sample_function_image.data.length; ++i)
+        sample_function_image.data[i] = 0;
+    for (var i = 0; i <= h; ++i)
+        for (var j = 0; j <= w; ++j) {
+            var d = sample_function(j, i);
+            if (Math.abs(d) < 1.4) {
+                sample_function_image.data[(i*w + j) * 4 + 0] = 0xAA;
+                sample_function_image.data[(i*w + j) * 4 + 1] = 0x55;
+                sample_function_image.data[(i*w + j) * 4 + 2] = 0x55;
+                sample_function_image.data[(i*w + j) * 4 + 3] = 0xFF;
+            }
+        }
+    context.putImageData(sample_function_image, -0.5, -0.5);
     
     // cell
     context.beginPath();
@@ -540,24 +573,6 @@ function draw_marching_cube(client_x, client_y, do_highlight) {
             }
             context.closePath();
             context.fill();
-        
-            // function
-            /*var sample_function = function(x, y) {return w+h;} // all plus
-            
-            var sample_function_image = context.createImageData(w, h);
-            for (var i = 0; i < sample_function_image.data.length; ++i)
-                sample_function_image.data[i] = 0;
-            for (var i = 0; i <= h; ++i)
-                for (var j = 0; j <= w; ++j) {
-                    var d = sample_function(j, i);
-                    if (Math.abs(d) < 1.4) {
-                        sample_function_image.data[(i*w + j) * 4 + 0] = 0xAA;
-                        sample_function_image.data[(i*w + j) * 4 + 1] = 0x55;
-                        sample_function_image.data[(i*w + j) * 4 + 2] = 0x55;
-                        sample_function_image.data[(i*w + j) * 4 + 3] = 0xFF;
-                    }
-                }
-            context.putImageData(sample_function_image, -0.5, -0.5);*/
         
             // minus
             context.fillStyle="#eeeeee";
