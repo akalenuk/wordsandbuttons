@@ -169,25 +169,11 @@ function draw_one_cube(context, j, i, grid_size, d_f, distance, do_interpolation
     }
 }
 
-function draw_marching_cubes_no_interpolation(context, d_f, w, h, grid_size, distance) {
+function draw_marching_cubes(context, d_f, do_interpolation, w, h, grid_size, distance) {
     context.beginPath();
     for(var i = 0; i <= h - grid_size; i += grid_size) {
         for(var j = 0; j <= w - grid_size; j += grid_size) {
-            draw_one_cube(context, j, i, grid_size, d_f, distance, false);
-        }
-    }
-    context.strokeStyle = "#3333AA";
-    context.lineWidth = 3;
-    context.stroke();
-    context.closePath(); 
-    context.lineWidth = 1;
-}
-
-function draw_marching_cubes(context, d_f, w, h, grid_size, distance) {
-    context.beginPath();
-    for(var i = 0; i <= h - grid_size; i += grid_size) {
-        for(var j = 0; j <= w - grid_size; j += grid_size) {
-            draw_one_cube(context, j, i, grid_size, d_f, distance, true);
+            draw_one_cube(context, j, i, grid_size, d_f, distance, do_interpolation);
         }
     }
     context.strokeStyle = "#3333AA";
@@ -225,6 +211,7 @@ function draw_contour() {
     if(do_contour) {
         draw_marching_cubes(context, function (x, y) {
             return Math.pow(Math.pow(x - w/2, 2) + Math.pow(y - h/2, 2), 0.5);},
+            true,
             w, h, 80, 160);
     }
 
@@ -346,8 +333,8 @@ function draw_grid_border_contour() {
             w, h, grid_size, 160);   
     }
     
-function draw_marching_cubes_no_interpolation_contour() {
-    var context = document.getElementById("marching_cubes_no_interpolation").getContext("2d");
+function draw_marching_cubes_contour(element, do_interpolation) {
+    var context = document.getElementById(element).getContext("2d");
     // background
     context.fillStyle="#eeeeee";
     context.fillRect(0, 0, w, h);
@@ -385,8 +372,9 @@ function draw_marching_cubes_no_interpolation_contour() {
     context.stroke();
     context.closePath();
     
-    draw_marching_cubes_no_interpolation(context, function (x, y) {
+    draw_marching_cubes(context, function (x, y) {
             return Math.pow(Math.pow(x - w/2, 2) + Math.pow(y - h/2, 2), 0.5);},
+            do_interpolation,
             w, h, grid_size, 160);   
     }
     
@@ -648,7 +636,7 @@ What if we add line segments that go across the cells? we can measure a function
     </p>
     <canvas id="marching_cubes_no_interpolation" width=640 height=480></canvas>
     <script language="JavaScript">
-    draw_marching_cubes_no_interpolation_contour();
+    draw_marching_cubes_contour("marching_cubes_no_interpolation", false);
     </script>
     <p>
 ...    
@@ -657,7 +645,14 @@ What if we add line segments that go across the cells? we can measure a function
     <script language="JavaScript">
     init_marching_cube_interpolation();
     </script>
-                
+    <p>
+...
+    </p>
+    <canvas id="marching_cubes_interpolation" width=640 height=480></canvas>
+    <script language="JavaScript">
+    draw_marching_cubes_contour("marching_cubes_interpolation", true);
+    </script>
+                    
     <h2>
 Dual contouring
     </h2>
