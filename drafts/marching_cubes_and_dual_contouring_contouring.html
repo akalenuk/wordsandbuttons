@@ -442,13 +442,16 @@ function init_marching_cube_interpolation() {
 
 function draw_marching_cube(element, do_interpolation, client_x, client_y, do_highlight) {
     var context = document.getElementById(element).getContext("2d");
+    context.font = "16px sans-serif";
+    context.textAlign = 'left';
+    context.textBaseline = 'bottom';
     
     // function
     var signed_distance_function = function(x, y, d) {
         return Math.sqrt(x*x + y*y) - d;
     };
     
-    var sample_function = function(x, y) {return w+h;}; // all plus
+    var sample_function = function(x, y) {return signed_distance_function(x - w*0.5, y + h*0.6, 340);};
     
     if(marching_cube_signs[0][0] == 0 && marching_cube_signs[0][1] == 1 && marching_cube_signs[1][0] == 1 && marching_cube_signs[1][1] == 1) 
         sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y + h*0.3, 340);};
@@ -457,13 +460,13 @@ function draw_marching_cube(element, do_interpolation, client_x, client_y, do_hi
         sample_function = function(x, y) {return signed_distance_function(x - w*0.9, y + h*0.1, 340);};
 
     if(marching_cube_signs[0][0] == 0 && marching_cube_signs[0][1] == 0 && marching_cube_signs[1][0] == 1 && marching_cube_signs[1][1] == 1) 
-        sample_function = function(x, y) {return signed_distance_function(x - w*0.5, y + h*0.3, 440);};
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.6, y + h*0.3, 440);};
     
     if(marching_cube_signs[0][0] == 1 && marching_cube_signs[0][1] == 1 && marching_cube_signs[1][0] == 0 && marching_cube_signs[1][1] == 1)     
         sample_function = function(x, y) {return signed_distance_function(x - w*0.1, y - h*1.1, 340);};
  
     if(marching_cube_signs[0][0] == 0 && marching_cube_signs[0][1] == 1 && marching_cube_signs[1][0] == 0 && marching_cube_signs[1][1] == 1)     
-        sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y - h*0.5, 380);};
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y - h*0.4, 380);};
         
     if(marching_cube_signs[0][0] == 1 && marching_cube_signs[0][1] == 0 && marching_cube_signs[1][0] == 0 && marching_cube_signs[1][1] == 1)
         sample_function = function(x, y) {return y < x ? signed_distance_function(x - w*1.0, y + h*0.1, 320)
@@ -480,19 +483,22 @@ function draw_marching_cube(element, do_interpolation, client_x, client_y, do_hi
                                                          : signed_distance_function(x - w*1.0, y - h*1.2, 365);};
                                                          
     if(marching_cube_signs[0][0] == 1 && marching_cube_signs[0][1] == 0 && marching_cube_signs[1][0] == 1 && marching_cube_signs[1][1] == 0)                                                           
-        sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y - h*0.5, 380);};
+        sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y - h*0.6, 380);};
     
     if(marching_cube_signs[0][0] == 0 && marching_cube_signs[0][1] == 0 && marching_cube_signs[1][0] == 1 && marching_cube_signs[1][1] == 0)  
         sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y + h*0.1, 540);};
     
     if(marching_cube_signs[0][0] == 1 && marching_cube_signs[0][1] == 1 && marching_cube_signs[1][0] == 0 && marching_cube_signs[1][1] == 0)  
-        sample_function = function(x, y) {return signed_distance_function(x - w*0.5, y - h*1.3, 440);};
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.4, y - h*1.3, 440);};
         
     if(marching_cube_signs[0][0] == 0 && marching_cube_signs[0][1] == 1 && marching_cube_signs[1][0] == 0 && marching_cube_signs[1][1] == 0)      
         sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y - h*1.1, 540);};
         
     if(marching_cube_signs[0][0] == 1 && marching_cube_signs[0][1] == 0 && marching_cube_signs[1][0] == 0 && marching_cube_signs[1][1] == 0)          
         sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y - h*1.1, 540);};
+    
+    if(marching_cube_signs[0][0] == 0 && marching_cube_signs[0][1] == 0 && marching_cube_signs[1][0] == 0 && marching_cube_signs[1][1] == 0)     
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.5, y - h*0.5, 340);};
         
     var sample_function_image = context.createImageData(w, h);
     for (var i = 0; i < sample_function_image.data.length; ++i)
@@ -566,7 +572,14 @@ function draw_marching_cube(element, do_interpolation, client_x, client_y, do_hi
             // plus           
             if(marching_cube_signs[i][j] == 1) {
                 context.fillRect(marching_cube_buttons_xy[i][j][0] - 2, marching_cube_buttons_xy[i][j][1] - 12, 4, 24);
-            }                        
+            }
+            if(do_interpolation) {
+                context.fillStyle="#222222";
+                context.fillText(
+                    Math.floor(sample_function(marching_cube_buttons_xy[i][j][0], marching_cube_buttons_xy[i][j][1])), 
+                    marching_cube_buttons_xy[i][j][0] + 24, 
+                    marching_cube_buttons_xy[i][j][1] - 6);
+            }
         }
 }
     </script>
