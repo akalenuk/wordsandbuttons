@@ -394,15 +394,16 @@ function draw_marching_cubes_no_interpolation_contour() {
 var marching_cube_signs = [[0, 1], [1, 1]];
 var marching_cube_buttons_xy = [[[160, 80], [480, 80]], [[160, 400], [480, 400]]];
 var marching_cube_buttons_r = 24.0;
-function init_marching_cube() {
-    var marching_cube = document.getElementById("marching_cube");
-    draw_marching_cube(0, 0, false);
+function init_marching_cube_no_interpolation() {
+    var marching_cube = document.getElementById("marching_cube_no_interpolation");
+    draw_marching_cube("marching_cube_no_interpolation", false, 0, 0, false);
 
     marching_cube.addEventListener('mousemove', function(e) {
         var canvas_rect = marching_cube.getBoundingClientRect();
         var client_x = e.clientX - canvas_rect.left;
         var client_y = e.clientY - canvas_rect.top;
-        draw_marching_cube(client_x, client_y, true);
+        draw_marching_cube("marching_cube_no_interpolation", false, client_x, client_y, true);
+        draw_marching_cube("marching_cube_interpolation", true, client_x, client_y, true);
     }, false);
     
     marching_cube.addEventListener('mouseup', function(e) {
@@ -417,12 +418,42 @@ function init_marching_cube() {
                     marching_cube_signs[i][j] = 1 - marching_cube_signs[i][j];
                 }
             }
-        draw_marching_cube(client_x, client_y, true);
+        draw_marching_cube("marching_cube_no_interpolation", false, client_x, client_y, true);
+        draw_marching_cube("marching_cube_interpolation", true, client_x, client_y, true);
     }, false);
 }
 
-function draw_marching_cube(client_x, client_y, do_highlight) {
-    var context = document.getElementById("marching_cube").getContext("2d");
+function init_marching_cube_interpolation() {
+    var marching_cube = document.getElementById("marching_cube_interpolation");
+    draw_marching_cube("marching_cube_interpolation", true, 0, 0, false);
+
+    marching_cube.addEventListener('mousemove', function(e) {
+        var canvas_rect = marching_cube.getBoundingClientRect();
+        var client_x = e.clientX - canvas_rect.left;
+        var client_y = e.clientY - canvas_rect.top;
+        draw_marching_cube("marching_cube_interpolation", true, client_x, client_y, true);
+        draw_marching_cube("marching_cube_no_interpolation", false, client_x, client_y, true);
+    }, false);
+    
+    marching_cube.addEventListener('mouseup', function(e) {
+        var canvas_rect = marching_cube.getBoundingClientRect();
+        var client_x = e.clientX - canvas_rect.left;
+        var client_y = e.clientY - canvas_rect.top;
+        for(var i = 0; i <= 1; ++i)
+            for(var j = 0; j <= 1; ++j) {
+                if(Math.pow(client_x - marching_cube_buttons_xy[i][j][0], 2) 
+                 + Math.pow(client_y - marching_cube_buttons_xy[i][j][1], 2) 
+                <= Math.pow(marching_cube_buttons_r, 2)) {
+                    marching_cube_signs[i][j] = 1 - marching_cube_signs[i][j];
+                }
+            }
+        draw_marching_cube("marching_cube_interpolation", true, client_x, client_y, true);
+        draw_marching_cube("marching_cube_no_interpolation", false, client_x, client_y, true);
+    }, false);
+}
+
+function draw_marching_cube(element, do_interpolation, client_x, client_y, do_highlight) {
+    var context = document.getElementById(element).getContext("2d");
     
     // function
     var sample_function = function(x, y) {return w+h;}; // all plus
@@ -506,7 +537,7 @@ function draw_marching_cube(client_x, client_y, do_highlight) {
     // draw the line segment(s)
     context.beginPath();
     var one_cube_size = marching_cube_buttons_xy[0][1][0] - marching_cube_buttons_xy[0][0][0];
-    draw_one_cube(context, marching_cube_buttons_xy[0][0][0], marching_cube_buttons_xy[0][0][1], one_cube_size, sample_function, 0, false);
+    draw_one_cube(context, marching_cube_buttons_xy[0][0][0], marching_cube_buttons_xy[0][0][1], one_cube_size, sample_function, 0, do_interpolation);
     context.strokeStyle = "#3333AA";
     context.lineWidth = 3;
     context.stroke();
@@ -608,9 +639,9 @@ Marching cubes
     <p>
 What if we add line segments that go across the cells? we can measure a function sign in four corners of a square, and add line segments accordingly. There are 4 squares, 2 signs, there are only 16 combinations of sign change possible
     </p>
-    <canvas id="marching_cube" width=640 height=480></canvas>
+    <canvas id="marching_cube_no_interpolation" width=640 height=480></canvas>
     <script language="JavaScript">
-    init_marching_cube();
+    init_marching_cube_no_interpolation();
     </script>
     <p>
 ...
@@ -619,7 +650,14 @@ What if we add line segments that go across the cells? we can measure a function
     <script language="JavaScript">
     draw_marching_cubes_no_interpolation_contour();
     </script>
-        
+    <p>
+...    
+    </p>
+    <canvas id="marching_cube_interpolation" width=640 height=480></canvas>
+    <script language="JavaScript">
+    init_marching_cube_interpolation();
+    </script>
+                
     <h2>
 Dual contouring
     </h2>
