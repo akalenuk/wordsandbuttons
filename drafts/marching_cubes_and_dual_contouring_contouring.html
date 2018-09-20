@@ -372,11 +372,11 @@ function draw_marching_cubes_contour(element, do_interpolation) {
     context.stroke();
     context.closePath();
     
-    draw_marching_cubes(context, function (x, y) {
-            return Math.pow(Math.pow(x - w/2, 2) + Math.pow(y - h/2, 2), 0.5);},
+    draw_marching_cubes(context, 
+            function (x, y) {return Math.pow(Math.pow(x - w/2, 2) + Math.pow(y - h/2, 2), 0.5);},
             do_interpolation,
             w, h, grid_size, 160);   
-    }
+}
     
     
 var marching_cube_signs = [[0, 1], [1, 1]];
@@ -672,6 +672,55 @@ function undo_last() {
     lines.splice(-1,1);
     draw_interactive_marching_cubes();
 }
+
+function draw_marching_cubes_square_contour() {
+    var context = document.getElementById("marching_cubes_square").getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    context.font = "16px sans-serif";
+
+    // square function
+    var d_f = function(x, y) {
+        return Math.max(Math.abs(y - h/2) - 130, Math.abs(x - w/2) - 170); 
+    }
+    
+    var distance_field = context.createImageData(w, h);
+    for (var i = 0; i < distance_field.data.length; ++i)
+        distance_field.data[i] = 0;
+    for (var i = 0; i <= h; ++i)
+        for (var j = 0; j <= w; ++j) {
+            var d = d_f(j, i);
+            if (Math.abs(d) < 1.4) {
+                distance_field.data[(i*w + j) * 4 + 0] = 0xAA;
+                distance_field.data[(i*w + j) * 4 + 1] = 0x55;
+                distance_field.data[(i*w + j) * 4 + 2] = 0x55;
+                distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
+            }
+        }
+    context.putImageData(distance_field, -0.5, -0.5);
+
+    // grid
+    const grid_size = 64;
+    context.beginPath();
+    for(var i = 0; i <= h; i += grid_size) {
+        context.moveTo(0.0, i);
+        context.lineTo(w, i);
+    }
+    for(var j = 0; j <= w; j += grid_size) {
+        context.moveTo(j, 0.0);
+        context.lineTo(j, h);
+    }
+    context.strokeStyle="#000000";
+    context.lineWidth=1;
+    context.stroke();
+    context.closePath();
+    
+    draw_marching_cubes(context, 
+            d_f,
+            true,
+            w, h, grid_size, 0);  
+}
     </script>
   </head>
   <body>
@@ -770,7 +819,13 @@ What if we add line segments that go across the cells? we can measure a function
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
-    
+    <p>
+...
+    </p>
+    <canvas id="marching_cubes_square" width=640 height=480></canvas>
+    <script language="JavaScript">
+    draw_marching_cubes_square_contour();
+    </script>    
     <h2>
 Dual contouring
     </h2>
