@@ -586,7 +586,7 @@ function draw_marching_cube(element, do_interpolation, client_x, client_y, do_hi
 // interactive
 var lines = [[[150, 516], [150, 516]], [[206, 454], [219, 438]], [[322, 398], [315, 464]], [[497, 109], [497, 109]], [[461, 145], [461, 145]], [[491, 227], [506, 224]]];
 
-function d_f(x, y) {
+function d_metaballs(x, y) {
     var d = 0;
     for (var i = 0; i < lines.length; ++i) {
         d += 1.0 / Math.sqrt((lines[i][1][0]-x)*(lines[i][1][0]-x) + (lines[i][1][1]-y)*(lines[i][1][1]-y));
@@ -636,7 +636,7 @@ function draw_interactive_marching_cubes(){
     
     for (var i = 0; i <= h; i += 2.0)
         for (var j = 0; j <= w; j += 2.0) {
-            d = d_f(j, i);
+            d = d_metaballs(j, i);
             if (d <= distance) {
                 distance_field.data[(i*w + j) * 4 + 0] = 0x55;
                 distance_field.data[(i*w + j) * 4 + 1] = 0x55;
@@ -661,7 +661,7 @@ function draw_interactive_marching_cubes(){
     context.stroke();
     context.closePath();
  
-    draw_marching_cubes(context, d_f, true, w, h, grid_size, distance);
+    draw_marching_cubes(context, d_metaballs, true, w, h, grid_size, distance);
 }
 
 function reset_all() {
@@ -674,6 +674,8 @@ function undo_last() {
     draw_interactive_marching_cubes();
 }
 
+
+// not interactive
 function draw_marching_cubes_square_contour() {
     var context = document.getElementById("marching_cubes_square").getContext("2d");
     // background
@@ -720,6 +722,97 @@ function draw_marching_cubes_square_contour() {
     draw_marching_cubes(context, 
             d_f,
             true,
+            w, h, grid_size, 0);  
+}
+
+function optimum_in_cube_brute(d_f, x, y, grid_size, gradient_step) {
+    var optimum = [0, 0];
+    var optimum_value = Number.MAX_VALUE;
+    for (var i = y; i < y + grid_size; i += gradient_step) {
+        for (var j = x; j < x + grid_size; j += gradient_step) {
+/*            var estimate = Math.pow(d_f(j, i) - distance, 2) // distance function border
+             + Math.pow(d_f(j, i) - d_f(j + gradient_step, i), 2) + Math.pow(d_f(j, i) - d_f(j, i - gradient_step), 2) // feature
+             + 0.1 * (Math.pow(j - (x + grid_size / 2), 2) + Math.pow(i - (y + grid_size / 2), 2) ); // stick to the cube's center as the last criterion*/
+             
+            var estimate = Math.pow(d_f(j, i), 2);
+            if (estimate < optimum_value) {
+                optimum_value = estimate;
+                optimum = [j, i];
+            }
+        }    
+    }
+    return optimum;
+}
+
+function draw_dual_contouring(context, d_f, w, h, grid_size, distance) {
+    context.beginPath();
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+            if(d_f(j, i) < distance != d_f(j, i + grid_size) < distance) {
+                var opt1 = optimum_in_cube_brute(d_f, j, i, grid_size, 2.0);
+                var opt2 = optimum_in_cube_brute(d_f, j - grid_size, i, grid_size, 2.0);
+                context.moveTo(opt1[0], opt1[1]);
+                context.lineTo(opt2[0], opt2[1]);
+            }
+            if(d_f(j, i) < distance != d_f(j + grid_size, i) < distance) {
+                var opt1 = optimum_in_cube_brute(d_f, j, i ,grid_size, 2.0);
+                var opt2 = optimum_in_cube_brute(d_f, j, i - grid_size, grid_size, 2.0);
+                context.moveTo(opt1[0], opt1[1]);
+                context.lineTo(opt2[0], opt2[1]);
+            }
+        }
+    }
+    context.strokeStyle="#883388";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath();
+}
+
+function draw_dual_square_contour() {
+    var context = document.getElementById("dual_square").getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    context.font = "16px sans-serif";
+
+    // square function
+    var d_f = function(x, y) {
+        return Math.max(Math.abs(y - h/2) - 130, Math.abs(x - w/2) - 170); 
+    }
+    
+    var distance_field = context.createImageData(w, h);
+    for (var i = 0; i < distance_field.data.length; ++i)
+        distance_field.data[i] = 0;
+    for (var i = 0; i <= h; ++i)
+        for (var j = 0; j <= w; ++j) {
+            var d = d_f(j, i);
+            if (Math.abs(d) < 1.4) {
+                distance_field.data[(i*w + j) * 4 + 0] = 0xAA;
+                distance_field.data[(i*w + j) * 4 + 1] = 0x55;
+                distance_field.data[(i*w + j) * 4 + 2] = 0x55;
+                distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
+            }
+        }
+    context.putImageData(distance_field, -0.5, -0.5);
+
+    // grid
+    const grid_size = 80;
+    context.beginPath();
+    for(var i = 0; i <= h; i += grid_size) {
+        context.moveTo(0.0, i);
+        context.lineTo(w, i);
+    }
+    for(var j = 0; j <= w; j += grid_size) {
+        context.moveTo(j, 0.0);
+        context.lineTo(j, h);
+    }
+    context.strokeStyle="#000000";
+    context.lineWidth=1;
+    context.stroke();
+    context.closePath();
+    
+    draw_dual_contouring(context, 
+            d_f,
             w, h, grid_size, 0);  
 }
     </script>
@@ -830,6 +923,13 @@ What if we add line segments that go across the cells? we can measure a function
     <h2>
 Dual contouring
     </h2>
+    <p>
+...
+    </p>
+    <canvas id="dual_square" width=640 height=480></canvas>
+    <script language="JavaScript">
+    draw_dual_square_contour();
+    </script>     
     <p>
 ...    
     </p>
