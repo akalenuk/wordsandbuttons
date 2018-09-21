@@ -763,19 +763,17 @@ function draw_dual_contouring(context, d_f, j0, i0, w, h, grid_size) {
     context.beginPath();
     for(var i = i0; i <= h - grid_size; i += grid_size) {
         for(var j = j0; j <= w - grid_size; j += grid_size) {
-            if(sign_change_in_cube(d_f, j, i, grid_size)){
-                if(sign_change_in_cube(d_f, j - grid_size, i, grid_size)) {
-                    var opt1 = optimum_in_cube_brute(d_f, j, i, grid_size, 1.0);
-                    var opt2 = optimum_in_cube_brute(d_f, j - grid_size, i, grid_size, 1.0);
-                    context.moveTo(opt1[0], opt1[1]);
-                    context.lineTo(opt2[0], opt2[1]);
-                }
-                if(sign_change_in_cube(d_f, j, i - grid_size, grid_size)) {
-                    var opt1 = optimum_in_cube_brute(d_f, j, i ,grid_size, 1.0);
-                    var opt2 = optimum_in_cube_brute(d_f, j, i - grid_size, grid_size, 1.0);
-                    context.moveTo(opt1[0], opt1[1]);
-                    context.lineTo(opt2[0], opt2[1]);
-                }
+            if(d_f(j, i) < 0 != d_f(j, i + grid_size) < 0) {
+                var opt1 = optimum_in_cube_brute(d_f, j, i, grid_size, 1.0);
+                var opt2 = optimum_in_cube_brute(d_f, j - grid_size, i, grid_size, 1.0);
+                context.moveTo(opt1[0], opt1[1]);
+                context.lineTo(opt2[0], opt2[1]);
+            }
+            if(d_f(j, i) < 0 != d_f(j + grid_size, i) < 0) {
+                var opt1 = optimum_in_cube_brute(d_f, j, i ,grid_size, 1.0);
+                var opt2 = optimum_in_cube_brute(d_f, j, i - grid_size, grid_size, 1.0);
+                context.moveTo(opt1[0], opt1[1]);
+                context.lineTo(opt2[0], opt2[1]);
             }
         }
     }
@@ -1005,7 +1003,7 @@ function draw_dual_square_contour() {
 }
 
 // interactive
-var lines = [[[92, 169], [542, 313]], [[442, 96], [166, 492]]];
+var lines = [[[92, 169], [542, 313]], [[432, 96], [166, 492]]];
 
 function dot(a1, a2, b1, b2) {
     return a1 * b1 + a2 * b2; 
