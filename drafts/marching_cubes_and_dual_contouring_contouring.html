@@ -725,6 +725,22 @@ function draw_marching_cubes_square_contour() {
             w, h, grid_size, 0);  
 }
 
+// dual contouring variant
+function sign_change_in_cube(d_f, x, y, grid_size) {
+    var signs = 0;
+    if( d_f(x, y) > 0 )
+        ++signs;
+    if( d_f(x + grid_size, y) > 0 )
+        ++signs;
+    if( d_f(x + grid_size, y + grid_size) > 0 )
+        ++signs;
+    if( d_f(x, y + grid_size) > 0 )
+        ++signs;        
+    if (signs == 0 || signs == 4)
+        return false;
+    return true;
+}
+
 function optimum_in_cube_brute(d_f, x, y, grid_size, gradient_step) {
     var optimum = [0, 0];
     var optimum_value = Number.MAX_VALUE;
@@ -735,6 +751,7 @@ function optimum_in_cube_brute(d_f, x, y, grid_size, gradient_step) {
              + 0.1 * (Math.pow(j - (x + grid_size / 2), 2) + Math.pow(i - (y + grid_size / 2), 2) ); // stick to the cube's center as the last criterion*/
              
             var estimate = Math.pow(d_f(j, i), 2);
+            estimate += Math.pow(d_f(j - gradient_step, i) - d_f(j + gradient_step, i), 2) + Math.pow(d_f(j, i - gradient_step) - d_f(j, i + gradient_step), 2);
             if (estimate < optimum_value) {
                 optimum_value = estimate;
                 optimum = [j, i];
@@ -748,21 +765,23 @@ function draw_dual_contouring(context, d_f, w, h, grid_size, distance) {
     context.beginPath();
     for(var i = 0; i <= h - grid_size; i += grid_size) {
         for(var j = 0; j <= w - grid_size; j += grid_size) {
-            if(d_f(j, i) < distance != d_f(j, i + grid_size) < distance) {
-                var opt1 = optimum_in_cube_brute(d_f, j, i, grid_size, 2.0);
-                var opt2 = optimum_in_cube_brute(d_f, j - grid_size, i, grid_size, 2.0);
-                context.moveTo(opt1[0], opt1[1]);
-                context.lineTo(opt2[0], opt2[1]);
-            }
-            if(d_f(j, i) < distance != d_f(j + grid_size, i) < distance) {
-                var opt1 = optimum_in_cube_brute(d_f, j, i ,grid_size, 2.0);
-                var opt2 = optimum_in_cube_brute(d_f, j, i - grid_size, grid_size, 2.0);
-                context.moveTo(opt1[0], opt1[1]);
-                context.lineTo(opt2[0], opt2[1]);
+            if(sign_change_in_cube(d_f, j, i, grid_size)){
+                if(sign_change_in_cube(d_f, j - grid_size, i, grid_size)) {
+                    var opt1 = optimum_in_cube_brute(d_f, j, i, grid_size, 1.0);
+                    var opt2 = optimum_in_cube_brute(d_f, j - grid_size, i, grid_size, 1.0);
+                    context.moveTo(opt1[0], opt1[1]);
+                    context.lineTo(opt2[0], opt2[1]);
+                }
+                if(sign_change_in_cube(d_f, j, i - grid_size, grid_size)) {
+                    var opt1 = optimum_in_cube_brute(d_f, j, i ,grid_size, 1.0);
+                    var opt2 = optimum_in_cube_brute(d_f, j, i - grid_size, grid_size, 1.0);
+                    context.moveTo(opt1[0], opt1[1]);
+                    context.lineTo(opt2[0], opt2[1]);
+                }
             }
         }
     }
-    context.strokeStyle="#883388";
+    context.strokeStyle="#338833";
     context.lineWidth=3;
     context.stroke();
     context.closePath();
