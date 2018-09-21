@@ -584,34 +584,34 @@ function draw_marching_cube(element, do_interpolation, client_x, client_y, do_hi
 }
 
 // interactive
-var lines = [[[150, 516], [150, 516]], [[206, 454], [219, 438]], [[322, 398], [315, 464]], [[497, 109], [497, 109]], [[461, 145], [461, 145]], [[491, 227], [506, 224]]];
+var metaballs = [[[150, 516], [150, 516]], [[206, 454], [219, 438]], [[322, 398], [315, 464]], [[497, 109], [497, 109]], [[461, 145], [461, 145]], [[491, 227], [506, 224]]];
 
 function d_metaballs(x, y) {
     var d = 0;
-    for (var i = 0; i < lines.length; ++i) {
-        d += 1.0 / Math.sqrt((lines[i][1][0]-x)*(lines[i][1][0]-x) + (lines[i][1][1]-y)*(lines[i][1][1]-y));
+    for (var i = 0; i < metaballs.length; ++i) {
+        d += 1.0 / Math.sqrt((metaballs[i][1][0]-x)*(metaballs[i][1][0]-x) + (metaballs[i][1][1]-y)*(metaballs[i][1][1]-y));
     }
-    return (1.0 / d) * Math.sqrt(lines.length);
+    return (1.0 / d) * Math.sqrt(metaballs.length);
 }
 
 function init_interactive_marching_cubes(){
     var canvas = document.getElementById("interactive_marching_cubes");
     canvas.addEventListener('mousedown', function(e){
         canvas_rect = canvas.getBoundingClientRect();
-        lines.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
+        metaballs.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
     }, false);
      
     canvas.addEventListener('mousemove', function(e){
         if(e.buttons == 1){
             canvas_rect = canvas.getBoundingClientRect();
-            lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+            metaballs[metaballs.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
             draw_interactive_marching_cubes();
         }
     }, false);
     
     canvas.addEventListener('mouseup', function(e){
         canvas_rect = canvas.getBoundingClientRect();
-        lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+        metaballs[metaballs.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
         draw_interactive_marching_cubes();
     }, false);
     
@@ -664,13 +664,13 @@ function draw_interactive_marching_cubes(){
     draw_marching_cubes(context, d_metaballs, true, w, h, grid_size, distance);
 }
 
-function reset_all() {
-    lines = [];
+function reset_all_metaballs() {
+    metaballs = [];
     draw_interactive_marching_cubes();
 }
 
-function undo_last() {
-    lines.splice(-1,1);
+function undo_last_metaball() {
+    metaballs.splice(-1,1);
     draw_interactive_marching_cubes();
 }
 
@@ -742,16 +742,14 @@ function sign_change_in_cube(d_f, x, y, grid_size) {
 }
 
 function optimum_in_cube_brute(d_f, x, y, grid_size, gradient_step) {
+    // this is the optimizer alternative that you can use to craft your own optimum criteria
     var optimum = [0, 0];
     var optimum_value = Number.MAX_VALUE;
     for (var i = y; i < y + grid_size; i += gradient_step) {
         for (var j = x; j < x + grid_size; j += gradient_step) {
-/*            var estimate = Math.pow(d_f(j, i) - distance, 2) // distance function border
-             + Math.pow(d_f(j, i) - d_f(j + gradient_step, i), 2) + Math.pow(d_f(j, i) - d_f(j, i - gradient_step), 2) // feature
-             + 0.1 * (Math.pow(j - (x + grid_size / 2), 2) + Math.pow(i - (y + grid_size / 2), 2) ); // stick to the cube's center as the last criterion*/
-             
-            var estimate = Math.pow(d_f(j, i), 2);
-            estimate += Math.pow(d_f(j - gradient_step, i) - d_f(j + gradient_step, i), 2) + Math.pow(d_f(j, i - gradient_step) - d_f(j, i + gradient_step), 2);
+            var estimate = Math.pow(d_f(j, i), 2); // this puts the point on the contour
+            estimate += 2.0 * Math.pow(d_f(j - gradient_step, i) - d_f(j + gradient_step, i), 2) + Math.pow(d_f(j, i - gradient_step) - d_f(j, i + gradient_step), 2); // this finds features
+            estimate += 0.01 * (Math.pow(j - (x + grid_size / 2), 2) + Math.pow(i - (y + grid_size / 2), 2) ); // this drags the point to the cell's center if there are no better alternatives
             if (estimate < optimum_value) {
                 optimum_value = estimate;
                 optimum = [j, i];
@@ -761,10 +759,10 @@ function optimum_in_cube_brute(d_f, x, y, grid_size, gradient_step) {
     return optimum;
 }
 
-function draw_dual_contouring(context, d_f, w, h, grid_size, distance) {
+function draw_dual_contouring(context, d_f, j0, i0, w, h, grid_size) {
     context.beginPath();
-    for(var i = 0; i <= h - grid_size; i += grid_size) {
-        for(var j = 0; j <= w - grid_size; j += grid_size) {
+    for(var i = i0; i <= h - grid_size; i += grid_size) {
+        for(var j = j0; j <= w - grid_size; j += grid_size) {
             if(sign_change_in_cube(d_f, j, i, grid_size)){
                 if(sign_change_in_cube(d_f, j - grid_size, i, grid_size)) {
                     var opt1 = optimum_in_cube_brute(d_f, j, i, grid_size, 1.0);
@@ -785,6 +783,177 @@ function draw_dual_contouring(context, d_f, w, h, grid_size, distance) {
     context.lineWidth=3;
     context.stroke();
     context.closePath();
+}
+
+var dual_cube_signs = [[0, 1], [1, 1]];
+var dual_cube_buttons_xy = [[[160, 80], [480, 80]], [[160, 400], [480, 400]]];
+var dual_cube_buttons_r = 24.0;
+function init_dual_cube() {
+    var dual_cube = document.getElementById("dual_cube");
+    draw_dual_cube(0, 0, false);
+
+    dual_cube.addEventListener('mousemove', function(e) {
+        var canvas_rect = dual_cube.getBoundingClientRect();
+        var client_x = e.clientX - canvas_rect.left;
+        var client_y = e.clientY - canvas_rect.top;
+        draw_dual_cube(client_x, client_y, true);
+    }, false);
+    
+    dual_cube.addEventListener('mouseup', function(e) {
+        var canvas_rect = dual_cube.getBoundingClientRect();
+        var client_x = e.clientX - canvas_rect.left;
+        var client_y = e.clientY - canvas_rect.top;
+        for(var i = 0; i <= 1; ++i)
+            for(var j = 0; j <= 1; ++j) {
+                if(Math.pow(client_x - dual_cube_buttons_xy[i][j][0], 2) 
+                 + Math.pow(client_y - dual_cube_buttons_xy[i][j][1], 2) 
+                <= Math.pow(dual_cube_buttons_r, 2)) {
+                    dual_cube_signs[i][j] = 1 - dual_cube_signs[i][j];
+                }
+            }
+        draw_dual_cube(client_x, client_y, true);
+    }, false);
+}
+
+function draw_dual_cube(client_x, client_y, do_highlight) {
+    var context = document.getElementById("dual_cube").getContext("2d");
+    context.font = "16px sans-serif";
+    context.textAlign = 'left';
+    context.textBaseline = 'bottom';
+    
+    // function
+    var signed_distance_function = function(x, y, d) {
+        return Math.sqrt(x*x + y*y) - d;
+    };
+    
+    var sample_function = function(x, y) {return signed_distance_function(x - w*0.5, y + h*0.6, 340);};
+    
+    if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 1) 
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y + h*0.3, 340);};
+
+    if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 1) 
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.9, y + h*0.1, 340);};
+
+    if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 1) 
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.6, y + h*0.3, 440);};
+    
+    if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 1)     
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.1, y - h*1.1, 340);};
+ 
+    if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 1)     
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y - h*0.4, 380);};
+        
+    if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 1)
+        sample_function = function(x, y) {return y < x ? signed_distance_function(x - w*1.0, y + h*0.1, 320)
+                                                       : signed_distance_function(x - w*0.0, y - h*1.1, 320);};
+
+    if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 1)
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y + h*0.1, 540);};
+        
+    if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 0)        
+        sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y - h*1.1, 410);};
+        
+    if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 0)           
+        sample_function = function(x, y) {return y < w-x ? signed_distance_function(x - w*0.0, y + h*0.2, 365)
+                                                         : signed_distance_function(x - w*1.0, y - h*1.2, 365);};
+                                                         
+    if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 0)                                                           
+        sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y - h*0.6, 380);};
+    
+    if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 0)  
+        sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y + h*0.1, 540);};
+    
+    if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 0)  
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.4, y - h*1.3, 440);};
+        
+    if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 0)      
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y - h*1.1, 540);};
+        
+    if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 0)          
+        sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y - h*1.1, 540);};
+    
+    if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 0)     
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.5, y - h*0.5, 340);};
+        
+    var sample_function_image = context.createImageData(w, h);
+    for (var i = 0; i < sample_function_image.data.length; ++i)
+        sample_function_image.data[i] = 0;
+    for (var i = 0; i <= h; ++i)
+        for (var j = 0; j <= w; ++j) {
+            var d = sample_function(j, i);
+            if (Math.abs(d) < 1.4) {
+                sample_function_image.data[(i*w + j) * 4 + 0] = 0xAA;
+                sample_function_image.data[(i*w + j) * 4 + 1] = 0x55;
+                sample_function_image.data[(i*w + j) * 4 + 2] = 0x55;
+                sample_function_image.data[(i*w + j) * 4 + 3] = 0xFF;
+            }
+        }
+    context.putImageData(sample_function_image, -0.5, -0.5);
+    
+    // cell
+    context.beginPath();
+    context.moveTo(0.0, dual_cube_buttons_xy[0][0][1]);
+    context.lineTo(w, dual_cube_buttons_xy[0][0][1]);
+    context.moveTo(0.0, dual_cube_buttons_xy[1][0][1]);
+    context.lineTo(w, dual_cube_buttons_xy[1][0][1]);
+    
+    context.moveTo(dual_cube_buttons_xy[0][0][0], 0.0);
+    context.lineTo(dual_cube_buttons_xy[0][0][0], h);
+    context.moveTo(dual_cube_buttons_xy[0][1][0], 0.0);
+    context.lineTo(dual_cube_buttons_xy[0][1][0], h)
+    
+    context.strokeStyle="#000000";
+    context.lineWidth=1;
+    context.stroke();
+    context.closePath();
+
+    // draw the line segment(s)
+    var one_cube_size = dual_cube_buttons_xy[0][1][0] - dual_cube_buttons_xy[0][0][0];
+    draw_dual_contouring(context, 
+            sample_function,
+            dual_cube_buttons_xy[0][0][0] - (dual_cube_buttons_xy[1][1][0] - dual_cube_buttons_xy[0][0][0]), 
+            dual_cube_buttons_xy[0][0][1] - (dual_cube_buttons_xy[1][1][1] - dual_cube_buttons_xy[0][0][1]), 
+            (dual_cube_buttons_xy[1][1][0] - dual_cube_buttons_xy[0][0][0]) * 3, 
+            (dual_cube_buttons_xy[1][1][1] - dual_cube_buttons_xy[0][0][1]) * 3, 
+            one_cube_size);
+    
+    // signs
+    for(var i = 0; i <= 1; ++i)
+        for(var j = 0; j <= 1; ++j) {
+            context.beginPath();
+            context.arc(dual_cube_buttons_xy[i][j][0], dual_cube_buttons_xy[i][j][1], dual_cube_buttons_r, 0, 2*Math.PI);
+            if(do_highlight && true && 
+               Math.pow(client_x - dual_cube_buttons_xy[i][j][0], 2) 
+             + Math.pow(client_y - dual_cube_buttons_xy[i][j][1], 2) 
+            <= Math.pow(dual_cube_buttons_r, 2)) { // highlight
+                if(dual_cube_signs[i][j] == 1) {
+                    context.fillStyle="#ff0000";
+                } else {
+                    context.fillStyle="#0000ff";
+                }
+            } else {
+                if(dual_cube_signs[i][j] == 1) {
+                    context.fillStyle="#660000";
+                } else {
+                    context.fillStyle="#000066";
+                }
+            }
+            context.closePath();
+            context.fill();
+        
+            // minus
+            context.fillStyle="#eeeeee";
+            context.fillRect(dual_cube_buttons_xy[i][j][0] - 12, dual_cube_buttons_xy[i][j][1] - 2, 24, 4);
+            // plus           
+            if(dual_cube_signs[i][j] == 1) {
+                context.fillRect(dual_cube_buttons_xy[i][j][0] - 2, dual_cube_buttons_xy[i][j][1] - 12, 4, 24);
+            }
+            context.fillStyle="#222222";
+            context.fillText(
+                Math.floor(sample_function(dual_cube_buttons_xy[i][j][0], dual_cube_buttons_xy[i][j][1])), 
+                dual_cube_buttons_xy[i][j][0] + 24, 
+                dual_cube_buttons_xy[i][j][1] - 6);
+        }
 }
 
 function draw_dual_square_contour() {
@@ -832,7 +1001,122 @@ function draw_dual_square_contour() {
     
     draw_dual_contouring(context, 
             d_f,
-            w, h, grid_size, 0);  
+            0, 0, w, h, grid_size);
+}
+
+// interactive
+var lines = [[[92, 169], [542, 313]], [[442, 96], [166, 492]]];
+
+function dot(a1, a2, b1, b2) {
+    return a1 * b1 + a2 * b2; 
+}
+
+function distance_to_segment(lp1x, lp1y, lp2x, lp2y, px, py) {
+    var t_proj = dot(px - lp1x, py - lp1y, lp2x - lp1x, lp2y - lp1y) / dot(lp2x - lp1x, lp2y - lp1y, lp2x - lp1x, lp2y - lp1y);
+    if (isNaN(t_proj))
+        t_proj = 0.0;
+    else if (t_proj < 0.0)
+        t_proj = 0.0;
+    else if (t_proj > 1.0)
+        t_proj = 1.0;
+    var p_proj_x = lp1x + (lp2x - lp1x) * t_proj;
+    var p_proj_y = lp1y + (lp2y - lp1y) * t_proj;
+    return Math.sqrt(dot(p_proj_x - px, p_proj_y - py, p_proj_x - px, p_proj_y - py));
+}
+
+function distance_to_line_segment(line, px, py) {
+    return distance_to_segment(line[0][0], line[0][1], line[1][0], line[1][1], px, py);
+}
+
+function d_lines(x, y) {
+    var d = Number.MAX_VALUE; // everything is out
+    for (var i = 0; i < lines.length; ++i) {
+        var di = distance_to_line_segment(lines[i], x, y);
+        if (di < d)
+            d = di;
+    }
+    return d - 64;
+}
+
+function init_interactive_dual_contouring(){
+    var canvas = document.getElementById("interactive_dual_contouring");
+    canvas.addEventListener('mousedown', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        lines.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
+    }, false);
+     
+    canvas.addEventListener('mousemove', function(e){
+        if(e.buttons == 1){
+            canvas_rect = canvas.getBoundingClientRect();
+            lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+            draw_interactive_dual_contouring();
+        }
+    }, false);
+    
+    canvas.addEventListener('mouseup', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+        draw_interactive_dual_contouring();
+    }, false);
+    
+    draw_interactive_dual_contouring();
+}
+
+function draw_interactive_dual_contouring(){
+    var canvas = document.getElementById("interactive_dual_contouring");
+    var context = canvas.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    var h = 640;
+    var grid_size = 32;
+    
+    // distance function
+    var distance_field = context.createImageData(w, h);
+    for (var i = 0; i < distance_field.data.length; ++i)
+        distance_field.data[i] = 0;
+    
+    for (var i = 0; i <= h; i += 2.0)
+        for (var j = 0; j <= w; j += 2.0) {
+            d = d_lines(j, i);
+            if (d <= 0) {
+                distance_field.data[(i*w + j) * 4 + 0] = 0x55;
+                distance_field.data[(i*w + j) * 4 + 1] = 0x55;
+                distance_field.data[(i*w + j) * 4 + 2] = 0xAA;
+                distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
+            }
+        }
+    context.putImageData(distance_field, -0.5, -0.5);
+    
+    // grid
+    context.beginPath();
+    for(var i = 0; i <= h; i += grid_size) {
+        context.moveTo(0.0, i);
+        context.lineTo(w, i);
+    }
+    for(var j = 0; j <= w; j += grid_size) {
+        context.moveTo(j, 0.0);
+        context.lineTo(j, h);
+    }
+    context.strokeStyle="#000000";
+    context.lineWidth=1;
+    context.stroke();
+    context.closePath();
+ 
+    draw_dual_contouring(context, 
+        d_lines,
+        0, 0, w, h, grid_size);
+}
+
+function reset_all_lines() {
+    lines = [];
+    draw_interactive_dual_contouring();
+}
+
+function undo_last_line() {
+    lines.splice(-1,1);
+    draw_interactive_dual_contouring();
 }
     </script>
   </head>
@@ -842,7 +1126,7 @@ function draw_dual_square_contour() {
 Marching cubes and dual contouring contouring
     </h1>
     <p>
-This is a basic introduction into the marching cubes and the dual contoring techniques. They are mostly known as 3D mesh generating algorithms but since it's hard to explain 3D things using 2D display, we will concentrate on planar analogue of the mesh generation which itself is called contouring.
+This is a basic introduction into the marching cubes and the dual contouring techniques. They are mostly known as 3D mesh generating algorithms but since it's hard to explain 3D things using 2D display, we will concentrate on planar analogue of the mesh generation which itself is called contouring.
     </p>
     <p>
 The second “contouring” in the title is not a mistake.
@@ -929,12 +1213,12 @@ What if we add line segments that go across the cells? we can measure a function
     init_interactive_marching_cubes();
     </script>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
-        <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
-        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
+        <button type="button" style="width: 108pt;" onclick="undo_last_metaball()">Undo last</button>
+        <button type="button" style="width: 108pt;" onclick="reset_all_metaballs()">Reset all</button>
     </div>
     <p>
 ...
-    </p>
+    </p>   
     <canvas id="marching_cubes_square" width=640 height=480></canvas>
     <script language="JavaScript">
     draw_marching_cubes_square_contour();
@@ -945,6 +1229,13 @@ Dual contouring
     <p>
 ...
     </p>
+    <canvas id="dual_cube" width=640 height=480></canvas>
+    <script language="JavaScript">
+    init_dual_cube();
+    </script>    
+    <p>
+...
+    </p>
     <canvas id="dual_square" width=640 height=480></canvas>
     <script language="JavaScript">
     draw_dual_square_contour();
@@ -952,7 +1243,18 @@ Dual contouring
     <p>
 ...    
     </p>
-
+    <p>
+...
+    </p>
+    <canvas id="interactive_dual_contouring" width=640 height=640></canvas>
+    <script language="JavaScript">
+    init_interactive_dual_contouring();
+    </script>
+    <div style="text-align:right; width:640px; padding-bottom:12pt;">
+        <button type="button" style="width: 108pt;" onclick="undo_last_line()">Undo last</button>
+        <button type="button" style="width: 108pt;" onclick="reset_all_lines()">Reset all</button>
+    </div>
+    
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
     <tr>
