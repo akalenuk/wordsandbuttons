@@ -241,8 +241,8 @@ function optimum_in_cube_brute(x, y) {
     for (var i = y; i < y + grid_size; i += gradient_step) {
         for (var j = x; j < x + grid_size; j += gradient_step) {
             var estimate = Math.pow(d_f(j, i) - distance, 2) // distance function border
-             + Math.pow(d_f(j, i) - d_f(j + gradient_step, i), 2) + Math.pow(d_f(j, i) - d_f(j, i - gradient_step), 2) // feature
-             + 0.1 * (Math.pow(j - (x + grid_size / 2), 2) + Math.pow(i - (y + grid_size / 2), 2) ); // stick to the cube's center as the last criterion
+             + Math.pow(d_f(j - gradient_step, i) - d_f(j + gradient_step, i), 2) + Math.pow(d_f(j, i - gradient_step) - d_f(j, i + gradient_step), 2) // feature
+             + 0.01 * (Math.pow(j - (x + grid_size / 2), 2) + Math.pow(i - (y + grid_size / 2), 2) ); // stick to the cube's center as the last criterion
             if (estimate < optimum_value) {
                 optimum_value = estimate;
                 optimum = [j, i];
