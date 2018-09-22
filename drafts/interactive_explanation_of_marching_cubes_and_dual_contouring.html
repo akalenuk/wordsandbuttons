@@ -272,9 +272,9 @@ function toggle_contour() {
     draw_contour();
     var toggle_contour = document.getElementById("toggle_contour");
     if(do_contour)
-        toggle_contour.innerHTML = "Undo contour";
+        toggle_contour.innerHTML = "Undo the contour";
     else
-        toggle_contour.innerHTML = "Do contour";
+        toggle_contour.innerHTML = "Do the contour";
 }
 
 function draw_grid_border(context, d_f, w, h, grid_size, distance) {
@@ -1110,7 +1110,7 @@ function undo_last_line() {
 Interactive explanation of marching cubes and dual contouring
     </h1>
     <p>
-Marching cubes and dual contouring methods are mostly known as 3D mesh generating algorithms but since it's hard to explain 3D things using 2D display, we will concentrate on planar analogue. We will generate contours.
+Marching cubes and dual contouring are mostly known as 3D mesh generating algorithms but since it's hard to explain 3D things using 2D display, we will concentrate on planar analogue. We will do contours.
     </p>
        
     <h2>
@@ -1127,13 +1127,13 @@ This function represents a circle. Now let's say we don't want a perfect circle,
     </p>
     <canvas id="contour" width=640 height=480></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
-        <button type="button" id="toggle_contour" onclick="toggle_contour()">Do contour</button>
+        <button type="button" id="toggle_contour" onclick="toggle_contour()">Do the contour</button>
     </div>
     <script language="JavaScript">
     draw_contour();
     </script>
     <p>
-We can then do things with the contour that would be tricky to do with the circle itself. Like intersecting it with a square or storing it in the same structure as other contours regardless of their original nature. 
+With the contour we can do things that would be tricky to do with the circle itself. Like intersecting it with another curve or storing it in the same structure with lines, triangles and all the other contours regardless of their original nature. 
     </p>
     <p>
 Conceptually, contouring is very easy. Let's rewrite our function:
@@ -1142,14 +1142,14 @@ Conceptually, contouring is very easy. Let's rewrite our function:
 F(x, y) = x<sup>2</sup> + y<sup>2</sup> - 4
     </p>
     <p>
-Now we cover some part of a plane with a grid. For every two adjacent cells we can add their common border as a contour line segment if the function <i>F(x,y)</i> changes sign between these two cell's centers.
+Now we cover a plane with a grid. For every two adjacent cells we can add their common border as a line segment to the contour if the function <i>F(x,y)</i> changes sign between these two cell's centers. 
     </p>
     <canvas id="grid_border" width=640 height=480></canvas>
     <script language="JavaScript">
     draw_grid_border_contour();
     </script>
     <p>
-Well, technically it does represent the curve. And the error is predictable, it doesn't exceed half of the cell's diagonal. But this contour has way too many corners as for a circle.
+Well, technically it does represent the original curve. And the error is predictable, it never exceeds half of the cell's diagonal. But this contour has way too many corners as for a circle.
     </p>
     <p>
 We need something better.
@@ -1159,17 +1159,17 @@ Marching cubes
     </h2>
 
     <p>
-What if we add line segments that go across the cells? We can measure function signs in all four corners of each square, and add line segments accordingly. Let's just connect the sign changing edges from midle to middle.
+What if we add line segments that go across the cells? We can measure function signs in every corner for each square, and add line segments accordingly. For now, let's just connect the sign changing edges from midle to middle.
     </p>
     <p>
-There are 4 squares, 2 signs, there are only 16 combinations of sign change possible.
+There are 4 squares, 2 signs; there are only 16 combinations of sign change possible.
     </p>
     <canvas id="marching_cube_no_interpolation" width=640 height=480></canvas>
     <script language="JavaScript">
     init_marching_cube_no_interpolation();
     </script>
     <p>
-Since a pair of signs for each cell's edge change synchronously for both cells that share this edge, line segments will connect automatically.
+Since a pair of signs for each cell's edge change synchronously for both cells that share the edge, line segments will connect automatically into a continous contour.
     </p>
     <canvas id="marching_cubes_no_interpolation" width=640 height=480></canvas>
     <script language="JavaScript">
@@ -1179,7 +1179,7 @@ Since a pair of signs for each cell's edge change synchronously for both cells t
 It's a little better than before, but it is still far from the shape we want. 
     </p>
     <p>
-What if we don't put our line segments on the middle, but try to find the best place to put them. We can do that since we have not only function's signs, but also the values.
+What if we don't put our line segments in the middle, but try to find the best place for them somewhere on the edge? It's a reasonable thing to do, since we can get not only the function's signs but also the values.
     </p>
     <p>
 One way to find a better place to put line segments will be using the linear interpolation.
@@ -1189,10 +1189,10 @@ One way to find a better place to put line segments will be using the linear int
     init_marching_cube_interpolation();
     </script>
     <p>
-It's not the best way possible. Since our target function doesn't have to be linear, we can't expect linear interpolation to work perfectly well. We should have been looking for a true point of isoline with an edge intersection instead.
+It's not the best way possible. Since our target function doesn't have to be linear, we can't expect linear interpolation to work perfectly well. Ideally, we should have been looking for a true point where the curve intersects an edge.
     </p>
     <p>
-But interpolation it works good enough most of the time, and it's super cheap.
+But interpolation works good enough most of the time, and it's super cheap.
     </p>
     <canvas id="marching_cubes_interpolation" width=640 height=480></canvas>
     <script language="JavaScript">
@@ -1217,19 +1217,19 @@ The noticeable drawback of marching cubes is that they don't work very well with
     draw_marching_cubes_square_contour();
     </script>
     <p>
-It gets better with finer grid, sure, but conceptually this is the weak spot. We need something even better.
+It gets better with finer grid, sure, but conceptually this is the weak spot. We still need something better.
     </p>
     <h2>
 Intermezzo
     </h2>
     <p>
-Marching cubes is not a single algorithm. It's a general approach spawning a family of algorithms. Some are adaptive. Some are supplemented with sharp feature detection. Some can preserve topology of non-manifold surfaces. Some work faster than others. Some have better memory consumptions.
+<i>Marching cubes is not a single algorithm. It's a general approach covering a whole family of algorithms. Some are adaptive. Some are supplemented with sharp feature detection. Some can preserve topology of non-manifold surfaces. Some work faster than others. Some have better memory consumption.</i>
     </p>
     <p>
-Just as that, dual contouring is not a single dual method. There are plenty. From primitive surface nets to the most sophisticated adaptive methods. We will not look into them.
+<i>Just as that, dual contouring is not a single dual method. There are plenty. From primitive surface nets to the most sophisticated adaptive methods. We will not look into them.</i>
     </p>
     <p>
-I believe, the most important lesson we can take is the idea of duality. The very concept, not the specific algorithms. We will look into it right now. 
+<i>I believe, the most important lesson we can take from this is the idea of duality. The very concept, not the specific algorithms. We will look into this right now.</i>
     </p>
     <h2>
 Dual contouring
@@ -1242,7 +1242,7 @@ With marching cubes we did the following:
 If a function changes its sign in a <b>cube</b>, we add a line segment from <b>edge</b> to <b>edge</b>.
         </li>
         <li>
-The exact ends of each segment are being placed on the <b>edges</b> to minimize difference between an isoline and a contour.
+The exact ends of each segment are being placed on the <b>edges</b> to minimize the difference between an isoline and a contour.
         </li>
     </ol>
     <p>
@@ -1284,11 +1284,14 @@ Here, try it yourself. Click and drag.
         <button type="button" style="width: 108pt;" onclick="undo_last_line()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all_lines()">Reset all</button>
     </div>
+    <p>
+Duality is a fascinating concept. The way you get new properties from an algorithm by simply swapping planes and points is in a way a mathematical miracle.
+    </p>
     <h2>
 Conclusion
     </h2>
     <p>
-In practice, marching cubes and dual contouring tend to be complicated because we want more than just a contour or a triangle mesh. We want them to work with sharp features, textures, open surfaces, non-manifold models, and all in a reasonable time too. But they are both rather simple conceptually. I hope this explanation shows it well.
+In practice, marching cubes and dual contouring tend to be complicated because we want more than just a contour or a triangle mesh out of them. We want them to work with sharp features, textures, open surfaces, non-manifold models, and all in a reasonable time, too. But they are both rather simple conceptually. I hope this explanation shows it well.
     </p>
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
