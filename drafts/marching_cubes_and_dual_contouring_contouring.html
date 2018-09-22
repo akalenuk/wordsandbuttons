@@ -176,11 +176,25 @@ function draw_marching_cubes(context, d_f, do_interpolation, w, h, grid_size, di
             draw_one_cube(context, j, i, grid_size, d_f, distance, do_interpolation);
         }
     }
-    context.strokeStyle = "#3333AA";
+    context.strokeStyle = "#457fd6";
     context.lineWidth = 3;
     context.stroke();
     context.closePath(); 
     context.lineWidth = 1;
+}
+
+function fill_a_pixel_in(pixel_data, j, i, d, r, g, b) {
+    if (Math.abs(d) < 1.4) {
+        pixel_data.data[(i*w + j) * 4 + 0] = r;
+        pixel_data.data[(i*w + j) * 4 + 1] = g;
+        pixel_data.data[(i*w + j) * 4 + 2] = b;
+        pixel_data.data[(i*w + j) * 4 + 3] = 0xFF;
+    } else if(Math.abs(d) < 2.0) {
+        pixel_data.data[(i*w + j) * 4 + 0] = r;
+        pixel_data.data[(i*w + j) * 4 + 1] = g;
+        pixel_data.data[(i*w + j) * 4 + 2] = b;
+        pixel_data.data[(i*w + j) * 4 + 3] = 0x7F;
+    }
 }
 
 var do_contour = false;
@@ -199,12 +213,7 @@ function draw_contour() {
     for (var i = 0; i <= h; ++i)
         for (var j = 0; j <= w; ++j) {
             var d = Math.pow(Math.pow(i - h/2, 2) + Math.pow(j - w/2, 2), 0.5) - 160;
-            if (Math.abs(d) < 1.4) {
-                distance_field.data[(i*w + j) * 4 + 0] = 0xAA;
-                distance_field.data[(i*w + j) * 4 + 1] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 2] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
-            }
+            fill_a_pixel_in(distance_field, j, i, d, 0xD6, 0x45, 0x62);
         }
     context.putImageData(distance_field, -0.5, -0.5);
 
@@ -281,7 +290,7 @@ function draw_grid_border(context, d_f, w, h, grid_size, distance) {
             }            
         }
     }
-    context.strokeStyle="#224477";
+    context.strokeStyle="#3561a3";
     context.lineWidth=3;
     context.stroke();
     context.closePath();
@@ -303,12 +312,7 @@ function draw_grid_border_contour() {
     for (var i = 0; i <= h; ++i)
         for (var j = 0; j <= w; ++j) {
             var d = Math.pow(Math.pow(i - h/2, 2) + Math.pow(j - w/2, 2), 0.5) - 160;
-            if (Math.abs(d) < 1.4) {
-                distance_field.data[(i*w + j) * 4 + 0] = 0xAA;
-                distance_field.data[(i*w + j) * 4 + 1] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 2] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
-            }
+            fill_a_pixel_in(distance_field, j, i, d, 0xD6, 0x45, 0x62);
         }
     context.putImageData(distance_field, -0.5, -0.5);
 
@@ -323,7 +327,7 @@ function draw_grid_border_contour() {
         context.moveTo(j, 0.0);
         context.lineTo(j, h);
     }
-    context.strokeStyle="#000000";
+    context.strokeStyle="#222222";
     context.lineWidth=1;
     context.stroke();
     context.closePath();
@@ -347,12 +351,7 @@ function draw_marching_cubes_contour(element, do_interpolation) {
     for (var i = 0; i <= h; ++i)
         for (var j = 0; j <= w; ++j) {
             var d = Math.pow(Math.pow(i - h/2, 2) + Math.pow(j - w/2, 2), 0.5) - 160;
-            if (Math.abs(d) < 1.4) {
-                distance_field.data[(i*w + j) * 4 + 0] = 0xAA;
-                distance_field.data[(i*w + j) * 4 + 1] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 2] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
-            }
+            fill_a_pixel_in(distance_field, j, i, d, 0xD6, 0x45, 0x62);
         }
     context.putImageData(distance_field, -0.5, -0.5);
 
@@ -367,7 +366,7 @@ function draw_marching_cubes_contour(element, do_interpolation) {
         context.moveTo(j, 0.0);
         context.lineTo(j, h);
     }
-    context.strokeStyle="#000000";
+    context.strokeStyle="#222222";
     context.lineWidth=1;
     context.stroke();
     context.closePath();
@@ -506,12 +505,7 @@ function draw_marching_cube(element, do_interpolation, client_x, client_y, do_hi
     for (var i = 0; i <= h; ++i)
         for (var j = 0; j <= w; ++j) {
             var d = sample_function(j, i);
-            if (Math.abs(d) < 1.4) {
-                sample_function_image.data[(i*w + j) * 4 + 0] = 0xAA;
-                sample_function_image.data[(i*w + j) * 4 + 1] = 0x55;
-                sample_function_image.data[(i*w + j) * 4 + 2] = 0x55;
-                sample_function_image.data[(i*w + j) * 4 + 3] = 0xFF;
-            }
+            fill_a_pixel_in(sample_function_image, j, i, d, 0xD6, 0x45, 0x62);
         }
     context.putImageData(sample_function_image, -0.5, -0.5);
     
@@ -536,7 +530,7 @@ function draw_marching_cube(element, do_interpolation, client_x, client_y, do_hi
     context.beginPath();
     var one_cube_size = marching_cube_buttons_xy[0][1][0] - marching_cube_buttons_xy[0][0][0];
     draw_one_cube(context, marching_cube_buttons_xy[0][0][0], marching_cube_buttons_xy[0][0][1], one_cube_size, sample_function, 0, do_interpolation);
-    context.strokeStyle = "#3333AA";
+    context.strokeStyle = "#457fd6";
     context.lineWidth = 3;
     context.stroke();
     context.closePath(); 
@@ -638,9 +632,9 @@ function draw_interactive_marching_cubes(){
         for (var j = 0; j <= w; j += 2.0) {
             d = d_metaballs(j, i);
             if (d <= distance) {
-                distance_field.data[(i*w + j) * 4 + 0] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 1] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 2] = 0xAA;
+                distance_field.data[(i*w + j) * 4 + 0] = 0x77;
+                distance_field.data[(i*w + j) * 4 + 1] = 0x77;
+                distance_field.data[(i*w + j) * 4 + 2] = 0x77;
                 distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
             }
         }
@@ -656,7 +650,7 @@ function draw_interactive_marching_cubes(){
         context.moveTo(j, 0.0);
         context.lineTo(j, h);
     }
-    context.strokeStyle="#000000";
+    context.strokeStyle="#222222";
     context.lineWidth=1;
     context.stroke();
     context.closePath();
@@ -694,12 +688,7 @@ function draw_marching_cubes_square_contour() {
     for (var i = 0; i <= h; ++i)
         for (var j = 0; j <= w; ++j) {
             var d = d_f(j, i);
-            if (Math.abs(d) < 1.4) {
-                distance_field.data[(i*w + j) * 4 + 0] = 0xAA;
-                distance_field.data[(i*w + j) * 4 + 1] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 2] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
-            }
+            fill_a_pixel_in(distance_field, j, i, d, 0xD6, 0x45, 0x62);
         }
     context.putImageData(distance_field, -0.5, -0.5);
 
@@ -714,7 +703,7 @@ function draw_marching_cubes_square_contour() {
         context.moveTo(j, 0.0);
         context.lineTo(j, h);
     }
-    context.strokeStyle="#000000";
+    context.strokeStyle="#222222";
     context.lineWidth=1;
     context.stroke();
     context.closePath();
@@ -777,7 +766,7 @@ function draw_dual_contouring(context, d_f, j0, i0, w, h, grid_size) {
             }
         }
     }
-    context.strokeStyle="#338833";
+    context.strokeStyle="#62d645";
     context.lineWidth=3;
     context.stroke();
     context.closePath();
@@ -879,12 +868,7 @@ function draw_dual_cube(client_x, client_y, do_highlight) {
     for (var i = 0; i <= h; ++i)
         for (var j = 0; j <= w; ++j) {
             var d = sample_function(j, i);
-            if (Math.abs(d) < 1.4) {
-                sample_function_image.data[(i*w + j) * 4 + 0] = 0xAA;
-                sample_function_image.data[(i*w + j) * 4 + 1] = 0x55;
-                sample_function_image.data[(i*w + j) * 4 + 2] = 0x55;
-                sample_function_image.data[(i*w + j) * 4 + 3] = 0xFF;
-            }
+            fill_a_pixel_in(sample_function_image, j, i, d, 0xD6, 0x45, 0x62);
         }
     context.putImageData(sample_function_image, -0.5, -0.5);
     
@@ -972,12 +956,7 @@ function draw_dual_square_contour() {
     for (var i = 0; i <= h; ++i)
         for (var j = 0; j <= w; ++j) {
             var d = d_f(j, i);
-            if (Math.abs(d) < 1.4) {
-                distance_field.data[(i*w + j) * 4 + 0] = 0xAA;
-                distance_field.data[(i*w + j) * 4 + 1] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 2] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
-            }
+            fill_a_pixel_in(distance_field, j, i, d, 0xD6, 0x45, 0x62);
         }
     context.putImageData(distance_field, -0.5, -0.5);
 
@@ -992,7 +971,7 @@ function draw_dual_square_contour() {
         context.moveTo(j, 0.0);
         context.lineTo(j, h);
     }
-    context.strokeStyle="#000000";
+    context.strokeStyle="#222222";
     context.lineWidth=1;
     context.stroke();
     context.closePath();
@@ -1079,9 +1058,9 @@ function draw_interactive_dual_contouring(){
         for (var j = 0; j <= w; j += 2.0) {
             d = d_lines(j, i);
             if (d <= 0) {
-                distance_field.data[(i*w + j) * 4 + 0] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 1] = 0x55;
-                distance_field.data[(i*w + j) * 4 + 2] = 0xAA;
+                distance_field.data[(i*w + j) * 4 + 0] = 0x77;
+                distance_field.data[(i*w + j) * 4 + 1] = 0x77;
+                distance_field.data[(i*w + j) * 4 + 2] = 0x77;
                 distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
             }
         }
@@ -1097,7 +1076,7 @@ function draw_interactive_dual_contouring(){
         context.moveTo(j, 0.0);
         context.lineTo(j, h);
     }
-    context.strokeStyle="#000000";
+    context.strokeStyle="#222222";
     context.lineWidth=1;
     context.stroke();
     context.closePath();
