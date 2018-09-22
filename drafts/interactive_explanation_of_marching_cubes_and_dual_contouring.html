@@ -744,6 +744,8 @@ function optimum_in_cube_brute(d_f, x, y, grid_size, gradient_step) {
     for (var i = y; i < y + grid_size; i += gradient_step) {
         for (var j = x; j < x + grid_size; j += gradient_step) {
             var estimate = Math.pow(d_f(j, i), 2); // this puts the point on the contour
+            if( estimate > optimum_value )
+                continue;
             estimate += 2.0 * Math.pow(d_f(j - gradient_step, i) - d_f(j + gradient_step, i), 2) + Math.pow(d_f(j, i - gradient_step) - d_f(j, i + gradient_step), 2); // this finds features
             estimate += 0.01 * (Math.pow(j - (x + grid_size / 2), 2) + Math.pow(i - (y + grid_size / 2), 2) ); // this drags the point to the cell's center if there are no better alternatives
             if (estimate < optimum_value) {
@@ -902,8 +904,8 @@ function draw_dual_cube(client_x, client_y, do_highlight) {
             sample_function,
             dual_cube_buttons_xy[0][0][0] - dx * 0.5, 
             dual_cube_buttons_xy[0][0][1] - dy * 0.5, 
-            dx * 2, 
-            dy * 2  , 
+            dx * 3, 
+            dy * 3  , 
             one_cube_size);
     
     // signs
