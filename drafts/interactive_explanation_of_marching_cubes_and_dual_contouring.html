@@ -820,6 +820,10 @@ function draw_dual_cube(client_x, client_y, do_highlight) {
         return Math.sqrt(x*x + y*y) - d;
     };
     
+    var signed_distance_function_for_skewed_eliipse = function(x, y, a, b, d) {
+        return Math.sqrt((x-a*y)*(x-a*y) + (y-b*x)*(y-b*x)) - d;
+    };
+    
     var sample_function = function(x, y) {return signed_distance_function(x - w*0.5, y + h*0.6, 340);};
     
     if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 1) 
@@ -838,8 +842,7 @@ function draw_dual_cube(client_x, client_y, do_highlight) {
         sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y - h*0.4, 380);};
         
     if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 1)
-        sample_function = function(x, y) {return y < x ? signed_distance_function(x - w*1.0, y + h*0.1, 320)
-                                                       : signed_distance_function(x - w*0.0, y - h*1.1, 320);};
+        sample_function = function(x, y) {return signed_distance_function_for_skewed_eliipse(x - w*0.5, y - h*0.5, -0.4, -0.6, 150);};
 
     if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 1)
         sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y + h*0.1, 540);};
@@ -848,8 +851,7 @@ function draw_dual_cube(client_x, client_y, do_highlight) {
         sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y - h*1.1, 410);};
         
     if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 0)           
-        sample_function = function(x, y) {return y < w-x ? signed_distance_function(x - w*0.0, y + h*0.2, 365)
-                                                         : signed_distance_function(x - w*1.0, y - h*1.2, 365);};
+        sample_function = function(x, y) {return signed_distance_function_for_skewed_eliipse(x - w*0.5, y - h*0.5, +0.4, +0.6, 150);};
                                                          
     if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 0)                                                           
         sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y - h*0.6, 380);};
