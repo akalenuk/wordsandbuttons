@@ -1182,10 +1182,10 @@ One way to find a better place to put line segments will be using the linear int
     init_marching_cube_interpolation();
     </script>
     <p>
-It's not the best way possible. Since our target function doesn't have to be linear, we can't expect linear interpolation to work perfectly well.
+It's not the best way possible. Since our target function doesn't have to be linear, we can't expect linear interpolation to work perfectly well. We should have been looking for a true point of isoline with an edge intersection instead.
     </p>
     <p>
-But it works good enough most of the time.
+But interpolation it works good enough most of the time, and it's super cheap.
     </p>
     <canvas id="marching_cubes_interpolation" width=640 height=480></canvas>
     <script language="JavaScript">
@@ -1228,7 +1228,35 @@ I believe, the most important lesson we can take is the idea of duality. The ver
 Dual contouring
     </h2>
     <p>
-
+With marching cubes we did the following:
+    </p>
+    <ol>
+        <li>
+If a function changes its sign in a <b>cube</b>, we add a line segment from <b>edge</b> to <i>edge</b>.
+        </li>
+        <li>
+The exact ends of each segment are being placed on the <b>edges</b> to minimize difference between an isoline and a contour.
+        </li>
+    </ol>
+    <p>
+Conceptually, dual contouring goes like this: 
+    </p>
+    <ol>
+        <li>
+If a function changes its sign going through the <b>edge</b>, we add a line segment from <b>cube</b> to <b>cube</b>.
+        </li>
+        <li>
+The exact ends of each segment are being placed in the <b>cubes</b> to minimize difference between an isoline and a contour.
+        </li>
+    </ol>
+    <p>
+Noticed anything?
+    </p>
+    <p>
+Exactly! This is the same algorithm, only cubes now play as edges and edges as cubes. That's the duality. 
+    </p>
+    <p>
+And now, since we get to place a segment end anywhere in the cube, we can also choose it to be on the corner.
     </p>
     <canvas id="dual_cube" width=640 height=480></canvas>
     <script language="JavaScript">
