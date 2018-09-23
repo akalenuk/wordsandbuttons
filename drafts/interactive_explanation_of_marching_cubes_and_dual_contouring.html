@@ -782,7 +782,7 @@ function draw_dual_contouring(context, d_f, j0, i0, w, h, grid_size) {
 }
 
 var dual_cube_signs = [[0, 1], [1, 1]];
-var dual_cube_buttons_xy = [[[160, 80], [480, 80]], [[160, 400], [480, 400]]];
+var dual_cube_buttons_xy = [[[640/2 - 80, 480/2 - 80], [640/2 + 80, 480/2 - 80]], [[640/2 - 80, 480/2 + 80], [640/2 + 80, 480/2 + 80]]];
 var dual_cube_buttons_r = 24.0;
 function init_dual_cube() {
     var dual_cube = document.getElementById("dual_cube");
@@ -822,56 +822,54 @@ function draw_dual_cube(client_x, client_y, do_highlight) {
         return Math.sqrt(x*x + y*y) - d;
     };
     
-    var signed_distance_function_for_skewed_eliipse = function(x, y, a, b, d) {
-        return Math.sqrt((x-a*y)*(x-a*y) + (y-b*x)*(y-b*x)) - d;
-    };
-    
     var sample_function = function(x, y) {return signed_distance_function(x - w*0.5, y + h*0.6, 340);};
     
     if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 1) 
-        sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y + h*0.1, 340);};
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y + h*0.1, 370);};
 
     if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 1) 
         sample_function = function(x, y) {return signed_distance_function(x - w*0.9, y + h*0.1, 340);};
 
     if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 1) 
-        sample_function = function(x, y) {return signed_distance_function(x - w*0.6, y + h*0.3, 440);};
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.6, y + h*0.3, 400);};
     
     if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 1)     
         sample_function = function(x, y) {return signed_distance_function(x - w*0.1, y - h*1.1, 340);};
  
     if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 1)     
-        sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y - h*0.4, 380);};
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y - h*0.4, 360);};
         
     if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 1)
-        sample_function = function(x, y) {return signed_distance_function_for_skewed_eliipse(x - w*0.5, y - h*0.5, -0.4, -0.6, 150);};
+        sample_function = function(x, y) {return y < x ? signed_distance_function(x - w*1.0, y + h*0.1, 380)
+                                                       : signed_distance_function(x - w*0.0, y - h*1.1, 370);};
 
     if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 1)
-        sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y + h*0.1, 540);};
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y + h*0.1, 500);};
         
     if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 0)        
-        sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y - h*1.1, 410);};
+        sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y - h*1.1, 390);};
         
     if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 0)           
-        sample_function = function(x, y) {return signed_distance_function_for_skewed_eliipse(x - w*0.5, y - h*0.5, +0.4, +0.6, 150);};
-                                                         
+        sample_function = function(x, y) {return y < w-x ? signed_distance_function(x - w*0.0, y + h*0.2, 380)
+                                                         : signed_distance_function(x - w*1.0, y - h*1.2, 400);};
+                                                                                                                  
     if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 0)                                                           
-        sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y - h*0.6, 380);};
+        sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y - h*0.6, 340);};
     
     if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 1 && dual_cube_signs[1][1] == 0)  
-        sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y + h*0.1, 540);};
+        sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y + h*0.1, 490);};
     
     if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 0)  
-        sample_function = function(x, y) {return signed_distance_function(x - w*0.4, y - h*1.3, 440);};
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.4, y - h*1.3, 410);};
         
     if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 1 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 0)      
-        sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y - h*1.1, 540);};
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.0, y - h*1.1, 490);};
         
     if(dual_cube_signs[0][0] == 1 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 0)          
-        sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y - h*1.1, 540);};
+        sample_function = function(x, y) {return signed_distance_function(x - w*1.0, y - h*1.1, 500);};
     
     if(dual_cube_signs[0][0] == 0 && dual_cube_signs[0][1] == 0 && dual_cube_signs[1][0] == 0 && dual_cube_signs[1][1] == 0)     
-        sample_function = function(x, y) {return signed_distance_function(x - w*0.5, y - h*0.5, 340);};
+        sample_function = function(x, y) {return signed_distance_function(x - w*0.5, y - h*0.5, 200);};
         
     var sample_function_image = context.createImageData(w, h);
     for (var i = 0; i < sample_function_image.data.length; ++i)
@@ -887,12 +885,20 @@ function draw_dual_cube(client_x, client_y, do_highlight) {
     var dx = (dual_cube_buttons_xy[1][1][0] - dual_cube_buttons_xy[0][0][0]);
     var dy = (dual_cube_buttons_xy[1][1][1] - dual_cube_buttons_xy[0][0][1]);
     context.beginPath();
-    context.moveTo(0.0, dual_cube_buttons_xy[1][0][1] - dy * 0.5);
-    context.lineTo(w, dual_cube_buttons_xy[1][0][1] - dy * 0.5);
-      
-    context.moveTo(dual_cube_buttons_xy[0][1][0] - dx * 0.5, 0.0);
-    context.lineTo(dual_cube_buttons_xy[0][1][0] - dx * 0.5, h);
-        
+    context.moveTo(0.0, dual_cube_buttons_xy[0][0][1]);
+    context.lineTo(w, dual_cube_buttons_xy[0][0][1]);
+    context.moveTo(0.0, dual_cube_buttons_xy[0][0][1] + dy);
+    context.lineTo(w, dual_cube_buttons_xy[0][0][1] + dy);
+
+    context.moveTo(dual_cube_buttons_xy[0][0][0] - dx, 0.0);
+    context.lineTo(dual_cube_buttons_xy[0][0][0] - dx, h);          
+    context.moveTo(dual_cube_buttons_xy[0][0][0], 0.0);
+    context.lineTo(dual_cube_buttons_xy[0][0][0], h);
+    context.moveTo(dual_cube_buttons_xy[0][0][0] + dx, 0.0);
+    context.lineTo(dual_cube_buttons_xy[0][0][0] + dx, h);
+    context.moveTo(dual_cube_buttons_xy[0][0][0] + 2*dx, 0.0);
+    context.lineTo(dual_cube_buttons_xy[0][0][0] + 2*dx, h);
+            
     context.strokeStyle="#000000";
     context.lineWidth=1;
     context.stroke();
@@ -902,10 +908,10 @@ function draw_dual_cube(client_x, client_y, do_highlight) {
     var one_cube_size = dual_cube_buttons_xy[0][1][0] - dual_cube_buttons_xy[0][0][0];
     draw_dual_contouring(context, 
             sample_function,
-            dual_cube_buttons_xy[0][0][0] - dx * 0.5, 
-            dual_cube_buttons_xy[0][0][1] - dy * 0.5, 
-            dx * 3, 
-            dy * 3  , 
+            dual_cube_buttons_xy[0][0][0] - 2*dx, 
+            dual_cube_buttons_xy[0][0][1] - dy, 
+            dx * 4.5, 
+            dy * 4.5, 
             one_cube_size);
     
     // signs
