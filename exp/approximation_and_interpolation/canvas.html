@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Approximation inter[plation</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.results {
+    font-family: sans-serif;
+    font-size: 14pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.formula {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: italic;
+    width: 505pt;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+}
+
+input[type="text"] {
+    width: 32pt;
+    height: 22pt;
+    font-size: 16pt;
+    text-align: center;
+}
+
+button {
+    width: 32pt;
+    height: 26pt;
+    font-size: 16pt;
+    text-align: center;
+}
+    </style>
+    <script language="JavaScript">
+
+// client
+var w = 640.0;
+var h = 640.0;
+
+
+function init_canvas(){
+    var canvas = document.getElementById("canvas");
+    canvas.addEventListener('mousedown', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        lines.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
+    }, false);
+     
+    canvas.addEventListener('mousemove', function(e){
+        if(e.buttons == 1){
+            canvas_rect = canvas.getBoundingClientRect();
+            lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+            draw_canvas();
+        }
+    }, false);
+    
+    canvas.addEventListener('mouseup', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+        draw_canvas();
+    }, false);
+    
+    draw_canvas();
+}
+
+
+
+function draw_canvas(){
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+}
+
+unction change_w() {
+    w = Number(document.getElementById("w_input").value);
+    if(isNaN(w)) {
+        w = 640;
+    }
+    document.getElementById("w_input").value = w;
+    document.getElementById("canvas").width = w;
+    draw_canvas();
+}
+
+function change_h() {
+    h = Number(document.getElementById("h_input").value);
+    if(isNaN(w)) {
+        h = 640;
+    }
+    document.getElementById("h_input").value = h;
+    document.getElementById("canvas").height = h;
+    draw_canvas();
+}
+
+function canvas_full_screen() {
+    var window_width = window.innerWidth;
+    var window_height = window.innerHeight;
+    document.getElementById("w_input").value = window_width;
+    document.getElementById("h_input").value = window_height;
+    change_w();
+    change_h();
+    window.scrollTo(0, document.getElementById("canvas").offsetTop);
+}
+
+function reset_all() {
+    lines = [];
+    draw_canvas();
+}
+
+function undo_last() {
+    lines.splice(-1,1);
+    draw_canvas();
+}
+
+    </script>
+  </head>
+  <body>
+    <center>
+    <form onsubmit="return false;">
+    Canvas size:
+    <input type="text" id="w_input" value="640" onchange="change_w();"> X 
+    <input type="text" id="h_input" value="640" onchange="change_h();">
+    <button type="button" style="width: auto;" onclick="canvas_full_screen()">Full screen</button><br>
+    </form>
+    <canvas id="canvas" width=640 height=640></canvas>
+    <script language="JavaScript">
+    init_canvas();
+    </script>
+    <div style="text-align:right; width:640px; padding-bottom:12pt;">
+        <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
+        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
+    </div>
+    </center>
+    
+  </body>
+</html>
