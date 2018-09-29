@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Approximation inter[plation</title>
+    <title>Approximation interpolation</title>
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <style>
 body{
@@ -104,31 +104,31 @@ button {
 var w = 640.0;
 var h = 640.0;
 
+var points = [];
 
 function init_canvas(){
     var canvas = document.getElementById("canvas");
     canvas.addEventListener('mousedown', function(e){
         canvas_rect = canvas.getBoundingClientRect();
-        lines.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
+        points.push([e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]);
     }, false);
      
     canvas.addEventListener('mousemove', function(e){
         if(e.buttons == 1){
             canvas_rect = canvas.getBoundingClientRect();
-            lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+            points[points.length-1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
             draw_canvas();
         }
     }, false);
     
     canvas.addEventListener('mouseup', function(e){
         canvas_rect = canvas.getBoundingClientRect();
-        lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+        points[points.length-1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
         draw_canvas();
     }, false);
     
     draw_canvas();
 }
-
 
 
 function draw_canvas(){
@@ -137,9 +137,18 @@ function draw_canvas(){
     // background
     context.fillStyle="#eeeeee";
     context.fillRect(0, 0, w, h);
+    
+    // points
+    context.fillStyle="#008800";
+    for (var i = 0; i < points.length; ++i) {
+        context.beginPath();
+        context.arc(points[i][0], points[i][1], 2, 0, 2*Math.PI);
+        context.fill();
+        context.closePath();
+    }
 }
 
-unction change_w() {
+function change_w() {
     w = Number(document.getElementById("w_input").value);
     if(isNaN(w)) {
         w = 640;
@@ -170,12 +179,12 @@ function canvas_full_screen() {
 }
 
 function reset_all() {
-    lines = [];
+    points = [];
     draw_canvas();
 }
 
 function undo_last() {
-    lines.splice(-1,1);
+    points.splice(-1,1);
     draw_canvas();
 }
 
