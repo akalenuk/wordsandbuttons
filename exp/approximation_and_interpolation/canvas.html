@@ -164,14 +164,14 @@ function solved_linear(A, B, n){
     return X;
 }
 
-function approximation_of(points) {
+function approximation_of(points, n) {
     const N = points.length;
     var A = [];
     var B = [];
 
-    for (var i = 0; i < N; ++i){
+    for (var i = 0; i < n; ++i){
         var Ai = []
-        for (var j = 0; j < N; ++j){
+        for (var j = 0; j < n; ++j){
             Ai.push(0);
             for(var k = 0; k < N; ++k){
                 Ai[j] += Math.pow(points[k][0], i + j);
@@ -183,12 +183,13 @@ function approximation_of(points) {
             B[i] += points[k][1] * Math.pow(points[k][0], i);
         }
     }
-    P = solved_linear(A, B, N);
+    P = solved_linear(A, B,n);
     return function(x) {
         Px = 0;
-        for(var i = 0; i < N; ++i) {
+        for(var i = 0; i < n; ++i) {
             Px += P[i] * Math.pow(x, i);
         }
+        return Px;
     };
 }
 
@@ -208,19 +209,22 @@ function draw_canvas(){
         context.closePath();
     }
     
-    polynomial = approximation_of(points);
-    context.beginPath();
-    for(var j = 1; j < w; ++j){
-        x1 = j - 1;
-        x2 = j;
-        y1 = polynomial(x1);
-        y2 = polynomial(x2);
-        context.moveTo(x1, y1);
-        context.lineTo(x2, y2);
+    // draw approxiamtion
+    if(points.length > 2) {
+        polynomial = approximation_of(points, 3);
+        context.beginPath();
+        for(var j = 1; j < w; ++j){
+            x1 = j - 1;
+            x2 = j;
+            y1 = polynomial(x1);
+            y2 = polynomial(x2);
+            context.moveTo(x1, y1);
+            context.lineTo(x2, y2);
+        }
+        context.strokeStyle="#661100";
+        context.stroke();
+        context.closePath();
     }
-    context.strokeStyle="#661100";
-    context.stroke();
-    context.closePath();
 }
 
 function change_w() {
