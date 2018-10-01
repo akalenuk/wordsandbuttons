@@ -328,7 +328,7 @@ function draw_grid_border_optimized(context, d_f, w, h, grid_size, distance) {
     context.closePath();
 }
 
-function draw_marching_cubes(context, d_f, w, h, grid_size, distance) {
+function draw_marching_cubes(context, d_f, w, h, grid_size, distance, do_interpolation) {
     context.beginPath();
     for(var i = 0; i <= h - grid_size; i += grid_size) {
         for(var j = 0; j <= w - grid_size; j += grid_size) {
@@ -340,6 +340,13 @@ function draw_marching_cubes(context, d_f, w, h, grid_size, distance) {
             var t01_11 = (distance - d01) / (d11 - d01);
             var t11_10 = (distance - d11) / (d10 - d11);
             var t10_00 = (distance - d10) / (d00 - d10);
+			if(!do_interpolation)
+			{
+				t00_01 = 0.5;
+				t01_11 = 0.5;
+				t11_10 = 0.5;
+				t10_00 = 0.5;
+			}
             var in_00 = d00 < distance;
             var out_00 = !in_00;
             var in_01 = d01 < distance;
@@ -412,6 +419,8 @@ function draw_marching_cubes(context, d_f, w, h, grid_size, distance) {
         }
     }
     context.strokeStyle="#3333AA";
+	if(!do_interpolation)
+		context.strokeStyle="#008800";
     context.lineWidth=3;
     context.stroke();
     context.closePath(); 
@@ -477,7 +486,7 @@ function draw_canvas(){
             context.moveTo(j, 0.0);
             context.lineTo(j, h);
         }
-        context.strokeStyle="#cccccc";
+        context.strokeStyle="#999999";
         context.lineWidth=1;
         context.stroke();
         context.closePath();
@@ -506,7 +515,12 @@ function draw_canvas(){
 
     // marching cubes
     if(document.getElementById("do_marching").checked) {
-        draw_marching_cubes(context, d_f, w, h, grid_size, distance);
+        draw_marching_cubes(context, d_f, w, h, grid_size, distance, true);
+    }
+
+    // marching cubes without interpolation
+    if(document.getElementById("do_marching_no_interpolation").checked) {
+        draw_marching_cubes(context, d_f, w, h, grid_size, distance, false);
     }
     
     // dual contour
@@ -636,6 +650,7 @@ tick(); // let it tick always
     <input type="checkbox" id="do_grid" onclick="draw_canvas();"/><label for="do_grid">Grid border</label>
     <input type="checkbox" id="do_optimized" onclick="draw_canvas();"/><label for="do_optimized">Optimized</label>
     <input type="checkbox" id="do_marching" checked onclick="draw_canvas();"/><label for="do_marching">Marching cubes</label>
+    <input type="checkbox" id="do_marching_no_interpolation" onclick="draw_canvas();"/><label for="do_marching_no_interpolation">MC without interpolation</label>
     <input type="checkbox" id="do_dual" onclick="draw_canvas();"/><label for="do_dual">Dual contour</label>
     <br>
     <input type="checkbox" id="draw_distances"onclick="draw_canvas();"/><label for="draw_distances">Show Distance</label>
