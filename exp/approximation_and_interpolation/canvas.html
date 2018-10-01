@@ -106,6 +106,30 @@ var h = 640.0;
 
 var points = [];
 
+// above
+var degree = 3;
+function change_degree() {
+    degree = Number(document.getElementById("degree_input").value);
+    if(isNaN(degree)) {
+        degree = 1;
+    }
+    document.getElementById("degree_input").value = degree;
+    draw_canvas();
+}
+
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name+"_input");
+    counter.value = Number(counter.value) + 1;
+    eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name+"_input");
+    counter.value = Number(counter.value) - 1;
+    eval('change_' + counter_name + '()');
+}
+
+// the canvas
 function init_canvas(){
     var canvas = document.getElementById("canvas");
     canvas.addEventListener('mousedown', function(e){
@@ -210,8 +234,8 @@ function draw_canvas(){
     }
     
     // draw approxiamtion
-    if(points.length > 2) {
-        polynomial = approximation_of(points, 3);
+    if(points.length > degree - 1) {
+        polynomial = approximation_of(points, degree);
         context.beginPath();
         for(var j = 1; j < w; ++j){
             x1 = j - 1;
@@ -227,36 +251,7 @@ function draw_canvas(){
     }
 }
 
-function change_w() {
-    w = Number(document.getElementById("w_input").value);
-    if(isNaN(w)) {
-        w = 640;
-    }
-    document.getElementById("w_input").value = w;
-    document.getElementById("canvas").width = w;
-    draw_canvas();
-}
-
-function change_h() {
-    h = Number(document.getElementById("h_input").value);
-    if(isNaN(w)) {
-        h = 640;
-    }
-    document.getElementById("h_input").value = h;
-    document.getElementById("canvas").height = h;
-    draw_canvas();
-}
-
-function canvas_full_screen() {
-    var window_width = window.innerWidth;
-    var window_height = window.innerHeight;
-    document.getElementById("w_input").value = window_width;
-    document.getElementById("h_input").value = window_height;
-    change_w();
-    change_h();
-    window.scrollTo(0, document.getElementById("canvas").offsetTop);
-}
-
+// under
 function reset_all() {
     points = [];
     draw_canvas();
@@ -272,10 +267,10 @@ function undo_last() {
   <body>
     <center>
     <form onsubmit="return false;">
-    Canvas size:
-    <input type="text" id="w_input" value="640" onchange="change_w();"> X 
-    <input type="text" id="h_input" value="640" onchange="change_h();">
-    <button type="button" style="width: auto;" onclick="canvas_full_screen()">Full screen</button><br>
+    Polynomial degree:
+    <button type="button" onclick="dec('degree')">-</button>
+    <input type="text" id="degree_input" value="3" onchange="change_degree();">
+    <button type="button" onclick="inc('degree')">+</button>
     </form>
     <canvas id="canvas" width=640 height=640></canvas>
     <script language="JavaScript">
