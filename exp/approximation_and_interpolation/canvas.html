@@ -217,6 +217,29 @@ function approximation_of(points, n) {
     };
 }
 
+function interpolation_of(points) {
+    const N = points.length;
+    var A = [];
+    var B = [];
+
+    for (var i = 0; i < N; ++i){
+        var Ai = []
+        for (var j = 0; j < N; ++j){
+            Ai.push(Math.pow(points[i][0], j));
+        }
+        A.push(Ai);
+        B.push(points[i][1]);
+    }
+    P = solved_linear(A, B, N);
+    return function(x) {
+        Px = 0;
+        for(var i = 0; i < N; ++i) {
+            Px += P[i] * Math.pow(x, i);
+        }
+        return Px;
+    };
+}
+
 function draw_canvas(){
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
@@ -236,6 +259,7 @@ function draw_canvas(){
     // draw approxiamtion
     if(points.length > 0) {
         polynomial = approximation_of(points, degree);
+//        polynomial = interpolation_of(points);
         context.beginPath();
         for(var j = 1; j < w; ++j){
             x1 = j - 1;
