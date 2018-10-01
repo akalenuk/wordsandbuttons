@@ -342,10 +342,10 @@ function draw_marching_cubes(context, d_f, w, h, grid_size, distance, do_interpo
             var t10_00 = (distance - d10) / (d00 - d10);
 			if(!do_interpolation)
 			{
-			t00_01 = 0.5;
-			t01_11 = 0.5;
-			t11_10 = 0.5;
-			t10_00 = 0.5;
+				t00_01 = 0.5;
+				t01_11 = 0.5;
+				t11_10 = 0.5;
+				t10_00 = 0.5;
 			}
             var in_00 = d00 < distance;
             var out_00 = !in_00;
@@ -419,6 +419,8 @@ function draw_marching_cubes(context, d_f, w, h, grid_size, distance, do_interpo
         }
     }
     context.strokeStyle="#3333AA";
+	if(!do_interpolation)
+		context.strokeStyle="#008800";
     context.lineWidth=3;
     context.stroke();
     context.closePath(); 
@@ -512,8 +514,13 @@ function draw_canvas(){
     }
 
     // marching cubes
-    if(document.getElementById("do_marching").checked || document.getElementById("do_marching_no_interpolation").checked) {
-        draw_marching_cubes(context, d_f, w, h, grid_size, distance, !document.getElementById("do_marching_no_interpolation").checked);
+    if(document.getElementById("do_marching").checked) {
+        draw_marching_cubes(context, d_f, w, h, grid_size, distance, true);
+    }
+
+    // marching cubes without interpolation
+    if(document.getElementById("do_marching_no_interpolation").checked) {
+        draw_marching_cubes(context, d_f, w, h, grid_size, distance, false);
     }
     
     // dual contour
