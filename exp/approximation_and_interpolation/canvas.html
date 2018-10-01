@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Approximation interpolation</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.results {
+    font-family: sans-serif;
+    font-size: 14pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.formula {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: italic;
+    width: 505pt;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+}
+
+input[type="text"] {
+    width: 32pt;
+    height: 22pt;
+    font-size: 16pt;
+    text-align: center;
+}
+
+button {
+    width: 32pt;
+    height: 26pt;
+    font-size: 16pt;
+    text-align: center;
+}
+    </style>
+    <script language="JavaScript">
+
+// client
+var w = 640.0;
+var h = 640.0;
+
+var points = [];
+
+// above
+var degree = 3;
+function change_degree() {
+    degree = Number(document.getElementById("degree_input").value);
+    if(isNaN(degree)) {
+        degree = 1;
+    }
+    document.getElementById("degree_input").value = degree;
+    draw_canvas();
+}
+
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name+"_input");
+    counter.value = Number(counter.value) + 1;
+    eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name+"_input");
+    counter.value = Number(counter.value) - 1;
+    eval('change_' + counter_name + '()');
+}
+
+// the canvas
+function init_canvas(){
+    var canvas = document.getElementById("canvas");
+    canvas.addEventListener('mousedown', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        points.push([e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]);
+    }, false);
+     
+    canvas.addEventListener('mousemove', function(e){
+        if(e.buttons == 1){
+            canvas_rect = canvas.getBoundingClientRect();
+            points[points.length-1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+            draw_canvas();
+        }
+    }, false);
+    
+    canvas.addEventListener('mouseup', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        points[points.length-1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+        draw_canvas();
+    }, false);
+    
+    draw_canvas();
+}
+
+function underflow_padded(x){
+    if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
+        return 1.e-5 * sign_0_positive(x);
+    return x;
+}
+
+function solved_linear(A, B, n){
+    var X = [];
+    for (var i = 0; i < n; ++i)
+        X.push(0.0);
+
+    // triangulize
+    for (var i = 0; i < n-1; ++i)
+        for (var j = 0; j < i+1; ++j) {
+            r = A[i+1][j] / underflow_padded(A[j][j]);
+            A[i+1][j] = 0.;
+            for (var b_j = j+1; b_j < n; ++b_j){
+                A[i+1][b_j] -= A[j][b_j]*r;
+            }
+            B[i+1] -= B[j]*r;
+        }
+
+    // calculate xs
+    X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
+    for (var i = n-2; i >= 0; --i){
+        var s = 0.0;
+        for (var j = i; j < n; ++j){
+            s = s + A[i][j]*X[j];
+        }
+        X[i] = (B[i] - s) / underflow_padded(A[i][i]);
+    }
+    return X;
+}
+
+function approximation_of(points, n) {
+    const N = points.length;
+    var A = [];
+    var B = [];
+
+    for (var i = 0; i < n; ++i){
+        var Ai = []
+        for (var j = 0; j < n; ++j){
+            Ai.push(0);
+            for(var k = 0; k < N; ++k){
+                Ai[j] += Math.pow(points[k][0], i + j);
+            }
+        }
+        A.push(Ai);
+        B.push(0);
+        for(var k = 0; k < N; ++k){
+            B[i] += points[k][1] * Math.pow(points[k][0], i);
+        }
+    }
+    P = solved_linear(A, B,n);
+    return function(x) {
+        Px = 0;
+        for(var i = 0; i < n; ++i) {
+            Px += P[i] * Math.pow(x, i);
+        }
+        return Px;
+    };
+}
+
+function draw_canvas(){
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    
+    // points
+    context.fillStyle="#008800";
+    for (var i = 0; i < points.length; ++i) {
+        context.beginPath();
+        context.arc(points[i][0], points[i][1], 2, 0, 2*Math.PI);
+        context.fill();
+        context.closePath();
+    }
+    
+    // draw approxiamtion
+    if(points.length > 0) {
+        polynomial = approximation_of(points, degree);
+        context.beginPath();
+        for(var j = 1; j < w; ++j){
+            x1 = j - 1;
+            x2 = j;
+            y1 = polynomial(x1);
+            y2 = polynomial(x2);
+            context.moveTo(x1, y1);
+            context.lineTo(x2, y2);
+        }
+        context.strokeStyle="#661100";
+        context.stroke();
+        context.closePath();
+    }
+}
+
+// under
+function reset_all() {
+    points = [];
+    draw_canvas();
+}
+
+function undo_last() {
+    points.splice(-1,1);
+    draw_canvas();
+}
+
+    </script>
+  </head>
+  <body>
+    <center>
+    <form onsubmit="return false;">
+    Polynomial degree:
+    <button type="button" onclick="dec('degree')">-</button>
+    <input type="text" id="degree_input" value="3" onchange="change_degree();">
+    <button type="button" onclick="inc('degree')">+</button>
+    </form>
+    <canvas id="canvas" width=640 height=640></canvas>
+    <script language="JavaScript">
+    init_canvas();
+    </script>
+    <div style="text-align:right; width:640px; padding-bottom:12pt;">
+        <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
+        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
+    </div>
+    </center>
+    
+  </body>
+</html>
