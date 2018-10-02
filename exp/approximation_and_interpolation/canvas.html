@@ -258,8 +258,10 @@ function draw_canvas(){
     
     // draw approxiamtion
     if(points.length > 0) {
-        polynomial = approximation_of(points, degree);
-//        polynomial = interpolation_of(points);
+        if(document.getElementById("do_interpolation").checked)
+            var polynomial = interpolation_of(points);
+        else
+            var polynomial = approximation_of(points, degree);
         context.beginPath();
         for(var j = 1; j < w; ++j){
             x1 = j - 1;
@@ -291,7 +293,9 @@ function undo_last() {
   <body>
     <center>
     <form onsubmit="return false;">
-    Polynomial degree:
+    <input type="checkbox" id="do_interpolation" onclick="draw_canvas();"/><label for="do_interpolation">Do interpolation</label> <br>
+    or approxiamate with <br>
+    polynomial degree:
     <button type="button" onclick="dec('degree')">-</button>
     <input type="text" id="degree_input" value="3" onchange="change_degree();">
     <button type="button" onclick="inc('degree')">+</button>
