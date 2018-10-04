@@ -124,7 +124,7 @@ This source code defines the number of bits in a byte and returns the size of <s
     <pre>
 static int BITS_IN_BYTE = 8;
 
-int main(){
+int main() {
     return sizeof(int)*BITS_IN_BYTE;
 }
     </pre>
@@ -142,19 +142,18 @@ Now look at two possible disassemblies for this source code and decide what vari
     <table><tr>
     <td>
     <pre>
-  push    rbp
-  mov     rbp, rsp
-  mov     dword ptr [rbp - 4], 0
-  movsxd  rax, dword ptr [BITS_IN_BYTE]
-  shl     rax, 2
-  mov     ecx, eax
-  mov     eax, ecx
-  pop     rbp
+BITS_IN_BYTE:
+  .long 8
+main:
+  mov eax, DWORD PTR BITS_IN_BYTE[rip]
+  cdqe
+  sal eax, 2
   ret</pre>
     </td>
     <td>
     <pre>
-  mov     eax, 32
+main:
+  mov eax, 32
   ret</pre>
     </td></tr></table>
     <div id="shown_1">
@@ -185,12 +184,13 @@ If the compiler makes such an optimization, this code:
     <table><tr>
     <td style="width: 505pt;">
     <pre>
-<i>inline</i> double <b>twice</b>(double x){
-    return x + x;
+<i>inline</i> int square(int x)  {
+    return x * x;
 }
 
-double <b>triple</b>(double x){
-    return twice(x) + x;
+
+int main(int argc, char** argv)  {
+    return square(argc);
 }
     </pre>
     </td>
@@ -202,8 +202,8 @@ Virtually becomes this:
     <td style="width: 505pt;">
     <pre>
 <i>// not really a source code, just explaining the idea</i>
-double triple(double x){
-    return x + x + x; <i>// twice gets inlined here</i>
+int main(int argc, char** argv)  {
+    return argc * argc;
 }
     </pre>
     </td>
@@ -217,22 +217,21 @@ Now look at these two disassembly variants below and choose the one where the fu
     <table><tr>
     <td>
     <pre>
-  movapd  xmm1, xmm0
-  addsd   xmm1, xmm1
-  addsd   xmm1, xmm0
-  movapd  xmm0, xmm1
+main:
+  imul edi, edi
+  mov eax, edi
   ret</pre>
     </td>
     <td>
     <pre>
-  push    rax
-  movsd   qword ptr [rsp], xmm0
-  call    twice(double)
-  addsd   xmm0, qword ptr [rsp]
-  pop     rax
+square(int):
+  imul edi, edi
+  mov eax, edi
   ret
-.................................
-  addsd   xmm0, xmm0
+main:
+  sub rsp, 8
+  call square(int)
+  add rsp, 8
   ret</pre>
     </td></tr></table>
     <div id="shown_2">
@@ -241,7 +240,7 @@ Now look at these two disassembly variants below and choose the one where the fu
     </div>
     <div id="hidden_2" style="display:none;">
         <p>
-Not really a mystery either. It’s the one on the left. You might not know, that the instruction to call a function is really called the <span id="shown_call" onclick="show('call')"><span class="code_piece"><u>call</u></span></span><span id="hidden_call" style="display:none"><span class="code_piece">call</span>. It stores a special register that points to the next instruction after the call in the stack and then sets it to the function's address. A processor hence jumps to run the function. The function then uses <span id="shown_ret"><span class="code_piece" onclick="show('ret')"><u>ret</u></span> to get</span><span id="hidden_ret" style="display:none"><span class="code_piece">ret</span> to get a stored address from the <span id="shown_stack" onclick="show('stack')"><u>stack</u></span><span id="hidden_stack" style="display:none">stack (which is a piece of memory organized in a first in last out fashion so if you, for instance, <span class="code_piece">push</span> rax and rbx there and then <span class="code_piece">pop</span> rax and rbx, these two will get swapped)</span> back to the register, and make processor jump</span> back to from where it has been called</span>. But since the disassembly on the left doesn't even contain any recall of <span class="code_piece">twice</span>, the function has to be inlined anyway.
+Not really a mystery either. It’s the one on the left. You might not know, that the instruction to call a function is really called the <span id="shown_call" onclick="show('call')"><span class="code_piece"><u>call</u></span></span><span id="hidden_call" style="display:none"><span class="code_piece">call</span>. It stores a special register that points to the next instruction after the call in the stack and then sets it to the function's address. A processor hence jumps to run the function. The function then uses <span id="shown_ret"><span class="code_piece" onclick="show('ret')"><u>ret</u></span> to get</span><span id="hidden_ret" style="display:none"><span class="code_piece">ret</span> to get a stored address from the <span id="shown_stack" onclick="show('stack')"><u>stack</u></span><span id="hidden_stack" style="display:none">stack (which is a piece of memory organized in a first in last out fashion so if you, for instance, <span class="code_piece">push</span> rax and rbx there and then <span class="code_piece">pop</span> rax and rbx, these two will get swapped)</span> back to the register, and make processor jump</span> back to from where it has been called</span>. But since the disassembly on the left doesn't even contain any recall of <span class="code_piece">square</span>, the function has to be inlined anyway.
         </p>
     </div>
 
@@ -260,10 +259,10 @@ Let's say we have this piece of code:
     <table><tr>
     <td style="width: 505pt;">
     <pre>
-float power_of_4(float x){
-    float result = 1;
-    for(int i = 0; i &lt; 4; ++i)
-        result *= x;
+int main(int argc, char**) {
+    int result = 1;
+    for(int i = 0; i &lt; 3; ++i)
+         result *= argc;
     return result;
 }
     </pre>
@@ -278,22 +277,21 @@ Which disassembly has the unrolled loop?
     <table><tr>
     <td>
     <pre>
-  movaps  xmm1, xmm0
-  movss   xmm0, dword ptr [rip + .LCPI0_0]
-  mov     eax, 4
+main:
+  mov eax, 1
+  mov ecx, 3
 .LBB0_1:
-  mulss   xmm0, xmm1
-  add     eax, -1
-  jne     .LBB0_1
+  imul eax, edi
+  dec ecx
+  jne .LBB0_1
   ret</pre>
     </td>
     <td>
     <pre>
-  movaps  xmm1, xmm0
-  mulss   xmm1, xmm1
-  mulss   xmm1, xmm0
-  mulss   xmm1, xmm0
-  movaps  xmm0, xmm1
+main:
+  mov eax, edi
+  imul eax, edi
+  imul eax, edi
   ret</pre>
     </td></tr></table>
     <div id="shown_3">
@@ -305,7 +303,7 @@ Which disassembly has the unrolled loop?
 It's the one on the right.
         </p>
         <p>
-You might not know that <span class="code_piece">j&lt;*&gt;</span> is the family of <span id="shown_jump" onclick="show('jump');"><u>jump instructions</u></span><span id="hidden_jump" style="display:none">jump instructions. There is one unconditional jump <span class="code_piece">jmp</span>, and a bunch of conditional jumps like: <span class="code_piece">jz</span> — jump when zero; <span class="code_piece">jg</span> — jump when greater; or, like in our code, <span class="code_piece">jne</span> — jump when not equal. These react on the boolean <span id="shown_flags" onclick="show('flags')"><u>flags</u> previously set by a processor</span><span id="hidden_flags" style="display:none">flags previously set by a processor. These are the bits residing in a special register that get triggered by arithmetic instructions such as <span id="shown_add" class="code_piece" onclick="show('add')"><u>add</u></span><span id="hidden_add" style="display:none"><span class="code_piece">add</span> (there is usually a whole family of instructions for a simple mnemonic, for instance <span class="code_piece">add</span> has these relatives: <span class="code_piece">fadd</span> — floating point addition; <span class="code_piece">paddb</span> — add packed byte integers; <span class="code_piece">addss</span> — add scalar single precision floating point values; and many more) </span> or <span class="code_piece">sub</span>, or by a special instruction to compare things <span class="code_piece">cmp</span></span></span>. Then again, the code on the right clearly has a repeating pattern, while the one on the left has a number four that is the loop's exit condition, and that should be enough to make a conclusion.
+You might not know that <span class="code_piece">j&lt;*&gt;</span> is the family of <span id="shown_jump" onclick="show('jump');"><u>jump instructions</u></span><span id="hidden_jump" style="display:none">jump instructions. There is one unconditional jump <span class="code_piece">jmp</span>, and a bunch of conditional jumps like: <span class="code_piece">jz</span> — jump when zero; <span class="code_piece">jg</span> — jump when greater; or, like in our code, <span class="code_piece">jne</span> — jump when not equal. These react on the boolean <span id="shown_flags" onclick="show('flags')"><u>flags</u> previously set by a processor</span><span id="hidden_flags" style="display:none">flags previously set by a processor. These are the bits residing in a special register that get triggered by arithmetic instructions such as <span id="shown_add" class="code_piece" onclick="show('add')"><u>add</u></span><span id="hidden_add" style="display:none"><span class="code_piece">add</span> (there is usually a whole family of instructions for a simple mnemonic, for instance <span class="code_piece">add</span> has these relatives: <span class="code_piece">fadd</span> — floating point addition; <span class="code_piece">paddb</span> — add packed byte integers; <span class="code_piece">addss</span> — add scalar single precision floating point values; and many more) </span> or <span class="code_piece">sub</span>, or by a special instruction to compare things <span class="code_piece">cmp</span></span></span>. Then again, the code on the right clearly has a repeating pattern, while the one on the left has a number three that is the loop's exit condition, and that should be enough to make a conclusion.
         </p>
     </div>
 
