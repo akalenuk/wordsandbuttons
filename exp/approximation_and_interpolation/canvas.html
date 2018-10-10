@@ -289,28 +289,65 @@ function draw_canvas(){
         context.closePath();
     }
     
-    // draw approxiamtion
-    if(points.length > 0) {
-        if(document.getElementById("do_interpolation").checked)
-            var polynomial = interpolation_of(points);
-        else if(document.getElementById("do_approximation").checked)
+    // draw approximation
+    if(document.getElementById("do_approximation").checked) {
+        if(points.length > 0) {
             var polynomial = approximation_of(points, degree);
-        else if (document.getElementById("do_both").checked)
-            var polynomial = approximation_of_all_but_first(points, degree);
-        
-        context.beginPath();
-        for(var j = 1; j < w; ++j){
-            x1 = j - 1;
-            x2 = j;
-            y1 = polynomial(x1);
-            y2 = polynomial(x2);
-            context.moveTo(x1, y1);
-            context.lineTo(x2, y2);
+            
+            context.beginPath();
+            for(var j = 1; j < w; ++j){
+                x1 = j - 1;
+                x2 = j;
+                y1 = polynomial(x1);
+                y2 = polynomial(x2);
+                context.moveTo(x1, y1);
+                context.lineTo(x2, y2);
+            }
+            context.strokeStyle="#661100";
+            context.stroke();
+            context.closePath();
         }
-        context.strokeStyle="#661100";
-        context.stroke();
-        context.closePath();
     }
+    
+    // draw interpolation
+    if(document.getElementById("do_interpolation").checked) {
+        if(points.length > 0) {
+            var polynomial = interpolation_of(points);
+            
+            context.beginPath();
+            for(var j = 1; j < w; ++j){
+                x1 = j - 1;
+                x2 = j;
+                y1 = polynomial(x1);
+                y2 = polynomial(x2);
+                context.moveTo(x1, y1);
+                context.lineTo(x2, y2);
+            }
+            context.strokeStyle="#006611";
+            context.stroke();
+            context.closePath();
+        }
+    }
+    
+   // draw approximation of all but first
+    if(document.getElementById("do_both").checked) {
+        if(points.length > 0) {
+            var polynomial = approximation_of_all_but_first(points, degree);
+            
+            context.beginPath();
+            for(var j = 1; j < w; ++j){
+                x1 = j - 1;
+                x2 = j;
+                y1 = polynomial(x1);
+                y2 = polynomial(x2);
+                context.moveTo(x1, y1);
+                context.lineTo(x2, y2);
+            }
+            context.strokeStyle="#001166";
+            context.stroke();
+            context.closePath();
+        }
+    }    
 }
 
 // under
