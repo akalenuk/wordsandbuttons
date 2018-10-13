@@ -623,6 +623,25 @@ function init_interactive_marching_cubes(){
         draw_interactive_marching_cubes();
     }, false);
     
+    canvas.addEventListener('touchstart', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        metaballs.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
+    }, false);
+     
+    canvas.addEventListener('touchmove', function(e){
+        if(e.buttons == 1){
+            canvas_rect = canvas.getBoundingClientRect();
+            metaballs[metaballs.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+            draw_interactive_marching_cubes();
+        }
+    }, false);
+    
+    canvas.addEventListener('touchend', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        metaballs[metaballs.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+        draw_interactive_marching_cubes();
+    }, false);
+    
     draw_interactive_marching_cubes();
 }
 
