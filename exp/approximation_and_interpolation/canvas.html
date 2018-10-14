@@ -248,7 +248,7 @@ function interpolation_of(points) {
 
 // experimental
 function approximation_of_all_but_first(points, n) {
-    const N = points.length;
+/*    const N = points.length;
     var A = [];
     var B = [];
 
@@ -273,7 +273,46 @@ function approximation_of_all_but_first(points, n) {
             Px += P[i] * Math.pow(x, i);
         }
         return Px;
-    };
+    };*/
+    // approxiamtion
+    const N = points.length;
+    var A = [];
+    var B = [];
+
+    for (var i = 0; i < n; ++i){
+        var Ai = []
+        for (var j = 0; j < n; ++j){
+            Ai.push(0);
+            for(var k = 0; k < N; ++k){
+                Ai[j] += Math.pow(points[k][0], i + j);
+            }
+        }
+        A.push(Ai);
+        B.push(0);
+        for(var k = 0; k < N; ++k){
+            B[i] += points[k][1] * Math.pow(points[k][0], i);
+        }
+    }
+    // introduce an equation
+    // point to interpolate
+    var pi = 0;
+    for (var j = 0; j < N; ++j){
+        A[0][j] = Math.pow(points[pi][0], j);
+    }
+    B[0] = points[pi][1];
+ 
+    
+    P = solved_linear(A, B,n);
+    
+       
+    
+    return function(x) {
+        Px = 0;
+        for(var i = 0; i < n; ++i) {
+            Px += P[i] * Math.pow(x, i);
+        }
+        return Px;
+    };    
 }
 
 
