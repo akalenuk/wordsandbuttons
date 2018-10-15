@@ -127,6 +127,16 @@ function change_ips() {
     draw_canvas();
 }
 
+var ims = 0;
+function change_ims() {
+    ims = Number(document.getElementById("ims_input").value);
+    if(isNaN(ims)) {
+        ims = 1;
+    }
+    document.getElementById("ims_input").value = ims;
+    draw_canvas();
+}
+
 function inc(counter_name) {
     var counter = document.getElementById(counter_name+"_input");
     counter.value = Number(counter.value) + 1;
@@ -309,9 +319,9 @@ function approximation_of_all_but_first(points, n) {
     // introduce the interpolating part
     for(var pi = 0; pi < ips; ++pi) {
         for (var j = 0; j < N; ++j){
-            A[pi][j] = Math.pow(points[pi][0], j);
+            A[pi + ims][j] = Math.pow(points[pi][0], j);
         }
-        B[pi] = points[pi][1];
+        B[pi + ims] = points[pi][1];
     }
     
     P = solved_linear(A, B,n);
@@ -432,10 +442,18 @@ function undo_last() {
     <input type="text" id="degree_input" value="3" onchange="change_degree();">
     <button type="button" onclick="inc('degree')">+</button>
     <br>
+    
     Interpolation points for the combined method:
     <button type="button" onclick="dec('ips')">-</button>
     <input type="text" id="ips_input" value="1" onchange="change_ips();">
     <button type="button" onclick="inc('ips')">+</button>    
+    <br>
+    
+    In-matrix shift:
+    <button type="button" onclick="dec('ims')">-</button>
+    <input type="text" id="ims_input" value="0" onchange="change_ims();">
+    <button type="button" onclick="inc('ims')">+</button> 
+    
     </form>
     <canvas id="canvas" width=640 height=640></canvas>
     <script language="JavaScript">
