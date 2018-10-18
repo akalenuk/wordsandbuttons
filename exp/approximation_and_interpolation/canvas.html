@@ -296,7 +296,7 @@ function approximation_with_weighted_first(points, n) {
     };
 }
 
-function approximation_of_all_but_first(points, n) {
+function approximation_of_all_but_first_ips(points, n) {
     // approxiamtion
     const N = points.length;
     var A = [];
@@ -318,11 +318,53 @@ function approximation_of_all_but_first(points, n) {
     }
     // introduce the interpolating part
     for(var pi = 0; pi < ips; ++pi) {
-        for (var j = 0; j < N; ++j){
+        for (var j = 0; j < n; ++j){
             A[pi + ims][j] = Math.pow(points[pi][0], j);
         }
         B[pi + ims] = points[pi][1];
     }
+    
+    P = solved_linear(A, B,n);
+    
+       
+    
+    return function(x) {
+        Px = 0;
+        for(var i = 0; i < n; ++i) {
+            Px += P[i] * Math.pow(x, i);
+        }
+        return Px;
+    };    
+}
+
+function approximation_of_all_but_first(points, n) { // experiment
+    // approxiamtion
+    const N = points.length;
+    var A = [];
+    var B = [];
+
+    for (var i = 0; i < n-1; ++i){
+        var Ai = []
+        for (var j = 0; j < n-1; ++j){
+            Ai.push(0);
+            for(var k = 1; k < N; ++k){
+                Ai[j] += Math.pow(points[k][0], i + j);
+            }
+        }
+        Ai.push(0.0);
+        A.push(Ai);
+        B.push(0.0);
+        for(var k = ips; k < N; ++k){
+            B[i] += points[k][1] * Math.pow(points[k][0], i);
+        }
+    }
+    // introduce the interpolating part
+    var Ai = []
+    for (var j = 0; j < n; ++j){
+        Ai.push(Math.pow(points[0][0], j));
+    }
+    A.push(Ai);
+    B.push(points[0][1]);
     
     P = solved_linear(A, B,n);
     
