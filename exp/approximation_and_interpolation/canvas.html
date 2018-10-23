@@ -295,6 +295,25 @@ function approximation_with_weighted_ips(points, n, weight) {
     };
 }
 
+function evaluate_by_ips_squared_error(f) {
+    var error2 = 0.0;
+    for(var i = 0; i < ips; ++i) {
+        error2 += Math.pow(points[i][1] - f(points[i][0]), 2);
+    }
+    return error2;
+}
+
+function approximation_with_autoweighted_ips(points, n) {
+    var weight = 1.0;
+    var error2 = 1.0;
+    while (error2 >= 1.0) {
+        f = approximation_with_weighted_ips(points, n, weight);
+        error2 = evaluate_by_ips_squared_error(f);
+        weight *= 2;
+    }
+    return f;
+}
+
 // experimental
 function approximation_with_weighted_first(points, n) {
     const N = points.length;
@@ -514,7 +533,7 @@ function draw_canvas(){
    // draw approximation + interpolation
     if(document.getElementById("do_both").checked) {
         if(points.length > 0) {
-            var polynomial = approximation_with_weighted_ips(points, degree, 100.0);
+            var polynomial = approximation_with_autoweighted_ips(points, degree);
             
             context.beginPath();
             for(var j = 1; j < w; ++j){
