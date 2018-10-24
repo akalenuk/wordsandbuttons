@@ -106,13 +106,23 @@ var h = 640.0;
 var points = [];
 
 // above
-var degree = 3;
-function change_degree() {
-    degree = Number(document.getElementById("degree_input").value);
-    if(isNaN(degree)) {
-        degree = 1;
+var app_degree = 3;
+function change_app_degree() {
+    app_degree = Number(document.getElementById("app_degree_input").value);
+    if(isNaN(app_degree)) {
+        app_degree = 1;
     }
-    document.getElementById("degree_input").value = degree;
+    document.getElementById("app_degree_input").value = app_degree;
+    draw_all_canvases();
+}
+
+var both_degree = 3;
+function change_both_degree() {
+    both_degree = Number(document.getElementById("both_degree_input").value);
+    if(isNaN(both_degree)) {
+        both_degree = 1;
+    }
+    document.getElementById("both_degree_input").value = both_degree;
     draw_all_canvases();
 }
 
@@ -126,15 +136,6 @@ function change_ips() {
     draw_all_canvases();
 }
 
-var ims = 0;
-function change_ims() {
-    ims = Number(document.getElementById("ims_input").value);
-    if(isNaN(ims)) {
-        ims = 1;
-    }
-    document.getElementById("ims_input").value = ims;
-    draw_all_canvases();
-}
 
 function inc(counter_name) {
     var counter = document.getElementById(counter_name+"_input");
@@ -322,7 +323,6 @@ function draw_all_canvases() {
 
 function draw_canvas(canvas_name){
     var canvas = document.getElementById(canvas_name);
-    if(!canvas) alert(canvas_name);
     var context = canvas.getContext("2d");
     // background
     context.fillStyle="#eeeeee";
@@ -341,9 +341,9 @@ function draw_canvas(canvas_name){
     }
     
     // draw approximation
-    if(canvas == "approximation_canvas") {
+    if(canvas_name == "approximation_canvas") {
         if(points.length > 0) {
-            var polynomial = approximation_of(points, degree);
+            var polynomial = approximation_of(points, app_degree + 1);
             
             context.beginPath();
             for(var j = 1; j < w; ++j){
@@ -361,7 +361,7 @@ function draw_canvas(canvas_name){
     }
     
     // draw interpolation
-    if(canvas == "interpolation_canvas") {
+    if(canvas_name == "interpolation_canvas") {
         if(points.length > 0) {
             var polynomial = interpolation_of(points);
             
@@ -381,9 +381,9 @@ function draw_canvas(canvas_name){
     }
     
    // draw approximation + interpolation
-    if(canvas == "both_canvas") {
+    if(canvas_name == "both_canvas") {
         if(points.length > 0) {
-            var polynomial = approximation_with_autoweighted_ips(points, degree);
+            var polynomial = approximation_with_autoweighted_ips(points, both_degree + 1);
             
             context.beginPath();
             for(var j = 1; j < w; ++j){
@@ -429,9 +429,9 @@ Approximation
     </p>
     <form onsubmit="return false;">   
     Polynomial degree:
-    <button type="button" onclick="dec('degree')">-</button>
-    <input type="text" id="degree_input" value="3" onchange="change_degree();">
-    <button type="button" onclick="inc('degree')">+</button>
+    <button type="button" onclick="dec('app_degree')">-</button>
+    <input type="text" id="app_degree_input" value="3" onchange="change_app_degree();">
+    <button type="button" onclick="inc('app_degree')">+</button>
     <br>    
     </form>
     <canvas id="approximation_canvas" width=640 height=640></canvas>
@@ -460,9 +460,9 @@ Why not have both?
     </p>
     <form onsubmit="return false;">
     Polynomial degree:
-    <button type="button" onclick="dec('degree')">-</button>
-    <input type="text" id="degree_input" value="3" onchange="change_degree();">
-    <button type="button" onclick="inc('degree')">+</button>
+    <button type="button" onclick="dec('both_degree')">-</button>
+    <input type="text" id="both_degree_input" value="3" onchange="change_both_degree();">
+    <button type="button" onclick="inc('both_degree')">+</button>
     <br>
     Interpolation points for the combined method:
     <button type="button" onclick="dec('ips')">-</button>
