@@ -269,17 +269,125 @@ function approximation_with_autoweighted_ips(points, n) {
 }
 
 // the canvases
+function init_canvas(canvas){
+    var canvas = document.getElementById(canvas);
+    canvas.addEventListener('mousedown', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        points.push([e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]);
+    }, false);
+     
+    canvas.addEventListener('mousemove', function(e){
+        if(e.buttons == 1){
+            canvas_rect = canvas.getBoundingClientRect();
+            points[points.length-1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+            draw_all_canvases();
+        }
+    }, false);
+    
+    canvas.addEventListener('mouseup', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        points[points.length-1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+        draw_all_canvases();
+    }, false);
+    
+    draw_all_canvases();
+}
 
+function draw_all_canvases() {
+    draw_canvas("approximation_canvas");
+    draw_canvas("interpolation_canvas");
+    draw_canvas("both_canvas");
+}
+
+function draw_canvas(canvas){
+    var canvas = document.getElementById(canvas);
+    var context = canvas.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    
+    // points
+    for (var i = 0; i < points.length; ++i) {
+        if(i < ips) 
+            context.fillStyle="#880088";
+        else
+            context.fillStyle="#008800"; 
+        context.beginPath();
+        context.arc(points[i][0], points[i][1], 3, 0, 2*Math.PI);
+        context.fill();
+        context.closePath();
+    }
+    
+    // draw approximation
+    if(canvas == "approximation_canvas") {
+        if(points.length > 0) {
+            var polynomial = approximation_of(points, degree);
+            
+            context.beginPath();
+            for(var j = 1; j < w; ++j){
+                x1 = j - 1;
+                x2 = j;
+                y1 = polynomial(x1);
+                y2 = polynomial(x2);
+                context.moveTo(x1, y1);
+                context.lineTo(x2, y2);
+            }
+            context.strokeStyle="#661100";
+            context.stroke();
+            context.closePath();
+        }
+    }
+    
+    // draw interpolation
+    if(canvas == "interpolation_canvas") {
+        if(points.length > 0) {
+            var polynomial = interpolation_of(points);
+            
+            context.beginPath();
+            for(var j = 1; j < w; ++j){
+                x1 = j - 1;
+                x2 = j;
+                y1 = polynomial(x1);
+                y2 = polynomial(x2);
+                context.moveTo(x1, y1);
+                context.lineTo(x2, y2);
+            }
+            context.strokeStyle="#006611";
+            context.stroke();
+            context.closePath();
+        }
+    }
+    
+   // draw approximation + interpolation
+    if(canvas == "both_canvas") {
+        if(points.length > 0) {
+            var polynomial = approximation_with_autoweighted_ips(points, degree);
+            
+            context.beginPath();
+            for(var j = 1; j < w; ++j){
+                x1 = j - 1;
+                x2 = j;
+                y1 = polynomial(x1);
+                y2 = polynomial(x2);
+                context.moveTo(x1, y1);
+                context.lineTo(x2, y2);
+            }
+            context.strokeStyle="#001166";
+            context.stroke();
+            context.closePath();
+        }
+    }    
+}
 
 // under
 function reset_all() {
     points = [];
-    draw_canvas();
+    draw_all_canvases();
 }
 
 function undo_last() {
     points.splice(-1,1);
-    draw_canvas();
+    draw_all_canvases();
 }
     </script>
   </head>
@@ -306,7 +414,7 @@ Approximation
     </form>
     <canvas id="approxiamtion_canvas" width=640 height=640></canvas>
     <script language="JavaScript">
-    init_approxiamtion_canvas();
+    init_canvas("approxiamtion_canvas");
     </script>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
@@ -321,7 +429,7 @@ Interpolation
     </p>
     <canvas id="interpolation_canvas" width=640 height=640></canvas>
     <script language="JavaScript">
-    init_interpolation_canvas();
+    init_canvas("interpolation_canvas");
     </script>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
@@ -346,7 +454,7 @@ Why not have both?
     </form>
     <canvas id="both_canvas" width=640 height=640></canvas>
     <script language="JavaScript">
-    init_both_canvas();
+    init_canvas("both_canvas");
     </script>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
