@@ -33,48 +33,69 @@ p {
     text-align: left;
 }
 
-pre {
+.results {
+    font-family: sans-serif;
+    font-size: 14pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.formula {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: italic;
+    width: 505pt;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+form {
     margin: 0 0 0 0;
     padding-top: 12pt;
     padding-left: 12pt;
     padding-right: 12pt;
     padding-bottom: 12pt;
-    font-size: 12pt;
+    font-size: 16pt;
     text-align: left;
-    width: 300pt;
+    width: 505pt;
+    background-color: #eeee99;
 }
 
-.code_piece {
-    font-family: monospace;
-    padding-left: 4pt;
-    padding-right: 4pt;
-}
-
-
-table {
-    border-width: 0pt;
-}
-
-td {
-    vertical-align: top;
-    padding: 6pt 12pt 6pt 12pt;
+input[type="text"] {
+    width: 32pt;
+    height: 22pt;
     font-size: 16pt;
-    border: 1px solid black;
-    width: 600pt;
+    text-align: center;
 }
 
-button{
-    width: 248pt;
-    height: 42pt;
-    margin-left:4pt;
-    margin-right:4pt;
+button {
+    width: 32pt;
+    height: 26pt;
     font-size: 16pt;
-}
-
-u {
-    border-bottom: 1px dotted #000;
-    text-decoration: none;
-    cursor: pointer;
+    text-align: center;
 }
     </style>
     <script language="JavaScript">
@@ -92,7 +113,7 @@ function change_degree() {
         degree = 1;
     }
     document.getElementById("degree_input").value = degree;
-    draw_canvas();
+    draw_all_canvases();
 }
 
 var ips = 1;
@@ -102,7 +123,7 @@ function change_ips() {
         ips = 1;
     }
     document.getElementById("ips_input").value = ips;
-    draw_canvas();
+    draw_all_canvases();
 }
 
 var ims = 0;
@@ -112,7 +133,7 @@ function change_ims() {
         ims = 1;
     }
     document.getElementById("ims_input").value = ims;
-    draw_canvas();
+    draw_all_canvases();
 }
 
 function inc(counter_name) {
@@ -269,8 +290,8 @@ function approximation_with_autoweighted_ips(points, n) {
 }
 
 // the canvases
-function init_canvas(canvas){
-    var canvas = document.getElementById(canvas);
+function init_canvas(canvas_name){
+    var canvas = document.getElementById(canvas_name);
     canvas.addEventListener('mousedown', function(e){
         canvas_rect = canvas.getBoundingClientRect();
         points.push([e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]);
@@ -299,8 +320,9 @@ function draw_all_canvases() {
     draw_canvas("both_canvas");
 }
 
-function draw_canvas(canvas){
-    var canvas = document.getElementById(canvas);
+function draw_canvas(canvas_name){
+    var canvas = document.getElementById(canvas_name);
+    if(!canvas) alert(canvas_name);
     var context = canvas.getContext("2d");
     // background
     context.fillStyle="#eeeeee";
@@ -412,10 +434,7 @@ Approximation
     <button type="button" onclick="inc('degree')">+</button>
     <br>    
     </form>
-    <canvas id="approxiamtion_canvas" width=640 height=640></canvas>
-    <script language="JavaScript">
-    init_canvas("approxiamtion_canvas");
-    </script>
+    <canvas id="approximation_canvas" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
@@ -428,9 +447,6 @@ Interpolation
 ...    
     </p>
     <canvas id="interpolation_canvas" width=640 height=640></canvas>
-    <script language="JavaScript">
-    init_canvas("interpolation_canvas");
-    </script>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
@@ -447,21 +463,23 @@ Why not have both?
     <button type="button" onclick="dec('degree')">-</button>
     <input type="text" id="degree_input" value="3" onchange="change_degree();">
     <button type="button" onclick="inc('degree')">+</button>
+    <br>
     Interpolation points for the combined method:
     <button type="button" onclick="dec('ips')">-</button>
     <input type="text" id="ips_input" value="1" onchange="change_ips();">
     <button type="button" onclick="inc('ips')">+</button>      
     </form>
     <canvas id="both_canvas" width=640 height=640></canvas>
-    <script language="JavaScript">
-    init_canvas("both_canvas");
-    </script>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>  
     
-    
+    <script language="JavaScript">
+    init_canvas("approximation_canvas");
+    init_canvas("interpolation_canvas");
+    init_canvas("both_canvas");
+    </script>
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
     <tr>
