@@ -78,9 +78,208 @@ u {
 }
     </style>
     <script language="JavaScript">
-function show(n){
-    document.getElementById("shown_" + n).style.display = "none";
-    document.getElementById("hidden_" + n).style.display = "inline";
+// client
+var w = 640.0;
+var h = 640.0;
+
+var points = [];
+
+// above
+var degree = 3;
+function change_degree() {
+    degree = Number(document.getElementById("degree_input").value);
+    if(isNaN(degree)) {
+        degree = 1;
+    }
+    document.getElementById("degree_input").value = degree;
+    draw_canvas();
+}
+
+var ips = 1;
+function change_ips() {
+    ips = Number(document.getElementById("ips_input").value);
+    if(isNaN(ips)) {
+        ips = 1;
+    }
+    document.getElementById("ips_input").value = ips;
+    draw_canvas();
+}
+
+var ims = 0;
+function change_ims() {
+    ims = Number(document.getElementById("ims_input").value);
+    if(isNaN(ims)) {
+        ims = 1;
+    }
+    document.getElementById("ims_input").value = ims;
+    draw_canvas();
+}
+
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name+"_input");
+    counter.value = Number(counter.value) + 1;
+    eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name+"_input");
+    counter.value = Number(counter.value) - 1;
+    eval('change_' + counter_name + '()');
+}
+
+// alrorithms
+function sign_0_positive(x){ // Math.sign like with no 0 option
+    if(x >= 0)
+        return 1.0;
+    return -1.0;
+}
+
+function underflow_padded(x){
+    if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
+        return 1.e-5 * sign_0_positive(x);
+    return x;
+}
+
+function solved_linear(A, B, n){
+    var X = [];
+    for (var i = 0; i < n; ++i)
+        X.push(0.0);
+
+    // triangulize
+    for (var i = 0; i < n-1; ++i)
+        for (var j = 0; j < i+1; ++j) {
+            r = A[i+1][j] / underflow_padded(A[j][j]);
+            A[i+1][j] = 0.;
+            for (var b_j = j+1; b_j < n; ++b_j){
+                A[i+1][b_j] -= A[j][b_j]*r;
+            }
+            B[i+1] -= B[j]*r;
+        }
+
+    // calculate xs
+    X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
+    for (var i = n-2; i >= 0; --i){
+        var s = 0.0;
+        for (var j = i; j < n; ++j){
+            s = s + A[i][j]*X[j];
+        }
+        X[i] = (B[i] - s) / underflow_padded(A[i][i]);
+    }
+    return X;
+}
+
+function approximation_of(points, n) {
+    const N = points.length;
+    var A = [];
+    var B = [];
+
+    for (var i = 0; i < n; ++i){
+        var Ai = []
+        for (var j = 0; j < n; ++j){
+            Ai.push(0);
+            for(var k = 0; k < N; ++k){
+                Ai[j] += Math.pow(points[k][0], i + j);
+            }
+        }
+        A.push(Ai);
+        B.push(0);
+        for(var k = 0; k < N; ++k){
+            B[i] += points[k][1] * Math.pow(points[k][0], i);
+        }
+    }
+    P = solved_linear(A, B,n);
+    return function(x) {
+        Px = 0;
+        for(var i = 0; i < n; ++i) {
+            Px += P[i] * Math.pow(x, i);
+        }
+        return Px;
+    };
+}
+
+function interpolation_of(points) {
+    const N = points.length;
+    var A = [];
+    var B = [];
+
+    for (var i = 0; i < N; ++i){
+        var Ai = []
+        for (var j = 0; j < N; ++j){
+            Ai.push(Math.pow(points[i][0], j));
+        }
+        A.push(Ai);
+        B.push(points[i][1]);
+    }
+    P = solved_linear(A, B, N);
+    return function(x) {
+        Px = 0;
+        for(var i = 0; i < N; ++i) {
+            Px += P[i] * Math.pow(x, i);
+        }
+        return Px;
+    };
+}
+
+function approximation_with_weighted_ips(points, n, weight) {
+    const N = points.length;
+    var A = [];
+    var B = [];
+
+    for (var i = 0; i < n; ++i){
+        var Ai = []
+        for (var j = 0; j < n; ++j){
+            Ai.push(0);
+            for(var k = 0; k < N; ++k){
+                Ai[j] += Math.pow(points[k][0], i + j) * ((k < ips) ? weight : 1.0);
+            }
+        }
+        A.push(Ai);
+        B.push(0);
+        for(var k = 0; k < N; ++k){
+            B[i] += points[k][1] * Math.pow(points[k][0], i) * ((k < ips) ? weight : 1.0);
+        }
+    }
+    P = solved_linear(A, B,n);
+    return function(x) {
+        Px = 0;
+        for(var i = 0; i < n; ++i) {
+            Px += P[i] * Math.pow(x, i);
+        }
+        return Px;
+    };
+}
+
+function evaluate_by_ips_squared_error(f) {
+    var error2 = 0.0;
+    for(var i = 0; i < ips; ++i) {
+        error2 += Math.pow(points[i][1] - f(points[i][0]), 2);
+    }
+    return error2;
+}
+
+function approximation_with_autoweighted_ips(points, n) {
+    var weight = 1.0;
+    var error2 = 1.0;
+    while (error2 >= 1.0) {
+        f = approximation_with_weighted_ips(points, n, weight);
+        error2 = evaluate_by_ips_squared_error(f);
+        weight *= 2;
+    }
+    return f;
+}
+
+// the canvases
+
+
+// under
+function reset_all() {
+    points = [];
+    draw_canvas();
+}
+
+function undo_last() {
+    points.splice(-1,1);
+    draw_canvas();
 }
     </script>
   </head>
