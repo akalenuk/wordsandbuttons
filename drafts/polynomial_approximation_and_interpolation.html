@@ -50,6 +50,14 @@ p {
     padding-bottom: 6pt;
 }
 
+.brackets {
+    font-size:48pt;
+    padding-bottom:8pt;
+    font-family: sans-serif;
+    font-weight: 100;
+    font-style: normal;
+}
+
 table.footer {
     padding: 64pt 0pt 32pt 0pt;
     background-color: transparent;
@@ -323,11 +331,14 @@ function draw_all_canvases() {
 
 function write_approximation_formula() {
     var approximation_formula = document.getElementById("approximation_formula");
-    formula_html = "<table>";
+    formula_html = "<table><tr>";   // A x = B
+    formula_html += "<td class=\"brackets\">[</td>";
+    formula_html += "<td>"; 
+    formula_html += "<table>"; // A
     for(var i = 0; i < app_degree + 1; ++i) {
         formula_html += "<tr>";
         for(var j = 0; j < app_degree + 1; ++j) {
-            formula_html += "<td>";
+            formula_html += "<td style=\"padding:4pt 4pt 4pt 4pt;\">";
             if(i + j == 0) {
                 formula_html += "n";
             } else {
@@ -340,7 +351,7 @@ function write_approximation_formula() {
                 else
                     formula_html += "<table><tr><td rowspan=2>x</td><td style=\"font-size: 10pt;\">" + String(i + j) + "</td></tr><tr><td style=\"font-size: 10pt;\">k</td></tr></table>"
                 formula_html += "</td>";
-                formula_html += "</tr><tr><td style=\"font-size:20pt;\" align=\"center\">";
+                formula_html += "</tr><tr><td style=\"font-size:20pt;\">";
                 formula_html += "&Sigma;";
                 formula_html += "</td></tr><tr><td align=\"center\" style=\"font-size: 10pt;\">";
                 formula_html += "k=1";
@@ -351,6 +362,10 @@ function write_approximation_formula() {
         }
         formula_html += "</tr>";
     }
+    formula_html += "</table>"; // A    
+    formula_html += "</td>";
+    formula_html += "<td class=\"brackets\">]</td>";
+    formula_html += "</tr></table>";  // A x = B
     approximation_formula.innerHTML = formula_html;
 }
 
