@@ -321,6 +321,39 @@ function draw_all_canvases() {
     draw_canvas("both_canvas");
 }
 
+function write_approximation_formula() {
+    var approximation_formula = document.getElementById("approximation_formula");
+    formula_html = "<table>";
+    for(var i = 0; i < app_degree + 1; ++i) {
+        formula_html += "<tr>";
+        for(var j = 0; j < app_degree + 1; ++j) {
+            formula_html += "<td>";
+            if(i + j == 0) {
+                formula_html += "n";
+            } else {
+                formula_html += "<table style=\"font-family: sans-serif; font-size: 16pt;\">";
+                formula_html += "<tr><td align=\"center\" style=\"font-size: 10pt;\">";
+                formula_html += "n";
+                formula_html += "</td><td rowspan=3>";
+                if(i + j == 1)
+                    formula_html += "<table><tr><td rowspan=2>x</td><td style=\"font-size: 10pt;\">&nbsp;</td></tr><tr><td style=\"font-size: 10pt;\">k</td></tr></table>"
+                else
+                    formula_html += "<table><tr><td rowspan=2>x</td><td style=\"font-size: 10pt;\">" + String(i + j) + "</td></tr><tr><td style=\"font-size: 10pt;\">k</td></tr></table>"
+                formula_html += "</td>";
+                formula_html += "</tr><tr><td style=\"font-size:20pt;\" align=\"center\">";
+                formula_html += "&Sigma;";
+                formula_html += "</td></tr><tr><td align=\"center\" style=\"font-size: 10pt;\">";
+                formula_html += "k=1";
+                formula_html += "</td></tr>";
+                formula_html += "</table>";
+            }
+            formula_html += "</td>";            
+        }
+        formula_html += "</tr>";
+    }
+    approximation_formula.innerHTML = formula_html;
+}
+
 function draw_canvas(canvas_name){
     var canvas = document.getElementById(canvas_name);
     var context = canvas.getContext("2d");
@@ -358,6 +391,7 @@ function draw_canvas(canvas_name){
             context.stroke();
             context.closePath();
         }
+        write_approximation_formula();
     }
     
     // draw interpolation
@@ -440,24 +474,7 @@ Approximation
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
     <p id="approximation_formula" class="formula">
-    <table>
-    <tr>
-    <tr>
-        <table style="font-family: sans-serif; font-size: 16pt;">
-        <tr><td align="center">
-            <sub>n</sub>
-        </td><td rowspan=3>
-            x<sup>i</sup>
-        </td>
-        </tr><tr><td style="font-size:20pt;" align="center">
-            &Sigma;
-        </td></tr><tr><td align="center">
-            <sup>i=1</sup>
-        </td></tr>
-        </table>
-    </tr>
-    </tr>
-    </table>
+    
     </p>
     
     
@@ -475,13 +492,13 @@ Interpolation
     <p id="interpolation_formula" class="formula">
     <table>
     <tr>
-    <tr>
+    <td>
         <table style="font-family: sans-serif; font-size: 16pt;">
         <tr><td>
             x<sup>i</sup>
         </td></tr>
         </table>
-    </tr>
+    </td>
     </tr>
     </table>
     </p>
