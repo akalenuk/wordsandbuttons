@@ -419,6 +419,64 @@ function write_approximation_formula() {
     approximation_formula.innerHTML = formula_html;
 }
 
+function write_interpolation_formula() {
+    var interpolation_formula = document.getElementById("interpolation_formula");
+    formula_html = "<table><tr>";   // A x = B
+    formula_html += "<td class=\"brackets\">[</td>";
+    formula_html += "<td>"; 
+    formula_html += "<table>"; // A
+    for(var i = 0; i < points.length; ++i) {
+        formula_html += "<tr>";
+        for(var j = 0; j < points.length; ++j) {
+            formula_html += "<td style=\"padding:2pt 6pt 2pt 6pt;\">";
+            if(j == 0)
+                formula_html += "<table><tr><td rowspan=2>1</td><td style=\"font-size: 10pt;\">&nbsp;</td></tr><tr><td style=\"font-size: 10pt;\">&nbsp;</td></tr></table>";
+            else if(j == 1)
+                formula_html += "<table><tr><td rowspan=2>x</td><td style=\"font-size: 10pt;\">&nbsp;</td></tr><tr><td style=\"font-size: 10pt;\">" + String(i) + "</td></tr></table>";
+            else
+                formula_html += "<table><tr><td rowspan=2>x</td><td style=\"font-size: 10pt;\">" + String(j) + "</td></tr><tr><td style=\"font-size: 10pt;\">" + String(i) + "</td></tr></table>";
+            formula_html += "</td>";            
+        }
+        formula_html += "</tr>";
+    }
+    formula_html += "</table>"; // A    
+    formula_html += "</td>";
+    formula_html += "<td class=\"brackets\">]</td>";
+    
+    formula_html += "<td class=\"brackets\">[</td>";
+    formula_html += "<td>"; 
+    formula_html += "<table>"; // x
+    for(var i = 0; i < points.length; ++i) {
+        formula_html += "<tr>";
+        formula_html += "<td style=\"padding:2pt 6pt 2pt 6pt;\">";
+        formula_html += "<table><tr><td rowspan=2>a</td><td style=\"font-size: 10pt;\">&nbsp;</td></tr><tr><td style=\"font-size: 10pt;\">" + String(i) + "</td></tr></table>";
+        formula_html += "</td>";            
+        formula_html += "</tr>";
+    }
+    formula_html += "</table>"; // x    
+    formula_html += "</td>";
+    formula_html += "<td class=\"brackets\">]</td>";
+    
+    formula_html += "<td class=\"brackets\">=</td>";
+    
+    formula_html += "<td class=\"brackets\">[</td>";
+    formula_html += "<td>"; 
+    formula_html += "<table>"; // B
+    for(var i = 0; i < points.length; ++i) {
+        formula_html += "<tr>";
+        formula_html += "<td style=\"padding:2pt 6pt 2pt 6pt;\">";
+        formula_html += "<table><tr><td rowspan=2>y</td><td style=\"font-size: 10pt;\">&nbsp;</td></tr><tr><td style=\"font-size: 10pt;\">" + String(i) + "</td></tr></table>";
+        formula_html += "</td>";            
+        formula_html += "</tr>";
+    }
+    formula_html += "</table>"; // B    
+    formula_html += "</td>";
+    formula_html += "<td class=\"brackets\">]</td>";
+    
+    formula_html += "</tr></table>";  // A x = B
+    interpolation_formula.innerHTML = formula_html;
+}
+
 function draw_canvas(canvas_name){
     var canvas = document.getElementById(canvas_name);
     var context = canvas.getContext("2d");
@@ -477,6 +535,7 @@ function draw_canvas(canvas_name){
             context.stroke();
             context.closePath();
         }
+        write_interpolation_formula();
     }
     
     // draw approximation + interpolation
@@ -555,17 +614,6 @@ Interpolation
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>    
     <p id="interpolation_formula" class="formula">
-    <table>
-    <tr>
-    <td>
-        <table style="font-family: sans-serif; font-size: 16pt;">
-        <tr><td>
-            x<sup>i</sup>
-        </td></tr>
-        </table>
-    </td>
-    </tr>
-    </table>
     </p>
     
     <h2>
