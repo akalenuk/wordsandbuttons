@@ -558,6 +558,7 @@ function write_interpolation_formula() {
 function draw_canvas(canvas_name){
     var canvas = document.getElementById(canvas_name);
     var context = canvas.getContext("2d");
+    context.font = "16px sans-serif";
     // background
     context.fillStyle="#eeeeee";
     context.fillRect(0, 0, w, h);
@@ -602,6 +603,13 @@ function draw_canvas(canvas_name){
         }
         write_approximation_formula();
         check_approximation_facts();
+        context.fillStyle="#222222";
+        if(is_shown("fact_1"))
+            context.fillText("Fact 1. Interpolation is a special case of approximation.", 32, 564);
+        if(is_shown("fact_2"))
+            context.fillText("Fact 2. Approximation works even for constants.", 32, 588);
+        if(is_shown("fact_3"))
+            context.fillText("Fact 3. You can do weighted approximation by multiplying points.", 32, 612);
     }
     
     // draw interpolation
@@ -682,6 +690,10 @@ function show(n){
     document.getElementById("hidden_" + n).style.display = "inline";
 }
 
+function is_shown(n){
+    return document.getElementById("hidden_" + n).style.display == "inline";
+}
+
 function show_approximation_facts() {
     document.getElementById("approximation_facts_button").style.display = "none";
     document.getElementById("approximation_facts_note").style.display = "none";
@@ -703,16 +715,8 @@ function check_approximation_facts() {
             && Math.abs(points_for_approximation[i][1] - points_for_approximation[j][1]) < 2.0)
                 show("fact_3");
     }
-    if(document.getElementById("hidden_fact_1").style.display == "inline"
-    && document.getElementById("hidden_fact_2").style.display == "inline"
-    && document.getElementById("hidden_fact_3").style.display == "inline")
+    if(is_shown("fact_1") && is_shown("fact_2") && is_shown("fact_3"))
         show_approximation_facts();
-}
-
-function show_interpolation_facts() {
-    show("fact_4");
-    show("fact_5");
-    show("fact_6");
 }
 </script>
   </head>
