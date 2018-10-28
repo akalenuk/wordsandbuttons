@@ -117,8 +117,8 @@ var points_for_both = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315],
 var app_degree = 2;
 function change_app_degree() {
     app_degree = Number(document.getElementById("app_degree_input").value);
-    if(isNaN(app_degree)) {
-        app_degree = 1;
+    if(isNaN(app_degree) || app_degree < 0) {
+        app_degree = 0;
     }
     document.getElementById("app_degree_input").value = app_degree;
     draw_canvas("approximation_canvas");
@@ -127,8 +127,8 @@ function change_app_degree() {
 var both_degree = 3;
 function change_both_degree() {
     both_degree = Number(document.getElementById("both_degree_input").value);
-    if(isNaN(both_degree)) {
-        both_degree = 1;
+    if(isNaN(both_degree) || both_degree < 0) {
+        both_degree = 0;
     }
     document.getElementById("both_degree_input").value = both_degree;
     draw_canvas("both_canvas");
@@ -601,6 +601,7 @@ function draw_canvas(canvas_name){
             context.closePath();
         }
         write_approximation_formula();
+        check_approximation_facts();
     }
     
     // draw interpolation
@@ -689,6 +690,25 @@ function show_approximation_facts() {
     show("fact_3");
 }
 
+function check_approximation_facts() {
+    if(points_for_approximation.length == app_degree + 1)
+        show("fact_1");
+        
+    if(app_degree == 0)
+        show("fact_2");
+        
+    for(var i = 0; i < points_for_approximation.length; ++i) {
+        for(var j = 0; j < i; ++j)
+            if(Math.abs(points_for_approximation[i][0] - points_for_approximation[j][0]) < 2.0
+            && Math.abs(points_for_approximation[i][1] - points_for_approximation[j][1]) < 2.0)
+                show("fact_3");
+    }
+    if(document.getElementById("hidden_fact_1").style.display == "inline"
+    && document.getElementById("hidden_fact_2").style.display == "inline"
+    && document.getElementById("hidden_fact_3").style.display == "inline")
+        show_approximation_facts();
+}
+
 function show_interpolation_facts() {
     show("fact_4");
     show("fact_5");
@@ -735,13 +755,13 @@ You might have heard term <i>linear regression</i>. It is a special case of poly
     </p>
     <div id="approximation_facts_note">
     <p>
-There are three more facts I want to share, but I think it would be more fun if you reveal them yourself with a living plot from above. Every time you have something interesting, a new fact will appear below. If you don't feel like playing games, simply press the “show everything” button below.
+There are three more facts I want to share, but I think it would be more fun if you reveal them yourself with a living plot from above. Every time you find something interesting, a new fact will appear below. If you don't feel like playing games, simply press the “show everything” button below.
     </p>
     </div>
     <button id="approximation_facts_button" type="button" style="width: 216pt;" onclick="show_approximation_facts()">Show everything</button>
     <div id="hidden_fact_1" style="display: none;">
     <p>
-<b>Fact 1.</b> When number of points is the degree of polynomial plus one, the approximation fits all the points perfectly. Another words, approximation becomes interpolation.
+<b>Fact 1.</b> When the number of points equals the degree of polynomial plus one, the approximation fits all the points perfectly. Another words, approximation becomes interpolation.
     </p>
     </div>
     <div id="hidden_fact_2" style="display: none;">
