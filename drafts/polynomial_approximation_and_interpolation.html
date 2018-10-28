@@ -672,7 +672,31 @@ One widely known fact, you can't have your polynomial degree less than the numbe
 Why not have both?
     </h2>
     <p>
-...    
+This is a bonus part. One of the frequently asked questions is “can we have a polynomial that will run through some points and will approximate the rest of the data set as well?”
+    </p>
+    <p>
+The answer is: yes but. We don't have a nice simple formula to do that so we have to either go numeric on that, or use a hack.
+    </p>
+    <p>
+Numeric approach is not so hard. Remember that interpolating polynomial degree may be gigher than a number of points in set? We can exploit that. We can compose a Vandermonde matrix out of all interpolating points and a number of fake ones. Then we will use the fake ones as variables for the numeric least square optimizer.
+    </p>
+    <p>
+When the optimizer finishes, we will have our polynomial both interpolating and approximating.
+    </p>
+    <p>
+The downside of this approach is that the optimizer may finish anytime between 10 nanoseconds and 6 billion years. This depends on the number of variables and the polynomial degree.
+    </p>
+    <p>
+The other approach is a hack. The thing is, in practice, we never get out polynomial exactly interpolating due to the computational error. Now if we're ok with this, why don't we argee on some tolerable error and use the orthogonal principle matrix multiplying our interpolating points more and more, untill the approximating polynomial fits them within the error?
+    </p>
+    <p>
+This works because what the approximation does, it minimizes the sum or squared residuals. If you put a point twice, its residual will be twice as important to the optimizer as anyone's else. If you add it 100 times, it will attract the polynomial 100 times stronger than any other point. 
+    </p>
+    <p>
+The brutal simplicity of this approach is its strength. You only need to optimize until you're ok with the error, and you only have one variable to alter. 
+    </p>
+    <p>
+You can try it out with an interactive plot, too:
     </p>
     <form onsubmit="return false;">
     Polynomial degree:
@@ -680,7 +704,7 @@ Why not have both?
     <input type="text" id="both_degree_input" value="3" onchange="change_both_degree();">
     <button type="button" onclick="inc('both_degree')">+</button>
     <br>
-    Interpolation points for the combined method:
+    Interpolation points for the hack:
     <button type="button" onclick="dec('ips')">-</button>
     <input type="text" id="ips_input" value="1" onchange="change_ips();">
     <button type="button" onclick="inc('ips')">+</button>      
