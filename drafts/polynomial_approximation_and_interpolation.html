@@ -329,6 +329,13 @@ function draw_all_canvases() {
 
 function write_approximation_formula() {
     var approximation_formula = document.getElementById("approximation_formula");
+    
+    if(app_degree < 0) {
+        approximation_formula.innerHTML = "This method only works for polynomials.";
+        return;
+    }
+    
+    
     formula_html = "<table><tr>";   // A x = B
     formula_html += "<td class=\"brackets\">[</td>";
     formula_html += "<td>"; 
@@ -431,6 +438,13 @@ function write_approximation_formula() {
 
 function write_interpolation_formula() {
     var interpolation_formula = document.getElementById("interpolation_formula");
+    
+    if(points.length == 0) {
+        interpolation_formula.innerHTML = "No data &ndash; no interpoaltion.";
+        return;
+    }
+        
+    
     formula_html = "<table><tr>";   // A x = B
     formula_html += "<td class=\"brackets\">[</td>";
     formula_html += "<td>"; 
@@ -518,7 +532,7 @@ function draw_canvas(canvas_name){
     
     // draw approximation
     if(canvas_name == "approximation_canvas") {
-        if(points.length > 0) {
+        if(points.length > 0 && app_degree >= 0) {
             var polynomial = approximation_of(points, app_degree + 1);
             
             context.beginPath();
@@ -553,9 +567,9 @@ function draw_canvas(canvas_name){
             }
             context.strokeStyle="#006611";
             context.stroke();
-            context.closePath();
-            write_interpolation_formula();
+            context.closePath();    
         }        
+        write_interpolation_formula();
     }
     
     // draw approximation + interpolation
@@ -636,7 +650,10 @@ You might have heard term <i>linear regresion</i>. It is a special case of polyn
 Interpolation
     </h2>
     <p>
-...    
+The word <i>interpolation</i> also comes from Latin and it roughly translates as “smoothing things in between”. When you have a set of points, you use interpolation to find values in between these points.
+    </p>
+    <p>
+With polynomial interpolations, it is about finding a polynomial that runs exactly through the points we want. Here, try it out. You can add and remove points, but you can't select a polynomial degree now since you can't have this degree less than the number of your points minus one.
     </p>
     <canvas id="interpolation_canvas" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
@@ -645,7 +662,12 @@ Interpolation
     </div>
     <div id="interpolation_formula" class="formula">
     </div>
-    
+    <p>
+The matrix is called Vandermonde matrix and it comes from the simple fact that if a polynomial runs through a point then <i>P(x<sub>i</sub>) = y<sub>i</sub></i>. Just write it out for every point, put it into the matrix form and here you go.
+    </p>
+    <p>
+One widely known fact, you can't have your polynomial degree less than the number of points minuns one. Another less known fact is that you can have it higher. It's very easy to see. Just imagine adding a new point to the data set, the one you don't need. The polynomial is still interpolating regarding the initial set, but you now have more control over it.
+    </p>
     <h2>
 Why not have both?
     </h2>
