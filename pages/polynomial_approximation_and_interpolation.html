@@ -217,9 +217,9 @@ function approximation_of(points, n) {
             B[i] += points[k][1] * Math.pow(points[k][0], i);
         }
     }
-    P = solved_linear(A, B,n);
+    var P = solved_linear(A, B,n);
     return function(x) {
-        Px = 0;
+        var Px = 0;
         for(var i = 0; i < n; ++i) {
             Px += P[i] * Math.pow(x, i);
         }
@@ -240,9 +240,9 @@ function interpolation_of(points) {
         A.push(Ai);
         B.push(points[i][1]);
     }
-    P = solved_linear(A, B, N);
+    var P = solved_linear(A, B, N);
     return function(x) {
-        Px = 0;
+        var Px = 0;
         for(var i = 0; i < N; ++i) {
             Px += P[i] * Math.pow(x, i);
         }
@@ -250,7 +250,7 @@ function interpolation_of(points) {
     };
 }
 
-function approximation_with_weighted_ips(points, n, weight) {
+function approximation_with_weighted_interpolating_n(points, n, interpolating_n, weight) {
     const N = points.length;
     var A = [];
     var B = [];
@@ -260,18 +260,18 @@ function approximation_with_weighted_ips(points, n, weight) {
         for (var j = 0; j < n; ++j){
             Ai.push(0);
             for(var k = 0; k < N; ++k){
-                Ai[j] += Math.pow(points[k][0], i + j) * ((k < ips) ? weight : 1.0);
+                Ai[j] += Math.pow(points[k][0], i + j) * ((k < interpolating_n) ? weight : 1.0);
             }
         }
         A.push(Ai);
         B.push(0);
         for(var k = 0; k < N; ++k){
-            B[i] += points[k][1] * Math.pow(points[k][0], i) * ((k < ips) ? weight : 1.0);
+            B[i] += points[k][1] * Math.pow(points[k][0], i) * ((k < interpolating_n) ? weight : 1.0);
         }
     }
-    P = solved_linear(A, B,n);
+    var P = solved_linear(A, B,n);
     return function(x) {
-        Px = 0;
+        var Px = 0;
         for(var i = 0; i < n; ++i) {
             Px += P[i] * Math.pow(x, i);
         }
@@ -279,20 +279,20 @@ function approximation_with_weighted_ips(points, n, weight) {
     };
 }
 
-function evaluate_by_ips_squared_error(f, points) {
+function evaluate_by_interpolating_n_squared_error(f, points, interpolating_n) {
     var error2 = 0.0;
-    for(var i = 0; i < ips; ++i) {
+    for(var i = 0; i < interpolating_n; ++i) {
         error2 += Math.pow(points[i][1] - f(points[i][0]), 2);
     }
     return error2;
 }
 
-function approximation_with_autoweighted_ips(points, n) {
+function approximation_with_autoweighted_interpolating_n(points, n, interpolating_n) {
     var weight = 1.0;
     var error2 = 1.0;
     while (error2 >= 1.0) {
-        f = approximation_with_weighted_ips(points, n, weight);
-        error2 = evaluate_by_ips_squared_error(f, points);
+        var f = approximation_with_weighted_interpolating_n(points, n, interpolating_n, weight);
+        error2 = evaluate_by_interpolating_n_squared_error(f, points, interpolating_n);
         weight *= 2;
     }
     return f;
@@ -636,7 +636,7 @@ function draw_canvas(canvas_name){
     // draw approximation + interpolation
     if(canvas_name == "both_canvas") {
         if(points.length > 0) {
-            var polynomial = approximation_with_autoweighted_ips(points, both_degree + 1);
+            var polynomial = approximation_with_autoweighted_interpolating_n(points, both_degree + 1, ips);
             
             context.beginPath();
             for(var j = 1; j < w; ++j){
