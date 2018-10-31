@@ -13,3 +13,4 @@ clean:
 	rm tco
 	rm no_tco
 	rm no_tco_instances_trick
+	rm cachegrind.*
