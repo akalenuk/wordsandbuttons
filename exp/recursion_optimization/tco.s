@@ -41,7 +41,16 @@ _Z12sum_of_firsti:
 main:
 .LFB1:
 	.cfi_startproc
-	movl	$21, %eax
+	xorl	%edx, %edx
+	movl	$65536, %eax
+	.p2align 4,,10
+	.p2align 3
+.L8:
+	addl	%eax, %edx
+	subl	$1, %eax
+	cmpl	$1, %eax
+	jne	.L8
+	leal	1(%rdx), %eax
 	ret
 	.cfi_endproc
 .LFE1:

@@ -9,6 +9,30 @@
 _Z12sum_of_firsti:
 .LFB0:
 	.cfi_startproc
+	testl	%edi, %edi
+	jne	.L4
+	xorl	%eax, %eax
+	ret
+	.p2align 4,,10
+	.p2align 3
+.L4:
+	jmp	_Z12sum_of_firsti.part.0
+	.cfi_endproc
+.LFE0:
+	.size	_Z12sum_of_firsti, .-_Z12sum_of_firsti
+	.section	.text.unlikely
+.LCOLDE0:
+	.text
+.LHOTE0:
+	.section	.text.unlikely
+.LCOLDB1:
+	.text
+.LHOTB1:
+	.p2align 4,,15
+	.type	_Z12sum_of_firsti.part.0, @function
+_Z12sum_of_firsti.part.0:
+.LFB2:
+	.cfi_startproc
 	pushq	%rbx
 	.cfi_def_cfa_offset 16
 	.cfi_offset 3, -16
@@ -23,16 +47,16 @@ _Z12sum_of_firsti:
 	.cfi_def_cfa_offset 8
 	ret
 	.cfi_endproc
-.LFE0:
-	.size	_Z12sum_of_firsti, .-_Z12sum_of_firsti
+.LFE2:
+	.size	_Z12sum_of_firsti.part.0, .-_Z12sum_of_firsti.part.0
 	.section	.text.unlikely
-.LCOLDE0:
+.LCOLDE1:
 	.text
-.LHOTE0:
+.LHOTE1:
 	.section	.text.unlikely
-.LCOLDB1:
+.LCOLDB2:
 	.section	.text.startup,"ax",@progbits
-.LHOTB1:
+.LHOTB2:
 	.p2align 4,,15
 	.globl	main
 	.type	main, @function
@@ -41,18 +65,18 @@ main:
 	.cfi_startproc
 	subq	$8, %rsp
 	.cfi_def_cfa_offset 16
-	movl	$4, %edi
-	call	_Z12sum_of_firsti
+	movl	$65535, %edi
+	call	_Z12sum_of_firsti.part.0
 	addq	$8, %rsp
 	.cfi_def_cfa_offset 8
-	addl	$11, %eax
+	addl	$65536, %eax
 	ret
 	.cfi_endproc
 .LFE1:
 	.size	main, .-main
 	.section	.text.unlikely
-.LCOLDE1:
+.LCOLDE2:
 	.section	.text.startup
-.LHOTE1:
+.LHOTE2:
 	.ident	"GCC: (Ubuntu 5.4.0-6ubuntu1~16.04.10) 5.4.0 20160609"
 	.section	.note.GNU-stack,"",@progbits
