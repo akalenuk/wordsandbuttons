@@ -5,6 +5,10 @@ all:
 	g++ -std=c++14 tco.cpp -O2 -o tco
 	g++ -std=c++14 no_tco.cpp -O2 -o no_tco
 	g++ -std=c++14 no_tco_instances_trick.cpp -O2 -o no_tco_instances_trick
+measurements:
+	valgrind --tool=cachegrind ./tco
+	valgrind --tool=cachegrind ./no_tco
+	valgrind --tool=cachegrind ./no_tco_instances_trick
 clean:
 	rm tco
 	rm no_tco
