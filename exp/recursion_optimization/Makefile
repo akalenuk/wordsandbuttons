@@ -9,6 +9,9 @@ measurements:
 	valgrind --tool=cachegrind ./tco
 	valgrind --tool=cachegrind ./no_tco
 	valgrind --tool=cachegrind ./no_tco_instances_trick
+	perf stat ./tco
+	perf stat ./no_tco
+	perf stat ./no_tco_instances_trick
 clean:
 	rm tco
 	rm no_tco
