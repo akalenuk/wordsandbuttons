@@ -1,4 +1,4 @@
-	.file	"no_tco_instances_trick.cpp"
+	.file	"no_tco_instances_trick_4.cpp"
 	.section	.text.unlikely,"ax",@progbits
 .LCOLDB0:
 	.text
