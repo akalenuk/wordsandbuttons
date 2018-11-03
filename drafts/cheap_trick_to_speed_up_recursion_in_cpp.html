@@ -274,9 +274,107 @@ sum_of_first(int):
 When the self-call is not a tail call, and can't even be made a tail call, the compiler skips the TCO optimization. And yes, you get all the overheads: all the amount of needless reads and writes.
     </p>
     <h2>
+The idea
     </h2>
+    <p>
+What if instead of a self-call, we would instantiate a copy of the original function and call that instead? The copy then will call the original. In theory, this allows a compiler to inline the copy, so instead of all 65536 nested calls we will only have 32768. Let's try it out.
+    </p>
+    <table><tr>
+    <td>
+    <pre><span id="slides_no_tco_trick_1" style="display:block"><div style="color:#994466"><b>1. C++ source code</b></div>
+template &lt;int instance_no, int divisor&gt;
+int sum_of_first(int n) {
+    if(n == 0)
+        return 0;
+    auto temp_sum = sum_of_first&lt;(instance_no + 1) % divisor, divisor&gt;(n-1);
+    return n == 1 ? 1 : temp_sum + n;
+}
+
+int main() {
+    return sum_of_first&lt;0, 2&gt;(65536);
+}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+</span><span id="slides_no_tco_trick_2" style="display:none"><div style="color:#992244"><b>2. Disassembly</b></div>
+int sum_of_first<0, 2>(int) [clone .part.1]:
+        push    rbp
+        push    rbx
+        mov     ebx, edi
+        mov     ebp, edi
+        sub     rsp, 8
+        sub     ebx, 1
+        jne     .L16
+.L2:    add     ebx, ebp
+        mov     eax, 1
+        cmp     ebp, 1
+        cmovne  eax, ebx
+        add     rsp, 8
+        pop     rbx
+        pop     rbp
+        ret
+.L16:   mov     eax, edi
+        sub     eax, 2
+        je      .L3
+        mov     edi, eax
+        call    int sum_of_first<0, 2>(int) [clone .part.1]
+.L3:    add     eax, ebx
+        cmp     ebx, 1
+        cmovne  ebx, eax
+        jmp     .L2</span><span id="slides_no_tco_trick_3" style="display:none"><div style="color:#770022"><b>3. Valgrind measurements</b></div>
+==10791== Command: ./no_tco_instances_trick_2
+==10791== 
+--10791-- warning: L3 cache found, using its data for the LL simulation.
+==10791== 
+==10791== I   refs:      877,592
+==10791== I1  misses:        756
+==10791== LLi misses:        747
+==10791== I1  miss rate:    0.09%
+==10791== LLi miss rate:    0.09%
+==10791== 
+==10791== D   refs:      230,985  (122,058 rd   + 108,927 wr)
+==10791== D1  misses:     33,992  ( 17,130 rd   +  16,862 wr)
+==10791== LLd misses:     17,838  (  1,054 rd   +  16,784 wr)
+==10791== D1  miss rate:    14.7% (   14.0%     +    15.5%  )
+==10791== LLd miss rate:     7.7% (    0.9%     +    15.4%  )
+==10791== 
+==10791== LL refs:        34,748  ( 17,886 rd   +  16,862 wr)
+==10791== LL misses:      18,585  (  1,801 rd   +  16,784 wr)
+==10791== LL miss rate:      1.7% (    0.2%     +    15.4%  )
+
+
+
+
+
+
+</span></pre></td>
+    </td></tr></table>
+    <p style="text-align:right">
+    <button type="button" id="slides_no_tco_trick_button" onclick="next('slides_no_tco_trick')">Next step</button>
+    </p>
+    <p>
+Well, the theory and compiler optimizations don't always work together. Yes, we have less calls, but the code itself became larger so the instruction references remained almost as they were. Althoug the data reference count lowered, it is still far from the desired TCO-like result.
+    </p>
+    <p>
+But it is something. 
+    </p>
+    <p>
+Besides, who said we should stop there? Let's try the same principle, but with more instances. Let's see where it brings us.
+    </p>
+    
+    
+    
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
     <tr>
