@@ -78,9 +78,37 @@ u {
 }
     </style>
     <script language="JavaScript">
-function show(n){
-    document.getElementById("shown_" + n).style.display = "none";
-    document.getElementById("hidden_" + n).style.display = "inline";
+function next(slides){
+    // show the next slide
+    var first_slide = document.getElementById(slides + "_" + 1);
+    for(var i = 1; i < 9; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if(this_slide)
+            if(this_slide.style.display == "block")
+                {
+                this_slide.style.display = "none";
+                if(next_slide)
+                    next_slide.style.display = "block";
+                else
+                    first_slide.style.display = "block";
+                break;
+                }
+    }
+    // name the button
+    var button = document.getElementById(slides + "_button")
+    for(var i = 1; i < 9; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if (this_slide && !next_slide && this_slide.style.display == "block") {
+            button.innerHTML = "Back to the 1-st slide";
+            break;
+        }
+        else
+            button.innerHTML = "Next slide";
+    }
 }
     </script>
   </head>
@@ -99,18 +127,82 @@ However, quoting Donald Knuth, “in established engineering disciplines a 12% i
 The idea
     </h2>
     <p>
-C++ has tail call optimiztion. It's when a recursive function that ends with self-call is replaced with the loop.
+C++ has tail call optimiztion. It's when a recursive function that ends with self-call is replaced with the simple loop. Let me show you how this works.
     </p>
     <table><tr>
     <td>
-    <pre>
-...
-    </pre>
-    </td>
-    </td></tr></table>
+    <pre><span id="slides_tco_1" style="display:block"><div style="color:#994466"><b>1. C++ source code</b></div>
+int sum_of_first(int n) {
+    return (n == 1) ? 1 : n + sum_of_first(n-1);
+}
 
+int main() {
+    return sum_of_first(65536);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+</span><span id="slides_tco_2" style="display:none"><div style="color:#992244"><b>2. Disassembly</b></div>
+sum_of_first(int):
+        cmp     edi, 1
+        je      .L4
+        xor     eax, eax
+.L3:
+        add     eax, edi
+        sub     edi, 1
+        cmp     edi, 1
+        jne     .L3
+        add     eax, 1
+        ret
+.L4:
+        mov     eax, 1
+        ret
+        
+        
+        
+        
+        
+</span><span id="slides_tco_3" style="display:none"><div style="color:#770022"><b>3. Valgrind measurements</b></div>
+==10788== Command: ./tco
+==10788== 
+--10788-- warning: L3 cache found, using its data for the LL simulation.
+==10788== 
+==10788== I   refs:      353,280
+==10788== I1  misses:        754
+==10788== LLi misses:        745
+==10788== I1  miss rate:    0.21%
+==10788== LLi miss rate:    0.21%
+==10788== 
+==10788== D   refs:       34,378  (23,753 rd   + 10,625 wr)
+==10788== D1  misses:      1,710  ( 1,215 rd   +    495 wr)
+==10788== LLd misses:      1,526  ( 1,053 rd   +    473 wr)
+==10788== D1  miss rate:     5.0% (   5.1%     +    4.7%  )
+==10788== LLd miss rate:     4.4% (   4.4%     +    4.5%  )
+==10788== 
+==10788== LL refs:         2,464  ( 1,969 rd   +    495 wr)
+==10788== LL misses:       2,271  ( 1,798 rd   +    473 wr)
+==10788== LL miss rate:      0.6% (   0.5%     +    4.5%  )</span></pre></td>
+    </td></tr></table>
+    <p style="text-align:right">
+    <button type="button" id="slides_tco_button" onclick="next('slides_tco')">Next step</button>
+    </p>
     <p>
-...    
+From disassembly you can see that there is no actual self call in the “recursive” <i>sum_of_first</a> function. From the valgrind report you can also see why this is important. 
+    <p>
+    </p>
+Normally, every time you call a function, you have to store its return adress in a stack. Even if the address is the same. This means that if you call your function 65536 times in a nested way, you will be writing the same address 65536 times only to read it all back on returns. It is pure overhead. But if the self call is a tail call, meaning that all the nested calls will eventually return to the same place, you don't have to do the calls at all. Simple loop will be enough.
+    </p>
+    <p>
+Compilers can do that for you. They rewrite your code to minimize overhead whenever they can. But what if they can't?
     </p>
 
 
