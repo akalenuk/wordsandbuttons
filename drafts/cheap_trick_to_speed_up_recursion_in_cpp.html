@@ -124,7 +124,7 @@ Cheap trick to speed up recursion in C++
 However, quoting Donald Knuth, “in established engineering disciplines a 12% improvement, easily obtained, is never considered marginal; and I believe the same viewpoint should prevail in software engineering.” 
     </p>
     <h2>
-The idea
+Tail call optimization vs. no tail call optimization
     </h2>
     <p>
 C++ has tail call optimiztion. It's when a recursive function that ends with self-call is replaced with the simple loop. Let me show you how this works.
@@ -196,14 +196,86 @@ sum_of_first(int):
     <button type="button" id="slides_tco_button" onclick="next('slides_tco')">Next step</button>
     </p>
     <p>
-From disassembly you can see that there is no actual self call in the “recursive” <i>sum_of_first</a> function. From the valgrind report you can also see why this is important. 
-    <p>
+From disassembly you can see that there is no actual self call in the “recursive” <i>sum_of_first</i> function. From the valgrind report you can also see why this is important. 
     </p>
+    <p>
 Normally, every time you call a function, you have to store its return adress in a stack. Even if the address is the same. This means that if you call your function 65536 times in a nested way, you will be writing the same address 65536 times only to read it all back on returns. It is pure overhead. But if the self call is a tail call, meaning that all the nested calls will eventually return to the same place, you don't have to do the calls at all. Simple loop will be enough.
     </p>
     <p>
 Compilers can do that for you. They rewrite your code to minimize overhead whenever they can. But what if they can't?
     </p>
+    <table><tr>
+    <td>
+    <pre><span id="slides_no_tco_1" style="display:block"><div style="color:#994466"><b>1. C++ source code</b></div>
+int sum_of_first(int n) {
+    if(n == 0)
+        return 0;
+    auto temp_sum = sum_of_first(n-1);
+    return n == 1 ? 1 : (temp_sum + n);
+}
+
+int main() {
+    return sum_of_first(65536);
+}
+
+
+
+
+
+
+
+
+
+</span><span id="slides_no_tco_2" style="display:none"><div style="color:#992244"><b>2. Disassembly</b></div>
+sum_of_first(int):
+        xor     eax, eax
+        test    edi, edi
+        jne     .L10
+        ret
+.L10:
+        push    rbx
+        mov     ebx, edi
+        lea     edi, [rdi-1]
+        call    sum_of_first(int)
+        mov     edx, 1
+        add     eax, ebx
+        cmp     ebx, 1
+        cmove   eax, edx
+        pop     rbx
+        ret
+        
+        
+             
+</span><span id="slides_no_tco_3" style="display:none"><div style="color:#770022"><b>3. Valgrind measurements</b></div>
+==10789== Command: ./no_tco
+==10789== 
+--10789-- warning: L3 cache found, using its data for the LL simulation.
+==10789== 
+==10789== I   refs:      943,105
+==10789== I1  misses:        754
+==10789== LLi misses:        745
+==10789== I1  miss rate:    0.08%
+==10789== LLi miss rate:    0.08%
+==10789== 
+==10789== D   refs:      296,520  (154,824 rd   + 141,696 wr)
+==10789== D1  misses:     33,991  ( 17,129 rd   +  16,862 wr)
+==10789== LLd misses:     17,838  (  1,053 rd   +  16,785 wr)
+==10789== D1  miss rate:    11.5% (   11.1%     +    11.9%  )
+==10789== LLd miss rate:     6.0% (    0.7%     +    11.8%  )
+==10789== 
+==10789== LL refs:        34,745  ( 17,883 rd   +  16,862 wr)
+==10789== LL misses:      18,583  (  1,798 rd   +  16,785 wr)
+==10789== LL miss rate:      1.5% (    0.2%     +    11.8%  )</span></pre></td>
+    </td></tr></table>
+    <p style="text-align:right">
+    <button type="button" id="slides_no_tco_button" onclick="next('slides_no_tco')">Next step</button>
+    </p>
+    <p>
+When the self-call is not a tail call, and can't even be made a tail call, the compiler skips the TCO optimization. And yes, you get all the overheads: all the amount of needless reads and writes.
+    </p>
+    <h2>
+    </h2>
+
 
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
