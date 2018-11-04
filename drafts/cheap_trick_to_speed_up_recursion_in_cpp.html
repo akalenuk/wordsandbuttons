@@ -325,7 +325,7 @@ Cheap trick to speed up recursion in C++
 <b>Disclaimer.</b> The trick I am about to show is not an example of good engineering. It depends on implementation specific optimization and as such is unreliable. In some contexts it may give you some noticeable performance gains, but in other it may even lead to performance degradation. 
     </p>
     <p>
-However, quoting Donald Knuth, “in established engineering disciplines a 12% improvement, easily obtained, is never considered marginal; and I believe the same viewpoint should prevail in software engineering.” 
+However, quoting Donald Knuth, <i>“in established engineering disciplines a 12% improvement, easily obtained, is never considered marginal; and I believe the same viewpoint should prevail in software engineering.”</i>
     </p>
     <h2>
 Tail call optimization vs. no tail call optimization
@@ -577,14 +577,20 @@ But it is something.
 Besides, who said we should stop there? Let's try the same principle, but with more instances.
     </p>
     <p>
-Let's measure instruction references for (almost) the same code with TCO, without TCO, and with self-calls spread through 2, 4, 8, 16, and 32 instances.
+It's not trivial to relevantly micro-benchmark this kind of functions. The thing is, if we make the operation larger, it will simply overflow the stack. We can request a larger stack, but then the operation itself will become unrealistic. Let's not measure the run time then. Let's measure instruction counts and memory operations instead.
+    </p>
+    <p>
+This is not the same thing as the time of execution, but it more or less correlates with the performance expectations.
+    </p>
+    <p>
+Here are the instruction counts for (almost) the same code with TCO, without TCO, and with self-calls spread through 2, 4, 8, 16, and 32 instances.
     </p>
     <canvas id="irefs" width=700 height=500></canvas>
     <script language="JavaScript">
     draw_irefs();
     </script>
     <p>
-Now let's measure data references for the same family of implementations.
+Now let's measure total data reads and writes for the same family of implementations.
     </p>
     <canvas id="drefs" width=700 height=500></canvas>
     <script language="JavaScript">
