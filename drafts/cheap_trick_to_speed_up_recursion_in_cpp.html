@@ -60,7 +60,7 @@ td {
     padding: 6pt 12pt 6pt 12pt;
     font-size: 16pt;
     border: 1px solid black;
-    width: 600pt;
+    width: 505pt;
 }
 
 button{
@@ -336,8 +336,8 @@ C++ has tail call optimiztion. It's when a recursive function that ends with sel
     <table><tr>
     <td>
     <pre><span id="slides_tco_1" style="display:block"><div style="color:#994466"><b>1. C++ source code</b></div>
-int sum_of_first(int n) {
-    return (n == 1) ? 1 : n + sum_of_first(n-1);
+int <b>sum_of_first</b>(int n) {
+    return (n == 1) ? 1 : n + <b>sum_of_first</b>(n-1); <span style="color:#224400">// tail call</span>
 }
 
 int main() {
@@ -364,7 +364,7 @@ sum_of_first(int):
         add     eax, edi
         sub     edi, 1
         cmp     edi, 1
-        jne     .L3
+        jne     .L3       <span style="color:#224400">; a jump instead of a call</span>
         add     eax, 1
         ret
 .L4:
@@ -376,25 +376,25 @@ sum_of_first(int):
         
         
 </span><span id="slides_tco_3" style="display:none"><div style="color:#770022"><b>3. Valgrind measurements</b></div>
-==10788== Command: ./tco
-==10788== 
---10788-- warning: L3 cache found, using its data for the LL simulation.
-==10788== 
-==10788== I   refs:      353,280
-==10788== I1  misses:        754
-==10788== LLi misses:        745
-==10788== I1  miss rate:    0.21%
-==10788== LLi miss rate:    0.21%
-==10788== 
-==10788== D   refs:       34,378  (23,753 rd   + 10,625 wr)
-==10788== D1  misses:      1,710  ( 1,215 rd   +    495 wr)
-==10788== LLd misses:      1,526  ( 1,053 rd   +    473 wr)
-==10788== D1  miss rate:     5.0% (   5.1%     +    4.7%  )
-==10788== LLd miss rate:     4.4% (   4.4%     +    4.5%  )
-==10788== 
-==10788== LL refs:         2,464  ( 1,969 rd   +    495 wr)
-==10788== LL misses:       2,271  ( 1,798 rd   +    473 wr)
-==10788== LL miss rate:      0.6% (   0.5%     +    4.5%  )</span></pre></td>
+Command: ./tco
+
+warning: L3 cache found, using its data for the LL simulation.
+
+I   refs:      353,280
+I1  misses:        754
+LLi misses:        745
+I1  miss rate:    0.21%
+LLi miss rate:    0.21%
+
+D   refs:       34,378  (23,753 rd   + 10,625 wr)
+D1  misses:      1,710  ( 1,215 rd   +    495 wr)
+LLd misses:      1,526  ( 1,053 rd   +    473 wr)
+D1  miss rate:     5.0% (   5.1%     +    4.7%  )
+LLd miss rate:     4.4% (   4.4%     +    4.5%  )
+
+LL refs:         2,464  ( 1,969 rd   +    495 wr)
+LL misses:       2,271  ( 1,798 rd   +    473 wr)
+LL miss rate:      0.6% (   0.5%     +    4.5%  )</span></pre></td>
     </td></tr></table>
     <p style="text-align:right">
     <button type="button" id="slides_tco_button" onclick="next('slides_tco')">Next step</button>
@@ -411,10 +411,10 @@ Compilers can do that for you. They rewrite your code to minimize overhead whene
     <table><tr>
     <td>
     <pre><span id="slides_no_tco_1" style="display:block"><div style="color:#994466"><b>1. C++ source code</b></div>
-int sum_of_first(int n) {
+int <b>sum_of_first</b>(int n) {
     if(n == 0)
         return 0;
-    auto temp_sum = sum_of_first(n-1);
+    auto temp_sum = <b>sum_of_first</b>(n-1); <span style="color:#224400">// not a tail</span>
     return n == 1 ? 1 : (temp_sum + n);
 }
 
@@ -440,7 +440,7 @@ sum_of_first(int):
         push    rbx
         mov     ebx, edi
         lea     edi, [rdi-1]
-        call    sum_of_first(int)
+        <b>call    sum_of_first(int)</b>  <span style="color:#224400">; self-call</span>
         mov     edx, 1
         add     eax, ebx
         cmp     ebx, 1
@@ -451,25 +451,25 @@ sum_of_first(int):
         
              
 </span><span id="slides_no_tco_3" style="display:none"><div style="color:#770022"><b>3. Valgrind measurements</b></div>
-==10789== Command: ./no_tco
-==10789== 
---10789-- warning: L3 cache found, using its data for the LL simulation.
-==10789== 
-==10789== I   refs:      943,105
-==10789== I1  misses:        754
-==10789== LLi misses:        745
-==10789== I1  miss rate:    0.08%
-==10789== LLi miss rate:    0.08%
-==10789== 
-==10789== D   refs:      296,520  (154,824 rd   + 141,696 wr)
-==10789== D1  misses:     33,991  ( 17,129 rd   +  16,862 wr)
-==10789== LLd misses:     17,838  (  1,053 rd   +  16,785 wr)
-==10789== D1  miss rate:    11.5% (   11.1%     +    11.9%  )
-==10789== LLd miss rate:     6.0% (    0.7%     +    11.8%  )
-==10789== 
-==10789== LL refs:        34,745  ( 17,883 rd   +  16,862 wr)
-==10789== LL misses:      18,583  (  1,798 rd   +  16,785 wr)
-==10789== LL miss rate:      1.5% (    0.2%     +    11.8%  )</span></pre></td>
+Command: ./no_tco
+
+warning: L3 cache found, using its data for the LL simulation.
+
+I   refs:      943,105
+I1  misses:        754
+LLi misses:        745
+I1  miss rate:    0.08%
+LLi miss rate:    0.08%
+
+D   refs:      296,520  (154,824 rd   + 141,696 wr)
+D1  misses:     33,991  ( 17,129 rd   +  16,862 wr)
+LLd misses:     17,838  (  1,053 rd   +  16,785 wr)
+D1  miss rate:    11.5% (   11.1%     +    11.9%  )
+LLd miss rate:     6.0% (    0.7%     +    11.8%  )
+
+LL refs:        34,745  ( 17,883 rd   +  16,862 wr)
+LL misses:      18,583  (  1,798 rd   +  16,785 wr)
+LL miss rate:      1.5% (    0.2%     +    11.8%  )</span></pre></td>
     </td></tr></table>
     <p style="text-align:right">
     <button type="button" id="slides_no_tco_button" onclick="next('slides_no_tco')">Next step</button>
@@ -486,16 +486,16 @@ What if instead of a self-call, we would instantiate a copy of the original func
     <table><tr>
     <td>
     <pre><span id="slides_no_tco_trick_1" style="display:block"><div style="color:#994466"><b>1. C++ source code</b></div>
-template &lt;int instance_no, int divisor&gt;
+template <b>&lt;int I, N&gt;</b> <span style="color:#224400">// 2 instances: &lt;0, 2&gt; and &lt;1, 2&gt;</span>
 int sum_of_first(int n) {
     if(n == 0)
         return 0;
-    auto temp_sum = sum_of_first&lt;(instance_no + 1) % divisor, divisor&gt;(n-1);
+    auto temp_sum = sum_of_first<b>&lt;(I + 1) % N, N&gt;</b>(n-1);
     return n == 1 ? 1 : temp_sum + n;
 }
 
 int main() {
-    return sum_of_first&lt;0, 2&gt;(65536);
+    return sum_of_first<b>&lt;0, 2&gt;</b>(65536);
 }
 
 
@@ -537,25 +537,25 @@ int sum_of_first<0, 2>(int) [clone .part.1]:
         cmp     ebx, 1
         cmovne  ebx, eax
         jmp     .L2</span><span id="slides_no_tco_trick_3" style="display:none"><div style="color:#770022"><b>3. Valgrind measurements</b></div>
-==10791== Command: ./no_tco_instances_trick_2
-==10791== 
---10791-- warning: L3 cache found, using its data for the LL simulation.
-==10791== 
-==10791== I   refs:      877,592
-==10791== I1  misses:        756
-==10791== LLi misses:        747
-==10791== I1  miss rate:    0.09%
-==10791== LLi miss rate:    0.09%
-==10791== 
-==10791== D   refs:      230,985  (122,058 rd   + 108,927 wr)
-==10791== D1  misses:     33,992  ( 17,130 rd   +  16,862 wr)
-==10791== LLd misses:     17,838  (  1,054 rd   +  16,784 wr)
-==10791== D1  miss rate:    14.7% (   14.0%     +    15.5%  )
-==10791== LLd miss rate:     7.7% (    0.9%     +    15.4%  )
-==10791== 
-==10791== LL refs:        34,748  ( 17,886 rd   +  16,862 wr)
-==10791== LL misses:      18,585  (  1,801 rd   +  16,784 wr)
-==10791== LL miss rate:      1.7% (    0.2%     +    15.4%  )
+Command: ./no_tco_instances_trick_2
+
+warning: L3 cache found, using its data for the LL simulation.
+
+I   refs:      877,592
+I1  misses:        756
+LLi misses:        747
+I1  miss rate:    0.09%
+LLi miss rate:    0.09%
+
+D   refs:      230,985  (122,058 rd   + 108,927 wr)
+D1  misses:     33,992  ( 17,130 rd   +  16,862 wr)
+LLd misses:     17,838  (  1,054 rd   +  16,784 wr)
+D1  miss rate:    14.7% (   14.0%     +    15.5%  )
+LLd miss rate:     7.7% (    0.9%     +    15.4%  )
+
+LL refs:        34,748  ( 17,886 rd   +  16,862 wr)
+LL misses:      18,585  (  1,801 rd   +  16,784 wr)
+LL miss rate:      1.7% (    0.2%     +    15.4%  )
 
 
 
