@@ -322,7 +322,7 @@ function draw_drefs(){
 Cheap trick to speed up recursion in C++
     </h1>
     <p>
-<b>Disclaimer.</b> The trick I am about to show is not an example of good engineering. It depends on implementation specific optimization and as such is unreliable. In some contexts it may give you some noticeable performance gains, but in other it may even lead to performance degradation. 
+<b>Disclaimer.</b> The trick I am about to show is not an example of good engineering. It depends on implementation-specific optimization and as such is unreliable. In some contexts, it may give you some noticeable performance gains, but in other, it may even lead to performance degradation.
     </p>
     <p>
 However, quoting Donald Knuth, <i>“in established engineering disciplines a 12% improvement, easily obtained, is never considered marginal; and I believe the same viewpoint should prevail in software engineering.”</i>
@@ -331,7 +331,7 @@ However, quoting Donald Knuth, <i>“in established engineering disciplines a 12
 Tail call optimization vs. no tail call optimization
     </h2>
     <p>
-C++ has tail call optimiztion. It's when a recursive function that ends with self-call is replaced with the simple loop. Let me show you how this works.
+C++ has tail call optimization. It's when a recursive function that ends with self-call is replaced with the simple loop. Let me show you how it works
     </p>
     <table><tr>
     <td>
@@ -400,10 +400,10 @@ LL miss rate:      0.6% (   0.5%     +    4.5%  )</span></pre></td>
     <button type="button" id="slides_tco_button" onclick="next('slides_tco')">Next step</button>
     </p>
     <p>
-From disassembly you can see that there is no actual self call in the “recursive” <i>sum_of_first</i> function. From the valgrind report you can also see why this is important. 
+From disassembly, you can see that there is no actual self-call in the “recursive” <i>sum_of_first</i> function. From the Valgrind report, you can also see why this is important.
     </p>
     <p>
-Normally, every time you call a function, you have to store its return adress in a stack. Even if the address is the same. This means that if you call your function 65536 times in a nested way, you will be writing the same address 65536 times only to read it all back on returns. It is pure overhead. But if the self call is a tail call, meaning that all the nested calls will eventually return to the same place, you don't have to do the calls at all. Simple loop will be enough.
+Normally, every time you call a function, you have to store its return address in a stack. Even if the address remains the same. Which means that if you call your function 65536 times in a nested way, you will be writing the same address 65536 times only to read it all back on returns. It is pure overhead. But if the self-call is a tail call, meaning that all the nested calls will eventually return to the same place, you don't have to do the calls at all. A simple loop will be enough.
     </p>
     <p>
 Compilers can do that for you. They rewrite your code to minimize overhead whenever they can. But what if they can't?
@@ -481,7 +481,7 @@ When the self-call is not a tail call, and can't even be made a tail call, the c
 The idea
     </h2>
     <p>
-What if instead of a self-call, we would instantiate a copy of the original function and call that instead? The copy then will call the original. In theory, this allows a compiler to inline the copy, so instead of all 65536 nested calls we will only have 32768. Let's try it out.
+What if instead of a self-call, we would instantiate a copy of the original function and call that instead? The copy then will call the original. In theory, this allows a compiler to inline the copy, so instead of all 65536 nested calls, we will only have 32768. Let's try it out.
     </p>
     <table><tr>
     <td>
@@ -568,7 +568,7 @@ LL miss rate:      1.7% (    0.2%     +    15.4%  )
     <button type="button" id="slides_no_tco_trick_button" onclick="next('slides_no_tco_trick')">Next step</button>
     </p>
     <p>
-Well, the theory and compiler optimizations don't always work together. Yes, we have less calls, but the code itself became larger so the instruction references remained almost as they were. Althoug the data reference count lowered, it is still far from the desired TCO-like result.
+Well, the theory and compiler optimizations don't always work together. Yes, we have fewer calls, but the code itself became larger, so the instruction references remained almost as they were. Although the data reference count lowered, it is still far from the desired TCO-like result.
     </p>
     <p>
 But it is something. 
@@ -577,7 +577,7 @@ But it is something.
 Besides, who said we should stop there? Let's try the same principle, but with more instances.
     </p>
     <p>
-It's not trivial to relevantly micro-benchmark this kind of functions. The thing is, if we make the operation larger, it will simply overflow the stack. We can request a larger stack, but then the operation itself will become unrealistic. Let's not measure the run time then. Let's measure instruction counts and memory operations instead.
+It's not trivial to relevantly micro-benchmark this kind of functions. The thing is, if we make the operation larger, it will just overflow the stack. We can request a larger stack, but then the operation itself will become unrealistic. Let's not measure the time then. Let's measure instruction counts and memory operations instead.
     </p>
     <p>
 This is not the same thing as the time of execution, but it more or less correlates with the performance expectations.
@@ -601,10 +601,10 @@ Now let's measure total data reads and writes for the same family of implementat
 Conclusion
     </h2>
     <p>
-The trick shows some perfromance gain and it's safe to use. It does rely on compiler's implementation details, but in the worse case it will merely not give you the gain you wish.
+The trick shows some performance gain, and it's safe to use. It does rely on compiler's implementation details, but in the worse case, it will merely not give you the gain you wish.
     </p>
     <p>
-On the other hand, it is merely a cheap trick. If you really have a bottleneck in the recursion, it is still best to rewrite it in iterative way or in the manner that enables the TCO. It is more work, but the benefit will not then depend on the current compiler's optimizations. Also, the code will not look stupid in the future, when the compilers learn do that recursion semi-inlining themselves.
+On the other hand, it is merely a cheap trick. If you have a bottleneck in the recursion, it is still best to rewrite it in an iterative way or in the manner that enables the TCO. It is more work, but the benefit will not then depend on the current compiler's optimizations. Also, the code will not look stupid in the future, when the compilers learn to do that recursion semi-inlining themselves.
     </p>
     <p style="font-family: sans-serif; font-size: 14pt;">
 All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the code is compiled with g++ 5.4.0 (-O2). The source code for the benchmark is available on <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/recursion_optimization/">Github</a>.
