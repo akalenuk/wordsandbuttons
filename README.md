@@ -21,4 +21,8 @@ https://wordsandbuttons.online/learn_you_a_lisp_in_0_minutes.html
 
 ---
 
-All the code is <a href="http://unlicense.org/">unlicensed</a>.
+All the code is properly <a href="http://unlicense.org/">unlicensed</a>. 
+
+If you want to use some visuals for teaching (or anything else really), you can just cut them out from the code like I always do for the talks and presentations. Like this one: https://wordsandbuttons.online/KAC_2/, or that one: https://wordsandbuttons.online/MatAcademy/integer.html. 
+
+If you need help with that, or you have an idea for the great visual you don't know how to implement, just mail me ok@wordsandbuttons.online and I'll do that for you.
