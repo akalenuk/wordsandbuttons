@@ -1,6 +1,6 @@
 import os
 
-path = '../../drafts/'
+path = '../'
 for file_name in os.listdir(path):
     if os.path.isfile(path + file_name):
         if file_name.endswith('.html'):
