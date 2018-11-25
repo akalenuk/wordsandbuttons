@@ -42,13 +42,36 @@ def deunhtmlize(text):
 def htmlize(text):
     return text.replace('&<;', '&lt;').replace('&>;', '&gt;')
 
-def colorize(text):
-    chunks = chunks_of(text)
+def colorize_line(line):
+    chunks = chunks_of(line)
     for chunk in chunks:
         replacement = '<span style="color: #' + color_of(chunk) + '">' + chunk + '</span>'
-        text_without_chunks = text.split(chunk)
-        text = replacement.join(text_without_chunks)
-    return text
+        line_without_chunks = line.split(chunk)
+        line = replacement.join(line_without_chunks)
+    return line
+
+def colorize_outside(quotes, line):
+    if quotes == '':
+        return colorize_line(line)
+    quote = quotes[0]
+    bits = line.split(quote)
+    new_bits = []
+    for bit, i in zip(bits, range(len(bits))):
+        if i % 2 == 1:
+            new_bits += [bit]
+        else:
+            new_bits += [colorize_outside(quotes[1:], bit)]
+    return quote.join(new_bits)
+
+def colorize_text(text):
+    new_lines = []
+    for line in text.split('\n'):
+        if line.lstrip().startswith('!') or line.lstrip().startswith('//') or line.lstrip().startswith('--'):
+            new_lines += ['<span color="#006600">' + line + '</span>']
+        else:
+            new_lines += [colorize_outside('\"\'', line)]
+    return '\n'.join(new_lines)
+
 
 path = '../'
 for file_name in os.listdir(path):
@@ -63,6 +86,6 @@ for file_name in os.listdir(path):
             for piece in text.split('<pre>')[1:]:
                 pre_text = piece.split('</pre>')[0]
                 print ('----')
-                print (htmlize(colorize(deunhtmlize(pre_text))))
+                print (htmlize(colorize_text(deunhtmlize(pre_text))))
                 print ('----')
             
