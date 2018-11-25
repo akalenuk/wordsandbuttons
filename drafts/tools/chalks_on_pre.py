@@ -17,23 +17,6 @@ def color_of(word):
     b = (word_n / 140 / 130 % 140);
     return to_ff(r) + to_ff(g) + to_ff(b)
 
-def chunks_of(text):
-    not_a_word_material = " @(){}[],.:;\"\'`<>=+-*/\t\n\\?|&#%!0123456789"
-    lines = text.split('\n')
-    lines = [line.rstrip() + "\n" for line in lines]
-
-    chunks = set()
-    word = ""
-    for line, n in zip(lines, range(1, len(lines)+1)):
-        for c in line:
-            if c in not_a_word_material:
-                if word != "":
-                   chunks.add(word)
-                word = ""
-            else:
-                word += c
-    return chunks
-
 # this is a two-step process, first we redo the symbols for not to mix them up them after colorization
 def deunhtmlize(text): 
     return text.replace('<', '&<;').replace('>', '&>;')
@@ -42,13 +25,21 @@ def deunhtmlize(text):
 def htmlize(text):
     return text.replace('&<;', '&lt;').replace('&>;', '&gt;')
 
+def not_a_word_material():
+    return " @(){}[],.:;\"\'`<>=+-*/\t\n\\?|&#%!0123456789"
+
 def colorize_line(line):
-    chunks = chunks_of(line)
-    for chunk in chunks:
-        replacement = '<span style="color: #' + color_of(chunk) + '">' + chunk + '</span>'
-        line_without_chunks = line.split(chunk)
-        line = replacement.join(line_without_chunks)
-    return line
+    chunk = ''
+    new_line = ''
+    for c in line + ' ':
+        if c in not_a_word_material():
+            if chunk != '':
+                new_line += '<span style="color: #' + color_of(chunk) + '">' + chunk + '</span>'
+                chunk = ''
+            new_line += c
+        else:
+            chunk += c
+    return new_line[:-1]
 
 def colorize_outside(quotes, line):
     if quotes == '':
@@ -67,7 +58,7 @@ def colorize_text(text):
     new_lines = []
     for line in text.split('\n'):
         if line.lstrip().startswith('!') or line.lstrip().startswith('//') or line.lstrip().startswith('--'):
-            new_lines += ['<span color="#006600">' + line + '</span>']
+            new_lines += ['<span style="color: #006600">' + line + '</span>']
         else:
             new_lines += [colorize_outside('\"\'', line)]
     return '\n'.join(new_lines)
