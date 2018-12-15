@@ -225,16 +225,70 @@ function put_metaball_d_f() {
     eval_d_f();
 }
 
+function dx(x, y) {
+    return ( d_f(x + gradient_step, y) - d_f(x, y) ) / gradient_step;
+}
+
 function gsx(x, y, distance) {
-    dd = distance - d_f(x, y);
-    dx = ( d_f(x + gradient_step, y) - d_f(x, y) ) / gradient_step;
-    return grid_size_limited(dx * dd);
+    var dd = distance - d_f(x, y);
+    return grid_size_limited(dx(x, y) * dd);
+}
+
+function dy(x, y) {
+    return ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
 }
 
 function gsy(x, y, distance) {
-    dd = distance - d_f(x, y);
-    dy = ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
-    return grid_size_limited(dy * dd);
+    var dd = distance - d_f(x, y);
+    return grid_size_limited(dy(x, y) * dd);
+}
+
+function sign_0_positive(x){ // Math.sign like with no 0 option
+    if(x >= 0)
+        return 1.0;
+    return -1.0;
+}
+
+function underflow_padded(x){
+    if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
+        return 1.e-5 * sign_0_positive(x);
+    return x;
+}
+
+function solved_linear(A, B, n){
+    var X = [];
+    for (var i = 0; i < n; ++i)
+        X[i] = 0.0;
+
+    // triangulize
+    for (var i = 0; i < n-1; ++i)
+        for (var j = 0; j < i+1; ++j) {
+            r = A[i+1][j] / underflow_padded(A[j][j]);
+            A[i+1][j] = 0.;
+            for (var b_j = j+1; b_j < n; ++b_j){
+                A[i+1][b_j] -= A[j][b_j]*r;
+            }
+            B[i+1] -= B[j]*r;
+        }
+
+    // calculate xs
+    X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
+    for (var i = n-2; i >= 0; --i){
+        var s = 0.0;
+        for (var j = i; j < n; ++j){
+            s = s + A[i][j]*X[j];
+        }
+        X[i] = (B[i] - s) / underflow_padded(A[i][i]);
+    }
+    return X;
+}
+
+function polynomial_in_x(A, x, n){
+    var y = 0.0;
+    for(var i = 0; i < n; ++i){
+        y += A[i] * Math.pow(x, i);
+    }
+    return y;
 }
 
 function optimum_in_cube_brute(x, y) {
@@ -325,6 +379,62 @@ function draw_grid_border_optimized(context, d_f, w, h, grid_size, distance) {
         }
     }
     context.strokeStyle="#33AA33";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath();
+}
+
+function draw_grid_border_splixels(context, d_f, w, h, grid_size, distance) {
+    context.beginPath();
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+            var do_horizontal = 
+                (d_f(j + 0.5 * grid_size, i - 0.5 * grid_size) - distance ) *
+                (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            var do_vertical = 
+                (d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) - distance ) *
+                (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            if(do_horizontal) {
+                p1x = j + gsx(j, i, distance);
+                p1y = i + gsy(j, i, distance);
+                p2x = j + grid_size + gsx(j + grid_size, i, distance);
+                p2y = i + gsy(j + grid_size, i, distance);
+                d1x = dx(p1x, p1y);
+                d1y = dy(p1x, p1y);
+                d2x = dx(p2x, p2y);
+                d2y = dy(p2x, p2y);
+                var Ax = [
+                    [0, 0, 0, 1],
+                    [0, 0, 1, 0],
+                    [1, 1, 1, 1],
+                    [3, 2, 1, 0]]
+                var Bx = [p1x, d1x, p2x, d2x]
+                var Px = solved_linear(Ax, Bx, 4);
+                var Ay = [
+                    [0, 0, 0, 1],
+                    [0, 0, 1, 0],
+                    [1, 1, 1, 1],
+                    [3, 2, 1, 0]]
+                var By = [p1y, d1y, p2y, d2y]
+                var Py = solved_linear(Ay, By, 4);
+                for(var i = 0; i < grid_size; i += 4) {
+                    var t1 = (i + 0.01) / grid_size;
+                    var t2 = (i + 0.99) / grid_size;
+                    var x1 = polynomial_in_x(Px, t1, 4);
+                    var y1 = polynomial_in_x(Py, t1, 4);
+                    var x2 = polynomial_in_x(Px, t2, 4);
+                    var y2 = polynomial_in_x(Py, t2, 4);
+                    context.moveTo(x1, y1);
+                    context.lineTo(x2, y2);
+                }
+            }
+            if(do_vertical) {
+                context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
+                context.lineTo(j + gsx(j, i + grid_size, distance), i + grid_size + gsy(j, i + grid_size, distance));
+            }
+        }
+    }
+    context.strokeStyle="#AA3399";
     context.lineWidth=3;
     context.stroke();
     context.closePath();
@@ -501,7 +611,11 @@ function draw_canvas(){
 
     // optimized border
     if(document.getElementById("do_optimized").checked) {
-        draw_grid_border_optimized(context, d_f, w, h, grid_size, distance);
+        if(document.getElementById("do_splixels").checked) {
+            draw_grid_border_splixels(context, d_f, w, h, grid_size, distance);
+        } else {
+            draw_grid_border_optimized(context, d_f, w, h, grid_size, distance);
+        }
     }
     
     // distance values
@@ -651,7 +765,8 @@ tick(); // let it tick always
     <br>
     <input type="checkbox" id="do_grid" onclick="draw_canvas();"/><label for="do_grid">Grid border</label>
     <input type="checkbox" id="do_optimized" onclick="draw_canvas();"/><label for="do_optimized">Optimized</label>
-    <input type="checkbox" id="do_optimized_limited" onclick="draw_canvas();"/><label for="do_optimized_limited"> & limited</label>    
+    <input type="checkbox" id="do_optimized_limited" onclick="draw_canvas();"/><label for="do_optimized_limited"> & limited</label>
+    <input type="checkbox" id="do_splixels" onclick="draw_canvas();"/><label for="do_splixels"> & splixels</label>
     <input type="checkbox" id="do_marching" checked onclick="draw_canvas();"/><label for="do_marching">Marching cubes</label>
     <input type="checkbox" id="do_marching_no_interpolation" onclick="draw_canvas();"/><label for="do_marching_no_interpolation">MC without interpolation</label>
     <input type="checkbox" id="do_dual" onclick="draw_canvas();"/><label for="do_dual">Dual contour</label>
