@@ -395,14 +395,14 @@ function draw_grid_border_splixels(context, d_f, w, h, grid_size, distance) {
                 (d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) - distance ) *
                 (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
             if(do_horizontal) {
-                p1x = j + gsx(j, i, distance);
-                p1y = i + gsy(j, i, distance);
-                p2x = j + grid_size + gsx(j + grid_size, i, distance);
-                p2y = i + gsy(j + grid_size, i, distance);
-                d1x = dx(p1x, p1y);
-                d1y = dy(p1x, p1y);
-                d2x = dx(p2x, p2y);
-                d2y = dy(p2x, p2y);
+                var p1x = j + gsx(j, i, distance);
+                var p1y = i + gsy(j, i, distance);
+                var p2x = j + grid_size + gsx(j + grid_size, i, distance);
+                var p2y = i + gsy(j + grid_size, i, distance);
+                var d1x = dx(p1x, p1y);
+                var d1y = dy(p1x, p1y);
+                var d2x = dx(p2x, p2y);
+                var d2y = dy(p2x, p2y);
                 var Ax = [
                     [0, 0, 0, 1],
                     [0, 0, 1, 0],
@@ -416,10 +416,10 @@ function draw_grid_border_splixels(context, d_f, w, h, grid_size, distance) {
                     [1, 1, 1, 1],
                     [3, 2, 1, 0]]
                 var By = [p1y, d1y, p2y, d2y]
-                var Py = solved_linear(Ay, By, 16);
-                for(var i = 0; i < grid_size; i += 16) {
-                    var t1 = (i + 0.01) / grid_size;
-                    var t2 = (i + 0.99) / grid_size;
+                var Py = solved_linear(Ay, By, 4);
+                for(var k = 0; k < grid_size; k += 2) {
+                    var t1 = (k + 0.01) / grid_size;
+                    var t2 = (k + 0.99) / grid_size;
                     var x1 = polynomial_in_x(Px, t1, 4);
                     var y1 = polynomial_in_x(Py, t1, 4);
                     var x2 = polynomial_in_x(Px, t2, 4);
