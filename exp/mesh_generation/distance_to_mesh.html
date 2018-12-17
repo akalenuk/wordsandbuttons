@@ -418,7 +418,7 @@ function draw_grid_border_splixels(context, d_f, w, h, grid_size, distance) {
                     [0, 1, 2, 3]];
                 var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
                 var Py = solved_linear(Ay, By, 4);
-                for(var k = 0; k < grid_size; k += 2) {
+                for(var k = 0; k < grid_size; k += 1) {
                     var t1 = (k + 0.01) / grid_size;
                     var t2 = (k + 0.99) / grid_size;
                     var x1 = polynomial_in_x(Px, t1, 4);
@@ -430,8 +430,39 @@ function draw_grid_border_splixels(context, d_f, w, h, grid_size, distance) {
                 }
             }
             if(do_vertical) {
-                context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
-                context.lineTo(j + gsx(j, i + grid_size, distance), i + grid_size + gsy(j, i + grid_size, distance));
+                var ds = d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) < d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) ? -1.0 : 1.0;
+                var p1x = j + gsx(j, i, distance);
+                var p1y = i + gsy(j, i, distance);
+                var p2x = j + gsx(j, i + grid_size, distance);
+                var p2y = i + grid_size + gsy(j, i + grid_size, distance);
+                var d1x = dx(p1x, p1y) * grid_size;
+                var d1y = dy(p1x, p1y) * grid_size;
+                var d2x = dx(p2x, p2y) * grid_size;
+                var d2y = dy(p2x, p2y) * grid_size;
+                var Ax = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var Bx = [p1x, ds*d1y, p2x, ds*d2y]
+                var Px = solved_linear(Ax, Bx, 4);
+                var Ay = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
+                var Py = solved_linear(Ay, By, 4);
+                for(var k = 0; k < grid_size; k += 1) {
+                    var t1 = (k + 0.01) / grid_size;
+                    var t2 = (k + 0.99) / grid_size;
+                    var x1 = polynomial_in_x(Px, t1, 4);
+                    var y1 = polynomial_in_x(Py, t1, 4);
+                    var x2 = polynomial_in_x(Px, t2, 4);
+                    var y2 = polynomial_in_x(Py, t2, 4);
+                    context.moveTo(x1, y1);
+                    context.lineTo(x2, y2);
+                }
             }
         }
     }
