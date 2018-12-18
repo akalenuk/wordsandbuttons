@@ -106,8 +106,8 @@ var w = 640.0;
 var h = 640.0;
 
 // algorithm
-var grid_size = 32.0;
-var distance = 32.0 * 2;
+var grid_size = 48.0;
+var distance = 84.0;
 var gradient_step = 1.0;
 
 var lines = [];
@@ -119,13 +119,11 @@ var _t3 = 0.; // time-related coefficient for the cubic contour
 var FPS = 8;
 
 function grid_size_limited(x) {
-    //if(!document.getElementById("do_optimized_limited").checked)
-    return x
-    /*if(x < -grid_size / 2.)
-        return -grid_size / 2.;
-    if(x > +grid_size / 2.)
-        return +grid_size / 2.;
-    return x;*/
+    if(x < -grid_size)
+        return -grid_size;
+    if(x > +grid_size)
+        return +grid_size;
+    return x;
 }
 
 function dot(a1, a2, b1, b2) {
@@ -651,17 +649,17 @@ function tick() {
     <button type="button" style="width: auto;" onclick="canvas_full_screen()">Full screen</button><br>
     Grid size:
     <button type="button" onclick="dec('grid_size')">-</button>
-    <input type="text" id="grid_size_input" value="32" onchange="change_grid_size();">
+    <input type="text" id="grid_size_input" value="48" onchange="change_grid_size();">
     <button type="button" onclick="inc('grid_size')">+</button>
     <br>
     Distance:
     <button type="button" onclick="alter_animation_d(-grid_size)">&lt;&lt;</button>
     <button type="button" onclick="dec('distance')">-</button>
-    <input type="text" id="distance_input" value="64" onchange="change_distance();">
+    <input type="text" id="distance_input" value="84" onchange="change_distance();">
     <button type="button" onclick="inc('distance')">+</button>
     <button type="button" onclick="alter_animation_d(+grid_size)">&gt;&gt;</button>
     <br>
-    <input type="checkbox" id="do_grid" checked onclick="draw_canvas();"/><label for="do_grid">Grid border</label>
+    <input type="checkbox" id="do_grid" checked onclick="draw_canvas();"/><label for="do_grid">Pixel contour</label>
     <input type="checkbox" id="do_optimized" onclick="draw_canvas();"/><label for="do_optimized">Surface mesh</label>
     <input type="checkbox" id="do_splixels" onclick="draw_canvas();"/><label for="do_splixels"> Splixels</label>
     <br>
