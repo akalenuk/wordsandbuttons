@@ -17,8 +17,9 @@ int main() {
     auto start = std::chrono::system_clock::now();
     for (auto i = 0u; i < TheSize - 3; ++i)
         if(xs[i] == 1 && xs[i+1] == 1 && xs[i+2] == 1 && xs[i+3] == 1)
+//        if((xs[i] - 1) * (xs[i+1] - 1) * (xs[i+2] - 1) * (xs[i+3] - 1))
             four_1_in_a_row++; 
     auto end = std::chrono::system_clock::now();
-
-    std::cout << (end-start).count() << "\n";
+    
+    std::cout << "time: " << (end-start).count() << "  1111s: " << four_1_in_a_row << "\n";
 }
