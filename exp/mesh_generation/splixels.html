@@ -114,6 +114,8 @@ var lines = [];
 
 // animation, not essencial for the algorithm
 var animation_d = distance;
+var _t1 = 0.; // time-related coefficient for the linear contour
+var _t3 = 0.; // time-related coefficient for the cubic contour
 var FPS = 8;
 
 function grid_size_limited(x) {
@@ -379,14 +381,14 @@ function draw_contour_splixels(context, d_f, w, h, grid_size, distance) {
                 (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
             if(do_horizontal) {
                 var ds = d_f(j + 0.5 * grid_size, i - 0.5 * grid_size) < d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) ? 1.0 : -1.0;
-                var p1x = j + gsx(j, i, distance);
-                var p1y = i + gsy(j, i, distance);
-                var p2x = j + grid_size + gsx(j + grid_size, i, distance);
-                var p2y = i + gsy(j + grid_size, i, distance);
-                var d1x = dx(p1x, p1y) * grid_size;
-                var d1y = dy(p1x, p1y) * grid_size;
-                var d2x = dx(p2x, p2y) * grid_size;
-                var d2y = dy(p2x, p2y) * grid_size;
+                var p1x = j + gsx(j, i, distance)  * _t1;
+                var p1y = i + gsy(j, i, distance)  * _t1;
+                var p2x = j + grid_size + gsx(j + grid_size, i, distance)  * _t1;
+                var p2y = i + gsy(j + grid_size, i, distance)  * _t1;
+                var d1x = dx(p1x, p1y) * grid_size  * _t3;
+                var d1y = dy(p1x, p1y) * grid_size  * _t3;
+                var d2x = dx(p2x, p2y) * grid_size  * _t3;
+                var d2y = dy(p2x, p2y) * grid_size  * _t3;
                 var Ax = [
                     [1, 0, 0, 0],
                     [0, 1, 0, 0],
@@ -414,14 +416,14 @@ function draw_contour_splixels(context, d_f, w, h, grid_size, distance) {
             }
             if(do_vertical) {
                 var ds = d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) < d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) ? -1.0 : 1.0;
-                var p1x = j + gsx(j, i, distance);
-                var p1y = i + gsy(j, i, distance);
-                var p2x = j + gsx(j, i + grid_size, distance);
-                var p2y = i + grid_size + gsy(j, i + grid_size, distance);
-                var d1x = dx(p1x, p1y) * grid_size;
-                var d1y = dy(p1x, p1y) * grid_size;
-                var d2x = dx(p2x, p2y) * grid_size;
-                var d2y = dy(p2x, p2y) * grid_size;
+                var p1x = j + gsx(j, i, distance) * _t1;
+                var p1y = i + gsy(j, i, distance) * _t1;
+                var p2x = j + gsx(j, i + grid_size, distance)  * _t1;
+                var p2y = i + grid_size + gsy(j, i + grid_size, distance)  * _t1;
+                var d1x = dx(p1x, p1y) * grid_size  * _t3;
+                var d1y = dy(p1x, p1y) * grid_size  * _t3;
+                var d2x = dx(p2x, p2y) * grid_size  * _t3;
+                var d2y = dy(p2x, p2y) * grid_size  * _t3;
                 var Ax = [
                     [1, 0, 0, 0],
                     [0, 1, 0, 0],
@@ -499,7 +501,7 @@ function draw_canvas(){
     }
  
     // grid border
-    if(document.getElementById("do_grid").checked) {
+    /*if(document.getElementById("do_grid").checked) {
         draw_contour(context, d_f, w, h, grid_size, distance);
     }
 
@@ -507,9 +509,9 @@ function draw_canvas(){
     if(document.getElementById("do_optimized").checked) {
         draw_contour_optimized(context, d_f, w, h, grid_size, distance);
     }
-    
+    */
     // splixels
-    if(document.getElementById("do_splixels").checked) {
+    if(document.getElementById("do_grid").checked || document.getElementById("do_optimized").checked || document.getElementById("do_splixels").checked) {
         draw_contour_splixels(context, d_f, w, h, grid_size, distance);
     }
     
@@ -618,10 +620,26 @@ function tick() {
         document.getElementById("distance_input").value = distance;
         draw_canvas();
     }
+    // contours
+    if(document.getElementById("do_optimized").checked && _t1 != 1.0) {
+       _t1 += 0.125;
+       draw_canvas();
+    }
+    if(!document.getElementById("do_optimized").checked && _t1 != 0.0) {
+       _t1 -= 0.125;
+       draw_canvas();
+    }
+    if(document.getElementById("do_splixels").checked && _t3 != 1.0) {
+       _t3 += 0.125;
+       draw_canvas();
+    }
+    if(!document.getElementById("do_splixels").checked && _t3 != 0.0) {
+       _t3 -= 0.125;
+       draw_canvas();
+    }
+
     setTimeout( function(){tick();}, 1000.0 / FPS);
 }
-
-tick(); // let it tick always
     </script>
   </head>
   <body>
@@ -643,8 +661,8 @@ tick(); // let it tick always
     <button type="button" onclick="inc('distance')">+</button>
     <button type="button" onclick="alter_animation_d(+grid_size)">&gt;&gt;</button>
     <br>
-    <input type="checkbox" id="do_grid" onclick="draw_canvas();"/><label for="do_grid">Grid border</label>
-    <input type="checkbox" id="do_optimized" checked onclick="draw_canvas();"/><label for="do_optimized">Surface mesh</label>
+    <input type="checkbox" id="do_grid" checked onclick="draw_canvas();"/><label for="do_grid">Grid border</label>
+    <input type="checkbox" id="do_optimized" onclick="draw_canvas();"/><label for="do_optimized">Surface mesh</label>
     <input type="checkbox" id="do_splixels" onclick="draw_canvas();"/><label for="do_splixels"> Splixels</label>
     <br>
     <input type="checkbox" id="draw_distances"onclick="draw_canvas();"/><label for="draw_distances">Show Distance</label>
@@ -654,6 +672,7 @@ tick(); // let it tick always
     <canvas id="canvas" width=640 height=640></canvas>
     <script language="JavaScript">
     init_canvas();
+    tick(); // let it tick always
     </script>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
