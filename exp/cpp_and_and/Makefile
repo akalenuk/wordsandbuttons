@@ -8,4 +8,6 @@ all:
 	clang++ -O2 -std=c++14 -march=native mul.cpp -o mul
 	./mul
 	rm ./mul
-
+	clang++ -O2 -std=c++14 -march=native minus_mul.cpp -o minus_mul
+	./minus_mul
+	rm ./minus_mul
