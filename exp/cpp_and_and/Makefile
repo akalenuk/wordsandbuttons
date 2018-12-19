@@ -11,3 +11,9 @@ all:
 	clang++ -O2 -std=c++14 -march=native minus_mul.cpp -o minus_mul
 	./minus_mul
 	rm ./minus_mul
+	clang++ -O2 -std=c++14 -march=native andand_double.cpp -o andand_double
+	./andand_double
+	rm ./andand_double
+	clang++ -O2 -std=c++14 -march=native minus_mul_double.cpp -o minus_mul_double
+	./minus_mul_double
+	rm ./minus_mul_double
