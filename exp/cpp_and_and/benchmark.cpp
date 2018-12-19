@@ -4,22 +4,21 @@
 #include <array>
 
 int main() {
-    using TheType = volatile int;
-    constexpr auto TheSize = 65536 * 16;
+    using TheType = int;
+    constexpr auto TheSize = 16 * 10000000;
     std::mt19937 rng(0);
     std::uniform_int_distribution<TheType> distribution(0, 1);
-    std::array<TheType, TheSize> xs;
+    std::vector<TheType> xs(TheSize);
     for (TheType &digit : xs) {
         digit = distribution(rng);
     }
    
     volatile auto four_1_in_a_row = 0u;
     auto start = std::chrono::system_clock::now();
-    for (auto i = 0u; i < TheSize - 3; ++i)
+    for (auto i = 0u; i < TheSize - 3; i += 1)
         if(xs[i] == 1 && xs[i+1] == 1 && xs[i+2] == 1 && xs[i+3] == 1)
-//        if((xs[i] - 1) * (xs[i+1] - 1) * (xs[i+2] - 1) * (xs[i+3] - 1))
             four_1_in_a_row++; 
     auto end = std::chrono::system_clock::now();
     
-    std::cout << "time: " << (end-start).count() << "  1111s: " << four_1_in_a_row << "\n";
+    std::cout << "time: " << (end-start).count() * 1e-9  << "  1111s: " << four_1_in_a_row << "\n";
 }
