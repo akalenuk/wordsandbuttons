@@ -17,3 +17,6 @@ all:
 	clang++ -O2 -std=c++14 -march=native minus_mul_plus_double.cpp -o minus_mul_double_plus
 	./minus_mul_double_plus
 	rm ./minus_mul_double_plus
+	clang++ -O2 -std=c++14 -march=native compare_zero.cpp -o compare_zero
+	./compare_zero
+	rm ./compare_zero
