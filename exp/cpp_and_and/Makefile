@@ -19,4 +19,20 @@ all:
 	rm ./minus_mul_double_plus
 	clang++ -O2 -std=c++14 -march=native compare_zero.cpp -o compare_zero
 	./compare_zero
-	rm ./compare_zero
+	rm compare_zero
+s:
+	clang++ -O2 -std=c++14 -march=native -S andand.cpp -o andand.s
+	clang++ -O2 -std=c++14 -march=native -S and.cpp -o and.s
+	clang++ -O2 -std=c++14 -march=native -S mul.cpp -o mul.s
+	clang++ -O2 -std=c++14 -march=native -S minus_mul_plus.cpp -o minus_mul_plus.s
+	clang++ -O2 -std=c++14 -march=native -S andand_double.cpp -o andand_double.s
+	clang++ -O2 -std=c++14 -march=native -S minus_mul_plus_double.cpp -o minus_mul_double_plus.s
+	clang++ -O2 -std=c++14 -march=native -S compare_zero.cpp -o compare_zero.s
+clean:
+	rm ./andand.s
+	rm ./and.s
+	rm ./mul.s
+	rm ./minus_mul_plus.s
+	rm ./andand_double.s
+	rm ./minus_mul_double_plus.s
+	rm ./compare_zero.s
