@@ -295,20 +295,54 @@ function reveal(no){
 Challenge your performance intuition with C++ operators
     </h1>
     <p>
-...
+I made a mistake. More of a typo really, I wrote “bitwise and” instead of “logical and” operator. A coleague of mine noticed that during the code review and said something like this. “You shouldn't use bitwise operators instead of logical ones, the latter do <a href="https://en.wikipedia.org/wiki/Short-circuit_evaluation">short-circuiting</a>.”
     </p>
-
     <p>
-Here is a benchmark example. It has no dependencies, and it's C++14 standard compliant.
+Both pieces of the sentence are valid. You shouldn't use bitwise operators instead of logical ones. Logical operators in C++ do perform short-circuit evaluation. That's true. But the invisible implication between the two pieces is wrong. It's much more complicated than that.
     </p>
-    <pre style="background-color: #bbbbff; width: 505pt;">
+    <p>
+Short-circuiting may be or may be not benefitial to the perfromance. It may or may be not perfromed on bitwise operators. And sometimes you're better off without doing logic the most logical way.
+    </p>
+    <p>
+I want to propose a game. Let's measure stuff and see if we can predict the measurements before they come. We did <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_magic_squares.html">a similar thing</a> last year, and that was fun so why not?
+    </p>
+    <p>
+So here is the benchmark example.
+    </p>
+    <table><tr>
+    <td>
+    <pre style="width: 505pt;">
+#include &lt;chrono&gt;
+#include &lt;iostream&gt;
+#include &lt;random&gt;
+#include &lt;array&gt;
 
-    </pre>
+int main() {
+  using <b>TheType</b> = int;
+  constexpr auto <b>TheSize</b> = 16 * 10000000;
+  std::mt19937 rng(0);
+  std::uniform_int_distribution&lt;<b>TheType</b>&gt; distribution(0, 1);
+  std::vector&lt;<b>TheType</b>&gt; xs(<b>TheSize</b>);
+  for (auto& digit : xs) {
+    digit = distribution(rng);
+  }
+   
+  volatile auto four_1_in_a_row = 0u;
+  auto start = std::chrono::system_clock::now();
+  <b>for (auto i = 0u; i &lt; TheSize - 3; i += 1)
+    if(xs[i] == 1 && xs[i+1] == 1 && xs[i+2] == 1 && xs[i+3] == 1)
+      four_1_in_a_row++;</b>
+  auto end = std::chrono::system_clock::now();
+    
+  std::cout &lt;&lt; "time: " &lt;&lt; (end-start).count() * 1e-9  
+    &lt;&lt; "  1111s: " &lt;&lt; four_1_in_a_row &lt;&lt; "\n";
+}</pre>
+    </td></tr></table>
     <p>
 Using your intuition and best judgment, please estimate their <i>relative</i> effectiveness. Use the slider below the code samples.
     </p>
     <p class="comment">
-My times are measured on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz. <br>All the code compiled with g++ 5.4.0 -std=c++11 -O2.
+Times are measured on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz. <br>All the code compiled with clang 3.8.0-2ubuntu4 -std=c++14 -O2.
     </p>
 
 
