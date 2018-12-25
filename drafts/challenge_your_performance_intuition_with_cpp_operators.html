@@ -102,15 +102,15 @@ button{
     <script language="JavaScript">
 var slider_set = [false, false, false, false,  false, false, false, false,  false, false];
 var slider_true_xs = [
-    7.5 / (7.5 + 7.5) * 512,
-    7.5 / (7.5 + 8.0) * 512,
-    7.5 / (7.5 + 3.0) * 512,
-    3.0 / (3.0 + 4.0) * 512,
+    7.6 / (7.6 + 7.6) * 512,
+    7.6 / (7.6 + 8.2) * 512,
+    7.6 / (7.6 + 3.1) * 512,
+    3.1 / (3.1 + 4.2) * 512,
 
-    7.5 / (7.5 + 7.5) * 512,
-    7.5 / (7.5 + 4.0) * 512,
-    7.5 / (7.5 + 7.5) * 512,
-    7.5 / (7.5 + 7.5) * 512
+    7.6 / (7.6 + 7.7) * 512,
+    3.1 / (3.1 + 4.2) * 512,
+    7.7 / (7.6 + 7.6) * 512,
+    7.6 / (7.6 + 7.6) * 512
     ];
 var slider_user_xs = [256, 256, 256, 256,  256, 256, 256, 256];
 var slider_xs = [256, 256, 256, 256,  256, 256, 256, 256];
@@ -588,7 +588,7 @@ They are almost the same.
     <button type="button" onclick="reveal(2)" id="button_3">Reveal the truth</button>
     <div id="the_truth_3" style="display:none;">
     <p>
-And this works perfectly. The code is a few lines longer, but there are no comparisons until the very end. Everything is blunt number-crunching. Computers love this type of code.
+And this works perfectly. The code is a few lines longer but there are no comparisons until the very end. Everything is blunt number crunching. Computers love this kind of code.
     </p>
     <table><tr>
     <td>
@@ -651,7 +651,6 @@ And this works perfectly. The code is a few lines longer, but there are no compa
   <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
     </pre>
     </td></tr></table>
-    </p>
     </div>
     <script language="JavaScript">
     init_slider(2);
@@ -661,7 +660,7 @@ And this works perfectly. The code is a few lines longer, but there are no compa
 Round 4. * vs abs
     </h1>
     <p>
-
+We don't really need multiplications. We don't really need squared error. Why don't we calcualate an absolute error instead?
     </p>
     <table><tr>
     <td id="left_4">
@@ -696,7 +695,8 @@ They are almost the same.
     <button type="button" onclick="reveal(3)" id="button_4">Reveal the truth</button>
     <div id="the_truth_4" style="display:none;">
     <p>
-The truth
+That's why. Getting an absolute value of an int is not a tribial job. It's not about clipping a bit off, it is a fair test and a conditional move that are heavier than a simple mul.
+    </p>
     <table><tr>
     <td>
     <pre>
@@ -774,7 +774,9 @@ The truth
   <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
     </pre>
     </td></tr></table>
-    </p>
+    <p>
+What's interesting, in floating point numbers, where getting an absolute value <i>is</i> about clipping a bit off, <a href="https://godbolt.org/z/ZoFInw">there are no tests or conditions</a>.
+    </p>    
     </div>
     <script language="JavaScript">
     init_slider(3);
@@ -784,7 +786,7 @@ The truth
 Round 5. int vs double
     </h1>
     <p>
-...
+The question is, will there be gain if we simply translate our code to work with doubles?
     </p>
     <table><tr>
     <td id="left_5">
@@ -820,7 +822,8 @@ They are almost the same.
     <button type="button" onclick="reveal(4)" id="button_5">Reveal the truth</button>
     <div id="the_truth_5" style="display:none;">
     <p>
-The truth
+Not really, no. The operations are different, but essentially the code is the same. It's still about comparing and jumping.
+    </p>
     <table><tr>
     <td>
     <pre>
@@ -884,36 +887,39 @@ The truth
   <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
     </pre>
     </td></tr></table>
-    </p>
     </div>
     <script language="JavaScript">
     init_slider(4);
     </script>
     
     <h2>
-Round 6. ==, && vs *, +, - but all in double
+Round 6. *, +, - int vs double
     </h1>
     <p>
-...
+But if we change the code to avoid logic, will there be gain?
     </p>
     <table><tr>
     <td id="left_6">
     <pre>
 ...
-  using TheType = double;
+inline int sq(int x) {
+  return x*x;
+}    
+...
+  using TheType = int;
 ...
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1 
-    && xs[i+1] == 1 
-    && xs[i+2] == 1 
-    && xs[i+3] == 1)
+    if(sq(xs[i] - 1) 
+     + sq(xs[i+1] - 1)
+     + sq(xs[i+2] - 1)
+     + sq(xs[i+3] - 1) == 0)
       ++four_1_in_a_row; 
     </pre>
     </td>
     <td id="right_6">
     <pre>
 ...
-inline int sq(int x) {
+inline double sq(int x) {
   return x*x;
 }
 ...
@@ -934,7 +940,8 @@ They are almost the same.
     <button type="button" onclick="reveal(5)" id="button_6">Reveal the truth</button>
     <div id="the_truth_6" style="display:none;">
     <p>
-The truth
+No. The code is conceptually the same though, so the loss is also not that drastic.
+    </p>
     <table><tr>
     <td>
     <pre>
@@ -942,29 +949,27 @@ The truth
   .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
 .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
 <span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #621369">vmovsd</span>  -24(%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0
-  <span style="color: #4d3309">vucomisd</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#7:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #621369">vmovsd</span>  -16(%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0
-  <span style="color: #4d3309">vucomisd</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#8:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #621369">vmovsd</span>  -8(%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0
-  <span style="color: #4d3309">vucomisd</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#9:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #621369">vmovsd</span>  (%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0
-  <span style="color: #4d3309">vucomisd</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#10:   #   in Loop: Header=BB0_6 Depth=1</span>
+  <span style="color: #665002">movl</span>  -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #052546">eax</span>
+  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #052546">eax</span>
+  <span style="color: #744661">imull</span>  %<span style="color: #052546">eax</span>, %<span style="color: #052546">eax</span>
+  <span style="color: #665002">movl</span>  -8(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #473411">ecx</span>
+  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #473411">ecx</span>
+  <span style="color: #744661">imull</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #473411">ecx</span>
+  <span style="color: #7b0d35">addl</span>  %<span style="color: #052546">eax</span>, %<span style="color: #473411">ecx</span>
+  <span style="color: #665002">movl</span>  -4(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #052546">eax</span>
+  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #052546">eax</span>
+  <span style="color: #744661">imull</span>  %<span style="color: #052546">eax</span>, %<span style="color: #052546">eax</span>
+  <span style="color: #7b0d35">addl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #052546">eax</span>
+  <span style="color: #665002">movl</span>  (%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #473411">ecx</span>
+  <span style="color: #665002">movl</span>  <span style="color: #417802">$</span>1, %<span style="color: #354a6d">edx</span>
+  <span style="color: #24690f">subl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #354a6d">edx</span>
+  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #473411">ecx</span>
+  <span style="color: #744661">imull</span>  %<span style="color: #354a6d">edx</span>, %<span style="color: #473411">ecx</span>
+  <span style="color: #025d32">cmpl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #052546">eax</span>
+  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>7
+<span style="color: #778877"># BB#17:   #   in Loop: Header=BB0_6 Depth=1</span>
   <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11:  # %.<span style="color: #5e7876">_crit_edge</span>
+.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>7:   # %.<span style="color: #04175e">backedge</span>
 <span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
   <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
   <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
@@ -1003,7 +1008,6 @@ The truth
   <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>1<span style="color: #077d4b">_</span>6
     </pre>
     </td></tr></table>
-    </p>
     </div>
     <script language="JavaScript">
     init_slider(5);
@@ -1013,7 +1017,7 @@ The truth
 Round 7. double vs float
     </h1>
     <p>
-...
+That sound a bit like cheating because with single precision types we would have to read two times less from the memory but let's give it a go.
     </p>
     <table><tr>
     <td id="left_7">
@@ -1049,7 +1053,8 @@ They are almost the same.
     <button type="button" onclick="reveal(6)" id="button_7">Reveal the truth</button>
     <div id="the_truth_7" style="display:none;">
     <p>
-The truth
+And that's the most peculiar thing. Although the code now reads much less from the memory, performance wise it's almost identical to its original form.
+    </p>
     <table><tr>
     <td>
     <pre>
@@ -1121,6 +1126,8 @@ The truth
   <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
     </pre>
     </td></tr></table>
+    <p>
+This has probably something to do with the bus and the CPU working asynchronously. If the CPU is busy enough, the bus load doesn't matter.
     </p>
     </div>
     <script language="JavaScript">
@@ -1131,7 +1138,7 @@ The truth
 Round 8. 1 vs 0
     </h1>
     <p>
-...
+This is the bonus round. There is a notion, right along with the short-circuiting being good for perfromance, that the comparison with zero is cheaper than any other comparison. Let's try it out.
     </p>
     <table><tr>
     <td id="left_8">
@@ -1161,7 +1168,8 @@ They are almost the same.
     <button type="button" onclick="reveal(7)" id="button_8">Reveal the truth</button>
     <div id="the_truth_8" style="display:none;">
     <p>
-The truth
+Of course, it isn't. It may be contextually beneficial to check agains zero because with Intel architecture there is a dedicated zero flag, and most of the time you can read it from the previous operation skipping the comparison part altogether. But in our example there is no operation to load the zero flag so the code on both sides is almost identical.
+    </p>
     <table><tr>
     <td>
     <pre>
@@ -1217,7 +1225,6 @@ The truth
   <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
     </pre>
     </td></tr></table>
-    </p>
     </div>
     <script language="JavaScript">
     init_slider(7);
@@ -1228,7 +1235,7 @@ The truth
 Congratulations!
     </h2>
     <p>
-You scored <span id="score"></span> pixels of error. As a reference, if you leave every slider untouched there would be <span id="default_score"></span> pixels of error.
+You scored <span id="score"></span> pixels of error. As a reference, if you leave every slider untouched there would be exactly <span id="default_score"></span> pixels of error.
     </p>
     </div>
 
