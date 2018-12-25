@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cubes test</title>
+    <meta name="keywords" content="iterative,algorithms,guide,tutorial,learning">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.results {
+    font-family: sans-serif;
+    font-size: 14pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.formula {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: italic;
+    width: 505pt;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+}
+
+input[type="text"] {
+    width: 32pt;
+    height: 22pt;
+    font-size: 16pt;
+    text-align: center;
+}
+
+button {
+    width: 32pt;
+    height: 26pt;
+    font-size: 16pt;
+    text-align: center;
+}
+    </style>
+    <script language="JavaScript">
+
+// client
+var w = 640.0;
+var h = 640.0;
+
+// algorithm
+var grid_size = 64.0;
+
+
+function init_canvas(){
+    var canvas = document.getElementById("canvas");
+    canvas.addEventListener('mousedown', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+    }, false);
+     
+    canvas.addEventListener('mousemove', function(e){
+        if(e.buttons == 1){
+            canvas_rect = canvas.getBoundingClientRect();
+            draw_canvas();
+        }
+    }, false);
+    
+    canvas.addEventListener('mouseup', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        draw_canvas();
+    }, false);
+    
+    draw_canvas();
+}
+
+
+function draw_canvas(){
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // distance function
+    var distance_field = context.createImageData(w, h);
+    for (var i = 0; i < distance_field.data.length; ++i)
+        distance_field.data[i] = 0;
+    
+    // grid
+    context.beginPath();
+    for(var i = grid_size; i <= h; i += grid_size) {
+        context.moveTo(0.0, i);
+        context.lineTo(w, i);
+    }
+    for(var j = grid_size; j <= w; j += grid_size) {
+        context.moveTo(j, 0.0);
+        context.lineTo(j, h);
+    }
+    context.strokeStyle="#999999";
+    context.lineWidth=1;
+    context.stroke();
+    context.closePath();
+}
+
+
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name+"_input");
+    counter.value = Number(counter.value) + 1;
+    eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name+"_input");
+    counter.value = Number(counter.value) - 1;
+    eval('change_' + counter_name + '()');
+}
+
+function reset_all() {
+    draw_canvas();
+}
+
+function undo_last() {
+    draw_canvas();
+}
+
+    </script>
+  </head>
+  <body>
+    <center>
+    <canvas id="canvas" width=640 height=640></canvas>
+    <script language="JavaScript">
+    init_canvas();
+    tick(); // let it tick always
+    </script>
+    <div style="text-align:right; width:640px; padding-bottom:12pt;">
+        <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
+        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
+    </div>
+    </center>
+  </body>
+</html>
