@@ -106,17 +106,24 @@ var w = 640.0;
 var h = 640.0;
 
 // algorithm
-var grid_size = 64.0;
+var pixel_size = 64.0;
+var grid_size = 32.0;
 
 // pixels
-var iw = Math.floor(w / grid_size) + 1;
-var ih = Math.floor(h / grid_size) + 1;
+var iw = Math.floor(w / pixel_size) + 1;
+var ih = Math.floor(h / pixel_size) + 1;
 var pixels = [];
 for(var i = 0; i < ih; ++i) {
     pixelsi = []
     for(var j = 0; j <iw; ++j)
         pixelsi.push(0);
     pixels.push(pixelsi);
+}
+
+function pixel_in(x, y) {
+    var in_pixels_i = Math.floor(y / pixel_size);
+    var in_pixels_j = Math.floor(x / pixel_size);
+    return pixels[in_pixels_i][in_pixels_j];
 }
 
 function init_canvas(){
@@ -136,8 +143,8 @@ function init_canvas(){
         canvas_rect = canvas.getBoundingClientRect();
         var j = e.clientX - canvas_rect.left;
         var i = e.clientY - canvas_rect.top;
-        var in_pixels_i = Math.floor(i / grid_size);
-        var in_pixels_j = Math.floor(j / grid_size);
+        var in_pixels_i = Math.floor(i / pixel_size);
+        var in_pixels_j = Math.floor(j / pixel_size);
         pixels[in_pixels_i][in_pixels_j] = 1 - pixels[in_pixels_i][in_pixels_j];
         draw_canvas();
     }, false);
@@ -158,8 +165,8 @@ function draw_canvas(){
     for (var i = 0; i < pixel_field.data.length; i += 4) {
         var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
         var on_canvas_j = Math.floor(i / 4) % w;
-        var in_pixels_i = Math.floor(on_canvas_i / grid_size);
-        var in_pixels_j = Math.floor(on_canvas_j / grid_size);
+        var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
+        var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
         if(pixels[in_pixels_i][in_pixels_j] == 1) {
             pixel_field.data[i + 0] = 0x55;
             pixel_field.data[i + 1] = 0x55;
@@ -176,11 +183,11 @@ function draw_canvas(){
     
     // grid
     context.beginPath();
-    for(var i = grid_size; i <= h; i += grid_size) {
+    for(var i = pixel_size; i <= h; i += pixel_size) {
         context.moveTo(0.0, i);
         context.lineTo(w, i);
     }
-    for(var j = grid_size; j <= w; j += grid_size) {
+    for(var j = pixel_size; j <= w; j += pixel_size) {
         context.moveTo(j, 0.0);
         context.lineTo(j, h);
     }
@@ -188,6 +195,8 @@ function draw_canvas(){
     context.lineWidth=1;
     context.stroke();
     context.closePath();
+    
+    // contour
 }
 
 
