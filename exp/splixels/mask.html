@@ -174,10 +174,14 @@ function polynomial_in_x(A, x, n){
 function pixel_in(x, y) {
     var in_pixels_i = Math.floor(y / pixel_size);
     var in_pixels_j = Math.floor(x / pixel_size);
-    if(in_pixels_i >= pixels.length || in_pixels_i < 0) 
-        return 0;
-    if(in_pixels_j >= pixels[0].length || in_pixels_j < 0)
-        return 0;
+    if(in_pixels_i >= pixels.length)
+        return pixel_in(x, (pixels.length-1) * pixel_size);
+    if(in_pixels_i < 0) 
+        return pixel_in(x, 0);
+    if(in_pixels_j >= pixels[0].length)
+        return pixel_in((pixels[0].length-1) * pixel_size, y);
+    if(in_pixels_j < 0)
+        return pixel_in(0, y);
     return pixels[in_pixels_i][in_pixels_j];
 }
 
@@ -378,6 +382,7 @@ function undo_last() {
   </script>
   </head>
   <body>
+    <br>
     <center>
     <canvas id="canvas" width=640 height=640></canvas>
     <script language="JavaScript">
