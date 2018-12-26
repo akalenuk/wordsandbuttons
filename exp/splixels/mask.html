@@ -196,10 +196,8 @@ function gsy(x, y) {
 function dx(x, y) {
     var A = [[0.0, 0.0], [0.0, 0.0]];
     var B = [0.0, 0.0];
-    for(var di = -2; di <= 2; ++di) {
-        for(var dj = -2; dj <= 2; ++dj) {
-            var xj = x + dj * pixel_size;
-            var yi = y + di * pixel_size;
+    for(var yi = y - 1.5 * pixel_size; yi <= y + 1.5 * pixel_size; yi += pixel_size) {
+        for(var xj = x - 1.5 * pixel_size; xj <= x + 1.5 * pixel_size; xj += pixel_size) {
             var w = 1 / (1 + Math.pow(Math.pow(x - xj, 2) + Math.pow(y - yi, 2), 0.5));
             A[0][0] += w;
             A[0][1] += w * (xj - x);
@@ -210,16 +208,14 @@ function dx(x, y) {
         }
     }
     var px = solved_linear(A, B, 2);
-    return px[1];
+    return px[1] * pixel_size;
 }
 
 function dy(x, y) {
     var A = [[0.0, 0.0], [0.0, 0.0]];
     var B = [0.0, 0.0];
-    for(var di = -2; di <= 2; ++di) {
-        for(var dj = -2; dj <= 2; ++dj) {
-            var xj = x + dj * pixel_size;
-            var yi = y + di * pixel_size;
+    for(var yi = y - 1.5 * pixel_size; yi <= y + 1.5 * pixel_size; yi += pixel_size) {
+        for(var xj = x - 1.5 * pixel_size; xj <= x + 1.5 * pixel_size; xj += pixel_size) {
             var w = 1 / (1 + Math.pow(Math.pow(x - xj, 2) + Math.pow(y - yi, 2), 0.5));
             A[0][0] += w;
             A[0][1] += w * (yi - y);
@@ -230,7 +226,7 @@ function dy(x, y) {
         }
     }
     var px = solved_linear(A, B, 2);
-    return px[1];
+    return px[1] * pixel_size;
 }
 
 
