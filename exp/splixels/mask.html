@@ -113,11 +113,15 @@ var grid_size = 64.0;
 var iw = Math.floor(w / pixel_size) + 1;
 var ih = Math.floor(h / pixel_size) + 1;
 var pixels = [];
-for(var i = 0; i < ih; ++i) {
-    pixelsi = []
-    for(var j = 0; j <iw; ++j)
-        pixelsi.push(0);
-    pixels.push(pixelsi);
+
+function reset_pixels() {
+    pixels = [];
+    for(var i = 0; i < ih; ++i) {
+        pixelsi = []
+        for(var j = 0; j <iw; ++j)
+            pixelsi.push(0);
+        pixels.push(pixelsi);
+    }
 }
 
 // solver
@@ -235,6 +239,7 @@ function dy(x, y) {
 
 
 function init_canvas(){
+    reset_pixels();
     var canvas = document.getElementById("canvas");
     canvas.addEventListener('mousedown', function(e){
         canvas_rect = canvas.getBoundingClientRect();
@@ -404,10 +409,7 @@ function dec(counter_name) {
 }
 
 function reset_all() {
-    draw_canvas();
-}
-
-function undo_last() {
+    reset_pixels();
     draw_canvas();
 }
 
@@ -421,7 +423,6 @@ function undo_last() {
     init_canvas();
     </script>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
-        <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
     </center>
