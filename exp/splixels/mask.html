@@ -189,13 +189,6 @@ function pixel_in(x, y) {
     return pixels[in_pixels_i][in_pixels_j];
 }
 
-function gsx(x, y) {
-    return 0.0;
-}
-
-function gsy(x, y) {
-    return 0.0;
-}
 
 const nd = 2.5;
 
@@ -236,6 +229,23 @@ function dy(x, y) {
     var px = solved_linear(A, B, 2);
     return px[1] * pixel_size;
 }
+
+function grid_size_limited(x) {
+    if(x < -grid_size)
+        return -grid_size;
+    if(x > +grid_size)
+        return +grid_size;
+    return x;
+}
+
+function gsx(x, y) {
+    return grid_size_limited(-dx(x, y) * pixel_size);
+}
+
+function gsy(x, y) {
+    return grid_size_limited(-dy(x, y) * pixel_size);
+}
+
 
 
 function init_canvas(){
