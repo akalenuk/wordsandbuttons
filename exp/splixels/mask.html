@@ -192,7 +192,11 @@ function pixel_in(x, y) {
 
 const nd = 2.5;
 
-function dx(x, y) {
+function len(x, y) {
+    return Math.sqrt(x*x + y*y);
+}
+
+function dx_from_linear(x, y) {
     var A = [[0.0, 0.0], [0.0, 0.0]];
     var B = [0.0, 0.0];
     for(var yi = y - nd * pixel_size; yi <= y + nd * pixel_size; yi += pixel_size) {
@@ -208,10 +212,10 @@ function dx(x, y) {
         }
     }
     var px = solved_linear(A, B, 2);
-    return px[1] * pixel_size;
+    return px[1];
 }
 
-function dy(x, y) {
+function dy_from_linear(x, y) {
     var A = [[0.0, 0.0], [0.0, 0.0]];
     var B = [0.0, 0.0];
     for(var yi = y - nd * pixel_size; yi <= y + nd * pixel_size; yi += pixel_size) {
@@ -227,7 +231,11 @@ function dy(x, y) {
         }
     }
     var px = solved_linear(A, B, 2);
-    return px[1] * pixel_size;
+    return px[1];
+}
+
+function dxy(x, y) {
+    return [dx_from_linear(x,y) * pixel_size, dy_from_linear(x,y) * pixel_size];
 }
 
 function grid_size_limited(x) {
@@ -238,12 +246,21 @@ function grid_size_limited(x) {
     return x;
 }
 
+function dx(x, y) {
+    return dxy(x, y)[0];
+}
+
+function dy(x, y) {
+    return dxy(x, y)[1];
+}
+
+
 function gsx(x, y) {
-    return grid_size_limited(-dx(x, y) * pixel_size);
+    return 0.0;
 }
 
 function gsy(x, y) {
-    return grid_size_limited(-dy(x, y) * pixel_size);
+    return 0.0;
 }
 
 
