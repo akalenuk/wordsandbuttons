@@ -279,12 +279,12 @@ function dy(x, y) {
 
 function gsx(x, y) {
 //    return 0;
-    return grid_size_limited(-dx(x, y) * dy_from_linear(x, y)[0] * pixel_size);
+    return grid_size_limited(-dx(x, y) * dx_from_linear(x, y)[0] * pixel_size);
 }
 
 function gsy(x, y) {
 //    return 0;
-    return grid_size_limited(-dy(x, y) * dx_from_linear(x, y)[0] * pixel_size);
+    return grid_size_limited(-dy(x, y) * dy_from_linear(x, y)[0] * pixel_size);
 }
 
 
@@ -361,14 +361,19 @@ function draw_canvas(){
     context.closePath();
     
     // contour
-    context.beginPath();
     for(var i = 0; i <= h - grid_size; i += grid_size) {
         for(var j = 0; j <= w - grid_size; j += grid_size) {
+        
+            context.fillStyle="#000000";
+            context.fillText(dx_from_linear(j, i)[0].toFixed(5), j, i);
+            context.fillText(dx_from_linear(j, i)[1].toFixed(5), j, i+16);
+            
             var do_horizontal = 
                 pixel_in(j + 0.5 * grid_size, i - 0.5 * grid_size) != pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size);
             var do_vertical = 
                 pixel_in(j - 0.5 * grid_size, i + 0.5 * grid_size) != pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size);
             if(do_horizontal) {
+                context.beginPath();
                 var ds = pixel_in(j + 0.5 * grid_size, i - 0.5 * grid_size) < pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) ? 1.0 : -1.0;
                 var p1x = j + gsx(j, i);
                 var p1y = i + gsy(j, i);
@@ -402,8 +407,16 @@ function draw_canvas(){
                     context.moveTo(x1, y1);
                     context.lineTo(x2, y2);
                 }
+                if((i / grid_size + j / grid_size) % 2 == 0)
+                    context.strokeStyle="#886633";
+                else
+                    context.strokeStyle="#33AA66";
+                context.lineWidth=3;
+                context.stroke();
+                context.closePath();
             }
             if(do_vertical) {
+                context.beginPath();
                 var ds = pixel_in(j - 0.5 * grid_size, i + 0.5 * grid_size) < pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) ? -1.0 : 1.0;
                 var p1x = j + gsx(j, i);
                 var p1y = i + gsy(j, i);
@@ -437,13 +450,16 @@ function draw_canvas(){
                     context.moveTo(x1, y1);
                     context.lineTo(x2, y2);
                 }
+                if((i / grid_size + j / grid_size) % 2 == 0)
+                    context.strokeStyle="#AA3366";
+                else
+                    context.strokeStyle="#3366AA";
+                context.lineWidth=3;
+                context.stroke();
+                context.closePath();
             }
         }
     }
-    context.strokeStyle="#AA3366";
-    context.lineWidth=3;
-    context.stroke();
-    context.closePath();
 }
 
 
