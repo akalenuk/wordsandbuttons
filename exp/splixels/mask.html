@@ -165,6 +165,15 @@ function solved_linear(A, B, n){
     return X;
 }
 
+function solved_linear2_or_zero(A, B) {
+    var d = (A[0][0]*A[1][1] - A[0][1]*A[1][0])
+    if(d == 0.0)
+        return [0.0, 0.0];
+    var x1 = (-A[0][1]*B[1] + A[1][1]*B[0]) / d;
+    var x2 = ( A[0][0]*B[1] - A[1][0]*B[0]) / d;
+    return [x1, x2];
+}
+
 // polynomial
 function polynomial_in_x(A, x, n){
     var y = 0.0;
@@ -211,8 +220,9 @@ function dx_from_linear(x, y) {
             B[1] += w * (xj - x) * pixel_in(xj, yi);
         }
     }
-    var px = solved_linear(A, B, 2);
+    var px = solved_linear2_or_zero(A, B);
     return px[1];
+//    return 0;
 }
 
 function dy_from_linear(x, y) {
@@ -230,14 +240,17 @@ function dy_from_linear(x, y) {
             B[1] += w * (yi - y) * pixel_in(xj, yi);
         }
     }
-    var px = solved_linear(A, B, 2);
+    var px = solved_linear2_or_zero(A, B);
     return px[1];
+//    return 0;
 }
 
 function dxy(x, y) {
     var dx = dx_from_linear(x, y);
     var dy = dy_from_linear(x, y);
     var l = len(dx, dy);
+    if(l < 1e-5)
+        return [0.0, 0.0];
     return [dx / l, dy / l];
 }
 
@@ -259,11 +272,13 @@ function dy(x, y) {
 
 
 function gsx(x, y) {
-    return grid_size_limited(-dx(x, y) * pixel_size / 2);
+    return 0;
+//    return grid_size_limited(-dx(x, y) * pixel_size / 2);
 }
 
 function gsy(x, y) {
-    return grid_size_limited(-dy(x, y) * pixel_size / 2);
+    return 0;
+//    return grid_size_limited(-dy(x, y) * pixel_size / 2);
 }
 
 
