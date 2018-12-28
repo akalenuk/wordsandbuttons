@@ -85,7 +85,7 @@ form {
 }
 
 input[type="text"] {
-    width: 64pt;
+    width: 48pt;
     height: 22pt;
     font-size: 16pt;
     text-align: center;
@@ -102,7 +102,7 @@ button {
 
 // client
 var w = 1024.0;
-var h = 640.0;
+var h = 1024.0;
 
 // algorithm
 var pixel_size = 64.0;
@@ -111,7 +111,24 @@ var grid_size = 64.0;
 // pixels
 var iw = Math.floor(w / pixel_size) + 1;
 var ih = Math.floor(h / pixel_size) + 1;
-var pixels = [];
+var pixels = [
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0],
+[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+[0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+[0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+[0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+[0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+[0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+];
 
 function reset_pixels() {
     pixels = [];
@@ -164,6 +181,7 @@ function solved_linear(A, B, n){
     return X;
 }
 
+// solver than returns 0, 0 if there is no solution
 function solved_linear2_or_zero(A, B) {
     var d = (A[0][0]*A[1][1] - A[0][1]*A[1][0])
     if(d == 0.0)
@@ -227,7 +245,6 @@ function dx_from_linear(x, y) {
     }
     var px = solved_linear2_or_zero(A, B);
     return px;
-//    return 0;
 }
 
 function dy_from_linear(x, y) {
@@ -246,7 +263,6 @@ function dy_from_linear(x, y) {
     }
     var px = solved_linear2_or_zero(A, B);
     return px;
-//    return 0;
 }
 
 function dxy(x, y) {
@@ -282,19 +298,16 @@ function dy(x, y) {
 
 
 function gsx(x, y) {
-//    return 0;
     return grid_size_limited(dx(x, y) * (0.5 - dy_from_linear(x, y)[0]) * grid_size * shiftd);
 }
 
 function gsy(x, y) {
-//    return 0;
     return grid_size_limited(dy(x, y) * (0.5 - dx_from_linear(x, y)[0]) * grid_size * shiftd);
 }
 
 
 
 function init_canvas(){
-    reset_pixels();
     var canvas = document.getElementById("canvas");
     canvas.addEventListener('mousedown', function(e){
         canvas_rect = canvas.getBoundingClientRect();
@@ -379,9 +392,8 @@ function draw_canvas(){
     context.stroke();
     context.closePath();    
     
-    var do_colors = document.getElementById("do_colors").checked;
-    
     // contour
+    var do_colors = document.getElementById("do_colors").checked;
     for(var i = 0; i <= h - grid_size; i += grid_size) {
         for(var j = 0; j <= w - grid_size; j += grid_size) {
             var do_horizontal = 
@@ -513,23 +525,23 @@ function reset_magic_numbers() {
   </script>
   </head>
   <body>
-    <br>
     <center>
-    grid_size: <input type="text" id="grid_size" value="32">
-    nd: <input type="text" id="nd" value="0.5">
-    weight: <input type="text" id="weight" value="4">
-    shiftd: <input type="text" id="shiftd" value="1.5">
-    <button type="button" onclick="reset_magic_numbers()">Change</button>
-    <input type="checkbox" id="do_colors" checked onclick="draw_canvas();"/><label for="do_colors">do colors</label>
     <br>
-    <canvas id="canvas" width=1024 height=640></canvas>
+    <br>
+    <canvas id="canvas" width=1024 height=1024></canvas>
+    <div style="text-align:right; width:1024px; padding-bottom:12pt;">
+        grid_size: <input type="text" id="grid_size" value="64">
+        nd: <input type="text" id="nd" value="0.5">
+        weight: <input type="text" id="weight" value="4">
+        shiftd: <input type="text" id="shiftd" value="1.5">
+        <button type="button" onclick="reset_magic_numbers()">&larr; Apply</button>
+        <input type="checkbox" id="do_colors" onclick="draw_canvas();"/><label for="do_colors">do colors</label>    
+        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset pixels</button>
+    </div>
+    </center>
     <script language="JavaScript">
     init_canvas();
     reset_magic_numbers();
     </script>
-    <div style="text-align:right; width:1024px; padding-bottom:12pt;">
-        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
-    </div>
-    </center>
   </body>
 </html>
