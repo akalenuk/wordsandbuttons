@@ -1,0 +1,544 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cubes test</title>
+    <meta name="keywords" content="iterative,algorithms,guide,tutorial,learning">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.results {
+    font-family: sans-serif;
+    font-size: 14pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.formula {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: italic;
+    width: 505pt;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+}
+
+input[type="text"] {
+    width: 48pt;
+    height: 22pt;
+    font-size: 16pt;
+    text-align: center;
+}
+
+button {
+    width: 128pt;
+    height: 26pt;
+    font-size: 16pt;
+    text-align: center;
+}
+    </style>
+    <script language="JavaScript">
+
+// client
+var w = 1024.0;
+var h = 1024.0;
+
+// algorithm
+var pixel_size = 64.0;
+var grid_size = 64.0;
+
+// pixels
+var iw = Math.floor(w / pixel_size) + 1;
+var ih = Math.floor(h / pixel_size) + 1;
+var pixels = [
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0],
+[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+[0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+[0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+[0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+[0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+[0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+];
+
+function reset_pixels() {
+    pixels = [];
+    for(var i = 0; i < ih; ++i) {
+        pixelsi = []
+        for(var j = 0; j <iw; ++j)
+            pixelsi.push(0);
+        pixels.push(pixelsi);
+    }
+}
+
+// solver
+function sign_0_positive(x){ // Math.sign like with no 0 option
+    if(x >= 0)
+        return 1.0;
+    return -1.0;
+}
+
+function underflow_padded(x){
+    if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
+        return 1.e-5 * sign_0_positive(x);
+    return x;
+}
+
+function solved_linear(A, B, n){
+    var X = [];
+    for (var i = 0; i < n; ++i)
+        X[i] = 0.0;
+
+    // triangulize
+    for (var i = 0; i < n-1; ++i)
+        for (var j = 0; j < i+1; ++j) {
+            r = A[i+1][j] / underflow_padded(A[j][j]);
+            A[i+1][j] = 0.;
+            for (var b_j = j+1; b_j < n; ++b_j){
+                A[i+1][b_j] -= A[j][b_j]*r;
+            }
+            B[i+1] -= B[j]*r;
+        }
+
+    // calculate xs
+    X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
+    for (var i = n-2; i >= 0; --i){
+        var s = 0.0;
+        for (var j = i; j < n; ++j){
+            s = s + A[i][j]*X[j];
+        }
+        X[i] = (B[i] - s) / underflow_padded(A[i][i]);
+    }
+    return X;
+}
+
+// solver than returns 0, 0 if there is no solution
+function solved_linear2_or_zero(A, B) {
+    var d = (A[0][0]*A[1][1] - A[0][1]*A[1][0])
+    if(d == 0.0)
+        return [0.0, 0.0];
+    var x1 = (-A[0][1]*B[1] + A[1][1]*B[0]) / d;
+    var x2 = ( A[0][0]*B[1] - A[1][0]*B[0]) / d;
+    return [x1, x2];
+}
+
+// polynomial
+function polynomial_in_x(A, x, n){
+    var y = 0.0;
+    for(var i = 0; i < n; ++i){
+        y += A[i] * Math.pow(x, i);
+    }
+    return y;
+}
+
+// algorithm
+function pixel_in(x, y) {
+    var in_pixels_i = Math.floor(y / pixel_size);
+    var in_pixels_j = Math.floor(x / pixel_size);
+    if(in_pixels_i >= pixels.length)
+        return pixel_in(x, (pixels.length-1) * pixel_size);
+    if(in_pixels_i < 0) 
+        return pixel_in(x, 0);
+    if(in_pixels_j >= pixels[0].length)
+        return pixel_in((pixels[0].length-1) * pixel_size, y);
+    if(in_pixels_j < 0)
+        return pixel_in(0, y);
+    return pixels[in_pixels_i][in_pixels_j];
+}
+
+
+var nd = 2.5;
+var weight = 4;
+var shiftd = 1.5;
+
+function len(x, y) {
+    return Math.sqrt(x*x + y*y);
+}
+
+function weight_of_point(x, y, xj, yi) {
+    return Math.pow(2 * Math.pow(0.5, weight), 0.5)
+        / (Math.pow(Math.abs(x - xj), weight) + Math.pow(Math.abs(y - yi), weight));
+}
+
+function dx_from_linear(x, y) {
+    var A = [[0.0, 0.0], [0.0, 0.0]];
+    var B = [0.0, 0.0];
+    for(var yi = y - nd * grid_size; yi <= y + nd * grid_size; yi += grid_size) {
+        for(var xj = x - nd * grid_size; xj <= x + nd * grid_size; xj += grid_size) {
+            var w = weight_of_point(x, y, xj, yi);
+            A[0][0] += w;
+            A[0][1] += w * (xj - x);
+            A[1][0] += w * (xj - x);
+            A[1][1] += w * Math.pow(xj - x, 2);
+            B[0] += w * pixel_in(xj, yi);
+            B[1] += w * (xj - x) * pixel_in(xj, yi);
+        }
+    }
+    var px = solved_linear2_or_zero(A, B);
+    return px;
+}
+
+function dy_from_linear(x, y) {
+    var A = [[0.0, 0.0], [0.0, 0.0]];
+    var B = [0.0, 0.0];
+    for(var yi = y - nd * grid_size; yi <= y + nd * grid_size; yi += grid_size) {
+        for(var xj = x - nd * grid_size; xj <= x + nd * grid_size; xj += grid_size) {
+            var w = weight_of_point(x, y, xj, yi);
+            A[0][0] += w;
+            A[0][1] += w * (yi - y);
+            A[1][0] += w * (yi - y);
+            A[1][1] += w * Math.pow(yi - y, 2);
+            B[0] += w * pixel_in(xj, yi);
+            B[1] += w * (yi - y) * pixel_in(xj, yi);
+        }
+    }
+    var px = solved_linear2_or_zero(A, B);
+    return px;
+}
+
+function dxy(x, y) {
+    var dx = dx_from_linear(x, y)[1];
+    var dy = dy_from_linear(x, y)[1];
+    var l = len(dx, dy);
+    if(l < 1e-5)
+        return [0.0, 0.0];
+    return [dx / l, dy / l];
+}
+
+function len_dxy(x, y) {
+    var dx = dx_from_linear(x, y)[0];
+    var dy = dy_from_linear(x, y)[0];
+    return len(dx, dy);
+}
+
+function grid_size_limited(x) {
+    if(x < -grid_size)
+        return -grid_size;
+    if(x > +grid_size)
+        return +grid_size;
+    return x;
+}
+
+function dx(x, y) {
+    return dxy(x, y)[0];
+}
+
+function dy(x, y) {
+    return dxy(x, y)[1];
+}
+
+
+function gsx(x, y) {
+    return grid_size_limited(dx(x, y) * (0.5 - dy_from_linear(x, y)[0]) * grid_size * shiftd);
+}
+
+function gsy(x, y) {
+    return grid_size_limited(dy(x, y) * (0.5 - dx_from_linear(x, y)[0]) * grid_size * shiftd);
+}
+
+
+
+function init_canvas(){
+    var canvas = document.getElementById("canvas");
+    canvas.addEventListener('mousedown', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+    }, false);
+     
+    canvas.addEventListener('mousemove', function(e){
+        if(e.buttons == 1){
+            canvas_rect = canvas.getBoundingClientRect();
+            draw_canvas();
+        }
+    }, false);
+    
+    canvas.addEventListener('mouseup', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        var j = e.clientX - canvas_rect.left;
+        var i = e.clientY - canvas_rect.top;
+        var in_pixels_i = Math.floor(i / pixel_size);
+        var in_pixels_j = Math.floor(j / pixel_size);
+        pixels[in_pixels_i][in_pixels_j] += 0.25;
+        if(pixels[in_pixels_i][in_pixels_j] == 1.25)
+            pixels[in_pixels_i][in_pixels_j] = 0.0;
+        draw_canvas();
+    }, false);
+    
+    draw_canvas();
+}
+
+
+function draw_canvas(){
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // pixels
+    var pixel_field = context.createImageData(w, h);
+    for (var i = 0; i < pixel_field.data.length; i += 4) {
+        var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
+        var on_canvas_j = Math.floor(i / 4) % w;
+        var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
+        var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
+        pixel_field.data[i + 0] = 0xAA * pixels[in_pixels_i][in_pixels_j];
+        pixel_field.data[i + 1] = 0xAA * pixels[in_pixels_i][in_pixels_j];
+        pixel_field.data[i + 2] = 0xFF * pixels[in_pixels_i][in_pixels_j];
+        pixel_field.data[i + 3] = 0xFF * pixels[in_pixels_i][in_pixels_j];
+    }
+    context.putImageData(pixel_field, -0.5, -0.5);
+    
+    // pixel grid
+    context.beginPath();
+    for(var i = pixel_size; i <= h; i += pixel_size) {
+        context.moveTo(0.0, i);
+        context.lineTo(w, i);
+    }
+    for(var j = pixel_size; j <= w; j += pixel_size) {
+        context.moveTo(j, 0.0);
+        context.lineTo(j, h);
+    }
+    context.strokeStyle="#AAAAAA";
+    context.lineWidth=1;
+    context.stroke();
+    context.closePath();
+    
+    // spline grid
+    context.beginPath();
+    for(var i = grid_size; i <= h; i += grid_size) {
+        context.moveTo(0.0, i);
+        context.lineTo(w, i);
+    }
+    for(var j = grid_size; j <= w; j += grid_size) {
+        context.moveTo(j, 0.0);
+        context.lineTo(j, h);
+    }
+    context.strokeStyle="#999999";
+    context.lineWidth=1;
+    context.stroke();
+    context.closePath();    
+    
+    // contour
+    var do_colors = document.getElementById("do_colors").checked;
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+            var do_horizontal = 
+                sign_0_positive(pixel_in(j + 0.5 * grid_size, i - 0.5 * grid_size) - 0.5) != 
+                sign_0_positive(pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) - 0.5);
+            var do_vertical = 
+                sign_0_positive(pixel_in(j - 0.5 * grid_size, i + 0.5 * grid_size) - 0.5) != 
+                sign_0_positive(pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) - 0.5);
+            if(do_horizontal) {
+                context.beginPath();
+                var ds = pixel_in(j + 0.5 * grid_size, i - 0.5 * grid_size) < pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) ? 1.0 : -1.0;
+                var p1x = j + gsx(j, i);
+                var p1y = i + gsy(j, i);
+                var p2x = j + grid_size + gsx(j + grid_size, i);
+                var p2y = i + gsy(j + grid_size, i);
+                var d1x = dx(p1x, p1y) * grid_size;
+                var d1y = dy(p1x, p1y) * grid_size;
+                var d2x = dx(p2x, p2y) * grid_size;
+                var d2y = dy(p2x, p2y) * grid_size;
+                var Ax = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var Bx = [p1x, ds*d1y, p2x, ds*d2y]
+                var Px = solved_linear(Ax, Bx, 4);
+                var Ay = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
+                var Py = solved_linear(Ay, By, 4);
+                for(var k = 0; k < grid_size; k += 1) {
+                    var t1 = (k + 0.01) / grid_size;
+                    var t2 = (k + 0.99) / grid_size;
+                    var x1 = polynomial_in_x(Px, t1, 4);
+                    var y1 = polynomial_in_x(Py, t1, 4);
+                    var x2 = polynomial_in_x(Px, t2, 4);
+                    var y2 = polynomial_in_x(Py, t2, 4);
+                    context.moveTo(x1, y1);
+                    context.lineTo(x2, y2);
+                }
+                if(do_colors)
+                    if((i / grid_size + j / grid_size) % 2 == 0)
+                        context.strokeStyle="#886633";
+                    else
+                        context.strokeStyle="#33AA66";
+                else
+                    context.strokeStyle="#AA3366";
+                context.lineWidth=3;
+                context.stroke();
+                context.closePath();
+            }
+            if(do_vertical) {
+                context.beginPath();
+                var ds = pixel_in(j - 0.5 * grid_size, i + 0.5 * grid_size) < pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) ? -1.0 : 1.0;
+                var p1x = j + gsx(j, i);
+                var p1y = i + gsy(j, i);
+                var p2x = j + gsx(j, i + grid_size);
+                var p2y = i + grid_size + gsy(j, i + grid_size);
+                var d1x = dx(p1x, p1y) * grid_size;
+                var d1y = dy(p1x, p1y) * grid_size;
+                var d2x = dx(p2x, p2y) * grid_size;
+                var d2y = dy(p2x, p2y) * grid_size;
+                var Ax = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var Bx = [p1x, ds*d1y, p2x, ds*d2y]
+                var Px = solved_linear(Ax, Bx, 4);
+                var Ay = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
+                var Py = solved_linear(Ay, By, 4);
+                for(var k = 0; k < grid_size; k += 1) {
+                    var t1 = (k + 0.01) / grid_size;
+                    var t2 = (k + 0.99) / grid_size;
+                    var x1 = polynomial_in_x(Px, t1, 4);
+                    var y1 = polynomial_in_x(Py, t1, 4);
+                    var x2 = polynomial_in_x(Px, t2, 4);
+                    var y2 = polynomial_in_x(Py, t2, 4);
+                    context.moveTo(x1, y1);
+                    context.lineTo(x2, y2);
+                }
+                if(do_colors)
+                    if((i / grid_size + j / grid_size) % 2 == 0)
+                        context.strokeStyle="#AA3366";
+                    else
+                        context.strokeStyle="#3366AA";
+                else
+                    context.strokeStyle="#AA3366";
+                context.lineWidth=3;
+                context.stroke();
+                context.closePath();
+            }
+        }
+    }
+}
+
+
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name+"_input");
+    counter.value = Number(counter.value) + 1;
+    eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name+"_input");
+    counter.value = Number(counter.value) - 1;
+    eval('change_' + counter_name + '()');
+}
+
+function reset_all() {
+    reset_pixels();
+    draw_canvas();
+}
+
+function reset_magic_numbers() {
+    grid_size = parseFloat(document.getElementById("grid_size").value);
+    nd = document.getElementById("nd").value;
+    weight = document.getElementById("weight").value;
+    shiftd = document.getElementById("shiftd").value;
+    draw_canvas();
+}
+
+  </script>
+  </head>
+  <body>
+    <center>
+    <br>
+    <br>
+    <canvas id="canvas" width=1024 height=1024></canvas>
+    <div style="text-align:right; width:1024px; padding-bottom:12pt;">
+        grid_size: <input type="text" id="grid_size" value="64">
+        nd: <input type="text" id="nd" value="0.5">
+        weight: <input type="text" id="weight" value="4">
+        shiftd: <input type="text" id="shiftd" value="1.5">
+        <button type="button" onclick="reset_magic_numbers()">&larr; Apply</button>
+        <input type="checkbox" id="do_colors" onclick="draw_canvas();"/><label for="do_colors">do colors</label>    
+        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset pixels</button>
+    </div>
+    </center>
+    <script language="JavaScript">
+    init_canvas();
+    reset_magic_numbers();
+    </script>
+  </body>
+</html>
