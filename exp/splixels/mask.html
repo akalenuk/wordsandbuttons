@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -86,14 +85,14 @@ form {
 }
 
 input[type="text"] {
-    width: 32pt;
+    width: 64pt;
     height: 22pt;
     font-size: 16pt;
     text-align: center;
 }
 
 button {
-    width: 32pt;
+    width: 128pt;
     height: 26pt;
     font-size: 16pt;
     text-align: center;
@@ -207,13 +206,17 @@ function len(x, y) {
     return Math.sqrt(x*x + y*y);
 }
 
+function weight_of_point(x, y, xj, yi) {
+    return Math.pow(2 * Math.pow(0.5, weight), 0.5)
+        / (Math.pow(Math.abs(x - xj), weight) + Math.pow(Math.abs(y - yi), weight));
+}
+
 function dx_from_linear(x, y) {
     var A = [[0.0, 0.0], [0.0, 0.0]];
     var B = [0.0, 0.0];
     for(var yi = y - nd * pixel_size; yi <= y + nd * pixel_size; yi += pixel_size) {
         for(var xj = x - nd * pixel_size; xj <= x + nd * pixel_size; xj += pixel_size) {
-            var w = Math.pow(2 * Math.pow(0.5, 2), 0.5)
-                / (Math.pow(x - xj, weight) + Math.pow(y - yi, weight));
+            var w = weight_of_point(x, y, xj, yi);
             A[0][0] += w;
             A[0][1] += w * (xj - x);
             A[1][0] += w * (xj - x);
@@ -232,7 +235,7 @@ function dy_from_linear(x, y) {
     var B = [0.0, 0.0];
     for(var yi = y - nd * pixel_size; yi <= y + nd * pixel_size; yi += pixel_size) {
         for(var xj = x - nd * pixel_size; xj <= x + nd * pixel_size; xj += pixel_size) {
-            var w = 1 / (Math.pow(x - xj, weight) + Math.pow(y - yi, weight));
+            var w = weight_of_point(x, y, xj, yi);
             A[0][0] += w;
             A[0][1] += w * (yi - y);
             A[1][0] += w * (yi - y);
@@ -501,7 +504,7 @@ function reset_magic_numbers() {
     nd: <input type="text" id="nd" value="2.5">
     weight: <input type="text" id="weight" value="4">
     shiftd: <input type="text" id="shiftd" value="1.5">
-    <button type="button" style="width: 120pt;" onclick="reset_magic_numbers()">Change</button>
+    <button type="button" onclick="reset_magic_numbers()">Change</button>
     <input type="checkbox" id="do_colors" checked onclick="draw_canvas();"/><label for="do_colors">do colors</label>
     <br>
     <canvas id="canvas" width=1024 height=640></canvas>
