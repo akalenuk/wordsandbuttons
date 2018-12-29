@@ -352,7 +352,9 @@ function fill_splixels_from_pixels() {
                 // filling splixels
                 splixels[splixels_i][splixels_j].to_margin = 0;
                 splixels[splixels_i][splixels_j].xy_shift = [gsx(j, i), gsy(j, i)];
-                splixels[splixels_i][splixels_j].xy_normal = [dx(p1x, p1y), dy(p1x, p1y)];
+                var shifted_j = j + splixels[splixels_i][splixels_j].xy_shift[0];
+                var shifted_i = i + splixels[splixels_i][splixels_j].xy_shift[1];
+                splixels[splixels_i][splixels_j].xy_normal = [dx(shifted_j, shifted_i), dy(shifted_j, shifted_i)];
             } else {
                 splixels[splixels_i][splixels_j].to_margin = pixel_in(j, i) < 0.5 ? -1 : 1;
             }
@@ -366,8 +368,8 @@ function draw_the_splixels(context, do_colors) {
             var si = Math.floor(i / grid_size);
             var sj = Math.floor(j / grid_size);
             
-            var do_horizontal = splixels[si][sj].to_margin != 0 && splixels[si][sj + 1].to_margin != 0;
-            var do_vertical   = splixels[si][sj].to_margin != 0 && splixels[si + 1][sj].to_margin != 0;
+            var do_horizontal = splixels[si][sj].to_margin == 0 && splixels[si][sj + 1].to_margin == 0;
+            var do_vertical   = splixels[si][sj].to_margin == 0 && splixels[si + 1][sj].to_margin == 0;
                                 
             if(do_horizontal) {
                 context.beginPath();
@@ -551,7 +553,9 @@ function draw_canvas(){
     
     // contour
     var do_colors = document.getElementById("do_colors").checked;
-    for(var i = 0; i <= h - grid_size; i += grid_size) {
+    fill_splixels_from_pixels();
+    draw_the_splixels(context, do_colors);
+/*    for(var i = 0; i <= h - grid_size; i += grid_size) {
         for(var j = 0; j <= w - grid_size; j += grid_size) {
             var splixels_i = Math.floor(i / grid_size);
             var splixels_j = Math.floor(j / grid_size);
@@ -678,7 +682,7 @@ function draw_canvas(){
                 context.closePath();
             }
         }
-    }
+    }*/
 }
 
 
