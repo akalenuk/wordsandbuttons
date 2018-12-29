@@ -352,9 +352,117 @@ function fill_splixels_from_pixels() {
                 // filling splixels
                 splixels[splixels_i][splixels_j].to_margin = 0;
                 splixels[splixels_i][splixels_j].xy_shift = [gsx(j, i), gsy(j, i)];
-                splixels[splixels_i][splixels_j].xy_shift = [dx(p1x, p1y), dy(p1x, p1y)];
+                splixels[splixels_i][splixels_j].xy_normal = [dx(p1x, p1y), dy(p1x, p1y)];
             } else {
                 splixels[splixels_i][splixels_j].to_margin = pixel_in(j, i) < 0.5 ? -1 : 1;
+            }
+        }
+    }
+}
+
+function draw_the_splixels(context, do_colors) {
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+            var si = Math.floor(i / grid_size);
+            var sj = Math.floor(j / grid_size);
+            
+            var do_horizontal = splixels[si][sj].to_margin != 0 && splixels[si][sj + 1].to_margin != 0;
+            var do_vertical   = splixels[si][sj].to_margin != 0 && splixels[si + 1][sj].to_margin != 0;
+                                
+            if(do_horizontal) {
+                context.beginPath();
+                var ds = pixel_in(j + 0.5 * grid_size, i - 0.5 * grid_size) < pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) ? 1.0 : -1.0;                
+                var p1x = j + splixels[si][sj].xy_shift[0];
+                var p1y = i + splixels[si][sj].xy_shift[1];
+                var p2x = j + grid_size + splixels[si][sj + 1].xy_shift[0];
+                var p2y = i + splixels[si][sj + 1].xy_shift[1];
+                var d1x = splixels[si][sj].xy_normal[0] * grid_size;
+                var d1y = splixels[si][sj].xy_normal[1] * grid_size;
+                var d2x = splixels[si][sj + 1].xy_normal[0] * grid_size;
+                var d2y = splixels[si][sj + 1].xy_normal[1] * grid_size;
+                        
+                var Ax = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var Bx = [p1x , ds*d1y, p2x, ds*d2y]
+                var Px = solved_linear(Ax, Bx, 4);
+                var Ay = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
+                var Py = solved_linear(Ay, By, 4);
+                for(var k = 0; k < grid_size; k += 1) {
+                    var t1 = (k + 0.01) / grid_size;
+                    var t2 = (k + 0.99) / grid_size;
+                    var x1 = polynomial_in_x(Px, t1, 4);
+                    var y1 = polynomial_in_x(Py, t1, 4);
+                    var x2 = polynomial_in_x(Px, t2, 4);
+                    var y2 = polynomial_in_x(Py, t2, 4);
+                    context.moveTo(x1, y1);
+                    context.lineTo(x2, y2);
+                }
+                if(do_colors)
+                    if((i / grid_size + j / grid_size) % 2 == 0)
+                        context.strokeStyle="#886633";
+                    else
+                        context.strokeStyle="#33AA66";
+                else
+                    context.strokeStyle="#AA3366";
+                context.lineWidth=3;
+                context.stroke();
+                context.closePath();
+            }
+            if(do_vertical) {
+                context.beginPath();
+                var ds = pixel_in(j - 0.5 * grid_size, i + 0.5 * grid_size) < pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) ? -1.0 : 1.0;
+                var p1x = j + splixels[si][sj].xy_shift[0];
+                var p1y = i + splixels[si][sj].xy_shift[1];
+                var p2x = j + splixels[si + 1][sj].xy_shift[0];
+                var p2y = i + grid_size + splixels[si + 1][sj].xy_shift[1];
+                var d1x = splixels[si][sj].xy_normal[0] * grid_size;
+                var d1y = splixels[si][sj].xy_normal[1] * grid_size;
+                var d2x = splixels[si + 1][sj].xy_normal[0] * grid_size;
+                var d2y = splixels[si + 1][sj].xy_normal[1] * grid_size;
+                
+                
+                var Ax = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var Bx = [p1x, ds*d1y, p2x, ds*d2y]
+                var Px = solved_linear(Ax, Bx, 4);
+                var Ay = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
+                var Py = solved_linear(Ay, By, 4);
+                for(var k = 0; k < grid_size; k += 1) {
+                    var t1 = (k + 0.01) / grid_size;
+                    var t2 = (k + 0.99) / grid_size;
+                    var x1 = polynomial_in_x(Px, t1, 4);
+                    var y1 = polynomial_in_x(Py, t1, 4);
+                    var x2 = polynomial_in_x(Px, t2, 4);
+                    var y2 = polynomial_in_x(Py, t2, 4);
+                    context.moveTo(x1, y1);
+                    context.lineTo(x2, y2);
+                }
+                if(do_colors)
+                    if((i / grid_size + j / grid_size) % 2 == 0)
+                        context.strokeStyle="#AA3366";
+                    else
+                        context.strokeStyle="#3366AA";
+                else
+                    context.strokeStyle="#AA3366";
+                context.lineWidth=3;
+                context.stroke();
+                context.closePath();
             }
         }
     }
