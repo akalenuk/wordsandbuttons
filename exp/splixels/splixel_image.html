@@ -144,7 +144,12 @@ function reset_pixels() {
 const splixel = {
     to_margin: 1, // 1 - outside, 0 - margin, -1 - inside (that might change to the quasi-distance)
     xy_shift: [0.0, 0.0], // shift from a splixel center point (which is pixel's upper-left)
-    xy_normal: [0.0, 0.0] // unnormalized normal vector in the shifted point.
+    xy_normal: [0.0, 0.0], // unnormalized normal vector in the shifted point.
+    // neighbors
+    right: false,
+    left: false, 
+    top: false,
+    bottom: false
 };
 
 var splixels = [];
@@ -355,7 +360,12 @@ function fill_splixels_from_pixels() {
                 var shifted_j = j + splixels[splixels_i][splixels_j].xy_shift[0];
                 var shifted_i = i + splixels[splixels_i][splixels_j].xy_shift[1];
                 splixels[splixels_i][splixels_j].xy_normal = [dx(shifted_j, shifted_i), dy(shifted_j, shifted_i)];
+                splixels[splixels_i][splixels_j].right = margin_to_the_right;
+                splixels[splixels_i][splixels_j].left = margin_to_the_left;
+                splixels[splixels_i][splixels_j].bottom = margin_to_the_bottom;
+                splixels[splixels_i][splixels_j].top = margin_to_the_top;
             } else {
+                splixels[splixels_i][splixels_j] = Object.create(splixel);
                 splixels[splixels_i][splixels_j].to_margin = pixel_in(j, i) < 0.5 ? -1 : 1;
             }
         }
@@ -368,8 +378,8 @@ function draw_the_splixels(context, do_colors) {
             var si = Math.floor(i / grid_size);
             var sj = Math.floor(j / grid_size);
             
-            var do_horizontal = splixels[si][sj].to_margin == 0 && splixels[si][sj + 1].to_margin == 0;
-            var do_vertical   = splixels[si][sj].to_margin == 0 && splixels[si + 1][sj].to_margin == 0;
+            var do_horizontal = splixels[si][sj].right;
+            var do_vertical   = splixels[si][sj].bottom;
                                 
             if(do_horizontal) {
                 context.beginPath();
