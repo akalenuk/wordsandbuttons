@@ -150,10 +150,12 @@ const splixel = {
 var splixels = [];
 
 function reset_spixels() {
+    var sw = 1 + Math.floor(w / grid_size) + 1;
+    var sh = 1 + Math.floor(h / grid_size) + 1;
     splixels = [];
-    for(var i = 0; i < ih; ++i) {
+    for(var i = 0; i < sh; ++i) {
         splixelsi = []
-        for(var j = 0; j <iw; ++j)
+        for(var j = 0; j < sw; ++j)
             splixelsi.push(Object.create(splixel));
         splixels.push(splixelsi);
     }
@@ -411,12 +413,20 @@ function draw_canvas(){
     var do_colors = document.getElementById("do_colors").checked;
     for(var i = 0; i <= h - grid_size; i += grid_size) {
         for(var j = 0; j <= w - grid_size; j += grid_size) {
+            var splixels_i = Math.floor(i / grid_size);
+            var splixels_j = Math.floor(j / grid_size);
+            
             var do_horizontal = 
                 sign_0_positive(pixel_in(j + 0.5 * grid_size, i - 0.5 * grid_size) - 0.5) != 
                 sign_0_positive(pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) - 0.5);
             var do_vertical = 
                 sign_0_positive(pixel_in(j - 0.5 * grid_size, i + 0.5 * grid_size) - 0.5) != 
                 sign_0_positive(pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) - 0.5);
+                
+            if(!do_horizontal && !do_vertical) {
+                splixels[splixels_i][splixels_j].to_margin = pixel_in(j, i) < 0.5 ? -1 : 1;
+            }
+                
             if(do_horizontal) {
                 context.beginPath();
                 var ds = pixel_in(j + 0.5 * grid_size, i - 0.5 * grid_size) < pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) ? 1.0 : -1.0;
@@ -428,6 +438,15 @@ function draw_canvas(){
                 var d1y = dy(p1x, p1y) * grid_size;
                 var d2x = dx(p2x, p2y) * grid_size;
                 var d2y = dy(p2x, p2y) * grid_size;
+                
+                // (re)filling splixels
+                splixels[splixels_i][splixels_j].to_margin = 0;
+                splixels[splixels_i][splixels_j].xy_shift = [gsx(j, i), gsy(j, i)];
+                splixels[splixels_i][splixels_j].xy_shift = [dx(p1x, p1y), dy(p1x, p1y)];
+                splixels[splixels_i][splixels_j + 1].to_margin = 0;
+                splixels[splixels_i][splixels_j + 1].xy_shift = [gsx(j + grid_size, i), gsy(j + grid_size, i)];
+                splixels[splixels_i][splixels_j + 1].xy_shift = [dx(p2x, p2y), dy(p2x, p2y)];
+                                
                 var Ax = [
                     [1, 0, 0, 0],
                     [0, 1, 0, 0],
@@ -474,6 +493,15 @@ function draw_canvas(){
                 var d1y = dy(p1x, p1y) * grid_size;
                 var d2x = dx(p2x, p2y) * grid_size;
                 var d2y = dy(p2x, p2y) * grid_size;
+                
+                // (re)filling splixels
+                splixels[splixels_i][splixels_j].to_margin = 0;
+                splixels[splixels_i][splixels_j].xy_shift = [gsx(j, i), gsy(j, i)];
+                splixels[splixels_i][splixels_j].xy_shift = [dx(p1x, p1y), dy(p1x, p1y)];
+                splixels[splixels_i][splixels_j + 1].to_margin = 0;
+                splixels[splixels_i][splixels_j + 1].xy_shift = [gsx(j, i + grid_size), gsy(j, i + grid_size)];
+                splixels[splixels_i][splixels_j + 1].xy_shift = [dx(p2x, p2y), dy(p2x, p2y)];
+                
                 var Ax = [
                     [1, 0, 0, 0],
                     [0, 1, 0, 0],
@@ -556,9 +584,9 @@ function reset_magic_numbers() {
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset pixels</button>
     </div>
     <script language="JavaScript">
-    init_canvas();
-    reset_magic_numbers();
     reset_spixels();
+    init_canvas();    
+    reset_magic_numbers();
     </script>
            
     </center>
