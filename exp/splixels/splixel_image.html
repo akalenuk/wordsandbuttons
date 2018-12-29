@@ -327,6 +327,38 @@ function gsy(x, y) {
     return grid_size_limited(dy(x, y) * (0.5 - dx_from_linear(x, y)[0]) * grid_size * shiftd);
 }
 
+function fill_splixels_from_pixels() {
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+            var splixels_i = Math.floor(i / grid_size);
+            var splixels_j = Math.floor(j / grid_size);
+            
+            var margin_to_the_right = 
+                sign_0_positive(pixel_in(j + 0.5 * grid_size, i - 0.5 * grid_size) - 0.5) != 
+                sign_0_positive(pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) - 0.5);
+            var margin_to_the_left = 
+                sign_0_positive(pixel_in(j - 0.5 * grid_size, i - 0.5 * grid_size) - 0.5) != 
+                sign_0_positive(pixel_in(j - 0.5 * grid_size, i + 0.5 * grid_size) - 0.5);
+                
+            var margin_to_the_bottom = 
+                sign_0_positive(pixel_in(j - 0.5 * grid_size, i + 0.5 * grid_size) - 0.5) != 
+                sign_0_positive(pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) - 0.5);
+            var margin_to_the_top = 
+                sign_0_positive(pixel_in(j - 0.5 * grid_size, i - 0.5 * grid_size) - 0.5) != 
+                sign_0_positive(pixel_in(j + 0.5 * grid_size, i - 0.5 * grid_size) - 0.5);
+
+                
+            if(margin_to_the_right || margin_to_the_left || margin_to_the_bottom || margin_to_the_top) {   
+                // filling splixels
+                splixels[splixels_i][splixels_j].to_margin = 0;
+                splixels[splixels_i][splixels_j].xy_shift = [gsx(j, i), gsy(j, i)];
+                splixels[splixels_i][splixels_j].xy_shift = [dx(p1x, p1y), dy(p1x, p1y)];
+            } else {
+                splixels[splixels_i][splixels_j].to_margin = pixel_in(j, i) < 0.5 ? -1 : 1;
+            }
+        }
+    }
+}
 
 
 function init_canvas(){
