@@ -57,7 +57,7 @@ def colorize_outside(quotes, line):
 def colorize_text(text):
     new_lines = []
     for line in text.split('\n'):
-        if line.lstrip().startswith('!') or line.lstrip().startswith('//') or line.lstrip().startswith('--') or line.lstrip().startswith('#'):
+        if line.lstrip().startswith('!') or line.lstrip().startswith('//') or line.lstrip().startswith('--')  or line.lstrip().startswith('#') or line.lstrip().startswith('@'):
             new_lines += ['<span style="color: #778877">' + line + '</span>']
         else:
             new_lines += [colorize_outside('\"\'', line)]
