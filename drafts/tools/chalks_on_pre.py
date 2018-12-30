@@ -26,7 +26,7 @@ def htmlize(text):
     return text.replace('&<;', '&lt;').replace('&>;', '&gt;')
 
 def not_a_word_material():
-    return " @(){}[],.:;\"\'`<>=+-*/\t\n\\?|&#%!0123456789"
+    return " @(){}[],.:;\"\'`<>=+-*/\t\n\\?|&#%!"
 
 def colorize_line(line):
     chunk = ''
