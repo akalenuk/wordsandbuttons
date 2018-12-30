@@ -257,17 +257,6 @@ function reveal(no){
         if(slider_set[i] == false)
             return;
     }
-
-    document.getElementById("show_in_the_end").style.display = "block";
-    var score = 0;
-    var default_score = 0;
-    for(var i = 0; i < 4; i++){
-        score += Math.abs(slider_user_xs[i] - slider_xs[i]);
-        default_score += Math.abs(256 - slider_xs[i]);
-    }
-
-    document.getElementById("score").innerHTML = "<b>" + score.toFixed(0) + "</b>";
-    document.getElementById("default_score").innerHTML = "<b>" + default_score.toFixed(0) + "</b>";
 }
     </script>
   </head>
@@ -331,7 +320,7 @@ Just like the last time, using your intuition and best judgment, please estimate
 Round 1. && vs &
     </h1>
     <p>
-The same question. Is && faster than &?
+The same question. Is now && faster than &?
     </p>
     <table><tr>
     <td id="left_1">
@@ -361,21 +350,69 @@ They are almost the same.
     <button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
     <div id="the_truth_1" style="display:none;">
     <p>
-They are almost the same. In fact, they generate almost the same code.
+Of course, not. We didn't change the compiler, only the processor. Clang still can do short-circuiting on 0 and &&. 
     </p>
     <table><tr>
     <td>
     <pre>
-
+	movw	r0, #36852
+	movt	r0, #976
+.LBB0_6:
+	ldr	r1, [r4, r5]
+	cmp	r1, #1
+	bne	.LBB0_9
+@ BB#7:
+	add	r1, r4, r5
+	ldr	r2, [r1, #4]
+	cmp	r2, #1
+	ldreq	r2, [r1, #8]
+	cmpeq	r2, #1
+	bne	.LBB0_9
+@ BB#8:
+	ldr	r1, [r1, #12]
+	cmp	r1, #1
+	ldreq	r1, [sp, #20]
+	addeq	r1, r1, #1
+	streq	r1, [sp, #20]
+.LBB0_9:
+	add	r5, r5, #4
+	cmp	r5, r0
+	bne	.LBB0_6
+@ BB#10:
+	mov	r0, sp
     </pre>
     </td>
     <td>
     <pre>
-
+	movw	r0, #36852
+	movt	r0, #976
+.LBB0_6:
+	mov	r1, r4
+	ldr	r2, [r1, r5]!
+	cmp	r2, #1
+	bne	.LBB0_9
+@ BB#7:
+	ldr	r2, [r1, #4]
+	cmp	r2, #1
+	ldreq	r2, [r1, #8]
+	cmpeq	r2, #1
+	bne	.LBB0_9
+@ BB#8:
+	ldr	r1, [r1, #12]
+	cmp	r1, #1
+	ldreq	r1, [sp, #20]
+	addeq	r1, r1, #1
+	streq	r1, [sp, #20]
+.LBB0_9:
+	add	r5, r5, #4
+	cmp	r5, r0
+	bne	.LBB0_6
+@ BB#10:
+	mov	r0, sp
     </pre>
     </td></tr></table>
     <p>
-The trick is in the context. Since == generates only 0 or 1, the short-circuiting for 0 and & is still possible. 0 & anything is still 0. Although, the same trick <a href="https://godbolt.org/z/0eEz_G">doesn't work with |</a> anymore.
+The code is still almost the same on the both sides. Although, what's interesting, not all the comparisons result in short-circuiting.
     </p>
     </div>
     <script language="JavaScript">
@@ -386,7 +423,7 @@ The trick is in the context. Since == generates only 0 or 1, the short-circuitin
 Round 2. ==, && vs *, +, -
     </h2>
     <p>
-In this simple example, we can substitute almost all the logic with computation. Instead of comparing each value separately we can calculate the squared error for the whole 4-tuple.
+On Intel substituting logic with arithmetic gave a noticeable gain. Will the trick work on ARMv7?
     </p>
     <table><tr>
     <td id="left_2">
@@ -421,19 +458,70 @@ They are almost the same.
     <button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
     <div id="the_truth_2" style="display:none;">
     <p>
-And this works perfectly. The code is a few lines longer, but there are no comparisons until the very end. Everything is blunt number crunching. Computers love this kind of code.
+No. We even lost a bit.
     </p>
     <table><tr>
     <td>
     <pre>
-
+	movw	r0, #36852
+	movt	r0, #976
+.LBB0_6:
+	ldr	r1, [r4, r5]
+	cmp	r1, #1
+	bne	.LBB0_9
+@ BB#7:
+	add	r1, r4, r5
+	ldr	r2, [r1, #4]
+	cmp	r2, #1
+	ldreq	r2, [r1, #8]
+	cmpeq	r2, #1
+	bne	.LBB0_9
+@ BB#8:
+	ldr	r1, [r1, #12]
+	cmp	r1, #1
+	ldreq	r1, [sp, #20]
+	addeq	r1, r1, #1
+	streq	r1, [sp, #20]
+.LBB0_9:
+	add	r5, r5, #4
+	cmp	r5, r0
+	bne	.LBB0_6
+@ BB#10:
+	mov	r0, sp
     </pre>
     </td>
     <td>
     <pre>
-
+	movw	r0, #36852
+	movt	r0, #976
+.LBB0_6:
+	mov	r1, r4
+	ldr	r2, [r1, r5]!
+	add	r5, r5, #4
+	sub	r2, r2, #1
+	ldmib	r1, {r3, r7}
+	mul	r2, r2, r2
+	sub	r3, r3, #1
+	ldr	r1, [r1, #12]
+	mla	r2, r3, r3, r2
+	sub	r6, r1, #1
+	rsb	r1, r1, #1
+	sub	r3, r7, #1
+	mul	r1, r1, r6
+	mla	r2, r3, r3, r2
+	cmp	r2, r1
+	ldreq	r1, [sp, #20]
+	addeq	r1, r1, #1
+	streq	r1, [sp, #20]
+	cmp	r5, r0
+	bne	.LBB0_6
+@ BB#7:
+	mov	r0, sp
     </pre>
     </td></tr></table>
+    <p>
+The code on the right is still plain computations, just like with the Intel i7. But ARMv7 doesn't have as much pipelines to get busy as Intel does, so it pays less penalty on branching.
+    </p>
     </div>
     <script language="JavaScript">
     init_slider(1);
@@ -443,7 +531,7 @@ And this works perfectly. The code is a few lines longer, but there are no compa
 Round 3. * vs abs
     </h2>
     <p>
-We don't really need multiplications. We don't really need squared error. Why don't we calculate an absolute error instead?
+With Intel switching multiplication to absolute value was a noticeable loss. How will ARM do?
     </p>
     <table><tr>
     <td id="left_3">
@@ -478,21 +566,74 @@ They are almost the same.
     <button type="button" onclick="reveal(2)" id="button_3">Reveal the truth</button>
     <div id="the_truth_3" style="display:none;">
     <p>
-That's why. Getting an absolute value of an int is not a trivial job. It's not about clipping a bit off; it is a fair comparison and a conditional move. This pair is heavier than a simple multiplication.
+There is a slight gain instead.
     </p>
     <table><tr>
     <td>
     <pre>
-
+	movw	r0, #36852
+	movt	r0, #976
+.LBB0_6:
+	mov	r1, r4
+	ldr	r2, [r1, r5]!
+	add	r5, r5, #4
+	sub	r2, r2, #1
+	ldmib	r1, {r3, r7}
+	mul	r2, r2, r2
+	sub	r3, r3, #1
+	ldr	r1, [r1, #12]
+	mla	r2, r3, r3, r2
+	sub	r6, r1, #1
+	rsb	r1, r1, #1
+	sub	r3, r7, #1
+	mul	r1, r1, r6
+	mla	r2, r3, r3, r2
+	cmp	r2, r1
+	ldreq	r1, [sp, #20]
+	addeq	r1, r1, #1
+	streq	r1, [sp, #20]
+	cmp	r5, r0
+	bne	.LBB0_6
+@ BB#7:
+	mov	r0, sp
     </pre>
     </td>
     <td>
     <pre>
-
+	movw	r0, #36852
+	movt	r0, #976
+.LBB0_6:
+	mov	r1, r4
+	ldr	r2, [r1, r5]!
+	add	r5, r5, #4
+	ldmib	r1, {r3, r7}
+	rsb	r6, r2, #1
+	cmp	r2, #0
+	subgt	r6, r2, #1
+	rsb	r2, r3, #1
+	cmp	r3, #0
+	ldr	r1, [r1, #12]
+	subgt	r2, r3, #1
+	rsb	r3, r7, #1
+	cmp	r7, #0
+	add	r2, r2, r6
+	subgt	r3, r7, #1
+	cmp	r1, #0
+	add	r2, r2, r3
+	rsb	r3, r1, #1
+	subgt	r3, r1, #1
+	cmn	r2, r3
+	ldreq	r1, [sp, #20]
+	addeq	r1, r1, #1
+	streq	r1, [sp, #20]
+	cmp	r5, r0
+	bne	.LBB0_6
+@ BB#7:
+	mov	r0, sp
     </pre>
     </td></tr></table>
     <p>
-What's interesting, in floating point numbers, when getting an absolute value <i>is</i> about clipping a bit off, <a href="https://godbolt.org/z/ZoFInw">there are no tests or conditions</a>.
+Again, the code for ARM is not conceptually different from what we saw for Intel. But conditional instructions are not that of a burden. So the absolute value version wins.
     </p>
     </div>
     <script language="JavaScript">
@@ -503,7 +644,7 @@ What's interesting, in floating point numbers, when getting an absolute value <i
 Round 4. int vs float
     </h1>
     <p>
-The question is, will there be any gain if we simply translate our code to work with doubles?
+On Intel, double and int versions work almost the same. ARMv7 is a 32-bit processor, so for it it would be fair to compare float with int. Let's do that.
     </p>
     <table><tr>
     <td id="left_4">
@@ -539,40 +680,88 @@ They are almost the same.
     <button type="button" onclick="reveal(3)" id="button_4">Reveal the truth</button>
     <div id="the_truth_4" style="display:none;">
     <p>
-Not really, no. The operations are different, but essentially the code is the same. It's still about comparing and jumping.
+And the float version is significantly slower. 
     </p>
     <table><tr>
     <td>
     <pre>
-
+	movw	r0, #36852
+	movt	r0, #976
+.LBB0_6:
+	ldr	r1, [r4, r5]
+	cmp	r1, #1
+	bne	.LBB0_9
+@ BB#7:
+	add	r1, r4, r5
+	ldr	r2, [r1, #4]
+	cmp	r2, #1
+	ldreq	r2, [r1, #8]
+	cmpeq	r2, #1
+	bne	.LBB0_9
+@ BB#8:
+	ldr	r1, [r1, #12]
+	cmp	r1, #1
+	ldreq	r1, [sp, #20]
+	addeq	r1, r1, #1
+	streq	r1, [sp, #20]
+.LBB0_9:
+	add	r5, r5, #4
+	cmp	r5, r0
+	bne	.LBB0_6
+@ BB#10:
+	mov	r0, sp
     </pre>
     </td>
     <td>
     <pre>
-
+	vmov.f32	s0, #1.000000e+00
+	movw	r0, #36852
+	movt	r0, #976
+.LBB0_6:
+	add	r1, r4, r5
+	vldr	s2, [r1]
+	vcmpe.f32	s2, s0
+	vmrs	APSR_nzcv, fpscr
+	bne	.LBB0_10
+@ BB#7:
+	vldr	s2, [r1, #4]
+	vcmpe.f32	s2, s0
+	vmrs	APSR_nzcv, fpscr
+	bne	.LBB0_10
+@ BB#8:
+	vldr	s2, [r1, #8]
+	vcmpe.f32	s2, s0
+	vmrs	APSR_nzcv, fpscr
+	bne	.LBB0_10
+@ BB#9:
+	vldr	s2, [r1, #12]
+	vcmpe.f32	s2, s0
+	vmrs	APSR_nzcv, fpscr
+	ldreq	r1, [sp, #20]
+	addeq	r1, r1, #1
+	streq	r1, [sp, #20]
+.LBB0_10:
+	add	r5, r5, #4
+	cmp	r5, r0
+	bne	.LBB0_6
+@ BB#11:
+	mov	r0, sp
     </pre>
     </td></tr></table>
+    <p>
+The code is fine. It's still about comparing and jumping. But the floating point operations themselves are a bit pricey on ARM.
+    </p>
     </div>
     <script language="JavaScript">
     init_slider(3);
     </script>
 
-
-    <div id="show_in_the_end" style="display:none;">
-    <h2>
-Congratulations!
-    </h2>
-    <p>
-You scored <span id="score"></span> pixels of error. As a reference, if you leave every slider untouched there would be exactly <span id="default_score"></span> pixels of error.
-    </p>
-
     <h2>
 Conclusion
     </h2>
     <p>
-The context matters. Unless you are willing to optimize for the specific platform and compiler paying greatly in terms of maintenance and portability, writing simple code is the best strategy.
+The context matters. Unless you are willing to optimize for the specific platform, paying greatly in terms of maintenance and portability, writing simple code is the best strategy.
     </p>
-    </div>
 
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
