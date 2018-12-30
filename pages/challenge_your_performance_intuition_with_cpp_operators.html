@@ -325,20 +325,20 @@ int main() {
   for (auto& digit : xs) {
     digit = distribution(rng);
   }
-   
+
   volatile auto four_1_in_a_row = 0u;
   auto start = std::chrono::system_clock::now();
   <b>for (auto i = 0u; i &lt; TheSize - 3; ++i)
     if(xs[i] == 1 && xs[i+1] == 1 && xs[i+2] == 1 && xs[i+3] == 1)
       ++four_1_in_a_row;</b>
   auto end = std::chrono::system_clock::now();
-    
-  std::cout &lt;&lt; "time: " &lt;&lt; (end-start).count() * 1e-9  
+
+  std::cout &lt;&lt; "time: " &lt;&lt; (end-start).count() * 1e-9
     &lt;&lt; "  1111s: " &lt;&lt; four_1_in_a_row &lt;&lt; "\n";
 }</pre>
     </td></tr></table>
     <p>
-I've made several variants of this code, compiled it with clang 3.8.0-2ubuntu4 -std=c++14 -O2, and measured their run time on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz. 
+I've made several variants of this code, compiled it with clang 3.8.0-2ubuntu4 -std=c++14 -O2, and measured their run time on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz.
     </p>
     <p>
 Using your intuition and best judgment, please estimate their relative performance. Please use the slider below the code samples.
@@ -354,21 +354,21 @@ The main question. Is && generally more effective than &?
     <td id="left_1">
     <pre>
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1 
-    && xs[i+1] == 1 
-    && xs[i+2] == 1 
+    if(xs[i] == 1
+    && xs[i+1] == 1
+    && xs[i+2] == 1
     && xs[i+3] == 1)
-      ++four_1_in_a_row; 
+      ++four_1_in_a_row;
     </pre>
     </td>
     <td id="right_1">
     <pre>
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1 
-     & xs[i+1] == 1 
-     & xs[i+2] == 1 
+    if(xs[i] == 1
+     & xs[i+1] == 1
+     & xs[i+2] == 1
      & xs[i+3] == 1)
-      ++four_1_in_a_row; 
+      ++four_1_in_a_row;
     </pre>
     </td></tr></table>
     <canvas id="slider_1" width=608 height=128></canvas>
@@ -412,7 +412,7 @@ They are almost the same. In fact, they generate almost the same code.
     <pre>
   <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
   .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6: 
+.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
 <span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
   <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
   <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>10
@@ -436,7 +436,7 @@ They are almost the same. In fact, they generate almost the same code.
     </td></tr></table>
     <p>
 The trick is in the context. Since == generates only 0 or 1, the short-circuiting for 0 and & is still possible. 0 & anything is still 0. Although, the same trick <a href="https://godbolt.org/z/0eEz_G">doesn't work with |</a> anymore.
-    </p>        
+    </p>
     </div>
     <script language="JavaScript">
     init_slider(0);
@@ -452,21 +452,21 @@ Round 2. & vs *
     <td id="left_2">
     <pre>
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1 
-     & xs[i+1] == 1 
-     & xs[i+2] == 1 
+    if(xs[i] == 1
+     & xs[i+1] == 1
+     & xs[i+2] == 1
      & xs[i+3] == 1)
-      ++four_1_in_a_row; 
+      ++four_1_in_a_row;
     </pre>
     </td>
     <td id="right_2">
     <pre>
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if((xs[i] == 1) 
-     * (xs[i+1] == 1) 
-     * (xs[i+2] == 1) 
+    if((xs[i] == 1)
+     * (xs[i+1] == 1)
+     * (xs[i+2] == 1)
      * (xs[i+3] == 1))
-      ++four_1_in_a_row; 
+      ++four_1_in_a_row;
     </pre>
     </td></tr></table>
     <canvas id="slider_2" width=608 height=128></canvas>
@@ -483,7 +483,7 @@ Surprisingly, they perform almost the same while their code is completely differ
     <pre>
   <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
   .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6: 
+.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
 <span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
   <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
   <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>10
@@ -550,7 +550,7 @@ There are 4 comparisons and the rest is just about turning flags into registers.
     </script>
 
     <h2>
-Round 3. ==, && vs *, +, - 
+Round 3. ==, && vs *, +, -
     </h1>
     <p>
 In this simple example, we can substitute almost all the logic with computation. Instead of comparing each value separately we can calculate the squared error for the whole 4-tuple.
@@ -559,11 +559,11 @@ In this simple example, we can substitute almost all the logic with computation.
     <td id="left_3">
     <pre>
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1 
-    && xs[i+1] == 1 
-    && xs[i+2] == 1 
+    if(xs[i] == 1
+    && xs[i+1] == 1
+    && xs[i+2] == 1
     && xs[i+3] == 1)
-      ++four_1_in_a_row; 
+      ++four_1_in_a_row;
     </pre>
     </td>
     <td id="right_3">
@@ -572,13 +572,13 @@ In this simple example, we can substitute almost all the logic with computation.
 inline int sq(int x) {
   return x*x;
 }
-...    
+...
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
     if(sq(xs[i] - 1)
      + sq(xs[i+1] - 1)
-     + sq(xs[i+2] - 1) 
+     + sq(xs[i+2] - 1)
      + sq(xs[i+3] - 1) == 0)
-      ++four_1_in_a_row; 
+      ++four_1_in_a_row;
     </pre>
     </td></tr></table>
     <canvas id="slider_3" width=608 height=128></canvas>
@@ -669,23 +669,23 @@ We don't really need multiplications. We don't really need squared error. Why do
 inline int sq(int x) {
   return x*x;
 }
-...    
+...
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
     if(sq(xs[i] - 1)
      + sq(xs[i+1] - 1)
-     + sq(xs[i+2] - 1) 
+     + sq(xs[i+2] - 1)
      + sq(xs[i+3] - 1) == 0)
-      ++four_1_in_a_row; 
+      ++four_1_in_a_row;
     </pre>
     </td>
     <td id="right_4">
     <pre>
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(std::abs(xs[i] - 1) 
-     + std::abs(xs[i+1] - 1) 
-     + std::abs(xs[i+2] - 1) 
+    if(std::abs(xs[i] - 1)
+     + std::abs(xs[i+1] - 1)
+     + std::abs(xs[i+2] - 1)
      + std::abs(xs[i+3] - 1) == 0)
-      ++four_1_in_a_row; 
+      ++four_1_in_a_row;
     </pre>
     </td></tr></table>
     <canvas id="slider_4" width=608 height=128></canvas>
@@ -735,7 +735,7 @@ That's why. Getting an absolute value of an int is not a trivial job. It's not a
     <pre>
   <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
   .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:   
+.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
 <span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
   <span style="color: #665002">movl</span>  -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #052546">eax</span>
   <span style="color: #265e08">leal</span>  -1(%<span style="color: #631f45">rax</span>), %<span style="color: #473411">ecx</span>
@@ -776,12 +776,12 @@ That's why. Getting an absolute value of an int is not a trivial job. It's not a
     </td></tr></table>
     <p>
 What's interesting, in floating point numbers, when getting an absolute value <i>is</i> about clipping a bit off, <a href="https://godbolt.org/z/ZoFInw">there are no tests or conditions</a>.
-    </p>    
+    </p>
     </div>
     <script language="JavaScript">
     init_slider(3);
     </script>
-    
+
     <h2>
 Round 5. int vs double
     </h1>
@@ -793,13 +793,13 @@ The question is, will there be any gain if we simply translate our code to work 
     <pre>
 ...
   using TheType = int;
-...    
+...
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1 
-    && xs[i+1] == 1 
-    && xs[i+2] == 1 
+    if(xs[i] == 1
+    && xs[i+1] == 1
+    && xs[i+2] == 1
     && xs[i+3] == 1)
-      ++four_1_in_a_row; 
+      ++four_1_in_a_row;
     </pre>
     </td>
     <td id="right_5">
@@ -808,11 +808,11 @@ The question is, will there be any gain if we simply translate our code to work 
   using TheType = double;
 ...
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1 
-    && xs[i+1] == 1 
-    && xs[i+2] == 1 
+    if(xs[i] == 1
+    && xs[i+1] == 1
+    && xs[i+2] == 1
     && xs[i+3] == 1)
-      ++four_1_in_a_row; 
+      ++four_1_in_a_row;
     </pre>
     </td></tr></table>
     <canvas id="slider_5" width=608 height=128></canvas>
@@ -891,7 +891,7 @@ Not really, no. The operations are different, but essentially the code is the sa
     <script language="JavaScript">
     init_slider(4);
     </script>
-    
+
     <h2>
 Round 6. *, +, - int vs double
     </h1>
@@ -904,16 +904,16 @@ But if we change the code to avoid logic, will there be any gain?
 ...
 inline int sq(int x) {
   return x*x;
-}    
+}
 ...
   using TheType = int;
 ...
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(sq(xs[i] - 1) 
+    if(sq(xs[i] - 1)
      + sq(xs[i+1] - 1)
      + sq(xs[i+2] - 1)
      + sq(xs[i+3] - 1) == 0)
-      ++four_1_in_a_row; 
+      ++four_1_in_a_row;
     </pre>
     </td>
     <td id="right_6">
@@ -926,11 +926,11 @@ inline double sq(int x) {
   using TheType = double;
 ...
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(sq(xs[i] - 1) 
+    if(sq(xs[i] - 1)
      + sq(xs[i+1] - 1)
      + sq(xs[i+2] - 1)
      + sq(xs[i+3] - 1) == 0)
-      ++four_1_in_a_row; 
+      ++four_1_in_a_row;
     </pre>
     </td></tr></table>
     <canvas id="slider_6" width=608 height=128></canvas>
@@ -1011,7 +1011,7 @@ No. The code is conceptually the same though, so the loss is also not that drast
     </div>
     <script language="JavaScript">
     init_slider(5);
-    </script>    
+    </script>
 
     <h2>
 Round 7. double vs float
@@ -1026,11 +1026,11 @@ That sound a bit like cheating because with single precision types we would have
   using TheType = double;
 ...
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1 
-    && xs[i+1] == 1 
-    && xs[i+2] == 1 
+    if(xs[i] == 1
+    && xs[i+1] == 1
+    && xs[i+2] == 1
     && xs[i+3] == 1)
-      ++four_1_in_a_row; 
+      ++four_1_in_a_row;
     </pre>
     </td>
     <td id="right_7">
@@ -1039,11 +1039,11 @@ That sound a bit like cheating because with single precision types we would have
   using TheType = float;
 ...
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1 
-    && xs[i+1] == 1 
-    && xs[i+2] == 1 
+    if(xs[i] == 1
+    && xs[i+1] == 1
+    && xs[i+2] == 1
     && xs[i+3] == 1)
-      ++four_1_in_a_row; 
+      ++four_1_in_a_row;
     </pre>
     </td></tr></table>
     <canvas id="slider_7" width=608 height=128></canvas>
@@ -1095,7 +1095,7 @@ And that's the most peculiar thing. Although the code now reads much less from t
     <pre>
   <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
   .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:  
+.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
 <span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
   <span style="color: #383463">vmovss</span>  -12(%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,4), %<span style="color: #356259">xmm</span>0
   <span style="color: #467402">vucomiss</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
@@ -1132,7 +1132,7 @@ This has probably something to do with the bus and the CPU working asynchronousl
     </div>
     <script language="JavaScript">
     init_slider(6);
-    </script> 
+    </script>
 
     <h2>
 Round 8. 1 vs 0
@@ -1144,21 +1144,21 @@ This is the bonus round. There is a notion, right along with the short-circuitin
     <td id="left_8">
     <pre>
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1 
-    && xs[i+1] == 1 
-    && xs[i+2] == 1 
+    if(xs[i] == 1
+    && xs[i+1] == 1
+    && xs[i+2] == 1
     && xs[i+3] == 1)
-      ++four_1_in_a_row; 
+      ++four_1_in_a_row;
     </pre>
     </td>
     <td id="right_8">
     <pre>
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 0 
-    && xs[i+1] == 0 
-    && xs[i+2] == 0 
+    if(xs[i] == 0
+    && xs[i+1] == 0
+    && xs[i+2] == 0
     && xs[i+3] == 0)
-      four_0_in_a_row++; 
+      four_0_in_a_row++;
     </pre>
     </td></tr></table>
     <canvas id="slider_8" width=608 height=128></canvas>
@@ -1228,7 +1228,7 @@ Of course, it isn't. It may be contextually beneficial to check against zero bec
     </div>
     <script language="JavaScript">
     init_slider(7);
-    </script> 
+    </script>
 
     <div id="show_in_the_end" style="display:none;">
     <h2>
@@ -1242,7 +1242,7 @@ You scored <span id="score"></span> pixels of error. As a reference, if you leav
 Conclusion
     </h2>
     <p>
-Truisms don't help performance. That's my conclusion. We all know that logical operations perform short-circuiting; that floats are shorter than doubles; that throwing away a sign from a number is easier than computing its square. It's all true. It's all irrelevant without a proper context. 
+Truisms don't help performance. That's my conclusion. We all know that logical operations perform short-circuiting; that floats are shorter than doubles; that throwing away a sign from a number is easier than computing its square. It's all true. It's all irrelevant without a proper context.
     </p>
     </div>
 
@@ -1250,15 +1250,15 @@ Truisms don't help performance. That's my conclusion. We all know that logical o
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
     <tr>
     <td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
-        <a href="index.html"><img src="favicon.ico"></a> 
+        <a href="index.html"><img src="favicon.ico"></a>
     </td>
     <td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
         &nbsp;&larr; there's more.
     </td>
     <td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
-        + 
-        <a href="https://github.com/akalenuk/wordsandbuttons">Github</a> & 
-        <a href="https://twitter.com/wordsandbuttons">Twitter</a> & 
+        +
+        <a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+        <a href="https://twitter.com/wordsandbuttons">Twitter</a> &
         <a href="https://news.ycombinator.com/from?site=wordsandbuttons.online">Hacker News</a>
     </td>
     </tr>
