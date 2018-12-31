@@ -315,21 +315,12 @@ function grid_size_limited(x) {
     return x;
 }
 
-function dx(x, y) {
-    return dxy(x, y)[0];
-}
-
-function dy(x, y) {
-    return dxy(x, y)[1];
-}
-
-
 function gsx(x, y) {
-    return grid_size_limited(dx(x, y) * (0.5 - dy_from_linear(x, y)[0]) * grid_size * shiftd);
+    return grid_size_limited(dxy(x, y)[0] * (0.5 - dy_from_linear(x, y)[0]) * grid_size * shiftd);
 }
 
 function gsy(x, y) {
-    return grid_size_limited(dy(x, y) * (0.5 - dx_from_linear(x, y)[0]) * grid_size * shiftd);
+    return grid_size_limited(dxy(x, y)[1] * (0.5 - dx_from_linear(x, y)[0]) * grid_size * shiftd);
 }
 
 function fill_splixels_from_pixels() {
@@ -359,7 +350,7 @@ function fill_splixels_from_pixels() {
                 splixels[splixels_i][splixels_j].xy_shift = [gsx(j, i), gsy(j, i)];
                 var shifted_j = j + splixels[splixels_i][splixels_j].xy_shift[0];
                 var shifted_i = i + splixels[splixels_i][splixels_j].xy_shift[1];
-                splixels[splixels_i][splixels_j].xy_normal = [dx(shifted_j, shifted_i), dy(shifted_j, shifted_i)];
+                splixels[splixels_i][splixels_j].xy_normal = dxy(shifted_j, shifted_i);
                 splixels[splixels_i][splixels_j].right = margin_to_the_right;
                 splixels[splixels_i][splixels_j].left = margin_to_the_left;
                 splixels[splixels_i][splixels_j].bottom = margin_to_the_bottom;
