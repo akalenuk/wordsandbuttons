@@ -1,7 +1,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Cubes test</title>
+    <title>Splixels from an image</title>
     <meta name="keywords" content="iterative,algorithms,guide,tutorial,learning">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <style>
@@ -175,7 +175,7 @@ function sign_0_positive(x){ // Math.sign like with no 0 option
 }
 
 function underflow_padded(x){
-    if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
+    if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, this is less than a pixel
         return 1.e-5 * sign_0_positive(x);
     return x;
 }
@@ -440,7 +440,6 @@ function draw_the_splixels(context, do_colors) {
                 var d2x = splixels[si + 1][sj].xy_normal[0] * grid_size;
                 var d2y = splixels[si + 1][sj].xy_normal[1] * grid_size;
                 
-                
                 var Ax = [
                     [1, 0, 0, 0],
                     [0, 1, 0, 0],
@@ -543,20 +542,22 @@ function draw_canvas(){
     }
     context.strokeStyle="#AAAAAA";
     context.lineWidth=1;
+    context.setLineDash([4, 4]);
     context.stroke();
+    context.setLineDash([]);
     context.closePath();
     
     // spline grid
     context.beginPath();
-    for(var i = grid_size; i <= h; i += grid_size) {
+    for(var i = grid_size / 2 ; i <= h; i += grid_size) {
         context.moveTo(0.0, i);
         context.lineTo(w, i);
     }
-    for(var j = grid_size; j <= w; j += grid_size) {
+    for(var j = grid_size / 2; j <= w; j += grid_size) {
         context.moveTo(j, 0.0);
         context.lineTo(j, h);
     }
-    context.strokeStyle="#999999";
+    context.strokeStyle="#bb7799";
     context.lineWidth=1;
     context.stroke();
     context.closePath();    
@@ -565,134 +566,6 @@ function draw_canvas(){
     var do_colors = document.getElementById("do_colors").checked;
     fill_splixels_from_pixels();
     draw_the_splixels(context, do_colors);
-/*    for(var i = 0; i <= h - grid_size; i += grid_size) {
-        for(var j = 0; j <= w - grid_size; j += grid_size) {
-            var splixels_i = Math.floor(i / grid_size);
-            var splixels_j = Math.floor(j / grid_size);
-            
-            var do_horizontal = 
-                sign_0_positive(pixel_in(j + 0.5 * grid_size, i - 0.5 * grid_size) - 0.5) != 
-                sign_0_positive(pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) - 0.5);
-            var do_vertical = 
-                sign_0_positive(pixel_in(j - 0.5 * grid_size, i + 0.5 * grid_size) - 0.5) != 
-                sign_0_positive(pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) - 0.5);
-                
-            if(!do_horizontal && !do_vertical) {
-                splixels[splixels_i][splixels_j].to_margin = pixel_in(j, i) < 0.5 ? -1 : 1;
-            }
-                
-            if(do_horizontal) {
-                context.beginPath();
-                var ds = pixel_in(j + 0.5 * grid_size, i - 0.5 * grid_size) < pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) ? 1.0 : -1.0;
-                var p1x = j + gsx(j, i);
-                var p1y = i + gsy(j, i);
-                var p2x = j + grid_size + gsx(j + grid_size, i);
-                var p2y = i + gsy(j + grid_size, i);
-                var d1x = dx(p1x, p1y) * grid_size;
-                var d1y = dy(p1x, p1y) * grid_size;
-                var d2x = dx(p2x, p2y) * grid_size;
-                var d2y = dy(p2x, p2y) * grid_size;
-                
-                // (re)filling splixels
-                splixels[splixels_i][splixels_j].to_margin = 0;
-                splixels[splixels_i][splixels_j].xy_shift = [gsx(j, i), gsy(j, i)];
-                splixels[splixels_i][splixels_j].xy_shift = [dx(p1x, p1y), dy(p1x, p1y)];
-                splixels[splixels_i][splixels_j + 1].to_margin = 0;
-                splixels[splixels_i][splixels_j + 1].xy_shift = [gsx(j + grid_size, i), gsy(j + grid_size, i)];
-                splixels[splixels_i][splixels_j + 1].xy_shift = [dx(p2x, p2y), dy(p2x, p2y)];
-                                
-                var Ax = [
-                    [1, 0, 0, 0],
-                    [0, 1, 0, 0],
-                    [1, 1, 1, 1],
-                    [0, 1, 2, 3]];
-                var Bx = [p1x, ds*d1y, p2x, ds*d2y]
-                var Px = solved_linear(Ax, Bx, 4);
-                var Ay = [
-                    [1, 0, 0, 0],
-                    [0, 1, 0, 0],
-                    [1, 1, 1, 1],
-                    [0, 1, 2, 3]];
-                var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
-                var Py = solved_linear(Ay, By, 4);
-                for(var k = 0; k < grid_size; k += 1) {
-                    var t1 = (k + 0.01) / grid_size;
-                    var t2 = (k + 0.99) / grid_size;
-                    var x1 = polynomial_in_x(Px, t1, 4);
-                    var y1 = polynomial_in_x(Py, t1, 4);
-                    var x2 = polynomial_in_x(Px, t2, 4);
-                    var y2 = polynomial_in_x(Py, t2, 4);
-                    context.moveTo(x1, y1);
-                    context.lineTo(x2, y2);
-                }
-                if(do_colors)
-                    if((i / grid_size + j / grid_size) % 2 == 0)
-                        context.strokeStyle="#886633";
-                    else
-                        context.strokeStyle="#33AA66";
-                else
-                    context.strokeStyle="#AA3366";
-                context.lineWidth=3;
-                context.stroke();
-                context.closePath();
-            }
-            if(do_vertical) {
-                context.beginPath();
-                var ds = pixel_in(j - 0.5 * grid_size, i + 0.5 * grid_size) < pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) ? -1.0 : 1.0;
-                var p1x = j + gsx(j, i);
-                var p1y = i + gsy(j, i);
-                var p2x = j + gsx(j, i + grid_size);
-                var p2y = i + grid_size + gsy(j, i + grid_size);
-                var d1x = dx(p1x, p1y) * grid_size;
-                var d1y = dy(p1x, p1y) * grid_size;
-                var d2x = dx(p2x, p2y) * grid_size;
-                var d2y = dy(p2x, p2y) * grid_size;
-                
-                // (re)filling splixels
-                splixels[splixels_i][splixels_j].to_margin = 0;
-                splixels[splixels_i][splixels_j].xy_shift = [gsx(j, i), gsy(j, i)];
-                splixels[splixels_i][splixels_j].xy_shift = [dx(p1x, p1y), dy(p1x, p1y)];
-                splixels[splixels_i][splixels_j + 1].to_margin = 0;
-                splixels[splixels_i][splixels_j + 1].xy_shift = [gsx(j, i + grid_size), gsy(j, i + grid_size)];
-                splixels[splixels_i][splixels_j + 1].xy_shift = [dx(p2x, p2y), dy(p2x, p2y)];
-                
-                var Ax = [
-                    [1, 0, 0, 0],
-                    [0, 1, 0, 0],
-                    [1, 1, 1, 1],
-                    [0, 1, 2, 3]];
-                var Bx = [p1x, ds*d1y, p2x, ds*d2y]
-                var Px = solved_linear(Ax, Bx, 4);
-                var Ay = [
-                    [1, 0, 0, 0],
-                    [0, 1, 0, 0],
-                    [1, 1, 1, 1],
-                    [0, 1, 2, 3]];
-                var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
-                var Py = solved_linear(Ay, By, 4);
-                for(var k = 0; k < grid_size; k += 1) {
-                    var t1 = (k + 0.01) / grid_size;
-                    var t2 = (k + 0.99) / grid_size;
-                    var x1 = polynomial_in_x(Px, t1, 4);
-                    var y1 = polynomial_in_x(Py, t1, 4);
-                    var x2 = polynomial_in_x(Px, t2, 4);
-                    var y2 = polynomial_in_x(Py, t2, 4);
-                    context.moveTo(x1, y1);
-                    context.lineTo(x2, y2);
-                }
-                if(do_colors)
-                    if((i / grid_size + j / grid_size) % 2 == 0)
-                        context.strokeStyle="#AA3366";
-                    else
-                        context.strokeStyle="#3366AA";
-                else
-                    context.strokeStyle="#AA3366";
-                context.lineWidth=3;
-                context.stroke();
-                context.closePath();
-            }
-        }
-    }*/
 }
 
 
