@@ -247,10 +247,6 @@ var nd = 2.5;
 var weight = 4;
 var shiftd = 1.5;
 
-function len(x, y) {
-    return Math.sqrt(x*x + y*y);
-}
-
 function weight_of_point(x, y, xj, yi) {
     return Math.pow(2 * Math.pow(0.5, weight), 0.5)
         / (Math.pow(Math.abs(x - xj), weight) + Math.pow(Math.abs(y - yi), weight));
@@ -295,16 +291,10 @@ function dy_from_linear(x, y) {
 function dxy(x, y) {
     var dx = dx_from_linear(x, y)[1];
     var dy = dy_from_linear(x, y)[1];
-    var l = len(dx, dy);
-    if(l < 1e-5)
+    var len = Math.sqrt(dx * dx + dy * dy);
+    if(len < 1e-5)
         return [0.0, 0.0];
-    return [dx / l, dy / l];
-}
-
-function len_dxy(x, y) {
-    var dx = dx_from_linear(x, y)[0];
-    var dy = dy_from_linear(x, y)[0];
-    return len(dx, dy);
+    return [dx / len, dy / len];
 }
 
 function grid_size_limited(x) {
@@ -315,6 +305,7 @@ function grid_size_limited(x) {
     return x;
 }
 
+// gradient shift
 function gsx(x, y) {
     return grid_size_limited(dxy(x, y)[0] * (0.5 - dy_from_linear(x, y)[0]) * grid_size * shiftd);
 }
@@ -323,6 +314,7 @@ function gsy(x, y) {
     return grid_size_limited(dxy(x, y)[1] * (0.5 - dx_from_linear(x, y)[0]) * grid_size * shiftd);
 }
 
+// the algorithm itself
 function fill_splixels_from_pixels() {
     for(var i = 0; i <= h - grid_size; i += grid_size) {
         for(var j = 0; j <= w - grid_size; j += grid_size) {
