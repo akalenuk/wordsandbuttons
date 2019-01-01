@@ -106,7 +106,7 @@ var h = 1024.0;
 
 // algorithm
 var pixel_size = 64.0;
-var grid_size = 64.0;
+var splixel_size = 64.0;
 
 // pixels
 var iw = Math.floor(w / pixel_size) + 1;
@@ -155,8 +155,8 @@ const splixel = {
 var splixels = [];
 
 function reset_spixels() {
-    var sw = 1 + Math.floor(w / grid_size) + 1;
-    var sh = 1 + Math.floor(h / grid_size) + 1;
+    var sw = 1 + Math.floor(w / splixel_size) + 1;
+    var sh = 1 + Math.floor(h / splixel_size) + 1;
     splixels = [];
     for(var i = 0; i < sh; ++i) {
         splixelsi = []
@@ -255,8 +255,8 @@ function weight_of_point(x, y, xj, yi) {
 function dx_from_linear(x, y) {
     var A = [[0.0, 0.0], [0.0, 0.0]];
     var B = [0.0, 0.0];
-    for(var yi = y - nd * grid_size; yi <= y + nd * grid_size; yi += grid_size) {
-        for(var xj = x - nd * grid_size; xj <= x + nd * grid_size; xj += grid_size) {
+    for(var yi = y - nd * splixel_size; yi <= y + nd * splixel_size; yi += splixel_size) {
+        for(var xj = x - nd * splixel_size; xj <= x + nd * splixel_size; xj += splixel_size) {
             var w = weight_of_point(x, y, xj, yi);
             A[0][0] += w;
             A[0][1] += w * (xj - x);
@@ -273,8 +273,8 @@ function dx_from_linear(x, y) {
 function dy_from_linear(x, y) {
     var A = [[0.0, 0.0], [0.0, 0.0]];
     var B = [0.0, 0.0];
-    for(var yi = y - nd * grid_size; yi <= y + nd * grid_size; yi += grid_size) {
-        for(var xj = x - nd * grid_size; xj <= x + nd * grid_size; xj += grid_size) {
+    for(var yi = y - nd * splixel_size; yi <= y + nd * splixel_size; yi += splixel_size) {
+        for(var xj = x - nd * splixel_size; xj <= x + nd * splixel_size; xj += splixel_size) {
             var w = weight_of_point(x, y, xj, yi);
             A[0][0] += w;
             A[0][1] += w * (yi - y);
@@ -297,43 +297,43 @@ function dxy(x, y) {
     return [dx / len, dy / len];
 }
 
-function grid_size_limited(x) {
-    if(x < -grid_size)
-        return -grid_size;
-    if(x > +grid_size)
-        return +grid_size;
+function splixel_size_limited(x) {
+    if(x < -splixel_size / 2)
+        return -splixel_size;
+    if(x > +splixel_size / 2)
+        return +splixel_size;
     return x;
 }
 
 // gradient shift
 function gsx(x, y) {
-    return grid_size_limited(dxy(x, y)[0] * (0.5 - dy_from_linear(x, y)[0]) * grid_size * shiftd);
+    return splixel_size_limited(dxy(x, y)[0] * (0.5 - dy_from_linear(x, y)[0]) * splixel_size * shiftd);
 }
 
 function gsy(x, y) {
-    return grid_size_limited(dxy(x, y)[1] * (0.5 - dx_from_linear(x, y)[0]) * grid_size * shiftd);
+    return splixel_size_limited(dxy(x, y)[1] * (0.5 - dx_from_linear(x, y)[0]) * splixel_size * shiftd);
 }
 
 // the algorithm itself
 function fill_splixels_from_pixels() {
-    for(var i = 0; i <= h - grid_size; i += grid_size) {
-        for(var j = 0; j <= w - grid_size; j += grid_size) {
-            var splixels_i = Math.floor(i / grid_size);
-            var splixels_j = Math.floor(j / grid_size);
+    for(var i = 0; i <= h - splixel_size; i += splixel_size) {
+        for(var j = 0; j <= w - splixel_size; j += splixel_size) {
+            var splixels_i = Math.floor(i / splixel_size);
+            var splixels_j = Math.floor(j / splixel_size);
             
             var margin_to_the_right = 
-                sign_0_positive(pixel_in(j + 0.5 * grid_size, i - 0.5 * grid_size) - 0.5) != 
-                sign_0_positive(pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) - 0.5);
+                sign_0_positive(pixel_in(j + 0.5 * splixel_size, i - 0.5 * splixel_size) - 0.5) != 
+                sign_0_positive(pixel_in(j + 0.5 * splixel_size, i + 0.5 * splixel_size) - 0.5);
             var margin_to_the_left = 
-                sign_0_positive(pixel_in(j - 0.5 * grid_size, i - 0.5 * grid_size) - 0.5) != 
-                sign_0_positive(pixel_in(j - 0.5 * grid_size, i + 0.5 * grid_size) - 0.5);
+                sign_0_positive(pixel_in(j - 0.5 * splixel_size, i - 0.5 * splixel_size) - 0.5) != 
+                sign_0_positive(pixel_in(j - 0.5 * splixel_size, i + 0.5 * splixel_size) - 0.5);
                 
             var margin_to_the_bottom = 
-                sign_0_positive(pixel_in(j - 0.5 * grid_size, i + 0.5 * grid_size) - 0.5) != 
-                sign_0_positive(pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) - 0.5);
+                sign_0_positive(pixel_in(j - 0.5 * splixel_size, i + 0.5 * splixel_size) - 0.5) != 
+                sign_0_positive(pixel_in(j + 0.5 * splixel_size, i + 0.5 * splixel_size) - 0.5);
             var margin_to_the_top = 
-                sign_0_positive(pixel_in(j - 0.5 * grid_size, i - 0.5 * grid_size) - 0.5) != 
-                sign_0_positive(pixel_in(j + 0.5 * grid_size, i - 0.5 * grid_size) - 0.5);
+                sign_0_positive(pixel_in(j - 0.5 * splixel_size, i - 0.5 * splixel_size) - 0.5) != 
+                sign_0_positive(pixel_in(j + 0.5 * splixel_size, i - 0.5 * splixel_size) - 0.5);
 
                 
             if(margin_to_the_right || margin_to_the_left || margin_to_the_bottom || margin_to_the_top) {   
@@ -356,25 +356,25 @@ function fill_splixels_from_pixels() {
 }
 
 function draw_the_splixels(context, do_colors) {
-    for(var i = 0; i <= h - grid_size; i += grid_size) {
-        for(var j = 0; j <= w - grid_size; j += grid_size) {
-            var si = Math.floor(i / grid_size);
-            var sj = Math.floor(j / grid_size);
+    for(var i = 0; i <= h - splixel_size; i += splixel_size) {
+        for(var j = 0; j <= w - splixel_size; j += splixel_size) {
+            var si = Math.floor(i / splixel_size);
+            var sj = Math.floor(j / splixel_size);
             
             var do_horizontal = splixels[si][sj].right;
             var do_vertical   = splixels[si][sj].bottom;
                                 
             if(do_horizontal) {
                 context.beginPath();
-                var ds = pixel_in(j + 0.5 * grid_size, i - 0.5 * grid_size) < pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) ? 1.0 : -1.0;                
+                var ds = pixel_in(j + 0.5 * splixel_size, i - 0.5 * splixel_size) < pixel_in(j + 0.5 * splixel_size, i + 0.5 * splixel_size) ? 1.0 : -1.0;                
                 var p1x = j + splixels[si][sj].xy_shift[0];
                 var p1y = i + splixels[si][sj].xy_shift[1];
-                var p2x = j + grid_size + splixels[si][sj + 1].xy_shift[0];
+                var p2x = j + splixel_size + splixels[si][sj + 1].xy_shift[0];
                 var p2y = i + splixels[si][sj + 1].xy_shift[1];
-                var d1x = splixels[si][sj].xy_normal[0] * grid_size;
-                var d1y = splixels[si][sj].xy_normal[1] * grid_size;
-                var d2x = splixels[si][sj + 1].xy_normal[0] * grid_size;
-                var d2y = splixels[si][sj + 1].xy_normal[1] * grid_size;
+                var d1x = splixels[si][sj].xy_normal[0] * splixel_size;
+                var d1y = splixels[si][sj].xy_normal[1] * splixel_size;
+                var d2x = splixels[si][sj + 1].xy_normal[0] * splixel_size;
+                var d2y = splixels[si][sj + 1].xy_normal[1] * splixel_size;
                         
                 var Ax = [
                     [1, 0, 0, 0],
@@ -390,9 +390,9 @@ function draw_the_splixels(context, do_colors) {
                     [0, 1, 2, 3]];
                 var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
                 var Py = solved_linear(Ay, By, 4);
-                for(var k = 0; k < grid_size; k += 1) {
-                    var t1 = (k) / grid_size;
-                    var t2 = (k + 1) / grid_size;
+                for(var k = 0; k < splixel_size; k += 1) {
+                    var t1 = (k) / splixel_size;
+                    var t2 = (k + 1) / splixel_size;
                     var x1 = polynomial_in_x(Px, t1, 4);
                     var y1 = polynomial_in_x(Py, t1, 4);
                     var x2 = polynomial_in_x(Px, t2, 4);
@@ -401,7 +401,7 @@ function draw_the_splixels(context, do_colors) {
                     context.lineTo(x2, y2);
                 }
                 if(do_colors)
-                    if((i / grid_size + j / grid_size) % 2 == 0)
+                    if((i / splixel_size + j / splixel_size) % 2 == 0)
                         context.strokeStyle="#886633";
                     else
                         context.strokeStyle="#33AA66";
@@ -413,15 +413,15 @@ function draw_the_splixels(context, do_colors) {
             }
             if(do_vertical) {
                 context.beginPath();
-                var ds = pixel_in(j - 0.5 * grid_size, i + 0.5 * grid_size) < pixel_in(j + 0.5 * grid_size, i + 0.5 * grid_size) ? -1.0 : 1.0;
+                var ds = pixel_in(j - 0.5 * splixel_size, i + 0.5 * splixel_size) < pixel_in(j + 0.5 * splixel_size, i + 0.5 * splixel_size) ? -1.0 : 1.0;
                 var p1x = j + splixels[si][sj].xy_shift[0];
                 var p1y = i + splixels[si][sj].xy_shift[1];
                 var p2x = j + splixels[si + 1][sj].xy_shift[0];
-                var p2y = i + grid_size + splixels[si + 1][sj].xy_shift[1];
-                var d1x = splixels[si][sj].xy_normal[0] * grid_size;
-                var d1y = splixels[si][sj].xy_normal[1] * grid_size;
-                var d2x = splixels[si + 1][sj].xy_normal[0] * grid_size;
-                var d2y = splixels[si + 1][sj].xy_normal[1] * grid_size;
+                var p2y = i + splixel_size + splixels[si + 1][sj].xy_shift[1];
+                var d1x = splixels[si][sj].xy_normal[0] * splixel_size;
+                var d1y = splixels[si][sj].xy_normal[1] * splixel_size;
+                var d2x = splixels[si + 1][sj].xy_normal[0] * splixel_size;
+                var d2y = splixels[si + 1][sj].xy_normal[1] * splixel_size;
                 
                 var Ax = [
                     [1, 0, 0, 0],
@@ -437,9 +437,9 @@ function draw_the_splixels(context, do_colors) {
                     [0, 1, 2, 3]];
                 var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
                 var Py = solved_linear(Ay, By, 4);
-                for(var k = 0; k < grid_size; k += 1) {
-                    var t1 = k / grid_size;
-                    var t2 = (k + 1) / grid_size;
+                for(var k = 0; k < splixel_size; k += 1) {
+                    var t1 = k / splixel_size;
+                    var t2 = (k + 1) / splixel_size;
                     var x1 = polynomial_in_x(Px, t1, 4);
                     var y1 = polynomial_in_x(Py, t1, 4);
                     var x2 = polynomial_in_x(Px, t2, 4);
@@ -448,7 +448,7 @@ function draw_the_splixels(context, do_colors) {
                     context.lineTo(x2, y2);
                 }
                 if(do_colors)
-                    if((i / grid_size + j / grid_size) % 2 == 0)
+                    if((i / splixel_size + j / splixel_size) % 2 == 0)
                         context.strokeStyle="#AA3366";
                     else
                         context.strokeStyle="#3366AA";
@@ -532,11 +532,11 @@ function draw_canvas(){
     
     // spline grid
     context.beginPath();
-    for(var i = grid_size / 2 ; i <= h; i += grid_size) {
+    for(var i = splixel_size / 2 ; i <= h; i += splixel_size) {
         context.moveTo(0.0, i);
         context.lineTo(w, i);
     }
-    for(var j = grid_size / 2; j <= w; j += grid_size) {
+    for(var j = splixel_size / 2; j <= w; j += splixel_size) {
         context.moveTo(j, 0.0);
         context.lineTo(j, h);
     }
@@ -570,7 +570,7 @@ function reset_all() {
 }
 
 function reset_magic_numbers() {
-    grid_size = parseFloat(document.getElementById("grid_size").value);
+    splixel_size = parseFloat(document.getElementById("splixel_size").value);
     nd = document.getElementById("nd").value;
     weight = document.getElementById("weight").value;
     shiftd = document.getElementById("shiftd").value;
@@ -585,7 +585,7 @@ function reset_magic_numbers() {
     <br>
     <canvas id="canvas" width=1024 height=1024></canvas>
     <div style="text-align:right; width:1024px; padding-bottom:12pt;">
-        grid_size: <input type="text" id="grid_size" value="64">
+        splixel_size: <input type="text" id="splixel_size" value="64">
         nd: <input type="text" id="nd" value="0.5">
         weight: <input type="text" id="weight" value="4">
         shiftd: <input type="text" id="shiftd" value="1.5">
