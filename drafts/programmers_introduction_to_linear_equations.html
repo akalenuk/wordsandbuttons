@@ -1349,41 +1349,41 @@ x<sub>1</sub><br>x<sub>2</sub><br>x<sub>3</sub>
     </form>
 
     <p>
-There are two major classes of linear system solvers: iterative and direct.
+Є два класи алгоритмів які розв'язують системи лінійних рівнянь: ітаративні та точні.
     </p>
     <p>
-Iterative algorithms are very simple conceptually. They all can be boiled down to these three steps
+Ітеративні алгоритми концептуально прості. Вони всі зводяться до трьох кроків.
     </p>
     <ol>
-    <li>Start somewhere.</li>
-    <li>See if you got what you were looking for. <br>If so — great, you are done!</li>
-    <li>If not, do something that brings you closer to the goal. <br>Go to the step 2.</li>
+    <li>Починаємо з якоїсь точки.</li>
+    <li>Перевіряємо, чи ця точка вже є достатньо добрим рішенням. <br>Якщо так — чудово, ми впорались!</li>
+    <li>Якщо ні, робимо щось що має наблизити цю точку по рішення. <br>Йдемо до кроку №2.</li>
     </ol>
     <p>
-Let's make a linear solver out of that. The part of the algorithm that will bring us closer to the solution will be a simple projection. If you project an arbitrary point on a line, the projection will be closer to ane point of that line, including of course the desired solution. Therefore, by projecting a point from one line to another we will get closer and closer to the solution.
+Давайте зробимо з цього рішалку. Той крок, що наближує точку до рішення буде простою проекцією на одну з прямих. Якщо ми візьмемо довільну точку і спроецюємо на одну з прямиз рівнянь, її проекція буде не дальше від розв'язку аніж сама точка. Точка, проекція, і розв'язок утворюватимуть прямокутний трикутник. Якщо він не вироджений, відрізок від проекції до рішення буде катетом, а від точки до рішення — гіпотенузою. Гіпотенуза не може бути коротшою за катете, отже якщо ми будемо послідовно проецювати точку з прямої на пряму, то рано чи піздно доберемося до якогось задовільно малого околу рішення.
     </p>
     <p>
-If, of course, there is one.
+Якщо звісно система має рішення.
     </p>
     <p>
-As for exit criteria, we can simply measure how far we have to travel to make an iteration — a projective “leap” from one line to another. Presumably, as we're getting closer, the leap distance should shorten, so at some point, we might consider it small enough to stop the operation.
+Щодо умови виходу, ми зробимо ще простіше. Ми мірятимо те, скільки точка мала подолати за свій останній перехід щоб спроецюватися на пряму. Очікувано, із тим як ми наближатимемося до рішення, і переходи ставатимуть коротші. Отже, коли перехід стане зовсім мальким, ми вважатемемо, що рішення достатньо поруч.
     </p>
     <p>
-And we can leave the question “where to start” unanswered. Of course, it would be fantastic to start right at the solution point, but generally, our algorithm should work for any starting point we choose.
+А вот на питання де починати, відповіді не буде. Чудово було б почати одразу біля рішення, але наш алгоритм мав би працювати починаючи з будь-якої точки, отже і сильно думати про це не варто.
     </p>
     <p>
-Here is the interactive illustration of it.
+Ось інтерактивна ілюстрація такого алгоритму.
     </p>
     <div id="solver_buttons">
     <center>
-        <button type="button" id="button_1" style="width: 180px;" onclick="radio(1)" disabled="true">Lines</button>
-        <button type="button" id="button_2" style="width: 180px;" onclick="radio(2)">Start point</button>
-        <button type="button" id="button_3" style="width: 180px;" onclick="radio(3)">Stop distance</button>
+        <button type="button" id="button_1" style="width: 180px;" onclick="radio(1)" disabled="true">Прямі</button>
+        <button type="button" id="button_2" style="width: 180px;" onclick="radio(2)">Початок</button>
+        <button type="button" id="button_3" style="width: 180px;" onclick="radio(3)">Перехід</button>
     </center>
     </div>
     <canvas id="solver_1" width=640 height=512></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
-        <button type="button" id="reset_solver" onclick="reset_solver()">Reset</button>
+        <button type="button" id="reset_solver" onclick="reset_solver()">Наново</button>
     </div>
 
     <p class="results" id="results">
