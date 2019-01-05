@@ -1076,6 +1076,23 @@ function almost(a, b) {
     return Math.abs(a-b) < 1.e-5;
 }
 
+function linear(A, B) {
+    if(A.length != B.length)
+        return false;
+    var proportion = 0.;
+    for(var i = 0; i < A.length; ++i) {
+        if(A[i] == 0. && B[i] != 0.)
+            return false;
+        if(A[i] != 0.)
+            if(proportion == 0.)
+                proportion = B[i] / A[i];
+            else
+                if(!almost(proportion, B[i] / A[i]) )
+                    return false
+    }
+    return true;
+}
+
 function done_system_3_quest_5() {
     var a11 =  Number(document.getElementById("s3_1_1").value);
     var a12 =  Number(document.getElementById("s3_1_2").value);
@@ -1086,9 +1103,9 @@ function done_system_3_quest_5() {
     var a23 =  Number(document.getElementById("s3_2_3").value);
     var b2 =  Number(document.getElementById("s3_2_4").value);
 
-    if(almost(a11 / a21, a12 / a22) && almost(a11 / a21, a13 / a23))
+    if(linear([a11, a12, a13], [a21, a22, a23]))
     {
-        if(almost(a11 / a21, b1 / b2))
+        if(linear([a11, a12, a13, b1], [a21, a22, a23, b2]) )
         {
             document.getElementById("reply_quest_5").innerHTML = "Звісно, вони лінійно залежні. Тобто утворюють одну і&nbsp;ту саму площину. Але кожна точка на&nbsp;площині все ж&nbsp;таки буде розв'язком.";
         } else {
