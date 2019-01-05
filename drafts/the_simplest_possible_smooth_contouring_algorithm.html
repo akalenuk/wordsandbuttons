@@ -71,9 +71,322 @@ u {
 }
     </style>
     <script language="JavaScript">
-function show(n){
-    document.getElementById("shown_" + n).style.display = "none";
-    document.getElementById("hidden_" + n).style.display = "inline";
+// canvas
+var w = 640.0;
+var h = 640.0;
+
+// algorithm
+var grid_size = 48.0;
+var distance = 84.0;
+var gradient_step = 1.0;  
+
+var lines = [];
+
+// animation, not essencial for the algorithm
+var animation_d = distance;
+var _t1 = 0.; // time-related coefficient for the linear contour
+var _t3 = 0.; // time-related coefficient for the cubic contour
+var FPS = 8;
+
+function d_f(x, y) {
+    var d = Number.MAX_VALUE; // everything is out
+    for (var i = 0; i < lines.length; ++i) {
+        var di = distance_to_line_segment(lines[i], x, y);
+        if (di < d)
+            d = di;
+    }
+    return d;
+}
+
+function dot(a1, a2, b1, b2) {
+    return a1 * b1 + a2 * b2; 
+}
+    
+function distance_to_segment(lp1x, lp1y, lp2x, lp2y, px, py) {
+    var t_proj = dot(px - lp1x, py - lp1y, lp2x - lp1x, lp2y - lp1y) / dot(lp2x - lp1x, lp2y - lp1y, lp2x - lp1x, lp2y - lp1y);
+    if (isNaN(t_proj))
+        t_proj = 0.0;
+    else if (t_proj < 0.0)
+        t_proj = 0.0;
+    else if (t_proj > 1.0)
+        t_proj = 1.0;
+    var p_proj_x = lp1x + (lp2x - lp1x) * t_proj;
+    var p_proj_y = lp1y + (lp2y - lp1y) * t_proj;
+    return Math.sqrt(dot(p_proj_x - px, p_proj_y - py, p_proj_x - px, p_proj_y - py));
+}
+
+function distance_to_line_segment(line, px, py) {
+    return distance_to_segment(line[0][0], line[0][1], line[1][0], line[1][1], px, py);
+}
+
+function dx(x, y) {
+    return ( d_f(x + gradient_step, y) - d_f(x, y) ) / gradient_step;
+}
+
+function gsx(x, y, distance) {
+    var dd = distance - d_f(x, y);
+    return dx(x, y) * dd;
+}
+
+function dy(x, y) {
+    return ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
+}
+
+function gsy(x, y, distance) {
+    var dd = distance - d_f(x, y);
+    return dy(x, y) * dd;
+}
+
+function sign_0_positive(x){ // Math.sign like with no 0 option
+    if(x >= 0)
+        return 1.0;
+    return -1.0;
+}
+
+function underflow_padded(x){
+    if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
+        return 1.e-5 * sign_0_positive(x);
+    return x;
+}
+
+function solved_linear(A, B, n){
+    var X = [];
+    for (var i = 0; i < n; ++i)
+        X[i] = 0.0;
+
+    // triangulize
+    for (var i = 0; i < n-1; ++i)
+        for (var j = 0; j < i+1; ++j) {
+            r = A[i+1][j] / underflow_padded(A[j][j]);
+            A[i+1][j] = 0.;
+            for (var b_j = j+1; b_j < n; ++b_j){
+                A[i+1][b_j] -= A[j][b_j]*r;
+            }
+            B[i+1] -= B[j]*r;
+        }
+
+    // calculate xs
+    X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
+    for (var i = n-2; i >= 0; --i){
+        var s = 0.0;
+        for (var j = i; j < n; ++j){
+            s = s + A[i][j]*X[j];
+        }
+        X[i] = (B[i] - s) / underflow_padded(A[i][i]);
+    }
+    return X;
+}
+
+function polynomial_in_x(A, x, n){
+    var y = 0.0;
+    for(var i = 0; i < n; ++i){
+        y += A[i] * Math.pow(x, i);
+    }
+    return y;
+}
+    
+function init_canvas(){
+    var canvas = document.getElementById("canvas");
+    canvas.addEventListener('mousedown', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        lines.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
+    }, false);
+     
+    canvas.addEventListener('mousemove', function(e){
+        if(e.buttons == 1){
+            canvas_rect = canvas.getBoundingClientRect();
+            lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+            draw_canvas();
+        }
+    }, false);
+    
+    canvas.addEventListener('mouseup', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+        draw_canvas();
+    }, false);
+    
+    draw_canvas();
+}    
+
+function draw_contour_smooth(context, d_f, w, h, grid_size, distance) {
+    context.beginPath();
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+            var do_horizontal = 
+                (d_f(j + 0.5 * grid_size, i - 0.5 * grid_size) - distance ) *
+                (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            var do_vertical = 
+                (d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) - distance ) *
+                (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            if(do_horizontal) {
+                var ds = d_f(j + 0.5 * grid_size, i - 0.5 * grid_size) < d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) ? 1.0 : -1.0;
+                var p1x = j + gsx(j, i, distance)  * _t1;
+                var p1y = i + gsy(j, i, distance)  * _t1;
+                var p2x = j + grid_size + gsx(j + grid_size, i, distance)  * _t1;
+                var p2y = i + gsy(j + grid_size, i, distance)  * _t1;
+                var d1x = dx(p1x, p1y) * grid_size  * _t3;
+                var d1y = dy(p1x, p1y) * grid_size  * _t3;
+                var d2x = dx(p2x, p2y) * grid_size  * _t3;
+                var d2y = dy(p2x, p2y) * grid_size  * _t3;
+                var Ax = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var Bx = [p1x, ds*d1y, p2x, ds*d2y]
+                var Px = solved_linear(Ax, Bx, 4);
+                var Ay = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
+                var Py = solved_linear(Ay, By, 4);
+                for(var k = 0; k < grid_size; k += 1) {
+                    var t1 = (k + 0.01) / grid_size;
+                    var t2 = (k + 0.99) / grid_size;
+                    var x1 = polynomial_in_x(Px, t1, 4);
+                    var y1 = polynomial_in_x(Py, t1, 4);
+                    var x2 = polynomial_in_x(Px, t2, 4);
+                    var y2 = polynomial_in_x(Py, t2, 4);
+                    context.moveTo(x1, y1);
+                    context.lineTo(x2, y2);
+                }
+            }
+            if(do_vertical) {
+                var ds = d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) < d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) ? -1.0 : 1.0;
+                var p1x = j + gsx(j, i, distance) * _t1;
+                var p1y = i + gsy(j, i, distance) * _t1;
+                var p2x = j + gsx(j, i + grid_size, distance)  * _t1;
+                var p2y = i + grid_size + gsy(j, i + grid_size, distance)  * _t1;
+                var d1x = dx(p1x, p1y) * grid_size  * _t3;
+                var d1y = dy(p1x, p1y) * grid_size  * _t3;
+                var d2x = dx(p2x, p2y) * grid_size  * _t3;
+                var d2y = dy(p2x, p2y) * grid_size  * _t3;
+                var Ax = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var Bx = [p1x, ds*d1y, p2x, ds*d2y]
+                var Px = solved_linear(Ax, Bx, 4);
+                var Ay = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
+                var Py = solved_linear(Ay, By, 4);
+                for(var k = 0; k < grid_size; k += 1) {
+                    var t1 = (k + 0.01) / grid_size;
+                    var t2 = (k + 0.99) / grid_size;
+                    var x1 = polynomial_in_x(Px, t1, 4);
+                    var y1 = polynomial_in_x(Py, t1, 4);
+                    var x2 = polynomial_in_x(Px, t2, 4);
+                    var y2 = polynomial_in_x(Py, t2, 4);
+                    context.moveTo(x1, y1);
+                    context.lineTo(x2, y2);
+                }
+            }
+        }
+    }
+    context.strokeStyle="#AA3366";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath();
+}
+
+
+function draw_canvas(){
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // distance function
+    var distance_field = context.createImageData(w, h);
+    for (var i = 0; i < distance_field.data.length; ++i)
+        distance_field.data[i] = 0;
+    
+    if(document.getElementById("draw_expected_shape").checked)
+        for (var i = 0; i <= h; i += 2.0)
+            for (var j = 0; j <= w; j += 2.0) {
+                d = d_f(j, i);
+                if (d <= distance) {
+                    distance_field.data[(i*w + j) * 4 + 0] = 0x55;
+                    distance_field.data[(i*w + j) * 4 + 1] = 0x55;
+                    distance_field.data[(i*w + j) * 4 + 2] = 0xAA;
+                    distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
+                }
+            }
+        context.putImageData(distance_field, -0.5, -0.5);
+    
+    // grid
+    if(document.getElementById("draw_grid").checked) {
+        context.beginPath();
+        for(var i = grid_size / 2; i <= h; i += grid_size) {
+            context.moveTo(0.0, i);
+            context.lineTo(w, i);
+        }
+        for(var j = grid_size / 2; j <= w; j += grid_size) {
+            context.moveTo(j, 0.0);
+            context.lineTo(j, h);
+        }
+        context.strokeStyle="#999999";
+        context.lineWidth=1;
+        context.stroke();
+        context.closePath();
+    }
+ 
+    // smooth
+    if(document.getElementById("do_grid").checked || document.getElementById("do_optimized").checked || document.getElementById("do_smooth").checked) {
+        draw_contour_smooth(context, d_f, w, h, grid_size, distance);
+    }
+    
+    // distance values
+    if(document.getElementById("draw_distances").checked && lines.length > 0) {
+        context.font = "16px Arial";
+        context.fillStyle = "#000000";
+        for(var i = 0; i <= h - grid_size; i += grid_size) {
+            for(var j = 0; j <= w - grid_size; j += grid_size) {
+                context.fillText(Math.round(d_f(j, i) - distance,1).toString(), j+5, i-5);
+            }
+        }
+    }
+}
+
+function reset_all() {
+    lines = [];
+    draw_canvas();
+}
+
+function undo_last() {
+    lines.splice(-1,1);
+    draw_canvas();
+}    
+    
+function tick() {
+    // contours
+    if(document.getElementById("do_optimized").checked && _t1 != 1.0) {
+       _t1 += 0.125;
+       draw_canvas();
+    }
+    if(!document.getElementById("do_optimized").checked && _t1 != 0.0) {
+       _t1 -= 0.125;
+       draw_canvas();
+    }
+    if(document.getElementById("do_smooth").checked && _t3 != 1.0) {
+       _t3 += 0.125;
+       draw_canvas();
+    }
+    if(!document.getElementById("do_smooth").checked && _t3 != 0.0) {
+       _t3 -= 0.125;
+       draw_canvas();
+    }
+
+    setTimeout( function(){tick();}, 1000.0 / FPS);
 }
     </script>
   </head>
@@ -85,24 +398,24 @@ The simplest possible smooth contouring algorithm
     <p>
 ...
     </p>
-
-    <table><tr>
-    <td>
-    <pre>
-...
-    </pre>
-    </td></tr></table>
-    <p>
-    <div id="shown_1">
-        <button type="button" onclick="show(1)">Yes</button>
-        <button type="button" onclick="show(1)">No</button>
+    <form onsubmit="return false;">
+    <input type="checkbox" id="do_grid" checked onclick="draw_canvas();"/><label for="do_grid">Pixel contour</label>
+    <input type="checkbox" id="do_optimized" onclick="draw_canvas();"/><label for="do_optimized">Linear contour</label>
+    <input type="checkbox" id="do_smooth" onclick="draw_canvas();"/><label for="do_smooth">Smooth contour</label>
+    <br>
+    <input type="checkbox" id="draw_distances"onclick="draw_canvas();"/><label for="draw_distances">Show Distance</label>
+    <input type="checkbox" id="draw_expected_shape" checked onclick="draw_canvas();"/><label for="draw_expected_shape">Show Expected Shape</label>
+    <input type="checkbox" id="draw_grid" checked onclick="draw_canvas();"/><label for="draw_grid">Show Grid</label>
+    </form>
+    <canvas id="canvas" width=640 height=640></canvas>
+    <script language="JavaScript">
+    init_canvas();
+    tick(); // let it tick always
+    </script>
+    <div style="text-align:right; width:640px; padding-bottom:12pt;">
+        <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
+        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
-    <div id="hidden_1" style="display:none;">
-        <p>
-...
-        </p>
-    </div>
-
     <p>
 ...
     </p>
