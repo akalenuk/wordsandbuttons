@@ -83,7 +83,6 @@ var gradient_step = 1.0;
 var lines = [];
 
 // animation, not essencial for the algorithm
-var animation_d = distance;
 var _t1 = 0.; // time-related coefficient for the linear contour
 var _t3 = 0.; // time-related coefficient for the cubic contour
 var FPS = 8;
@@ -95,7 +94,7 @@ function d_f(x, y) {
         if (di < d)
             d = di;
     }
-    return d;
+    return d - distance;
 }
 
 function dot(a1, a2, b1, b2) {
@@ -123,8 +122,8 @@ function dx(x, y) {
     return ( d_f(x + gradient_step, y) - d_f(x, y) ) / gradient_step;
 }
 
-function gsx(x, y, distance) {
-    var dd = distance - d_f(x, y);
+function gsx(x, y) {
+    var dd = - d_f(x, y);
     return dx(x, y) * dd;
 }
 
@@ -132,8 +131,8 @@ function dy(x, y) {
     return ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
 }
 
-function gsy(x, y, distance) {
-    var dd = distance - d_f(x, y);
+function gsy(x, y) {
+    var dd = - d_f(x, y);
     return dy(x, y) * dd;
 }
 
@@ -209,24 +208,24 @@ function init_canvas(){
     draw_canvas();
 }    
 
-function draw_contour_smooth(context, d_f, w, h, grid_size, distance) {
+function draw_contour_smooth(context, d_f, w, h, grid_size) {
     context.beginPath();
     for(var i = 0; i <= h - grid_size; i += grid_size) {
         for(var j = 0; j <= w - grid_size; j += grid_size) {
             for(var horizontal in [1, 0]) {
                 var vertical = 1 - horizontal;
                 // check if there is a border crossing
-                var distance_in_p1 = d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance;
-                var distance_in_p2 = d_f(j + (0.5 - vertical) * grid_size, i + (0.5 - horizontal) * grid_size) - distance;
+                var distance_in_p1 = d_f(j + 0.5 * grid_size, i + 0.5 * grid_size);
+                var distance_in_p2 = d_f(j + (0.5 - vertical) * grid_size, i + (0.5 - horizontal) * grid_size);
                 if( distance_in_p1 * distance_in_p2 < 0) {  // sign change = border crosing                    
                     // cotour piece direction matters for normal calculations
                     var cpd = distance_in_p1 > distance_in_p2 ? 1 : -1;
                     if(vertical)
                         cpd = -cpd;
-                    var p1x = j + gsx(j, i, distance)  * _t1;
-                    var p1y = i + gsy(j, i, distance)  * _t1;
-                    var p2x = j + horizontal * grid_size + gsx(j + horizontal * grid_size, i + vertical * grid_size, distance)  * _t1;
-                    var p2y = i + vertical * grid_size + gsy(j + horizontal * grid_size, i + vertical * grid_size, distance)  * _t1;
+                    var p1x = j + gsx(j, i)  * _t1;
+                    var p1y = i + gsy(j, i)  * _t1;
+                    var p2x = j + horizontal * grid_size + gsx(j + horizontal * grid_size, i + vertical * grid_size)  * _t1;
+                    var p2y = i + vertical * grid_size + gsy(j + horizontal * grid_size, i + vertical * grid_size)  * _t1;
                     var d1x = dx(p1x, p1y) * grid_size  * _t3;
                     var d1y = dy(p1x, p1y) * grid_size  * _t3;
                     var d2x = dx(p2x, p2y) * grid_size  * _t3;
@@ -282,7 +281,7 @@ function draw_canvas(){
         for (var i = 0; i <= h; i += 2.0)
             for (var j = 0; j <= w; j += 2.0) {
                 d = d_f(j, i);
-                if (d <= distance) {
+                if (d <= 0) {
                     distance_field.data[(i*w + j) * 4 + 0] = 0x55;
                     distance_field.data[(i*w + j) * 4 + 1] = 0x55;
                     distance_field.data[(i*w + j) * 4 + 2] = 0xAA;
@@ -310,7 +309,7 @@ function draw_canvas(){
  
     // smooth
     if(document.getElementById("do_grid").checked || document.getElementById("do_optimized").checked || document.getElementById("do_smooth").checked) {
-        draw_contour_smooth(context, d_f, w, h, grid_size, distance);
+        draw_contour_smooth(context, d_f, w, h, grid_size);
     }
     
     // distance values
@@ -319,7 +318,7 @@ function draw_canvas(){
         context.fillStyle = "#000000";
         for(var i = 0; i <= h - grid_size; i += grid_size) {
             for(var j = 0; j <= w - grid_size; j += grid_size) {
-                context.fillText(Math.round(d_f(j, i) - distance,1).toString(), j+5, i-5);
+                context.fillText(Math.round(d_f(j, i),1).toString(), j+5, i-5);
             }
         }
     }
