@@ -91,8 +91,8 @@ var gradient_step = 1.0;
 var lines = [];
 
 // animation, not essencial for the algorithm
-var _t1 = 0.; // time-related coefficient for the linear contour
-var _t3 = 0.; // time-related coefficient for the cubic contour
+var _t1 = 1.; // time-related coefficient for the linear contour
+var _t3 = 1.; // time-related coefficient for the cubic contour
 var FPS = 8;
 
 function d_f(x, y) {
@@ -184,9 +184,9 @@ function solved_linear(A, B, n){
     return X;
 }
 
-function polynomial_in_x(A, x, n){
+function polynomial_in_x(A, x){
     var y = 0.0;
-    for(var i = 0; i < n; ++i){
+    for(var i = 0; i < A.length; ++i){
         y += A[i] * Math.pow(x, i);
     }
     return y;
@@ -255,10 +255,10 @@ function draw_contour_smooth(context, d_f, w, h, grid_size) {
                     for(var k = 0; k < grid_size; k += 1) {
                         var t1 = (k + 0) / grid_size;
                         var t2 = (k + 1) / grid_size;
-                        var x1 = polynomial_in_x(Px, t1, 4);
-                        var y1 = polynomial_in_x(Py, t1, 4);
-                        var x2 = polynomial_in_x(Px, t2, 4);
-                        var y2 = polynomial_in_x(Py, t2, 4);
+                        var x1 = polynomial_in_x(Px, t1);
+                        var y1 = polynomial_in_x(Py, t1);
+                        var x2 = polynomial_in_x(Px, t2);
+                        var y2 = polynomial_in_x(Py, t2);
                         context.moveTo(x1, y1);
                         context.lineTo(x2, y2);
                     }
