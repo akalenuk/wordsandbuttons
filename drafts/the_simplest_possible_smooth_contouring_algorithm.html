@@ -144,46 +144,6 @@ function gsy(x, y) {
     return dy(x, y) * dd;
 }
 
-function sign_0_positive(x){ // Math.sign like with no 0 option
-    if(x >= 0)
-        return 1.0;
-    return -1.0;
-}
-
-function underflow_padded(x){
-    if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
-        return 1.e-5 * sign_0_positive(x);
-    return x;
-}
-
-function solved_linear(A, B, n){
-    var X = [];
-    for (var i = 0; i < n; ++i)
-        X[i] = 0.0;
-
-    // triangulize
-    for (var i = 0; i < n-1; ++i)
-        for (var j = 0; j < i+1; ++j) {
-            r = A[i+1][j] / underflow_padded(A[j][j]);
-            A[i+1][j] = 0.;
-            for (var b_j = j+1; b_j < n; ++b_j){
-                A[i+1][b_j] -= A[j][b_j]*r;
-            }
-            B[i+1] -= B[j]*r;
-        }
-
-    // calculate xs
-    X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
-    for (var i = n-2; i >= 0; --i){
-        var s = 0.0;
-        for (var j = i; j < n; ++j){
-            s = s + A[i][j]*X[j];
-        }
-        X[i] = (B[i] - s) / underflow_padded(A[i][i]);
-    }
-    return X;
-}
-
 function polynomial_in_x(A, x){
     var y = 0.0;
     for(var i = 0; i < A.length; ++i){
@@ -245,16 +205,22 @@ function draw_contour_smooth(context, d_f, w, h, grid_size) {
                     var cpd = distance_in_p1 > distance_in_p2 ? 1 : -1;
                     if(vertical)
                         cpd = -cpd;
+                        
+                    // Px
                     var p1x = j + gsx(j, i)  * _t1;
-                    var p1y = i + gsy(j, i)  * _t1;
                     var p2x = j + horizontal * grid_size + gsx(j + horizontal * grid_size, i + vertical * grid_size)  * _t1;
-                    var p2y = i + vertical * grid_size + gsy(j + horizontal * grid_size, i + vertical * grid_size)  * _t1;
                     var d1x = dx(p1x, p1y) * grid_size  * _t3;
-                    var d1y = dy(p1x, p1y) * grid_size  * _t3;
                     var d2x = dx(p2x, p2y) * grid_size  * _t3;
-                    var d2y = dy(p2x, p2y) * grid_size  * _t3;
                     var Px = spline_for(p1x, cpd*d1y, p2x, cpd*d2y);
+                        
+                    // Py                
+                    var p1y = i + gsy(j, i)  * _t1;
+                    var p2y = i + vertical * grid_size + gsy(j + horizontal * grid_size, i + vertical * grid_size)  * _t1;
+                    var d1y = dy(p1x, p1y) * grid_size  * _t3;
+                    var d2y = dy(p2x, p2y) * grid_size  * _t3;
                     var Py = spline_for(p1y, (-cpd)*d1x, p2y, (-cpd)*d2x);
+                    
+                    // draw contour
                     for(var k = 0; k < grid_size; k += 1) {
                         var t1 = (k + 0) / grid_size;
                         var t2 = (k + 1) / grid_size;
