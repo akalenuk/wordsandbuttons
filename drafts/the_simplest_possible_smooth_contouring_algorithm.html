@@ -206,18 +206,20 @@ function draw_contour_smooth(context, d_f, w, h, grid_size) {
                     if(vertical)
                         cpd = -cpd;
                         
-                    // Px
+                    // p1
                     var p1x = j + gsx(j, i)  * _t1;
-                    var p2x = j + horizontal * grid_size + gsx(j + horizontal * grid_size, i + vertical * grid_size)  * _t1;
-                    var d1x = dx(p1x, p1y) * grid_size  * _t3;
-                    var d2x = dx(p2x, p2y) * grid_size  * _t3;
-                    var Px = spline_for(p1x, cpd*d1y, p2x, cpd*d2y);
-                        
-                    // Py                
                     var p1y = i + gsy(j, i)  * _t1;
-                    var p2y = i + vertical * grid_size + gsy(j + horizontal * grid_size, i + vertical * grid_size)  * _t1;
+                    var d1x = dx(p1x, p1y) * grid_size  * _t3;
                     var d1y = dy(p1x, p1y) * grid_size  * _t3;
+                        
+                    // p2            
+                    var p2x = j + horizontal * grid_size + gsx(j + horizontal * grid_size, i + vertical * grid_size)  * _t1;
+                    var p2y = i + vertical * grid_size + gsy(j + horizontal * grid_size, i + vertical * grid_size)  * _t1;
+                    var d2x = dx(p2x, p2y) * grid_size  * _t3;
                     var d2y = dy(p2x, p2y) * grid_size  * _t3;
+                    
+                    // parametric curve
+                    var Px = spline_for(p1x, cpd*d1y, p2x, cpd*d2y);
                     var Py = spline_for(p1y, (-cpd)*d1x, p2y, (-cpd)*d2x);
                     
                     // draw contour
