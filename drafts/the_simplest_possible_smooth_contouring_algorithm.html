@@ -61,6 +61,11 @@ input[type="checkbox"] {
     width: 16pt;
 }
 
+input[type="radio"] {
+    height: 16pt;
+    width: 16pt;
+}
+
 label {
     font-size: 16pt;
 }
@@ -267,11 +272,11 @@ function draw_canvas(){
     // grid
     if(document.getElementById("draw_grid").checked) {
         context.beginPath();
-        for(var i = grid_size / 2; i <= h; i += grid_size) {
+        for(var i = 0; i <= h; i += grid_size) {
             context.moveTo(0.0, i);
             context.lineTo(w, i);
         }
-        for(var j = grid_size / 2; j <= w; j += grid_size) {
+        for(var j = 0; j <= w; j += grid_size) {
             context.moveTo(j, 0.0);
             context.lineTo(j, h);
         }
@@ -310,11 +315,11 @@ function undo_last() {
     
 function tick() {
     // contours
-    if(document.getElementById("do_optimized").checked && _t1 != 1.0) {
+    if((document.getElementById("do_optimized").checked || document.getElementById("do_smooth").checked) && _t1 != 1.0) {
        _t1 += 0.125;
        draw_canvas();
     }
-    if(!document.getElementById("do_optimized").checked && _t1 != 0.0) {
+    if(!(document.getElementById("do_optimized").checked || document.getElementById("do_smooth").checked) && _t1 != 0.0) {
        _t1 -= 0.125;
        draw_canvas();
     }
@@ -340,9 +345,9 @@ The simplest possible smooth contouring algorithm
 ...
     </p>
     <form onsubmit="return false;">
-    <input type="checkbox" id="do_grid" checked onclick="draw_canvas();"/><label for="do_grid">Pixel contour</label>
-    <input type="checkbox" id="do_optimized" onclick="draw_canvas();"/><label for="do_optimized">Linear contour</label>
-    <input type="checkbox" id="do_smooth" onclick="draw_canvas();"/><label for="do_smooth">Smooth contour</label>
+    <input type="radio" name="contour_type" id="do_grid" onclick="draw_canvas();"/><label for="do_grid">Pixel contour</label>
+    <input type="radio" name="contour_type" id="do_optimized" onclick="draw_canvas();"/><label for="do_optimized">Linear contour</label>
+    <input type="radio" name="contour_type" id="do_smooth" checked onclick="draw_canvas();"/><label for="do_smooth">Smooth contour</label>
     <br>
     <input type="checkbox" id="draw_distances"onclick="draw_canvas();"/><label for="draw_distances">Show Distance</label>
     <input type="checkbox" id="draw_expected_shape" checked onclick="draw_canvas();"/><label for="draw_expected_shape">Show Expected Shape</label>
