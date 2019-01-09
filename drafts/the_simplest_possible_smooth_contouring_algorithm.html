@@ -184,17 +184,21 @@ function init_canvas(){
 
 function draw_contour_smooth(context, d_f, w, h, grid_size) {
     context.beginPath();
+    const x_step_for_no = [grid_size, 0];
+    const y_step_for_no = [0, grid_size];
     for(var y = 0; y <= h - grid_size; y += grid_size) {
         for(var x = 0; x <= w - grid_size; x += grid_size) {
-            for(var horizontal in [1, 0]) {
-                var vertical = 1 - horizontal;
+            for(var step_no = 0; step_no <= 1; ++step_no) {
+                var x_step = x_step_for_no[step_no];
+                var y_step = y_step_for_no[step_no];
+
                 // check if there is a border crossing
-                var distance_in_p1 = d_f(x + 0.5 * grid_size, y + 0.5 * grid_size);
-                var distance_in_p2 = d_f(x + (0.5 - vertical) * grid_size, y + (0.5 - horizontal) * grid_size);
-                if( distance_in_p1 * distance_in_p2 < 0) {  // sign change = border crosing                    
-                    // cotour piece direction matters for normal calculations
-                    var cpd = distance_in_p1 > distance_in_p2 ? 1 : -1;
-                    if(vertical)
+                var distance_on_side1 = d_f(x + grid_size/2, y + grid_size/2);
+                var distance_on_side2 = d_f(x + grid_size/2 - y_step, y + grid_size/2 - x_step);
+                if( distance_on_side1 * distance_on_side2 < 0) {  // sign change = border crosing                    
+                    // contour piece direction matters for normal calculations
+                    var cpd = distance_on_side1 > distance_on_side2 ? 1 : -1;
+                    if(step_no == 1)
                         cpd = -cpd;
                         
                     // p1
@@ -205,9 +209,9 @@ function draw_contour_smooth(context, d_f, w, h, grid_size) {
                     var d1y = dy(p1x, p1y) * grid_size  * _t3;
                         
                     // p2          
-                    var distance_in_p2 = d_f(x + horizontal * grid_size, y + vertical * grid_size);  
-                    var p2x = x + horizontal * grid_size - dx(x + horizontal * grid_size, y + vertical * grid_size) * distance_in_p2  * _t1;
-                    var p2y = y + vertical * grid_size - dy(x + horizontal * grid_size, y + vertical * grid_size) * distance_in_p2  * _t1;
+                    var distance_in_p2 = d_f(x + x_step, y + y_step);  
+                    var p2x = x + x_step - dx(x + x_step, y + y_step) * distance_in_p2  * _t1;
+                    var p2y = y + y_step - dy(x + x_step, y + y_step) * distance_in_p2  * _t1;
                     var d2x = dx(p2x, p2y) * grid_size  * _t3;
                     var d2y = dy(p2x, p2y) * grid_size  * _t3;
                     
