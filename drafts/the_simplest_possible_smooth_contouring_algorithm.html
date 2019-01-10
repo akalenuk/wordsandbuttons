@@ -189,18 +189,19 @@ function init_canvas(){
 
 function draw_contour_smooth(context, d_f, w, h, grid_size) {
     context.beginPath();
-    const x_step_for_no = [grid_size, 0];
-    const y_step_for_no = [0, grid_size];
     for(var y = 0; y <= h - grid_size; y += grid_size) {
         for(var x = 0; x <= w - grid_size; x += grid_size) {
             for(var step_no = 0; step_no <= 1; ++step_no) {
-                var x_step = x_step_for_no[step_no];
-                var y_step = y_step_for_no[step_no];
+                // 1-st piece is horizontal, 2-nd - vertical
+                var x_step = (step_no == 0) ? grid_size : 0;
+                var y_step = (step_no == 1) ? grid_size : 0;
 
                 // check if there is a border crossing
                 var distance_on_side = [d_f(x + grid_size/2, y + grid_size/2),
                     d_f(x + grid_size/2 - y_step, y + grid_size/2 - x_step)];
-                if( distance_on_side[0] * distance_on_side[1] < 0) {  // sign change = border crosing                    
+
+                 // sign change = border crosing         
+                if( Math.sign(distance_on_side[0]) != Math.sign(distance_on_side[1])) {                
                     // contour piece direction matters for normal calculations
                     var cpd = Math.sign(distance_on_side[step_no]);
                         
