@@ -90,25 +90,11 @@ var h = 640.0;
 
 // algorithm
 var grid_size = 48.0;
-var distance = 84.0;
 var gradient_step = 1.0;  
 
+// distance function
+var distance = 84.0;
 var lines = [];
-
-// animation, not essencial for the algorithm
-var _t1 = 1.; // time-related coefficient for the linear contour
-var _t3 = 1.; // time-related coefficient for the cubic contour
-var FPS = 8;
-
-function d_f(x, y) {
-    var d = Number.MAX_VALUE; // everything is out
-    for (var i = 0; i < lines.length; ++i) {
-        var di = distance_to_line_segment(lines[i], x, y);
-        if (di < d)
-            d = di;
-    }
-    return d - distance;
-}
 
 function dot(a1, a2, b1, b2) {
     return a1 * b1 + a2 * b2; 
@@ -131,15 +117,23 @@ function distance_to_line_segment(line, px, py) {
     return distance_to_segment(line[0][0], line[0][1], line[1][0], line[1][1], px, py);
 }
 
-function dx(x, y) {
-    return ( d_f(x + gradient_step, y) - d_f(x, y) ) / gradient_step;
+function d_f(x, y) {
+    var d = Number.MAX_VALUE; // everything is out
+    for (var i = 0; i < lines.length; ++i) {
+        var di = distance_to_line_segment(lines[i], x, y);
+        if (di < d)
+            d = di;
+    }
+    return d - distance;
 }
 
-function dy(x, y) {
-    return ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
-}
+// animation, not essencial for the algorithm
+var _t1 = 1.; // time-related coefficient for the linear contour
+var _t3 = 1.; // time-related coefficient for the cubic contour
+const FPS = 24;
 
 
+// spline related
 function polynomial_in_x(A, x){
     var y = 0.0;
     for(var i = 0; i < A.length; ++i){
@@ -189,6 +183,15 @@ function init_canvas(){
 
 function draw_contour_smooth(context, d_f, w, h, grid_size) {
     context.beginPath();
+    
+    const dx = function(x, y) {
+        return ( d_f(x + gradient_step, y) - d_f(x, y) ) / gradient_step;
+    }
+
+    const dy = function(x, y) {
+        return ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
+    }
+    
     for(var y = 0; y <= h - grid_size; y += grid_size) {
         for(var x = 0; x <= w - grid_size; x += grid_size) {
             for(var step_no = 0; step_no <= 1; ++step_no) {
