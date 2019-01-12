@@ -78,8 +78,8 @@ button {
 }
 
 textarea {
-    width: 505pt;
-    font-size: 14pt;
+    width: 600pt;
+    font-size: 12pt;
     font-family: monospace;
 }
 
@@ -185,7 +185,7 @@ function draw_contour_smooth(context, d_f, w, h, grid_size) {
                 var distance_on_side = [d_f(x + grid_size/2, y + grid_size/2),
                     d_f(x + grid_size/2 - y_step, y + grid_size/2 - x_step)];
 
-                 // sign change = border crosing         
+                 // sign change = border crossing         
                 if( Math.sign(distance_on_side[0]) != Math.sign(distance_on_side[1])) {                
                     // contour piece direction matters for normal calculations
                     var cpd = Math.sign(distance_on_side[step_no]);
@@ -261,7 +261,7 @@ function tick() {
     setTimeout( function(){tick();}, 1000.0 / FPS);
 }
 
-// the 3-step canvases (they share the data and utility functions with the main canvas)
+// the 3-step (+0) canvases (they share the data and utility functions with the main canvas)
 function init_canvas_step(step_no){
     var canvas = document.getElementById("canvas_step_" + step_no);
     canvas.addEventListener('mousedown', function(e){
@@ -290,6 +290,16 @@ function draw_canvas() {
     for(var i = 0; i <= 3; ++i) {
         draw_canvas_step(i);
     }
+}
+
+function eval_contour_function(step_no, code_text) {
+    var old_script_code = document.getElementById("draw_contour_step_" + step_no);
+    if (old_script_code)
+        old_script_code.parentNode.removeChild(old_script_code);
+    var new_script_code = document.createElement('script');
+    new_script_code.id = "d_f_function";
+    new_script_code.text = code_text;
+    document.body.appendChild(new_script_code);
 }
 
 function draw_canvas_step(step_no) {
@@ -341,10 +351,8 @@ function draw_canvas_step(step_no) {
     
     if(step_no == 1) {
         context.beginPath();
-        /*eval("var f = function (x) {return x}");
-        alert(f(0));*/
-        eval("var contour_function = " + document.getElementById("textarea_step_1").innerHTML);
-        contour_function(context, d_f, w, h, grid_size);
+        eval_contour_function(step_no, document.getElementById("textarea_step_1").value)
+        draw_contour_step_1(context, d_f, w, h, grid_size);
         context.strokeStyle="#AA3366";
         context.lineWidth=3;
         context.stroke();
@@ -396,37 +404,36 @@ The simplest possible smooth contouring algorithm
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
-    <textarea id="textarea_step_1" rows=15>
-function(context, d_f, w, h, grid_size) {
-    for(var y = 0; y &lt;= h - grid_size; y += grid_size) {
-        for(var x = 0; x &lt;= w - grid_size; x += grid_size) {
-            for(var step_no = 0; step_no &lt;= 1; ++step_no) {
-                // 1-st piece is horizontal, 2-nd - vertical
-                var x_step = (step_no == 0) ? grid_size : 0;
-                var y_step = (step_no == 1) ? grid_size : 0;
+    <textarea id="textarea_step_1" rows=30>
+function draw_contour_step_1(context, d_f, w, h, grid_size) {
+    for(var y = 0; y &lt;= h - grid_size; y += grid_size)
+    for(var x = 0; x &lt;= w - grid_size; x += grid_size)
+    for(var step_no = 0; step_no &lt;= 1; ++step_no) {
+        // 1-st piece is horizontal, 2-nd - vertical
+        var x_step = (step_no == 0) ? grid_size : 0;
+        var y_step = (step_no == 1) ? grid_size : 0;
 
-                // check if there is a border crossing
-                var distance_on_side = [d_f(x + grid_size/2, y + grid_size/2),
-                    d_f(x + grid_size/2 - y_step, y + grid_size/2 - x_step)];
+        // check if there is a border crossing
+        var d_on_side = [d_f(x + grid_size/2, y + grid_size/2),
+            d_f(x + grid_size/2 - y_step, y + grid_size/2 - x_step)];
 
-                 // sign change = border crosing         
-                if( Math.sign(distance_on_side[0]) != Math.sign(distance_on_side[1])) {                
-                    
-                    // p1
-                    var p1x = x;
-                    var p1y = y;
-                        
-                    // p2          
-                    var p2x = x + x_step;
-                    var p2y = y + y_step;
-                    
-                    // draw contour
-                    context.moveTo(x1, y1);
-                    context.lineTo(x2, y2);
-                }
-            }
+         // sign change = border crossing         
+        if( Math.sign(d_on_side[0]) != Math.sign(d_on_side[1])) {                
+            
+            // p1
+            var p1x = x;
+            var p1y = y;
+                
+            // p2          
+            var p2x = x + x_step;
+            var p2y = y + y_step;
+            
+            // draw contour
+            context.moveTo(p1x, p1y);
+            context.lineTo(p2x, p2y);
         }
-    }    
+    }
+}   
     </textarea>     
     
     <p>
