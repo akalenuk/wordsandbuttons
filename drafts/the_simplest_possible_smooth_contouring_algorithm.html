@@ -244,27 +244,27 @@ function tick() {
     // contours
     if((document.getElementById("do_optimized").checked || document.getElementById("do_smooth").checked) && _t1 != 1.0) {
        _t1 += 0.125;
-       draw_canvas();
+       draw_canvas_ver(0);
     }
     if(!(document.getElementById("do_optimized").checked || document.getElementById("do_smooth").checked) && _t1 != 0.0) {
        _t1 -= 0.125;
-       draw_canvas();
+       draw_canvas_ver(0);
     }
     if(document.getElementById("do_smooth").checked && _t3 != 1.0) {
        _t3 += 0.125;
-       draw_canvas();
+       draw_canvas_ver(0);
     }
     if(!document.getElementById("do_smooth").checked && _t3 != 0.0) {
        _t3 -= 0.125;
-       draw_canvas();
+       draw_canvas_ver(0);
     }
 
     setTimeout( function(){tick();}, 1000.0 / FPS);
 }
 
-// the 3-step (+0) canvases (they share the data and utility functions with the main canvas)
-function init_canvas_step(step_no){
-    var canvas = document.getElementById("canvas_step_" + step_no);
+// the 3-ver (+0) canvases (they share the data and utility functions with the main canvas)
+function init_canvas_ver(ver_no){
+    var canvas = document.getElementById("canvas_ver_" + ver_no);
     canvas.addEventListener('mousedown', function(e){
         canvas_rect = canvas.getBoundingClientRect();
         lines.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
@@ -284,17 +284,17 @@ function init_canvas_step(step_no){
         draw_canvas();
     }, false);
     
-    draw_canvas_step(step_no);
+    draw_canvas_ver(ver_no);
 }
 
 function draw_canvas() {
     for(var i = 0; i <= 3; ++i) {
-        draw_canvas_step(i);
+        draw_canvas_ver(i);
     }
 }
 
-function eval_contour_function(step_no, code_text) {
-    var old_script_code = document.getElementById("draw_contour_step_" + step_no);
+function eval_contour_function(ver_no, code_text) {
+    var old_script_code = document.getElementById("draw_contour_ver_" + ver_no);
     if (old_script_code)
         old_script_code.parentNode.removeChild(old_script_code);
     var new_script_code = document.createElement('script');
@@ -303,8 +303,8 @@ function eval_contour_function(step_no, code_text) {
     document.body.appendChild(new_script_code);
 }
 
-function draw_canvas_step(step_no) {
-    var canvas = document.getElementById("canvas_step_" + step_no);
+function draw_canvas_ver(ver_no) {
+    var canvas = document.getElementById("canvas_ver_" + ver_no);
     var context = canvas.getContext("2d");
     // background
     context.fillStyle="#eeeeee";
@@ -346,16 +346,16 @@ function draw_canvas_step(step_no) {
     }
  
     // parametric animated contour
-    if(step_no == 0) {
+    if(ver_no == 0) {
         draw_contour_smooth(context, d_f, w, h, grid_size);
     } else {
         context.beginPath();
-        document.getElementById("error_" + step_no).innerHTML = "This code is changeable.";
+        document.getElementById("error_" + ver_no).innerHTML = "This code is changeable.";
         try {
-            eval_contour_function(step_no, document.getElementById("textarea_step_" + step_no).value)
-            eval("draw_contour_step_" + step_no + "(context, d_f, w, h, grid_size);");
+            eval_contour_function(ver_no, document.getElementById("textarea_ver_" + ver_no).value)
+            eval("draw_contour_ver_" + ver_no + "(context, d_f, w, h, grid_size);");
         } catch (error) {
-            document.getElementById("error_" + step_no).innerHTML = "<b>Error:</b> " + error.message;
+            document.getElementById("error_" + ver_no).innerHTML = "<b>Error:</b> " + error.message;
         }        
         context.strokeStyle="#AA3366";
         context.lineWidth=3;
@@ -395,7 +395,7 @@ The simplest possible smooth contouring algorithm
     <input type="checkbox" id="draw_expected_shape" checked onclick="draw_canvas();"/><label for="draw_expected_shape">Show Expected Shape</label>
     <input type="checkbox" id="draw_grid" checked onclick="draw_canvas();"/><label for="draw_grid">Show Grid</label>
     </form>
-    <canvas id="canvas_step_0" width=640 height=640></canvas>
+    <canvas id="canvas_ver_0" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
@@ -403,13 +403,13 @@ The simplest possible smooth contouring algorithm
     <p>
 ...
     </p>
-    <canvas id="canvas_step_1" width=640 height=640></canvas>
+    <canvas id="canvas_ver_1" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
-    <textarea id="textarea_step_1" rows=24 onInput="draw_canvas_step(1)">
-function draw_contour_step_1(context, d_f, w, h, grid_size) {
+    <textarea id="textarea_ver_1" rows=24 onInput="draw_canvas_ver(1)">
+function draw_contour_ver_1(context, d_f, w, h, grid_size) {
     for(var y = 0; y &lt;= h - grid_size; y += grid_size)
     for(var x = 0; x &lt;= w - grid_size; x += grid_size) {
         var d_in_square = d_f(x + grid_size/2, y + grid_size/2);
@@ -438,13 +438,13 @@ function draw_contour_step_1(context, d_f, w, h, grid_size) {
     <p>
 ...
     </p>
-    <canvas id="canvas_step_2" width=640 height=640></canvas>
+    <canvas id="canvas_ver_2" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
-    <textarea id="textarea_step_2" rows=42 onInput="draw_canvas_step(2)">
-function draw_contour_step_2(context, d_f, w, h, grid_size) {
+    <textarea id="textarea_ver_2" rows=42 onInput="draw_canvas_ver(2)">
+function draw_contour_ver_2(context, d_f, w, h, grid_size) {
     const dx = function(x, y) {
         return ( d_f(x + gradient_step, y) - d_f(x, y) ) / gradient_step;
     }
@@ -490,13 +490,37 @@ function draw_contour_step_2(context, d_f, w, h, grid_size) {
     <p>
 ...
     </p>
-    <canvas id="canvas_step_3" width=640 height=640></canvas>
+    <canvas id="canvas_ver_3" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
-    <textarea id="textarea_step_3" rows=45>
-function draw_contour_step_3(context, d_f, w, h, grid_size) {
+    <textarea id="textarea_ver_3" rows=84>
+function draw_contour_ver_3(context, d_f, w, h, grid_size) {
+    // spline related
+    const polynomial_in_x = function(A, x){
+        var y = 0.0;
+        for(var i = 0; i &lt; A.length; ++i){
+            y += A[i] * Math.pow(x, i);
+        }
+        return y;
+    }
+
+    const spline_for = function(p1, p1d, p2, p2d) {
+    //     A = [
+    //         [1, 0, 0, 0],
+    //         [0, 1, 0, 0],
+    //         [1, 1, 1, 1],
+    //         [0, 1, 2, 3]];
+    //     B = [p1, p1d, p2, p2d]
+        return [
+            p1,
+            p1d,
+            3 * p2 - p2d - 3*p1 - 2*p1d,
+            p2d + p1d - 2*p2 + 2*p1
+        ];
+    }
+
     const dx = function(x, y) {
         return ( d_f(x + gradient_step, y) - d_f(x, y) ) / gradient_step;
     }
@@ -513,27 +537,28 @@ function draw_contour_step_3(context, d_f, w, h, grid_size) {
         var y_step = (piece_no == 1) ? grid_size : 0;
 
         // check if there is a border crossing
-        var distance_on_side = [d_f(x + grid_size/2, y + grid_size/2),
+        var d_on_side = [d_f(x + grid_size/2, y + grid_size/2),
             d_f(x + grid_size/2 - y_step, y + grid_size/2 - x_step)];
 
          // sign change = border crossing         
-        if( Math.sign(distance_on_side[0]) != Math.sign(distance_on_side[1])) {                
+        if( Math.sign(d_on_side[0]) != Math.sign(d_on_side[1])) {
+
             // contour piece direction matters for normal calculations
-            var cpd = Math.sign(distance_on_side[piece_no]);
+            var cpd = Math.sign(d_on_side[piece_no]);
                 
             // p1
-            var distance_in_p1 = d_f(x, y);
-            var p1x = x - dx(x, y) * distance_in_p1  * _t1;
-            var p1y = y - dy(x, y) * distance_in_p1  * _t1;
-            var d1x = dx(p1x, p1y) * grid_size  * _t3;
-            var d1y = dy(p1x, p1y) * grid_size  * _t3;
+            var d_in_p1 = d_f(x, y);
+            var p1x = x - dx(x, y) * d_in_p1;
+            var p1y = y - dy(x, y) * d_in_p1;
+            var d1x = dx(p1x, p1y) * grid_size;
+            var d1y = dy(p1x, p1y) * grid_size;
                 
             // p2          
-            var distance_in_p2 = d_f(x + x_step, y + y_step);  
-            var p2x = x + x_step - dx(x + x_step, y + y_step) * distance_in_p2  * _t1;
-            var p2y = y + y_step - dy(x + x_step, y + y_step) * distance_in_p2  * _t1;
-            var d2x = dx(p2x, p2y) * grid_size  * _t3;
-            var d2y = dy(p2x, p2y) * grid_size  * _t3;
+            var d_in_p2 = d_f(x + x_step, y + y_step);  
+            var p2x = x + x_step - dx(x + x_step, y + y_step) * d_in_p2;
+            var p2y = y + y_step - dy(x + x_step, y + y_step) * d_in_p2;
+            var d2x = dx(p2x, p2y) * grid_size;
+            var d2y = dy(p2x, p2y) * grid_size;
             
             // parametric curve
             var Px = spline_for(p1x, cpd*d1y, p2x, cpd*d2y);
@@ -552,7 +577,7 @@ function draw_contour_step_3(context, d_f, w, h, grid_size) {
             }
         }
     }
-}    
+}
     </textarea>     
     <p id="error_3" class="comment">
     </p>     
@@ -561,10 +586,10 @@ function draw_contour_step_3(context, d_f, w, h, grid_size) {
     </p>        
 
     <script language="JavaScript">
-    init_canvas_step(0);
-    init_canvas_step(1);
-    init_canvas_step(2);
-    init_canvas_step(3);
+    init_canvas_ver(0);
+    init_canvas_ver(1);
+    init_canvas_ver(2);
+    init_canvas_ver(3);
     tick(); // let it tick always
     </script>    
 
