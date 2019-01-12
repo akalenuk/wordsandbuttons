@@ -348,14 +348,12 @@ function draw_canvas_step(step_no) {
     // parametric animated contour
     if(step_no == 0) {
         draw_contour_smooth(context, d_f, w, h, grid_size);
-    }
-    
-    if(step_no == 1) {
+    } else {
         context.beginPath();
         document.getElementById("error_" + step_no).innerHTML = "This code is changeable.";
         try {
-            eval_contour_function(step_no, document.getElementById("textarea_step_1").value)
-            draw_contour_step_1(context, d_f, w, h, grid_size);
+            eval_contour_function(step_no, document.getElementById("textarea_step_" + step_no).value)
+            eval("draw_contour_step_" + step_no + "(context, d_f, w, h, grid_size);");
         } catch (error) {
             document.getElementById("error_" + step_no).innerHTML = "<b>Error:</b> " + error.message;
         }        
@@ -445,9 +443,50 @@ function draw_contour_step_1(context, d_f, w, h, grid_size) {
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
-    <textarea id="textarea_step_2" rows=25>
-    </textarea>     
+    <textarea id="textarea_step_2" rows=42 onInput="draw_canvas_step(2)">
+function draw_contour_step_2(context, d_f, w, h, grid_size) {
+    const dx = function(x, y) {
+        return ( d_f(x + gradient_step, y) - d_f(x, y) ) / gradient_step;
+    }
+
+    const dy = function(x, y) {
+        return ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
+    }
     
+    for(var y = 0; y <= h - grid_size; y += grid_size)
+    for(var x = 0; x <= w - grid_size; x += grid_size)
+    for(var step_no = 0; step_no <= 1; ++step_no) {
+        // 1-st piece is horizontal, 2-nd - vertical
+        var x_step = (step_no == 0) ? grid_size : 0;
+        var y_step = (step_no == 1) ? grid_size : 0;
+
+        // check if there is a border crossing
+        var x_in_square = x + grid_size / 2;
+        var y_in_square = y + grid_size / 2;
+        var d_in_square = d_f(x_in_square, y_in_square);
+        var d_in_neighbor = d_f(x_in_square - y_step, y_in_square - x_step);
+
+         // sign change = border crossing         
+        if( Math.sign(d_in_square) != Math.sign(d_in_neighbor)) {                           
+            // p1
+            var d_in_p1 = d_f(x, y);
+            var p1x = x - dx(x, y) * d_in_p1;
+            var p1y = y - dy(x, y) * d_in_p1;
+                
+            // p2          
+            var d_in_p2 = d_f(x + x_step, y + y_step);  
+            var p2x = x + x_step - dx(x + x_step, y + y_step) * d_in_p2;
+            var p2y = y + y_step - dy(x + x_step, y + y_step) * d_in_p2;
+            
+            // draw horizontal on step_no = 0 or vertical on step_no = 1
+            context.moveTo(p1x, p1y);
+            context.lineTo(p2x, p2y);
+        }
+    }
+}    
+    </textarea>     
+    <p id="error_2" class="comment">
+    </p> 
     <p>
 ...
     </p>
@@ -458,7 +497,8 @@ function draw_contour_step_1(context, d_f, w, h, grid_size) {
     </div>
     <textarea id="textarea_step_3" rows=45>
     </textarea>     
-    
+    <p id="error_3" class="comment">
+    </p>     
     <p>
 ...
     </p>        
