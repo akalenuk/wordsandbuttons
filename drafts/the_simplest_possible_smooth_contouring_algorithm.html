@@ -83,10 +83,11 @@ textarea {
     font-family: monospace;
 }
 
-u {
-    border-bottom: 1px dotted #000;
-    text-decoration: none;
-    cursor: pointer;
+.comment {
+    font-size: 12pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
 }
     </style>
     <script language="JavaScript">
@@ -351,8 +352,13 @@ function draw_canvas_step(step_no) {
     
     if(step_no == 1) {
         context.beginPath();
-        eval_contour_function(step_no, document.getElementById("textarea_step_1").value)
-        draw_contour_step_1(context, d_f, w, h, grid_size);
+        document.getElementById("error_" + step_no).innerHTML = "This code is changeable.";
+        try {
+            eval_contour_function(step_no, document.getElementById("textarea_step_1").value)
+            draw_contour_step_1(context, d_f, w, h, grid_size);
+        } catch (error) {
+            document.getElementById("error_" + step_no).innerHTML = "<b>Error:</b> " + error.message;
+        }        
         context.strokeStyle="#AA3366";
         context.lineWidth=3;
         context.stroke();
@@ -404,7 +410,7 @@ The simplest possible smooth contouring algorithm
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
-    <textarea id="textarea_step_1" rows=24>
+    <textarea id="textarea_step_1" rows=24 onInput="draw_canvas_step(1)">
 function draw_contour_step_1(context, d_f, w, h, grid_size) {
     for(var y = 0; y &lt;= h - grid_size; y += grid_size)
     for(var x = 0; x &lt;= w - grid_size; x += grid_size) {
@@ -427,7 +433,9 @@ function draw_contour_step_1(context, d_f, w, h, grid_size) {
         }
     }
 }   
-    </textarea>     
+    </textarea>
+    <p id="error_1" class="comment">
+    </p>
     
     <p>
 ...
