@@ -77,6 +77,12 @@ button {
     text-align: center;
 }
 
+textarea {
+    width: 505pt;
+    font-size: 14pt;
+    font-family: monospace;
+}
+
 u {
     border-bottom: 1px dotted #000;
     text-decoration: none;
@@ -328,10 +334,23 @@ function draw_canvas_step(step_no) {
         context.closePath();
     }
  
-    // smooth
-    if(document.getElementById("do_grid").checked || document.getElementById("do_optimized").checked || document.getElementById("do_smooth").checked) {
+    // parametric animated contour
+    if(step_no == 0) {
         draw_contour_smooth(context, d_f, w, h, grid_size);
     }
+    
+    if(step_no == 1) {
+        context.beginPath();
+        /*eval("var f = function (x) {return x}");
+        alert(f(0));*/
+        eval("var contour_function = " + document.getElementById("textarea_step_1").innerHTML);
+        contour_function(context, d_f, w, h, grid_size);
+        context.strokeStyle="#AA3366";
+        context.lineWidth=3;
+        context.stroke();
+        context.closePath();
+    }
+    
     
     // distance values
     if(document.getElementById("draw_distances").checked && lines.length > 0) {
@@ -377,6 +396,39 @@ The simplest possible smooth contouring algorithm
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
+    <textarea id="textarea_step_1" rows=15>
+function(context, d_f, w, h, grid_size) {
+    for(var y = 0; y &lt;= h - grid_size; y += grid_size) {
+        for(var x = 0; x &lt;= w - grid_size; x += grid_size) {
+            for(var step_no = 0; step_no &lt;= 1; ++step_no) {
+                // 1-st piece is horizontal, 2-nd - vertical
+                var x_step = (step_no == 0) ? grid_size : 0;
+                var y_step = (step_no == 1) ? grid_size : 0;
+
+                // check if there is a border crossing
+                var distance_on_side = [d_f(x + grid_size/2, y + grid_size/2),
+                    d_f(x + grid_size/2 - y_step, y + grid_size/2 - x_step)];
+
+                 // sign change = border crosing         
+                if( Math.sign(distance_on_side[0]) != Math.sign(distance_on_side[1])) {                
+                    
+                    // p1
+                    var p1x = x;
+                    var p1y = y;
+                        
+                    // p2          
+                    var p2x = x + x_step;
+                    var p2y = y + y_step;
+                    
+                    // draw contour
+                    context.moveTo(x1, y1);
+                    context.lineTo(x2, y2);
+                }
+            }
+        }
+    }    
+    </textarea>     
+    
     <p>
 ...
     </p>
@@ -385,6 +437,9 @@ The simplest possible smooth contouring algorithm
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
+    <textarea id="textarea_step_2" rows=25>
+    </textarea>     
+    
     <p>
 ...
     </p>
@@ -393,6 +448,9 @@ The simplest possible smooth contouring algorithm
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
+    <textarea id="textarea_step_3" rows=45>
+    </textarea>     
+    
     <p>
 ...
     </p>        
