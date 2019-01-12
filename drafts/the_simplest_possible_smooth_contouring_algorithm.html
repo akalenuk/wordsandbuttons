@@ -404,33 +404,26 @@ The simplest possible smooth contouring algorithm
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
-    <textarea id="textarea_step_1" rows=30>
+    <textarea id="textarea_step_1" rows=24>
 function draw_contour_step_1(context, d_f, w, h, grid_size) {
     for(var y = 0; y &lt;= h - grid_size; y += grid_size)
-    for(var x = 0; x &lt;= w - grid_size; x += grid_size)
-    for(var step_no = 0; step_no &lt;= 1; ++step_no) {
-        // 1-st piece is horizontal, 2-nd - vertical
-        var x_step = (step_no == 0) ? grid_size : 0;
-        var y_step = (step_no == 1) ? grid_size : 0;
+    for(var x = 0; x &lt;= w - grid_size; x += grid_size) {
+        var d_in_square = d_f(x + grid_size/2, y + grid_size/2);
+        var d_in_square_on_the_left = d_f(x - grid_size/2, y + grid_size/2);
+        var d_in_square_above = d_f(x + grid_size/2, y - grid_size/2);
 
-        // check if there is a border crossing
-        var d_on_side = [d_f(x + grid_size/2, y + grid_size/2),
-            d_f(x + grid_size/2 - y_step, y + grid_size/2 - x_step)];
-
-         // sign change = border crossing         
-        if( Math.sign(d_on_side[0]) != Math.sign(d_on_side[1])) {                
-            
-            // p1
-            var p1x = x;
-            var p1y = y;
-                
-            // p2          
-            var p2x = x + x_step;
-            var p2y = y + y_step;
-            
-            // draw contour
-            context.moveTo(p1x, p1y);
-            context.lineTo(p2x, p2y);
+        // draw a horizontal line if there is a sign change
+        if( Math.sign(d_in_square) != Math.sign(d_in_square_above)) {                
+            // draw a contour piece
+            context.moveTo(x, y);
+            context.lineTo(x + grid_size, y);
+        }
+        
+        // draw a vertical line if there is a sign change
+        if( Math.sign(d_in_square) != Math.sign(d_in_square_on_the_left)) {                
+            // draw a contour piece
+            context.moveTo(x, y);
+            context.lineTo(x, y + grid_size);
         }
     }
 }   
