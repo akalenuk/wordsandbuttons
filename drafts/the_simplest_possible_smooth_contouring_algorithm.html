@@ -164,7 +164,7 @@ function spline_for(p1, p1d, p2, p2d) {
     ];
 }
 
-function draw_contour_smooth(context, d_f, w, h, grid_size) {
+function draw_contour_animated(context, d_f, w, h, grid_size) {
     context.beginPath();
     
     const dx = function(x, y) {
@@ -210,9 +210,9 @@ function draw_contour_smooth(context, d_f, w, h, grid_size) {
                     var Py = spline_for(p1y, (-cpd)*d1x, p2y, (-cpd)*d2x);
                     
                     // draw contour
-                    for(var k = 0; k < grid_size; k += 1) {
+                    for(var k = 0; k < grid_size; k += 3) {
                         var t1 = (k + 0) / grid_size;
-                        var t2 = (k + 1) / grid_size;
+                        var t2 = (k + 3) / grid_size;
                         var x1 = polynomial_in_x(Px, t1);
                         var y1 = polynomial_in_x(Py, t1);
                         var x2 = polynomial_in_x(Px, t2);
@@ -347,7 +347,7 @@ function draw_canvas_ver(ver_no) {
  
     // parametric animated contour
     if(ver_no == 0) {
-        draw_contour_smooth(context, d_f, w, h, grid_size);
+        draw_contour_animated(context, d_f, w, h, grid_size);
     } else {
         context.beginPath();
         document.getElementById("error_" + ver_no).innerHTML = "This code is changeable.";
