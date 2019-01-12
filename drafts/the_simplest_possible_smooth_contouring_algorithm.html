@@ -177,10 +177,10 @@ function draw_contour_smooth(context, d_f, w, h, grid_size) {
     
     for(var y = 0; y <= h - grid_size; y += grid_size) {
         for(var x = 0; x <= w - grid_size; x += grid_size) {
-            for(var step_no = 0; step_no <= 1; ++step_no) {
+            for(var piece_no = 0; piece_no <= 1; ++piece_no) {
                 // 1-st piece is horizontal, 2-nd - vertical
-                var x_step = (step_no == 0) ? grid_size : 0;
-                var y_step = (step_no == 1) ? grid_size : 0;
+                var x_step = (piece_no == 0) ? grid_size : 0;
+                var y_step = (piece_no == 1) ? grid_size : 0;
 
                 // check if there is a border crossing
                 var distance_on_side = [d_f(x + grid_size/2, y + grid_size/2),
@@ -189,7 +189,7 @@ function draw_contour_smooth(context, d_f, w, h, grid_size) {
                  // sign change = border crossing         
                 if( Math.sign(distance_on_side[0]) != Math.sign(distance_on_side[1])) {                
                     // contour piece direction matters for normal calculations
-                    var cpd = Math.sign(distance_on_side[step_no]);
+                    var cpd = Math.sign(distance_on_side[piece_no]);
                         
                     // p1
                     var distance_in_p1 = d_f(x, y);
@@ -453,12 +453,12 @@ function draw_contour_step_2(context, d_f, w, h, grid_size) {
         return ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
     }
     
-    for(var y = 0; y <= h - grid_size; y += grid_size)
-    for(var x = 0; x <= w - grid_size; x += grid_size)
-    for(var step_no = 0; step_no <= 1; ++step_no) {
+    for(var y = 0; y &lt;= h - grid_size; y += grid_size)
+    for(var x = 0; x &lt;= w - grid_size; x += grid_size)
+    for(var piece_no = 0; piece_no &lt;= 1; ++piece_no) {
         // 1-st piece is horizontal, 2-nd - vertical
-        var x_step = (step_no == 0) ? grid_size : 0;
-        var y_step = (step_no == 1) ? grid_size : 0;
+        var x_step = (piece_no == 0) ? grid_size : 0;
+        var y_step = (piece_no == 1) ? grid_size : 0;
 
         // check if there is a border crossing
         var x_in_square = x + grid_size / 2;
@@ -478,7 +478,7 @@ function draw_contour_step_2(context, d_f, w, h, grid_size) {
             var p2x = x + x_step - dx(x + x_step, y + y_step) * d_in_p2;
             var p2y = y + y_step - dy(x + x_step, y + y_step) * d_in_p2;
             
-            // draw horizontal on step_no = 0 or vertical on step_no = 1
+            // draw horizontal on piece_no = 0 or vertical on piece_no = 1
             context.moveTo(p1x, p1y);
             context.lineTo(p2x, p2y);
         }
@@ -496,6 +496,63 @@ function draw_contour_step_2(context, d_f, w, h, grid_size) {
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
     <textarea id="textarea_step_3" rows=45>
+function draw_contour_step_3(context, d_f, w, h, grid_size) {
+    const dx = function(x, y) {
+        return ( d_f(x + gradient_step, y) - d_f(x, y) ) / gradient_step;
+    }
+
+    const dy = function(x, y) {
+        return ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
+    }
+    
+    for(var y = 0; y &lt;= h - grid_size; y += grid_size)
+    for(var x = 0; x &lt;= w - grid_size; x += grid_size)
+    for(var piece_no = 0; piece_no &lt;= 1; ++piece_no) {
+        // 1-st piece is horizontal, 2-nd - vertical
+        var x_step = (piece_no == 0) ? grid_size : 0;
+        var y_step = (piece_no == 1) ? grid_size : 0;
+
+        // check if there is a border crossing
+        var distance_on_side = [d_f(x + grid_size/2, y + grid_size/2),
+            d_f(x + grid_size/2 - y_step, y + grid_size/2 - x_step)];
+
+         // sign change = border crossing         
+        if( Math.sign(distance_on_side[0]) != Math.sign(distance_on_side[1])) {                
+            // contour piece direction matters for normal calculations
+            var cpd = Math.sign(distance_on_side[piece_no]);
+                
+            // p1
+            var distance_in_p1 = d_f(x, y);
+            var p1x = x - dx(x, y) * distance_in_p1  * _t1;
+            var p1y = y - dy(x, y) * distance_in_p1  * _t1;
+            var d1x = dx(p1x, p1y) * grid_size  * _t3;
+            var d1y = dy(p1x, p1y) * grid_size  * _t3;
+                
+            // p2          
+            var distance_in_p2 = d_f(x + x_step, y + y_step);  
+            var p2x = x + x_step - dx(x + x_step, y + y_step) * distance_in_p2  * _t1;
+            var p2y = y + y_step - dy(x + x_step, y + y_step) * distance_in_p2  * _t1;
+            var d2x = dx(p2x, p2y) * grid_size  * _t3;
+            var d2y = dy(p2x, p2y) * grid_size  * _t3;
+            
+            // parametric curve
+            var Px = spline_for(p1x, cpd*d1y, p2x, cpd*d2y);
+            var Py = spline_for(p1y, (-cpd)*d1x, p2y, (-cpd)*d2x);
+            
+            // draw contour
+            for(var k = 0; k &lt; grid_size; k += 1) {
+                var t1 = (k + 0) / grid_size;
+                var t2 = (k + 1) / grid_size;
+                var x1 = polynomial_in_x(Px, t1);
+                var y1 = polynomial_in_x(Py, t1);
+                var x2 = polynomial_in_x(Px, t2);
+                var y2 = polynomial_in_x(Py, t2);
+                context.moveTo(x1, y1);
+                context.lineTo(x2, y2);
+            }
+        }
+    }
+}    
     </textarea>     
     <p id="error_3" class="comment">
     </p>     
