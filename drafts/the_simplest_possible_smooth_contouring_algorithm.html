@@ -423,14 +423,14 @@ function draw_contour_ver_1(context, d_f, w, h, grid_size) {
         var d_in_square_on_the_left = d_f(x - grid_size/2, y + grid_size/2);
         var d_in_square_above = d_f(x + grid_size/2, y - grid_size/2);
 
-        // draw a horizontal line if there is a sign change
+        // draw a horizontal piece if there is a sign change
         if( Math.sign(d_in_square) != Math.sign(d_in_square_above)) {                
             // draw a contour piece
             context.moveTo(x, y);
             context.lineTo(x + grid_size, y);
         }
         
-        // draw a vertical line if there is a sign change
+        // draw a vertical piece if there is a sign change
         if( Math.sign(d_in_square) != Math.sign(d_in_square_on_the_left)) {                
             // draw a contour piece
             context.moveTo(x, y);
@@ -543,15 +543,15 @@ function draw_contour_ver_3(context, d_f, w, h, grid_size) {
         var x_step = (piece_no == 0) ? grid_size : 0;
         var y_step = (piece_no == 1) ? grid_size : 0;
 
-        // check if there is a border crossing
-        var d_on_side = [d_f(x + grid_size/2, y + grid_size/2),
+        // first square is this square, the second is a neighbor
+        var d_in_square = [d_f(x + grid_size/2, y + grid_size/2),
             d_f(x + grid_size/2 - y_step, y + grid_size/2 - x_step)];
 
          // sign change = border crossing         
-        if( Math.sign(d_on_side[0]) != Math.sign(d_on_side[1])) {
+        if( Math.sign(d_in_square[0]) != Math.sign(d_in_square[1])) {
 
             // contour piece direction matters for normal calculations
-            var cpd = Math.sign(d_on_side[piece_no]);
+            var cpd = Math.sign(d_in_square[piece_no]);
                 
             // p1
             var d_in_p1 = d_f(x, y);
