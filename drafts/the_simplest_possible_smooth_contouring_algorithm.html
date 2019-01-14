@@ -88,6 +88,15 @@ textarea {
     font-family: monospace;
 }
 
+.formula {
+    font-family: sans-serif;
+    font-size: 15pt;
+    font-style: italic;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
 .comment {
     font-size: 12pt;
     text-align:center;
@@ -391,8 +400,12 @@ function draw_canvas_ver(ver_no) {
 The simplest possible smooth contouring algorithm
     </h1>
     <p>
-...
+Contouring algorithm is something that turns your implicit function into a contour. <a href="interactive_explanation_of_marching_cubes_and_dual_contouring.html">Marching cubes and dual method</a> are the most noted examples.
     </p>
+    <p>
+There is a simpler algorithm that may be not as efficient computationally, but instead you can easily improve it to generate smooth contours and not just polylines. Here's an interactive plot you can draw things on. 
+    </p>
+    
     <form onsubmit="return false;">
     <label>Show: </label><input type="checkbox" id="draw_distances"onclick="draw_canvas();"/><label for="draw_distances">distance; </label>
     <input type="checkbox" id="draw_expected_shape" checked onclick="draw_canvas();"/><label for="draw_expected_shape">expected shape; </label>
@@ -408,7 +421,10 @@ The simplest possible smooth contouring algorithm
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
     </div>
     <p>
-...
+The algorithm accepts a distance function as an input. The distance function is a from of implicit function that denotes the distance to the expected curve for every point on the plane. You can turn distance printouts on and off with a checkbox from above.
+    </p>
+    <p>
+<b>First phase</b> of the algorithm is finding the initial contour. The simplest way to do so is to traverse all the cubes of a grid. If the distance function sign changes between the neighboring cubes, there is a piece of contour between them. You only have to put one horizontal and one vertical piece per cube to form a fully closed contour.
     </p>
     <canvas id="canvas_ver_1" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
@@ -443,7 +459,7 @@ function draw_contour_ver_1(context, d_f, w, h, grid_size) {
     </p>
     
     <p>
-...
+<b>The second phase</b> is attracting the contour nodes to the expected curve. Since we have a distance function, we can measure the distance to the curve for every node point. Then we use the function's gradient to see how it grows. We don't want to get further away from the function, we want to get closer. So we multiply the gradient by negative distance and add that to the node's coordinates.
     </p>
     <canvas id="canvas_ver_2" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
@@ -495,8 +511,55 @@ function draw_contour_ver_2(context, d_f, w, h, grid_size) {
     <p id="error_2" class="comment">
     </p> 
     <p>
-...
+<b>The third phase</b> is adding curvature. Once again, we measure the function's gradient for every node's new position. We use the inverted gradient as the partial derivatives to form a <a href="quadric_splines_are_useful_too.html">parametric 3-rd degree polynomial</a>.
     </p>
+    <p>
+It probably sounds more complicated than it is. The 3-rd degree polynomials for <i>x</i> and <i>y</i> can be obtained from these systems:
+    </p>
+    <table>
+    <tr>
+    <td style="width: 300pt; border: 0px;">
+    <p class="formula" style="width: 300pt;">
+a<sub>x</sub>t<sub>0</sub><sup>3</sup> + b<sub>x</sub>t<sub>0</sub><sup>2</sup> + c<sub>x</sub>t<sub>0</sub> + d<sub>x</sub> = x<sub>0</sub><br>
+3a<sub>x</sub>t<sub>0</sub><sup>2</sup> + 2b<sub>x</sub>t<sub>0</sub> + c<sub>x</sub> = dx<sub>0</sub> / dt<sub>0</sub><br>
+a<sub>x</sub>t<sub>1</sub><sup>3</sup> + b<sub>x</sub>t<sub>1</sub><sup>2</sup> + c<sub>x</sub>t<sub>1</sub> + d<sub>x</sub> = x<sub>1</sub><br>
+3a<sub>x</sub>t<sub>1</sub><sup>2</sup> + 2b<sub>x</sub>t<sub>1</sub> + c<sub>x</sub> = dx<sub>1</sub> / dt<sub>1</sub>
+    </p>    
+    </td>
+    <td style="width: 300pt; border: 0px;">
+    <p class="formula" style="width: 300pt;">
+a<sub>x</sub>t<sub>0</sub><sup>3</sup> + b<sub>x</sub>t<sub>0</sub><sup>2</sup> + c<sub>x</sub>t<sub>0</sub> + d<sub>x</sub> = y<sub>0</sub><br>
+3a<sub>x</sub>t<sub>0</sub><sup>2</sup> + 2b<sub>x</sub>t<sub>0</sub> + c<sub>x</sub> = dy<sub>0</sub> / dt<sub>0</sub><br>
+a<sub>x</sub>t<sub>1</sub><sup>3</sup> + b<sub>x</sub>t<sub>1</sub><sup>2</sup> + c<sub>x</sub>t<sub>1</sub> + d<sub>x</sub> = y<sub>1</sub><br>
+3a<sub>x</sub>t<sub>1</sub><sup>2</sup> + 2b<sub>x</sub>t<sub>1</sub> + c<sub>x</sub> = dy<sub>1</sub> / dt<sub>1</sub>
+    </p>    
+    </td>
+    </tr>
+    </table>
+    <p>
+If you paramtrize if for <i>t = [0..1]</i>, the systems will get simpler.
+    </p>
+    <table>
+    <tr>
+    <td style="width: 300pt; border: 0px;">
+    <p class="formula" style="width: 300pt;">
+d<sub>x</sub> = x<sub>0</sub><br>
+c<sub>x</sub> = dx<sub>0</sub> / dt<sub>0</sub><br>
+a<sub>x</sub> + b<sub>x</sub> + c<sub>x</sub> + d<sub>x</sub> = x<sub>1</sub><br>
+3a<sub>x</sub> + 2b<sub>x</sub> + c<sub>x</sub> = dx<sub>1</sub> / dt<sub>1</sub>
+    </p>    
+    </td>
+    <td style="width: 300pt; border: 0px;">
+    <p class="formula" style="width: 300pt;">
+d<sub>x</sub> = y<sub>0</sub><br>
+c<sub>x</sub> = dy<sub>0</sub> / dt<sub>0</sub><br>
+a<sub>x</sub> + b<sub>x</sub> + c<sub>x</sub> + d<sub>x</sub> = y<sub>1</sub><br>
+3a<sub>x</sub> + 2b<sub>x</sub> + c<sub>x</sub> = dy<sub>1</sub> / dt<sub>1</sub>
+    </p>    
+    </td>
+    </tr>
+    </table>
+      
     <canvas id="canvas_ver_3" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
@@ -587,10 +650,8 @@ function draw_contour_ver_3(context, d_f, w, h, grid_size) {
 }
     </textarea>     
     <p id="error_3" class="comment">
-    </p>     
-    <p>
-...
-    </p>        
+    </p>
+      
 
     <script language="JavaScript">
     init_canvas_ver(0);
