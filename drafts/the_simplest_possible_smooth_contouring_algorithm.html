@@ -334,7 +334,7 @@ function draw_canvas_ver(ver_no) {
     for (var i = 0; i < distance_field.data.length; ++i)
         distance_field.data[i] = 0;
     
-    if(document.getElementById("draw_expected_shape").checked)
+    if((ver_no == 0 && document.getElementById("draw_expected_shape").checked) || ver_no > 0)
         for (var i = 0; i <= h; i += 2.0)
             for (var j = 0; j <= w; j += 2.0) {
                 d = d_f(j, i);
@@ -348,7 +348,7 @@ function draw_canvas_ver(ver_no) {
         context.putImageData(distance_field, -0.5, -0.5);
     
     // grid
-    if(document.getElementById("draw_grid").checked) {
+    if((ver_no == 0 && document.getElementById("draw_grid").checked) || ver_no == 1 || ver_no == 2 ) {
         context.beginPath();
         for(var i = 0; i <= h; i += grid_size) {
             context.moveTo(0.0, i);
@@ -386,7 +386,7 @@ function draw_canvas_ver(ver_no) {
     
     
     // distance values
-    if(document.getElementById("draw_distances").checked && lines.length > 0) {
+    if(((ver_no == 0 && document.getElementById("draw_distances").checked) || ver_no == 1) && lines.length > 0) {
         context.font = "16px Arial";
         context.fillStyle = "#000000";
         context.textAlign = "center";
@@ -425,7 +425,7 @@ There is a simpler algorithm that may be not as efficient computationally, but i
     <canvas id="canvas_ver_0" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
-        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
+        <button type="button" style="width: 108pt;" onclick="reset_all()">Clear</button>
     </div>
     <p>
 The algorithm accepts a distance function as an input. The distance function is a from of implicit function that denotes the distance to the expected curve for every point on the plane. You can turn distance printouts on and off with a checkbox from above.
@@ -436,7 +436,7 @@ The algorithm accepts a distance function as an input. The distance function is 
     <canvas id="canvas_ver_1" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
-        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
+        <button type="button" style="width: 108pt;" onclick="reset_all()">Clear</button>
     </div>
     <textarea id="textarea_ver_1" rows=24 onInput="draw_canvas_ver(1)">
 function draw_contour_ver_1(context, d_f, w, h, grid_size) {
@@ -471,7 +471,7 @@ function draw_contour_ver_1(context, d_f, w, h, grid_size) {
     <canvas id="canvas_ver_2" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
-        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
+        <button type="button" style="width: 108pt;" onclick="reset_all()">Clear</button>
     </div>
     <textarea id="textarea_ver_2" rows=42 onInput="draw_canvas_ver(2)">
 function draw_contour_ver_2(context, d_f, w, h, grid_size) {
@@ -660,7 +660,7 @@ function draw_contour_ver_3(context, d_f, w, h, grid_size) {
     </p>
     
     <p>
-The concepts on which the algorithm is built are not simple: partial derivatives, gradients, parametric polynomials. But the algorithm itself is. 
+The concepts on which the algorithm is built are not simple: partial derivatives, gradients, parametric polynomials. But the algorithm itself is: cells &rarr; lines &rarr; curves. 
     </p>
     <p>
 I like it not because how it works. There are better alternatives out there. I like it because what it shows. It shows how the mathematical concepts work together to solve a practical problem with very little added complexity.
