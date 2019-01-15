@@ -410,7 +410,7 @@ The simplest possible smooth contouring algorithm
 Contouring algorithm is something that turns your implicit function into a contour. <a href="interactive_explanation_of_marching_cubes_and_dual_contouring.html">Marching cubes and dual method</a> are the most noted examples.
     </p>
     <p>
-There is a simpler algorithm that may be not as efficient computationally, but instead you can easily improve it to generate smooth contours and not just polylines. Here's an interactive plot you can draw things on. 
+There is also a simpler algorithm. It may be not as efficient computationally, but due to it's simplicity, it can be easily improved to produce smooth contours and not just polylines. Here's an interactive plot to show how it works. 
     </p>
     
     <form onsubmit="return false;">
@@ -428,10 +428,10 @@ There is a simpler algorithm that may be not as efficient computationally, but i
         <button type="button" style="width: 108pt;" onclick="reset_all()">Clear</button>
     </div>
     <p>
-The algorithm accepts a distance function as an input. The distance function is a from of implicit function that denotes the distance to the expected curve for every point on the plane. You can turn distance printouts on and off with a checkbox from above.
+The algorithm accepts a distance function for input. This function denotes the distance to the expected curve for every point on the plane. 
     </p>
     <p>
-<b>First phase</b> of the algorithm is finding the initial contour. The simplest way to do so is to traverse all the cubes of a grid. If the distance function sign changes between the centers of some neighboring cubes, there should be a piece of contour between them. You only have to put one horizontal and one vertical piece per cube to form a fully closed contour.
+<b>The first phase</b> of the algorithm is finding the initial contour. Let's iterate through all the cells of a grid. If the distance function changes its sing between the neighboring cells' centers, we'll add a piece of contour between them. We have to put one horizontal and one vertical piece per cube to form a fully closed contour.
     </p>
     <canvas id="canvas_ver_1" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
@@ -466,7 +466,10 @@ function draw_contour_ver_1(context, d_f, w, h, grid_size) {
     </p>
     
     <p>
-<b>The second phase</b> is attracting the contour nodes to the expected curve. Since we have a distance function, we can measure the distance to the curve for every node point. Then we use the function's gradient to see how it grows. We don't want to get further away from the function, we want to get closer. So we multiply the gradient by negative distance and add that to the node's coordinates.
+<b>The second phase</b> is attracting the contour nodes to the expected curve. The distance function shows how far every node is from the expected curve. And the direction to shift our node is also detectable from the distance function's <a href="https://en.wikipedia.org/wiki/Gradient">gradient</a>.
+    </p>
+    <p>
+All we have to do is to add a gradient vector multiplied by an inverse distance to every node point.
     </p>
     <canvas id="canvas_ver_2" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
@@ -518,10 +521,10 @@ function draw_contour_ver_2(context, d_f, w, h, grid_size) {
     <p id="error_2" class="comment">
     </p> 
     <p>
-<b>The third phase</b> is adding curvature. Once again, we measure the function's gradient for every node's new position. We use the inverted gradient as the partial derivatives to form a <a href="quadric_splines_are_useful_too.html">parametric 3-rd degree polynomial</a>.
+<b>The third phase</b> is adding curvature. Once again, we'll measure the function's gradient for every node. We'll use the <a href="https://en.wikipedia.org/wiki/Partial_derivative">partial derivatives</a> from it to form a <a href="quadric_splines_are_useful_too.html">parametric 3-rd degree polynomial</a>.
     </p>
     <p>
-It probably sounds more complicated than it is. The 3-rd degree polynomials for <i>x</i> and <i>y</i> can be obtained from these systems:
+It probably sounds more complicated than it is. The 3-rd degree polynomials for <i>x</i> and <i>y</i> are the solutions for these systems:
     </p>
     <table>
     <tr>
@@ -544,7 +547,7 @@ a<sub>x</sub>t<sub>1</sub><sup>3</sup> + b<sub>x</sub>t<sub>1</sub><sup>2</sup> 
     </tr>
     </table>
     <p>
-If you paramtrize if for <i>t = [0..1]</i>, the systems will get simpler.
+If you parametrize the polynomials for <i>t = [0..1]</i>, the systems will become:
     </p>
     <table>
     <tr>
@@ -660,10 +663,7 @@ function draw_contour_ver_3(context, d_f, w, h, grid_size) {
     </p>
     
     <p>
-The concepts on which the algorithm is built are not simple: partial derivatives, gradients, parametric polynomials. But the algorithm itself is: cells &rarr; lines &rarr; curves. 
-    </p>
-    <p>
-I like it not because how it works. There are better alternatives out there. I like it because what it shows. It shows how the mathematical concepts work together to solve a practical problem with very little added complexity.
+The concepts on which the algorithm is built may not be simple: partial derivatives, gradients, parametric polynomials. But the algorithm itself is: cells &rarr; lines &rarr; curves. 
     </p>
 
     <script language="JavaScript">
