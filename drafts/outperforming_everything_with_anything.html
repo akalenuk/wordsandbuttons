@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Outperforming everything with anything</title>
+    <meta name="keywords" content="python,meta-programming,LLVM,performance,tutorial">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+pre {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 12pt;
+    text-align: left;
+    width: 300pt;
+}
+
+table {
+    border-width: 0pt;
+}
+
+td {
+    vertical-align: top;
+    padding: 6pt 12pt 6pt 12pt;
+    font-size: 16pt;
+    border: 1px solid black;
+    width: 505pt;
+}
+
+button{
+    width: 248pt;
+    height: 42pt;
+    margin-left:4pt;
+    margin-right:4pt;
+    font-size: 16pt;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+u {
+    border-bottom: 1px dotted #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+    </style>
+    <script language="JavaScript">
+function next(slides){
+    // show the next slide
+    var first_slide = document.getElementById(slides + "_" + 1);
+    for(var i = 1; i < 9; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if(this_slide)
+            if(this_slide.style.display == "block")
+                {
+                this_slide.style.display = "none";
+                if(next_slide)
+                    next_slide.style.display = "block";
+                else
+                    first_slide.style.display = "block";
+                break;
+                }
+    }
+    // name the button
+    var button = document.getElementById(slides + "_button")
+    for(var i = 1; i < 9; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if (this_slide && !next_slide && this_slide.style.display == "block") {
+            button.innerHTML = "Back to the 1-st step";
+            break;
+        }
+        else
+            button.innerHTML = "Next step";
+    }
+}
+
+function draw_results(){
+    var d = document.getElementById("results");
+    var d_context = d.getContext("2d");
+    d_context.font = "16px sans-serif";
+    // background
+    d_context.fillStyle="#eeeeee";
+	d_context.fillRect(0, 0, 702, 500);
+
+	var x = 0.0;
+	var y = 0.0;
+	// C metaprogramming
+	x = 0.5;
+	y = 1.5;
+	d_context.fillStyle="#BB0022";
+	d_context.fillText("70 ms. C with tricks", x + 4, y + 16);
+	d_context.beginPath();
+	d_context.strokeStyle="#BB0022";
+	d_context.moveTo(x, y);
+	d_context.lineTo(x+233, y);
+	d_context.lineWidth=2;
+	d_context.stroke();
+	d_context.closePath();
+
+	// C++ metaprogramming
+	x = 234.5;
+	y = 499.5 - Math.floor(499 * 60/ 70);
+	d_context.fillStyle="#882200";
+	d_context.fillText("60 ms. C++ with a trick", x + 4, y - 8);
+	d_context.beginPath();
+	d_context.strokeStyle="#882200";
+	d_context.moveTo(x, y);
+	d_context.lineTo(x+233, y);
+	d_context.lineWidth=2;
+	d_context.stroke();
+	d_context.closePath();
+
+	// Python + LLVM
+	x = 498.5;
+	y = 499.5 - Math.floor(499 * 55 / 70);
+	d_context.fillStyle="#668811";
+	d_context.fillText("55 ms. Python + LLVM", x + 4, y - 8);
+	d_context.beginPath();
+	d_context.strokeStyle="#446600";
+	d_context.moveTo(x, y);
+	d_context.lineTo(x+233, y);
+	d_context.lineWidth=2;
+	d_context.stroke();
+	d_context.closePath();
+}
+
+function init_results(){
+    draw_results();
+}
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+Outperforming everything with anything
+<br>
+<sub>Python? Sure, why not?</sub>
+    </h1>
+    <p>
+This continues <a href="http://wordsandbuttons.online/outperforming_lapack_with_c_metaprogramming.html">Outperforming LAPACK with C metaprogramming</a>, and <a href="http://wordsandbuttons.online/vastly_outperforming_lapack_with_cpp_metaprogramming.html"> Vastly outperforming LAPACK with C++ metaprogramming</a>. The two articles describe language tricks to help you help the compiler generate highly-performant code. But the tricks described there imply that you know what you do better than the compiler does. If this is the case, do you really need a compiler at all?
+    </p>
+    <p>
+The alternative would be writing programs in plain assembly. Although the horrors of it are vastly exaggerated, this approach has two major flaws.
+    </p>
+    <ol>
+    <li>
+Assembly code is not really portable. Sure, sometimes it's not even that important. You may have to implement some specific algorithm for some dedicated hardware, and the priority of portability may seem low. But consider this. What if you are actually good at your job? What if the algorithm you implement survives some five or ten years? At some point you would want to update your hardware and non-portability may suddenly become an issue.
+    </li>
+    <li>
+Although it became much easier with modern tools, assembly programming still requires a lot of tedious manual labor. What seems to be just a line of code in C may become a screen full of assembly. And a screen full of C code may become an all-night typing party.
+    </li>
+    </ol>
+    <p>
+Thankfully, we all live in the XXI century, and both of these problems have already been addressed.
+    </p>
+    <p>
+The solution to the first one would be <a href="https://en.wikipedia.org/wiki/LLVM">LLVM</a>. Initially, it meant “Low Level Virtual Machine” and that is exactly what we want to ensure portability. Simply put, it takes some code written in very low-level language called intermediate representation and generates highly optimized native code from it. Single input — many outputs for many hardware platforms.
+    </p>
+    <p>
+With LLVM we have the power of low-level programming so that we can structure our program manually, and we still delegate hardware micro-optimizations to the machine.
+    </p>
+    <p>
+And the solution to the second problem is basically any language you want. Lisp, Python, Perl, even bash, and AWK will do. They are all meant to eliminate tedious labor. Every language you use daily for automation may be used to generate highly-performant code. And it's reasonably easy too. I'll show you.
+    </p>
+    <h2>
+Function call substitution with Python
+    </h2>
+    <p>
+What I want to do here is to repeat the same experiment I did with C and C++ in the articles from before. I want to generate a fully inlined fully unrolled solution that would embed itself into the benchmarking code. My plan then is as follows.
+    <ol>
+    <li>
+Use Clang to generate LLVM intermediate code for a benchmark that is supposed to measure yet non-existent function named <i>solve_5</i>
+    </li>
+    <li>
+Hijack a benchmark with a Python script meaning replacing <i>solve_5</i> call with a completely auto-generated solution and updating all the instructions' numbers after it.
+    </li>
+    <li>
+Use the LLVM static compiler LLC to turn the intermediate code into the machine code.
+    </li>
+    <li>
+Use the GNU assembler and the Clang's linker to make the machine code into an executable binary.
+    </li>
+    </ol>
+    <p>
+In terms of source code, the whole process should look somehow like this.
+    </p>
+    <table><tr>
+    <td>
+    <pre><span id="slides_recursive_1" style="display:block"><div style="color:#994466"><b>Step 1. Benchmark C source code</b></div>
+#include "stdio.h"
+
+<b>extern void solve_5(double* a, double* b, double* x);</b> // fake
+
+int main() {
+    double sum_x[5] = {0., 0., 0., 0., 0.};
+    for(int i = 0; i &lt; 1000000; ++i) {
+        double a[5*5] = {
+            6.80, -6.05, -0.45,  8.32, -9.67,
+           -2.11, -3.30,  2.58,  2.71, -5.14,
+            5.66,  5.36, -2.70,  4.35, -7.26,
+            5.97, -4.44,  0.27, -7.17,  6.08,
+            8.23,  1.08,  9.04,  2.14, -6.87
+        };
+        double b[5] = {
+            4.02,  6.19, -8.22, -7.57, -3.03,
+        };
+        double x[5];
+
+        <b>solve_5(a, b, x);</b> // this will get replaced later
+
+        for(int j = 0; j &lt; 5; ++j){
+            sum_x[j] += x[j];
+        }
+    }
+    printf("%f, %f, %f, %f, %f\n",
+        sum_x[0], sum_x[1], sum_x[2], sum_x[3], sum_x[4]);
+    return 0;
+}
+
+</span><span id="slides_recursive_2" style="display:none"><div style="color:#992244"><b>Step 2. LLVM assembly language</b></div>
+... 27 lines before...
+<span style="font-size:10pt;">; &lt;label&gt;:6                                       ; preds = %3
+  %7 = bitcast [25 x double]* %a to i8*
+  call void @llvm.memcpy.p0i8.p0i8.i32
+    (i8* %7, i8* bitcast ([25 x double]* @main.a to i8*), i32 200, i32 8, i1 false)
+  %8 = bitcast [5 x double]* %b to i8*
+  call void @llvm.memset.p0i8.i32(i8* %8, i8 0, i32 40, i32 8, i1 false)
+  %9 = bitcast i8* %8 to [5 x double]*
+  %10 = getelementptr [5 x double], [5 x double]* %9, i32 0, i32 0
+  store double 4.020000e+00, double* %10
+  %11 = getelementptr [5 x double], [5 x double]* %9, i32 0, i32 1
+  store double 6.190000e+00, double* %11
+  %12 = getelementptr [5 x double], [5 x double]* %9, i32 0, i32 2
+  store double -8.220000e+00, double* %12
+  %13 = getelementptr [5 x double], [5 x double]* %9, i32 0, i32 3
+  store double -7.570000e+00, double* %13
+  %14 = getelementptr [5 x double], [5 x double]* %9, i32 0, i32 4
+  store double -3.030000e+00, double* %14
+  %15 = getelementptr inbounds [25 x double], [25 x double]* %a, i32 0, i32 0
+  %16 = getelementptr inbounds [5 x double], [5 x double]* %b, i32 0, i32 0
+  %17 = getelementptr inbounds [5 x double], [5 x double]* %x, i32 0, i32 0
+  <b>call void @solve_5(double* %15, double* %16, double* %17) ; to replace</b>
+  store i32 0, i32* %j, align 4
+  br label <b>%18 ; to update</b>
+
+; &lt;label&gt;:18                                      ; preds = <b>%29</b>, <b>%6</b>
+  <b>%19</b> = load i32, i32* %j, align 4
+  <b>%20</b> = icmp slt i32 <b>%19</b>, 5
+  br i1 <b>%20</b>, label <b>%21</b>, label <b>%32</b></span>
+... 58 lines after... </span><span id="slides_recursive_3" style="display:none"><div style="color:#881122"><b>Step 3. LLVM after the call replacement</b></div>
+... 44 lines before ...
+<span style="font-size:10pt;">  %15 = getelementptr inbounds [25 x double], [25 x double]* %a, i32 0, i32 0
+  %16 = getelementptr inbounds [5 x double], [5 x double]* %b, i32 0, i32 0
+  %17 = getelementptr inbounds [5 x double], [5 x double]* %x, i32 0, i32 0
+<b>%18 = getelementptr inbounds double, double* %15, i64 6  ; generated
+%19 = load double, double* %18, align 8                  ; by
+%20 = getelementptr inbounds double, double* %15, i64 24 ; the
+%21 = load double, double* %20, align 8                  ; Python
+%22 = fmul double %19, %21                               ; script</b>
+
+</span>... 2407 more lines of auto-generated code ...<span style="font-size:10pt;">
+
+<b>%2422 = getelementptr inbounds double, double* %17, i64 3
+%2423 = load double, double* %2422, align 8
+%2424 = fmul double %2421, %2423
+%2425 = fsub double %2419, %2424
+%2426 = getelementptr inbounds double, double* %15, i64 24
+%2427 = load double, double* %2426, align 8
+%2428 = fdiv double %2425, %2427
+%2429 = getelementptr inbounds double, double* %17, i64 4
+store double %2428, double* %2429, align 8</b>
+
+  store i32 0, i32* %j, align 4
+  br label <b>%2430  ; instructions updated by the same script</b>
+
+; <label>:18                                      ; preds = %2441, %6
+  <b>%2431</b> = load i32, i32* %j, align 4
+  <b>%2432</b> = icmp slt i32 <b>%2431</b>, 5
+  br i1 <b>%2432</b>, label <b>%2433</b>, label <b>%2444</b>
+</span>... still 58 lines after...</span><span id="slides_recursive_4" style="display:none"><div style="color:#881122"><b>Step 4. Native optimized assembly</b></div>
+... 139 lines of assembly ...
+	vmovsd	352(%esp), %xmm0        # xmm0 = mem[0],zero
+	vmulsd	256(%esp), %xmm2, %xmm6
+	vmovsd	.LCPI0_0, %xmm4         # xmm4 = mem[0],zero
+	vmulsd	%xmm4, %xmm0, %xmm7
+	vsubsd	%xmm7, %xmm6, %xmm6
+	vmulsd	128(%esp), %xmm0, %xmm5 # 8-byte Folded Reload
+	vmovapd	%xmm0, %xmm3
+	vmulsd	344(%esp), %xmm2, %xmm7
+	vsubsd	%xmm5, %xmm7, %xmm1
+	vmovsd	%xmm1, 128(%esp)        # 8-byte Spill
+	vmulsd	280(%esp), %xmm2, %xmm7
+	vmulsd	192(%esp), %xmm4, %xmm5 # 8-byte Folded Reload
+	vsubsd	%xmm5, %xmm7, %xmm7
+	vmovsd	%xmm7, 120(%esp)        # 8-byte Spill
+	vmovsd	104(%esp), %xmm0        # 8-byte Reload
+
+	vmulsd	%xmm6, %xmm0, %xmm5
+	vmulsd	%xmm7, %xmm1, %xmm6
+	vsubsd	%xmm6, %xmm5, %xmm5
+	vmovsd	%xmm5, 64(%esp)         # 8-byte Spill
+	vmovapd	%xmm3, %xmm7
+	vmulsd	88(%esp), %xmm7, %xmm3  # 8-byte Folded Reload
+	vmulsd	336(%esp), %xmm2, %xmm6
+	vsubsd	%xmm3, %xmm6, %xmm3
+	vmulsd	%xmm0, %xmm3, %xmm3
+	vmulsd	80(%esp), %xmm1, %xmm6  # 8-byte Folded Reload
+	vsubsd	%xmm6, %xmm3, %xmm1
+	vmovsd	%xmm1, 88(%esp)         # 8-byte Spill
+... only 400 more lines of assembly ...</span></pre>
+    </td>
+    </td></tr></table>
+    <p style="text-align:right">
+    <button type="button" id="slides_recursive_button" onclick="next('slides_recursive')">Next step</button>
+    </p>
+    <p>
+The most exciting thing is how the crappy intermediate code generated by the Python script turns into very compact and very effective code for the hardware. It is highly super-scalarized, and the huge parts of it have been reduced by LLVM. But were these low-level optimizations enough to generate something competitive in performance with C and C++ solutions?
+    </p>
+
+    <p>
+It's hard to tell the exact numbers when everything runs super-fast to begin with. But after several sessions, I can provide some approximate measurements for the three cases: C with tricks, C++ with a trick, and Python with LLVM.
+    </p>
+    <ol>
+    <li>
+The tricks for C don't quite work for Clang, so I had to measure GCC version. It runs for roughly 70 ms in average.
+    </li>
+    <li>
+The C++ version was built with Clang and it runs for 60 ms.
+    </li>
+    <li>
+<b>The Python version, the one described here, runs only for 55 ms.</b>
+    </li>
+    </ol>
+    <canvas id="results" width=700 height=500></canvas>
+    <script language="JavaScript">
+    init_results();
+    </script>
+    <p>
+Of course, this advantage is not something you would kill for. It is more of a symbolic victory. You can write programs in Python that will outperform ones written in C or C++. You don't have to have an elaborate compiler (plus libraries, tooling, documents, and community) to generate high-performant code.
+    </p>
+    <h2>
+Details on implementation
+    </h2>
+    <p>
+The script that does the substitution, implements an algorithm, and, most importantly, provides a Python to LLVM layer, is only 100 lines long! You can see it in <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/python_to_llvm/exp_embed_on_call/substitute_solver_call.py">one piece on GitHub</a>.
+    </p>
+    <p>
+The most fascinating is the <i>LLVMCode</i> object. It is something that pretends to be a mere array, it looks like it can provide data by the index, accept data by the index, and be a subject of some simple arithmetic operators. But actually, what it does undercover is it logs the history of all operations performed with it or its quasi-co-operands or its quasi-data. The log is being written in the form of LLVM intermediate representation.
+    </p>
+    <p>
+So if you have some perfectly Python-ish algorithm that operates on lists, you can feed it with <i>LLVMCode</i> objects and what you get in return is the log of all LLVM operations required to achieve a result of the initial algorithm. Which is LLVM code. <i>LLVMCode</i> objects turn everyday Python code into LLVM code-generators.
+    </p>
+    <p>
+In our case, the algorithm is the recursive Kramer's linear solver named <i>solve_linear_system</i>. It is not some special code-generating algorithm, it is an actual solver. It was designed to work with numbers. But since Python is dynamically typed, all you have to do to turn it into a code generator is to run it with <i>LLVMCode</i> objects instead of arrays. That's it!
+    </p>
+    <h2>
+Conclusion
+    </h2>
+    <p>
+What I show here is not at all novel. People have been using dynamically typed languages to generate code for decades. What is indeed worth your attention is how unbelievably easy it became to do so in the XXI century. I am not an LLVM expert, I don't even write in Python professionally, yet I could make a highly-performant piece of code with a bit of googling, trial and error, and a 100-lines-long Python script.
+    </p>
+    <p>
+I really think that the difference between high performance compiling languages and slow but fast-to-develop scripting languages is more a matter of public opinion rather that some objective reality. You can generate fast code with Python or Perl or, of course, Lisp. Native code generation may very well be not a core feature of a language, but something like a pluggable option. Something done by a dedicated library for instance.
+    </p>
+    <p>
+And the prospects of this approach are rather appealing. You can do your research, rapid prototyping, preliminary measurements and tuning in one language, and then generate some highly-performant native code... in the same language. Probably, without even adopting the algorithm you have been developing.
+    </p>
+    <p>
+High-performance computing has no reason to remain a privilege of compiling languages. A compiler is just a program, you can do its job in any language. I&nbsp;believe you can teach Matlab to generate LLVM code if you want to.
+    </p>
+    <br>
+    <p style="font-family: sans-serif; font-size: 14pt;">
+All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the code is compiled with clang version 3.8.0-2ubuntu4 and g++ 5.4.0 with -march=native -O2. The source code for the benchmark is available on <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/python_to_llvm">Github</a>.
+    </p>
+
+    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+    <tr>
+    <td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+        <a href="index.html"><img src="favicon.ico"></a>
+    </td>
+    <td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+        &nbsp;&larr; there's more.
+    </td>
+    <td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+        +
+        <a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+        <a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+        <a href="https://news.ycombinator.com/from?site=wordsandbuttons.online">Hacker News</a>
+    </td>
+    </tr>
+    </table>
+    </center>
+  </body>
+</html>
