@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8">
     <title>Outperforming everything with anything</title>
-    <meta name="keywords" content="python,meta-programming,LLVM,performance,tutorial">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <style>
 body{
@@ -234,8 +233,146 @@ Use the LLVM static compiler LLC to turn the intermediate code into the machine 
 Use the GNU assembler and the Clang's linker to make the machine code into an executable binary.
     </li>
     </ol>
+    <h2>
+Python part
+    </h2>
     <p>
-In terms of source code, the whole process should look somehow like this.
+We need a solver in Python just like we had with C and C++. Here it is:
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+# this generates n-solver in LLVM code with LLVMCode objects. 
+# No LLVM stuff yet, just completely Pythonic solution
+def solve_linear_system(a_array, b_array, x_array, n_value):
+  def a(i, j, n):
+    if n == n_value: 
+      return a_array[i * n_value + j]
+    return a(i, j, n+1)*a(n, n, n+1) - a(i, n, n+1)*a(n, j, n+1)
+
+  def b(i, n):
+    if n == n_value: 
+      return b_array[i]
+    return a(n, n, n+1)*b(i, n+1) - a(i, n, n+1)*b(n, n+1)
+
+  def x(i):
+    d = b(i,i+1)
+    for j in range(i): 
+      d -= a(i, j, i+1) * x_array[j]
+    return d / a(i, i, i+1)
+
+  for k in range(n_value):
+    x_array[k] = x(k)
+
+return x_array
+    </pre>
+    </td>
+    </tr></table>
+    <p>
+If we run this on numbers, we'll have numbers. But we want code. So let's make an object that pretends to be an array of numbers or even a single number only to spy on the algorithm. Our object will write down every operation that the algorithms wants it to do. In LLVM code.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+# this is basically the whole LLVM layer
+I = 0
+STACK = []
+
+class LLVMCode:
+  # the only constructor for now is by double* instruction
+  def __init__(self, io, code = ''): 
+    self.io = io
+    self.code = code
+  def __getitem__(self, i): 
+    global I, STACK
+    copy_code = "%" + str(I+1) 
+    copy_code += " = getelementptr inbounds double, double* "
+    copy_code += self.io +", i64 " + str(i) + "\n"
+    copy_code += "%" + str(I+2) 
+    copy_code += " = load double, double* %" + str(I+1) 
+    copy_code += ", align 8\n"
+    I += 2
+    STACK += [I]
+    return LLVMCode(self.io, copy_code)
+  def __setitem__(self, i, other_llvcode):
+    global I, STACK
+    self.code += other_llvcode.code
+    self.code += "%" + str(I+1) 
+    self.code += " = getelementptr inbounds double, double* "
+    self.code += self.io +", i64 " + str(i) + "\n"
+    self.code += "store double %" + str(I) 
+    self.code += ", double* %" + str(I+1) + ", align 8\n"
+    I += 1
+    STACK = STACK[:-1]
+    return self
+  def general_arithmetics(self, operator, other_llvcode):
+    global I, STACK
+    self.code += other_llvcode.code;
+    self.code += "%" + str(I+1) + " = f" + operator 
+    self.code += " double %" + str(STACK[-2]) + ", %" 
+    self.code += str(STACK[-1]) + "\n";
+    I += 1
+    STACK = STACK[:-2] + [I]
+    return self
+  def __add__(self, other_llvcode):
+    return self.general_arithmetics('add', other_llvcode)
+  def __sub__(self, other_llvcode):
+    return self.general_arithmetics('sub', other_llvcode)
+  def __mul__(self, other_llvcode):
+    return self.general_arithmetics('mul', other_llvcode)    
+  def __div__(self, other_llvcode):
+    return self.general_arithmetics('div', other_llvcode) 
+    </pre>
+    </td>
+    </tr></table>
+    <p>
+Now when we run the solver with this kind of objects, we'll get a fully functional linear solver written in LLVM. All we have to do is to put it into the benchmark code to see how fast it is.
+    </p>
+    <p>
+Instruction in LLVM are numbered and we want to preserve this numeration, so the function that inserts our code into our benchmark is not trivial. But it's not very complicated either.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+# this replaces the function call 
+# and updates all the instruction indices   
+def replace_call(text, line, params):
+  global I, STACK
+  # '%12 ' -> 12
+  I = int(''.join(
+    [xi for xi in params[2] if xi.isdigit()]
+    )) 
+  first_instruction_to_replace = I + 1
+  STACK = []
+  replacement = solve_linear_system(
+    LLVMCode(params[0]), 
+    LLVMCode(params[1]), 
+    LLVMCode(params[2]), 5).code
+  delta_instruction = I - first_instruction_to_replace + 1
+  for i in xrange(first_instruction_to_replace, sys.maxint):
+    not_found = sum(
+      [text.find('%' + str(i) + c) == -1 
+        for c in POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH]
+      )
+    if not_found == 4:
+      # the last instruction has already been substituted
+      break
+    new_i = i + delta_instruction
+    for c in POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH: 
+      # substitute instruction number
+      text = text.replace('%' + str(i) + c, '%' + str(new_i) + c)
+return text.replace(line, replacement)        
+    </pre>
+    </td>
+    </tr></table>    
+    <p>
+The whole code that does the insertion, implements a solver, and provides a Python-to-LLVM layer is only 100 lines long! You can see it in <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/python_to_llvm/exp_embed_on_call/substitute_solver_call.py">one piece on GitHub</a>.
+    </p>    
+    <h2>
+Benchmark
+    </h2>
+    <p>
+I wrote the benchmark in C. When I run my Makefile, its call for <i>solve_5</i> gets replaced by the LLVM code generated from Python by Python.
     </p>
     <table><tr>
     <td>
@@ -390,21 +527,6 @@ The C++ version was built with Clang and it runs for 60 ms.
     </script>
     <p>
 Of course, this advantage is not something you would kill for. It is more of a symbolic victory. You can write programs in Python that will outperform ones written in C or C++. You don't have to have an elaborate compiler (plus libraries, tooling, documents, and community) to generate high-performant code.
-    </p>
-    <h2>
-Details on implementation
-    </h2>
-    <p>
-The script that does the substitution, implements an algorithm, and, most importantly, provides a Python to LLVM layer, is only 100 lines long! You can see it in <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/python_to_llvm/exp_embed_on_call/substitute_solver_call.py">one piece on GitHub</a>.
-    </p>
-    <p>
-The most fascinating is the <i>LLVMCode</i> object. It is something that pretends to be a mere array, it looks like it can provide data by the index, accept data by the index, and be a subject of some simple arithmetic operators. But actually, what it does undercover is it logs the history of all operations performed with it or its quasi-co-operands or its quasi-data. The log is being written in the form of LLVM intermediate representation.
-    </p>
-    <p>
-So if you have some perfectly Python-ish algorithm that operates on lists, you can feed it with <i>LLVMCode</i> objects and what you get in return is the log of all LLVM operations required to achieve a result of the initial algorithm. Which is LLVM code. <i>LLVMCode</i> objects turn everyday Python code into LLVM code-generators.
-    </p>
-    <p>
-In our case, the algorithm is the recursive Kramer's linear solver named <i>solve_linear_system</i>. It is not some special code-generating algorithm, it is an actual solver. It was designed to work with numbers. But since Python is dynamically typed, all you have to do to turn it into a code generator is to run it with <i>LLVMCode</i> objects instead of arrays. That's it!
     </p>
     <h2>
 Conclusion
