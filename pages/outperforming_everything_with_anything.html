@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8">
     <title>Outperforming everything with anything</title>
-    <meta name="keywords" content="python,meta-programming,LLVM,performance,tutorial">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <style>
 body{
@@ -190,52 +189,211 @@ Outperforming everything with anything
 <sub>Python? Sure, why not?</sub>
     </h1>
     <p>
-This continues <a href="http://wordsandbuttons.online/outperforming_lapack_with_c_metaprogramming.html">Outperforming LAPACK with C metaprogramming</a>, and <a href="http://wordsandbuttons.online/vastly_outperforming_lapack_with_cpp_metaprogramming.html"> Vastly outperforming LAPACK with C++ metaprogramming</a>. The two articles describe language tricks to help you help the compiler generate highly-performant code. But the tricks described there imply that you know what you do better than the compiler does. If this is the case, do you really need a compiler at all?
+This continues <a href="http://wordsandbuttons.online/outperforming_lapack_with_c_metaprogramming.html">Outperforming LAPACK with C metaprogramming</a>, and <a href="http://wordsandbuttons.online/vastly_outperforming_lapack_with_cpp_metaprogramming.html"> Vastly outperforming LAPACK with C++ metaprogramming</a>. These two posts describe language tricks to make compilers generate highly-performant code for you. But do you need compilers at all?
     </p>
     <p>
 The alternative would be writing programs in plain assembly. Although the horrors of it are vastly exaggerated, this approach has two major flaws.
     </p>
     <ol>
     <li>
-Assembly code is not really portable. Sure, sometimes it's not even that important. You may have to implement some specific algorithm for some dedicated hardware, and the priority of portability may seem low. But consider this. What if you are actually good at your job? What if the algorithm you implement survives some five or ten years? At some point you would want to update your hardware and non-portability may suddenly become an issue.
+Assembly code is not portable.
     </li>
     <li>
-Although it became much easier with modern tools, assembly programming still requires a lot of tedious manual labor. What seems to be just a line of code in C may become a screen full of assembly. And a screen full of C code may become an all-night typing party.
+Although it became much easier with modern tools, assembly programming still requires a lot of tedious work. 
     </li>
     </ol>
     <p>
 Thankfully, we all live in the XXI century, and both of these problems have already been addressed.
     </p>
     <p>
-The solution to the first one would be <a href="https://en.wikipedia.org/wiki/LLVM">LLVM</a>. Initially, it meant “Low Level Virtual Machine” and that is exactly what we want to ensure portability. Simply put, it takes some code written in very low-level language called intermediate representation and generates highly optimized native code from it. Single input — many outputs for many hardware platforms.
+The solution to the first one would be <a href="https://en.wikipedia.org/wiki/LLVM">LLVM</a>. Initially, it meant “Low Level Virtual Machine” and that is exactly what we want to ensure portability. Simply put, it takes some code written in very low-level hardware agnostic language and returns some highly optimized native code for the specific hardware platform. With LLVM we have both the power of low-level programming and the automation of hardware-oriented micro-optimizations.
     </p>
     <p>
-With LLVM we have the power of low-level programming so that we can structure our program manually, and we still delegate hardware micro-optimizations to the machine.
-    </p>
-    <p>
-And the solution to the second problem is basically any language you want. Lisp, Python, Perl, even bash, and AWK will do. They are all meant to eliminate tedious labor. Every language you use daily for automation may be used to generate highly-performant code. And it's reasonably easy too. I'll show you.
+And the solution to the second problem is any “scripting” language you want. Scheme, Python, Perl, even bash or AWK will do. They are all meant to eliminate tedious work. Everything you use daily for automation you can use to generate highly-performant code. 
     </p>
     <h2>
-Function call substitution with Python
+The plan
     </h2>
     <p>
-What I want to do here is to repeat the same experiment I did with C and C++ in the articles from before. I want to generate a fully inlined fully unrolled solution that would embed itself into the benchmarking code. My plan then is as follows.
+Let's repeat the same experiment I did with C and C++ in the posts from before. Let's generate a fully inlined fully unrolled solution and embed it into the benchmarking code. The plan then is as follows.
     <ol>
     <li>
-Use Clang to generate LLVM intermediate code for a benchmark that is supposed to measure yet non-existent function named <i>solve_5</i>
+Use Clang to generate LLVM intermediate code for the benchmark that is supposed to measure yet non-existent function named <i>solve_5</i>
     </li>
     <li>
-Hijack a benchmark with a Python script meaning replacing <i>solve_5</i> call with a completely auto-generated solution and updating all the instructions' numbers after it.
+Make Python generate a linear solver code in LLVM.
+    </li>     
+    <li>
+Hijack a benchmark with a Python script replacing <i>solve_5</i> call with the generated solver.
     </li>
     <li>
-Use the LLVM static compiler LLC to turn the intermediate code into the machine code.
+Use the LLVM static compiler to turn the intermediate code into the machine code.
     </li>
     <li>
 Use the GNU assembler and the Clang's linker to make the machine code into an executable binary.
     </li>
     </ol>
     <p>
-In terms of source code, the whole process should look somehow like this.
+That's how it looks in a Makefile:
+    </p>    
+    <table><tr>
+    <td>
+    <pre>
+all: generate_llvm generate_s generate_elf test
+.PHONY: generate_llvm
+generate_llvm:
+  <b>clang</b> benchmark.c -march=native -S -emit-llvm -o benchmark.bc
+  <b>python</b> substitute_solver_call.py benchmark.bc
+.PHONY: generate_s
+generate_s:
+  <b>llc</b> -O2 benchmark.bc -o benchmark.s
+.PHONY: generate_elf
+generate_elf:
+  <b>as</b> benchmark.s -o benchmark.o
+  <b>clang</b> -o benchmark benchmark.o
+    </pre>
+    </td></tr>
+    </table>
+    <h2>
+The Python part
+    </h2>
+    <p>
+We need a linear solver in Python just like we had with C and C++. Here it is:
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+<span style="color: #778877"># this generates n-solver in LLVM code with LLVMCode objects.</span>
+<span style="color: #778877"># No LLVM stuff yet, just completely Pythonic solution</span>
+<span style="color: #645406">def</span> <span style="color: #39505d">solve_linear_system</span>(<span style="color: #304622">a_array</span>, <span style="color: #106a75">b_array</span>, <span style="color: #4a383c">x_array</span>, <span style="color: #0c654d">n_value</span>):
+  <span style="color: #645406">def</span> <span style="color: #584a16">a</span>(<span style="color: #592715">i</span>, <span style="color: #602462">j</span>, <span style="color: #6d2251">n</span>):
+    <span style="color: #084f73">if</span> <span style="color: #6d2251">n</span> == <span style="color: #0c654d">n_value</span>:
+      <span style="color: #494b6a">return</span> <span style="color: #304622">a_array</span>[<span style="color: #592715">i</span> * <span style="color: #0c654d">n_value</span> + <span style="color: #602462">j</span>]
+    <span style="color: #494b6a">return</span> <span style="color: #584a16">a</span>(<span style="color: #592715">i</span>, <span style="color: #602462">j</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>)*<span style="color: #584a16">a</span>(<span style="color: #6d2251">n</span>, <span style="color: #6d2251">n</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>) - <span style="color: #584a16">a</span>(<span style="color: #592715">i</span>, <span style="color: #6d2251">n</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>)*<span style="color: #584a16">a</span>(<span style="color: #6d2251">n</span>, <span style="color: #602462">j</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>)
+
+  <span style="color: #645406">def</span> <span style="color: #037677">b</span>(<span style="color: #592715">i</span>, <span style="color: #6d2251">n</span>):
+    <span style="color: #084f73">if</span> <span style="color: #6d2251">n</span> == <span style="color: #0c654d">n_value</span>:
+      <span style="color: #494b6a">return</span> <span style="color: #106a75">b_array</span>[<span style="color: #592715">i</span>]
+    <span style="color: #494b6a">return</span> <span style="color: #584a16">a</span>(<span style="color: #6d2251">n</span>, <span style="color: #6d2251">n</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>)*<span style="color: #037677">b</span>(<span style="color: #592715">i</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>) - <span style="color: #584a16">a</span>(<span style="color: #592715">i</span>, <span style="color: #6d2251">n</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>)*<span style="color: #037677">b</span>(<span style="color: #6d2251">n</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>)
+
+  <span style="color: #645406">def</span> <span style="color: #390958">x</span>(<span style="color: #592715">i</span>):
+    <span style="color: #3c2d3f">d</span> = <span style="color: #037677">b</span>(<span style="color: #592715">i</span>,<span style="color: #592715">i</span>+<span style="color: #4a4642">1</span>)
+    <span style="color: #096162">for</span> <span style="color: #602462">j</span> <span style="color: #59483a">in</span> <span style="color: #2c6a50">range</span>(<span style="color: #592715">i</span>):
+      <span style="color: #3c2d3f">d</span> -= <span style="color: #584a16">a</span>(<span style="color: #592715">i</span>, <span style="color: #602462">j</span>, <span style="color: #592715">i</span>+<span style="color: #4a4642">1</span>) * <span style="color: #4a383c">x_array</span>[<span style="color: #602462">j</span>]
+    <span style="color: #494b6a">return</span> <span style="color: #3c2d3f">d</span> / <span style="color: #584a16">a</span>(<span style="color: #592715">i</span>, <span style="color: #592715">i</span>, <span style="color: #592715">i</span>+<span style="color: #4a4642">1</span>)
+
+  <span style="color: #096162">for</span> <span style="color: #290e7a">k</span> <span style="color: #59483a">in</span> <span style="color: #2c6a50">range</span>(<span style="color: #0c654d">n_value</span>):
+    <span style="color: #4a383c">x_array</span>[<span style="color: #290e7a">k</span>] = <span style="color: #390958">x</span>(<span style="color: #290e7a">k</span>)
+
+<span style="color: #494b6a">return</span> <span style="color: #4a383c">x_array</span>
+    </pre>
+    </td>
+    </tr></table>
+    <p>
+When we run this on numbers, we have numbers. But we want the code. So let's make an object that pretends to be numbers only to spy on the algorithm. The object that writes down every operation the algorithm wants it to perform in ready to assemble LLVM intermediate language.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+<span style="color: #778877"># this is basically the whole LLVM layer</span>
+<span style="color: #08327a">I</span> = <span style="color: #604b5f">0</span>
+<span style="color: #25683e">STACK</span> = []
+
+<span style="color: #2e656c">class</span> <span style="color: #43382b">LLVMCode</span>:
+<span style="color: #778877">  # the only constructor for now is by double* instruction</span>
+  <span style="color: #645406">def</span> <span style="color: #3a3b70">__init__</span>(<span style="color: #007637">self</span>, <span style="color: #364561">io</span>, <span style="color: #173c3f">code</span> = ''):
+    <span style="color: #007637">self</span>.<span style="color: #364561">io</span> = <span style="color: #364561">io</span>
+    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> = <span style="color: #173c3f">code</span>
+  <span style="color: #645406">def</span> <span style="color: #607263">__getitem__</span>(<span style="color: #007637">self</span>, <span style="color: #592715">i</span>):
+    <span style="color: #222a54">global</span> <span style="color: #08327a">I</span>, <span style="color: #25683e">STACK</span>
+    <span style="color: #45213d">copy_code</span> = "%" + <span style="color: #3d114f">str</span>(<span style="color: #08327a">I</span>+<span style="color: #4a4642">1</span>)
+    <span style="color: #45213d">copy_code</span> += " = getelementptr inbounds double, double* "
+    <span style="color: #45213d">copy_code</span> += <span style="color: #007637">self</span>.<span style="color: #364561">io</span> +", i64 " + <span style="color: #3d114f">str</span>(<span style="color: #592715">i</span>) + "\n"
+    <span style="color: #45213d">copy_code</span> += "%" + <span style="color: #3d114f">str</span>(<span style="color: #08327a">I</span>+<span style="color: #6b0812">2</span>)
+    <span style="color: #45213d">copy_code</span> += " = load double, double* %" + <span style="color: #3d114f">str</span>(<span style="color: #08327a">I</span>+<span style="color: #4a4642">1</span>)
+    <span style="color: #45213d">copy_code</span> += ", align 8\n"
+    <span style="color: #08327a">I</span> += <span style="color: #6b0812">2</span>
+    <span style="color: #25683e">STACK</span> += [<span style="color: #08327a">I</span>]
+    <span style="color: #494b6a">return</span> <span style="color: #43382b">LLVMCode</span>(<span style="color: #007637">self</span>.<span style="color: #364561">io</span>, <span style="color: #45213d">copy_code</span>)
+  <span style="color: #645406">def</span> <span style="color: #6f6638">__setitem__</span>(<span style="color: #007637">self</span>, <span style="color: #592715">i</span>, <span style="color: #2f066f">other_llvcode</span>):
+    <span style="color: #222a54">global</span> <span style="color: #08327a">I</span>, <span style="color: #25683e">STACK</span>
+    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += <span style="color: #2f066f">other_llvcode</span>.<span style="color: #173c3f">code</span>
+    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += "%" + <span style="color: #3d114f">str</span>(<span style="color: #08327a">I</span>+<span style="color: #4a4642">1</span>)
+    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += " = getelementptr inbounds double, double* "
+    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += <span style="color: #007637">self</span>.<span style="color: #364561">io</span> +", i64 " + <span style="color: #3d114f">str</span>(<span style="color: #592715">i</span>) + "\n"
+    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += "store double %" + <span style="color: #3d114f">str</span>(<span style="color: #08327a">I</span>)
+    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += ", double* %" + <span style="color: #3d114f">str</span>(<span style="color: #08327a">I</span>+<span style="color: #4a4642">1</span>) + ", align 8\n"
+    <span style="color: #08327a">I</span> += <span style="color: #4a4642">1</span>
+    <span style="color: #25683e">STACK</span> = <span style="color: #25683e">STACK</span>[:-<span style="color: #4a4642">1</span>]
+    <span style="color: #494b6a">return</span> <span style="color: #007637">self</span>
+  <span style="color: #645406">def</span> <span style="color: #2f6c4d">general_arithmetics</span>(<span style="color: #007637">self</span>, <span style="color: #796703">operator</span>, <span style="color: #2f066f">other_llvcode</span>):
+    <span style="color: #222a54">global</span> <span style="color: #08327a">I</span>, <span style="color: #25683e">STACK</span>
+    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += <span style="color: #2f066f">other_llvcode</span>.<span style="color: #173c3f">code</span>;
+    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += "%" + <span style="color: #3d114f">str</span>(<span style="color: #08327a">I</span>+<span style="color: #4a4642">1</span>) + " = f" + <span style="color: #796703">operator</span>
+    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += " double %" + <span style="color: #3d114f">str</span>(<span style="color: #25683e">STACK</span>[-<span style="color: #6b0812">2</span>]) + ", %"
+    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += <span style="color: #3d114f">str</span>(<span style="color: #25683e">STACK</span>[-<span style="color: #4a4642">1</span>]) + "\n";
+    <span style="color: #08327a">I</span> += <span style="color: #4a4642">1</span>
+    <span style="color: #25683e">STACK</span> = <span style="color: #25683e">STACK</span>[:-<span style="color: #6b0812">2</span>] + [<span style="color: #08327a">I</span>]
+    <span style="color: #494b6a">return</span> <span style="color: #007637">self</span>
+  <span style="color: #645406">def</span> <span style="color: #2e5454">__add__</span>(<span style="color: #007637">self</span>, <span style="color: #2f066f">other_llvcode</span>):
+    <span style="color: #494b6a">return</span> <span style="color: #007637">self</span>.<span style="color: #2f6c4d">general_arithmetics</span>('add', <span style="color: #2f066f">other_llvcode</span>)
+  <span style="color: #645406">def</span> <span style="color: #4c5371">__sub__</span>(<span style="color: #007637">self</span>, <span style="color: #2f066f">other_llvcode</span>):
+    <span style="color: #494b6a">return</span> <span style="color: #007637">self</span>.<span style="color: #2f6c4d">general_arithmetics</span>('sub', <span style="color: #2f066f">other_llvcode</span>)
+  <span style="color: #645406">def</span> <span style="color: #737f3d">__mul__</span>(<span style="color: #007637">self</span>, <span style="color: #2f066f">other_llvcode</span>):
+    <span style="color: #494b6a">return</span> <span style="color: #007637">self</span>.<span style="color: #2f6c4d">general_arithmetics</span>('mul', <span style="color: #2f066f">other_llvcode</span>)
+  <span style="color: #645406">def</span> <span style="color: #625e58">__div__</span>(<span style="color: #007637">self</span>, <span style="color: #2f066f">other_llvcode</span>):
+    <span style="color: #494b6a">return</span> <span style="color: #007637">self</span>.<span style="color: #2f6c4d">general_arithmetics</span>('div', <span style="color: #2f066f">other_llvcode</span>)
+    </pre>
+    </td>
+    </tr></table>
+    <p>
+Now when we run the solver with this kind of objects, we get a fully functional linear solver written in LLVM intermediate language. Then we put it into the benchmark code to see how fast it is.
+    </p>
+    <p>
+Instruction in LLVM are numbered and we want to preserve this enumeration, so the function that inserts our code into our benchmark is not trivial. But it's not very complicated either.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+<span style="color: #778877"># this replaces the function call</span>
+<span style="color: #778877"># and updates all the instructions' indices</span>
+<span style="color: #645406">def</span> <span style="color: #014039">replace_call</span>(<span style="color: #325a0c">text</span>, <span style="color: #041729">line</span>, <span style="color: #592927">params</span>):
+  <span style="color: #222a54">global</span> <span style="color: #08327a">I</span>, <span style="color: #25683e">STACK</span>
+<span style="color: #778877">  # '%12 ' -&gt; 12</span>
+  <span style="color: #08327a">I</span> = <span style="color: #1c4768">int</span>(''.<span style="color: #565f0b">join</span>(
+    [<span style="color: #3e5a18">xi</span> <span style="color: #096162">for</span> <span style="color: #3e5a18">xi</span> <span style="color: #59483a">in</span> <span style="color: #592927">params</span>[<span style="color: #6b0812">2</span>] <span style="color: #084f73">if</span> <span style="color: #3e5a18">xi</span>.<span style="color: #797d16">isdigit</span>()]
+    ))
+  <span style="color: #656709">first_instruction_to_replace</span> = <span style="color: #08327a">I</span> + <span style="color: #4a4642">1</span>
+  <span style="color: #25683e">STACK</span> = []
+  <span style="color: #483706">replacement</span> = <span style="color: #39505d">solve_linear_system</span>(
+    <span style="color: #43382b">LLVMCode</span>(<span style="color: #592927">params</span>[<span style="color: #604b5f">0</span>]),
+    <span style="color: #43382b">LLVMCode</span>(<span style="color: #592927">params</span>[<span style="color: #4a4642">1</span>]),
+    <span style="color: #43382b">LLVMCode</span>(<span style="color: #592927">params</span>[<span style="color: #6b0812">2</span>]), <span style="color: #4d036b">5</span>).<span style="color: #173c3f">code</span>
+  <span style="color: #7b4c7c">delta_instruction</span> = <span style="color: #08327a">I</span> - <span style="color: #656709">first_instruction_to_replace</span> + <span style="color: #4a4642">1</span>
+  <span style="color: #096162">for</span> <span style="color: #592715">i</span> <span style="color: #59483a">in</span> <span style="color: #727a53">xrange</span>(<span style="color: #656709">first_instruction_to_replace</span>, <span style="color: #371934">sys</span>.<span style="color: #536d5e">maxint</span>):
+    <span style="color: #645e04">not_found</span> = <span style="color: #280944">sum</span>(
+      [<span style="color: #325a0c">text</span>.<span style="color: #595715">find</span>('%' + <span style="color: #3d114f">str</span>(<span style="color: #592715">i</span>) + <span style="color: #627424">c</span>) == -<span style="color: #4a4642">1</span>
+        <span style="color: #096162">for</span> <span style="color: #627424">c</span> <span style="color: #59483a">in</span> <span style="color: #656211">POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH</span>]
+      )
+    <span style="color: #084f73">if</span> <span style="color: #645e04">not_found</span> == <span style="color: #6b4565">4</span>:
+<span style="color: #778877">      # the last instruction has already been substituted</span>
+      <span style="color: #3d714c">break</span>
+    <span style="color: #6d725f">new_i</span> = <span style="color: #592715">i</span> + <span style="color: #7b4c7c">delta_instruction</span>
+    <span style="color: #096162">for</span> <span style="color: #627424">c</span> <span style="color: #59483a">in</span> <span style="color: #656211">POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH</span>:
+<span style="color: #778877">      # substitute instruction number</span>
+      <span style="color: #325a0c">text</span> = <span style="color: #325a0c">text</span>.<span style="color: #3f7941">replace</span>('%' + <span style="color: #3d114f">str</span>(<span style="color: #592715">i</span>) + <span style="color: #627424">c</span>, '%' + <span style="color: #3d114f">str</span>(<span style="color: #6d725f">new_i</span>) + <span style="color: #627424">c</span>)
+<span style="color: #494b6a">return</span> <span style="color: #325a0c">text</span>.<span style="color: #3f7941">replace</span>(<span style="color: #041729">line</span>, <span style="color: #483706">replacement</span>)
+    </pre>
+    </td>
+    </tr></table>
+    <p>
+The whole piece of code that implements the solver, provides the Python-to-LLVM layer, and does the code insertion is only 100 lines long! You can see it in <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/python_to_llvm/exp_embed_on_call/substitute_solver_call.py">one piece on GitHub</a>.
+    </p>
+    <h2>
+The benchmark
+    </h2>
+    <p>
+The benchmark itself is in C. When we run the Makefile, its call for <i>solve_5</i> gets replaced by the LLVM code generated from Python by Python.
     </p>
     <table><tr>
     <td>
@@ -367,15 +525,14 @@ store double %2428, double* %2429, align 8</b>
     <button type="button" id="slides_recursive_button" onclick="next('slides_recursive')">Next step</button>
     </p>
     <p>
-The most exciting thing is how the crappy intermediate code generated by the Python script turns into very compact and very effective code for the hardware. It is highly super-scalarized, and the huge parts of it have been reduced by LLVM. But were these low-level optimizations enough to generate something competitive in performance with C and C++ solutions?
+The most noteworthy is how the ultra-verbose intermediate code generated by the Python script turns into some very compact and very effective code for the hardware. It is highly super-scalarized too. But is it good enough to compete with C and C++ solutions?
     </p>
-
     <p>
-It's hard to tell the exact numbers when everything runs super-fast to begin with. But after several sessions, I can provide some approximate measurements for the three cases: C with tricks, C++ with a trick, and Python with LLVM.
+Here are some approximate numbers for the three cases: C with tricks, C++ with a trick, and Python with LLVM.
     </p>
     <ol>
     <li>
-The tricks for C don't quite work for Clang, so I had to measure GCC version. It runs for roughly 70 ms in average.
+The tricks for C don't quite work for Clang, so GCC version is measured. It runs for roughly 70 ms on average.
     </li>
     <li>
 The C++ version was built with Clang and it runs for 60 ms.
@@ -389,41 +546,20 @@ The C++ version was built with Clang and it runs for 60 ms.
     init_results();
     </script>
     <p>
-Of course, this advantage is not something you would kill for. It is more of a symbolic victory. You can write programs in Python that will outperform ones written in C or C++. You don't have to have an elaborate compiler (plus libraries, tooling, documents, and community) to generate high-performant code.
-    </p>
-    <h2>
-Details on implementation
-    </h2>
-    <p>
-The script that does the substitution, implements an algorithm, and, most importantly, provides a Python to LLVM layer, is only 100 lines long! You can see it in <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/python_to_llvm/exp_embed_on_call/substitute_solver_call.py">one piece on GitHub</a>.
-    </p>
-    <p>
-The most fascinating is the <i>LLVMCode</i> object. It is something that pretends to be a mere array, it looks like it can provide data by the index, accept data by the index, and be a subject of some simple arithmetic operators. But actually, what it does undercover is it logs the history of all operations performed with it or its quasi-co-operands or its quasi-data. The log is being written in the form of LLVM intermediate representation.
-    </p>
-    <p>
-So if you have some perfectly Python-ish algorithm that operates on lists, you can feed it with <i>LLVMCode</i> objects and what you get in return is the log of all LLVM operations required to achieve a result of the initial algorithm. Which is LLVM code. <i>LLVMCode</i> objects turn everyday Python code into LLVM code-generators.
-    </p>
-    <p>
-In our case, the algorithm is the recursive Kramer's linear solver named <i>solve_linear_system</i>. It is not some special code-generating algorithm, it is an actual solver. It was designed to work with numbers. But since Python is dynamically typed, all you have to do to turn it into a code generator is to run it with <i>LLVMCode</i> objects instead of arrays. That's it!
+Of course, this speed-up is not something you would kill for. But it shows that you can write programs in Python that outperform their counterparts written in C or C++. You don't have to learn some special language to create high-performant applications or libraries.
     </p>
     <h2>
 Conclusion
     </h2>
     <p>
-What I show here is not at all novel. People have been using dynamically typed languages to generate code for decades. What is indeed worth your attention is how unbelievably easy it became to do so in the XXI century. I am not an LLVM expert, I don't even write in Python professionally, yet I could make a highly-performant piece of code with a bit of googling, trial and error, and a 100-lines-long Python script.
+I think that the dichotomy between fast compiling languages and slow scripting languages is a bluff. Native code generation may very well be not a core feature but something like a pluggable option. Like a library. Think about the benefits: you can do your research and rapid prototyping in one language, and then generate highly-performant code... in the same language. 
     </p>
     <p>
-I really think that the difference between high performance compiling languages and slow but fast-to-develop scripting languages is more a matter of public opinion rather that some objective reality. You can generate fast code with Python or Perl or, of course, Lisp. Native code generation may very well be not a core feature of a language, but something like a pluggable option. Something done by a dedicated library for instance.
-    </p>
-    <p>
-And the prospects of this approach are rather appealing. You can do your research, rapid prototyping, preliminary measurements and tuning in one language, and then generate some highly-performant native code... in the same language. Probably, without even adopting the algorithm you have been developing.
-    </p>
-    <p>
-High-performance computing has no reason to remain a privilege of compiling languages. A compiler is just a program, you can do its job in any language. I&nbsp;believe you can teach Matlab to generate LLVM code if you want to.
+High-performance computing has no reason to remain a privilege of compiling languages. A compiler is just a soft machine for code generation. You can generate code in any language you want. I&nbsp;believe you can teach Matlab to generate ultra-fast LLVM code if you want to.
     </p>
     <br>
     <p style="font-family: sans-serif; font-size: 14pt;">
-All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the code is compiled with clang version 3.8.0-2ubuntu4 and g++ 5.4.0 with -march=native -O2. The source code for the benchmark is available on <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/python_to_llvm">Github</a>.
+All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the code is compiled with clang version 3.8.0-2ubuntu4 and g++ 5.4.0 with -march=native -O2. The source code for the benchmark is <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/python_to_llvm">available on Github</a>.
     </p>
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
