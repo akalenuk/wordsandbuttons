@@ -189,33 +189,33 @@ Outperforming everything with anything
 <sub>Python? Sure, why not?</sub>
     </h1>
     <p>
-This continues <a href="http://wordsandbuttons.online/outperforming_lapack_with_c_metaprogramming.html">Outperforming LAPACK with C metaprogramming</a>, and <a href="http://wordsandbuttons.online/vastly_outperforming_lapack_with_cpp_metaprogramming.html"> Vastly outperforming LAPACK with C++ metaprogramming</a>. The two posts describe language tricks to make a compiler generate highly-performant code. But do you need a compiler at all?
+This continues <a href="http://wordsandbuttons.online/outperforming_lapack_with_c_metaprogramming.html">Outperforming LAPACK with C metaprogramming</a>, and <a href="http://wordsandbuttons.online/vastly_outperforming_lapack_with_cpp_metaprogramming.html"> Vastly outperforming LAPACK with C++ metaprogramming</a>. These two posts describe language tricks to make compilers generate highly-performant code for you. But do you need compilers at all?
     </p>
     <p>
 The alternative would be writing programs in plain assembly. Although the horrors of it are vastly exaggerated, this approach has two major flaws.
     </p>
     <ol>
     <li>
-Assembly code is not portable. Sure, if you plan on working on a single platform for the rest of your life, it's not a problem. But if you're planing to survive for some ten or twenty more years, you will probably meet some new hardware your code is just not ready for.
+Assembly code is not portable.
     </li>
     <li>
-Although it became much easier with modern tools, assembly programming still requires a lot of manual labor. It is more tedious than with C or C++ too.
+Although it became much easier with modern tools, assembly programming still requires a lot of tediour work. 
     </li>
     </ol>
     <p>
 Thankfully, we all live in the XXI century, and both of these problems have already been addressed.
     </p>
     <p>
-The solution to the first one would be <a href="https://en.wikipedia.org/wiki/LLVM">LLVM</a>. Initially, it meant “Low Level Virtual Machine” and that is exactly what we want to ensure portability. Simply put, it takes some code written in very low-level language and generates highly optimized native code from it for every hardware platform you want. With LLVM we have the power of low-level programming so that we can structure our program manually, and we still delegate hardware micro-optimizations to the machine.
+The solution to the first one would be <a href="https://en.wikipedia.org/wiki/LLVM">LLVM</a>. Initially, it meant “Low Level Virtual Machine” and that is exactly what we want to ensure portability. Simply put, it takes some code written in very low-level hardware agnostic language and returns some highly optimized native code for the specific hardware platform. With LLVM we both have the power of low-level programming, and the automation of hardware-oriented micro-optimizations.
     </p>
     <p>
-And the solution to the second problem is basically any scripting language you want. Scheme, Python, Perl, even bash, and AWK will do. They are all meant to eliminate tedious labor. Every language you use daily for automation may be used to generate highly-performant code. 
+And the solution to the second problem is any “scripting” language you want. Scheme, Python, Perl, even bash or AWK will do. They are all meant to eliminate tedious work. Everything you use daily for automation you can use to generate highly-performant code. 
     </p>
     <h2>
 The plan
     </h2>
     <p>
-Let's repeat the same experiment I did with C and C++ in the posts from before. I want to generate a fully inlined fully unrolled solution and embed it into the benchmarking code. My plan then is as follows.
+Let's repeat the same experiment I did with C and C++ in the posts from before. Let's generate a fully inlined fully unrolled solution and embed it into the benchmarking code. The plan then is as follows.
     <ol>
     <li>
 Use Clang to generate LLVM intermediate code for the benchmark that is supposed to measure yet non-existent function named <i>solve_5</i>
@@ -255,10 +255,10 @@ generate_elf:
     </td></tr>
     </table>
     <h2>
-The python part
+The Python part
     </h2>
     <p>
-We need a solver in Python just like we had with C and C++. Here it is:
+We need a linear solver in Python just like we had with C and C++. Here it is:
     </p>
     <table><tr>
     <td>
@@ -290,7 +290,7 @@ We need a solver in Python just like we had with C and C++. Here it is:
     </td>
     </tr></table>
     <p>
-If we run this on numbers, we'll have numbers. But we want code. So let's make an object that pretends to be an array of numbers or even a single number only to spy on the algorithm. Our object will write down every operation that the algorithms wants it to do. In ready to assemble LLVM code.
+If we run this on numbers, we'll have numbers. But we want code. So let's make an object that pretends to be numbers only to spy on the algorithm. Our object writes down every operation the algorithms wants it to perform in ready to assemble LLVM intermediate language.
     </p>
     <table><tr>
     <td>
@@ -347,7 +347,7 @@ If we run this on numbers, we'll have numbers. But we want code. So let's make a
     </td>
     </tr></table>
     <p>
-Now when we run the solver with this kind of objects, we'll get a fully functional linear solver written in LLVM. All we have to do is to put it into the benchmark code to see how fast it is.
+Now when we run the solver with this kind of objects, we get a fully functional linear solver written in LLVM intermediate language. Then we put it into the benchmark code to see how fast it is.
     </p>
     <p>
 Instruction in LLVM are numbered and we want to preserve this numeration, so the function that inserts our code into our benchmark is not trivial. But it's not very complicated either.
@@ -393,7 +393,7 @@ The whole code that does the insertion, implements a solver, and provides a Pyth
 The benchmark
     </h2>
     <p>
-I wrote the benchmark in C. When I run my Makefile, its call for <i>solve_5</i> gets replaced by the LLVM code generated from Python by Python.
+The benchmark itself is in C. When we run the Makefile, its call for <i>solve_5</i> gets replaced by the LLVM code generated from Python by Python.
     </p>
     <table><tr>
     <td>
@@ -525,15 +525,14 @@ store double %2428, double* %2429, align 8</b>
     <button type="button" id="slides_recursive_button" onclick="next('slides_recursive')">Next step</button>
     </p>
     <p>
-The most exciting thing is how the ultra-verbose intermediate code generated by the Python script turns into very compact and very effective code for the hardware. It is highly super-scalarized, and the huge parts of it have been reduced by LLVM. But were these low-level optimizations enough to generate something competitive in performance with C and C++ solutions?
+The most noteworthy is how the ultra-verbose intermediate code generated by the Python script turns into very compact and very effective code for the hardware. It is highly super-scalarized too. But is it good enough to compete with C and C++ solutions?
     </p>
-
     <p>
-It's hard to tell the exact numbers when everything runs super-fast to begin with. But after several sessions, I measured some approximate numbers for the three cases: C with tricks, C++ with a trick, and Python with LLVM.
+Here are some approximate numbers for the three cases: C with tricks, C++ with a trick, and Python with LLVM.
     </p>
     <ol>
     <li>
-The tricks for C don't quite work for Clang, so I had to measure GCC version. It runs for roughly 70 ms in average.
+The tricks for C don't quite work for Clang, so GCC version is measured. It runs for roughly 70 ms in average.
     </li>
     <li>
 The C++ version was built with Clang and it runs for 60 ms.
@@ -553,14 +552,14 @@ Of course, this speed-up is not something you would kill for. But it shows that 
 Conclusion
     </h2>
     <p>
-I think that the dychotomy between high performant compiling languages and slow but fast-to-develop scripting languages is a bluff. You can generate fast code with Python or Perl or, of course, Lisp. Native code generation may very well be not a core feature of a language, but something like a pluggable option. Something done by a dedicated library for instance. Think about the benefits: you can do your research and rapid prototyping in one language, and then generate highly-performant code... in the same language. 
+I think that the dychotomy between high performant compiling languages and slow but fast-to-develop scripting languages is a bluff. You can generate fast code with Python or Perl or, of course, Lisp. Native code generation may very well be not a core feature of a language but something like a pluggable option. Like a library. Think about the benefits: you can do your research and rapid prototyping in one language, and then generate highly-performant code... in the same language. 
     </p>
     <p>
 High-performance computing has no reason to remain a privilege of compiling languages. A compiler is just a soft machine for code generation. You can generate code in any language you want. I&nbsp;believe you can teach Matlab to generate ultra-fast LLVM code if you want to.
     </p>
     <br>
     <p style="font-family: sans-serif; font-size: 14pt;">
-All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the code is compiled with clang version 3.8.0-2ubuntu4 and g++ 5.4.0 with -march=native -O2. The source code for the benchmark is available on <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/python_to_llvm">Github</a>.
+All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the code is compiled with clang version 3.8.0-2ubuntu4 and g++ 5.4.0 with -march=native -O2. The source code for the benchmark is <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/python_to_llvm">available on Github</a>.
     </p>
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
