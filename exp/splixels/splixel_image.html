@@ -166,46 +166,20 @@ function reset_spixels() {
     }
 }
 
-
-// solver
-function sign_0_positive(x){ // Math.sign like with no 0 option
-    if(x >= 0)
-        return 1.0;
-    return -1.0;
-}
-
-function underflow_padded(x){
-    if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, this is less than a pixel
-        return 1.e-5 * sign_0_positive(x);
-    return x;
-}
-
-function solved_linear(A, B, n){
-    var X = [];
-    for (var i = 0; i < n; ++i)
-        X[i] = 0.0;
-
-    // triangulize
-    for (var i = 0; i < n-1; ++i)
-        for (var j = 0; j < i+1; ++j) {
-            r = A[i+1][j] / underflow_padded(A[j][j]);
-            A[i+1][j] = 0.;
-            for (var b_j = j+1; b_j < n; ++b_j){
-                A[i+1][b_j] -= A[j][b_j]*r;
-            }
-            B[i+1] -= B[j]*r;
-        }
-
-    // calculate xs
-    X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
-    for (var i = n-2; i >= 0; --i){
-        var s = 0.0;
-        for (var j = i; j < n; ++j){
-            s = s + A[i][j]*X[j];
-        }
-        X[i] = (B[i] - s) / underflow_padded(A[i][i]);
-    }
-    return X;
+// solver specific to [0..1] parametrized splines
+function spline_for(p1, p1d, p2, p2d) {
+//     A = [
+//         [1, 0, 0, 0],
+//         [0, 1, 0, 0],
+//         [1, 1, 1, 1],
+//         [0, 1, 2, 3]];
+//     B = [p1, p1d, p2, p2d]
+    return [
+        p1,
+        p1d,
+        3 * p2 - p2d - 3*p1 - 2*p1d,
+        p2d + p1d - 2*p2 + 2*p1
+    ];
 }
 
 // solver than returns 0, 0 if there is no solution
@@ -316,6 +290,12 @@ function gsy(x, y) {
 
 // the algorithm itself
 function fill_splixels_from_pixels() {
+    sign_0_positive = function(x){ // Math.sign like with no 0 option
+        if(x >= 0)
+            return 1.0;
+        return -1.0;
+    }
+
     for(var i = 0; i <= h - splixel_size; i += splixel_size) {
         for(var j = 0; j <= w - splixel_size; j += splixel_size) {
             var splixels_i = Math.floor(i / splixel_size);
@@ -355,6 +335,7 @@ function fill_splixels_from_pixels() {
     }
 }
 
+
 function draw_the_splixels(context, do_colors) {
     for(var i = 0; i <= h - splixel_size; i += splixel_size) {
         for(var j = 0; j <= w - splixel_size; j += splixel_size) {
@@ -376,20 +357,9 @@ function draw_the_splixels(context, do_colors) {
                 var d2x = splixels[si][sj + 1].xy_normal[0] * splixel_size;
                 var d2y = splixels[si][sj + 1].xy_normal[1] * splixel_size;
                         
-                var Ax = [
-                    [1, 0, 0, 0],
-                    [0, 1, 0, 0],
-                    [1, 1, 1, 1],
-                    [0, 1, 2, 3]];
-                var Bx = [p1x , ds*d1y, p2x, ds*d2y]
-                var Px = solved_linear(Ax, Bx, 4);
-                var Ay = [
-                    [1, 0, 0, 0],
-                    [0, 1, 0, 0],
-                    [1, 1, 1, 1],
-                    [0, 1, 2, 3]];
-                var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
-                var Py = solved_linear(Ay, By, 4);
+                var Px = spline_for(p1x , ds*d1y, p2x, ds*d2y);
+                var Py = spline_for(p1y, (-ds)*d1x, p2y, (-ds)*d2x);
+ 
                 for(var k = 0; k < splixel_size; k += 1) {
                     var t1 = (k) / splixel_size;
                     var t2 = (k + 1) / splixel_size;
@@ -423,20 +393,9 @@ function draw_the_splixels(context, do_colors) {
                 var d2x = splixels[si + 1][sj].xy_normal[0] * splixel_size;
                 var d2y = splixels[si + 1][sj].xy_normal[1] * splixel_size;
                 
-                var Ax = [
-                    [1, 0, 0, 0],
-                    [0, 1, 0, 0],
-                    [1, 1, 1, 1],
-                    [0, 1, 2, 3]];
-                var Bx = [p1x, ds*d1y, p2x, ds*d2y]
-                var Px = solved_linear(Ax, Bx, 4);
-                var Ay = [
-                    [1, 0, 0, 0],
-                    [0, 1, 0, 0],
-                    [1, 1, 1, 1],
-                    [0, 1, 2, 3]];
-                var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
-                var Py = solved_linear(Ay, By, 4);
+                var Px = spline_for(p1x, ds*d1y, p2x, ds*d2y);
+                var Py = spline_for(p1y, (-ds)*d1x, p2y, (-ds)*d2x);
+
                 for(var k = 0; k < splixel_size; k += 1) {
                     var t1 = k / splixel_size;
                     var t2 = (k + 1) / splixel_size;
