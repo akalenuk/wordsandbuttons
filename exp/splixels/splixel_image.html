@@ -329,7 +329,7 @@ function fill_splixels_from_pixels() {
                 splixels[splixels_i][splixels_j].top = margin_to_the_top;
             } else {
                 splixels[splixels_i][splixels_j] = Object.create(splixel);
-                splixels[splixels_i][splixels_j].to_margin = pixel_in(j, i) < 0.5 ? -1 : 1;
+                splixels[splixels_i][splixels_j].to_margin = pixel_in(j, i) < 0.5 ? 1 : -1;
             }
         }
     }
@@ -544,6 +544,50 @@ function copy_splixels() {
     draw_the_splixels(context, new_splixels, false);
 }
 
+function dilate_splixels() {
+    // copy + dilate
+    var new_splixels = [];
+    var sw = 1 + Math.floor(w / splixel_size) + 1;
+    var sh = 1 + Math.floor(h / splixel_size) + 1;
+    for(var i = 0; i < sh; ++i) {
+        splixelsi = []
+        for(var j = 0; j < sw; ++j) {
+            var new_splixel = Object.create(splixel);
+            var touch_front = false;
+            for(var ni = Math.max(0, i - 1); ni <= Math.min(sh - 1, i + 1); ++ni)
+                for(var nj = Math.max(0, j - 1); nj <= Math.min(sw - 1, j + 1); ++nj)
+                    if(splixels[ni][nj].to_margin == 0)
+                        touch_front = true;
+            if(splixels[i][j].to_margin == 0)
+                new_splixel.to_margin = -1;
+            if(splixels[i][j].to_margin == 1 && touch_front)
+                new_splixel.to_margin = 0;
+            splixelsi.push(new_splixel);
+        }
+        new_splixels.push(splixelsi);
+    }
+    // reset neighbors
+    for(var i = 1; i < sh; ++i) {
+        for(var j = 1; j < sw; ++j) {
+            if(new_splixels[i-1][j].to_margin == 0 && new_splixels[i][j].to_margin == 0){
+                new_splixels[i-1][j].bottom = true;
+                new_splixels[i][j].top = true;
+            }
+            if(new_splixels[i][j-1].to_margin == 0 && new_splixels[i][j].to_margin == 0){
+                new_splixels[i][j-1].right = true;
+                new_splixels[i][j].left = true;
+            }
+
+        }        
+    }
+    
+    // draw
+    var canvas = document.getElementById("canvas_2");
+    var context = canvas.getContext("2d");
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    draw_the_splixels(context, new_splixels, false);
+}
   </script>
   </head>
   <body>
@@ -561,7 +605,8 @@ function copy_splixels() {
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset pixels</button>
     </div>
     <br>
-    <button type="button" style="width: 128pt;" onclick="copy_splixels()">Copy splixels</button>
+    <button type="button" style="width: 128pt;" onclick="copy_splixels()">Copy</button>
+    <button type="button" style="width: 128pt;" onclick="dilate_splixels()">Dilate</button>
     <br>
     <canvas id="canvas_2" width=1024 height=1024></canvas>
     
