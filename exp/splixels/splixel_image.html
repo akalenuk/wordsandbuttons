@@ -417,6 +417,13 @@ function draw_the_splixels(context, splixels, do_colors) {
                 context.stroke();
                 context.closePath();
             }
+            
+        context.font = "16px Arial";
+        context.fillStyle = "#000000";
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillText(splixels[si][sj].xy_shift[0].toFixed(2), j, i-8);
+        context.fillText(splixels[si][sj].xy_shift[1].toFixed(2), j, i+8);
         }
     }
 }
@@ -552,17 +559,32 @@ function dilate_splixels() {
     for(var i = 0; i < sh; ++i) {
         splixelsi = []
         for(var j = 0; j < sw; ++j) {
-            var new_splixel = Object.create(splixel);
+            var new_splixel = Object.create(splixel);      
+            new_splixel.xy_shift = [0., 0.];   
+            new_splixel.xy_normal = [0., 0.];
             var touch_front = false;
+            var front_count = 0;
+            
             for(var ni = Math.max(0, i - 1); ni <= Math.min(sh - 1, i + 1); ++ni)
                 for(var nj = Math.max(0, j - 1); nj <= Math.min(sw - 1, j + 1); ++nj)
-                    if(splixels[ni][nj].to_margin == 0)
+                    if(splixels[ni][nj].to_margin == 0) {
                         touch_front = true;
+                        ++front_count;
+                        new_splixel.xy_shift[0] += splixels[ni][nj].xy_shift[0];
+                        new_splixel.xy_shift[1] += splixels[ni][nj].xy_shift[1];
+//                        new_splixel.xy_normal[0] += splixels[ni][nj].xy_normal[0];
+//                        new_splixel.xy_normal[1] += splixels[ni][nj].xy_normal[1];
+                    }
             if(splixels[i][j].to_margin == 0)
                 new_splixel.to_margin = -1;
-            if(splixels[i][j].to_margin == 1 && touch_front)
+            if(splixels[i][j].to_margin == 1 && touch_front) {
                 new_splixel.to_margin = 0;
-            splixelsi.push(new_splixel);
+                new_splixel.xy_shift[0] /= front_count;
+                new_splixel.xy_shift[1] /= front_count;
+//                new_splixel.xy_normal[0] /= front_count;
+//                new_splixel.xy_normal[1] /= front_count;
+            }
+            splixelsi.push(new_splixel);   
         }
         new_splixels.push(splixelsi);
     }
