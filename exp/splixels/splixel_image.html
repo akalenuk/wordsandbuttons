@@ -185,7 +185,7 @@ const splixel = {
 
 var splixels = [];
 
-function reset_spixels() {
+function reset_splixels() {
     var sw = 1 + Math.floor(w / splixel_size) + 1;
     var sh = 1 + Math.floor(h / splixel_size) + 1;
     splixels = [];
@@ -551,11 +551,11 @@ function draw_canvas(){
 
 function reset_all() {
     reset_pixels();
+    reset_splixels();
     draw_canvas();
 }
 
 function reset_magic_numbers() {
-    splixel_size = parseFloat(document.getElementById("splixel_size").value);
     nd = document.getElementById("nd").value;
     weight = document.getElementById("weight").value;
     shiftd = document.getElementById("shiftd").value;
@@ -717,7 +717,7 @@ function reimport_image() {
         for(var i = 0; i < new_h; ++i)
             for(var j = 0; j < new_w; ++j)
                 pixels[i][j] = parseInt(numbers[4 + i*new_w + j]) / new_depth;
-        reset_spixels();
+        reset_splixels();
         draw_canvas();
     } catch (error) {
         document.getElementById("import_status").innerHTML = "Sorry, couldn't parse that. " + error.message;
@@ -747,7 +747,6 @@ P2
     <br>    
     <canvas id="canvas" width=1024 height=1024></canvas>
     <div style="text-align:right; width:1024px; padding-bottom:12pt;">
-        splixel_size: <input type="text" id="splixel_size" value="64">
         nd: <input type="text" id="nd" value="0.5">
         weight: <input type="text" id="weight" value="4">
         shiftd: <input type="text" id="shiftd" value="1.5">
@@ -762,10 +761,11 @@ P2
     <canvas id="canvas_2" width=1024 height=1024></canvas>
     
     <script language="JavaScript">
-    reset_spixels();
-    reimport_image();
+
+    reset_splixels();
     init_canvas();    
     reset_magic_numbers();
+    reimport_image();    
     </script>
            
     </center>
