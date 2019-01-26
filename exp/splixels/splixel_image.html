@@ -667,8 +667,51 @@ function dilate_splixels() {
     draw_the_splixels(context, new_splixels, false);
 }
 
+function space_divided(text) {
+    var new_text = text.replace('\r', ' ');
+    new_text = new_text.replace('\n', ' ');
+    new_text = new_text.replace('\t', ' ');
+    while(true) {
+        new_new_text = new_text.replace('  ', ' ');
+        if(new_new_text.length == new_text.length)
+            return new_text;
+        new_text = new_new_text;    
+    }
+}
+
 function reimport_image() {
-    
+    var text = document.getElementById("import_PGM").value;
+    document.getElementById("import_status").innerHTML = "";
+    var lines = text.split("\n");
+    var no_comments = []
+    for(var i = 0; i < lines.length; ++i) {
+        var new_line = lines[i].trim();
+        if (new_line == "" || new_line[0] == '#')
+            continue;
+        no_comments.push(new_line);
+    }
+    var numbers = space_divided(no_comments.join(' ')).split(' ');
+    if(numbers[0] != "P2") {
+        document.getElementById("import_status").innerHTML = "Sorry, I can only import grayscale Netpbm (*.pgm = 'P2...')";
+        return;
+    }
+    try {
+        var new_w = parseInt(numbers[1]);
+        var new_h = parseInt(numbers[2]);
+        var new_depth = parseInt(numbers[3]);
+        if(numbers.length > new_w * new_h + 4) {
+            document.getElementById("import_status").innerHTML = "Sorry, there's some extra data I couldn't parse.";
+            return;
+        }
+        if(numbers.length < new_w * new_h + 4) {
+            document.getElementById("import_status").innerHTML = "Sorry, not enough data to form an image.";
+            return;
+        }
+        
+    } catch (error) {
+        document.getElementById("import_status").innerHTML = "Sorry, couldn't parse that. " + error.message;
+    }     
+    alert(numbers);
 }
   </script>
   </head>
@@ -676,7 +719,7 @@ function reimport_image() {
     <center>
     <br>
     <br>
-    <textarea id="input_PGM" rows=24 onInput="reimport_image()">
+    <textarea id="import_PGM" rows=24 onInput="reimport_image()">
 P2
 # Shows the word "FEEP" (example from Netpbm man page on PGM)
 24 7
