@@ -707,11 +707,21 @@ function reimport_image() {
             document.getElementById("import_status").innerHTML = "Sorry, not enough data to form an image.";
             return;
         }
-        
+        h = 1024.0 * new_h / new_w;
+        document.getElementById("canvas").height = h;
+        pixel_size = w / new_w;
+        splixel_size = pixel_size;
+        iw = Math.floor(w / pixel_size) + 1;
+        ih = Math.floor(h / pixel_size) + 1;
+        reset_pixels();
+        for(var i = 0; i < new_h; ++i)
+            for(var j = 0; j < new_w; ++j)
+                pixels[i][j] = parseInt(numbers[4 + i*new_w + j]) / new_depth;
+        reset_spixels();
+        draw_canvas();
     } catch (error) {
         document.getElementById("import_status").innerHTML = "Sorry, couldn't parse that. " + error.message;
     }     
-    alert(numbers);
 }
   </script>
   </head>
