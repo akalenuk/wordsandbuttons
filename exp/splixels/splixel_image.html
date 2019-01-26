@@ -447,14 +447,15 @@ function draw_the_splixels(context, splixels, do_colors) {
                 context.lineWidth=3;
                 context.stroke();
                 context.closePath();
-            }
-            
-        context.font = "16px Arial";
-        context.fillStyle = "#000000";
-        context.textAlign = "center";
-        context.textBaseline = "middle";
-        context.fillText(splixels[si][sj].xy_shift[0].toFixed(2), j, i-8);
-        context.fillText(splixels[si][sj].xy_shift[1].toFixed(2), j, i+8);
+            }        
+            context.font = "16px Arial";
+            context.fillStyle = "#000000";
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+            if(!splixels[si][sj].xy_shift)
+                alert(si*1000+sj);
+            context.fillText(splixels[si][sj].xy_shift[0].toFixed(2), j, i-8);
+            context.fillText(splixels[si][sj].xy_shift[1].toFixed(2), j, i+8);
         }
     }
 }
@@ -569,8 +570,12 @@ function copy_splixels() {
     var sh = 1 + Math.floor(h / splixel_size) + 1;
     for(var i = 0; i < sh; ++i) {
         splixelsi = []
-        for(var j = 0; j < sw; ++j)
-            splixelsi.push(Object.assign({}, splixels[i][j]));
+        for(var j = 0; j < sw; ++j) {
+            var new_splixel = Object.assign({}, splixels[i][j]);      
+            new_splixel.xy_shift = splixels[i][j].xy_shift.slice(); 
+            new_splixel.xy_normal = splixels[i][j].xy_normal.slice();
+            splixelsi.push(new_splixel);
+            }
         new_splixels.push(splixelsi);
     }
     
