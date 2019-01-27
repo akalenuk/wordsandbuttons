@@ -243,11 +243,13 @@ function pixel_in(i, j) {
         return pixel_in(i, pixels[0].length-1);
     if(j < 0)
         return pixel_in(i, 0);
+    if(Math.floor(i) != i || Math.floor(j) != j)
+        return pixels[i][j];
     return pixels[i][j];
 }
 
 
-var nd = 2.5;
+var nd = 1;
 var weight = 4;
 var shiftd = 1.5;
 
@@ -556,111 +558,6 @@ function reset_magic_numbers() {
     draw_canvas();
 }
 
-// second canvas
-function copy_splixels() {
-    // copy
-    var new_splixels = [];
-    var sw = 1 + iw;
-    var sh = 1 + ih;
-    for(var i = 0; i < sh; ++i) {
-        splixelsi = []
-        for(var j = 0; j < sw; ++j) {
-            var new_splixel = Object.assign({}, splixels[i][j]);      
-            new_splixel.xy_shift = splixels[i][j].xy_shift.slice(); 
-            new_splixel.xy_normal = splixels[i][j].xy_normal.slice();
-            splixelsi.push(new_splixel);
-            }
-        new_splixels.push(splixelsi);
-    }
-    
-    // draw
-    var canvas = document.getElementById("canvas_2");
-    var context = canvas.getContext("2d");
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
-    draw_the_splixels(context, new_splixels, false);
-}
-
-function dilate_splixels() {
-    // copy + dilate
-    var new_splixels = [];
-    var sw = 1 + iw;
-    var sh = 1 + ih;
-    for(var i = 0; i < sh; ++i) {
-        splixelsi = []
-        for(var j = 0; j < sw; ++j) {
-            var new_splixel = Object.create(splixel);      
-            new_splixel.xy_shift = [0., 0.];   
-            new_splixel.xy_normal = [0., 0.];
-            var touch_front = false;
-            var straight_count = 0;
-            var diagonal_count = 0;
-            
-            for(var ni = Math.max(0, i - 1); ni <= Math.min(sh - 1, i + 1); ++ni)
-                for(var nj = Math.max(0, j - 1); nj <= Math.min(sw - 1, j + 1); ++nj)
-                    if(splixels[ni][nj].to_margin == 0) {
-                        touch_front = true;
-                        if(ni == i || nj == j)
-                            straight_count++;
-                        else
-                            diagonal_count++;
-                    }
-                    
-            for(var ni = Math.max(0, i - 1); ni <= Math.min(sh - 1, i + 1); ++ni)
-                for(var nj = Math.max(0, j - 1); nj <= Math.min(sw - 1, j + 1); ++nj)
-                    if(splixels[ni][nj].to_margin == 0) {
-                        if(straight_count > 0 && (ni == i || nj == j)) {
-                            new_splixel.xy_shift[0] += splixels[ni][nj].xy_shift[0];
-                            new_splixel.xy_shift[1] += splixels[ni][nj].xy_shift[1];
-                        }
-                        if(straight_count == 0 && diagonal_count > 0 && !(ni == i || nj == j)) {
-                            new_splixel.xy_shift[0] += splixels[ni][nj].xy_shift[0];
-                            new_splixel.xy_shift[1] += splixels[ni][nj].xy_shift[1];
-                        }
-//                        new_splixel.xy_normal[0] += splixels[ni][nj].xy_normal[0];
-//                        new_splixel.xy_normal[1] += splixels[ni][nj].xy_normal[1];
-                    }
-            if(splixels[i][j].to_margin == 0)
-                new_splixel.to_margin = -1;
-            if(splixels[i][j].to_margin == 1 && touch_front) {
-                new_splixel.to_margin = 0;
-                if(straight_count > 0) {
-                    new_splixel.xy_shift[0] /= straight_count;
-                    new_splixel.xy_shift[1] /= straight_count;
-                } else if(diagonal_count > 0){
-                    new_splixel.xy_shift[0] /= diagonal_count / Math.sqrt(2);
-                    new_splixel.xy_shift[1] /= diagonal_count / Math.sqrt(2);
-                }
-//                new_splixel.xy_normal[0] /= front_count;
-//                new_splixel.xy_normal[1] /= front_count;
-            }
-            splixelsi.push(new_splixel);   
-        }
-        new_splixels.push(splixelsi);
-    }
-    // reset neighbors
-    for(var i = 1; i < sh; ++i) {
-        for(var j = 1; j < sw; ++j) {
-            if(new_splixels[i-1][j].to_margin == 0 && new_splixels[i][j].to_margin == 0){
-                new_splixels[i-1][j].bottom = true;
-                new_splixels[i][j].top = true;
-            }
-            if(new_splixels[i][j-1].to_margin == 0 && new_splixels[i][j].to_margin == 0){
-                new_splixels[i][j-1].right = true;
-                new_splixels[i][j].left = true;
-            }
-
-        }        
-    }
-    
-    // draw
-    var canvas = document.getElementById("canvas_2");
-    var context = canvas.getContext("2d");
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
-    draw_the_splixels(context, new_splixels, false);
-}
-
 function space_divided(text) {
     var new_text = text.replace('\r', ' ');
     new_text = new_text.replace('\n', ' ');
@@ -710,11 +607,11 @@ function reimport_image() {
         for(var i = 0; i < new_h; ++i)
             for(var j = 0; j < new_w; ++j)
                 pixels[i][j] = parseInt(numbers[4 + i*new_w + j]) / new_depth;
-        reset_splixels();
-        draw_canvas();
     } catch (error) {
         document.getElementById("import_status").innerHTML = "Sorry, couldn't parse that. " + error.message;
-    }     
+    }
+    reset_splixels();
+    draw_canvas();  
 }
   </script>
   </head>
@@ -740,7 +637,7 @@ P2
     <br>    
     <canvas id="canvas" width=1024 height=1024></canvas>
     <div style="text-align:right; width:1024px; padding-bottom:12pt;">
-        nd: <input type="text" id="nd" value="1.5">
+        nd: <input type="text" id="nd" value="1">
         weight: <input type="text" id="weight" value="4">
         shiftd: <input type="text" id="shiftd" value="1.5">
         <button type="button" onclick="reset_magic_numbers()">&larr; Apply</button>
@@ -748,13 +645,8 @@ P2
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset pixels</button>
     </div>
     <br>
-    <button type="button" style="width: 128pt;" onclick="copy_splixels()">Copy</button>
-    <button type="button" style="width: 128pt;" onclick="dilate_splixels()">Dilate</button>
-    <br>
-    <canvas id="canvas_2" width=1024 height=1024></canvas>
-    
-    <script language="JavaScript">
 
+    <script language="JavaScript">
     reset_splixels();
     init_canvas();    
     reset_magic_numbers();
