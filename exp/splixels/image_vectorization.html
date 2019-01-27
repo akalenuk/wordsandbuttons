@@ -247,13 +247,13 @@ function pixel_in(i, j) {
 }
 
 
-var nd = 1;
+var nd = 1.5;
 var weight = 4;
 var shiftd = 1.5;
 
 function weight_of_point(x, y, xj, yi) {
-    return 1
-        / (Math.pow(Math.abs(x - xj) + 1, weight) + Math.pow(Math.abs(y - yi) + 1, weight));
+    return Math.pow(2 * Math.pow(0.5, weight), 0.5)
+        / (Math.pow(Math.abs(x - xj), weight) + Math.pow(Math.abs(y - yi), weight));
 }
 
 function dx_from_linear(x, y) {
@@ -451,8 +451,10 @@ function draw_the_splixels(context, splixels, do_colors) {
             context.textAlign = "center";
             context.textBaseline = "middle";
 //            context.fillText(splixels[i][j].to_margin, x, y);
-            context.fillText(splixels[i][j].xy_normal[0].toFixed(2), x, y-8);
-            context.fillText(splixels[i][j].xy_normal[1].toFixed(2), x, y+8);
+            context.fillText(splixels[i][j].xy_shift[0].toFixed(2), x, y-8);
+            context.fillText(splixels[i][j].xy_shift[1].toFixed(2), x, y+8);
+//            context.fillText(splixels[i][j].xy_normal[0].toFixed(2), x, y-8);
+//            context.fillText(splixels[i][j].xy_normal[1].toFixed(2), x, y+8);
         }
     }
 }
@@ -553,7 +555,7 @@ function reset_all() {
 }
 
 function reset_magic_numbers() {
-    nd = parseInt(document.getElementById("nd").value);
+    nd = parseFloat(document.getElementById("nd").value);
     weight = parseFloat(document.getElementById("weight").value);
     shiftd = parseFloat(document.getElementById("shiftd").value);
     draw_canvas();
@@ -638,7 +640,7 @@ P2
     <br>    
     <canvas id="canvas" width=1024 height=1024></canvas>
     <div style="text-align:right; width:1024px; padding-bottom:12pt;">
-        nd: <input type="text" id="nd" value="1">
+        nd: <input type="text" id="nd" value="1.5">
         weight: <input type="text" id="weight" value="4">
         shiftd: <input type="text" id="shiftd" value="1.5">
         <button type="button" onclick="reset_magic_numbers()">&larr; Apply</button>
