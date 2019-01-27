@@ -373,15 +373,15 @@ function draw_the_splixels(context, splixels, do_colors) {
                                 
             if(do_horizontal) {
                 context.beginPath();
-                var ds = pixel_in(i, j + 1) < pixel_in(i + 1, j + 1) ? 1.0 : -1.0;                
+                var ds = pixel_in(i -1, j) < pixel_in(i, j) ? 1.0 : -1.0;                
                 var p1x = j + splixels[i][j].xy_shift[0];
                 var p1y = i + splixels[i][j].xy_shift[1];
                 var p2x = j + 1 + splixels[i][j + 1].xy_shift[0];
                 var p2y = i + splixels[i][j + 1].xy_shift[1];
-                var d1x = 0 * splixels[i][j].xy_normal[0];
-                var d1y = 0 * splixels[i][j].xy_normal[1];
-                var d2x = 0 * splixels[i][j + 1].xy_normal[0];
-                var d2y = 0 * splixels[i][j + 1].xy_normal[1];
+                var d1x = splixels[i][j].xy_normal[0];
+                var d1y = splixels[i][j].xy_normal[1];
+                var d2x = splixels[i][j + 1].xy_normal[0];
+                var d2y = splixels[i][j + 1].xy_normal[1];
                         
                 var Px = spline_for(p1x , ds*d1y, p2x, ds*d2y);
                 var Py = spline_for(p1y, (-ds)*d1x, p2y, (-ds)*d2x);
@@ -409,15 +409,15 @@ function draw_the_splixels(context, splixels, do_colors) {
             }
             if(do_vertical) {
                 context.beginPath();
-                var ds = pixel_in(i + 1, j) < pixel_in(i + 1, j + 1) ? -1.0 : 1.0;
+                var ds = pixel_in(i, j - 1) < pixel_in(i, j) ? -1.0 : 1.0;
                 var p1x = j + splixels[i][j].xy_shift[0];
                 var p1y = i + splixels[i][j].xy_shift[1];
                 var p2x = j + splixels[i + 1][j].xy_shift[0];
                 var p2y = i + 1 + splixels[i + 1][j].xy_shift[1];
-                var d1x = 0 * splixels[i][j].xy_normal[0];
-                var d1y = 0 * splixels[i][j].xy_normal[1];
-                var d2x = 0 * splixels[i + 1][j].xy_normal[0];
-                var d2y = 0 * splixels[i + 1][j].xy_normal[1];
+                var d1x = splixels[i][j].xy_normal[0];
+                var d1y = splixels[i][j].xy_normal[1];
+                var d2x = splixels[i + 1][j].xy_normal[0];
+                var d2y = splixels[i + 1][j].xy_normal[1];
                 
                 var Px = spline_for(p1x, ds*d1y, p2x, ds*d2y);
                 var Py = spline_for(p1y, (-ds)*d1x, p2y, (-ds)*d2x);
@@ -451,10 +451,10 @@ function draw_the_splixels(context, splixels, do_colors) {
             context.textAlign = "center";
             context.textBaseline = "middle";
 //            context.fillText(splixels[i][j].to_margin, x, y);
-            context.fillText(splixels[i][j].xy_shift[0].toFixed(2), x, y-8);
-            context.fillText(splixels[i][j].xy_shift[1].toFixed(2), x, y+8);
-//            context.fillText(splixels[i][j].xy_normal[0].toFixed(2), x, y-8);
-//            context.fillText(splixels[i][j].xy_normal[1].toFixed(2), x, y+8);
+//            context.fillText(splixels[i][j].xy_shift[0].toFixed(2), x, y-8);
+//            context.fillText(splixels[i][j].xy_shift[1].toFixed(2), x, y+8);
+            context.fillText(splixels[i][j].xy_normal[0].toFixed(2), x, y-8);
+            context.fillText(splixels[i][j].xy_normal[1].toFixed(2), x, y+8);
         }
     }
 }
