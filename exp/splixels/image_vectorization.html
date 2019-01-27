@@ -332,18 +332,18 @@ function fill_splixels_from_pixels() {
         for(var j = 0; j <= iw; j += 1) {
 
             var margin_to_the_right = 
-                sign_0_positive(pixel_in(i+0, j+1) - threshold) != 
-                sign_0_positive(pixel_in(i+1, j+1) - threshold);
+                sign_0_positive(pixel_in(i-1, j+0) - threshold) != 
+                sign_0_positive(pixel_in(i+0, j+0) - threshold);
             var margin_to_the_left = 
-                sign_0_positive(pixel_in(i+0, j+0) - threshold) != 
-                sign_0_positive(pixel_in(i+1, j+0) - threshold);
+                sign_0_positive(pixel_in(i-1, j-1) - threshold) != 
+                sign_0_positive(pixel_in(i+0, j-1) - threshold);
                 
             var margin_to_the_bottom = 
-                sign_0_positive(pixel_in(i+1, j+0) - threshold) != 
-                sign_0_positive(pixel_in(i+1, j+1) - threshold);
+                sign_0_positive(pixel_in(i+0, j-1) - threshold) != 
+                sign_0_positive(pixel_in(i+0, j+0) - threshold);
             var margin_to_the_top = 
-                sign_0_positive(pixel_in(i+0, j+0) - threshold) != 
-                sign_0_positive(pixel_in(i+0, j+1) - threshold);
+                sign_0_positive(pixel_in(i-1, j-1) - threshold) != 
+                sign_0_positive(pixel_in(i-1, j+0) - threshold);
 
                 
             if(margin_to_the_right || margin_to_the_left || margin_to_the_bottom || margin_to_the_top) {   
@@ -369,6 +369,7 @@ function fill_splixels_from_pixels() {
 function draw_the_splixels(context, splixels, do_colors) {
     for(var i = 0; i <= ih; i += 1) {
         for(var j = 0; j <= iw; j += 1) {          
+            /*
             var do_horizontal = splixels[i][j].right;
             var do_vertical   = splixels[i][j].bottom;
                                 
@@ -444,14 +445,16 @@ function draw_the_splixels(context, splixels, do_colors) {
                 context.stroke();
                 context.closePath();
             }
-            
+            */
+            var x = j * pixel_size;
+            var y = i * pixel_size;
             context.font = "16px Arial";
             context.fillStyle = "#777777";
             context.textAlign = "center";
             context.textBaseline = "middle";
-            context.fillText(splixels[i][j].to_margin, j, i-8);
-//            context.fillText(splixels[i][j].xy_normal[0].toFixed(2), j, i-8);
-//            context.fillText(splixels[i][j].xy_normal[1].toFixed(2), j, i+8);
+            context.fillText(splixels[i][j].to_margin, x, y);
+//            context.fillText(splixels[i][j].xy_normal[0].toFixed(2), x, y-8);
+//            context.fillText(splixels[i][j].xy_normal[1].toFixed(2), x, y+8);
         }
     }
 }
