@@ -142,25 +142,7 @@ var pixels = [
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-// a cat
-/*[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0],
-[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-[0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-[0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-[0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-[0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-[0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]*/
-];
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 
 function reset_pixels() {
     pixels = [];
@@ -328,7 +310,6 @@ function fill_splixels_from_pixels() {
 
     for(var i = 0; i <= ih; i += 1) {
         for(var j = 0; j <= iw; j += 1) {
-
             var margin_to_the_right = 
                 sign_0_positive(pixel_in(i-1, j+0) - threshold) != 
                 sign_0_positive(pixel_in(i+0, j+0) - threshold);
@@ -365,85 +346,40 @@ function fill_splixels_from_pixels() {
 
 
 function draw_the_splixels(context, splixels, do_colors) {
+    context.beginPath();
     for(var i = 0; i <= ih; i += 1) {
         for(var j = 0; j <= iw; j += 1) {          
-            
-            var do_horizontal = splixels[i][j].right;
-            var do_vertical   = splixels[i][j].bottom;
-                                
-            if(do_horizontal) {
-                context.beginPath();
-                var ds = pixel_in(i -1, j) < pixel_in(i, j) ? 1.0 : -1.0;                
-                var p1x = j + splixels[i][j].xy_shift[0];
-                var p1y = i + splixels[i][j].xy_shift[1];
-                var p2x = j + 1 + splixels[i][j + 1].xy_shift[0];
-                var p2y = i + splixels[i][j + 1].xy_shift[1];
-                var d1x = splixels[i][j].xy_normal[0];
-                var d1y = splixels[i][j].xy_normal[1];
-                var d2x = splixels[i][j + 1].xy_normal[0];
-                var d2y = splixels[i][j + 1].xy_normal[1];
-                        
-                var Px = spline_for(p1x , ds*d1y, p2x, ds*d2y);
-                var Py = spline_for(p1y, (-ds)*d1x, p2y, (-ds)*d2x);
- 
-                for(var k = 0; k < pixel_size; k += 1) {
-                    var t1 = (k) / pixel_size;
-                    var t2 = (k + 1) / pixel_size;
-                    var x1 = polynomial_in_x(Px, t1, 4) * pixel_size;
-                    var y1 = polynomial_in_x(Py, t1, 4) * pixel_size;
-                    var x2 = polynomial_in_x(Px, t2, 4) * pixel_size;
-                    var y2 = polynomial_in_x(Py, t2, 4) * pixel_size;
-                    context.moveTo(x1, y1);
-                    context.lineTo(x2, y2);
+            var do_piece = [splixels[i][j].right, splixels[i][j].bottom]; // horizontal, then vertical
+            for(var piece_no = 0; piece_no < 2; ++piece_no) {
+                if(do_piece[piece_no]) {
+                    var x_step = (piece_no == 0 ? 1 : 0);
+                    var y_step = (piece_no == 1 ? 1 : 0);
+                    var ds = (pixel_in(i - x_step, j - y_step) < pixel_in(i, j)) ^ piece_no ? 1.0 : -1.0;                
+                    var p1x = j + splixels[i][j].xy_shift[0];
+                    var p1y = i + splixels[i][j].xy_shift[1];
+                    var p2x = j + x_step + splixels[i + y_step][j + x_step].xy_shift[0];
+                    var p2y = i + y_step + splixels[i + y_step][j + x_step].xy_shift[1];
+                    var d1x = splixels[i][j].xy_normal[0];
+                    var d1y = splixels[i][j].xy_normal[1];
+                    var d2x = splixels[i + y_step][j + x_step].xy_normal[0];
+                    var d2y = splixels[i + y_step][j + x_step].xy_normal[1];
+                            
+                    var Px = spline_for(p1x , ds*d1y, p2x, ds*d2y);
+                    var Py = spline_for(p1y, (-ds)*d1x, p2y, (-ds)*d2x);
+     
+                    for(var k = 0; k < pixel_size; k += 1) {
+                        var t1 = (k) / pixel_size;
+                        var t2 = (k + 1) / pixel_size;
+                        var x1 = polynomial_in_x(Px, t1, 4) * pixel_size;
+                        var y1 = polynomial_in_x(Py, t1, 4) * pixel_size;
+                        var x2 = polynomial_in_x(Px, t2, 4) * pixel_size;
+                        var y2 = polynomial_in_x(Py, t2, 4) * pixel_size;
+                        context.moveTo(x1, y1);
+                        context.lineTo(x2, y2);
+                    }
                 }
-                if(do_colors)
-                    if((i + j) % 2 == 0)
-                        context.strokeStyle="#886633";
-                    else
-                        context.strokeStyle="#33AA66";
-                else
-                    context.strokeStyle="#AA3366";
-                context.lineWidth=3;
-                context.stroke();
-                context.closePath();
             }
-            if(do_vertical) {
-                context.beginPath();
-                var ds = pixel_in(i, j - 1) < pixel_in(i, j) ? -1.0 : 1.0;
-                var p1x = j + splixels[i][j].xy_shift[0];
-                var p1y = i + splixels[i][j].xy_shift[1];
-                var p2x = j + splixels[i + 1][j].xy_shift[0];
-                var p2y = i + 1 + splixels[i + 1][j].xy_shift[1];
-                var d1x = splixels[i][j].xy_normal[0];
-                var d1y = splixels[i][j].xy_normal[1];
-                var d2x = splixels[i + 1][j].xy_normal[0];
-                var d2y = splixels[i + 1][j].xy_normal[1];
-                
-                var Px = spline_for(p1x, ds*d1y, p2x, ds*d2y);
-                var Py = spline_for(p1y, (-ds)*d1x, p2y, (-ds)*d2x);
-
-                for(var k = 0; k < pixel_size; k += 1) {
-                    var t1 = k / pixel_size;
-                    var t2 = (k + 1) / pixel_size;
-                    var x1 = polynomial_in_x(Px, t1, 4) * pixel_size;
-                    var y1 = polynomial_in_x(Py, t1, 4) * pixel_size;
-                    var x2 = polynomial_in_x(Px, t2, 4) * pixel_size;
-                    var y2 = polynomial_in_x(Py, t2, 4) * pixel_size;
-                    context.moveTo(x1, y1);
-                    context.lineTo(x2, y2);
-                }
-                if(do_colors)
-                    if((i + j) % 2 == 0)
-                        context.strokeStyle="#AA3366";
-                    else
-                        context.strokeStyle="#3366AA";
-                else
-                    context.strokeStyle="#AA3366";
-                context.lineWidth=3;
-                context.stroke();
-                context.closePath();
-            }
-            
+                            
             var x = j * pixel_size;
             var y = i * pixel_size;
             context.font = "16px Arial";
@@ -457,6 +393,10 @@ function draw_the_splixels(context, splixels, do_colors) {
 //            context.fillText(splixels[i][j].xy_normal[1].toFixed(2), x, y+8);
         }
     }
+    context.strokeStyle="#AA3366";
+    context.lineWidth = 3;
+    context.stroke();
+    context.closePath();
 }
 
 
