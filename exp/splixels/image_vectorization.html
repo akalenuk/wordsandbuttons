@@ -345,20 +345,19 @@ function fill_splixels_from_pixels() {
 }
 
 //
-var splines = []
 function turn_pixels_into_splines() {
-    splines = [];
-    // "horizontal" pieces
+    var splines = [];
     var old_point;
     var old_normal;
+    // "horizontal" pieces    
     for(var i = 0; i <= ih; i += 1) {
         for(var j = 0; j <= iw; j += 1) {
             var margin_to_the_right = 
-                sign_0_positive(pixel_in(i-1, j+0) - threshold) != 
-                sign_0_positive(pixel_in(i+0, j+0) - threshold);
+                Math.sign(pixel_in(i-1, j+0) - threshold) != 
+                Math.sign(pixel_in(i+0, j+0) - threshold);
             var margin_to_the_left = 
-                sign_0_positive(pixel_in(i-1, j-1) - threshold) != 
-                sign_0_positive(pixel_in(i+0, j-1) - threshold);
+                Math.sign(pixel_in(i-1, j-1) - threshold) != 
+                Math.sign(pixel_in(i+0, j-1) - threshold);
             if(margin_to_the_right || margin_to_the_left) {
                 var point = [j + gsx(j, i), i + gsy(j, i)];
                 var normal = dxy(point[0], point[1]);
@@ -375,6 +374,32 @@ function turn_pixels_into_splines() {
             }      
         }
     }
+    // "vertical" pieces
+    for(var j = 0; j <= iw; j += 1) {
+        for(var i = 0; i <= ih; i += 1) {
+            var margin_to_the_bottom = 
+                Math.sign(pixel_in(i+0, j-1) - threshold) != 
+                Math.sign(pixel_in(i+0, j+0) - threshold);
+            var margin_to_the_top = 
+                Math.sign(pixel_in(i-1, j-1) - threshold) != 
+                Math.sign(pixel_in(i-1, j+0) - threshold);
+            if(margin_to_the_bottom || margin_to_the_top) {
+                var point = [j + gsx(j, i), i + gsy(j, i)];
+                var normal = dxy(point[0], point[1]);
+                if(margin_to_the_top) {
+                    var ds = 1;
+                    var Px = spline_for(old_point[0] , ds*old_normal[1], point[0], ds*normal[1]);
+                    var Py = spline_for(old_point[1], (-ds)*old_normal[0], point[1], (-ds)*normal[0]);
+                    splines.push([Px, Py]);
+                }
+                if(margin_to_the_bottom) {
+                    old_point = point;
+                    old_normal = normal;                    
+                }   
+            }      
+        }
+    }
+    return splines;
 }
 
 function draw_the_splines(context, splines) {
@@ -537,8 +562,10 @@ function draw_canvas(){
     context.closePath();    
     
     // contour
-    fill_splixels_from_pixels();
-    draw_the_splixels(context, splixels);
+    var splines = turn_pixels_into_splines();
+    draw_the_splines(context, splines);
+/*    fill_splixels_from_pixels();
+    draw_the_splixels(context, splixels);*/
 }
 
 function reset_all() {
