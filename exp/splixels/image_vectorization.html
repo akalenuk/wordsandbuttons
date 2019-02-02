@@ -362,9 +362,9 @@ function turn_pixels_into_splines() {
                 var point = [j + gsx(j, i), i + gsy(j, i)];
                 var normal = dxy(point[0], point[1]);
                 if(margin_to_the_left) {
-                    var ds = 1;
-                    var Px = spline_for(old_point[0] , ds*old_normal[1], point[0], ds*normal[1]);
-                    var Py = spline_for(old_point[1], (-ds)*old_normal[0], point[1], (-ds)*normal[0]);
+                    var ds = Math.sign(pixel_in(i - 1, j - 1) - threshold);
+                    var Px = spline_for(old_point[0], (-ds)*old_normal[1], point[0], (-ds)*normal[1]);
+                    var Py = spline_for(old_point[1], ds*old_normal[0], point[1], ds*normal[0]);
                     splines.push([Px, Py]);
                 }
                 if(margin_to_the_right) {
@@ -387,7 +387,7 @@ function turn_pixels_into_splines() {
                 var point = [j + gsx(j, i), i + gsy(j, i)];
                 var normal = dxy(point[0], point[1]);
                 if(margin_to_the_top) {
-                    var ds = 1;
+                    var ds = Math.sign(pixel_in(i - 1, j - 1) - threshold);
                     var Px = spline_for(old_point[0] , ds*old_normal[1], point[0], ds*normal[1]);
                     var Py = spline_for(old_point[1], (-ds)*old_normal[0], point[1], (-ds)*normal[0]);
                     splines.push([Px, Py]);
