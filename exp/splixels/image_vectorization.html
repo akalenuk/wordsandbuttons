@@ -1,7 +1,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Splixels from an image</title>
+    <title>Splines from an image</title>
     <meta name="keywords" content="iterative,algorithms,guide,tutorial,learning">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <style>
@@ -377,7 +377,25 @@ function turn_pixels_into_splines() {
     }
 }
 
-function draw_the_splines(context, splixels) {
+function draw_the_splines(context, splines) {
+    context.beginPath();
+    for(var i = 0; i < splines.length; ++i) {
+        for(var k = 0; k < pixel_size; k += 1) {
+            var t1 = (k) / pixel_size;
+            var t2 = (k + 1) / pixel_size;
+            var x1 = polynomial_in_x(splines[i][0], t1, 4) * pixel_size;
+            var y1 = polynomial_in_x(splines[i][1], t1, 4) * pixel_size;
+            var x2 = polynomial_in_x(splines[i][0], t2, 4) * pixel_size;
+            var y2 = polynomial_in_x(splines[i][1], t2, 4) * pixel_size;
+            context.moveTo(x1, y1);
+            context.lineTo(x2, y2);
+        }
+    }
+    
+    context.strokeStyle="#AA3366";
+    context.lineWidth = 3;
+    context.stroke();
+    context.closePath();    
 }
 
 function draw_the_splixels(context, splixels) {
