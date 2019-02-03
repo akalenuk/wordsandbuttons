@@ -215,7 +215,7 @@ function polynomial_in_x(A, x, n){
     return y;
 }
 
-// algorithm
+// algorithm parts
 function pixel_in(i, j) {
     if(i >= pixels.length)
         return pixel_in(pixels.length-1, j);
@@ -300,6 +300,11 @@ function gsy(x, y) {
     return limited_05(dxy(x, y)[1] * (0.5 - dx_from_linear(x, y)[0]) * shiftd);
 }
 
+// sign without 0 option
+function sign(x) {
+    return x >= 0 ? 1 : -1;
+}
+
 // the algorithm itself
 function turn_pixels_into_splines() {
     var splines = [];
@@ -309,11 +314,11 @@ function turn_pixels_into_splines() {
     for(var i = 0; i <= ih; i += 1) {
         for(var j = 0; j <= iw; j += 1) {
             var margin_to_the_right = 
-                Math.sign(pixel_in(i-1, j+0) - threshold) != 
-                Math.sign(pixel_in(i+0, j+0) - threshold);
+                sign(pixel_in(i-1, j+0) - threshold) != 
+                sign(pixel_in(i+0, j+0) - threshold);
             var margin_to_the_left = 
-                Math.sign(pixel_in(i-1, j-1) - threshold) != 
-                Math.sign(pixel_in(i+0, j-1) - threshold);
+                sign(pixel_in(i-1, j-1) - threshold) != 
+                sign(pixel_in(i+0, j-1) - threshold);
             if(margin_to_the_right || margin_to_the_left) {
                 var point = [j + gsx(j, i), i + gsy(j, i)];
                 var normal = dxy(point[0], point[1]);
@@ -334,11 +339,11 @@ function turn_pixels_into_splines() {
     for(var j = 0; j <= iw; j += 1) {
         for(var i = 0; i <= ih; i += 1) {
             var margin_to_the_bottom = 
-                Math.sign(pixel_in(i+0, j-1) - threshold) != 
-                Math.sign(pixel_in(i+0, j+0) - threshold);
+                sign(pixel_in(i+0, j-1) - threshold) != 
+                sign(pixel_in(i+0, j+0) - threshold);
             var margin_to_the_top = 
-                Math.sign(pixel_in(i-1, j-1) - threshold) != 
-                Math.sign(pixel_in(i-1, j+0) - threshold);
+                sign(pixel_in(i-1, j-1) - threshold) != 
+                sign(pixel_in(i-1, j+0) - threshold);
             if(margin_to_the_bottom || margin_to_the_top) {
                 var point = [j + gsx(j, i), i + gsy(j, i)];
                 var normal = dxy(point[0], point[1]);
