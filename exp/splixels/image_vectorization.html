@@ -301,50 +301,6 @@ function gsy(x, y) {
 }
 
 // the algorithm itself
-function fill_splixels_from_pixels() {
-    sign_0_positive = function(x){ // Math.sign like with no 0 option
-        if(x >= 0)
-            return 1.0;
-        return -1.0;
-    }
-
-    for(var i = 0; i <= ih; i += 1) {
-        for(var j = 0; j <= iw; j += 1) {
-            var margin_to_the_right = 
-                sign_0_positive(pixel_in(i-1, j+0) - threshold) != 
-                sign_0_positive(pixel_in(i+0, j+0) - threshold);
-            var margin_to_the_left = 
-                sign_0_positive(pixel_in(i-1, j-1) - threshold) != 
-                sign_0_positive(pixel_in(i+0, j-1) - threshold);
-                
-            var margin_to_the_bottom = 
-                sign_0_positive(pixel_in(i+0, j-1) - threshold) != 
-                sign_0_positive(pixel_in(i+0, j+0) - threshold);
-            var margin_to_the_top = 
-                sign_0_positive(pixel_in(i-1, j-1) - threshold) != 
-                sign_0_positive(pixel_in(i-1, j+0) - threshold);
-
-                
-            if(margin_to_the_right || margin_to_the_left || margin_to_the_bottom || margin_to_the_top) {   
-                // filling splixels
-                splixels[i][j].to_margin = 0;
-                splixels[i][j].xy_shift = [gsx(j, i), gsy(j, i)];
-                var shifted_j = j + splixels[i][j].xy_shift[0];
-                var shifted_i = i + splixels[i][j].xy_shift[1];
-                splixels[i][j].xy_normal = dxy(shifted_j, shifted_i);
-                splixels[i][j].right = margin_to_the_right;
-                splixels[i][j].left = margin_to_the_left;
-                splixels[i][j].bottom = margin_to_the_bottom;
-                splixels[i][j].top = margin_to_the_top;
-            } else {
-                splixels[i][j] = Object.create(splixel);
-                splixels[i][j].to_margin = pixel_in(i, j) < 0.5 ? 1 : -1;
-            }
-        }
-    }
-}
-
-//
 function turn_pixels_into_splines() {
     var splines = [];
     var old_point;
@@ -422,61 +378,6 @@ function draw_the_splines(context, splines) {
     context.stroke();
     context.closePath();    
 }
-
-function draw_the_splixels(context, splixels) {
-    context.beginPath();
-    for(var i = 0; i <= ih; i += 1) {
-        for(var j = 0; j <= iw; j += 1) {          
-            var do_piece = [splixels[i][j].right, splixels[i][j].bottom]; // horizontal, then vertical
-            for(var piece_no = 0; piece_no < 2; ++piece_no) {
-                if(do_piece[piece_no]) {
-                    var x_step = (piece_no == 0 ? 1 : 0);
-                    var y_step = (piece_no == 1 ? 1 : 0);
-                    var ds = (pixel_in(i - x_step, j - y_step) < pixel_in(i, j)) ^ piece_no ? 1.0 : -1.0;                
-                    var p1x = j + splixels[i][j].xy_shift[0];
-                    var p1y = i + splixels[i][j].xy_shift[1];
-                    var p2x = j + x_step + splixels[i + y_step][j + x_step].xy_shift[0];
-                    var p2y = i + y_step + splixels[i + y_step][j + x_step].xy_shift[1];
-                    var d1x = splixels[i][j].xy_normal[0];
-                    var d1y = splixels[i][j].xy_normal[1];
-                    var d2x = splixels[i + y_step][j + x_step].xy_normal[0];
-                    var d2y = splixels[i + y_step][j + x_step].xy_normal[1];
-                            
-                    var Px = spline_for(p1x , ds*d1y, p2x, ds*d2y);
-                    var Py = spline_for(p1y, (-ds)*d1x, p2y, (-ds)*d2x);
-     
-                    for(var k = 0; k < pixel_size; k += 1) {
-                        var t1 = (k) / pixel_size;
-                        var t2 = (k + 1) / pixel_size;
-                        var x1 = polynomial_in_x(Px, t1, 4) * pixel_size;
-                        var y1 = polynomial_in_x(Py, t1, 4) * pixel_size;
-                        var x2 = polynomial_in_x(Px, t2, 4) * pixel_size;
-                        var y2 = polynomial_in_x(Py, t2, 4) * pixel_size;
-                        context.moveTo(x1, y1);
-                        context.lineTo(x2, y2);
-                    }
-                }
-            }
-                            
-            var x = j * pixel_size;
-            var y = i * pixel_size;
-            context.font = "16px Arial";
-            context.fillStyle = "#777777";
-            context.textAlign = "center";
-            context.textBaseline = "middle";
-//            context.fillText(splixels[i][j].to_margin, x, y);
-//            context.fillText(splixels[i][j].xy_shift[0].toFixed(2), x, y-8);
-//            context.fillText(splixels[i][j].xy_shift[1].toFixed(2), x, y+8);
-//            context.fillText(splixels[i][j].xy_normal[0].toFixed(2), x, y-8);
-//            context.fillText(splixels[i][j].xy_normal[1].toFixed(2), x, y+8);
-        }
-    }
-    context.strokeStyle="#AA3366";
-    context.lineWidth = 3;
-    context.stroke();
-    context.closePath();
-}
-
 
 function init_canvas(){
     var canvas = document.getElementById("canvas");
@@ -564,24 +465,9 @@ function draw_canvas(){
     // contour
     var splines = turn_pixels_into_splines();
     draw_the_splines(context, splines);
-/*    fill_splixels_from_pixels();
-    draw_the_splixels(context, splixels);*/
 }
 
-function reset_all() {
-    reset_pixels();
-    reset_splixels();
-    draw_canvas();
-}
-
-function reset_magic_numbers() {
-    nd = parseFloat(document.getElementById("nd").value);
-    weight = parseFloat(document.getElementById("weight").value);
-    shiftd = parseFloat(document.getElementById("shiftd").value);
-    threshold = parseFloat(document.getElementById("threshold").value);
-    draw_canvas();
-}
-
+// pgm import
 function space_divided(text) {
     var new_text = text.replace('\r', ' ');
     new_text = new_text.replace('\n', ' ');
@@ -637,13 +523,29 @@ function reimport_image() {
     reset_splixels();
     draw_canvas();  
 }
+
+// ui
+function reset_all() {
+    reset_pixels();
+    reset_splixels();
+    draw_canvas();
+}
+
+function reset_magic_numbers() {
+    nd = parseFloat(document.getElementById("nd").value);
+    weight = parseFloat(document.getElementById("weight").value);
+    shiftd = parseFloat(document.getElementById("shiftd").value);
+    threshold = parseFloat(document.getElementById("threshold").value);
+    draw_canvas();
+}
+
   </script>
   </head>
   <body>
     <center>
     <br>
     <br>
-    <textarea id="import_PGM" rows=24 onInput="reimport_image()">
+    <textarea id="import_PGM" rows=14 onInput="reimport_image()">
 P2
 # Shows the word "FEEP" (example from Netpbm man page on PGM)
 24 7
