@@ -154,6 +154,8 @@ function reset_pixels() {
     }
 }
 
+var splines_points_normals = [];
+
 // solver specific to [0..1] parametrized splines
 function spline_for(p1, p1d, p2, p2d) {
 //     A = [
@@ -282,6 +284,8 @@ function sign(x) {
 // the algorithm itself
 function turn_pixels_into_splines() {
     var splines = [];
+    var points = [];
+    var normals = [];
     if(true) {
         // "horizontal" pieces    
         for(var i = 0; i <= ih; i += 1) {
@@ -305,6 +309,8 @@ function turn_pixels_into_splines() {
                     var normal = dxy(point[0], point[1]);
                     if(margin_to_the_left && margin_to_the_right && margin_to_the_top && margin_to_the_bottom)
                         normal = [0., 0.];
+                    points.push(point);
+                    normals.push(normal);
                     if(margin_to_the_left && old_point) {
                         var ds = Math.sign(pixel_in(i - 1, j - 1) - threshold);
                         var Px = spline_for(old_point[0], (-ds)*old_normal[1], point[0], (-ds)*normal[1]);
@@ -342,6 +348,8 @@ function turn_pixels_into_splines() {
                     var normal = dxy(point[0], point[1]);
                     if(margin_to_the_left && margin_to_the_right && margin_to_the_top && margin_to_the_bottom)
                         normal = [0., 0.];
+                    points.push(point);
+                    normals.push(normal);
                     if(margin_to_the_top && old_point) {
                         var ds = Math.sign(pixel_in(i - 1, j - 1) - threshold);
                         var Px = spline_for(old_point[0] , ds*old_normal[1], point[0], ds*normal[1]);
@@ -356,7 +364,7 @@ function turn_pixels_into_splines() {
             }
         }
     }
-    return splines;
+    return [splines, points, normals];
 }
 
 function draw_the_splines(context, splines) {
@@ -468,8 +476,8 @@ function draw_canvas(){
     context.closePath();    
     
     // contour
-    var splines = turn_pixels_into_splines();
-    draw_the_splines(context, splines);
+    splines_points_normals = turn_pixels_into_splines();
+    draw_the_splines(context, splines_points_normals[0]);
     
     // values
     context.font = "16px Arial";
