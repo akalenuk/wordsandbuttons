@@ -320,7 +320,7 @@ function turn_pixels_into_splines() {
                         var Px = spline_for(old_point[0], (-ds)*old_normal[1], point[0], (-ds)*normal[1]);
                         var Py = spline_for(old_point[1], ds*old_normal[0], point[1], ds*normal[0]);
                         points.push([old_point, point]);
-                        normals.push([old_normal, normal]);
+                        normals.push([[ds*old_normal[0], (-ds)*old_normal[1]], [ds*normal[0], (-ds)*normal[1]]]);
                         splines.push([Px, Py]);
                     }
                     if(margin_to_the_right) {
@@ -359,7 +359,7 @@ function turn_pixels_into_splines() {
                         var Px = spline_for(old_point[0] , ds*old_normal[1], point[0], ds*normal[1]);
                         var Py = spline_for(old_point[1], (-ds)*old_normal[0], point[1], (-ds)*normal[0]);
                         points.push([old_point, point]);
-                        normals.push([old_normal, normal]);
+                        normals.push([[(-ds)*old_normal[0], ds*old_normal[1]], [(-ds)*normal[0], ds*normal[1]]]);
                         splines.push([Px, Py]);
                     }
                     if(margin_to_the_bottom) {
@@ -574,7 +574,7 @@ function export_splines() {
     var svg = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
     svg += "<svg width=\"" + printable(iw) + "\" height=\"" + printable(ih) + "\" viewBox=\"0 0 " + printable(iw) + " " + printable(ih) + "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
     for(var i = 0; i < splines_points_normals[0].length; ++i) {
-        var splines = splines_points_normals[0];
+/*        var splines = splines_points_normals[0];
         var x1 = printable(polynomial_in_x(splines[i][0], 0, 4));
         var y1 = printable(polynomial_in_x(splines[i][1], 0, 4));
         var x2 = printable(polynomial_in_x(splines[i][0], 0.25, 4));
@@ -584,14 +584,14 @@ function export_splines() {
         var x4 = printable(polynomial_in_x(splines[i][0], 1, 4));
         var y4 = printable(polynomial_in_x(splines[i][1], 1, 4));
         svg += "<path fill=\"none\" stroke=\"rgb(0,0,0)\" d=\"M " + x1 + "," + y1 + " ";
-        svg += "C " + x2 + "," + y2 + " " +  x3 + "," + y3 + " " + x4 + "," + y4 + "\"/>\n";
-/*        var p1 = splines_points_normals[1][i][0];
+        svg += "C " + x2 + "," + y2 + " " +  x3 + "," + y3 + " " + x4 + "," + y4 + "\"/>\n";*/
+        var p1 = splines_points_normals[1][i][0];
         var p2 = splines_points_normals[1][i][1];
         var p1_n = splines_points_normals[2][i][0];
         var p2_n = splines_points_normals[2][i][1];
         svg += "<path fill=\"none\" stroke=\"rgb(0,0,0)\" d=\"M " + printable(p1[0]) + "," + printable(p1[1]) + " ";
-        svg += "C " + printable(p1[0] - p1_n[0]) + "," + printable(p1[1] - p1_n[1]); 
-        svg += " " +  printable(p2[0] - p2_n[0]) + "," + printable(p2[1] - p2_n[1]) + " " + printable(p2[0]) + "," + printable(p2[1]) + "\"/>\n";*/
+        svg += "C " + printable(p1[0] + p1_n[0]) + "," + printable(p1[1] + p1_n[1]); 
+        svg += " " +  printable(p2[0] + p2_n[0]) + "," + printable(p2[1] + p2_n[1]) + " " + printable(p2[0]) + "," + printable(p2[1]) + "\"/>\n";
     }
     svg += "</svg>\n";
     document.getElementById("export_SVG").value = svg;
