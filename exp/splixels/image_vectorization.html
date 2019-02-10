@@ -315,12 +315,12 @@ function turn_pixels_into_splines() {
                     var normal = dxy(point[0], point[1]);
                     if(margin_to_the_left && margin_to_the_right && margin_to_the_top && margin_to_the_bottom)
                         normal = [0., 0.];
-                    points.push(point);
-                    normals.push(normal);
                     if(margin_to_the_left && old_point) {
                         var ds = Math.sign(pixel_in(i - 1, j - 1) - threshold);
                         var Px = spline_for(old_point[0], (-ds)*old_normal[1], point[0], (-ds)*normal[1]);
                         var Py = spline_for(old_point[1], ds*old_normal[0], point[1], ds*normal[0]);
+                        points.push([old_point, point]);
+                        normals.push([old_normal, normal]);
                         splines.push([Px, Py]);
                     }
                     if(margin_to_the_right) {
@@ -354,12 +354,12 @@ function turn_pixels_into_splines() {
                     var normal = dxy(point[0], point[1]);
                     if(margin_to_the_left && margin_to_the_right && margin_to_the_top && margin_to_the_bottom)
                         normal = [0., 0.];
-                    points.push(point);
-                    normals.push(normal);
                     if(margin_to_the_top && old_point) {
                         var ds = Math.sign(pixel_in(i - 1, j - 1) - threshold);
                         var Px = spline_for(old_point[0] , ds*old_normal[1], point[0], ds*normal[1]);
                         var Py = spline_for(old_point[1], (-ds)*old_normal[0], point[1], (-ds)*normal[0]);
+                        points.push([old_point, point]);
+                        normals.push([old_normal, normal]);
                         splines.push([Px, Py]);
                     }
                     if(margin_to_the_bottom) {
@@ -567,7 +567,19 @@ function reset_magic_numbers() {
 }
 
 function export_splines() {
-
+    var svg = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
+    svg += "<svg width=\"" + iw + "\" height=\"" + ih + "\" viewBox=\"0 0 " + iw + " " + ih + "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
+    for(var i = 0; i < splines_points_normals[0].length; ++i) {
+        var p1 = splines_points_normals[1][i][0];
+        var p2 = splines_points_normals[1][i][1];
+        var p1_n = splines_points_normals[2][i][0];
+        var p2_n = splines_points_normals[2][i][1];
+        svg += "<path fill=\"none\" stroke=\"rgb(0,0,0)\" d=\"M " + p1[0].toFixed(2) + "," + p1[1].toFixed(2) + " ";
+        svg += "C " + (p1[0] + p1_n[0]).toFixed(2) + "," + (p1[1] + p1_n[1]).toFixed(2); 
+        svg += " " +  (p2[0] + p2_n[0]).toFixed(2) + "," + (p2[1] + p2_n[1]).toFixed(2) + " " + p2[0].toFixed(2) + "," + p2[1].toFixed(2) + "\"/>\n";
+    }
+    svg += "</svg>\n";
+    document.getElementById("export_SVG").value = svg;
 }
   </script>
   </head>
@@ -613,8 +625,8 @@ P2
         shiftd: <input type="text" id="shiftd" value="1.5">
         threshold: <input type="text" id="threshold" value="0.5">
         <button type="button" onclick="reset_magic_numbers()">&larr; Apply</button> 
-        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset pixels</button>
-        <button type="button" style="width: 108pt;" onclick="export_splines()">Export to SVG</button>  
+        <button type="button" onclick="reset_all()">Reset pixels</button>
+        <button type="button" onclick="export_splines()">Write to SVG</button>  
     </form>
     <br>
     <textarea id="export_SVG" rows=14>
