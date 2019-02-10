@@ -567,16 +567,20 @@ function reset_magic_numbers() {
 }
 
 function export_splines() {
+    const printable = function(x) {
+        return Math.floor(x * 100);
+    }; 
+    
     var svg = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
-    svg += "<svg width=\"" + iw + "\" height=\"" + ih + "\" viewBox=\"0 0 " + iw + " " + ih + "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
+    svg += "<svg width=\"" + printable(iw) + "\" height=\"" + printable(ih) + "\" viewBox=\"0 0 " + printable(iw) + " " + printable(ih) + "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
     for(var i = 0; i < splines_points_normals[0].length; ++i) {
         var p1 = splines_points_normals[1][i][0];
         var p2 = splines_points_normals[1][i][1];
         var p1_n = splines_points_normals[2][i][0];
         var p2_n = splines_points_normals[2][i][1];
-        svg += "<path fill=\"none\" stroke=\"rgb(0,0,0)\" d=\"M " + p1[0].toFixed(2) + "," + p1[1].toFixed(2) + " ";
-        svg += "C " + (p1[0] + p1_n[0]).toFixed(2) + "," + (p1[1] + p1_n[1]).toFixed(2); 
-        svg += " " +  (p2[0] + p2_n[0]).toFixed(2) + "," + (p2[1] + p2_n[1]).toFixed(2) + " " + p2[0].toFixed(2) + "," + p2[1].toFixed(2) + "\"/>\n";
+        svg += "<path fill=\"none\" stroke=\"rgb(0,0,0)\" d=\"M " + printable(p1[0]) + "," + printable(p1[1]) + " ";
+        svg += "C " + printable(p1[0] - p1_n[0]) + "," + printable(p1[1] - p1_n[1]); 
+        svg += " " +  printable(p2[0] - p2_n[0]) + "," + printable(p2[1] - p2_n[1]) + " " + printable(p2[0]) + "," + printable(p2[1]) + "\"/>\n";
     }
     svg += "</svg>\n";
     document.getElementById("export_SVG").value = svg;
