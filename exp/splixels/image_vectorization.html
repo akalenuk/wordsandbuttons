@@ -499,6 +499,33 @@ function draw_canvas(){
         }
     }
     
+    // tangents if needed
+    if(document.getElementById("tool_3").checked) {
+        var points = splines_points_normals[1];
+        var normals = splines_points_normals[1];
+        for(var i = 0; i < splines_points_normals[1].length; ++i) {
+            for(var j = 0; j < 2; ++j) {
+                context.beginPath();
+                context.lineWidth=1;
+                context.moveTo(pixel_size * points[i][j][0], pixel_size * points[i][j][1]);
+                context.lineTo(pixel_size * (points[i][j][0] + normals[i][j][0]), pixel_size * (points[i][j][1] + normals[i][j][1]));
+                context.strokeStyle="#AA3366";
+                context.setLineDash([2, 2]);
+                context.stroke();
+                context.setLineDash([]);
+                context.closePath();
+                
+                context.beginPath();
+                context.arc(
+                    pixel_size * (points[i][j][0] + normals[i][j][0]), 
+                    pixel_size * (points[i][j][1] + normals[i][j][1]), 3, 0, 2*Math.PI);
+                context.fillStyle="#AA3366";
+                context.fill();
+                context.closePath();        
+            }
+        }
+    }
+    
     // values
     context.font = "16px Arial";
     context.fillStyle = "#777777";
