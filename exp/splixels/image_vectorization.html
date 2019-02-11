@@ -485,6 +485,20 @@ function draw_canvas(){
     splines_points_normals = turn_pixels_into_splines();
     draw_the_splines(context, splines_points_normals[0]);
     
+    // points if needed
+    if(document.getElementById("tool_2").checked) {
+        var points = splines_points_normals[1];
+        for(var i = 0; i < splines_points_normals[1].length; ++i) {
+            for(var j = 0; j < 2; ++j) {
+                context.beginPath();
+                context.arc(pixel_size * points[i][j][0], pixel_size * points[i][j][1], 3, 0, 2*Math.PI);
+                context.fillStyle="#AA3366";
+                context.fill();
+                context.closePath();        
+            }
+        }
+    }
+    
     // values
     context.font = "16px Arial";
     context.fillStyle = "#777777";
@@ -619,10 +633,10 @@ P2
     -->
     <textarea id="import_PGM" rows=14 onInput="reimport_image()">
 P2
-# Shows the word "FEEP" (example from Netpbm man page on PGM)
+# 
 3 3
 15
-0 0 0 0 7 0 0 0 0
+0 0 0 0 15 0 0 0 0
     </textarea>
     <p id="import_status" class="comment">
     </p>
@@ -630,9 +644,9 @@ P2
     <canvas id="canvas" width=1024 height=1024></canvas>
     <form>
         Click to change: 
-        <input type="radio" name="tool" id="tool_1" value="image" checked=true><label for="tool_1">image; </label>
-        <input type="radio" name="tool" id="tool_2" value="points"><label for="tool_2">points; </label>
-        <input type="radio" name="tool" id="tool_3" value="tangents"><label for="tool_3">tangents; </label>
+        <input type="radio" name="tool" id="tool_1" value="image" checked=true onclick="draw_canvas()"><label for="tool_1">image; </label>
+        <input type="radio" name="tool" id="tool_2" value="points" onclick="draw_canvas()"><label for="tool_2">points; </label>
+        <input type="radio" name="tool" id="tool_3" value="tangents" onclick="draw_canvas()"><label for="tool_3">tangents; </label>
         <br>
 
         nd: <input type="text" id="nd" value="1.5">
