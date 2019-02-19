@@ -577,7 +577,7 @@ function draw_canvas(){
         }
 }
 
-// pgm import
+// import from PGM
 function space_divided(text) {
     var new_text = text.replace('\r', ' ');
     new_text = new_text.replace('\n', ' ');
@@ -633,24 +633,8 @@ function reimport_image() {
     draw_canvas();  
 }
 
-// ui
-function reset_all() {
-    reset_pixels();
-    draw_canvas();
-}
 
-/*function reset_magic_numbers() {
-    nd = parseFloat(document.getElementById("nd").value);
-    weight = parseFloat(document.getElementById("weight").value);
-    shiftd = parseFloat(document.getElementById("shiftd").value);
-    threshold = parseFloat(document.getElementById("threshold").value);
-    draw_canvas();
-}*/
-
-function reset_threshold() {
-    threshold = parseFloat(document.getElementById("threshold").value);
-}
-
+// export to SVG
 function export_splines() {
     const printable = function(x) {
         return Math.floor(x * 100);
@@ -659,17 +643,6 @@ function export_splines() {
     var svg = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
     svg += "<svg width=\"" + printable(iw) + "\" height=\"" + printable(ih) + "\" viewBox=\"0 0 " + printable(iw) + " " + printable(ih) + "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
     for(var i = 0; i < splines_points_tangents[0].length; ++i) {
-/*        var splines = splines_points_tangents[0];
-        var x1 = printable(polynomial_in_x(splines[i][0], 0, 4));
-        var y1 = printable(polynomial_in_x(splines[i][1], 0, 4));
-        var x2 = printable(polynomial_in_x(splines[i][0], 0.25, 4));
-        var y2 = printable(polynomial_in_x(splines[i][1], 0.25, 4));
-        var x3 = printable(polynomial_in_x(splines[i][0], 0.75, 4));
-        var y3 = printable(polynomial_in_x(splines[i][1], 0.75, 4));
-        var x4 = printable(polynomial_in_x(splines[i][0], 1, 4));
-        var y4 = printable(polynomial_in_x(splines[i][1], 1, 4));
-        svg += "<path fill=\"none\" stroke=\"rgb(0,0,0)\" d=\"M " + x1 + "," + y1 + " ";
-        svg += "C " + x2 + "," + y2 + " " +  x3 + "," + y3 + " " + x4 + "," + y4 + "\"/>\n";*/
         var p1 = splines_points_tangents[1][i][0];
         var p2 = splines_points_tangents[1][i][1];
         var p1_n = splines_points_tangents[2][i][0];
@@ -680,6 +653,16 @@ function export_splines() {
     }
     svg += "</svg>\n";
     document.getElementById("export_SVG").value = svg;
+}
+
+// ui
+function reset_all() {
+    reset_pixels();
+    draw_canvas();
+}
+
+function reset_threshold() {
+    threshold = parseFloat(document.getElementById("threshold").value);
 }
   </script>
   </head>
