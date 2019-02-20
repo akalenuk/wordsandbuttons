@@ -394,7 +394,8 @@ function draw_the_splines(context, splines) {
     context.closePath();    
 }
 
-var cur_point_index = -1;
+var cur_point_index_1 = -1;
+var cur_point_index_2 = -1;
 var cur_tangent_index = -1;
 function init_canvas(){
     var canvas = document.getElementById("canvas");
@@ -402,21 +403,30 @@ function init_canvas(){
         canvas_rect = canvas.getBoundingClientRect();
         var x = e.clientX - canvas_rect.left;
         var y = e.clientY - canvas_rect.top;
-        var min_d2 = (w+h)*(w+h);
+        var min_d2_1 = (w+h)*(w+h);
+        var min_d2_2 = (w+h)*(w+h);
         if(document.getElementById("tool_2").checked) { // points
-            cur_point_index = -1;
+            cur_point_index_1 = -1;
+            cur_point_index_2 = -1;
             var points = splines_points_tangents[1];
             for(var i = 0; i < points.length; ++i) {
-                var px = points[i][0] * pixel_size;
-                var py = points[i][1] * pixel_size;
-                var d2 = (px-x)*(px-x) + (py-y)*(py-y);
-                if(cur_point_index == -1 || d2 < min_d2) {
-                    min_d2 = d2;
-                    cur_point_index = i;
+                var px_1 = points[i][0][0] * pixel_size;
+                var py_1 = points[i][0][1] * pixel_size;
+                var d2_1 = (px_1 - x)*(px_1 - x) + (py_1 - y)*(py_1 - y);
+                if(cur_point_index_1 == -1 || d2_1 < min_d2_1) {
+                    min_d2_1 = d2_1;
+                    cur_point_index_1 = i;
+                }
+                var px_2 = points[i][1][0] * pixel_size;
+                var py_2 = points[i][1][1] * pixel_size;
+                var d2_2 = (px_2 - x)*(px_2 - x) + (py_2 - y)*(py_2 - y);
+                if(cur_point_index_2 == -1 || d2_2 < min_d2_2) {
+                    min_d2_2 = d2_2;
+                    cur_point_index_2 = i;
                 }
             }
         } else if(document.getElementById("tool_3").checked) { // tangents
-            cur_tangent_index = -1;
+/*            cur_tangent_index = -1;
             var points = splines_points_tangents[1];
             var tangents = splines_points_tangents[2];
             for(var i = 0; i < points.length; ++i) {
@@ -427,7 +437,7 @@ function init_canvas(){
                     min_d2 = d2;
                     cur_tangent_index = i;
                 }
-            }
+            }*/
         }
         
     }, false);
@@ -435,17 +445,25 @@ function init_canvas(){
     canvas.addEventListener('mousemove', function(e){
         if(e.buttons == 1){
             canvas_rect = canvas.getBoundingClientRect();
+            var x = e.clientX - canvas_rect.left;
+            var y = e.clientY - canvas_rect.top;
+            if(document.getElementById("tool_2").checked) { // points
+                splines_points_tangents[1][cur_point_index_1][0][0] = x / pixel_size;
+                splines_points_tangents[1][cur_point_index_1][0][1] = y / pixel_size;
+                splines_points_tangents[1][cur_point_index_2][1][0] = x / pixel_size;
+                splines_points_tangents[1][cur_point_index_2][1][1] = y / pixel_size;                
+            }
             draw_canvas();
         }
     }, false);
     
     canvas.addEventListener('mouseup', function(e){
         canvas_rect = canvas.getBoundingClientRect();
-        var j = e.clientX - canvas_rect.left;
-        var i = e.clientY - canvas_rect.top;
+        var x = e.clientX - canvas_rect.left;
+        var y = e.clientY - canvas_rect.top;
         if(document.getElementById("tool_1").checked) {
-            var in_pixels_i = Math.floor(i / pixel_size);
-            var in_pixels_j = Math.floor(j / pixel_size);
+            var in_pixels_i = Math.floor(y / pixel_size);
+            var in_pixels_j = Math.floor(x / pixel_size);
             pixels[in_pixels_i][in_pixels_j] *= 7;
             if(e.shiftKey)       
                 pixels[in_pixels_i][in_pixels_j] += 7;
@@ -453,8 +471,13 @@ function init_canvas(){
                 pixels[in_pixels_i][in_pixels_j] += 1;
             pixels[in_pixels_i][in_pixels_j] = Math.floor(pixels[in_pixels_i][in_pixels_j]) % 8;
             pixels[in_pixels_i][in_pixels_j] /= 7;
-            draw_canvas();
+        } else if(document.getElementById("tool_2").checked) { // points
+            splines_points_tangents[1][cur_point_index_1][0][0] = x / pixel_size;
+            splines_points_tangents[1][cur_point_index_1][0][1] = y / pixel_size;
+            splines_points_tangents[1][cur_point_index_2][1][0] = x / pixel_size;
+            splines_points_tangents[1][cur_point_index_2][1][1] = y / pixel_size; 
         }
+        draw_canvas();            
     }, false);
     
     draw_canvas();
@@ -516,7 +539,7 @@ function draw_canvas(){
     context.closePath();    
     
     // contour
-    splines_points_tangents = turn_pixels_into_splines();
+    splines_points_tangents = turn_pixels_into_splines();   // here is the problem: this should be extracted
     draw_the_splines(context, splines_points_tangents[0]);
     
     // points if needed
@@ -578,19 +601,18 @@ function draw_canvas(){
 }
 
 // import from PGM
-function space_divided(text) {
-    var new_text = text.replace('\r', ' ');
-    new_text = new_text.replace('\n', ' ');
-    new_text = new_text.replace('\t', ' ');
-    while(true) {
-        new_new_text = new_text.replace('  ', ' ');
-        if(new_new_text.length == new_text.length)
-            return new_text;
-        new_text = new_new_text;    
-    }
-}
-
 function reimport_image() {
+    space_divided = function(text) {
+        var new_text = text.replace('\r', ' ');
+        new_text = new_text.replace('\n', ' ');
+        new_text = new_text.replace('\t', ' ');
+        while(true) {
+            new_new_text = new_text.replace('  ', ' ');
+            if(new_new_text.length == new_text.length)
+                return new_text;
+            new_text = new_new_text;    
+        }
+    }
     var text = document.getElementById("import_PGM").value;
     document.getElementById("import_status").innerHTML = "";
     var lines = text.split("\n");
