@@ -471,6 +471,7 @@ function init_canvas(){
                 pixels[in_pixels_i][in_pixels_j] += 1;
             pixels[in_pixels_i][in_pixels_j] = Math.floor(pixels[in_pixels_i][in_pixels_j]) % 8;
             pixels[in_pixels_i][in_pixels_j] /= 7;
+            splines_points_tangents = turn_pixels_into_splines(); 
         } else if(document.getElementById("tool_2").checked) { // points
             splines_points_tangents[1][cur_point_index_1][0][0] = x / pixel_size;
             splines_points_tangents[1][cur_point_index_1][0][1] = y / pixel_size;
@@ -539,7 +540,6 @@ function draw_canvas(){
     context.closePath();    
     
     // contour
-    splines_points_tangents = turn_pixels_into_splines();   // here is the problem: this should be extracted
     draw_the_splines(context, splines_points_tangents[0]);
     
     // points if needed
@@ -649,6 +649,7 @@ function reimport_image() {
         for(var i = 0; i < new_h; ++i)
             for(var j = 0; j < new_w; ++j)
                 pixels[i][j] = parseInt(numbers[4 + i*new_w + j]) / new_depth;
+        splines_points_tangents = turn_pixels_into_splines();            
     } catch (error) {
         document.getElementById("import_status").innerHTML = "Sorry, couldn't parse that. " + error.message;
     }
@@ -721,8 +722,8 @@ P2
     </textarea>
 
     <script language="JavaScript">
+    reimport_image();    
     init_canvas();    
-    reimport_image();
     </script>
            
     </center>
