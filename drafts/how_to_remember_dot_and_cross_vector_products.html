@@ -71,7 +71,163 @@ u {
 }
     </style>
     <script language="JavaScript">
+// client
+var w = 640.0;
+var h = 512.0;
 
+// visible region
+var x_min = -5.0;
+var y_min = -4.0;
+var x_max = 5.0;
+var y_max = 4.0;
+
+var client_x_center = w*(0-x_min)/(x_max-x_min);
+var client_x_step = (w/(x_max-x_min));
+
+var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+var client_y_step = (h/(y_max-y_min));
+
+function client_to_x(client_x){
+    return (client_x - client_x_center) / client_x_step;
+}
+
+function client_to_y(client_y){
+    return (client_y_center - client_y) / client_y_step;
+}
+
+function x_to_client(x){
+    return x * client_x_step + client_x_center;
+}
+
+function y_to_client(y){
+    return client_y_center - y * client_y_step;
+}
+
+function draw_grid_on(context){
+    // grid
+    context.beginPath();
+    context.moveTo(0, client_y_center);
+    context.lineTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center - 5);
+    context.moveTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center + 5);
+    context.moveTo(client_x_center, h);
+    context.lineTo(client_x_center, 0);
+    context.lineTo(client_x_center - 5, 12);
+    context.moveTo(client_x_center, 0);
+    context.lineTo(client_x_center + 5, 12);
+    context.fillStyle="#000000";
+    for(var i = x_min + 1; i <= x_max - 1; i++){
+        context.moveTo(client_x_center + i*client_x_step, client_y_center);
+        context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+        context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+    }
+    for(var i = y_min + 1; i <= y_max - 1; i++){
+        context.moveTo(client_x_center, client_y_center - i*client_y_step);
+        context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+        context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+    }
+    context.strokeStyle = "#000000";
+    context.stroke();
+    context.closePath();
+}
+
+var dot_x = -3;
+var dot_y = 2; 
+var cross_x = 3;
+var cross_y = -1.5;
+
+function init_dot(){
+    var dot = document.getElementById("dot");
+    var canvas_rect = dot.getBoundingClientRect();
+    draw_dot(0, 0, false);
+
+    dot.addEventListener('mousemove', function(e){
+        var canvas_rect = dot.getBoundingClientRect();
+        draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+            dot_x = client_to_x(e.clientX - canvas_rect.left);
+            dot_y = client_to_y(e.clientY - canvas_rect.top);
+            draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+        }
+    }, false);
+
+    dot.addEventListener('mousedown', function(e){
+        var canvas_rect = dot.getBoundingClientRect();
+        dot_x = client_to_x(e.clientX - canvas_rect.left);
+        dot_y = client_to_y(e.clientY - canvas_rect.top);
+        draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    dot.addEventListener('mouseleave', function(e){
+        draw_dot(0, 0, false);
+    }, false);
+}
+
+function draw_dot(client_x, client_y, do_guides){
+    var dot = document.getElementById("dot");
+    var context = dot.getContext("2d");
+    context.font = "16px sans-serif";
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // grid
+    draw_grid_on(context);
+
+    // point
+    context.fillStyle="#008800";
+    context.beginPath();
+    context.arc(x_to_client(dot_x), y_to_client(dot_y), 2, 0, 2*Math.PI);
+    context.fill();
+    context.closePath();
+}
+
+function init_cross(){
+    var cross = document.getElementById("cross");
+    var canvas_rect = cross.getBoundingClientRect();
+    draw_cross(0, 0, false);
+
+    cross.addEventListener('mousemove', function(e){
+        var canvas_rect = cross.getBoundingClientRect();
+        draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+            cross_x = client_to_x(e.clientX - canvas_rect.left);
+            cross_y = client_to_y(e.clientY - canvas_rect.top);
+            draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+        }
+    }, false);
+
+    cross.addEventListener('mousedown', function(e){
+        var canvas_rect = cross.getBoundingClientRect();
+        cross_x = client_to_x(e.clientX - canvas_rect.left);
+        cross_y = client_to_y(e.clientY - canvas_rect.top);
+        draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    cross.addEventListener('mouseleave', function(e){
+        draw_cross(0, 0, false);
+    }, false);
+}
+
+function draw_cross(client_x, client_y, do_guides){
+    var cross = document.getElementById("cross");
+    var context = cross.getContext("2d");
+    context.font = "16px sans-serif";
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // grid
+    draw_grid_on(context);
+
+    // point
+    context.fillStyle="#008800";
+    context.beginPath();
+    context.arc(x_to_client(cross_x), y_to_client(cross_y), 2, 0, 2*Math.PI);
+    context.fill();
+    context.closePath();
+}
     </script>
   </head>
   <body>
@@ -82,12 +238,18 @@ How to remember dot and cross vector products
     <p>
 ...
     </p>
-
-
-
+    <canvas id="dot" width=640 height=512></canvas>
     <p>
 ...
     </p>
+    <canvas id="cross" width=640 height=512></canvas>
+    <p>
+...
+    </p>
+    <script language="JavaScript">
+    init_dot();
+    init_cross();
+    </script>    
 
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
