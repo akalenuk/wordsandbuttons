@@ -401,8 +401,8 @@ function draw_the_splines(context, splines) {
     context.closePath();    
 }
 
-var cur_point_index_1 = -1;
-var cur_point_index_2 = -1;
+var cur_point_indexes = [];
+var cur_point_in_pair_indexes = [];
 var cur_tangent_index = -1;
 var cur_tangent_in_pair_index = -1;
 function init_canvas(){
@@ -412,25 +412,23 @@ function init_canvas(){
         var x = e.clientX - canvas_rect.left;
         var y = e.clientY - canvas_rect.top;
         if(document.getElementById("tool_2").checked) { // points
-            cur_point_index_1 = -1;
-            cur_point_index_2 = -1;
-            var min_d2_1 = (w+h)*(w+h);
-            var min_d2_2 = (w+h)*(w+h);
+            cur_point_indexes = [];
+            cur_point_in_pair_indexes = [];
             var points = points_and_tangents[0];
+            var min_d2 = (w+h)*(w+h);
             for(var i = 0; i < points.length; ++i) {
-                var px_1 = points[i][0][0] * pixel_size;
-                var py_1 = points[i][0][1] * pixel_size;
-                var d2_1 = (px_1 - x)*(px_1 - x) + (py_1 - y)*(py_1 - y);
-                if(cur_point_index_1 == -1 || d2_1 < min_d2_1) {
-                    min_d2_1 = d2_1;
-                    cur_point_index_1 = i;
-                }
-                var px_2 = points[i][1][0] * pixel_size;
-                var py_2 = points[i][1][1] * pixel_size;
-                var d2_2 = (px_2 - x)*(px_2 - x) + (py_2 - y)*(py_2 - y);
-                if(cur_point_index_2 == -1 || d2_2 < min_d2_2) {
-                    min_d2_2 = d2_2;
-                    cur_point_index_2 = i;
+                for(var j = 0; j < 2; ++ j) {
+                    var px = pixel_size * points[i][j][0];
+                    var py = pixel_size * points[i][j][1];
+                    var d2 = (px - x)*(px - x) + (py - y)*(py - y);
+                    if(cur_point_indexes.length == 0 || d2 < min_d2) {
+                        cur_point_indexes = [i];
+                        cur_point_in_pair_indexes = [j];
+                        min_d2 = d2;
+                    }else if(d2 == min_d2) {
+                        cur_point_indexes.push(i);
+                        cur_point_in_pair_indexes.push(j);
+                    }
                 }
             }
         } else if(document.getElementById("tool_3").checked) { // tangents
@@ -462,10 +460,10 @@ function init_canvas(){
             var y = e.clientY - canvas_rect.top;
             if(document.getElementById("tool_2").checked) { // points
                 var points = points_and_tangents[0];
-                points[cur_point_index_1][0][0] = x / pixel_size;
-                points[cur_point_index_1][0][1] = y / pixel_size;
-                points[cur_point_index_2][1][0] = x / pixel_size;
-                points[cur_point_index_2][1][1] = y / pixel_size;                
+                for(var i = 0; i < cur_point_indexes.length; ++i) {
+                    points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][0] = x / pixel_size;
+                    points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][1] = y / pixel_size;
+                }               
             } else if(document.getElementById("tool_3").checked) { // tangents
                 var points = points_and_tangents[0];
                 var tangents = points_and_tangents[1];
@@ -496,10 +494,10 @@ function init_canvas(){
             splines = turn_points_and_tangents_into_splines(points_and_tangents);
         } else if(document.getElementById("tool_2").checked) { // points
             var points = points_and_tangents[0];
-            points[cur_point_index_1][0][0] = x / pixel_size;
-            points[cur_point_index_1][0][1] = y / pixel_size;
-            points[cur_point_index_2][1][0] = x / pixel_size;
-            points[cur_point_index_2][1][1] = y / pixel_size;
+            for(var i = 0; i < cur_point_indexes.length; ++i) {
+                points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][0] = x / pixel_size;
+                points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][1] = y / pixel_size;
+            }
             splines = turn_points_and_tangents_into_splines(points_and_tangents);  
         } else if(document.getElementById("tool_3").checked) { // tangents
             var points = points_and_tangents[0];
