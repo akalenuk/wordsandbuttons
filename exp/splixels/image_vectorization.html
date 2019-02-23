@@ -198,7 +198,7 @@ function polynomial_in_x(A, x, n){
     return y;
 }
 
-// algorithm parts
+// pixel value with out of bounds compenstaions
 function pixel_in(pixels, i, j) {
     if(i >= pixels.length)
         return pixel_in(pixels, pixels.length-1, j);
@@ -266,21 +266,13 @@ function dxy(x, y) {
     return [dx / len, dy / len];
 }
 
-function limited_05(x) { // does it help here?
-    if(x < -0.5)
-        return -0.5;
-    if(x > +0.5)
-        return +0.5;
-    return x;
-}
-
 // gradient shift
 function gsx(x, y) {
-    return limited_05(dxy(x, y)[0] * (0.5 - dy_from_linear(x, y)[0]) * shiftd);
+    return dxy(x, y)[0] * (0.5 - dy_from_linear(x, y)[0]) * shiftd;
 }
 
 function gsy(x, y) {
-    return limited_05(dxy(x, y)[1] * (0.5 - dx_from_linear(x, y)[0]) * shiftd);
+    return dxy(x, y)[1] * (0.5 - dx_from_linear(x, y)[0]) * shiftd;
 }
 
 // sign without 0 option
@@ -292,76 +284,59 @@ function sign(x) {
 function turn_pixels_into_points_and_tangents(pixels) {
     var points = [];
     var tangents = [];
-    if(true) {
-        // "horizontal" pieces    
-        for(var i = 0; i <= ih; i += 1) {
-            var old_point = [];
-            var old_tangent = [];
-            for(var j = 0; j <= iw; j += 1) {
-                var margin_to_the_right = 
-                    sign(pixel_in(pixels, i-1, j+0) - threshold) != 
-                    sign(pixel_in(pixels, i+0, j+0) - threshold);
-                var margin_to_the_left = 
-                    sign(pixel_in(pixels, i-1, j-1) - threshold) != 
-                    sign(pixel_in(pixels, i+0, j-1) - threshold);
-                var margin_to_the_bottom = 
-                    sign(pixel_in(pixels, i+0, j-1) - threshold) != 
-                    sign(pixel_in(pixels, i+0, j+0) - threshold);
-                var margin_to_the_top = 
-                    sign(pixel_in(pixels, i-1, j-1) - threshold) != 
-                    sign(pixel_in(pixels, i-1, j+0) - threshold);                    
-                if(margin_to_the_right || margin_to_the_left) {
-                    var point = [j + gsx(j, i), i + gsy(j, i)];
-                    var tangent = dxy(point[0], point[1]);
-                    if(margin_to_the_left && margin_to_the_right && margin_to_the_top && margin_to_the_bottom)
-                        tangent = [0., 0.];
-                    if(margin_to_the_left && old_point) {
-                        var ds = Math.sign(pixel_in(pixels, i - 1, j - 1) - threshold);
-                        points.push([old_point, point]);
-                        tangents.push([[(-ds)*old_tangent[1], ds*old_tangent[0]], [(-ds)*tangent[1], ds*tangent[0]]]);
-                    }
-                    if(margin_to_the_right) {
-                        old_point = point;
-                        old_tangent = tangent;
-                    }   
-                }      
-            }
+
+    // "horizontal" pieces    
+    for(var i = 0; i <= ih; i += 1) {
+        var old_point = [];
+        var old_tangent = [];
+        for(var j = 0; j <= iw; j += 1) {
+            // if right, left, top, and bottom pixels have a sign change, there should be a spline there
+            var sign_change_on_the_right  = sign(pixel_in(pixels, i-1, j+0) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
+            var sign_change_on_the_left   = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i+0, j-1) - threshold);
+            var sign_change_on_the_bottom = sign(pixel_in(pixels, i+0, j-1) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
+            var sign_change_on_the_top    = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i-1, j+0) - threshold);                
+            if(sign_change_on_the_right || sign_change_on_the_left) {
+                var point = [j + gsx(j, i), i + gsy(j, i)];
+                var tangent = dxy(point[0], point[1]);
+                if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
+                    tangent = [0., 0.];
+                if(sign_change_on_the_left && old_point) {
+                    var ds = Math.sign(pixel_in(pixels, i - 1, j - 1) - threshold);
+                    points.push([old_point, point]);
+                    tangents.push([[(-ds)*old_tangent[1], ds*old_tangent[0]], [(-ds)*tangent[1], ds*tangent[0]]]);
+                }
+                if(sign_change_on_the_right) {
+                    old_point = point;
+                    old_tangent = tangent;
+                }   
+            }      
         }
     }
+
     // "vertical" pieces
-    if(true) {
-        for(var j = 0; j <= iw; j += 1) {
-            var old_point = [];
-            var old_tangent = [];
-            for(var i = 0; i <= ih; i += 1) {
-                var margin_to_the_right = 
-                    sign(pixel_in(pixels, i-1, j+0) - threshold) != 
-                    sign(pixel_in(pixels, i+0, j+0) - threshold);
-                var margin_to_the_left = 
-                    sign(pixel_in(pixels, i-1, j-1) - threshold) != 
-                    sign(pixel_in(pixels, i+0, j-1) - threshold);            
-                var margin_to_the_bottom = 
-                    sign(pixel_in(pixels, i+0, j-1) - threshold) != 
-                    sign(pixel_in(pixels, i+0, j+0) - threshold);
-                var margin_to_the_top = 
-                    sign(pixel_in(pixels, i-1, j-1) - threshold) != 
-                    sign(pixel_in(pixels, i-1, j+0) - threshold);
-                if(margin_to_the_bottom || margin_to_the_top) {
-                    var point = [j + gsx(j, i), i + gsy(j, i)];
-                    var tangent = dxy(point[0], point[1]);
-                    if(margin_to_the_left && margin_to_the_right && margin_to_the_top && margin_to_the_bottom)
-                        tangent = [0., 0.];
-                    if(margin_to_the_top && old_point) {
-                        var ds = Math.sign(pixel_in(pixels, i - 1, j - 1) - threshold);
-                        points.push([old_point, point]);
-                        tangents.push([[ds*old_tangent[1], (-ds)*old_tangent[0]], [ds*tangent[1], (-ds)*tangent[0]]]);
-                    }
-                    if(margin_to_the_bottom) {
-                        old_point = point;
-                        old_tangent = tangent;                    
-                    }   
-                }      
-            }
+    for(var j = 0; j <= iw; j += 1) {
+        var old_point = [];
+        var old_tangent = [];
+        for(var i = 0; i <= ih; i += 1) {
+            var sign_change_on_the_right  = sign(pixel_in(pixels, i-1, j+0) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
+            var sign_change_on_the_left   = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i+0, j-1) - threshold);
+            var sign_change_on_the_bottom = sign(pixel_in(pixels, i+0, j-1) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
+            var sign_change_on_the_top    = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i-1, j+0) - threshold); 
+            if(sign_change_on_the_bottom || sign_change_on_the_top) {
+                var point = [j + gsx(j, i), i + gsy(j, i)];
+                var tangent = dxy(point[0], point[1]);
+                if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
+                    tangent = [0., 0.];
+                if(sign_change_on_the_top && old_point) {
+                    var ds = Math.sign(pixel_in(pixels, i - 1, j - 1) - threshold);
+                    points.push([old_point, point]);
+                    tangents.push([[ds*old_tangent[1], (-ds)*old_tangent[0]], [ds*tangent[1], (-ds)*tangent[0]]]);
+                }
+                if(sign_change_on_the_bottom) {
+                    old_point = point;
+                    old_tangent = tangent;                    
+                }   
+            }      
         }
     }
     return [points, tangents];
