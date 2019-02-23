@@ -160,7 +160,8 @@ function reset_pixels() {
     }
 }
 
-var splines_points_tangents = [];
+var points_and_tangents = [];
+var splines = [];
 
 // solver specific to [0..1] parametrized splines
 function spline_for(p1, p1d, p2, p2d) {
@@ -288,8 +289,7 @@ function sign(x) {
 }
 
 // the algorithm itself
-function turn_pixels_into_splines() {
-    var splines = [];
+function turn_pixels_into_points_and_tangents(pixels) {
     var points = [];
     var tangents = [];
     if(true) {
@@ -317,11 +317,8 @@ function turn_pixels_into_splines() {
                         tangent = [0., 0.];
                     if(margin_to_the_left && old_point) {
                         var ds = Math.sign(pixel_in(i - 1, j - 1) - threshold);
-                        var Px = spline_for(old_point[0], (-ds)*old_tangent[1], point[0], (-ds)*tangent[1]);
-                        var Py = spline_for(old_point[1], ds*old_tangent[0], point[1], ds*tangent[0]);
                         points.push([old_point, point]);
                         tangents.push([[(-ds)*old_tangent[1], ds*old_tangent[0]], [(-ds)*tangent[1], ds*tangent[0]]]);
-                        splines.push([Px, Py]);
                     }
                     if(margin_to_the_right) {
                         old_point = point;
@@ -356,11 +353,8 @@ function turn_pixels_into_splines() {
                         tangent = [0., 0.];
                     if(margin_to_the_top && old_point) {
                         var ds = Math.sign(pixel_in(i - 1, j - 1) - threshold);
-                        var Px = spline_for(old_point[0] , ds*old_tangent[1], point[0], ds*tangent[1]);
-                        var Py = spline_for(old_point[1], (-ds)*old_tangent[0], point[1], (-ds)*tangent[0]);
                         points.push([old_point, point]);
                         tangents.push([[ds*old_tangent[1], (-ds)*old_tangent[0]], [ds*tangent[1], (-ds)*tangent[0]]]);
-                        splines.push([Px, Py]);
                     }
                     if(margin_to_the_bottom) {
                         old_point = point;
@@ -370,7 +364,19 @@ function turn_pixels_into_splines() {
             }
         }
     }
-    return [splines, points, tangents];
+    return [points, tangents];
+}
+
+function turn_points_and_tangents_into_splines(points_and_tangents)
+{
+    var points = points_and_tangents[0];
+    var tangents = points_and_tangents[1];
+    for(var i = 0; i < points.length; ++i) {
+        var Px = spline_for(points[i][0][0], tangents[i][0][1], points[i][1][0], tangents[i][1][1]);
+        var Py = spline_for(points[i][0][1], tangents[i][0][0], points[i][1][1], tangents[i][1][0]);
+        splines.push([Px, Py]);
+    }
+    return splines
 }
 
 function draw_the_splines(context, splines) {
@@ -408,7 +414,7 @@ function init_canvas(){
         if(document.getElementById("tool_2").checked) { // points
             cur_point_index_1 = -1;
             cur_point_index_2 = -1;
-            var points = splines_points_tangents[1];
+            var points = points_and_tangents[0];
             for(var i = 0; i < points.length; ++i) {
                 var px_1 = points[i][0][0] * pixel_size;
                 var py_1 = points[i][0][1] * pixel_size;
@@ -426,18 +432,6 @@ function init_canvas(){
                 }
             }
         } else if(document.getElementById("tool_3").checked) { // tangents
-/*            cur_tangent_index = -1;
-            var points = splines_points_tangents[1];
-            var tangents = splines_points_tangents[2];
-            for(var i = 0; i < points.length; ++i) {
-                var px = (points[i][0] + tangent[i][0]) * pixel_size;
-                var py = (points[i][1] + tangent[i][1]) * pixel_size;
-                var d2 = (px-x)*(px-x) + (py-y)*(py-y);
-                if(cur_tangent_index == -1 || d2 < min_d2) {
-                    min_d2 = d2;
-                    cur_tangent_index = i;
-                }
-            }*/
         }
         
     }, false);
@@ -448,11 +442,13 @@ function init_canvas(){
             var x = e.clientX - canvas_rect.left;
             var y = e.clientY - canvas_rect.top;
             if(document.getElementById("tool_2").checked) { // points
-                splines_points_tangents[1][cur_point_index_1][0][0] = x / pixel_size;
-                splines_points_tangents[1][cur_point_index_1][0][1] = y / pixel_size;
-                splines_points_tangents[1][cur_point_index_2][1][0] = x / pixel_size;
-                splines_points_tangents[1][cur_point_index_2][1][1] = y / pixel_size;                
+                var points = points_and_tangents[0];
+                points[cur_point_index_1][0][0] = x / pixel_size;
+                points[cur_point_index_1][0][1] = y / pixel_size;
+                points[cur_point_index_2][1][0] = x / pixel_size;
+                points[cur_point_index_2][1][1] = y / pixel_size;                
             }
+            splines = turn_points_and_tangents_into_splines(points_and_tangents);
             draw_canvas();
         }
     }, false);
@@ -471,12 +467,15 @@ function init_canvas(){
                 pixels[in_pixels_i][in_pixels_j] += 1;
             pixels[in_pixels_i][in_pixels_j] = Math.floor(pixels[in_pixels_i][in_pixels_j]) % 8;
             pixels[in_pixels_i][in_pixels_j] /= 7;
-            splines_points_tangents = turn_pixels_into_splines(); 
+            points_and_tangents = turn_pixels_into_points_and_tangents(pixels);
+            splines = turn_points_and_tangents_into_splines(points_and_tangents);
         } else if(document.getElementById("tool_2").checked) { // points
-            splines_points_tangents[1][cur_point_index_1][0][0] = x / pixel_size;
-            splines_points_tangents[1][cur_point_index_1][0][1] = y / pixel_size;
-            splines_points_tangents[1][cur_point_index_2][1][0] = x / pixel_size;
-            splines_points_tangents[1][cur_point_index_2][1][1] = y / pixel_size; 
+            var points = points_and_tangents[0];
+            points[cur_point_index_1][0][0] = x / pixel_size;
+            points[cur_point_index_1][0][1] = y / pixel_size;
+            points[cur_point_index_2][1][0] = x / pixel_size;
+            points[cur_point_index_2][1][1] = y / pixel_size;
+            splines = turn_points_and_tangents_into_splines(points_and_tangents);  
         }
         draw_canvas();            
     }, false);
@@ -540,12 +539,12 @@ function draw_canvas(){
     context.closePath();    
     
     // contour
-    draw_the_splines(context, splines_points_tangents[0]);
+    draw_the_splines(context, splines);
     
     // points if needed
     if(document.getElementById("tool_2").checked) {
-        var points = splines_points_tangents[1];
-        for(var i = 0; i < splines_points_tangents[1].length; ++i) {
+        var points = points_and_tangents[0];
+        for(var i = 0; i < points.length; ++i) {
             for(var j = 0; j < 2; ++j) {
                 context.beginPath();
                 context.arc(pixel_size * points[i][j][0], pixel_size * points[i][j][1], 3, 0, 2*Math.PI);
@@ -558,9 +557,9 @@ function draw_canvas(){
     
     // tangents if needed
     if(document.getElementById("tool_3").checked) {
-        var points = splines_points_tangents[1];
-        var tangents = splines_points_tangents[2];
-        for(var i = 0; i < splines_points_tangents[1].length; ++i) {
+        var points = points_and_tangents[0];
+        var tangents = points_and_tangents[1];
+        for(var i = 0; i < points.length; ++i) {
             for(var j = 0; j < 2; ++j) {
                 context.beginPath();
                 context.arc(pixel_size * points[i][j][0], pixel_size * points[i][j][1], 3, 0, 2*Math.PI);
@@ -649,7 +648,8 @@ function reimport_image() {
         for(var i = 0; i < new_h; ++i)
             for(var j = 0; j < new_w; ++j)
                 pixels[i][j] = parseInt(numbers[4 + i*new_w + j]) / new_depth;
-        splines_points_tangents = turn_pixels_into_splines();            
+        points_and_tangents = turn_pixels_into_points_and_tangents(pixels);
+        splines = turn_points_and_tangents_into_splines(points_and_tangents);
     } catch (error) {
         document.getElementById("import_status").innerHTML = "Sorry, couldn't parse that. " + error.message;
     }
