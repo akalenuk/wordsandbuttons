@@ -263,8 +263,7 @@ function turn_pixels_into_points_and_tangents(pixels) {
                 var g_shift = gradient_shift(pixels, threshold, j, i);
                 var point = [j + g_shift[0], i + g_shift[1]];
                 var g = gradient(pixels, point[0], point[1]);
-                var ds = Math.sign(pixel_in(pixels, i - 1, j - 1) - threshold);                
-                var tangent = [-ds*g[1], ds*g[0]];
+                var tangent = [-g[0], g[1]];
                 if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
                     tangent = [0., 0.];
                 if(sign_change_on_the_left && old_point) {                    
@@ -273,7 +272,7 @@ function turn_pixels_into_points_and_tangents(pixels) {
                 }
                 if(sign_change_on_the_right) {
                     old_point = point;
-                    old_tangent = tangent;
+                    old_tangent = [-tangent[0], -tangent[1]];
                 }   
             }      
         }
@@ -291,9 +290,8 @@ function turn_pixels_into_points_and_tangents(pixels) {
             if(sign_change_on_the_bottom || sign_change_on_the_top) {
                 var g_shift = gradient_shift(pixels, threshold, j, i);
                 var point = [j + g_shift[0], i + g_shift[1]];
-                var g = gradient(pixels, point[0], point[1]);
-                var ds = Math.sign(pixel_in(pixels, i - 1, j - 1) - threshold);               
-                var tangent = [ds*g[1], -ds*g[0]];
+                var g = gradient(pixels, point[0], point[1]);             
+                var tangent = [g[0], -g[1]];
                 
                 if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
                     tangent = [0., 0.];
@@ -303,7 +301,7 @@ function turn_pixels_into_points_and_tangents(pixels) {
                 }
                 if(sign_change_on_the_bottom) {
                     old_point = point;
-                    old_tangent = tangent;                    
+                    old_tangent = [-tangent[0], -tangent[1]];                   
                 }   
             }      
         }
@@ -670,7 +668,6 @@ function reset_threshold() {
     <center>
     <br>
     <br>
-    <!--
     <textarea id="import_PGM" rows=14>
 P2
 # CREATOR: GIMP PNM Filter Version 1.1
@@ -693,7 +690,7 @@ P2
 0   0   0   0   0   73  57  0   0   0   2   20  0   0   0   0   
 0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
     </textarea>
-    -->
+    <!--
     <textarea id="import_PGM" rows=14>    
 P2
 3 3
@@ -702,6 +699,7 @@ P2
 0 14 0
 0 0 0
     </textarea>
+    -->
     <form>
         Grey value threshold: <input type="text" id="threshold" value="0.5">
         <button type="button" style="width: 200pt;" onclick="reset_threshold(); reimport_image()">Reimport the PGM</button> 
