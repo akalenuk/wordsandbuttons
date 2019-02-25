@@ -234,8 +234,9 @@ function gradient(pixels, x, y) {
 
 function gradient_shift(pixels, threshold, x, y) {
     var g = gradient(pixels, x, y);
+    var g_norm = Math.sqrt(g[0]*g[0] + g[1]*g[1]) * 0.5;
     var d = threshold - value_in(pixels, x, y);
-    return [g[0] * d, g[1] * d];
+    return [g[0] * d / g_norm, g[1] * d / g_norm];
 }
 
 // sign without 0 option
@@ -261,7 +262,7 @@ function turn_pixels_into_points_and_tangents(pixels) {
             if(sign_change_on_the_right || sign_change_on_the_left) {
                 var g_shift = gradient_shift(pixels, threshold, j, i);
                 var point = [j + g_shift[0], i + g_shift[1]];
-                var g = gradient(pixels, j, i);
+                var g = gradient(pixels, point[0], point[1]);
                 var ds = Math.sign(pixel_in(pixels, i - 1, j - 1) - threshold);                
                 var tangent = [-ds*g[1], ds*g[0]];
                 if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
@@ -290,7 +291,7 @@ function turn_pixels_into_points_and_tangents(pixels) {
             if(sign_change_on_the_bottom || sign_change_on_the_top) {
                 var g_shift = gradient_shift(pixels, threshold, j, i);
                 var point = [j + g_shift[0], i + g_shift[1]];
-                var g = gradient(pixels, j, i);
+                var g = gradient(pixels, point[0], point[1]);
                 var ds = Math.sign(pixel_in(pixels, i - 1, j - 1) - threshold);               
                 var tangent = [ds*g[1], -ds*g[0]];
                 
