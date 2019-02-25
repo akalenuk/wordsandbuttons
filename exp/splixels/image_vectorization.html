@@ -208,7 +208,9 @@ function pixel_in(pixels, i, j) {
         return pixel_in(pixels, i, pixels[0].length-1);
     if(j < 0)
         return pixel_in(pixels, i, 0);
-    return pixels[Math.floor(i)][Math.floor(j)];
+    if(!pixels[i])
+        alert(i);
+    return pixels[i][j];
 }
 
 // linear interpolation
@@ -287,6 +289,19 @@ function gsy(x, y) {
     return dxy(x, y)[1] * (threshold - dx_from_linear(x, y)[0]) * shiftd;
 }
 
+// atother attempt
+function gradient(pixels, x, y) {
+    const epsilon = 1e-5;
+    return [(value_in(pixels, x + epsilon, y) - value_in(pixels, x, y)) / epsilon,
+            (value_in(pixels, x, y + epsilon) - value_in(pixels, x, y)) / epsilon];
+}
+
+function gradient_shift(pixels, threshold, x, y) {
+    var g = gradient(pixels, x, y);
+    var d = threshold - value_in(pixels, x, y);
+    return [g[0] * d, g[1] * d];
+}
+
 // sign without 0 option
 function sign(x) {
     return x >= 0 ? 1 : -1;
@@ -308,14 +323,16 @@ function turn_pixels_into_points_and_tangents(pixels) {
             var sign_change_on_the_bottom = sign(pixel_in(pixels, i+0, j-1) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
             var sign_change_on_the_top    = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i-1, j+0) - threshold);                
             if(sign_change_on_the_right || sign_change_on_the_left) {
-                var point = [j + gsx(j, i), i + gsy(j, i)];
-                var tangent = dxy(point[0], point[1]);
+                var g_shift = gradient_shift(pixels, threshold, j, i);
+                var point = [j + g_shift[0], i + g_shift[1]];
+                var g = gradient(pixels, j, i);
+                var ds = Math.sign(pixel_in(pixels, i - 1, j - 1) - threshold);                
+                var tangent = [-ds*g[1], ds*g[0]];
                 if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
                     tangent = [0., 0.];
-                if(sign_change_on_the_left && old_point) {
-                    var ds = Math.sign(pixel_in(pixels, i - 1, j - 1) - threshold);
+                if(sign_change_on_the_left && old_point) {                    
                     points.push([old_point, point]);
-                    tangents.push([[(-ds)*old_tangent[1], ds*old_tangent[0]], [(-ds)*tangent[1], ds*tangent[0]]]);
+                    tangents.push([old_tangent, tangent]);
                 }
                 if(sign_change_on_the_right) {
                     old_point = point;
@@ -335,14 +352,17 @@ function turn_pixels_into_points_and_tangents(pixels) {
             var sign_change_on_the_bottom = sign(pixel_in(pixels, i+0, j-1) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
             var sign_change_on_the_top    = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i-1, j+0) - threshold); 
             if(sign_change_on_the_bottom || sign_change_on_the_top) {
-                var point = [j + gsx(j, i), i + gsy(j, i)];
-                var tangent = dxy(point[0], point[1]);
+                var g_shift = gradient_shift(pixels, threshold, j, i);
+                var point = [j + g_shift[0], i + g_shift[1]];
+                var g = gradient(pixels, j, i);
+                var ds = Math.sign(pixel_in(pixels, i - 1, j - 1) - threshold);               
+                var tangent = [ds*g[1], -ds*g[0]];
+                
                 if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
                     tangent = [0., 0.];
                 if(sign_change_on_the_top && old_point) {
-                    var ds = Math.sign(pixel_in(pixels, i - 1, j - 1) - threshold);
                     points.push([old_point, point]);
-                    tangents.push([[ds*old_tangent[1], (-ds)*old_tangent[0]], [ds*tangent[1], (-ds)*tangent[0]]]);
+                    tangents.push([old_tangent, tangent]);
                 }
                 if(sign_change_on_the_bottom) {
                     old_point = point;
