@@ -539,6 +539,10 @@ function draw_canvas(){
         pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
         pixel_field.data[i + 2] = 0xFF;
         pixel_field.data[i + 3] = 0xFF;
+        // threshold
+        if((value_in(pixels, (on_canvas_j-1) / pixel_size, on_canvas_i / pixel_size) - threshold) * (value_in(pixels, on_canvas_j / pixel_size, on_canvas_i / pixel_size) - threshold) < 0
+        || (value_in(pixels, on_canvas_j / pixel_size, (on_canvas_i-1) / pixel_size) - threshold) * (value_in(pixels, on_canvas_j / pixel_size, on_canvas_i / pixel_size) - threshold) < 0)
+            pixel_field.data[i + 2] = 0x33;
     }
     context.putImageData(pixel_field, -0.5, -0.5);
     
