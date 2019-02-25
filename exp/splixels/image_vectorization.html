@@ -225,71 +225,7 @@ function value_in(pixels, x, y) {
          + pixel_in(pixels, i+1, j) * (ti) * (1 - tj);
 }
 
-
-var nd = 1.5;
-var weight = 4;
-var shiftd = 1.5;
-
-function weight_of_point(x, y, xj, yi) {
-    return Math.pow(2 * Math.pow(0.5, weight), 0.5)
-        / (Math.pow(Math.abs(x - xj), weight) + Math.pow(Math.abs(y - yi), weight));
-}
-
-function dx_from_linear(x, y) {
-    var A = [[0.0, 0.0], [0.0, 0.0]];
-    var B = [0.0, 0.0];
-    for(var yi = y - nd; yi <= y + nd; yi += 1) {
-        for(var xj = x - nd; xj <= x + nd; xj += 1) {
-            var w = weight_of_point(x, y, xj, yi);
-            A[0][0] += w;
-            A[0][1] += w * (xj - x);
-            A[1][0] += w * (xj - x);
-            A[1][1] += w * Math.pow(xj - x, 2);
-            B[0] += w * pixel_in(pixels, yi, xj);
-            B[1] += w * (xj - x) * pixel_in(pixels, yi, xj);
-        }
-    }
-    var px = solved_linear2_or_zero(A, B);
-    return px;
-}
-
-function dy_from_linear(x, y) {
-    var A = [[0.0, 0.0], [0.0, 0.0]];
-    var B = [0.0, 0.0];
-    for(var yi = y - nd; yi <= y + nd; yi += 1) {
-        for(var xj = x - nd; xj <= x + nd; xj += 1) {
-            var w = weight_of_point(x, y, xj, yi);
-            A[0][0] += w;
-            A[0][1] += w * (yi - y);
-            A[1][0] += w * (yi - y);
-            A[1][1] += w * Math.pow(yi - y, 2);
-            B[0] += w * pixel_in(pixels, yi, xj);
-            B[1] += w * (yi - y) * pixel_in(pixels, yi, xj);
-        }
-    }
-    var px = solved_linear2_or_zero(A, B);
-    return px;
-}
-
-function dxy(x, y) {
-    var dx = dx_from_linear(x, y)[1];
-    var dy = dy_from_linear(x, y)[1];
-    var len = Math.sqrt(dx * dx + dy * dy);
-    if(len < 1e-5)
-        return [0.0, 0.0];
-    return [dx / len, dy / len];
-}
-
-// gradient shift
-function gsx(x, y) {
-    return dxy(x, y)[0] * (threshold - dy_from_linear(x, y)[0]) * shiftd;
-}
-
-function gsy(x, y) {
-    return dxy(x, y)[1] * (threshold - dx_from_linear(x, y)[0]) * shiftd;
-}
-
-// atother attempt
+// gradient
 function gradient(pixels, x, y) {
     const epsilon = 1e-5;
     return [(value_in(pixels, x + epsilon, y) - value_in(pixels, x, y)) / epsilon,
