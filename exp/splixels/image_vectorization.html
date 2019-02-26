@@ -263,8 +263,9 @@ function turn_pixels_into_points_and_tangents(pixels) {
                 var g_shift = gradient_shift(pixels, threshold, j, i);
                 var point = [j + g_shift[0], i + g_shift[1]];
                 var g = gradient(pixels, point[0], point[1]);
-                var sign_invertion = sign(g[0]) * sign(g[1]);
-                var tangent = [-sign_invertion*g[1], sign_invertion*g[0]];
+                var sign_inversion = sign(g[0]) * sign(g[1]);
+                sign_inversion *= sign(value_in(pixels, point[0], point[1]) - threshold);
+                var tangent = [-sign_inversion*g[1], sign_inversion*g[0]];
                 if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
                     tangent = [0., 0.];
                 if(sign_change_on_the_left && old_point) {                    
@@ -292,8 +293,9 @@ function turn_pixels_into_points_and_tangents(pixels) {
                 var g_shift = gradient_shift(pixels, threshold, j, i);
                 var point = [j + g_shift[0], i + g_shift[1]];
                 var g = gradient(pixels, point[0], point[1]);             
-                var sign_invertion = sign(g[0]) * sign(g[1]);
-                var tangent = [sign_invertion*g[1], -sign_invertion*g[0]];
+                var sign_inversion = sign(g[0]) * sign(g[1]);
+                sign_inversion *= sign(value_in(pixels, point[0], point[1]) - threshold);
+                var tangent = [sign_inversion*g[1], -sign_inversion*g[0]];
                 if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
                     tangent = [0., 0.];
                 if(sign_change_on_the_top && old_point) {
@@ -669,7 +671,6 @@ function reset_threshold() {
     <center>
     <br>
     <br>
-<!--    
     <textarea id="import_PGM" rows=14>
 P2
 # CREATOR: GIMP PNM Filter Version 1.1
@@ -692,7 +693,7 @@ P2
 0   0   0   0   0   73  57  0   0   0   2   20  0   0   0   0   
 0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
     </textarea>
--->
+<!--
     <textarea id="import_PGM" rows=14>    
 P2
 3 3
@@ -701,7 +702,7 @@ P2
 0 14 0
 0 0 0
     </textarea>
-    
+-->
     <form>
         Grey value threshold: <input type="text" id="threshold" value="0.5">
         <button type="button" style="width: 200pt;" onclick="reset_threshold(); reimport_image()">Reimport the PGM</button> 
