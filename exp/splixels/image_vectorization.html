@@ -124,37 +124,17 @@ var w = 1024.0;
 var h = 1024.0;
 
 // algorithm
-var pixel_size = 64.0;
-
 var threshold = 0.5;
 
 // pixels
-var iw = Math.floor(w / pixel_size) + 1;
-var ih = Math.floor(h / pixel_size) + 1;
-var pixels = [
-// nothing
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+var pixels = [];
+var pixel_size;
 
-function reset_pixels() {
+function reset_pixels(w, h) {
     pixels = [];
-    for(var i = 0; i < ih; ++i) {
+    for(var i = 0; i < h; ++i) {
         pixelsi = []
-        for(var j = 0; j <iw; ++j)
+        for(var j = 0; j <w; ++j)
             pixelsi.push(0);
         pixels.push(pixelsi);
     }
@@ -177,16 +157,6 @@ function spline_for(p1, p1d, p2, p2d) {
         3 * p2 - p2d - 3*p1 - 2*p1d,
         p2d + p1d - 2*p2 + 2*p1
     ];
-}
-
-// solver than returns 0, 0 if there is no solution
-function solved_linear2_or_zero(A, B) {
-    var d = (A[0][0]*A[1][1] - A[0][1]*A[1][0])
-    if(d == 0.0)
-        return [0.0, 0.0];
-    var x1 = (-A[0][1]*B[1] + A[1][1]*B[0]) / d;
-    var x2 = ( A[0][0]*B[1] - A[1][0]*B[0]) / d;
-    return [x1, x2];
 }
 
 // polynomial
@@ -248,10 +218,10 @@ function turn_pixels_into_points_and_tangents(pixels) {
     var tangents = [];
 
     // "horizontal" pieces    
-    for(var i = 0; i <= ih; i += 1) {
+    for(var i = 0; i <= pixels.length; i += 1) {
         var old_point = [];
         var old_tangent = [];
-        for(var j = 0; j <= iw; j += 1) {
+        for(var j = 0; j <= pixels[0].length; j += 1) {
             // if right, left, top, and bottom pixels have a sign change, there should be a spline there
             var sign_change_on_the_right  = sign(pixel_in(pixels, i-1, j+0) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
             var sign_change_on_the_left   = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i+0, j-1) - threshold);
@@ -277,10 +247,10 @@ function turn_pixels_into_points_and_tangents(pixels) {
     }
 
     // "vertical" pieces
-    for(var j = 0; j <= iw; j += 1) {
+    for(var j = 0; j <= pixels[0].length; j += 1) {
         var old_point = [];
         var old_tangent = [];
-        for(var i = 0; i <= ih; i += 1) {
+        for(var i = 0; i <= pixels.length; i += 1) {
             var sign_change_on_the_right  = sign(pixel_in(pixels, i-1, j+0) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
             var sign_change_on_the_left   = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i+0, j-1) - threshold);
             var sign_change_on_the_bottom = sign(pixel_in(pixels, i+0, j-1) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
@@ -614,9 +584,7 @@ function reimport_image() {
         h = 1024.0 * new_h / new_w;
         document.getElementById("canvas").height = h;
         pixel_size = w / new_w;
-        iw = new_w;
-        ih = new_h;
-        reset_pixels();
+        reset_pixels(new_w, new_h);
         for(var i = 0; i < new_h; ++i)
             for(var j = 0; j < new_w; ++j)
                 pixels[i][j] = parseInt(numbers[4 + i*new_w + j]) / new_depth;
@@ -633,10 +601,10 @@ function reimport_image() {
 function export_splines() {
     const printable = function(x) {
         return Math.floor(x * 100);
-    }; 
-    
+    };
     var svg = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
-    svg += "<svg width=\"" + printable(iw) + "\" height=\"" + printable(ih) + "\" viewBox=\"0 0 " + printable(iw) + " " + printable(ih) + "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
+    svg += "<svg width=\"" + printable(pixels[0].length) + "\" height=\"" + printable(pixels.length);
+    svg += "\" viewBox=\"0 0 " + printable(pixels[0].length) + " " + printable(pixels.length) + "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
     for(var i = 0; i < points_and_tangents[0].length; ++i) {
         var p1 = points_and_tangents[0][i][0];
         var p2 = points_and_tangents[0][i][1];
@@ -651,11 +619,6 @@ function export_splines() {
 }
 
 // ui
-function reset_all() {
-    reset_pixels();
-    draw_canvas();
-}
-
 function reset_threshold() {
     threshold = parseFloat(document.getElementById("threshold").value);
 }
