@@ -1,6 +1,6 @@
 # wordsandbuttons.online
 
-This is the source code for Words and Buttons Online — a growing collection of interactive tutorials, guides, and quizzes about things generally considered boring. Maths, software engineering, programming languages.
+This is the source code for Words and Buttons Online — a growing collection of interactive tutorials, guides, and quizzes about things generally considered boring. Maths, algorithms, programming languages.
 
 See: https://wordsandbuttons.online/
 
