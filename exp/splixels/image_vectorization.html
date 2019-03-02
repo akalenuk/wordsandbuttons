@@ -212,8 +212,14 @@ function sign(x) {
     return x >= 0 ? 1 : -1;
 }
 
+//
+function fit_point_better(pixels, threshold, point) {
+    gs = gradient_shift(pixels, threshold, point[0], point[1])
+    return [point[0] + gs[0], point[1] + gs[1]];
+}
+
 // the algorithm itself
-function turn_pixels_into_points_and_tangents(pixels) {
+function turn_pixels_into_points_and_tangents(pixels, threshold) {
     var points = [];
     var tangents = [];
 
@@ -228,8 +234,8 @@ function turn_pixels_into_points_and_tangents(pixels) {
             var sign_change_on_the_bottom = sign(pixel_in(pixels, i+0, j-1) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
             var sign_change_on_the_top    = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i-1, j+0) - threshold);                
             if(sign_change_on_the_right || sign_change_on_the_left) {
-                var g_shift = gradient_shift(pixels, threshold, j, i);
-                var point = [j + g_shift[0], i + g_shift[1]];
+                var point = [j, i];
+                point = fit_point_better(pixels, threshold, point);
                 var g = gradient(pixels, point[0], point[1]);
                 var tangent = g[1] >= 0 ? [g[1], -g[0]] : [-g[1], g[0]];
                 if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
@@ -256,8 +262,8 @@ function turn_pixels_into_points_and_tangents(pixels) {
             var sign_change_on_the_bottom = sign(pixel_in(pixels, i+0, j-1) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
             var sign_change_on_the_top    = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i-1, j+0) - threshold); 
             if(sign_change_on_the_bottom || sign_change_on_the_top) {
-                var g_shift = gradient_shift(pixels, threshold, j, i);
-                var point = [j + g_shift[0], i + g_shift[1]];
+                var point = [j, i];
+                point = fit_point_better(pixels, threshold, point);
                 var g = gradient(pixels, point[0], point[1]);             
                 var tangent = g[0] < 0 ? [g[1], -g[0]] : [-g[1], g[0]];
                 if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
@@ -399,7 +405,7 @@ function init_canvas(){
                 pixels[in_pixels_i][in_pixels_j] += 1;
             pixels[in_pixels_i][in_pixels_j] = Math.floor(pixels[in_pixels_i][in_pixels_j]) % 8;
             pixels[in_pixels_i][in_pixels_j] /= 7;
-            points_and_tangents = turn_pixels_into_points_and_tangents(pixels);
+            points_and_tangents = turn_pixels_into_points_and_tangents(pixels, threshold);
             splines = turn_points_and_tangents_into_splines(points_and_tangents);
         } else if(document.getElementById("tool_2").checked) { // points
             var points = points_and_tangents[0];
@@ -588,7 +594,7 @@ function reimport_image() {
         for(var i = 0; i < new_h; ++i)
             for(var j = 0; j < new_w; ++j)
                 pixels[i][j] = parseInt(numbers[4 + i*new_w + j]) / new_depth;
-        points_and_tangents = turn_pixels_into_points_and_tangents(pixels);
+        points_and_tangents = turn_pixels_into_points_and_tangents(pixels, threshold);
         splines = turn_points_and_tangents_into_splines(points_and_tangents);
     } catch (error) {
         document.getElementById("import_status").innerHTML = "Sorry, couldn't parse that. " + error.message;
