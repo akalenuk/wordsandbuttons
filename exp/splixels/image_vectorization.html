@@ -214,8 +214,10 @@ function sign(x) {
 
 // brings a point closer to the threshold isoline
 function fit_point_better(pixels, threshold, point) {
+    if(Math.abs(value_in(pixels, point[0], point[1]) - threshold) < 1/255)
+        return point;
     gs = gradient_shift(pixels, threshold, point[0], point[1])
-    return [point[0] + gs[0], point[1] + gs[1]];
+    return fit_point_better(pixels, threshold, [point[0] + gs[0], point[1] + gs[1]]);
 }
 
 // the algorithm itself
@@ -234,9 +236,7 @@ function turn_pixels_into_points_and_tangents(pixels, threshold) {
             var sign_change_on_the_bottom = sign(pixel_in(pixels, i+0, j-1) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
             var sign_change_on_the_top    = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i-1, j+0) - threshold);                
             if(sign_change_on_the_right || sign_change_on_the_left) {
-                var point = [j, i];
-                point = fit_point_better(pixels, threshold, point);
-                point = fit_point_better(pixels, threshold, point);
+                var point = fit_point_better(pixels, threshold, [j, i]);
                 var g = gradient(pixels, point[0], point[1]);
                 var tangent = g[1] >= 0 ? [g[1], -g[0]] : [-g[1], g[0]];
                 if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
@@ -263,9 +263,7 @@ function turn_pixels_into_points_and_tangents(pixels, threshold) {
             var sign_change_on_the_bottom = sign(pixel_in(pixels, i+0, j-1) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
             var sign_change_on_the_top    = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i-1, j+0) - threshold); 
             if(sign_change_on_the_bottom || sign_change_on_the_top) {
-                var point = [j, i];
-                point = fit_point_better(pixels, threshold, point);
-                point = fit_point_better(pixels, threshold, point);
+                var point = fit_point_better(pixels, threshold, [j, i]);
                 var g = gradient(pixels, point[0], point[1]);             
                 var tangent = g[0] < 0 ? [g[1], -g[0]] : [-g[1], g[0]];
                 if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
