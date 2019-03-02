@@ -212,7 +212,7 @@ function sign(x) {
     return x >= 0 ? 1 : -1;
 }
 
-//
+// brings a point closer to the threshold isoline
 function fit_point_better(pixels, threshold, point) {
     gs = gradient_shift(pixels, threshold, point[0], point[1])
     return [point[0] + gs[0], point[1] + gs[1]];
@@ -235,6 +235,7 @@ function turn_pixels_into_points_and_tangents(pixels, threshold) {
             var sign_change_on_the_top    = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i-1, j+0) - threshold);                
             if(sign_change_on_the_right || sign_change_on_the_left) {
                 var point = [j, i];
+                point = fit_point_better(pixels, threshold, point);
                 point = fit_point_better(pixels, threshold, point);
                 var g = gradient(pixels, point[0], point[1]);
                 var tangent = g[1] >= 0 ? [g[1], -g[0]] : [-g[1], g[0]];
@@ -263,6 +264,7 @@ function turn_pixels_into_points_and_tangents(pixels, threshold) {
             var sign_change_on_the_top    = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i-1, j+0) - threshold); 
             if(sign_change_on_the_bottom || sign_change_on_the_top) {
                 var point = [j, i];
+                point = fit_point_better(pixels, threshold, point);
                 point = fit_point_better(pixels, threshold, point);
                 var g = gradient(pixels, point[0], point[1]);             
                 var tangent = g[0] < 0 ? [g[1], -g[0]] : [-g[1], g[0]];
@@ -447,10 +449,6 @@ function draw_canvas(){
         pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
         pixel_field.data[i + 2] = 0xFF;
         pixel_field.data[i + 3] = 0xFF;
-        // threshold
-        if((value_in(pixels, (on_canvas_j-1) / pixel_size, on_canvas_i / pixel_size) - threshold) * (value_in(pixels, on_canvas_j / pixel_size, on_canvas_i / pixel_size) - threshold) < 0
-        || (value_in(pixels, on_canvas_j / pixel_size, (on_canvas_i-1) / pixel_size) - threshold) * (value_in(pixels, on_canvas_j / pixel_size, on_canvas_i / pixel_size) - threshold) < 0)
-            pixel_field.data[i + 2] = 0x33;
     }
     context.putImageData(pixel_field, -0.5, -0.5);
     
@@ -470,21 +468,6 @@ function draw_canvas(){
     context.stroke();
     context.setLineDash([]);
     context.closePath();
-    
-    // spline grid
-    /*context.beginPath();
-    for(var i = pixel_size / 2 ; i <= h; i += pixel_size) {
-        context.moveTo(0.0, i);
-        context.lineTo(w, i);
-    }
-    for(var j = pixel_size / 2; j <= w; j += pixel_size) {
-        context.moveTo(j, 0.0);
-        context.lineTo(j, h);
-    }
-    context.strokeStyle="#bb7799";
-    context.lineWidth=1;
-    context.stroke();
-    context.closePath();*/
     
     // contour
     draw_the_splines(context, splines);
@@ -535,16 +518,6 @@ function draw_canvas(){
             }
         }
     }
-    
-    // values
-    /*context.font = "16px Arial";
-    context.fillStyle = "#777777";
-    context.textAlign = "center";
-    context.textBaseline = "middle";    
-    for(var i = 0; i < pixels.length; ++i)
-        for(var j = 0; j < pixels[0].length; ++j) {
-            context.fillText(pixels[i][j], (j + 0.5)*pixel_size, (i + 0.5)*pixel_size);
-        }*/
 }
 
 // import from PGM
