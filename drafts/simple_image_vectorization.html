@@ -306,6 +306,108 @@ function draw_the_splines(context, splines) {
     context.closePath();    
 }
 
+// gray-scale canvas
+function draw_greyscale_canvas() {
+    var canvas = document.getElementById("greyscale_canvas");
+    var context = canvas.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // pixels
+    var pixel_field = context.createImageData(w, h);
+    for (var i = 0; i < pixel_field.data.length; i += 4) {
+        var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
+        var on_canvas_j = Math.floor(i / 4) % w;
+        var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
+        var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
+        var pixel_value = Math.max(Math.min(pixels[in_pixels_i][in_pixels_j], 1.0), 0.0);
+        pixel_field.data[i + 0] = 0xAA + (0xFF - 0xAA) * pixel_value;
+        pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
+        pixel_field.data[i + 2] = 0xFF;
+        pixel_field.data[i + 3] = 0xFF;
+    }
+    context.putImageData(pixel_field, -0.5, -0.5);
+    
+    // pixel grid
+    context.beginPath();
+    for(var i = pixel_size; i <= h; i += pixel_size) {
+        context.moveTo(0.0, i);
+        context.lineTo(w, i);
+    }
+    for(var j = pixel_size; j <= w; j += pixel_size) {
+        context.moveTo(j, 0.0);
+        context.lineTo(j, h);
+    }
+    context.strokeStyle="#AAAAAA";
+    context.lineWidth=1;
+    context.setLineDash([4, 4]);
+    context.stroke();
+    context.setLineDash([]);
+    context.closePath();
+    
+    context.font = "14px Arial";
+    context.fillStyle = "#000000";
+    context.textAlign = "center";
+    context.textBaseline = "middle"; 
+    for(var i = 0; i < pixels.length; ++i) {
+        for(var j = 0; j< pixels[0].length; ++j) {
+           context.fillText(Math.floor(255 * pixels[i][j]).toString(), (j + 0.5) * pixel_size, (i + 0.5) * pixel_size);
+        }
+    }
+}
+
+// gray-scale canvas contour
+function draw_greyscale_canvas_contour() {
+    var canvas = document.getElementById("greyscale_canvas_contour");
+    var context = canvas.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // pixels
+    var pixel_field = context.createImageData(w, h);
+    for (var i = 0; i < pixel_field.data.length; i += 4) {
+        var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
+        var on_canvas_j = Math.floor(i / 4) % w;
+        var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
+        var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
+        var pixel_value = Math.max(Math.min(pixels[in_pixels_i][in_pixels_j], 1.0), 0.0);
+        pixel_field.data[i + 0] = 0xAA + (0xFF - 0xAA) * pixel_value;
+        pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
+        pixel_field.data[i + 2] = 0xFF;
+        pixel_field.data[i + 3] = 0xFF;
+        if ( pixel_in(pixels, in_pixels_i, in_pixels_j) < threshold 
+          != pixel_in(pixels, Math.floor((on_canvas_i - 1) / pixel_size), in_pixels_j) < threshold 
+        ||   pixel_in(pixels, in_pixels_i, in_pixels_j) < threshold 
+          != pixel_in(pixels, in_pixels_i, Math.floor((on_canvas_j - 1) / pixel_size)) < threshold) {
+            pixel_field.data[i + 0] = 0x11;
+            pixel_field.data[i + 1] = 0x11;
+            pixel_field.data[i + 2] = 0x11;
+        }
+           
+    }
+    context.putImageData(pixel_field, -0.5, -0.5);
+    
+    // pixel grid
+    context.beginPath();
+    for(var i = pixel_size; i <= h; i += pixel_size) {
+        context.moveTo(0.0, i);
+        context.lineTo(w, i);
+    }
+    for(var j = pixel_size; j <= w; j += pixel_size) {
+        context.moveTo(j, 0.0);
+        context.lineTo(j, h);
+    }
+    context.strokeStyle="#AAAAAA";
+    context.lineWidth=1;
+    context.setLineDash([4, 4]);
+    context.stroke();
+    context.setLineDash([]);
+    context.closePath();
+}
+
+// the main canvas
 var cur_point_indexes = [];
 var cur_point_in_pair_indexes = [];
 var cur_tangent_index = -1;
@@ -597,7 +699,7 @@ function reset_threshold() {
 Simple image vectorization
     </h1>
     <p>
-Image vectorization is when you have some soapy raster image and you want to make a crisp vector picture out of it.
+Image vectorization is when you have some soapy raster image and you make a crisp vector picture out of it.
     </p>
     <img style="width: 505pt;" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Bitmap_VS_SVG.svg"/>
     <p class="comment">
@@ -628,9 +730,16 @@ Satellite images may have a lot or channels. Apart from the colors from the visi
     <p>
 Our image will be a simple gray-scale bitmap.
     </p>
-    
+    <canvas id="greyscale_canvas" width=640 height=640></canvas>
+    <p>
+Technically, we can turn it into some kind of vector representation with little effort. Let's just agree on some threshold, and find the contour of the pixels that have the values exceeding this threshold.
+    </p>
+    <canvas id="greyscale_canvas_contour" width=640 height=640></canvas>
+    <p>
+Well, it's simple, but it's not what we wanted. We want curves, not corners. And for that, we have to make our image less cornery.
+    </p>
     <h2>
-Import PGM    
+Import PGM
     </h2>
     <p>
 PGM is a 1-channel ASCII image format. You can make a PGM file in GIMP.
@@ -706,6 +815,8 @@ Only the outline is supported. No filling, no coloring.
     <script language="JavaScript">
     reimport_image();    
     init_canvas();    
+    draw_greyscale_canvas();
+    draw_greyscale_canvas_contour();
     </script>
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
