@@ -1,7 +1,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Splines from an image</title>
+    <title>Image vectorization: PGM -> SVG</title>
     <meta name="keywords" content="iterative,algorithms,guide,tutorial,learning">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <style>
@@ -200,6 +200,8 @@ function gradient(pixels, x, y) {
             (value_in(pixels, x, y + epsilon) - value_in(pixels, x, y)) / epsilon];
 }
 
+// how far should you shift the point to meet the isoline 
+// if value_in were a distance function
 function gradient_shift(pixels, threshold, x, y) {
     var g = gradient(pixels, x, y);
     var g_norm = Math.sqrt(g[0]*g[0] + g[1]*g[1]);
@@ -207,14 +209,10 @@ function gradient_shift(pixels, threshold, x, y) {
     return [g[0] * d / g_norm / g_norm, g[1] * d / g_norm / g_norm];
 }
 
-// sign without 0 option
-function sign(x) {
-    return x >= 0 ? 1 : -1;
-}
-
 // brings a point closer to the threshold isoline
 function fit_point_better(pixels, threshold, point) {
-    if(Math.abs(value_in(pixels, point[0], point[1]) - threshold) < 1/255)
+    const small_enough_error = 1/255;
+    if(Math.abs(value_in(pixels, point[0], point[1]) - threshold) < small_enough_error)
         return point;
     gs = gradient_shift(pixels, threshold, point[0], point[1])
     return fit_point_better(pixels, threshold, [point[0] + gs[0], point[1] + gs[1]]);
@@ -231,23 +229,32 @@ function turn_pixels_into_points_and_tangents(pixels, threshold) {
         var old_tangent = [];
         for(var j = 0; j <= pixels[0].length; j += 1) {
             // if right, left, top, and bottom pixels have a sign change, there should be a spline there
-            var sign_change_on_the_right  = sign(pixel_in(pixels, i-1, j+0) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
-            var sign_change_on_the_left   = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i+0, j-1) - threshold);
-            var sign_change_on_the_bottom = sign(pixel_in(pixels, i+0, j-1) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
-            var sign_change_on_the_top    = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i-1, j+0) - threshold);                
+            var sign_change_on_the_right  = (pixel_in(pixels, i-1, j+0) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+            var sign_change_on_the_left   = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i+0, j-1) - threshold) < 0;
+            var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+            var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
             if(sign_change_on_the_right || sign_change_on_the_left) {
+                // fits the point on a threshold isoline
                 var point = fit_point_better(pixels, threshold, [j, i]);
                 var g = gradient(pixels, point[0], point[1]);
+                
+                // we want our tangent to be X-positive for horizontal pieces
                 var tangent = g[1] >= 0 ? [g[1], -g[0]] : [-g[1], g[0]];
+                
+                // this is an T or X junction, the tangent is ambiguous
                 if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
                     tangent = [0., 0.];
+                    
+                // store the point+tangent and the previous point+tangent if there is one
                 if(sign_change_on_the_left && old_point) {                    
                     points.push([old_point, point]);
                     tangents.push([old_tangent, tangent]);
                 }
+                
+                // save the point+tangent for later
                 if(sign_change_on_the_right) {
                     old_point = point;
-                    old_tangent = [tangent[0], tangent[1]];
+                    old_tangent = tangent;
                 }   
             }      
         }
@@ -258,10 +265,10 @@ function turn_pixels_into_points_and_tangents(pixels, threshold) {
         var old_point = [];
         var old_tangent = [];
         for(var i = 0; i <= pixels.length; i += 1) {
-            var sign_change_on_the_right  = sign(pixel_in(pixels, i-1, j+0) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
-            var sign_change_on_the_left   = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i+0, j-1) - threshold);
-            var sign_change_on_the_bottom = sign(pixel_in(pixels, i+0, j-1) - threshold) != sign(pixel_in(pixels, i+0, j+0) - threshold);
-            var sign_change_on_the_top    = sign(pixel_in(pixels, i-1, j-1) - threshold) != sign(pixel_in(pixels, i-1, j+0) - threshold); 
+            var sign_change_on_the_right  = (pixel_in(pixels, i-1, j+0) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+            var sign_change_on_the_left   = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i+0, j-1) - threshold) < 0;
+            var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+            var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
             if(sign_change_on_the_bottom || sign_change_on_the_top) {
                 var point = fit_point_better(pixels, threshold, [j, i]);
                 var g = gradient(pixels, point[0], point[1]);             
@@ -274,7 +281,7 @@ function turn_pixels_into_points_and_tangents(pixels, threshold) {
                 }
                 if(sign_change_on_the_bottom) {
                     old_point = point;
-                    old_tangent = [tangent[0], tangent[1]];
+                    old_tangent = tangent;
                 }   
             }      
         }
