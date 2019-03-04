@@ -151,7 +151,7 @@ function polynomial_in_x(A, x){
     return y;
 }
 
-// pixel value with out of bounds compenstaions
+// pixel value with out of bounds checks
 function pixel_in(pixels, i, j) {
     if(i >= pixels.length)
         return pixel_in(pixels, pixels.length-1, j);
@@ -448,23 +448,6 @@ function draw_interpolation_canvas() {
            
     }
     context.putImageData(pixel_field, -0.5, -0.5);
-    
-    // pixel grid
-    context.beginPath();
-    for(var i = pixel_size; i <= h; i += pixel_size) {
-        context.moveTo(0.0, i);
-        context.lineTo(w, i);
-    }
-    for(var j = pixel_size; j <= w; j += pixel_size) {
-        context.moveTo(j, 0.0);
-        context.lineTo(j, h);
-    }
-    context.strokeStyle="#AAAAAA";
-    context.lineWidth=1;
-    context.setLineDash([4, 4]);
-    context.stroke();
-    context.setLineDash([]);
-    context.closePath();
 }
 
 // the main canvas
@@ -812,8 +795,38 @@ Let's say our image is not a table of values. Let's say we only know the values 
 This is called interpolation. The simplest case would be nearest neighbor interpolation, where for every point on an image, the value is the value from the nearest pixel center. But this simply turns it back into a table.
     </p>
     <p>
-A little more advanced is the bilinear interpolation. The value is the linear sum of the four neighboring values 
+A little more advanced is the bilinear interpolation. The value is the linear sum of the four neighboring values. It looks like this.
     </p>
+    <table>
+    <tr><td>
+    <pre>
+// pixel value with out of bounds checks
+function pixel_in(pixels, i, j) {
+    if(i &gt;= pixels.length)
+        return pixel_in(pixels, pixels.length-1, j);
+    if(i &lt; 0) 
+        return pixel_in(pixels, 0, j);
+    if(j &gt;= pixels[0].length)
+        return pixel_in(pixels, i, pixels[0].length-1);
+    if(j &lt; 0)
+        return pixel_in(pixels, i, 0);
+    return pixels[i][j];
+}
+
+// linear interpolation
+function value_in(pixels, x, y) {
+    var j = Math.floor(x - 0.5);
+    var tj = x - 0.5 - j;
+    var i = Math.floor(y - 0.5);
+    var ti = y - 0.5 - i;
+    return pixel_in(pixels, i, j) * (1 - ti) * (1 - tj)
+         + pixel_in(pixels, i, j+1) * (1 - ti) * (tj)
+         + pixel_in(pixels, i+1, j+1) * (ti) * (tj)
+         + pixel_in(pixels, i+1, j) * (ti) * (1 - tj);
+}    
+    </pre>
+    </td></tr>
+    </table>
     <p>
 If we darken the pixels where the interpolated value meets the threshold, we'll get some kind of a contour.
     </p>
@@ -827,7 +840,58 @@ If we darken the pixels where the interpolated value meets the threshold, we'll 
     <p>
 There are another methods. Plenty of them. But linear interpolation solves the cornery border problem just fine. Except the border is still just smaller pixels. It's not a vector representation yet. 
     </p>
-    
+    <h2>
+Turning an interpolated image into a contour
+    </h2>
+    <p>
+We can borrow an idea from the <a href="https://wordsandbuttons.online/the_simplest_possible_smooth_contouring_algorithm.html">simplest possible smooth contouring</a> algorithm. We'll build initial border as a cornery pixel border, and then we'll use the smooth interpolated image to move each contour point onto the closest point where the image meets the threshold value.
+    </p>
+    <p>
+With the distance field, it's easy. You just take its gradient, take the difference between the value you have and the threshold value. Since it's the distance field, the value difference is exactly the distance you should move your point for. And the gradient is the exact opposite direction. You just inverse, multiply, add — and you're there.
+    </p>
+    <p>
+Unfortunately, we don't have a distance field. We have a continuous image which only looks like one.
+    </p>
+    <p>
+But the principle still works. If you move along the gradient, you will get closer to the threshold value. And the more the difference, the further you have to go. It's just you wouldn't always get there in one try.
+    </p>
+    <p>
+So let's try several times then. Let's make an <a href="https://wordsandbuttons.online/interactive_introduction_to_iterative_algorithms.html">iterative algorithm</a> out of it.
+    </p>
+    <table>
+    <tr><td>
+    <pre>
+// gradient
+function gradient(pixels, x, y) {
+    const eps = 1e-5;
+    return [(value_in(pixels, x + eps, y) - value_in(pixels, x, y)) / eps,
+            (value_in(pixels, x, y + eps) - value_in(pixels, x, y)) / eps];
+}
+
+// how far should you shift the point to meet the isoline 
+// if value_in were a distance function
+function gradient_shift(pixels, threshold, x, y) {
+    var g = gradient(pixels, x, y);
+    var g_norm = Math.sqrt(g[0]*g[0] + g[1]*g[1]);
+    var d = threshold - value_in(pixels, x, y);
+    return [g[0] * d / g_norm / g_norm, g[1] * d / g_norm / g_norm];
+}
+
+// brings a point closer to the threshold isoline
+function fit_point_better(pixels, threshold, point) {
+    const ok_error = 1/255;
+    if(Math.abs(value_in(pixels, point[0], point[1]) - threshold) &lt; ok_error)
+        return point;
+    gs = gradient_shift(pixels, threshold, point[0], point[1])
+    var new_point = [point[0] + gs[0], point[1] + gs[1]];
+    return fit_point_better(pixels, threshold, new_point);
+}
+    </pre>
+    </td></tr>
+    </table>    
+    <p>
+We'll just jump along the gradient several times until we're close enough to the point
+    </p>
     <h2>
 Import PGM
     </h2>
