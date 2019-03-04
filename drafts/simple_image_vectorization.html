@@ -407,6 +407,7 @@ function draw_greyscale_canvas_contour() {
     context.closePath();
 }
 
+// interpolation canvas
 function draw_interpolation_canvas() {
     var canvas = document.getElementById("interpolation_canvas");
     var context = canvas.getContext("2d");
@@ -448,6 +449,107 @@ function draw_interpolation_canvas() {
            
     }
     context.putImageData(pixel_field, -0.5, -0.5);
+}
+
+// fitting
+function fit_point_several_times(pixels, threshold, point, n) {
+    const small_enough_error = 1/255;
+    if(n == 0)
+        return point;
+    gs = gradient_shift(pixels, threshold, point[0], point[1])
+    return fit_point_several_times(pixels, threshold, [point[0] + gs[0], point[1] + gs[1]], n-1);
+}
+
+var fit_iterations = 0;
+
+function fit_the_point_iteration() {
+    fit_iterations++;
+    if(fit_iterations > 0 && fit_iterations < 4)
+        document.getElementById("fitting_button").innerHTML = "Fit more";        
+    else if (fit_iterations == 4)
+        document.getElementById("fitting_button").innerHTML = "Start over"; 
+    else if (fit_iterations == 5) {
+        document.getElementById("fitting_button").innerHTML = "Fit the contour"; 
+        fit_iterations = 0;
+    }
+    draw_fitting_canvas();
+}
+
+function draw_fitting_canvas(){
+    var canvas = document.getElementById("fitting_canvas");
+    var context = canvas.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // pixels
+    var pixel_field = context.createImageData(w, h);
+    for (var i = 0; i < pixel_field.data.length; i += 4) {
+        var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
+        var on_canvas_j = Math.floor(i / 4) % w;
+        var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
+        var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
+        var x = on_canvas_j / pixel_size;
+        var y = on_canvas_i / pixel_size;
+        var pixel_value = Math.max(Math.min(value_in(pixels, x, y), 1.0), 0.0);
+        pixel_field.data[i + 0] = 0xAA + (0xFF - 0xAA) * pixel_value;
+        pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
+        pixel_field.data[i + 2] = 0xFF;
+        pixel_field.data[i + 3] = 0xFF;          
+    }
+    context.putImageData(pixel_field, -0.5, -0.5);
+    
+    // contour
+    context.beginPath();
+    // "horizontal" pieces    
+    for(var i = 0; i <= pixels.length; i += 1) {
+        var old_point = [];
+        for(var j = 0; j <= pixels[0].length; j += 1) {
+            var sign_change_on_the_right  = (pixel_in(pixels, i-1, j+0) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+            var sign_change_on_the_left   = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i+0, j-1) - threshold) < 0;
+            var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+            var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
+            if(sign_change_on_the_right || sign_change_on_the_left) {
+                var point = fit_point_several_times(pixels, threshold, [j, i], fit_iterations);
+                    
+                // draw the line
+                if(sign_change_on_the_left && old_point) {                    
+                    context.moveTo(old_point[0] * pixel_size, old_point[1] * pixel_size);
+                    context.lineTo(point[0] * pixel_size, point[1] * pixel_size);
+                }
+                
+                // save the point+tangent for later
+                if(sign_change_on_the_right) {
+                    old_point = point;
+                }   
+            }      
+        }
+    }
+
+    // "vertical" pieces
+    for(var j = 0; j <= pixels[0].length; j += 1) {
+        var old_point = [];
+        for(var i = 0; i <= pixels.length; i += 1) {
+            var sign_change_on_the_right  = (pixel_in(pixels, i-1, j+0) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+            var sign_change_on_the_left   = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i+0, j-1) - threshold) < 0;
+            var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+            var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
+            if(sign_change_on_the_bottom || sign_change_on_the_top) {
+                var point = fit_point_several_times(pixels, threshold, [j, i], fit_iterations);
+                if(sign_change_on_the_top && old_point) {
+                    context.moveTo(old_point[0] * pixel_size, old_point[1] * pixel_size);
+                    context.lineTo(point[0] * pixel_size, point[1] * pixel_size);
+                }
+                if(sign_change_on_the_bottom) {
+                    old_point = point;
+                }   
+            }      
+        }
+    }
+    context.strokeStyle="#AA3366";
+    context.lineWidth = 3;
+    context.stroke();
+    context.closePath(); 
 }
 
 // the main canvas
@@ -500,7 +602,6 @@ function init_canvas(){
                 }
             }
         }
-        
     }, false);
      
     canvas.addEventListener('mousemove', function(e){
@@ -892,6 +993,18 @@ function fit_point_better(pixels, threshold, point) {
     <p>
 We'll just jump along the gradient several times until we're close enough to the point
     </p>
+    <canvas id="fitting_canvas" width=640 height=640></canvas>
+        <form>
+        <button type="button" id="fitting_button" style="width: 200pt;" onclick="fit_the_point_iteration();">Fit the contour</button> 
+    </form>
+    <p>
+That's all fine, but we can do better. Let's make the contour smooth.
+    </p>
+    
+    <h2>
+Cubic splines
+    </h2>
+    
     <h2>
 Import PGM
     </h2>
@@ -972,6 +1085,7 @@ Only the outline is supported. No filling, no coloring.
     draw_greyscale_canvas();
     draw_greyscale_canvas_contour();
     draw_interpolation_canvas();
+    draw_fitting_canvas();
     </script>
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
