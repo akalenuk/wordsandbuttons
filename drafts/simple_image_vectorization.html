@@ -407,6 +407,66 @@ function draw_greyscale_canvas_contour() {
     context.closePath();
 }
 
+function draw_interpolation_canvas() {
+    var canvas = document.getElementById("interpolation_canvas");
+    var context = canvas.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // pixels
+    var interpolated_in = function (pixels, x, y) {
+        return value_in(pixels, x, y);
+    }
+    if(document.getElementById("interpolation_1").checked) {
+        interpolated_in = function (pixels, x, y) {
+            return pixel_in(pixels, Math.floor(y), Math.floor(x));
+        }
+    }
+    
+    var pixel_field = context.createImageData(w, h);
+    for (var i = 0; i < pixel_field.data.length; i += 4) {
+        var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
+        var on_canvas_j = Math.floor(i / 4) % w;
+        var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
+        var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
+        var x = on_canvas_j / pixel_size;
+        var y = on_canvas_i / pixel_size;
+        var pixel_value = Math.max(Math.min(interpolated_in(pixels, x, y), 1.0), 0.0);
+        pixel_field.data[i + 0] = 0xAA + (0xFF - 0xAA) * pixel_value;
+        pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
+        pixel_field.data[i + 2] = 0xFF;
+        pixel_field.data[i + 3] = 0xFF;
+        if ( interpolated_in(pixels, x, y) < threshold 
+          != interpolated_in(pixels, x - 1 / pixel_size, y) < threshold 
+        ||   interpolated_in(pixels, x, y) < threshold 
+          != interpolated_in(pixels, x, y - 1 / pixel_size) < threshold) {
+            pixel_field.data[i + 0] = 0x11;
+            pixel_field.data[i + 1] = 0x11;
+            pixel_field.data[i + 2] = 0x11;
+        }
+           
+    }
+    context.putImageData(pixel_field, -0.5, -0.5);
+    
+    // pixel grid
+    context.beginPath();
+    for(var i = pixel_size; i <= h; i += pixel_size) {
+        context.moveTo(0.0, i);
+        context.lineTo(w, i);
+    }
+    for(var j = pixel_size; j <= w; j += pixel_size) {
+        context.moveTo(j, 0.0);
+        context.lineTo(j, h);
+    }
+    context.strokeStyle="#AAAAAA";
+    context.lineWidth=1;
+    context.setLineDash([4, 4]);
+    context.stroke();
+    context.setLineDash([]);
+    context.closePath();
+}
+
 // the main canvas
 var cur_point_indexes = [];
 var cur_point_in_pair_indexes = [];
@@ -691,6 +751,10 @@ function export_splines() {
 function reset_threshold() {
     threshold = parseFloat(document.getElementById("threshold").value);
 }
+
+function change_interpolation() {
+    draw_interpolation_canvas();
+}
     </script>
   </head>
   <body>
@@ -719,10 +783,10 @@ On the plus side, it illustrates the basic approach rather well. It shows how th
 An input image
     </h2>
     <p>
-A raster image is essentially a rectangular grid of things. If it's a full-color RGB, then it's a grid of triplets. Each element of a triplet represents a value in a reg, green, or blue channel of a colored image.
+A raster image is essentially a rectangular table of things. If it's a full-color RGB, then it's a table of triplets. Each element of a triplet represents a value in a reg, green, or blue channel of a colored image.
     </p>
     <p>
-Medical images, such as obtained from computer tomography, are usually the grids of a single 12-bit or 16-bit integers. It's not a color really, since the values come from invisible X-ray radiation, but they are called gray-values nevertheless.
+Medical images, such as obtained from computer tomography, are usually the tables of a single 12-bit or 16-bit integer. It's not a color really, since the values come from invisible X-ray radiation, but they are called gray-values nevertheless.
     </p>
     <p>
 Satellite images may have a lot or channels. Apart from the colors from the visible specter they may contain ultra-violet and infra-red light. Channels may be represented by integers or floating point values.
@@ -738,6 +802,32 @@ Technically, we can turn it into some kind of vector representation with little 
     <p>
 Well, it's simple, but it's not what we wanted. We want curves, not corners. And for that, we have to make our image less cornery.
     </p>
+    <h2>
+Image interpolation
+    </h2>
+    <p>
+Let's say our image is not a table of values. Let's say we only know the values in the centers of the pixels, and we have to guess the values between them somehow.
+    </p>
+    <p>
+This is called interpolation. The simplest case would be nearest neighbor interpolation, where for every point on an image, the value is the value from the nearest pixel center. But this simply turns it back into a table.
+    </p>
+    <p>
+A little more advanced is the bilinear interpolation. The value is the linear sum of the four neighboring values 
+    </p>
+    <p>
+If we darken the pixels where the interpolated value meets the threshold, we'll get some kind of a contour.
+    </p>
+    <canvas id="interpolation_canvas" width=640 height=640></canvas>
+    <form>
+        Interpolation: 
+        <input type="radio" name="interpolation" id="interpolation_1" value="neighbor" onclick="draw_interpolation_canvas()"><label for="interpolation_1">nearest neighbor; </label>
+        <input type="radio" name="interpolation" id="interpolation_2" value="linear" checked=true onclick="draw_interpolation_canvas()"><label for="interpolation_2">bilinear. </label>
+        <br>
+    </form>
+    <p>
+There are another methods. Plenty of them. But linear interpolation solves the cornery border problem just fine. Except the border is still just smaller pixels. It's not a vector representation yet. 
+    </p>
+    
     <h2>
 Import PGM
     </h2>
@@ -817,6 +907,7 @@ Only the outline is supported. No filling, no coloring.
     init_canvas();    
     draw_greyscale_canvas();
     draw_greyscale_canvas_contour();
+    draw_interpolation_canvas();
     </script>
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
