@@ -100,6 +100,16 @@ textarea {
     font-family: sans-serif;
     padding-bottom: 24pt;
 }
+
+.formula {
+    font-family: sans-serif;
+    font-size: 15pt;
+    font-style: italic;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
     </style>
     <script language="JavaScript">
 // client
@@ -550,6 +560,173 @@ function draw_fitting_canvas(){
     context.lineWidth = 3;
     context.stroke();
     context.closePath(); 
+}
+
+// cubic
+var cubic_xs = [300, 150, 500, 600];
+var cubic_ys = [200, 400, 550, 100];
+var cubic_n = 4;
+var cubic_i = 0;
+
+// todo: remove
+function client_to_x(x) {return x;}
+function client_to_y(x) {return x;}
+function x_to_client(x) {return x;} 
+function y_to_client(x) {return x;}
+
+function init_cubic(){
+    cubic = document.getElementById("cubic_canvas");
+    var canvas_rect = cubic.getBoundingClientRect();
+    draw_cubic_canvas(0, 0, false);
+
+    cubic.addEventListener('mousemove', function(e){
+        var canvas_rect = cubic.getBoundingClientRect();
+        draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+            cubic_xs[cubic_i] = client_to_x(e.clientX - canvas_rect.left);
+            cubic_ys[cubic_i] = client_to_y(e.clientY - canvas_rect.top);
+            draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+        }
+    }, false);
+
+    cubic.addEventListener('mousedown', function(e){
+        var canvas_rect = cubic.getBoundingClientRect();
+        cubic_xs[cubic_i] = client_to_x(e.clientX - canvas_rect.left);
+        cubic_ys[cubic_i] = client_to_y(e.clientY - canvas_rect.top);
+        draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    cubic.addEventListener('mouseleave', function(e){
+        draw_cubic_canvas(0, 0, false);
+    }, false);
+}
+
+function draw_cubic_canvas(client_x, client_y, do_guides){
+    cubic = document.getElementById("cubic_canvas");
+    var context = cubic.getContext("2d");
+    context.font = "16px sans-serif";
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // cubic
+    /*var A = [];
+    var B = [];
+
+    A[0] = [];
+    for(var j = 0; j < cubic_n-1; ++j)
+        A[0][j+1] = Math.pow(cubic_xs[1], j) * (j+1);
+    A[0][0] = 0.0;
+    B[0] = (cubic_ys[1] - cubic_ys[0]) / (cubic_xs[1] - cubic_xs[0]);
+
+    for(var i = 1; i < cubic_n-1; ++i){
+        A[i] = [];
+        for(var j = 0; j < cubic_n; ++j){
+            A[i][j] = Math.pow(cubic_xs[i], j);
+        }
+        B[i] = cubic_ys[i];
+    }
+
+    A[cubic_n-1] = [];
+    for(var j = 0; j < cubic_n-1; ++j)
+        A[cubic_n-1][j+1] = Math.pow(cubic_xs[cubic_n-2], j) * (j+1);
+    A[cubic_n-1][0] = 0.0;
+    B[cubic_n-1] = (cubic_ys[cubic_n-1] - cubic_ys[cubic_n-2]) / (cubic_xs[cubic_n-1] - cubic_xs[cubic_n-2]);
+
+    X = solved_linear(A, B, cubic_n);
+
+    // back
+    context.beginPath();
+    for(var j = 1; j < w; ++j){
+        x1 = client_to_x(j-1);
+        x2 = client_to_x(j);
+        y1 = polynomial_in_x(X, x1, cubic_n);
+        y2 = polynomial_in_x(X, x2, cubic_n);
+        context.moveTo(x_to_client(x1), y_to_client(y1));
+        context.lineTo(x_to_client(x2), y_to_client(y2));
+    }
+    context.strokeStyle="#FF9988";
+    context.stroke();
+    context.closePath();
+    // front
+    context.beginPath();
+    for(var j = 1; j < w; ++j){
+        x1 = client_to_x(j-1);
+        x2 = client_to_x(j);
+        if(x1 > cubic_xs[1] && x2 < cubic_xs[2]){
+            y1 = polynomial_in_x(X, x1, cubic_n);
+            y2 = polynomial_in_x(X, x2, cubic_n);
+            context.moveTo(x_to_client(x1), y_to_client(y1));
+            context.lineTo(x_to_client(x2), y_to_client(y2));
+        }
+    }
+    context.strokeStyle="#661100";
+    context.stroke();
+    context.closePath();*/
+    
+    var Px = spline_for(cubic_xs[1], cubic_xs[0] - cubic_xs[1], cubic_xs[2], cubic_xs[3] - cubic_xs[2]);
+    var Py = spline_for(cubic_ys[1], cubic_ys[0] - cubic_ys[1], cubic_ys[2], cubic_ys[3] - cubic_ys[2]);
+    
+    context.beginPath();
+    for(var i = 0; i < w; ++i) {    
+        var t1 = (i) / w;
+        var t2 = (i + 1) / w;
+        var x1 = polynomial_in_x(Px, t1);
+        var y1 = polynomial_in_x(Py, t1);
+        var x2 = polynomial_in_x(Px, t2);
+        var y2 = polynomial_in_x(Py, t2);
+        context.moveTo(x1, y1);
+        context.lineTo(x2, y2);
+    }
+    context.strokeStyle="#AA3311";
+    context.stroke();
+    context.closePath();
+    
+    // dots
+    context.beginPath();
+    for(var i = 0; i < cubic_n; ++i){
+        context.moveTo(x_to_client(cubic_xs[i])-5.5, y_to_client(cubic_ys[i])+5.5);
+        context.lineTo(x_to_client(cubic_xs[i])+5.5, y_to_client(cubic_ys[i])-5.5);
+        context.moveTo(x_to_client(cubic_xs[i])+5.5, y_to_client(cubic_ys[i])+5.5);
+        context.lineTo(x_to_client(cubic_xs[i])-5.5, y_to_client(cubic_ys[i])-5.5);
+    }
+    context.strokeStyle="#AA3311";
+    context.stroke();
+    context.closePath();
+
+    // tangents
+    context.beginPath();
+    context.setLineDash([4, 4]);
+    context.moveTo(x_to_client(cubic_xs[0]), y_to_client(cubic_ys[0]));
+    context.lineTo(x_to_client(cubic_xs[1]), y_to_client(cubic_ys[1]));
+    context.moveTo(x_to_client(cubic_xs[cubic_n-2]), y_to_client(cubic_ys[cubic_n-2]));
+    context.lineTo(x_to_client(cubic_xs[cubic_n-1]), y_to_client(cubic_ys[cubic_n-1]));
+    context.strokeStyle="#AA3311";
+    context.stroke();
+    context.setLineDash([]);
+    context.closePath();
+
+    // guides
+    if(do_guides){
+        min_d = Math.pow(cubic_xs[0] - client_to_x(client_x), 2) + Math.pow(cubic_ys[0] - client_to_y(client_y), 2);
+        min_i = 0;
+        for(var i = 1; i < cubic_n; ++i){
+            var di = Math.pow(cubic_xs[i] - client_to_x(client_x), 2) + Math.pow(cubic_ys[i] - client_to_y(client_y), 2);
+            if(di < min_d){
+                min_d = di;
+                min_i = i;
+            }
+        }
+        cubic_i = min_i;
+        context.setLineDash([4, 4]);
+        context.beginPath();
+        context.moveTo(x_to_client(cubic_xs[min_i]), y_to_client(cubic_ys[min_i]));
+        context.lineTo(client_x, client_y);
+        context.strokeStyle="#AA3311";
+        context.stroke();
+        context.closePath();
+        context.setLineDash([]);
+    }
 }
 
 // the main canvas
@@ -1004,7 +1181,35 @@ That's all fine, but we can do better. Let's make the contour smooth.
     <h2>
 Cubic splines
     </h2>
-    
+    <p>
+All we have to do to make the contour smooth is to turn each line segment into a parametric cubic curve.
+    </p>
+    <p>
+It's probably sounds more complicated than it is. A parametric cubic curve is just a pair of polynomials. If you have the points and partial derivatives in this points, you can get the coefficients for them from this pair of <a href="https://wordsandbuttons.online/programmers_introduction_to_linear_equations.html">linear systems</a>:
+    </p>
+    <p class="formula" style="text-align: left; margin-left: 10em;">
+Px(t<sub>1</sub>)' = 3a<sub>x</sub>t<sub>1</sub><sup>2</sup> + 2b<sub>x</sub>t<sub>1</sub> + c = dx<sub>1</sub>/dt
+<br>
+Px(t<sub>1</sub>) = a<sub>x</sub>t<sub>1</sub><sup>3</sup> + b<sub>x</sub>t<sub>1</sub><sup>2</sup> + c<sub>x</sub>t<sub>1</sub> + d = x<sub>1</sub>
+<br>
+Px(t<sub>2</sub>) = a<sub>x</sub>t<sub>2</sub><sup>3</sup> + b<sub>x</sub>t<sub>2</sub><sup>2</sup> + c<sub>x</sub>t<sub>2</sub> + d = x<sub>2</sub>
+<br>
+Px(t<sub>2</sub>)' = 3a<sub>x</sub>t<sub>2</sub><sup>2</sup> + 2b<sub>x</sub>t<sub>2</sub> + c = dx<sub>2</sub>/dt
+    <br>
+    <br>
+Py(t<sub>1</sub>)' = 3a<sub>y</sub>t<sub>1</sub><sup>2</sup> + 2b<sub>y</sub>t<sub>1</sub> + c = dy<sub>1</sub>/dt
+<br>
+Py(t<sub>1</sub>) = a<sub>y</sub>t<sub>1</sub><sup>3</sup> + b<sub>y</sub>t<sub>1</sub><sup>2</sup> + c<sub>y</sub>t<sub>1</sub> + d = y<sub>1</sub>
+<br>
+Py(t<sub>2</sub>) = a<sub>y</sub>t<sub>2</sub><sup>3</sup> + b<sub>y</sub>t<sub>2</sub><sup>2</sup> + c<sub>y</sub>t<sub>2</sub> + d = y<sub>2</sub>
+<br>
+Py(t<sub>2</sub>)' = 3a<sub>y</sub>t<sub>2</sub><sup>2</sup> + 2b<sub>y</sub>t<sub>2</sub> + c = dy<sub>2</sub>/dt
+    </p>    
+    <p>
+The curve itself will then look like this.
+    </p>
+    <canvas id="cubic_canvas" width=640 height=640></canvas>
+        
     <h2>
 Import PGM
     </h2>
@@ -1086,6 +1291,7 @@ Only the outline is supported. No filling, no coloring.
     draw_greyscale_canvas_contour();
     draw_interpolation_canvas();
     draw_fitting_canvas();
+    init_cubic();
     </script>
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
