@@ -1208,7 +1208,151 @@ function polynomial_in_t(A, t){
     </pre>
     </td></tr>
     </table>    
-        
+    <p>
+So for every line segment with tangents, we can make a parametric polynomial. There is one problem though. We don't have tangents.
+    </p>
+    <p>
+We have gradient, which is orthogonal to the tangent, but we don't really have a direction. The tangent can be oriented left or right from the gradient.
+    </p>
+    <p>
+But this is solvable. Let's just pick the direction and keep it consistent. Let the curves that originally come from horizontally oriented segments always have both tangents that way that <i>dx > 0</i>. And the ones that come from vertically oriented segments, will have <i>dy > 0</i>.
+    </p>
+    <p>
+Look like it's enough to assemble an algorithm.
+    </p>
+    <h2>
+Creating splines from the pixels
+    </h2>
+    <p>
+Let's split our vectorization into two parts. First, we'll get points and tangents per each line segment from the pixels. Then we'll turn it all into polynomial splines.
+    </p>
+    <p>
+The function that does the first part looks like this.    
+    </p>
+    <table>
+    <tr><td>
+    <pre>
+function turn_pixels_into_points_and_tangents(pixels, threshold) {
+    var points = [];
+    var tangents = [];
+
+    // "horizontal" pieces    
+    for(var i = 0; i &lt;= pixels.length; i += 1) {
+        var old_point = [];
+        var old_tangent = [];
+        for(var j = 0; j &lt;= pixels[0].length; j += 1) {
+            // if right, left, top, and bottom pixels have a sign change, 
+            // there should be a spline there
+            var sign_change_on_the_right  = 
+                (pixel_in(pixels, i-1, j+0) - threshold) * 
+                (pixel_in(pixels, i+0, j+0) - threshold) &lt; 0;
+            var sign_change_on_the_left   = 
+                (pixel_in(pixels, i-1, j-1) - threshold) * 
+                (pixel_in(pixels, i+0, j-1) - threshold) &lt; 0;
+            var sign_change_on_the_bottom = 
+                (pixel_in(pixels, i+0, j-1) - threshold) * 
+                (pixel_in(pixels, i+0, j+0) - threshold) &lt; 0;
+            var sign_change_on_the_top    = 
+                (pixel_in(pixels, i-1, j-1) - threshold) * 
+                (pixel_in(pixels, i-1, j+0) - threshold) &lt; 0;
+            if(sign_change_on_the_right || sign_change_on_the_left) {
+                // fits the point on a threshold isoline
+                var point = fit_point_better(pixels, threshold, [j, i]);
+                var g = gradient(pixels, point[0], point[1]);
+                
+                // we want our tangent to be X-positive for horizontal pieces
+                var tangent = g[1] >= 0 ? [g[1], -g[0]] : [-g[1], g[0]];
+                
+                // this is an T or X junction, the tangent is ambiguous
+                if(sign_change_on_the_left + 
+                   sign_change_on_the_right + 
+                   sign_change_on_the_top + 
+                   sign_change_on_the_bottom > 2)
+                    tangent = [0., 0.];
+                    
+                // store the point+tangent and the previous point+tangent 
+                // if there is one
+                if(sign_change_on_the_left && old_point) {                    
+                    points.push([old_point, point]);
+                    tangents.push([old_tangent, tangent]);
+                }
+                
+                // save the point+tangent for later
+                if(sign_change_on_the_right) {
+                    old_point = point;
+                    old_tangent = tangent;
+                }   
+            }      
+        }
+    }
+
+    // "vertical" pieces
+    for(var j = 0; j &lt;= pixels[0].length; j += 1) {
+        var old_point = [];
+        var old_tangent = [];
+        for(var i = 0; i &lt;= pixels.length; i += 1) {
+            var sign_change_on_the_right  = 
+                (pixel_in(pixels, i-1, j+0) - threshold) * 
+                (pixel_in(pixels, i+0, j+0) - threshold) &lt; 0;
+            var sign_change_on_the_left   = 
+                (pixel_in(pixels, i-1, j-1) - threshold) * 
+                (pixel_in(pixels, i+0, j-1) - threshold) &lt; 0;
+            var sign_change_on_the_bottom = 
+                (pixel_in(pixels, i+0, j-1) - threshold) * 
+                (pixel_in(pixels, i+0, j+0) - threshold) &lt; 0;
+            var sign_change_on_the_top    = 
+                (pixel_in(pixels, i-1, j-1) - threshold) * 
+                (pixel_in(pixels, i-1, j+0) - threshold) &lt; 0;
+            if(sign_change_on_the_bottom || sign_change_on_the_top) {
+                var point = fit_point_better(pixels, threshold, [j, i]);
+                var g = gradient(pixels, point[0], point[1]);             
+                var tangent = g[0] &lt; 0 ? [g[1], -g[0]] : [-g[1], g[0]];
+                if(sign_change_on_the_left + 
+                   sign_change_on_the_right + 
+                   sign_change_on_the_top + 
+                   sign_change_on_the_bottom > 2)
+                    tangent = [0., 0.];
+                if(sign_change_on_the_top && old_point) {
+                    points.push([old_point, point]);
+                    tangents.push([old_tangent, tangent]);
+                }
+                if(sign_change_on_the_bottom) {
+                    old_point = point;
+                    old_tangent = tangent;
+                }   
+            }      
+        }
+    }
+    return [points, tangents];
+}
+    </pre>
+    </td></tr>
+    </table>       
+    <p>
+And the one that does the second part — like this.    
+    </p>
+    <table>
+    <tr><td>
+    <pre>
+function turn_points_and_tangents_into_splines(points_and_tangents)
+{
+    var splines = [];
+    var points = points_and_tangents[0];
+    var tangents = points_and_tangents[1];
+    for(var i = 0; i &lt; points.length; ++i) {
+        var Px = spline_for(
+            points[i][0][0], tangents[i][0][0], 
+            points[i][1][0], tangents[i][1][0]);
+        var Py = spline_for(
+            points[i][0][1], tangents[i][0][1], 
+            points[i][1][1], tangents[i][1][1]);
+        splines.push([Px, Py]);
+    }
+    return splines
+}
+    </pre>
+    </td></tr>
+    </table>    
     <h2>
 Import PGM
     </h2>
