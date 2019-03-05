@@ -153,12 +153,12 @@ function spline_for(p1, p1d, p2, p2d) {
 }
 
 // polynomial
-function polynomial_in_x(A, x){
-    var y = 0.0;
+function polynomial_in_t(A, t){
+    var pt = 0.0;
     for(var i = 0; i < A.length; ++i){
-        y += A[i] * Math.pow(x, i);
+        pt += A[i] * Math.pow(t, i);
     }
-    return y;
+    return pt;
 }
 
 // pixel value with out of bounds checks
@@ -301,10 +301,10 @@ function draw_the_splines(context, splines) {
         for(var k = 0; k < pixel_size; k += 1) {
             var t1 = (k) / pixel_size;
             var t2 = (k + 1) / pixel_size;
-            var x1 = polynomial_in_x(splines[i][0], t1) * pixel_size;
-            var y1 = polynomial_in_x(splines[i][1], t1) * pixel_size;
-            var x2 = polynomial_in_x(splines[i][0], t2) * pixel_size;
-            var y2 = polynomial_in_x(splines[i][1], t2) * pixel_size;
+            var x1 = polynomial_in_t(splines[i][0], t1) * pixel_size;
+            var y1 = polynomial_in_t(splines[i][1], t1) * pixel_size;
+            var x2 = polynomial_in_t(splines[i][0], t2) * pixel_size;
+            var y2 = polynomial_in_t(splines[i][1], t2) * pixel_size;
             context.moveTo(x1, y1);
             context.lineTo(x2, y2);
         }
@@ -608,61 +608,6 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
     // background
     context.fillStyle="#eeeeee";
     context.fillRect(0, 0, w, h);
-
-    // cubic
-    /*var A = [];
-    var B = [];
-
-    A[0] = [];
-    for(var j = 0; j < cubic_n-1; ++j)
-        A[0][j+1] = Math.pow(cubic_xs[1], j) * (j+1);
-    A[0][0] = 0.0;
-    B[0] = (cubic_ys[1] - cubic_ys[0]) / (cubic_xs[1] - cubic_xs[0]);
-
-    for(var i = 1; i < cubic_n-1; ++i){
-        A[i] = [];
-        for(var j = 0; j < cubic_n; ++j){
-            A[i][j] = Math.pow(cubic_xs[i], j);
-        }
-        B[i] = cubic_ys[i];
-    }
-
-    A[cubic_n-1] = [];
-    for(var j = 0; j < cubic_n-1; ++j)
-        A[cubic_n-1][j+1] = Math.pow(cubic_xs[cubic_n-2], j) * (j+1);
-    A[cubic_n-1][0] = 0.0;
-    B[cubic_n-1] = (cubic_ys[cubic_n-1] - cubic_ys[cubic_n-2]) / (cubic_xs[cubic_n-1] - cubic_xs[cubic_n-2]);
-
-    X = solved_linear(A, B, cubic_n);
-
-    // back
-    context.beginPath();
-    for(var j = 1; j < w; ++j){
-        x1 = client_to_x(j-1);
-        x2 = client_to_x(j);
-        y1 = polynomial_in_x(X, x1, cubic_n);
-        y2 = polynomial_in_x(X, x2, cubic_n);
-        context.moveTo(x_to_client(x1), y_to_client(y1));
-        context.lineTo(x_to_client(x2), y_to_client(y2));
-    }
-    context.strokeStyle="#FF9988";
-    context.stroke();
-    context.closePath();
-    // front
-    context.beginPath();
-    for(var j = 1; j < w; ++j){
-        x1 = client_to_x(j-1);
-        x2 = client_to_x(j);
-        if(x1 > cubic_xs[1] && x2 < cubic_xs[2]){
-            y1 = polynomial_in_x(X, x1, cubic_n);
-            y2 = polynomial_in_x(X, x2, cubic_n);
-            context.moveTo(x_to_client(x1), y_to_client(y1));
-            context.lineTo(x_to_client(x2), y_to_client(y2));
-        }
-    }
-    context.strokeStyle="#661100";
-    context.stroke();
-    context.closePath();*/
     
     var Px = spline_for(cubic_xs[1], cubic_xs[0] - cubic_xs[1], cubic_xs[2], cubic_xs[3] - cubic_xs[2]);
     var Py = spline_for(cubic_ys[1], cubic_ys[0] - cubic_ys[1], cubic_ys[2], cubic_ys[3] - cubic_ys[2]);
@@ -671,10 +616,10 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
     for(var i = 0; i < w; ++i) {    
         var t1 = (i) / w;
         var t2 = (i + 1) / w;
-        var x1 = polynomial_in_x(Px, t1);
-        var y1 = polynomial_in_x(Py, t1);
-        var x2 = polynomial_in_x(Px, t2);
-        var y2 = polynomial_in_x(Py, t2);
+        var x1 = polynomial_in_t(Px, t1);
+        var y1 = polynomial_in_t(Py, t1);
+        var x2 = polynomial_in_t(Px, t2);
+        var y2 = polynomial_in_t(Py, t2);
         context.moveTo(x1, y1);
         context.lineTo(x2, y2);
     }
@@ -727,6 +672,16 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
         context.closePath();
         context.setLineDash([]);
     }
+    
+    // labels
+    context.font = "14px Arial";
+    context.fillStyle = "#000000";
+    context.textAlign = "center";
+    context.textBaseline = "middle"; 
+    context.fillText("point 1", cubic_xs[1], cubic_ys[1]);
+    context.fillText("point 2", cubic_xs[2], cubic_ys[2]);
+    context.fillText("tangent 1", (cubic_xs[0] + cubic_xs[1]) / 2, (cubic_ys[0] + cubic_ys[1]) / 2);
+    context.fillText("tangent 2", (cubic_xs[2] + cubic_xs[3]) / 2, (cubic_ys[2] + cubic_ys[3]) / 2);
 }
 
 // the main canvas
@@ -1209,6 +1164,50 @@ Py(t<sub>2</sub>)' = 3a<sub>y</sub>t<sub>2</sub><sup>2</sup> + 2b<sub>y</sub>t<s
 The curve itself will then look like this.
     </p>
     <canvas id="cubic_canvas" width=640 height=640></canvas>
+    <p>
+Even more, since we get to choose the parameter range, we can make it [0..1]. This greatly simplifies our system and makes it really easy to solve. We don't even need a linear system solver for this.
+    </p>
+    <p>
+Here is the function that makes one array of polynomial coefficients from two pairs of point and tangent values.
+    </p>
+    <table>
+    <tr><td>
+    <pre>
+// solver specific to [0..1] parametrized splines
+function spline_for(p1, p1d, p2, p2d) {
+//     A = [
+//         [1, 0, 0, 0],
+//         [0, 1, 0, 0],
+//         [1, 1, 1, 1],
+//         [0, 1, 2, 3]];
+//     B = [p1, p1d, p2, p2d]
+    return [
+        p1,
+        p1d,
+        3 * p2 - p2d - 3*p1 - 2*p1d,
+        p2d + p1d - 2*p2 + 2*p1
+    ];
+}
+    </pre>
+    </td></tr>
+    </table>
+    <p>
+The polynomial is then computed in every <i>t</i> with this function.
+    </p>
+    <table>
+    <tr><td>
+    <pre>
+// polynomial
+function polynomial_in_t(A, t){
+    var pt = 0.0;
+    for(var i = 0; i &lt; A.length; ++i){
+        pt += A[i] * Math.pow(x, i);
+    }
+    return pt;
+}
+    </pre>
+    </td></tr>
+    </table>    
         
     <h2>
 Import PGM
