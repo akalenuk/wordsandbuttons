@@ -568,11 +568,6 @@ var cubic_ys = [200, 400, 550, 100];
 var cubic_n = 4;
 var cubic_i = 0;
 
-// todo: remove
-function client_to_x(x) {return x;}
-function client_to_y(x) {return x;}
-function x_to_client(x) {return x;} 
-function y_to_client(x) {return x;}
 
 function init_cubic(){
     cubic = document.getElementById("cubic_canvas");
@@ -583,16 +578,16 @@ function init_cubic(){
         var canvas_rect = cubic.getBoundingClientRect();
         draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
         if(e.buttons == 1){
-            cubic_xs[cubic_i] = client_to_x(e.clientX - canvas_rect.left);
-            cubic_ys[cubic_i] = client_to_y(e.clientY - canvas_rect.top);
+            cubic_xs[cubic_i] = e.clientX - canvas_rect.left;
+            cubic_ys[cubic_i] = e.clientY - canvas_rect.top;
             draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
         }
     }, false);
 
     cubic.addEventListener('mousedown', function(e){
         var canvas_rect = cubic.getBoundingClientRect();
-        cubic_xs[cubic_i] = client_to_x(e.clientX - canvas_rect.left);
-        cubic_ys[cubic_i] = client_to_y(e.clientY - canvas_rect.top);
+        cubic_xs[cubic_i] = e.clientX - canvas_rect.left;
+        cubic_ys[cubic_i] = e.clientY - canvas_rect.top;
         draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
@@ -641,10 +636,10 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
     // tangents
     context.beginPath();
     context.setLineDash([4, 4]);
-    context.moveTo(x_to_client(cubic_xs[0]), y_to_client(cubic_ys[0]));
-    context.lineTo(x_to_client(cubic_xs[1]), y_to_client(cubic_ys[1]));
-    context.moveTo(x_to_client(cubic_xs[cubic_n-2]), y_to_client(cubic_ys[cubic_n-2]));
-    context.lineTo(x_to_client(cubic_xs[cubic_n-1]), y_to_client(cubic_ys[cubic_n-1]));
+    context.moveTo(cubic_xs[0], cubic_ys[0]);
+    context.lineTo(cubic_xs[1], cubic_ys[1]);
+    context.moveTo(cubic_xs[cubic_n-2], cubic_ys[cubic_n-2]);
+    context.lineTo(cubic_xs[cubic_n-1], cubic_ys[cubic_n-1]);
     context.strokeStyle="#6633AA";
     context.stroke();
     context.setLineDash([]);
@@ -652,10 +647,10 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
 
     // guides
     if(do_guides){
-        min_d = Math.pow(cubic_xs[0] - client_to_x(client_x), 2) + Math.pow(cubic_ys[0] - client_to_y(client_y), 2);
+        min_d = Math.pow(cubic_xs[0] - client_x, 2) + Math.pow(cubic_ys[0] - client_y, 2);
         min_i = 0;
         for(var i = 1; i < cubic_n; ++i){
-            var di = Math.pow(cubic_xs[i] - client_to_x(client_x), 2) + Math.pow(cubic_ys[i] - client_to_y(client_y), 2);
+            var di = Math.pow(cubic_xs[i] - client_x, 2) + Math.pow(cubic_ys[i] - client_y, 2);
             if(di < min_d){
                 min_d = di;
                 min_i = i;
@@ -664,7 +659,7 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
         cubic_i = min_i;
         context.setLineDash([4, 4]);
         context.beginPath();
-        context.moveTo(x_to_client(cubic_xs[min_i]), y_to_client(cubic_ys[min_i]));
+        context.moveTo(cubic_xs[min_i], cubic_ys[min_i]);
         context.lineTo(client_x, client_y);
         context.strokeStyle="#6633AA";
         context.stroke();
@@ -684,6 +679,7 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
     context.fillText("tangent 1", (cubic_xs[0] + cubic_xs[1]) / 2, (cubic_ys[0] + cubic_ys[1]) / 2);
     context.fillText("tangent 2", (cubic_xs[2] + cubic_xs[3]) / 2, (cubic_ys[2] + cubic_ys[3]) / 2);
 }
+
 
 // the main canvas
 var cur_point_indexes = [];
@@ -939,6 +935,10 @@ function reimport_image() {
     } catch (error) {
         document.getElementById("import_status").innerHTML = "Sorry, couldn't parse that. " + error.message;
     }
+    draw_greyscale_canvas();
+    draw_greyscale_canvas_contour();
+    draw_interpolation_canvas();
+    draw_fitting_canvas();
     draw_canvas();  
 }
 
