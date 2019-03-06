@@ -1352,12 +1352,18 @@ function turn_points_and_tangents_into_splines(points_and_tangents)
 }
     </pre>
     </td></tr>
-    </table>    
+    </table>
+    <p>
+This split is not essential for the algorithm, but it makes it possible to edit the model in both image and spline representation.
+    </p>
     <h2>
-Import PGM
+Import, edit, export
     </h2>
     <p>
-PGM is a 1-channel ASCII image format. You can make a PGM file in GIMP.
+Now, when we have the algorithm, let's see how it works in practice. Let's import an gray-scale image from PGM, turn it into splines, edit them, then export them as SVG.
+    </p>
+    <p>
+PGM is a 1-channel ASCII image format. You can make a PGM file in GIMP or any other raster image editor.
     </p>
     <textarea id="import_PGM" rows=20>
 P2
@@ -1380,16 +1386,6 @@ P2
 0   0   0   0   0   73  57  0   0   0   2   20  0   0   0   0   
 0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
     </textarea>
-<!--
-    <textarea id="import_PGM" rows=14>    
-P2
-3 3
-15
-0 0 0
-0 14 0
-0 0 0
-    </textarea>
--->
     <form>
         Grey value threshold: <input type="text" id="threshold" value="0.5">
         <button type="button" style="width: 200pt;" onclick="reset_threshold(); reimport_image()">Reimport the PGM</button> 
@@ -1397,27 +1393,20 @@ P2
     <p id="import_status" class="comment">
     </p>
     <br>
-    <h2>
-Edit image and vectors
-    </h2>
     <p>
-Image editing overrides vectors. Click on a canvas to increase a pixel's luminosity. Click holding the Shift key to reduce it.
+When the image is imported, we can either edit the source image pixel-by-pixel or move the splines' points and tangents. Click on a canvas to increase a pixel's luminosity. Click holding the Shift key to reduce it. Please note that in this example, image editing overrides vectors.
     </p>
     <canvas id="canvas" width=640 height=640></canvas>
     <form>
-        Click to change: 
+        Click to edit: 
         <input type="radio" name="tool" id="tool_1" value="image" checked=true onclick="draw_canvas()"><label for="tool_1">image; </label>
         <input type="radio" name="tool" id="tool_2" value="points" onclick="draw_canvas()"><label for="tool_2">points; </label>
         <input type="radio" name="tool" id="tool_3" value="tangents" onclick="draw_canvas()"><label for="tool_3">tangents; </label>
         <br>  
     </form>
     <br>
-    
-    <h2>
-Vector export
-    </h2>
     <p>
-Only the outline is supported. No filling, no coloring.
+When you're happy with the splines, you can export them in SVG. In this example, only the outline is supported. No filling, no coloring.
     </p>
     <form>
         <button type="button" onclick="export_splines()">Export to SVG</button>  
@@ -1426,7 +1415,29 @@ Only the outline is supported. No filling, no coloring.
     <textarea id="export_SVG" rows=14>
 
     </textarea>
+    <p>
+You don't have to export the polynomials. SVG supports Bezier curves, and they are basically the same as cubics. Only instead of coefficients you write the control points. 
+    </p>
+    <p>
+The first point is the starting point of the spline. The second is the sum of the first point and one third of a tangent vector. The third is the subtraction of the finishing point of the spline and the one third of a second tangent. The fourth is the finishing point of the spline.
+    </p>
+    <p>
+The code for the export function, just as all the code mentioned here including the visuals, is available <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/pages/simple_image_vectorization.html">on Github</a>.
+    </p>
+    <h2>
+Conclusion
+    </h2>
+    <p>
+The algorithm shows how bilinear interpolation, polynomial approximation, differential analysis, and iterative algorithms work together to solve a practical problem. 
+    </p>
+    <p>
+I hope this page will not only satisfy one's curiosity, but help someone retain inspiration while studying these things. I know from my experience that basic calculus, while being not more complicated than the traffic code, is particularly hard to learn because you don't see the application right away. You learn about series, limits, derivatives, integrals, and for what reason? How do you turn this knowledge into something useful?
+    </p>
+    <p>
+Well, this is one of the many examples.
+    </p>
 
+    
     <script language="JavaScript">
     reimport_image();    
     init_canvas();    
