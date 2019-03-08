@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Tries as the evolution of nothing</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a {
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+table {
+    border-width: 0pt;
+}
+
+td {
+    vertical-align: top;
+    padding: 6pt 12pt 6pt 12pt;
+    font-size: 16pt;
+    border: 1px solid black;
+    width: 505pt;
+}
+
+button{
+    width: 248pt;
+    height: 42pt;
+    margin-left:4pt;
+    margin-right:4pt;
+    font-size: 16pt;
+}
+
+.comment {
+    font-size: 12pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
+
+b {
+    font-style: bold;
+    color: #e30707;
+}
+
+u {
+    text-decoration: none;
+    color: #999;
+}
+    </style>
+    <script language="JavaScript">
+const FPS = 2.0;
+
+function next(slides, disable_the_button){
+    // show the next slide
+    var first_slide = document.getElementById(slides + "_" + 1);
+    for(var i = 1; i < 99; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if(this_slide && this_slide.style.display == "block") { // the visible one
+            this_slide.style.display = "none";
+            if(next_slide)
+                next_slide.style.display = "block";
+            else
+                first_slide.style.display = "block";
+            break;
+        }
+    }
+    // name and en/disable the button. After the slides are set
+    var button = document.getElementById(slides + "_button");
+    for(var i = 1; i < 99; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if(this_slide && this_slide.style.display == "block") {
+            if (!next_slide) {
+                button.innerHTML = "Back to the 1-st frame";
+                button.disabled = false;
+            } else {
+                button.innerHTML = "Run demo";
+                if(i != 1 && disable_the_button)
+                    button.disabled = true;
+            }
+            break;
+        }
+    }
+}
+
+function run(frames) {
+    var button = document.getElementById(frames + "_button");
+    var was_last_frame = button.innerHTML != "Run demo";
+    next(frames, true);
+    var now_last_frame = button.innerHTML != "Run demo";
+    if(!was_last_frame && ! now_last_frame)
+        setTimeout( function(){run(frames);}, 1000.0 / FPS);
+}
+
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+Tries (radix trees, not “try” plural) as the evolution of nothing
+    </h1>
+    <p>
+Let's say we have an array of decimal digits. There are 10 digits, and every one occurs only once.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+8 4 3 5 2 0 1 9 7 6</pre>
+    </td>
+    </tr></table>
+    <p>
+What should we do to have it sorted?
+    </p>
+    <img style="width: 505pt;" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/20161226_Alfter_6.jpg/768px-20161226_Alfter_6.jpg">
+    <p class="comment">
+By Bungert55 [<a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a>], from Wikimedia Commons
+    </p>
+    <p>
+Nothing! Nothing at all. The thing is, regardless of how the digits are placed in the unsorted array, the sorted array of unique digits is <i>always</i> like this:
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+0 1 2 3 4 5 6 7 8 9</pre>
+    </td>
+    </tr></table>
+    <p>
+<i>Since we already know the answer, we don't have to do anything to compute it.</i>
+    </p>
+    <p>
+Of course, if you don't have a sorted digits array lying around, you can recreate it on top of the initial array.
+    </p>
+
+    <table><tr>
+    <td>
+    <pre>
+<span id="no_sort_1" style="display:block">8 4 3 5 2 0 1 9 7 6
+</span><span id="no_sort_2" style="display:none"><b>0</b> <u>4 3 5 2 0 1 9 7 6</u>
+</span><span id="no_sort_3" style="display:none"><b>0 1</b> <u>3 5 2 0 1 9 7 6</u>
+</span><span id="no_sort_4" style="display:none"><b>0 1 2</b> <u>5 2 0 1 9 7 6</u>
+</span><span id="no_sort_5" style="display:none"><b>0 1 2 3</b> <u>2 0 1 9 7 6</u>
+</span><span id="no_sort_6" style="display:none"><b>0 1 2 3 4</b> <u>0 1 9 7 6</u>
+</span><span id="no_sort_7" style="display:none"><b>0 1 2 3 4 5</b> <u>1 9 7 6</u>
+</span><span id="no_sort_8" style="display:none"><b>0 1 2 3 4 5 6</b> <u>9 7 6</u>
+</span><span id="no_sort_9" style="display:none"><b>0 1 2 3 4 5 6 7</b> <u>7 6</u>
+</span><span id="no_sort_10" style="display:none"><b>0 1 2 3 4 5 6 7 8</b> <u>6</u>
+</span><span id="no_sort_11" style="display:none"><b>0 1 2 3 4 5 6 7 8 9</b>
+</span></pre>
+    </td></tr></table>
+    <p style="text-align:right">
+    <button type="button" id="no_sort_button" onclick="run('no_sort')">Run demo</button>
+    </p>
+    <p>
+This is simple and super-effective since the complexity of the operation is only <i>O(n)</i> where <i>n</i> is the number of elements.
+    </p>
+
+    <p>
+Now let's say some of the digits are missing.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+8 3 5 2 1 9 7 6</pre>
+    </td>
+    </tr></table>
+    <p>
+What do we do now?
+    </p>
+    <img style="width: 505pt;" src="https://upload.wikimedia.org/wikipedia/commons/b/b4/Albizia_versicolor_tree.jpg">
+    <p class="comment">
+By StoffelLombard [<a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>], from Wikimedia Commons
+    </p>
+    <p>
+One answer could be, we just make an array of flags, traverse the initial array, and every digit will raise a flag when occurred. Then we'll traverse the flags and recreate only the elements that occurred.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+<span id="flags_1" style="display:block">8 3 5 2 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ F   F   F   F   F   F   F   F   F   F
+</span><span id="flags_2" style="display:none"><b>8</b> 3 5 2 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] <b>[8]</b> [9]
+ F   F   F   F   F   F   F   F   <b>T</b>   F
+</span><span id="flags_3" style="display:none">8 <b>3</b> 5 2 1 9 7 6
+
+[0] [1] [2] <b>[3]</b> [4] [5] [6] [7] [8] [9]
+ F   F   F   <b>T</b>   F   F   F   F   T   F
+</span><span id="flags_4" style="display:none">8 3 <b>5</b> 2 1 9 7 6
+
+[0] [1] [2] [3] [4] <b>[5]</b> [6] [7] [8] [9]
+ F   F   F   T   F   <b>T</b>   F   F   T   F
+</span><span id="flags_5" style="display:none">8 3 5 <b>2</b> 1 9 7 6
+
+[0] [1] <b>[2]</b> [3] [4] [5] [6] [7] [8] [9]
+ F   F   <b>T</b>   T   F   T   F   F   T   F
+</span><span id="flags_6" style="display:none">8 3 5 2 <b>1</b> 9 7 6
+
+[0] <b>[1]</b> [2] [3] [4] [5] [6] [7] [8] [9]
+ F   <b>T</b>   T   T   F   T   F   F   T   F
+</span><span id="flags_7" style="display:none">8 3 5 2 1 <b>9</b> 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] <b>[9]</b>
+ F   T   T   T   F   T   F   F   T   <b>T</b>
+</span><span id="flags_8" style="display:none">8 3 5 2 1 9 <b>7</b> 6
+
+[0] [1] [2] [3] [4] [5] [6] <b>[7]</b> [8] [9]
+ F   T   T   T   F   T   F   <b>T</b>   T   T
+</span><span id="flags_9" style="display:none">8 3 5 2 1 9 7 <b>6</b>
+
+[0] [1] [2] [3] [4] [5] <b>[6]</b> [7] [8] [9]
+ F   T   T   T   F   T   <b>T</b>   T   T   T
+</span><span id="flags_10" style="display:none">8 3 5 2 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ F   <b>T   T   T</b>   F   <b>T   T   T   T   T </b>
+</span><span id="flags_11" style="display:none">8 3 5 2 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ F   T   T   T   F   T   T   T   T   T
+</span><span id="flags_12" style="display:none">8 3 5 2 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ F   <b>T   T   T</b>   F   <b>T   T   T   T   T </b>
+</span><span id="flags_13" style="display:none">8 3 5 2 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ F   T   T   T   F   T   T   T   T   T
+</span><span id="flags_14" style="display:none">8 3 5 2 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ F   <b>T   T   T</b>   F   <b>T   T   T   T   T </b>
+</span><span id="flags_15" style="display:none">8 3 5 2 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ F   T   T   T   F   T   T   T   T   T
+</span><span id="flags_16" style="display:none"><u>8 3 5 2 1 9 7 6</u>
+
+<b>[0]</b> [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ <b>F</b>   T   T   T   F   T   T   T   T   T
+</span><span id="flags_17" style="display:none"><b>1</b> <u>3 5 2 1 9 7 6</u>
+
+[0] <b>[1]</b> [2] [3] [4] [5] [6] [7] [8] [9]
+ F   <b>T</b>   T   T   F   T   T   T   T   T
+</span><span id="flags_18" style="display:none"><b>1 2</b> <u>5 2 1 9 7 6</u>
+
+[0] [1] <b>[2]</b> [3] [4] [5] [6] [7] [8] [9]
+ F   T   <b>T</b>   T   F   T   T   T   T   T
+</span><span id="flags_19" style="display:none"><b>1 2 3</b> <u>2 1 9 7 6</u>
+
+[0] [1] [2] <b>[3]</b> [4] [5] [6] [7] [8] [9]
+ F   T   T   <b>T</b>   F   T   T   T   T   T
+</span><span id="flags_20" style="display:none"><b>1 2 3</b> <u>2 1 9 7 6</u>
+
+[0] [1] [2] [3] <b>[4]</b> [5] [6] [7] [8] [9]
+ F   T   T   T   <b>F</b>   T   T   T   T   T
+</span><span id="flags_21" style="display:none"><b>1 2 3 5</b> <u>1 9 7 6</u>
+
+[0] [1] [2] [3] [4] <b>[5]</b> [6] [7] [8] [9]
+ F   T   T   T   F   <b>T</b>   T   T   T   T
+</span><span id="flags_22" style="display:none"><b>1 2 3 5 6</b> <u>9 7 6</u>
+
+[0] [1] [2] [3] [4] [5] <b>[6]</b> [7] [8] [9]
+ F   T   T   T   F   T   <b>T</b>   T   T   T
+</span><span id="flags_23" style="display:none"><b>1 2 3 5 6 7</b> <u>7 6</u>
+
+[0] [1] [2] [3] [4] [5] [6] <b>[7]</b> [8] [9]
+ F   T   T   T   F   T   T   <b>T</b>   T   T
+</span><span id="flags_24" style="display:none"><b>1 2 3 5 6 7 8</b> <u>6</u>
+
+[0] [1] [2] [3] [4] [5] [6] [7] <b>[8]</b> [9]
+ F   T   T   T   F   T   T   T   <b>T</b>   T
+</span><span id="flags_25" style="display:none"><b>1 2 3 5 6 7 8 9</b>
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] <b>[9]</b>
+ F   T   T   T   F   T   T   T   T   <b>T</b>
+</span><span id="flags_26" style="display:none"><b>1 2 3 5 6 7 8 9</b>
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ F   T   T   T   F   T   T   T   T   T
+</span></pre>
+    </td></tr></table>
+    <p style="text-align:right">
+    <button type="button" id="flags_button" onclick="run('flags')">Run demo</button>
+    </p>
+    <p>
+This has two traversals with the respecting complexity of O(n) and O(k) where the k is the number of all the possible digits.
+    </p>
+
+    <p>
+What if we have repeating elements?
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+8 3 5 8 2 1 1 9 7 6</pre>
+    </td>
+    </tr></table>
+    <br>
+    <img style="width: 505pt;" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Aspen_Alley.jpg/576px-Aspen_Alley.jpg">
+    <p class="comment">
+By Campbelle16 [<a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>], from Wikimedia Commons
+    </p>
+    <p>
+Well, we can just make our flags into counters.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+<span id="counters_1" style="display:block">8 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   0   0   0   0   0   0   0   0   0
+</span><span id="counters_2" style="display:none"><b>8</b> 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] <b>[8]</b> [9]
+ 0   0   0   0   0   0   0   0   <b>1</b>   0
+</span><span id="counters_3" style="display:none">8 <b>3</b> 5 8 2 1 1 9 7 6
+
+[0] [1] [2] <b>[3]</b> [4] [5] [6] [7] [8] [9]
+ 0   0   0   <b>1</b>   0   0   0   0   1   0
+</span><span id="counters_4" style="display:none">8 3 <b>5</b> 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] <b>[5]</b> [6] [7] [8] [9]
+ 0   0   0   1   0   <b>1</b>   0   0   1   0
+</span><span id="counters_5" style="display:none">8 3 5 <b>8</b> 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] <b>[8]</b> [9]
+ 0   0   0   1   0   1   0   0   <b>2</b>   0
+</span><span id="counters_6" style="display:none">8 3 5 8 <b>2</b> 1 1 9 7 6
+
+[0] [1] <b>[2]</b> [3] [4] [5] [6] [7] [8] [9]
+ 0   0   <b>1</b>   1   0   1   0   0   2   0
+</span><span id="counters_7" style="display:none">8 3 5 8 2 <b>1</b> 1 9 7 6
+
+[0] <b>[1]</b> [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   <b>1</b>   1   1   0   1   0   0   2   0
+</span><span id="counters_8" style="display:none">8 3 5 8 2 1 <b>1</b> 9 7 6
+
+[0] <b>[1]</b> [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   <b>2</b>   1   1   0   1   0   0   2   0
+</span><span id="counters_9" style="display:none">8 3 5 8 2 1 1 <b>9</b> 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] <b>[9]</b>
+ 0   2   1   1   0   1   0   0   2   <b>1</b>
+</span><span id="counters_10" style="display:none">8 3 5 8 2 1 1 9 <b>7</b> 6
+
+[0] [1] [2] [3] [4] [5] [6] <b>[7]</b> [8] [9]
+ 0   2   1   1   0   1   0   <b>1</b>   2   1
+</span><span id="counters_11" style="display:none">8 3 5 8 2 1 1 9 7 <b>6</b>
+
+[0] [1] [2] [3] [4] [5] <b>[6]</b> [7] [8] [9]
+ 0   2   1   1   0   1   <b>1</b>   1   2   1
+</span><span id="counters_12" style="display:none">8 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   <b>2   1   1</b>   0   <b>1   1   1   2   1</b>
+</span><span id="counters_13" style="display:none">8 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   2   1   1   0   1   1   1   2   1
+</span><span id="counters_14" style="display:none">8 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   <b>2   1   1</b>   0   <b>1   1   1   2   1</b>
+</span><span id="counters_15" style="display:none">8 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   2   1   1   0   1   1   1   2   1
+</span><span id="counters_16" style="display:none">8 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   <b>2   1   1</b>   0   <b>1   1   1   2   1</b>
+</span><span id="counters_17" style="display:none">8 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   2   1   1   0   1   1   1   2   1
+</span><span id="counters_18" style="display:none"><u>8 3 5 8 2 1 1 9 7 6</u>
+
+<b>[0]</b> [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ <b>0</b>   2   1   1   0   1   1   1   2   1
+</span><span id="counters_19" style="display:none"><b>1 1</b> <u>5 8 2 1 1 9 7 6</u>
+
+[0] <b>[1]</b> [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   <b>2</b>   1   1   0   1   1   1   2   1
+</span><span id="counters_20" style="display:none"><b>1 1 2</b> <u>8 2 1 1 9 7 6</u>
+
+[0] [1] <b>[2]</b> [3] [4] [5] [6] [7] [8] [9]
+ 0   2   <b>1</b>   1   0   1   1   1   2   1
+</span><span id="counters_21" style="display:none"><b>1 1 2 3</b> <u>2 1 1 9 7 6</u>
+
+[0] [1] [2] <b>[3]</b> [4] [5] [6] [7] [8] [9]
+ 0   2   1   <b>1</b>   0   1   1   1   2   1
+</span><span id="counters_22" style="display:none"><b>1 1 2 3</b> <u>2 1 1 9 7 6</u>
+
+[0] [1] [2] [3] <b>[4]</b> [5] [6] [7] [8] [9]
+ 0   2   1   1   <b>0</b>   1   1   1   2   1
+</span><span id="counters_23" style="display:none"><b>1 1 2 3 5</b> <u>1 1 9 7 6</u>
+
+[0] [1] [2] [3] [4] <b>[5]</b> [6] [7] [8] [9]
+ 0   2   1   1   0   <b>1</b>   1   1   2   1
+</span><span id="counters_24" style="display:none"><b>1 1 2 3 5 6</b> <u>1 9 7 6</u>
+
+[0] [1] [2] [3] [4] [5] <b>[6]</b> [7] [8] [9]
+ 0   2   1   1   0   1   <b>1</b>   1   2   1
+</span><span id="counters_25" style="display:none"><b>1 1 2 3 5 6 7</b> <u>9 7 6</u>
+
+[0] [1] [2] [3] [4] [5] [6] <b>[7]</b> [8] [9]
+ 0   2   1   1   0   1   1   <b>1</b>   2   1
+</span><span id="counters_26" style="display:none"><b>1 1 2 3 5 6 7 8 8</b> <u>6</u>
+
+[0] [1] [2] [3] [4] [5] [6] [7] <b>[8]</b> [9]
+ 0   2   1   1   0   1   1   1   <b>2</b>   1
+</span><span id="counters_27" style="display:none"><b>1 1 2 3 5 6 7 8 8 9</b>
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] <b>[9]</b>
+ 0   2   1   1   0   1   1   1   2   <b>1</b>
+</span><span id="counters_28" style="display:none"><b>1 1 2 3 5 6 7 8 8 9</b>
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   2   1   1   0   1   1   1   2   1
+</span></pre>
+    </td></tr></table>
+    <p style="text-align:right">
+    <button type="button" id="counters_button" onclick="run('counters')">Run demo</button>
+    </p>
+    <p>
+It's still rather effective, it's still <i>O(n)</i> and <i>O(k)</i>. It is still the sorting algorithm with linear complexity. The problem is, normally you want to sort something other than single-digit numbers, so your <i>k</i> grows quite a bit.
+    </p>
+    <p>
+If you want to sort 16-bit integer numbers, you would need to allocate 65 536 counters. If it's 32-bit, then it's 4 294 967 296. And it's even impossible to count the counters if you want to sort something of dynamic size, like strings or arbitrary length numbers.
+    </p>
+    <p>
+And that's when we need the trees. Radix trees, also known as <i>tries</i> as in re<i>trie</i>val.
+    </p>
+    <p>
+The idea here is simple. Of course, we can't just allocate trillions of counters but the chances are, we wouldn't even need most of them. So instead of laying them in a linear way, why don't we organize them as a tree? Just split a number into digits, and every digit, when being addressed, will allocate another set of digits. The number 417 then will be then denoted like this:
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+allocated for 41:    [0][1][2][3][4][5][6]<b>[7]</b>[8][9]
+                      0  0  0  0  0  0  0  <b>1</b>  0  0
+                      :
+allocated for 4:  [0]<b>[1]</b>[2][3][4][5][6][7][8][9]
+                   0  0  0  0  0  0  0  0  0  0
+                   :
+root: [0][1][2][3]<b>[4]</b>[5][6][7][8][9]
+       0  0  0  0  0  0  0  0  0  0
+    </pre>
+    </td>
+    </tr></table>
+    <p>
+We stored a 3-digit number using 30 counters. And they are shared. It would cost nothing to store another 417 or 418, and 427 would only require 10 more counters. We're not really constrained by the size of a number either, we can do as many digits as fits in our memory by attaching the trie as a subtrie to a larger trie.
+    </p>
+    <p>
+To put an array in a trie, we only need <i>n*l</i> operations, where <i>l</i> is the number of digits in a number including trailing zeroes.
+    </p>
+    <p>
+Sorting in this structure is fairly trivial, you just traverse the trie from lower digit to higher entering the subtrees if there is something of interest there.
+    </p>
+    <p>
+Let's sort this:
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+418 7 1 30 7 34 30 7 417
+    </pre>
+    </td>
+    </tr></table>
+
+    <table><tr>
+    <td>
+    <pre>
+<span id="trie_1" style="display:block">
+[0][1][2][3][4][5][6][7][8][9]
+ 0  <b>1</b>  0  0  0  0  0  <b>3</b>  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        <b>2</b>  0  0  0  <b>1</b>  0  0  0  0  0
+ :        :
+[0][1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  <b>1</b>  <b>1</b>  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+[0][1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+
+</span><span id="trie_2" style="display:none">
+[0][1][2][3][4][5][6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+[0][1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+
+</span><span id="trie_3" style="display:none">
+[0][1][2][3][4][5][6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+
+</span><span id="trie_4" style="display:none">
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+
+</span><span id="trie_5" style="display:none">
+[0]<b>[1]</b>[2][3][4][5][6][7][8][9]
+ 0  <b>1</b>  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+<b>1</b>
+</span><span id="trie_6" style="display:none">
+[0][1]<b>[2]</b>[3][4][5][6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+1
+</span><span id="trie_7" style="display:none">
+[0][1][2]<b>[3]</b>[4][5][6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+1
+</span><span id="trie_8" style="display:none">
+[0][1][2][3]<b>[4]</b>[5][6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+1
+</span><span id="trie_9" style="display:none">
+[0][1][2][3][4]<b>[5]</b>[6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+1
+</span><span id="trie_10" style="display:none">
+[0][1][2][3][4][5]<b>[6]</b>[7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+1
+</span><span id="trie_11" style="display:none">
+[0][1][2][3][4][5][6]<b>[7]</b>[8][9]
+ 0  1  0  0  0  0  0  <b>3</b>  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+1 <b>7 7 7</b>
+</span><span id="trie_12" style="display:none">
+[0][1][2][3][4][5][6][7]<b>[8]</b>[9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+1 7 7 7
+</span><span id="trie_13" style="display:none">
+[0][1][2][3][4][5][6][7][8]<b>[9]</b>
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+1 7 7 7
+</span><span id="trie_14" style="display:none">
+[0][1][2][3][4][5][6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+[0][1][2]<b>[3]</b>[4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+1 7 7 7
+</span><span id="trie_15" style="display:none">
+[0][1][2][3][4][5][6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       <b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ :        <b>2</b>  0  0  0  1  0  0  0  0  0
+ :        :
+[0][1][2]<b>[3]</b>[4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+1 7 7 7 <b>30 30</b>
+</span><span id="trie_16" style="display:none">
+[0][1][2][3][4][5][6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3]<b>[4]</b>[5][6][7][8][9]
+ :        2  0  0  0  <b>1</b>  0  0  0  0  0
+ :        :
+[0][1][2]<b>[3]</b>[4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+<b>[0]</b>[1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+1 7 7 7 30 30 <b>34</b>
+</span><span id="trie_17" style="display:none">
+[0][1][2][3][4][5][6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+[0][1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+[0][1][2][3]<b>[4]</b>[5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+1 7 7 7 30 30 34
+</span><span id="trie_18" style="display:none">
+[0][1][2][3][4][5][6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+[0][1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0]<b>[1]</b>[2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+[0][1][2][3]<b>[4]</b>[5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+1 7 7 7 30 30 34
+</span><span id="trie_19" style="display:none">
+[0][1][2][3][4][5][6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+[0][1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6]<b>[7]</b>[8][9]
+ :              0  0  0  0  0  0  0  <b>1</b>  1  0
+ :              :
+ :          [0]<b>[1]</b>[2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+[0][1][2][3]<b>[4]</b>[5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+1 7 7 7 30 30 34 <b>417</b>
+</span><span id="trie_20" style="display:none">
+[0][1][2][3][4][5][6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+[0][1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7]<b>[8]</b>[9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0]<b>[1]</b>[2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+[0][1][2][3]<b>[4]</b>[5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+1 7 7 7 30 30 34 417 <b>418</b>
+</span><span id="trie_21" style="display:none">
+[0][1][2][3][4][5][6][7][8][9]
+ 0  1  0  0  0  0  0  3  0  0
+ :
+ :       [0][1][2][3][4][5][6][7][8][9]
+ :        2  0  0  0  1  0  0  0  0  0
+ :        :
+[0][1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+ :
+ :             [0][1][2][3][4][5][6][7][8][9]
+ :              0  0  0  0  0  0  0  1  1  0
+ :              :
+ :          [0][1][2][3][4][5][6][7][8][9]
+ :           0  0  0  0  0  0  0  0  0  0
+ :           :
+[0][1][2][3][4][5][6][7][8][9]
+ 0  0  0  0  0  0  0  0  0  0
+
+<b>1 7 7 7 30 30 34 417 418</b>
+</span></pre>
+    </td></tr></table>
+    <p style="text-align:right">
+    <button type="button" id="trie_button" onclick="run('trie')">Run demo</button>
+    </p>
+
+    <p>
+This is a digital tree also known as radix tree, and this is how radix sort works. Of course, in practice, the digits are usually binary not decimal.
+    </p>
+    <p>
+It's not that effective as no sorting at all or as a single-digit radix sort. It has <i>O(n*m)</i> complexity where <i>m</i> is the length of sorted numbers in digits multiplied by the size of a radix. For binary digits, it's basically the size of a number in bits.
+    </p>
+    <p>
+Standard sorting algorithms have <i>O(n log(n))</i> complexity, so the competition is really between <i>m</i> and <i>log(n)</i>. As we established earlier, log(4 294 967 296) is 32, so if you want to sort some 32-bit numbers, you should have your array larger than 4B to make radix sort justified. Unless your data is huge, or the numbers are really small, the standard sort will do the job better.
+    </p>
+    <p>
+The same goes for the data structure itself. It also has <i>O(m)</i> retrieval complexity, and it's also justified on big data or shorter keys.
+    </p>
+    <p>
+Radix trees are used in the most unexpected application like in <a href="https://vincent.bernat.im/en/blog/2017-ipv4-route-lookup-linux">IP routing</a> or as a <a href="https://lwn.net/Articles/175432/">pointer to index array</a> in the Linux kernel. But the most common application for them is text processing, although, to enjoy all the benefits we have to modify our structure a bit.
+    </p>
+
+    <p>
+So far we were talking about digital trees where every digit is a node. The problem with this system is that the digits are positional, and we want out tree to be ordered. With numbers, 2 &lt; 12, so we have to store 2 as 02 to keep the order when traversing. But this is not so with strings in alphabetical order. Letter 'a' comes before the letter 'b', and the word 'add' still precedes 'be' while being longer.
+    </p>
+    <p>
+This means that instead of a digital tree, we might use a prefix tree that conceptually looks like this:
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+cat cats cow cower
+
+        [a...s...z]
+         :   <b>1</b>
+         :
+    [a...t...z]
+     :   <b>1</b>
+     :          [a...r...z]
+     :           :   <b>1</b>
+     :           :
+     :      [a...e...z]
+     :       :
+     :       :
+     :  [a...w...z]
+     :   :   <b>1</b>
+     :   :
+    [a...o...z]
+     :
+     :
+[a...c...z]
+    </pre>
+    </td>
+    </tr></table>
+    <p>
+This tree can have elements on every node not only the leaves.
+    </p>
+
+    <h2>
+The numbers
+    </h2>
+    <p>
+To see how the tries perform in reality, I've made a simple benchmark: <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/sort/radix">https://github.com/akalenuk/wordsandbuttons/tree/master/exp/sort/radix</a>.
+    </p>
+    <p>
+My tries are prefix tries of standard strings. I try them with different radix size from 1 to 8 bits. The larger the radix, the shorter is the lookup but also the more memory it takes to build a trie. These things should be kept in balance. As the experiments show, extra data allocations may be more harmful to performance than extra lookups.
+    </p>
+    <p>
+On my machine it goes like this. Sorting a million quasi-words 3 to 4 letters long:
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+   std::sort - 240
+   radix 1 sort - 221
+   radix 2 sort - 180
+   radix 4 sort - 146
+   radix 8 sort - 410
+    </pre>
+    </td>
+    </tr></table>
+    <p>
+These are the timings measured in milliseconds. As you can see, on these data radix 8 is way less effective than radix 4, and even worse than the standard sort.
+    </p>
+    <p>
+Writing and reading 100 000 quasi-words of length 2 to 8 with a trie:
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+Trie::Map with 1-bits radix
+   Writing: 602
+   Reading: 636
+   Size in bytes: 35 434 704
+
+Trie::Map with 2-bits radix
+   Writing: 411
+   Reading: 404
+   Size in bytes: 30 357 520
+
+Trie::Map with 4-bits radix
+   Writing: 714
+   Reading: 727
+   Size in bytes: 54 409 656
+
+Trie::Map with 8-bits radix
+   Writing: 1156
+   Reading: 599
+   Size in bytes: 466 866 200
+
+std::map
+   Writing: 1404
+   Reading: 1408
+
+std::unordered_map
+   Writing: 479
+   Reading: 466
+    </pre>
+    </td>
+    </tr></table>
+    <p>
+Please note, that my implementation is rather crude. Normally, it is not a good idea to allocate small bits of memory with the standard <i>new</i> and <i>delete</i> operators.
+    </p>
+    <p>
+My experiments are aimed to show that even with ineffective implementation tries can outperform the standard containers and algorithms on the specific data.
+    </p>
+    <p>
+I encourage you to conduct your own experiments on your own data to see if you're using the best structures possible.
+    </p>
+
+    <h2>
+Conclusion
+    </h2>
+    <p>
+The idea behind the tries evolves from doing nothing with unordered digits to the elaborate data structures that excel in big data storage. It is still the same idea, the same principle. Knowing this principle should help you understand the tries, and add them to your arsenal of data structures and algorithms.
+    </p>
+
+    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+    <tr>
+    <td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+        <a href="index.html"><img src="favicon.ico"></a>
+    </td>
+    <td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+        &nbsp;&larr; there's more.
+    </td>
+    <td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+        +
+        <a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+        <a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+        <a href="https://news.ycombinator.com/from?site=wordsandbuttons.online">Hacker News</a>
+    </td>
+    </tr>
+    </table>
+    </center>
+  </body>
+</html>
