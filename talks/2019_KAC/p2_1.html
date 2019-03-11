@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Tries as the evolution of nothing</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a {
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+table {
+    border-width: 0pt;
+}
+
+td {
+    vertical-align: top;
+    padding: 6pt 12pt 6pt 12pt;
+    font-size: 16pt;
+    border: 1px solid black;
+    width: 505pt;
+}
+
+button{
+    width: 248pt;
+    height: 42pt;
+    margin-left:4pt;
+    margin-right:4pt;
+    font-size: 16pt;
+}
+
+.comment {
+    font-size: 12pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
+
+b {
+    font-style: bold;
+    color: #e30707;
+}
+
+u {
+    text-decoration: none;
+    color: #999;
+}
+    </style>
+    <script language="JavaScript">
+const FPS = 2.0;
+
+function next(slides, disable_the_button){
+    // show the next slide
+    var first_slide = document.getElementById(slides + "_" + 1);
+    for(var i = 1; i < 99; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if(this_slide && this_slide.style.display == "block") { // the visible one
+            this_slide.style.display = "none";
+            if(next_slide)
+                next_slide.style.display = "block";
+            else
+                first_slide.style.display = "block";
+            break;
+        }
+    }
+    // name and en/disable the button. After the slides are set
+    var button = document.getElementById(slides + "_button");
+    for(var i = 1; i < 99; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if(this_slide && this_slide.style.display == "block") {
+            if (!next_slide) {
+                button.innerHTML = "Back to the 1-st frame";
+                button.disabled = false;
+            } else {
+                button.innerHTML = "Run demo";
+                if(i != 1 && disable_the_button)
+                    button.disabled = true;
+            }
+            break;
+        }
+    }
+}
+
+function run(frames) {
+    var button = document.getElementById(frames + "_button");
+    var was_last_frame = button.innerHTML != "Run demo";
+    next(frames, true);
+    var now_last_frame = button.innerHTML != "Run demo";
+    if(!was_last_frame && ! now_last_frame)
+        setTimeout( function(){run(frames);}, 1000.0 / FPS);
+}
+
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+Почнемо із задачки
+    </h1>
+    <p>
+Нехай маємо масив із десяти десяткових цифр. кожна цифра зустрічається один і тільки один раз.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+8 4 3 5 2 0 1 9 7 6</pre>
+    </td>
+    </tr></table>
+    <p>
+Що треба зробити щоб він став відсортованим?
+    </p>
+    <p>
+Алгоритм, підхід, ідея?
+    </p>
+
+    <br>
+    <br>
+    <table style="width: 505pt;">
+    <tr>
+    <td class="footer" style="text-align: left;"><a href="p1_2.html">&larr; назад</a></td>
+    <td class="footer" style="text-align: center"><a href="index.html">- на стартову -</a></td>
+    <td class="footer" style="text-align: right"><a href="p2_2.html">вперед &rarr;</a></td>
+    </tr>
+    </table>
+
+    </center>
+  </body>
+</html>
