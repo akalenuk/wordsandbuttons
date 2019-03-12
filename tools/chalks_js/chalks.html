@@ -1,0 +1,89 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Splixels from an image</title>
+    <meta name="keywords" content="iterative,algorithms,guide,tutorial,learning">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+    </style>
+    <script language="JavaScript">
+function painted_in(line, color) {
+    if(line.length == 0)
+        return line;
+    return "<span style=\"color:#" + color + "\">" + line + "</span>";
+}
+
+function colorized_token(token) {
+    return painted_in(token, "900");
+}
+    
+function tokenized_and_transformed(transformed, line, tokens) {
+    if(tokens.length == 0)
+        return transformed(line);
+    var last_token = tokens.pop();
+    var result = line.split(last_token).map(function(piece_of_line) {
+        return tokenized_and_transformed(transformed, piece_of_line, tokens);
+    }).join(last_token);
+    tokens.push(last_token);
+    return result;
+}
+
+function code_and_comment_in(line, separators) {
+    if (separators.length == 0)
+        return [line, ""];
+    var last_separator = separators.pop();
+    var separated = line.split(last_separator);
+    var code_or_not = separated[0];
+    separated[0] = "";
+    var code_or_not_and_comments = code_and_comment_in(code_or_not, separators);
+    code_or_not_and_comments[1] += separated.join(last_separator);
+    return code_or_not_and_comments;
+}
+    
+function colorized_line(line) {
+    var code_and_comment = code_and_comment_in(line, ['//', '--', '#']);
+    return tokenized_and_transformed(colorized_token, code_and_comment[0], [' ', '\t', '.', ',', '+', '-', '/', '*']) + painted_in(code_and_comment[1], "777");
+}
+    
+function colorized_lines(lines) {
+    if(lines.length == 0) 
+        return [];
+    var last_line = lines.pop();
+    colorized_lines(lines).push(colorized_line(last_line));
+    return lines;
+}
+
+
+function colorized_with_chalks(text) {
+    return colorized_lines(text.split('\n')).join('\n');
+}
+
+    </script>
+    <body>
+    <pre>
+    <div id="code">
+// solver specific to [0..1] parametrized splines
+function spline_for(p1, p1d, p2, p2d) {
+//     A = [
+//         [1, 0, 0, 0],
+//         [0, 1, 0, 0],
+//         [1, 1, 1, 1],
+//         [0, 1, 2, 3]];
+//     B = [p1, p1d, p2, p2d]
+    return [ 
+        p1,     // first point
+        p1d,    // first point derivative
+        3 * p2 - p2d - 3*p1 - 2*p1d,
+        p2d + p1d - 2*p2 + 2*p1
+    ];
+}
+    </div>   
+    </pre>
+    <script language="JavaScript">
+document.getElementById("code").innerHTML = colorized_with_chalks(document.getElementById("code").innerHTML);
+    </script>
+    </body>
+</html>    
