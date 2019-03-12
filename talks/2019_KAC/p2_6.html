@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Tries as the evolution of nothing</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a {
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+table {
+    border-width: 0pt;
+}
+
+td {
+    vertical-align: top;
+    padding: 6pt 12pt 6pt 12pt;
+    font-size: 16pt;
+    border: 1px solid black;
+    width: 505pt;
+}
+
+button{
+    width: 248pt;
+    height: 42pt;
+    margin-left:4pt;
+    margin-right:4pt;
+    font-size: 16pt;
+}
+
+.comment {
+    font-size: 12pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
+
+b {
+    font-style: bold;
+    color: #e30707;
+}
+
+u {
+    text-decoration: none;
+    color: #999;
+}
+    </style>
+    <script language="JavaScript">
+const FPS = 2.0;
+
+function next(slides, disable_the_button){
+    // show the next slide
+    var first_slide = document.getElementById(slides + "_" + 1);
+    for(var i = 1; i < 99; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if(this_slide && this_slide.style.display == "block") { // the visible one
+            this_slide.style.display = "none";
+            if(next_slide)
+                next_slide.style.display = "block";
+            else
+                first_slide.style.display = "block";
+            break;
+        }
+    }
+    // name and en/disable the button. After the slides are set
+    var button = document.getElementById(slides + "_button");
+    for(var i = 1; i < 99; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if(this_slide && this_slide.style.display == "block") {
+            if (!next_slide) {
+                button.innerHTML = "Наново";
+                button.disabled = false;
+            } else {
+                button.innerHTML = "Показати";
+                if(i != 1 && disable_the_button)
+                    button.disabled = true;
+            }
+            break;
+        }
+    }
+}
+
+function run(frames) {
+    var button = document.getElementById(frames + "_button");
+    var was_last_frame = button.innerHTML != "Показати";
+    next(frames, true);
+    var now_last_frame = button.innerHTML != "Показати";
+    if(!was_last_frame && ! now_last_frame)
+        setTimeout( function(){run(frames);}, 1000.0 / FPS);
+}
+
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+Можна використовувати масив лічильників
+    </h1>
+
+    <p>
+Та ж сама ідея. Перший прохід по масиву, кожна цифра інкрементує власний лічільник. Другий прохід по цифрах &ndash; викладаємо в масив стільки екземплярів цифри, скільки нарахували у першому проході.
+    </p>
+    <table><tr>
+    <td>
+    <pre>
+<span id="counters_1" style="display:block">8 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   0   0   0   0   0   0   0   0   0
+</span><span id="counters_2" style="display:none"><b>8</b> 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] <b>[8]</b> [9]
+ 0   0   0   0   0   0   0   0   <b>1</b>   0
+</span><span id="counters_3" style="display:none">8 <b>3</b> 5 8 2 1 1 9 7 6
+
+[0] [1] [2] <b>[3]</b> [4] [5] [6] [7] [8] [9]
+ 0   0   0   <b>1</b>   0   0   0   0   1   0
+</span><span id="counters_4" style="display:none">8 3 <b>5</b> 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] <b>[5]</b> [6] [7] [8] [9]
+ 0   0   0   1   0   <b>1</b>   0   0   1   0
+</span><span id="counters_5" style="display:none">8 3 5 <b>8</b> 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] <b>[8]</b> [9]
+ 0   0   0   1   0   1   0   0   <b>2</b>   0
+</span><span id="counters_6" style="display:none">8 3 5 8 <b>2</b> 1 1 9 7 6
+
+[0] [1] <b>[2]</b> [3] [4] [5] [6] [7] [8] [9]
+ 0   0   <b>1</b>   1   0   1   0   0   2   0
+</span><span id="counters_7" style="display:none">8 3 5 8 2 <b>1</b> 1 9 7 6
+
+[0] <b>[1]</b> [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   <b>1</b>   1   1   0   1   0   0   2   0
+</span><span id="counters_8" style="display:none">8 3 5 8 2 1 <b>1</b> 9 7 6
+
+[0] <b>[1]</b> [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   <b>2</b>   1   1   0   1   0   0   2   0
+</span><span id="counters_9" style="display:none">8 3 5 8 2 1 1 <b>9</b> 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] <b>[9]</b>
+ 0   2   1   1   0   1   0   0   2   <b>1</b>
+</span><span id="counters_10" style="display:none">8 3 5 8 2 1 1 9 <b>7</b> 6
+
+[0] [1] [2] [3] [4] [5] [6] <b>[7]</b> [8] [9]
+ 0   2   1   1   0   1   0   <b>1</b>   2   1
+</span><span id="counters_11" style="display:none">8 3 5 8 2 1 1 9 7 <b>6</b>
+
+[0] [1] [2] [3] [4] [5] <b>[6]</b> [7] [8] [9]
+ 0   2   1   1   0   1   <b>1</b>   1   2   1
+</span><span id="counters_12" style="display:none">8 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   <b>2   1   1</b>   0   <b>1   1   1   2   1</b>
+</span><span id="counters_13" style="display:none">8 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   2   1   1   0   1   1   1   2   1
+</span><span id="counters_14" style="display:none">8 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   <b>2   1   1</b>   0   <b>1   1   1   2   1</b>
+</span><span id="counters_15" style="display:none">8 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   2   1   1   0   1   1   1   2   1
+</span><span id="counters_16" style="display:none">8 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   <b>2   1   1</b>   0   <b>1   1   1   2   1</b>
+</span><span id="counters_17" style="display:none">8 3 5 8 2 1 1 9 7 6
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   2   1   1   0   1   1   1   2   1
+</span><span id="counters_18" style="display:none"><u>8 3 5 8 2 1 1 9 7 6</u>
+
+<b>[0]</b> [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ <b>0</b>   2   1   1   0   1   1   1   2   1
+</span><span id="counters_19" style="display:none"><b>1 1</b> <u>5 8 2 1 1 9 7 6</u>
+
+[0] <b>[1]</b> [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   <b>2</b>   1   1   0   1   1   1   2   1
+</span><span id="counters_20" style="display:none"><b>1 1 2</b> <u>8 2 1 1 9 7 6</u>
+
+[0] [1] <b>[2]</b> [3] [4] [5] [6] [7] [8] [9]
+ 0   2   <b>1</b>   1   0   1   1   1   2   1
+</span><span id="counters_21" style="display:none"><b>1 1 2 3</b> <u>2 1 1 9 7 6</u>
+
+[0] [1] [2] <b>[3]</b> [4] [5] [6] [7] [8] [9]
+ 0   2   1   <b>1</b>   0   1   1   1   2   1
+</span><span id="counters_22" style="display:none"><b>1 1 2 3</b> <u>2 1 1 9 7 6</u>
+
+[0] [1] [2] [3] <b>[4]</b> [5] [6] [7] [8] [9]
+ 0   2   1   1   <b>0</b>   1   1   1   2   1
+</span><span id="counters_23" style="display:none"><b>1 1 2 3 5</b> <u>1 1 9 7 6</u>
+
+[0] [1] [2] [3] [4] <b>[5]</b> [6] [7] [8] [9]
+ 0   2   1   1   0   <b>1</b>   1   1   2   1
+</span><span id="counters_24" style="display:none"><b>1 1 2 3 5 6</b> <u>1 9 7 6</u>
+
+[0] [1] [2] [3] [4] [5] <b>[6]</b> [7] [8] [9]
+ 0   2   1   1   0   1   <b>1</b>   1   2   1
+</span><span id="counters_25" style="display:none"><b>1 1 2 3 5 6 7</b> <u>9 7 6</u>
+
+[0] [1] [2] [3] [4] [5] [6] <b>[7]</b> [8] [9]
+ 0   2   1   1   0   1   1   <b>1</b>   2   1
+</span><span id="counters_26" style="display:none"><b>1 1 2 3 5 6 7 8 8</b> <u>6</u>
+
+[0] [1] [2] [3] [4] [5] [6] [7] <b>[8]</b> [9]
+ 0   2   1   1   0   1   1   1   <b>2</b>   1
+</span><span id="counters_27" style="display:none"><b>1 1 2 3 5 6 7 8 8 9</b>
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] <b>[9]</b>
+ 0   2   1   1   0   1   1   1   2   <b>1</b>
+</span><span id="counters_28" style="display:none"><b>1 1 2 3 5 6 7 8 8 9</b>
+
+[0] [1] [2] [3] [4] [5] [6] [7] [8] [9]
+ 0   2   1   1   0   1   1   1   2   1
+</span></pre>
+    </td></tr></table>
+    <p style="text-align:right">
+    <button type="button" id="counters_button" onclick="run('counters')">Показати</button>
+    </p>
+    <p>
+Все ще супер-ефективно. Все ще <i>O(n)</i> та <i>O(k)</i>. 
+    </p>
+    <p>
+Проблема. Не так часто доводиться сортувати цифри. Якщо переходити до більш реалістичних чисел, <i>k</i> зростає до непрагматичних значень.
+    </p>
+    <p>
+Якщо сортувати 16-бітні числа, треба буде завести масив із 65 536 лічильників. Якщо 32-бітні, то із 4 294 967 296. Для об'єктів із змінною довжиною, наприклад для строк, підрахувати кількість лічильників наперед навіть неможливо.
+    </p>
+
+    <br>
+    <br>
+    <table style="width: 505pt;">
+    <tr>
+    <td class="footer" style="text-align: left;"><a href="p2_5.html">&larr; назад</a></td>
+    <td class="footer" style="text-align: center"><a href="index.html">- на стартову -</a></td>
+    <td class="footer" style="text-align: right"><a href="p2_7.html">вперед &rarr;</a></td>
+    </tr>
+    </table>
+
+    </center>
+  </body>
+</html>
