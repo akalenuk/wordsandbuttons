@@ -1,8 +1,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Splixels from an image</title>
-    <meta name="keywords" content="iterative,algorithms,guide,tutorial,learning">
+    <title>Chalks highlighting</title>
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <style>
 body{
@@ -17,7 +16,14 @@ function painted_in(line, color) {
 }
 
 function colorized_token(token) {
-    return painted_in(token, "900");
+    function in_hex(x) {
+        return Math.floor(x / 16).toString(16) + (x % 16).toString(16);
+    }
+    var code_sum = 0;
+    for(var i = 0; i < token.length; ++i)
+        code_sum += token.charCodeAt(i);
+    var color = in_hex((1 + code_sum % 3) * 40) + in_hex((1 + code_sum % 4) * 30) + in_hex((1 + code_sum % 5) * 24);
+    return painted_in(token, color);
 }
     
 function tokenized_and_transformed(transformed, line, tokens) {
