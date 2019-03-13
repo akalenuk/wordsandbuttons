@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Префіксні дерева як еволюція прагматичного неробства</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a {
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+table {
+    border-width: 0pt;
+}
+
+button{
+    width: 248pt;
+    height: 42pt;
+    margin-left:4pt;
+    margin-right:4pt;
+    font-size: 16pt;
+}
+
+.comment {
+    font-size: 12pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
+
+b {
+    font-style: bold;
+    color: #e30707;
+}
+
+u {
+    text-decoration: none;
+    color: #999;
+}
+
+td {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    text-align: left;
+    padding: 8pt 8pt 8pt 8pt;
+}
+
+th {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: bold;
+    text-align: left;
+    padding: 36pt 8pt 8pt 8pt;
+}	
+    </style>
+    <script language="JavaScript">
+const FPS = 2.0;
+
+function next(slides, disable_the_button){
+    // show the next slide
+    var first_slide = document.getElementById(slides + "_" + 1);
+    for(var i = 1; i < 99; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if(this_slide && this_slide.style.display == "block") { // the visible one
+            this_slide.style.display = "none";
+            if(next_slide)
+                next_slide.style.display = "block";
+            else
+                first_slide.style.display = "block";
+            break;
+        }
+    }
+    // name and en/disable the button. After the slides are set
+    var button = document.getElementById(slides + "_button");
+    for(var i = 1; i < 99; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if(this_slide && this_slide.style.display == "block") {
+            if (!next_slide) {
+                button.innerHTML = "Наново";
+                button.disabled = false;
+            } else {
+                button.innerHTML = "Показати";
+                if(i != 1 && disable_the_button)
+                    button.disabled = true;
+            }
+            break;
+        }
+    }
+}
+
+function run(frames) {
+    var button = document.getElementById(frames + "_button");
+    var was_last_frame = button.innerHTML != "Показати";
+    next(frames, true);
+    var now_last_frame = button.innerHTML != "Показати";
+    if(!was_last_frame && ! now_last_frame)
+        setTimeout( function(){run(frames);}, 1000.0 / FPS);
+}
+
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+Баланс між шириною цифри і довжиною дерева
+    </h1>
+    <p>
+Десяткові дерева пласкіші за двійкові. Чим більша цифра, тим коротший шлях пошуку елемента, але тим більший оверхед по пам'яті, тим гірше кешуються запити.
+    </p>
+    <p>
+Запишемо і вичитаємо масив із 100 000 слів довжиною в 2-8 літер.
+    </p>
+    <table style="width:505pt">
+    <tr><th>Структура              </th><th>Час запису в мс.</th><th>Час вичитки в мс.</th><th>Розмір структури</th></tr>
+    <tr><td>1-bit trie             </td><td>602 </td><td>636 </td><td>35 434 704 </td></tr>
+    <tr><td>2-bit trie             </td><td>411 </td><td>404 </td><td>30 357 520 </td></tr>
+    <tr><td>4-bit trie             </td><td>714 </td><td>727 </td><td>54 409 656 </td></tr>
+    <tr><td>8-bit trie             </td><td>1156</td><td>599 </td><td>466 866 200 </td></tr>
+    <tr><td>std::map               </td><td>1404</td><td>1408</td><td> </td></tr>
+    <tr><td>std::unordered_map     </td><td>479 </td><td>466 </td><td> </td></tr>
+    </table>
+    <p class="comment">
+Компілятор: clang 3.8.0-2ubuntu4; процесор Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz.
+    </p>
+    <p>
+Отже, існує певний баланс при якому дерево працює найоптимальніше.
+    </p>
+    <br>
+    <br>
+    <table style="width: 505pt;">
+    <tr>
+    <td class="footer" style="text-align: left;"><a href="p2_10.html">&larr; назад</a></td>
+    <td class="footer" style="text-align: center"><a href="index.html">- на стартову -</a></td>
+    <td class="footer" style="text-align: right"><a href="p3_2.html">вперед &rarr;</a></td>
+    </tr>
+    </table>
+
+    </center>
+  </body>
+</html>
