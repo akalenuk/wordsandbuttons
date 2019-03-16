@@ -199,10 +199,19 @@ function draw_cross_grid_on(context){
 }
 
 // visuals
-var dot_x = 1;
-var dot_y = 1; 
-var cross_x = 1;
-var cross_y = 1;
+var dot_x = [1, 2, 3];
+var dot_y = [1, 2, 3];
+var cross_x = [0.5, 0.75, 1];
+var cross_y = [0.5, 0.75, 1];
+
+function nearest_in(xs, ys, x, y) {
+    var nearest_i = 0;
+    for(var i = 1; i < dot_x.length; ++i)
+        if((Math.pow(x - xs[i], 2) + Math.pow(y - ys[i], 2)) < (Math.pow(x - xs[nearest_i], 2) + Math.pow(y - ys[nearest_i], 2)))
+            nearest_i = i;
+    return nearest_i;
+}
+
 
 function init_dot(){
     var dot = document.getElementById("dot");
@@ -212,17 +221,23 @@ function init_dot(){
     dot.addEventListener('mousemove', function(e){
         var canvas_rect = dot.getBoundingClientRect();
         draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-        if(e.buttons == 1){
-            dot_x = dot_client_to_x(e.clientX - canvas_rect.left);
-            dot_y = dot_client_to_y(e.clientY - canvas_rect.top);
+        if(e.buttons == 1){          
+            var x = dot_client_to_x(e.clientX - canvas_rect.left);
+            var y = dot_client_to_y(e.clientY - canvas_rect.top);
+            var dot_i = nearest_in(dot_x, dot_y, x, y);
+            dot_x[dot_i] = x;
+            dot_y[dot_i] = y;
             draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
         }
     }, false);
 
     dot.addEventListener('mousedown', function(e){
         var canvas_rect = dot.getBoundingClientRect();
-        dot_x = dot_client_to_x(e.clientX - canvas_rect.left);
-        dot_y = dot_client_to_y(e.clientY - canvas_rect.top);
+        var x = dot_client_to_x(e.clientX - canvas_rect.left);
+        var y = dot_client_to_y(e.clientY - canvas_rect.top);
+        var dot_i = nearest_in(dot_x, dot_y, x, y);
+        dot_x[dot_i] = x;
+        dot_y[dot_i] = y;
         draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
@@ -242,12 +257,14 @@ function draw_dot(client_x, client_y, do_guides){
     // grid
     draw_dot_grid_on(context);
 
-    // point
-    context.fillStyle="#008800";
-    context.beginPath();
-    context.arc(dot_x_to_client(dot_x), dot_y_to_client(dot_y), 2, 0, 2*Math.PI);
-    context.fill();
-    context.closePath();
+    // points
+    for(var i = 0; i < cross_x.length; ++i) {
+        context.fillStyle="#008800";
+        context.beginPath();
+        context.arc(dot_x_to_client(dot_x[i]), dot_y_to_client(dot_y[i]), 2, 0, 2*Math.PI);
+        context.fill();
+        context.closePath();
+    }
 }
 
 function init_cross(){
@@ -259,16 +276,22 @@ function init_cross(){
         var canvas_rect = cross.getBoundingClientRect();
         draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
         if(e.buttons == 1){
-            cross_x = cross_client_to_x(e.clientX - canvas_rect.left);
-            cross_y = cross_client_to_y(e.clientY - canvas_rect.top);
+            var x = cross_client_to_x(e.clientX - canvas_rect.left);
+            var y = cross_client_to_y(e.clientY - canvas_rect.top);
+            var cross_i = nearest_in(cross_x, cross_y, x, y);
+            cross_x[cross_i] = x;
+            cross_y[cross_i] = y;
             draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
         }
     }, false);
 
     cross.addEventListener('mousedown', function(e){
         var canvas_rect = cross.getBoundingClientRect();
-        cross_x = cross_client_to_x(e.clientX - canvas_rect.left);
-        cross_y = cross_client_to_y(e.clientY - canvas_rect.top);
+        var x = cross_client_to_x(e.clientX - canvas_rect.left);
+        var y = cross_client_to_y(e.clientY - canvas_rect.top);
+        var cross_i = nearest_in(cross_x, cross_y, x, y);
+        cross_x[cross_i] = x;
+        cross_y[cross_i] = y;
         draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
@@ -288,12 +311,14 @@ function draw_cross(client_x, client_y, do_guides){
     // grid
     draw_cross_grid_on(context);
 
-    // point
-    context.fillStyle="#008800";
-    context.beginPath();
-    context.arc(cross_x_to_client(cross_x), cross_y_to_client(cross_y), 2, 0, 2*Math.PI);
-    context.fill();
-    context.closePath();
+    // points
+    for(var i = 0; i < cross_x.length; ++i) {
+        context.fillStyle="#008800";
+        context.beginPath();
+        context.arc(cross_x_to_client(cross_x[i]), cross_y_to_client(cross_y[i]), 2, 0, 2*Math.PI);
+        context.fill();
+        context.closePath();
+    }
 }
     </script>
   </head>
