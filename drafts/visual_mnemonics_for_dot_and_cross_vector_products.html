@@ -76,16 +76,17 @@ var w = 640.0;
 var h = 640.0;
 
 // visible region for dot
-var dot_x_min = -5.0;
-var dot_y_min = -4.0;
-var dot_x_max = 5.0;
-var dot_y_max = 4.0;
+var dot_x_min = -1.0;
+var dot_y_min = -1.0;
+var dot_x_max = 7.0;
+var dot_y_max = 7.0;
 
 var dot_client_x_center = w*(0-dot_x_min)/(dot_x_max-dot_x_min);
 var dot_client_x_step = (w/(dot_x_max-dot_x_min));
 
 var dot_client_y_center = h - h*(0-dot_y_min)/(dot_y_max-dot_y_min);
 var dot_client_y_step = (h/(dot_y_max-dot_y_min));
+
 
 function dot_client_to_x(client_x){
     return (client_x - dot_client_x_center) / dot_client_x_step;
@@ -118,13 +119,17 @@ function draw_dot_grid_on(context){
     context.lineTo(dot_client_x_center + 5, 12);
     context.fillStyle="#000000";
     for(var i = dot_x_min + 1; i <= dot_x_max - 1; i++){
-        context.moveTo(dot_client_x_center + i*dot_client_x_step, dot_client_y_center);
-        context.lineTo(dot_client_x_center + i*dot_client_x_step, dot_client_y_center - 5);
-        context.fillText(i, dot_client_x_center + i*dot_client_x_step + 4, dot_client_y_center + 16);
+        if(i != 0) {
+            context.moveTo(dot_client_x_center + i*dot_client_x_step, dot_client_y_center);
+            context.lineTo(dot_client_x_center + i*dot_client_x_step, dot_client_y_center - 5);
+            context.fillText(i, dot_client_x_center + i*dot_client_x_step + 4, dot_client_y_center + 16);
+        }
     }
     for(var i = dot_y_min + 1; i <= dot_y_max - 1; i++){
-        context.moveTo(dot_client_x_center, dot_client_y_center - i*dot_client_y_step);
-        context.lineTo(dot_client_x_center + 5, dot_client_y_center - i*dot_client_y_step);
+        if(i != 0) {
+            context.moveTo(dot_client_x_center, dot_client_y_center - i*dot_client_y_step);
+            context.lineTo(dot_client_x_center + 5, dot_client_y_center - i*dot_client_y_step);
+        }
         context.fillText(i, dot_client_x_center + 5, dot_client_y_center - i*dot_client_y_step + 16);
     }
     context.strokeStyle = "#000000";
@@ -133,10 +138,10 @@ function draw_dot_grid_on(context){
 }
 
 // visible region for cross
-var cross_x_min = -5.0;
-var cross_y_min = -4.0;
-var cross_x_max = 5.0;
-var cross_y_max = 4.0;
+var cross_x_min = -0.25;
+var cross_y_min = -0.25;
+var cross_x_max = 1.25;
+var cross_y_max = 1.25;
 
 var cross_client_x_center = w*(0-cross_x_min)/(cross_x_max-cross_x_min);
 var cross_client_x_step = (w/(cross_x_max-cross_x_min));
@@ -174,14 +179,18 @@ function draw_cross_grid_on(context){
     context.moveTo(cross_client_x_center, 0);
     context.lineTo(cross_client_x_center + 5, 12);
     context.fillStyle="#000000";
-    for(var i = cross_x_min + 1; i <= cross_x_max - 1; i++){
-        context.moveTo(cross_client_x_center + i*cross_client_x_step, cross_client_y_center);
-        context.lineTo(cross_client_x_center + i*cross_client_x_step, cross_client_y_center - 5);
-        context.fillText(i, cross_client_x_center + i*cross_client_x_step + 4, cross_client_y_center + 16);
+    for(var i = cross_x_min + 0.25; i <= cross_x_max; i++){
+        if(i != 0) {
+            context.moveTo(cross_client_x_center + i*cross_client_x_step, cross_client_y_center);
+            context.lineTo(cross_client_x_center + i*cross_client_x_step, cross_client_y_center - 5);
+            context.fillText(i, cross_client_x_center + i*cross_client_x_step + 4, cross_client_y_center + 16);
+        }
     }
-    for(var i = cross_y_min + 1; i <= cross_y_max - 1; i++){
-        context.moveTo(cross_client_x_center, cross_client_y_center - i*cross_client_y_step);
-        context.lineTo(cross_client_x_center + 5, cross_client_y_center - i*cross_client_y_step);
+    for(var i = cross_y_min + 0.25; i <= cross_y_max; i++){
+        if(i != 0) {
+            context.moveTo(cross_client_x_center, cross_client_y_center - i*cross_client_y_step);
+            context.lineTo(cross_client_x_center + 5, cross_client_y_center - i*cross_client_y_step);
+        }
         context.fillText(i, cross_client_x_center + 5, cross_client_y_center - i*cross_client_y_step + 16);
     }
     context.strokeStyle = "#000000";
@@ -190,10 +199,10 @@ function draw_cross_grid_on(context){
 }
 
 // visuals
-var dot_x = -3;
-var dot_y = 2; 
-var cross_x = 3;
-var cross_y = -1.5;
+var dot_x = 1;
+var dot_y = 1; 
+var cross_x = 1;
+var cross_y = 1;
 
 function init_dot(){
     var dot = document.getElementById("dot");
@@ -296,11 +305,11 @@ Visual mnemonics for dot and cross vector products
     <p>
 ...
     </p>
-    <canvas id="dot" width=640 height=512></canvas>
+    <canvas id="dot" width=640 height=640></canvas>
     <p>
 ...
     </p>
-    <canvas id="cross" width=640 height=512></canvas>
+    <canvas id="cross" width=640 height=640></canvas>
     <p>
 ...
     </p>
