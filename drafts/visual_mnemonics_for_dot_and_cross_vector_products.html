@@ -229,8 +229,24 @@ function init_dot(){
             var x = dot_client_to_x(e.clientX - canvas_rect.left);
             var y = dot_client_to_y(e.clientY - canvas_rect.top);
             var dot_i = nearest_in(dot_x, dot_y, x, y);
-            dot_x[dot_i] = x;
-            dot_y[dot_i] = y;
+            if(dot_i == 0) {
+                var dx = dot_x[2] - dot_x[0];
+                var dy = dot_y[2] - dot_y[0];
+                dot_x[2] = x + dx;
+                dot_y[2] = y + dy;
+                dot_x[dot_i] = x;
+                dot_y[dot_i] = y;
+            } else if(dot_i == 1) {
+                dot_x[dot_i] = x;
+                dot_y[dot_i] = y;            
+            } else if(dot_i == 2) {
+                var dx = x - dot_x[0];
+                var dy = y - dot_y[0];
+                var dn = Math.sqrt(dx*dx + dy*dy);
+                dot_x[dot_i] = dot_x[0] + 2 * dx / dn;
+                dot_y[dot_i] = dot_y[0] + 2 * dy / dn;
+            }
+
             draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
         }
     }, false);
@@ -240,8 +256,23 @@ function init_dot(){
         var x = dot_client_to_x(e.clientX - canvas_rect.left);
         var y = dot_client_to_y(e.clientY - canvas_rect.top);
         var dot_i = nearest_in(dot_x, dot_y, x, y);
-        dot_x[dot_i] = x;
-        dot_y[dot_i] = y;
+        if(dot_i == 0) {
+            var dx = dot_x[2] - dot_x[0];
+            var dy = dot_y[2] - dot_y[0];
+            dot_x[2] = x + dx;
+            dot_y[2] = y + dy;
+            dot_x[dot_i] = x;
+            dot_y[dot_i] = y;
+        } else if(dot_i == 1) {
+            dot_x[dot_i] = x;
+            dot_y[dot_i] = y;            
+        } else if(dot_i == 2) {
+            var dx = x - dot_x[0];
+            var dy = y - dot_y[0];
+            var dn = Math.sqrt(dx*dx + dy*dy);
+            dot_x[dot_i] = dot_x[0] + 2 * dx / dn;
+            dot_y[dot_i] = dot_y[0] + 2 * dy / dn;
+        }
         draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
