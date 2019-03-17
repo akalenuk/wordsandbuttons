@@ -198,6 +198,24 @@ function draw_cross_grid_on(context){
     context.closePath();
 }
 
+
+// helper
+function draw_arrow(context, x1, y1, x2, y2) {
+    var d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+    context.beginPath();
+    context.moveTo(x1, y1);
+    context.lineTo(x2, y2);
+    context.moveTo(x2 - (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d + (x2 - x1) * 6 / d);    
+    context.lineTo(x2, y2);
+    context.moveTo(x2 + (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d - (x2 - x1) * 6 / d);    
+    context.lineTo(x2, y2);    
+    
+    
+    context.strokeStyle = "#000000";
+    context.stroke();
+    context.closePath();    
+}
+
 // visuals
 
 // earth, sun, vector
@@ -324,11 +342,13 @@ function draw_dot(client_x, client_y, do_guides){
             pixel_field.data[i + 1] = 0x7F + (0xDD - 0x7F) * light;
             pixel_field.data[i + 2] = 0xD6 + (0xDD - 0xD6) * light;
             pixel_field.data[i + 3] = 0xFF;
-        }
-            
-        
+        }        
     }
     context.putImageData(pixel_field, ej-0.5, ei-0.5);
+    
+    draw_arrow(context, 
+        dot_x_to_client(dot_x[0] / 2 + dot_x[2] / 2), dot_y_to_client(dot_y[0] / 2 + dot_y[2] / 2), 
+        dot_x_to_client(dot_x[2]), dot_y_to_client(dot_y[2]));
 
     // grid
     draw_dot_grid_on(context);
