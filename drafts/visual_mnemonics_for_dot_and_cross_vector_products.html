@@ -73,69 +73,167 @@ u {
     <script language="JavaScript">
 // client
 var w = 640.0;
-var h = 512.0;
+var h = 640.0;
 
-// visible region
-var x_min = -5.0;
-var y_min = -4.0;
-var x_max = 5.0;
-var y_max = 4.0;
+// visible region for dot
+var dot_x_min = -1.0;
+var dot_y_min = -1.0;
+var dot_x_max = 7.0;
+var dot_y_max = 7.0;
 
-var client_x_center = w*(0-x_min)/(x_max-x_min);
-var client_x_step = (w/(x_max-x_min));
+var dot_client_x_center = w*(0-dot_x_min)/(dot_x_max-dot_x_min);
+var dot_client_x_step = (w/(dot_x_max-dot_x_min));
 
-var client_y_center = h - h*(0-y_min)/(y_max-y_min);
-var client_y_step = (h/(y_max-y_min));
+var dot_client_y_center = h - h*(0-dot_y_min)/(dot_y_max-dot_y_min);
+var dot_client_y_step = (h/(dot_y_max-dot_y_min));
 
-function client_to_x(client_x){
-    return (client_x - client_x_center) / client_x_step;
+
+function dot_client_to_x(client_x){
+    return (client_x - dot_client_x_center) / dot_client_x_step;
 }
 
-function client_to_y(client_y){
-    return (client_y_center - client_y) / client_y_step;
+function dot_client_to_y(client_y){
+    return (dot_client_y_center - client_y) / dot_client_y_step;
 }
 
-function x_to_client(x){
-    return x * client_x_step + client_x_center;
+function dot_x_to_client(x){
+    return x * dot_client_x_step + dot_client_x_center;
 }
 
-function y_to_client(y){
-    return client_y_center - y * client_y_step;
+function dot_y_to_client(y){
+    return dot_client_y_center - y * dot_client_y_step;
 }
 
-function draw_grid_on(context){
+function draw_dot_grid_on(context){
     // grid
     context.beginPath();
-    context.moveTo(0, client_y_center);
-    context.lineTo(w, client_y_center);
-    context.lineTo(w - 12, client_y_center - 5);
-    context.moveTo(w, client_y_center);
-    context.lineTo(w - 12, client_y_center + 5);
-    context.moveTo(client_x_center, h);
-    context.lineTo(client_x_center, 0);
-    context.lineTo(client_x_center - 5, 12);
-    context.moveTo(client_x_center, 0);
-    context.lineTo(client_x_center + 5, 12);
+    context.moveTo(0, dot_client_y_center);
+    context.lineTo(w, dot_client_y_center);
+    context.lineTo(w - 12, dot_client_y_center - 5);
+    context.moveTo(w, dot_client_y_center);
+    context.lineTo(w - 12, dot_client_y_center + 5);
+    context.moveTo(dot_client_x_center, h);
+    context.lineTo(dot_client_x_center, 0);
+    context.lineTo(dot_client_x_center - 5, 12);
+    context.moveTo(dot_client_x_center, 0);
+    context.lineTo(dot_client_x_center + 5, 12);
     context.fillStyle="#000000";
-    for(var i = x_min + 1; i <= x_max - 1; i++){
-        context.moveTo(client_x_center + i*client_x_step, client_y_center);
-        context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
-        context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+    for(var i = dot_x_min + 1; i <= dot_x_max - 1; i++){
+        if(i != 0) {
+            context.moveTo(dot_client_x_center + i*dot_client_x_step, dot_client_y_center);
+            context.lineTo(dot_client_x_center + i*dot_client_x_step, dot_client_y_center - 5);
+            context.fillText(i, dot_client_x_center + i*dot_client_x_step + 4, dot_client_y_center + 16);
+        }
     }
-    for(var i = y_min + 1; i <= y_max - 1; i++){
-        context.moveTo(client_x_center, client_y_center - i*client_y_step);
-        context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
-        context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+    for(var i = dot_y_min + 1; i <= dot_y_max - 1; i++){
+        if(i != 0) {
+            context.moveTo(dot_client_x_center, dot_client_y_center - i*dot_client_y_step);
+            context.lineTo(dot_client_x_center + 5, dot_client_y_center - i*dot_client_y_step);
+        }
+        context.fillText(i, dot_client_x_center + 5, dot_client_y_center - i*dot_client_y_step + 16);
     }
     context.strokeStyle = "#000000";
     context.stroke();
     context.closePath();
 }
 
-var dot_x = -3;
-var dot_y = 2; 
-var cross_x = 3;
-var cross_y = -1.5;
+// visible region for cross
+var cross_x_min = -0.25;
+var cross_y_min = -0.25;
+var cross_x_max = 1.25;
+var cross_y_max = 1.25;
+
+var cross_client_x_center = w*(0-cross_x_min)/(cross_x_max-cross_x_min);
+var cross_client_x_step = (w/(cross_x_max-cross_x_min));
+
+var cross_client_y_center = h - h*(0-cross_y_min)/(cross_y_max-cross_y_min);
+var cross_client_y_step = (h/(cross_y_max-cross_y_min));
+
+function cross_client_to_x(client_x){
+    return (client_x - cross_client_x_center) / cross_client_x_step;
+}
+
+function cross_client_to_y(client_y){
+    return (cross_client_y_center - client_y) / cross_client_y_step;
+}
+
+function cross_x_to_client(x){
+    return x * cross_client_x_step + cross_client_x_center;
+}
+
+function cross_y_to_client(y){
+    return cross_client_y_center - y * cross_client_y_step;
+}
+
+function draw_cross_grid_on(context){
+    // grid
+    context.beginPath();
+    context.moveTo(0, cross_client_y_center);
+    context.lineTo(w, cross_client_y_center);
+    context.lineTo(w - 12, cross_client_y_center - 5);
+    context.moveTo(w, cross_client_y_center);
+    context.lineTo(w - 12, cross_client_y_center + 5);
+    context.moveTo(cross_client_x_center, h);
+    context.lineTo(cross_client_x_center, 0);
+    context.lineTo(cross_client_x_center - 5, 12);
+    context.moveTo(cross_client_x_center, 0);
+    context.lineTo(cross_client_x_center + 5, 12);
+    context.fillStyle="#000000";
+    for(var i = cross_x_min + 0.25; i <= cross_x_max; i++){
+        if(i != 0) {
+            context.moveTo(cross_client_x_center + i*cross_client_x_step, cross_client_y_center);
+            context.lineTo(cross_client_x_center + i*cross_client_x_step, cross_client_y_center - 5);
+            context.fillText(i, cross_client_x_center + i*cross_client_x_step + 4, cross_client_y_center + 16);
+        }
+    }
+    for(var i = cross_y_min + 0.25; i <= cross_y_max; i++){
+        if(i != 0) {
+            context.moveTo(cross_client_x_center, cross_client_y_center - i*cross_client_y_step);
+            context.lineTo(cross_client_x_center + 5, cross_client_y_center - i*cross_client_y_step);
+        }
+        context.fillText(i, cross_client_x_center + 5, cross_client_y_center - i*cross_client_y_step + 16);
+    }
+    context.strokeStyle = "#000000";
+    context.stroke();
+    context.closePath();
+}
+
+
+// helper
+function draw_arrow(context, x1, y1, x2, y2) {
+    var d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+    context.beginPath();
+    context.moveTo(x1, y1);
+    context.lineTo(x2, y2);
+    context.moveTo(x2 - (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d + (x2 - x1) * 6 / d);    
+    context.lineTo(x2, y2);
+    context.moveTo(x2 + (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d - (x2 - x1) * 6 / d);    
+    context.lineTo(x2, y2);    
+    
+    
+    context.strokeStyle = "#000000";
+    context.stroke();
+    context.closePath();    
+}
+
+// visuals
+
+// earth, sun, vector
+var dot_x = [1, 4, 1];
+var dot_y = [1, 4, 3];
+
+
+var cross_x = [0.5, 0.75, 1];
+var cross_y = [0.5, 0.75, 1];
+
+function nearest_in(xs, ys, x, y) {
+    var nearest_i = 0;
+    for(var i = 1; i < dot_x.length; ++i)
+        if((Math.pow(x - xs[i], 2) + Math.pow(y - ys[i], 2)) < (Math.pow(x - xs[nearest_i], 2) + Math.pow(y - ys[nearest_i], 2)))
+            nearest_i = i;
+    return nearest_i;
+}
+
 
 function init_dot(){
     var dot = document.getElementById("dot");
@@ -145,17 +243,54 @@ function init_dot(){
     dot.addEventListener('mousemove', function(e){
         var canvas_rect = dot.getBoundingClientRect();
         draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-        if(e.buttons == 1){
-            dot_x = client_to_x(e.clientX - canvas_rect.left);
-            dot_y = client_to_y(e.clientY - canvas_rect.top);
+        if(e.buttons == 1){          
+            var x = dot_client_to_x(e.clientX - canvas_rect.left);
+            var y = dot_client_to_y(e.clientY - canvas_rect.top);
+            var dot_i = nearest_in(dot_x, dot_y, x, y);
+            if(dot_i == 0) {
+                var dx = dot_x[2] - dot_x[0];
+                var dy = dot_y[2] - dot_y[0];
+                dot_x[2] = x + dx;
+                dot_y[2] = y + dy;
+                dot_x[dot_i] = x;
+                dot_y[dot_i] = y;
+            } else if(dot_i == 1) {
+                dot_x[dot_i] = x;
+                dot_y[dot_i] = y;            
+            } else if(dot_i == 2) {
+                var dx = x - dot_x[0];
+                var dy = y - dot_y[0];
+                var dn = Math.sqrt(dx*dx + dy*dy);
+                dot_x[dot_i] = dot_x[0] + 2 * dx / dn;
+                dot_y[dot_i] = dot_y[0] + 2 * dy / dn;
+            }
+
             draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
         }
     }, false);
 
     dot.addEventListener('mousedown', function(e){
         var canvas_rect = dot.getBoundingClientRect();
-        dot_x = client_to_x(e.clientX - canvas_rect.left);
-        dot_y = client_to_y(e.clientY - canvas_rect.top);
+        var x = dot_client_to_x(e.clientX - canvas_rect.left);
+        var y = dot_client_to_y(e.clientY - canvas_rect.top);
+        var dot_i = nearest_in(dot_x, dot_y, x, y);
+        if(dot_i == 0) {
+            var dx = dot_x[2] - dot_x[0];
+            var dy = dot_y[2] - dot_y[0];
+            dot_x[2] = x + dx;
+            dot_y[2] = y + dy;
+            dot_x[dot_i] = x;
+            dot_y[dot_i] = y;
+        } else if(dot_i == 1) {
+            dot_x[dot_i] = x;
+            dot_y[dot_i] = y;            
+        } else if(dot_i == 2) {
+            var dx = x - dot_x[0];
+            var dy = y - dot_y[0];
+            var dn = Math.sqrt(dx*dx + dy*dy);
+            dot_x[dot_i] = dot_x[0] + 2 * dx / dn;
+            dot_y[dot_i] = dot_y[0] + 2 * dy / dn;
+        }
         draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
@@ -172,15 +307,60 @@ function draw_dot(client_x, client_y, do_guides){
     context.fillStyle="#eeeeee";
     context.fillRect(0, 0, w, h);
 
-    // grid
-    draw_grid_on(context);
+    // "earth"
+    var ew = 2 * dot_client_x_step;
+    var eh = 2 * dot_client_y_step;
+    var ej = dot_x_to_client(dot_x[0]) - dot_client_x_step;
+    var ei = dot_y_to_client(dot_y[0]) - dot_client_y_step;
+    
+    var pixel_field = context.createImageData(ew, eh);
+    for (var i = 0; i < pixel_field.data.length; i += 4) {
+        var on_canvas_i = Math.floor(Math.floor(i / 4) / ew) + ei;
+        var on_canvas_j = Math.floor(i / 4) % ew + ej;
+        var x = dot_client_to_x(on_canvas_j);
+        var y = dot_client_to_y(on_canvas_i);
+        var ex = x - dot_x[0];
+        var ey = y - dot_y[0];
+        
+        if(ex * ex + ey * ey > 1.) {
+            pixel_field.data[i + 0] = 0xEE;
+            pixel_field.data[i + 1] = 0xEE;
+            pixel_field.data[i + 2] = 0xEE;
+            pixel_field.data[i + 3] = 0xFF;
+        } else {
+            var ez = 1 - ex*ex - ey*ey;
+            
+            var dx = dot_x[1] - dot_x[0];
+            var dy = dot_y[1] - dot_y[0];
+            var dz = -ez;
+            var dn = Math.pow(dx * dx + dy * dy + dz * dz, 0.5);
+            
+            var light = ex * dx / dn + ey * dy / dn + ez * dz / dn;
+            if(light < 0)
+                light = 0;
+            pixel_field.data[i + 0] = 0x45 + (0xDD - 0x45) * light;
+            pixel_field.data[i + 1] = 0x7F + (0xDD - 0x7F) * light;
+            pixel_field.data[i + 2] = 0xD6 + (0xDD - 0xD6) * light;
+            pixel_field.data[i + 3] = 0xFF;
+        }        
+    }
+    context.putImageData(pixel_field, ej-0.5, ei-0.5);
+    
+    draw_arrow(context, 
+        dot_x_to_client(dot_x[0] / 2 + dot_x[2] / 2), dot_y_to_client(dot_y[0] / 2 + dot_y[2] / 2), 
+        dot_x_to_client(dot_x[2]), dot_y_to_client(dot_y[2]));
 
-    // point
-    context.fillStyle="#008800";
-    context.beginPath();
-    context.arc(x_to_client(dot_x), y_to_client(dot_y), 2, 0, 2*Math.PI);
-    context.fill();
-    context.closePath();
+    // grid
+    draw_dot_grid_on(context);
+
+    // points
+    for(var i = 0; i < cross_x.length; ++i) {
+        context.fillStyle="#008800";
+        context.beginPath();
+        context.arc(dot_x_to_client(dot_x[i]), dot_y_to_client(dot_y[i]), 2, 0, 2*Math.PI);
+        context.fill();
+        context.closePath();
+    }
 }
 
 function init_cross(){
@@ -192,16 +372,22 @@ function init_cross(){
         var canvas_rect = cross.getBoundingClientRect();
         draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
         if(e.buttons == 1){
-            cross_x = client_to_x(e.clientX - canvas_rect.left);
-            cross_y = client_to_y(e.clientY - canvas_rect.top);
+            var x = cross_client_to_x(e.clientX - canvas_rect.left);
+            var y = cross_client_to_y(e.clientY - canvas_rect.top);
+            var cross_i = nearest_in(cross_x, cross_y, x, y);
+            cross_x[cross_i] = x;
+            cross_y[cross_i] = y;
             draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
         }
     }, false);
 
     cross.addEventListener('mousedown', function(e){
         var canvas_rect = cross.getBoundingClientRect();
-        cross_x = client_to_x(e.clientX - canvas_rect.left);
-        cross_y = client_to_y(e.clientY - canvas_rect.top);
+        var x = cross_client_to_x(e.clientX - canvas_rect.left);
+        var y = cross_client_to_y(e.clientY - canvas_rect.top);
+        var cross_i = nearest_in(cross_x, cross_y, x, y);
+        cross_x[cross_i] = x;
+        cross_y[cross_i] = y;
         draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
@@ -219,14 +405,16 @@ function draw_cross(client_x, client_y, do_guides){
     context.fillRect(0, 0, w, h);
 
     // grid
-    draw_grid_on(context);
+    draw_cross_grid_on(context);
 
-    // point
-    context.fillStyle="#008800";
-    context.beginPath();
-    context.arc(x_to_client(cross_x), y_to_client(cross_y), 2, 0, 2*Math.PI);
-    context.fill();
-    context.closePath();
+    // points
+    for(var i = 0; i < cross_x.length; ++i) {
+        context.fillStyle="#008800";
+        context.beginPath();
+        context.arc(cross_x_to_client(cross_x[i]), cross_y_to_client(cross_y[i]), 2, 0, 2*Math.PI);
+        context.fill();
+        context.closePath();
+    }
 }
     </script>
   </head>
@@ -238,11 +426,11 @@ Visual mnemonics for dot and cross vector products
     <p>
 ...
     </p>
-    <canvas id="dot" width=640 height=512></canvas>
+    <canvas id="dot" width=640 height=640></canvas>
     <p>
 ...
     </p>
-    <canvas id="cross" width=640 height=512></canvas>
+    <canvas id="cross" width=640 height=640></canvas>
     <p>
 ...
     </p>
