@@ -422,8 +422,34 @@ function draw_cross(client_x, client_y, do_guides){
     context.fillStyle="#eeeeee";
     context.fillRect(0, 0, w, h);
 
+
+    // road    
+    var road_l = Math.sqrt(2 * Math.pow(cross_x_max - cross_x_min, 2), 2);
+    var road_dx = cross_x[1] - cross_x[0];
+    var road_dy = cross_y[1] - cross_y[0];
+    var road_d = Math.sqrt(road_dx * road_dx + road_dy * road_dy);
+    context.beginPath();
+    context.strokeStyle = "#666666";
+    context.lineWidth = 64;
+    context.moveTo(cross_x_to_client(cross_x[0] - road_dx / road_d * road_l), cross_y_to_client(cross_y[0] - road_dy / road_d * road_l));
+    context.lineTo(cross_x_to_client(cross_x[0] + road_dx / road_d * road_l), cross_y_to_client(cross_y[0] + road_dy / road_d * road_l));
+    context.stroke();    
+    context.closePath();
+    
+    context.beginPath();
+    context.setLineDash([40, 40]);    
+    context.strokeStyle = "#FFFFFF";
+    context.lineWidth = 6;
+    context.moveTo(cross_x_to_client(cross_x[0] - road_dx / road_d * road_l), cross_y_to_client(cross_y[0] - road_dy / road_d * road_l));
+    context.lineTo(cross_x_to_client(cross_x[0] + road_dx / road_d * road_l), cross_y_to_client(cross_y[0] + road_dy / road_d * road_l));    
+    context.stroke();
+    context.setLineDash([]);
+    context.closePath();     
+
     // grid
+    context.lineWidth = 1;    
     draw_cross_grid_on(context);
+
 
     // points
     for(var i = 0; i < cross_x.length; ++i) {
