@@ -222,9 +222,9 @@ function draw_arrow(context, x1, y1, x2, y2, color) {
 var dot_x = [1, 4, 1];
 var dot_y = [1, 4, 3];
 
-
+// road 1->2, stick-man
 var cross_x = [0.5, 0.75, 1];
-var cross_y = [0.5, 0.75, 1];
+var cross_y = [0.5, 0.75, 0.5];
 
 function nearest_in(xs, ys, x, y) {
     var nearest_i = 0;
@@ -392,9 +392,8 @@ function init_cross(){
         if(e.buttons == 1){
             var x = cross_client_to_x(e.clientX - canvas_rect.left);
             var y = cross_client_to_y(e.clientY - canvas_rect.top);
-            var cross_i = nearest_in(cross_x, cross_y, x, y);
-            cross_x[cross_i] = x;
-            cross_y[cross_i] = y;
+            cross_x[2] = x;
+            cross_y[2] = y;
             draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
         }
     }, false);
@@ -403,15 +402,47 @@ function init_cross(){
         var canvas_rect = cross.getBoundingClientRect();
         var x = cross_client_to_x(e.clientX - canvas_rect.left);
         var y = cross_client_to_y(e.clientY - canvas_rect.top);
-        var cross_i = nearest_in(cross_x, cross_y, x, y);
-        cross_x[cross_i] = x;
-        cross_y[cross_i] = y;
+        cross_x[2] = x;
+        cross_y[2] = y;
         draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
     cross.addEventListener('mouseleave', function(e){
         draw_cross(0, 0, false);
     }, false);
+}
+
+
+function draw_the_stick_man(context, x, y, right) {
+    const gx = right ? 6 : -6;
+    const gy = 6;
+    if(!right) {
+        x = x - 7*gx;
+    }
+    context.beginPath();
+    context.strokeStyle = "#2751b3";
+    context.lineWidth = 6;
+    context.moveTo(x, y);
+    context.lineTo(x + gx * 2, y - gy * 3);
+    context.lineTo(x + gx * 3, y - gy * 6);
+    context.lineTo(x + gx * 6, y - gy * 4);
+    context.lineTo(x + gx * 7, y - gy * 0);
+    context.moveTo(x + gx * 3, y - gy * 6);
+    context.lineTo(x + gx * 4, y - gy * 12);
+    context.lineTo(x + gx * 1, y - gy * 10);
+    context.lineTo(x + gx * 0, y - gy * 7);
+    context.moveTo(x + gx * 4, y - gy * 12);
+    context.lineTo(x + gx * 5, y - gy * 9);
+    context.lineTo(x + gx * 8, y - gy * 7);
+    context.stroke();
+    context.closePath();
+    
+    context.fillStyle="#2751b3";
+    context.beginPath();
+    context.arc(x + gx * 4.5, y - gy * 14.5, 8, 0, 2*Math.PI);
+    context.fill();
+    context.closePath();
+    
 }
 
 function draw_cross(client_x, client_y, do_guides){
@@ -456,7 +487,12 @@ function draw_cross(client_x, client_y, do_guides){
         cross_x_to_client(cross_x[0]), cross_y_to_client(cross_y[0]), 
         cross_x_to_client(cross_x[1]), cross_y_to_client(cross_y[1]), "#2751b3");        
 
+
+    // stick man
+    draw_the_stick_man(context, cross_x_to_client(cross_x[2]), cross_y_to_client(cross_y[2]), false);
+
     // grid
+    context.lineWidth = 1;  
     draw_cross_grid_on(context);
 
     // points
