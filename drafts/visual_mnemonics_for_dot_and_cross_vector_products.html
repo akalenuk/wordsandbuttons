@@ -337,6 +337,7 @@ function draw_dot(client_x, client_y, do_guides){
     }
     context.putImageData(pixel_field, ej-0.5, ei-0.5);
     
+    context.lineWidth = 3;
     draw_arrow(context, 
         dot_x_to_client(dot_x[0] / 2 + dot_x[2] / 2), dot_y_to_client(dot_y[0] / 2 + dot_y[2] / 2), 
         dot_x_to_client(dot_x[2]), dot_y_to_client(dot_y[2]), "#2751b3");
@@ -347,12 +348,13 @@ function draw_dot(client_x, client_y, do_guides){
     draw_arrow(context, 
         dot_x_to_client(dot_x[0] / 2 + dot_x[2] / 2), dot_y_to_client(dot_y[0] / 2 + dot_y[2] / 2),
         dot_x_to_client(dot_x[0] / 2 + dot_x[2] / 2 + to_sun_x / to_sun_d), dot_y_to_client(dot_y[0] / 2 + dot_y[2] / 2 + to_sun_y / to_sun_d), "#b3aa27");
+    context.lineWidth = 1;
 
     // sun
     context.beginPath();    
     for(var i = 0; i < 11; ++i) {
-        var dx = 5 * Math.sin(2*Math.PI * i / 11);
-        var dy = 5 * Math.cos(2*Math.PI * i / 11);
+        var dx = 15 * Math.sin(2*Math.PI * i / 11);
+        var dy = 15 * Math.cos(2*Math.PI * i / 11);
         context.moveTo(dot_x_to_client(dot_x[1]) + dx, dot_y_to_client(dot_y[1]) + dy);
         context.lineTo(dot_x_to_client(dot_x[1]), dot_y_to_client(dot_y[1]));
     }
@@ -460,7 +462,7 @@ function draw_cross(client_x, client_y, do_guides){
     var road_dy = cross_y[1] - cross_y[0];
     var road_d = Math.sqrt(road_dx * road_dx + road_dy * road_dy);
     context.beginPath();
-    context.strokeStyle = "#666666";
+    context.strokeStyle = "#BBBBBB";
     context.lineWidth = 64;
     context.moveTo(cross_x_to_client(cross_x[0] - road_dx / road_d * road_l), cross_y_to_client(cross_y[0] - road_dy / road_d * road_l));
     context.lineTo(cross_x_to_client(cross_x[0] + road_dx / road_d * road_l), cross_y_to_client(cross_y[0] + road_dy / road_d * road_l));
@@ -470,39 +472,49 @@ function draw_cross(client_x, client_y, do_guides){
     context.beginPath();
     context.setLineDash([40, 40]);    
     context.strokeStyle = "#FFFFFF";
-    context.lineWidth = 6;
+    context.lineWidth = 3;
     context.moveTo(cross_x_to_client(cross_x[0] - road_dx / road_d * road_l), cross_y_to_client(cross_y[0] - road_dy / road_d * road_l));
     context.lineTo(cross_x_to_client(cross_x[0] + road_dx / road_d * road_l), cross_y_to_client(cross_y[0] + road_dy / road_d * road_l));    
     context.stroke();
     context.setLineDash([]);
     context.closePath();
     
-    context.lineWidth = 1;    
-        
+    context.lineWidth = 3;        
     draw_arrow(context, 
         cross_x_to_client(cross_x[0]), cross_y_to_client(cross_y[0]), 
         cross_x_to_client(cross_x[2]), cross_y_to_client(cross_y[2]), "#2751b3");
-        
     draw_arrow(context, 
         cross_x_to_client(cross_x[0]), cross_y_to_client(cross_y[0]), 
-        cross_x_to_client(cross_x[1]), cross_y_to_client(cross_y[1]), "#2751b3");        
-
-
+        cross_x_to_client(cross_x[1]), cross_y_to_client(cross_y[1]), "#b3aa27");        
+    context.lineWidth = 1;    
+    
     // stick man
-    draw_the_stick_man(context, cross_x_to_client(cross_x[2]), cross_y_to_client(cross_y[2]), false);
+    var x1 = (cross_x[1] - cross_x[0]);
+    var y1 = (cross_y[1] - cross_y[0]);
+    var x2 = (cross_x[2] - cross_x[0]);
+    var y2 = (cross_y[2] - cross_y[0]);      
+    var cross_product = (x1 * y2 - x2 * y1);
+    draw_the_stick_man(context, cross_x_to_client(cross_x[2]), cross_y_to_client(cross_y[2]), cross_product > 0);
 
+
+    // text
+    context.textAlign = "left";
+    context.textBaseline = "top";
+    context.font = "16px sans-serif";    
+    var label_x = cross_x_to_client(cross_x[2]);
+    var label_y = cross_y_to_client(cross_y[2]);
+    var cross_product_label = '(0, 0, ' + cross_product.toFixed(2) + ')';
+    context.fillStyle = "#eeeeee";
+    context.fillText(cross_product_label, label_x-1, label_y);
+    context.fillText(cross_product_label, label_x+1, label_y);
+    context.fillText(cross_product_label, label_x, label_y-1);
+    context.fillText(cross_product_label, label_x, label_y+1);
+    context.fillStyle = "#4d1119";
+    context.fillText(cross_product_label, label_x, label_y);
+    
     // grid
     context.lineWidth = 1;  
     draw_cross_grid_on(context);
-
-    // points
-    for(var i = 0; i < cross_x.length; ++i) {
-        context.fillStyle="#008800";
-        context.beginPath();
-        context.arc(cross_x_to_client(cross_x[i]), cross_y_to_client(cross_y[i]), 2, 0, 2*Math.PI);
-        context.fill();
-        context.closePath();
-    }
 }
     </script>
   </head>
