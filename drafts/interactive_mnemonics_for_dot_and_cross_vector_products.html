@@ -33,23 +33,11 @@ p {
     text-align: left;
 }
 
-pre {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 12pt;
-    text-align: left;
-    width: 300pt;
-}
-
 .formula {
     font-family: sans-serif;
     font-size: 15pt;
     font-style: italic;
     text-align: center;
-    padding-top: 6pt;
     padding-bottom: 6pt;
 }
 
@@ -497,14 +485,19 @@ function draw_cross(client_x, client_y, do_guides){
     var x2 = (cross_x[2] - cross_x[0]);
     var y2 = (cross_y[2] - cross_y[0]);      
     var cross_product = (x1 * y2 - x2 * y1);
-    draw_the_stick_man(context, cross_x_to_client(cross_x[2]), cross_y_to_client(cross_y[2]), cross_product > 0);
+    
+    var stick_vector_d = Math.sqrt(Math.pow(cross_x[2] - cross_x[0], 2) + Math.pow(cross_y[2] - cross_y[0], 2));
+    var stick_vector_client_dxy = cross_client_to_x(6) - cross_client_to_x(0);
+    var stick_x = cross_x[0] + (cross_x[2] - cross_x[0]) * (1 + stick_vector_client_dxy / stick_vector_d);
+    var stick_y = cross_y[0] + (cross_y[2] - cross_y[0]) * (1 + stick_vector_client_dxy / stick_vector_d);
+    draw_the_stick_man(context, cross_x_to_client(stick_x), cross_y_to_client(stick_y), cross_product > 0);
 
 
     // text
     context.textAlign = "left";
     context.textBaseline = "top";
     context.font = "16px sans-serif";    
-    var label_x = cross_x_to_client(cross_x[2]);
+    var label_x = cross_x_to_client(cross_x[2]) + 6;
     var label_y = cross_y_to_client(cross_y[2]);
     var cross_product_label = '(0, 0, ' + cross_product.toFixed(2) + ')';
     context.fillStyle = "#eeeeee";
