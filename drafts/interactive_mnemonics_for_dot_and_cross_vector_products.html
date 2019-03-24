@@ -217,8 +217,8 @@ var dot_x = [1, 3, 1];
 var dot_y = [1, 3, 3];
 
 // road 1->2, stick-man
-var cross_x = [0.5, 0.75, 1];
-var cross_y = [0.5, 0.75, 0.5];
+var cross_x = [0.0, Math.sqrt(2)/2, 0.25];
+var cross_y = [0.0, Math.sqrt(2)/2, 0.75];
 
 function nearest_in(xs, ys, x, y) {
     var nearest_i = 0;
@@ -346,14 +346,16 @@ function draw_dot(client_x, client_y, do_guides){
 
     // sun
     context.beginPath();    
-    for(var i = 0; i < 11; ++i) {
-        var dx = 15 * Math.sin(2*Math.PI * i / 11);
-        var dy = 15 * Math.cos(2*Math.PI * i / 11);
+    context.lineWidth = 2;
+    for(var i = 0; i < 21; ++i) {
+        var dx = 25 * Math.sin(2*Math.PI * i / 11);
+        var dy = 25 * Math.cos(2*Math.PI * i / 11);
         context.moveTo(dot_x_to_client(dot_x[1]) + dx, dot_y_to_client(dot_y[1]) + dy);
         context.lineTo(dot_x_to_client(dot_x[1]), dot_y_to_client(dot_y[1]));
     }
     context.strokeStyle = "#b3aa27";
     context.stroke();
+    context.lineWidth = 1;
     context.closePath(); 
 
     // text
@@ -375,9 +377,9 @@ function draw_dot(client_x, client_y, do_guides){
 
     // formula
     var dot_formula = document.getElementById("dot_formula");
-    dot_formula.innerHTML = "<span style='color:#b3aa27'>" + (to_sun_x / to_sun_d).toFixed(2) + "</span> * ";
+    dot_formula.innerHTML = "<span style='color:#8c851d'>" + (to_sun_x / to_sun_d).toFixed(2) + "</span> * ";
     dot_formula.innerHTML += "<span style='color:#2751b3'>" + (normal_x).toFixed(2) + "</span> + ";
-    dot_formula.innerHTML += "<span style='color:#b3aa27'>" + (to_sun_y / to_sun_d).toFixed(2) + "</span> * ";
+    dot_formula.innerHTML += "<span style='color:#8c851d'>" + (to_sun_y / to_sun_d).toFixed(2) + "</span> * ";
     dot_formula.innerHTML += "<span style='color:#2751b3'>" + (normal_y).toFixed(2) + "</span> = ";
     dot_formula.innerHTML += "<span style='color:#4d1119'>" + (dot_product).toFixed(2) + "</span>"
     // grid
@@ -520,24 +522,24 @@ function draw_cross(client_x, client_y, do_guides){
     document.getElementById("y2").innerHTML = y2.toFixed(2);
 
     var cross_formula_i = document.getElementById("cross_formula_i");
-    cross_formula_i.innerHTML = "i: <span style='color:#b3aa27'>" + (y1).toFixed(2) + "</span> * ";
+    cross_formula_i.innerHTML = "i: <span style='color:#8c851d'>" + (y1).toFixed(2) + "</span> * ";
     cross_formula_i.innerHTML += "<span style='color:#2751b3'>" + (0).toFixed(2) + "</span> - ";
     cross_formula_i.innerHTML += "<span style='color:#2751b3'>" + (y2).toFixed(2) + "</span> * ";
-    cross_formula_i.innerHTML += "<span style='color:#b3aa27'>" + (0).toFixed(2) + "</span> = ";
+    cross_formula_i.innerHTML += "<span style='color:#8c851d'>" + (0).toFixed(2) + "</span> = ";
     cross_formula_i.innerHTML += "<span style='color:#4d1119'>" + (0).toFixed(2) + "</span>"
    
     var cross_formula_j = document.getElementById("cross_formula_j");
-    cross_formula_j.innerHTML = "j: <span style='color:#b3aa27'>" + (0).toFixed(2) + "</span> * ";
+    cross_formula_j.innerHTML = "j: <span style='color:#8c851d'>" + (0).toFixed(2) + "</span> * ";
     cross_formula_j.innerHTML += "<span style='color:#2751b3'>" + (x2).toFixed(2) + "</span> - ";
     cross_formula_j.innerHTML += "<span style='color:#2751b3'>" + (0).toFixed(2) + "</span> * ";
-    cross_formula_j.innerHTML += "<span style='color:#b3aa27'>" + (x1).toFixed(2) + "</span> = ";
+    cross_formula_j.innerHTML += "<span style='color:#8c851d'>" + (x1).toFixed(2) + "</span> = ";
     cross_formula_j.innerHTML += "<span style='color:#4d1119'>" + (0).toFixed(2) + "</span>"   
         
     var cross_formula_k = document.getElementById("cross_formula_k");
-    cross_formula_k.innerHTML = "k: <span style='color:#b3aa27'>" + (x1).toFixed(2) + "</span> * ";
+    cross_formula_k.innerHTML = "k: <span style='color:#8c851d'>" + (x1).toFixed(2) + "</span> * ";
     cross_formula_k.innerHTML += "<span style='color:#2751b3'>" + (y2).toFixed(2) + "</span> - ";
     cross_formula_k.innerHTML += "<span style='color:#2751b3'>" + (x2).toFixed(2) + "</span> * ";
-    cross_formula_k.innerHTML += "<span style='color:#b3aa27'>" + (y1).toFixed(2) + "</span> = ";
+    cross_formula_k.innerHTML += "<span style='color:#8c851d'>" + (y1).toFixed(2) + "</span> = ";
     cross_formula_k.innerHTML += "<span style='color:#4d1119'>" + (cross_product).toFixed(2) + "</span>"
     
     // grid
@@ -564,17 +566,17 @@ The more embarassing for me to admit, up until very recently I couldn't remember
 ...
     </p>
     <canvas id="cross" width=640 height=640></canvas>
-    <p>
-...
-    </p>
     <table style="border:0;">
     <tr><td class="table_formula">i</td><td class="table_formula">j</td><td class="table_formula">k</td>
         <td id="cross_formula_i" class="table_formula" style="padding-left:32pt;"></td></tr>
-    <tr><td class="table_formula" style="color:#b3aa27" id="x1">x1</td><td class="table_formula" style="color:#b3aa27" id="y1">y1</td><td class="table_formula" style="color:#b3aa27">0.00</td>
+    <tr><td class="table_formula" style="color:#8c851d" id="x1">x1</td><td class="table_formula" style="color:#8c851d" id="y1">y1</td><td class="table_formula" style="color:#8c851d">0.00</td>
         <td id="cross_formula_j" class="table_formula" style="padding-left:32pt;"></td></tr>
     <tr><td class="table_formula" style="color:#2751b3" id="x2">x2</td><td class="table_formula" style="color:#2751b3" id="y2">y2</td><td class="table_formula" style="color:#2751b3">0.00</td>
         <td id="cross_formula_k" class="table_formula" style="padding-left:32pt;"></td></tr>
     </table>
+    <p>
+...
+    </p>
     
     <script language="JavaScript">
     init_dot();
