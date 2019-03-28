@@ -104,6 +104,27 @@ button {
 var w = 640.0;
 var h = 640.0;
 
+
+var xs = [-1, 140, 500, 500, 140];
+var ys = [-1, 140, 140, 500, 500];
+var zs = [-1,  60, 100, 180, 230];
+var tris = [[1, 2, 3], [3, 4, 1]];
+var border = [[1, 2], [2, 3], [3, 4], [4, 1]];
+
+
+function in_tri(px, py, x1, y1, x2, y2, x3, y3) {
+    /* shove it into sympy to get solution
+    px, py, x1, y1, x2, y2, x3, y3, a, b = symbols('px py x1 y1 x2 y2 x3 y3 a b')
+    solve([
+    x1 + a * (x2-x1) + b * (x3-x1) - px,
+    y1 + a * (y2-y1) + b * (y3-y1) - py
+    ], (a, b))
+    */
+    var a = (-(px - x1)*(y1 - y3) + (py - y1)*(x1 - x3))/((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2));
+    var b = ((px - x1)*(y1 - y2) - (py - y1)*(x1 - x2))/((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2));
+    return (a >= 0 && b >= 0 && a + b <= 1.);
+}
+
 function init_canvas(){
     var canvas = document.getElementById("canvas");
     canvas.addEventListener('mousedown', function(e){
@@ -132,6 +153,23 @@ function draw_canvas(){
     // background
     context.fillStyle="#eeeeee";
     context.fillRect(0, 0, w, h);
+    
+        // pixels
+    var pixel_field = context.createImageData(w, h);
+    for (var i = 0; i < pixel_field.data.length; i += 4) {
+        var y = Math.floor(Math.floor(i / 4) / w);
+        var x = Math.floor(i / 4) % w;
+        var z = 0;
+        if(in_tri(x, y, xs[tris[0][0]], ys[tris[0][0]], xs[tris[0][1]], ys[tris[0][1]], xs[tris[0][2]], ys[tris[0][2]]))
+            z = 100;
+        if(in_tri(x, y, xs[tris[1][0]], ys[tris[1][0]], xs[tris[1][1]], ys[tris[1][1]], xs[tris[1][2]], ys[tris[1][2]]))
+            z = 200;            
+        pixel_field.data[i + 0] = z;
+        pixel_field.data[i + 1] = z;
+        pixel_field.data[i + 2] = z;
+        pixel_field.data[i + 3] = 0xFF;
+    }
+    context.putImageData(pixel_field, -0.5, -0.5);
 }
 
     </script>
