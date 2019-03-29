@@ -125,6 +125,17 @@ function in_tri(px, py, x1, y1, x2, y2, x3, y3) {
     return (a >= 0 && b >= 0 && a + b <= 1.);
 }
 
+function in_edge(px, py, x1, y1, x2, y2) {
+    if((px-x1)*(y2-y1)-(py-x1)*(x2-x1) < 0)
+        return false;
+    /*
+    px, py, x1, y1, x2, y2, a = symbols('px py x1 y1 x2 y2 a')
+    solve([(x1 + (x2 - x1) * a - px) * (x2 - x1) + (y1 + (y2 - y1) * a - py) * (y2 - y1)], (a))
+    */
+    var a = (-px*x1 + px*x2 - py*y1 + py*y2 + x1*x1 - x1*x2 + y1*y1 - y1*y2)/(x1*x1 - 2*x1*x2 + x2*x2 + y1*y1 - 2*y1*y2 + y2*y2);
+    return (a >= 0 && a <= 1);
+}
+
 function init_canvas(){
     var canvas = document.getElementById("canvas");
     canvas.addEventListener('mousedown', function(e){
@@ -161,9 +172,18 @@ function draw_canvas(){
         var x = Math.floor(i / 4) % w;
         var z = 0;
         if(in_tri(x, y, xs[tris[0][0]], ys[tris[0][0]], xs[tris[0][1]], ys[tris[0][1]], xs[tris[0][2]], ys[tris[0][2]]))
-            z = 100;
-        if(in_tri(x, y, xs[tris[1][0]], ys[tris[1][0]], xs[tris[1][1]], ys[tris[1][1]], xs[tris[1][2]], ys[tris[1][2]]))
-            z = 200;            
+            z = 40;
+        else if(in_tri(x, y, xs[tris[1][0]], ys[tris[1][0]], xs[tris[1][1]], ys[tris[1][1]], xs[tris[1][2]], ys[tris[1][2]]))
+            z = 80;
+        else if(in_edge(x, y, xs[border[0][0]], ys[border[0][0]], xs[border[0][1]], ys[border[0][1]]))
+            z = 120
+        else if(in_edge(x, y, xs[border[1][0]], ys[border[1][0]], xs[border[1][1]], ys[border[1][1]]))
+            z = 160
+        else if(in_edge(x, y, xs[border[2][0]], ys[border[2][0]], xs[border[2][1]], ys[border[2][1]]))
+            z = 200
+        else if(in_edge(x, y, xs[border[3][0]], ys[border[3][0]], xs[border[3][1]], ys[border[3][1]]))
+            z = 240
+
         pixel_field.data[i + 0] = z;
         pixel_field.data[i + 1] = z;
         pixel_field.data[i + 2] = z;
