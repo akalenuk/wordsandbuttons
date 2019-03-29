@@ -136,6 +136,21 @@ function in_edge(px, py, x1, y1, x2, y2) {
     return (a >= 0 && a <= 1);
 }
 
+function d2(x1, y1, x2, y2) {
+    return (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1);
+}
+
+function closest_point_starting_from(x, y, i) {
+    for(var j = i + 1; j < xs.length; ++j)
+        if(d2(x, y, xs[j], ys[j]) < d2(x, y, xs[i], ys[i]))
+            return closest_point_starting_from(x, y, j);
+    return i;
+}
+
+function closest_point(x, y){
+    return closest_point_starting_from(x, y, 1);
+}
+
 function init_canvas(){
     var canvas = document.getElementById("canvas");
     canvas.addEventListener('mousedown', function(e){
@@ -164,8 +179,9 @@ function draw_canvas(){
     // background
     context.fillStyle="#eeeeee";
     context.fillRect(0, 0, w, h);
+
     
-        // pixels
+    // pixels
     var pixel_field = context.createImageData(w, h);
     for (var i = 0; i < pixel_field.data.length; i += 4) {
         var y = Math.floor(Math.floor(i / 4) / w);
@@ -176,14 +192,15 @@ function draw_canvas(){
         else if(in_tri(x, y, xs[tris[1][0]], ys[tris[1][0]], xs[tris[1][1]], ys[tris[1][1]], xs[tris[1][2]], ys[tris[1][2]]))
             z = 80;
         else if(in_edge(x, y, xs[border[0][0]], ys[border[0][0]], xs[border[0][1]], ys[border[0][1]]))
-            z = 120
+            z = 100
         else if(in_edge(x, y, xs[border[1][0]], ys[border[1][0]], xs[border[1][1]], ys[border[1][1]]))
-            z = 160
+            z = 120
         else if(in_edge(x, y, xs[border[2][0]], ys[border[2][0]], xs[border[2][1]], ys[border[2][1]]))
-            z = 200
+            z = 140
         else if(in_edge(x, y, xs[border[3][0]], ys[border[3][0]], xs[border[3][1]], ys[border[3][1]]))
-            z = 240
-
+            z = 160
+        else
+            z = 160 + 20 * closest_point(x, y);
         pixel_field.data[i + 0] = z;
         pixel_field.data[i + 1] = z;
         pixel_field.data[i + 2] = z;
