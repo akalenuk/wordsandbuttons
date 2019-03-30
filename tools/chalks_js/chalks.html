@@ -58,26 +58,29 @@ function colorized_with_chalks(text) {
         var result = "";
         var cur_chunk = "";
         for(var i = 0; i < line.length; ++i) {
+            var quote_found = false;
             for(var j = 0; j < possible_quotes.length; ++j) {
-                var possible_quote = line.substr(i, i+possible_quotes[j][0].length);
+                var possible_quote = line.substr(i, possible_quotes[j][0].length);
                 var possible_escape = i == 0 ? '' : line.substr(i-1, 1);
-                if(possible_quote == possible_quotes[j] && possible_escape != '\\') {
-                    alert(cur_chunk);
+                if(possible_quote == possible_quotes[j][0] && possible_escape != '\\') {
+                    quote_found = true;
                     result += tokenized_and_transformed(colorized_token, cur_chunk, possible_separators, 0);
                     cur_chunk = "";
                     for(; i < line.length; ++i) {
                         cur_chunk += line[i];
-                        possible_quote_end = line.substr(i, i+possible_quotes[j][1].length);
+                        possible_quote_end = line.substr(i, possible_quotes[j][1].length);
                         if(possible_quote_end == possible_quotes[j][1]) {
                             i += possible_quotes[j][1].length;
                             break
                         }
+                    }
                     result += painted_in(cur_chunk, "888");
                     cur_chunk = "";
-                    }
+                    break;
                 }
             }
-            cur_chunk += line[i];
+            if(!quote_found)
+                cur_chunk += line[i];
 	    }
         result += tokenized_and_transformed(colorized_token, cur_chunk, possible_separators, 0);
         return result;
