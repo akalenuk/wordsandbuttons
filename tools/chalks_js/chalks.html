@@ -10,7 +10,7 @@ body{
     </style>
     <script language="JavaScript">
 function colorized_with_chalks(text) {
-    const possible_separators = [' ', '\t', '.', ',', '+', '-', '/', '*', '(', ')', '<', '>', '[', ']', '{', '}', '&lt;', '&gt;'];
+    const possible_separators = [' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '<', '>', '[', ']', '{', '}', '&lt;', '&gt;'];
     const possible_quotes = [['//', '\n'], ['--', '\n'], ['#', '\n'], ['\'', '\''], ['"', '"'], ['/*', '*/']];
 
     function painted_in(line, color) {
@@ -39,21 +39,6 @@ function colorized_with_chalks(text) {
         return result;
     }
 
-/*    function code_and_comment_in(line, separators, separator_i) {
-        if (separator_i == separators.length)
-            return [line, ""];
-        var separated = line.split(separators[separator_i]);
-        var code_or_not_and_comments = code_and_comment_in(separated[0], separators, separator_i + 1);
-        separated[0] = '';
-        code_or_not_and_comments[1] += separated.join(separators[separator_i]);
-        return code_or_not_and_comments;
-    }
-
-    function colorized_line(line) {
-        var code_and_comment = code_and_comment_in(line, possible_comments, 0);
-        return tokenized_and_transformed(colorized_token, code_and_comment[0], possible_separators, 0) + painted_in(code_and_comment[1], "999");
-    }*/
-
     function colorized_line(line) {
         var result = "";
         var cur_chunk = "";
@@ -69,8 +54,9 @@ function colorized_with_chalks(text) {
                     ++i;
                     for(; i < line.length; ++i) {
                         cur_chunk += line[i];
-                        possible_quote_end = line.substr(i, possible_quotes[j][1].length);
-                        if(possible_quote_end == possible_quotes[j][1]) {
+                        var possible_quote_end = line.substr(i, possible_quotes[j][1].length);
+                        var possible_escape = i == 0 ? '' : line.substr(i-1, 1);
+                        if(possible_quote_end == possible_quotes[j][1] && possible_escape != '\\') {
                             i += possible_quotes[j][1].length - 1;
                             break
                         }
@@ -121,6 +107,7 @@ a = "string";
 b = 'char';
 c = '\"';
 d = "\'" + '\'';
+e = '\"' + "\"";
     </div>   
     </pre>
     <script language="JavaScript">
