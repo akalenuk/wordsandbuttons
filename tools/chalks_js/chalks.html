@@ -23,7 +23,7 @@ function colorized_with_chalks(text) {
         }
         var code_sum = 0;
         for(var i = 0; i < token.length; ++i)
-            code_sum += (i + token.charCodeAt(i));
+            code_sum += ((i+1) * token.charCodeAt(i));
         var color = in_hex((1 + code_sum % 3) * 40) + in_hex((1 + code_sum % 4) * 30) + in_hex((1 + code_sum % 5) * 24);
         return painted_in(token, color);
     }
@@ -51,7 +51,7 @@ function colorized_with_chalks(text) {
                     for(++i; i < line.length; ++i) {
                         cur_chunk += line[i];
                         var possible_quote_end = line.substr(i, possible_quotes[j][1].length);
-                        var possible_escape = i == 0 ? '' : line.substr(i-1, 1);
+                        var possible_escape = line.substr(i-1, 1);
                         if(possible_quote_end == possible_quotes[j][1] && possible_escape != '\\') {
                             i += possible_quotes[j][1].length - 1;
                             break
@@ -68,7 +68,6 @@ function colorized_with_chalks(text) {
         result += tokenized_and_transformed(colorized_token, cur_chunk, possible_separators, 0);
         return result;
 	}
-
     return (text.split('\n')).map(colorized_line).join('\n');
 }
     </script>
