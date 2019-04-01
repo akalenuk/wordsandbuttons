@@ -14,9 +14,7 @@ function colorized_with_chalks(text) {
     const possible_quotes = [['//', '\n'], ['--', '\n'], ['#', '\n'], ['\'', '\''], ['"', '"'], ['/*', '*/']];
 
     function painted_in(line, color) {
-        if(line.length == 0)
-            return line;
-        return "<span style=\"color:#" + color + "\">" + line + "</span>";
+        return line.length == 0 ? line : "<span style=\"color:#" + color + "\">" + line + "</span>";
     }
 
     function colorized_token(token) {
@@ -33,10 +31,9 @@ function colorized_with_chalks(text) {
     function tokenized_and_transformed(transformed, line, separators, separator_i) {
         if(separator_i == separators.length)
             return transformed(line);
-        var result = line.split(separators[separator_i]).map(function(piece_of_line) {
+        return line.split(separators[separator_i]).map(function(piece_of_line) {
             return tokenized_and_transformed(transformed, piece_of_line, separators, separator_i + 1);
         }).join(separators[separator_i]);
-        return result;
     }
 
     function colorized_line(line) {
@@ -51,8 +48,7 @@ function colorized_with_chalks(text) {
                     quote_found = true;
                     result += tokenized_and_transformed(colorized_token, cur_chunk, possible_separators, 0);
                     cur_chunk = "" + line[i];
-                    ++i;
-                    for(; i < line.length; ++i) {
+                    for(++i; i < line.length; ++i) {
                         cur_chunk += line[i];
                         var possible_quote_end = line.substr(i, possible_quotes[j][1].length);
                         var possible_escape = i == 0 ? '' : line.substr(i-1, 1);
@@ -72,11 +68,8 @@ function colorized_with_chalks(text) {
         result += tokenized_and_transformed(colorized_token, cur_chunk, possible_separators, 0);
         return result;
 	}
-        
-    function colorized_lines(lines) {
-        return lines.map(colorized_line);
-    }
-    return colorized_lines(text.split('\n')).join('\n');
+
+    return (text.split('\n')).map(colorized_line).join('\n');
 }
     </script>
     <body>
