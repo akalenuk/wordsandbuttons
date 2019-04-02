@@ -36,8 +36,23 @@ function colorized_with_chalks(text) {
         }).join(separators[separator_i]);
     }
 
+    function unquoted_and_colorized(line, quotes_i) {
+        if(quotes_i == possible_quotes.length)
+            return tokenized_and_transformed(colorized_token, line, possible_separators, 0);
+        var chunks = line.replace('\\' + possible_quotes[quotes_i][0], '\n').split(possible_quotes[quotes_i][0]);
+        var chunk_no = 0;
+        return chunks.map( function(chunk) {
+            var escape_ready_chunk = chunk.replace('\n', '\\' + possible_quotes[quotes_i][0]).replace('\\' + possible_quotes[quotes_i][1], '\n');
+            var in_out_quote = escape_ready_chunk.split(possible_quotes[quotes_i][1]);
+            ++chunk_no;
+            return (in_out_quote.length == 2 || chunk_no > 1 ? painted_in(possible_quotes[quotes_i][0] + in_out_quote[0].replace('\n', '\\' + possible_quotes[quotes_i][1]) + possible_quotes[quotes_i][1], "888") : '')
+                + (in_out_quote.length == 2 || chunk_no == 1 ? unquoted_and_colorized(in_out_quote[in_out_quote.length - 1].replace('\n', '\\' + possible_quotes[quotes_i][1]), quotes_i + 1) : '');
+        }).join('');
+    }
+
     function colorized_line(line) {
-        var result = "";
+        return unquoted_and_colorized(line, 0);
+        /*var result = "";
         var cur_chunk = "";
         for(var i = 0; i < line.length; ++i) {
             var quote_found = false;
@@ -66,7 +81,7 @@ function colorized_with_chalks(text) {
                 cur_chunk += line[i];
 	    }
         result += tokenized_and_transformed(colorized_token, cur_chunk, possible_separators, 0);
-        return result;
+        return result;*/
 	}
     return (text.split('\n')).map(colorized_line).join('\n');
 }
