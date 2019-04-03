@@ -11,7 +11,9 @@ body{
     <script language="JavaScript">
 function colorized_with_chalks(text) {
     const possible_separators = ['&lt;', '&gt;', ' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '<', '>', '[', ']', '{', '}'];
-    const possible_quotes = [['//', '\n'], ['--', '\n'], ['#', '\n'], ['\'', '\''], ['"', '"'], ['/*', '*/']];
+    const possible_brackets = [['/*', '*/'], ['(*', '*)']];
+    const possible_comments = ['//', '--', '#'];
+    const possible_quotes = ['\'', '"']; 
 
     function painted_in(line, color) {
         return line.length == 0 ? line : "<span style=\"color:#" + color + "\">" + line + "</span>";
@@ -36,22 +38,21 @@ function colorized_with_chalks(text) {
         }).join(separators[separator_i]);
     }
 
-    function unquoted_and_colorized(line, quotes_i) {
-        if(quotes_i == possible_quotes.length)
+    function unbracketed(line, brackets_i) {
+        if(line.split('&laquo;').length != 1)
+            alert(line);
+        if(brackets_i == possible_brackets.length)
             return tokenized_and_transformed(colorized_token, line, possible_separators, 0);
-        var chunks = line.replace('\\' + possible_quotes[quotes_i][0], '\n').split(possible_quotes[quotes_i][0]);
-        var chunk_no = 0;
-        return chunks.map( function(chunk) {
-            var escape_ready_chunk = chunk.replace('\n', '\\' + possible_quotes[quotes_i][0]).replace('\\' + possible_quotes[quotes_i][1], '\n');
-            var in_out_quote = escape_ready_chunk.split(possible_quotes[quotes_i][1]);
-            ++chunk_no;
-            return (in_out_quote.length == 2 || chunk_no > 1 ? painted_in(possible_quotes[quotes_i][0] + in_out_quote[0].replace('\n', '\\' + possible_quotes[quotes_i][1]) + (in_out_quote.length == 2 ?possible_quotes[quotes_i][1] : ''), "888") : '')
-                + (in_out_quote.length == 2 || chunk_no == 1 ? unquoted_and_colorized(in_out_quote[in_out_quote.length - 1].replace('\n', '\\' + possible_quotes[quotes_i][1]), quotes_i + 1) : '');
+        var chunks = line.split(possible_brackets[brackets_i][0]);
+        return unbracketed(chunks[0], brackets_i + 1) + chunks.slice(1).map( function(chunk) {
+            var in_out_bracket = chunk.split(possible_brackets[brackets_i][1]);
+            return painted_in(possible_brackets[brackets_i][0] + in_out_bracket[0] + possible_brackets[brackets_i][1], "888") 
+                 + unbracketed(in_out_bracket[1], brackets_i + 1);
         }).join('');
     }
 
     function colorized_line(line) {
-        return unquoted_and_colorized(line, 0);
+        return unbracketed(line, 0);
         /*var result = "";
         var cur_chunk = "";
         for(var i = 0; i < line.length; ++i) {
@@ -116,6 +117,7 @@ b = 'char';
 c = '\"';
 d = "\'" + '\'';
 e = '\"' + "\"";
+left (*center*) right
     </div>   
     </pre>
     <script language="JavaScript">
