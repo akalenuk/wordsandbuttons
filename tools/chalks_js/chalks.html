@@ -27,39 +27,36 @@ function colorized_with_chalks(text) {
         return painted_in(token, color);
     }
         
-    function separated(line, separator_i) {
-        if(separator_i == separators.length)
+    function separated(line, i) {
+        if(i == separators.length)
             return colorized(line);
-        return line.split(separators[separator_i]).map(function(subline) {
-            return separated(subline, separator_i + 1);
-        }).join(separators[separator_i]);
+        return line.split(separators[i]).map(function(subline) {
+            return separated(subline, i + 1);}).join(separators[i]);
     }
 
-    function unbracketed(line, brackets_i) {
-        if(brackets_i == brackets.length)
+    function unbracketed(line, i) {
+        if(i == brackets.length)
             return separated(line, 0);
-        var chunks = line.split(brackets[brackets_i][0]);
-        return unbracketed(chunks[0], brackets_i + 1) + chunks.slice(1).map( function(chunk) {
-            var in_out_bracket = chunk.split(brackets[brackets_i][1]);
-            return painted_in(brackets[brackets_i][0] + in_out_bracket[0] + brackets[brackets_i][1], "888") 
-                 + unbracketed(in_out_bracket[1], brackets_i + 1);
-        }).join('');
+        var chunks = line.split(brackets[i][0]);
+        return unbracketed(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+            var in_out_bracket = chunk.split(brackets[i][1]);
+            return painted_in(brackets[i][0] + in_out_bracket[0] + brackets[i][1], "888") + unbracketed(in_out_bracket[1], i + 1);}).join('');
     }
     
-    function unquoted(line, quote_i) {        
-        if(quote_i == quotes.length) 
+    function unquoted(line, i) {        
+        if(i == quotes.length) 
             return unbracketed(line, 0);
         var chunk_no = 0;
-        return line.split('\\' + quotes[quote_i]).join('\n').split(quotes[quote_i]).map(function (chunk) {
-            return chunk.split('\n').join('\\' + quotes[quote_i]);}).map(function (chunk) {
-                return ++chunk_no % 2  == 1 ? unquoted(chunk, quote_i + 1) : painted_in(quotes[quote_i] + chunk + quotes[quote_i], "888");}).join('');
+        return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {
+            return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {
+                return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "888");}).join('');
     }
     
-    function uncommented(line, comment_i) {
-        if(comment_i == comments.length)
+    function uncommented(line, i) {
+        if(i == comments.length)
             return unquoted(line, 0);
-        var code_and_comment = line.split(comments[comment_i]);
-        return uncommented(code_and_comment[0], comment_i + 1) + painted_in([''].concat(code_and_comment.slice(1)).join(comments[comment_i]), "888");
+        var code_and_comment = line.split(comments[i]);
+        return uncommented(code_and_comment[0], i + 1) + painted_in([''].concat(code_and_comment.slice(1)).join(comments[i]), "888");
     }
 
     return (text.split('\n')).map(function(line) {return uncommented(line, 0);}).join('\n');
