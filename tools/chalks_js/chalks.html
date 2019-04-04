@@ -12,7 +12,6 @@ body{
 function colorized_with_chalks(text) {
     const separators = ['&lt;', '&gt;', ' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '<', '>', '[', ']', '{', '}'];
     const brackets = [['/*', '*/'], ['(*', '*)'], ['//', '\n'], ['--', '\n'], ['#', '\n']];
-/*    const comments = ['//', '--', '#'];*/
     const quotes = ['\'', '"']; 
 
     function painted_in(line, color) {
@@ -34,34 +33,25 @@ function colorized_with_chalks(text) {
             return separated(subline, i + 1);}).join(separators[i]);
     }
 
-    function unbracketed(line, i) {
-        if(i == brackets.length)
-            return separated(line, 0);
-        var chunks = line.split(brackets[i][0]);
-        return unbracketed(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
-            var in_out_bracket = chunk.split(brackets[i][1]);
-            return painted_in(brackets[i][0] + in_out_bracket[0] + brackets[i][1], "888") + unbracketed(in_out_bracket.slice(1).join(brackets[i][1]), i + 1);}).join('');
-    }
-    
     function unquoted(line, i) {        
         if(i == quotes.length) 
-            return unbracketed(line, 0);
+            return separated(line, 0);
         var chunk_no = 0;
         return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {
             return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {
                 return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "888");}).join('');
     }
     
-/*    function uncommented(line, i) {
-        if(i == comments.length)
+    function unbracketed(line, i) {
+        if(i == brackets.length)
             return unquoted(line, 0);
-        var code_and_comment = line.split(comments[i]);
-        return uncommented(code_and_comment[0], i + 1) + painted_in([''].concat(code_and_comment.slice(1)).join(comments[i]), "888");
+        var chunks = line.split(brackets[i][0]);
+        return unbracketed(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+            var in_out_bracket = chunk.split(brackets[i][1]);
+            return painted_in(brackets[i][0] + in_out_bracket[0] + brackets[i][1], "888") + unbracketed(in_out_bracket.slice(1).join(brackets[i][1]), i + 1);}).join('');
     }
-
-    return (text.split('\n')).map(function(line) {return uncommented(line, 0);}).join('\n');
-    */
-    return unquoted(text, 0);
+    
+    return unbracketed(text, 0);
 }
     </script>
     <body>
