@@ -10,16 +10,16 @@ body{
     </style>
     <script language="JavaScript">
 function colorized_with_chalks(text) {
-    const possible_separators = ['&lt;', '&gt;', ' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '<', '>', '[', ']', '{', '}'];
-    const possible_brackets = [['/*', '*/'], ['(*', '*)']];
-    const possible_comments = ['//', '--', '#'];
-    const possible_quotes = ['\'', '"']; 
+    const separators = ['&lt;', '&gt;', ' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '<', '>', '[', ']', '{', '}'];
+    const brackets = [['/*', '*/'], ['(*', '*)']];
+    const comments = ['//', '--', '#'];
+    const quotes = ['\'', '"']; 
 
     function painted_in(line, color) {
         return line.length == 0 ? line : "<span style=\"color:#" + color + "\">" + line + "</span>";
     }
 
-    function colorized_token(token) {
+    function colorized(token) {
         var code_sum = 0;
         for(var i = 0; i < token.length; ++i)
             code_sum += ((i+1) * token.charCodeAt(i));
@@ -27,39 +27,39 @@ function colorized_with_chalks(text) {
         return painted_in(token, color);
     }
         
-    function tokenized_and_transformed(transformed, line, separators, separator_i) {
+    function separated(line, separator_i) {
         if(separator_i == separators.length)
-            return transformed(line);
-        return line.split(separators[separator_i]).map(function(piece_of_line) {
-            return tokenized_and_transformed(transformed, piece_of_line, separators, separator_i + 1);
+            return colorized(line);
+        return line.split(separators[separator_i]).map(function(subline) {
+            return separated(subline, separator_i + 1);
         }).join(separators[separator_i]);
     }
 
     function unbracketed(line, brackets_i) {
-        if(brackets_i == possible_brackets.length)
-            return tokenized_and_transformed(colorized_token, line, possible_separators, 0);
-        var chunks = line.split(possible_brackets[brackets_i][0]);
+        if(brackets_i == brackets.length)
+            return separated(line, 0);
+        var chunks = line.split(brackets[brackets_i][0]);
         return unbracketed(chunks[0], brackets_i + 1) + chunks.slice(1).map( function(chunk) {
-            var in_out_bracket = chunk.split(possible_brackets[brackets_i][1]);
-            return painted_in(possible_brackets[brackets_i][0] + in_out_bracket[0] + possible_brackets[brackets_i][1], "888") 
+            var in_out_bracket = chunk.split(brackets[brackets_i][1]);
+            return painted_in(brackets[brackets_i][0] + in_out_bracket[0] + brackets[brackets_i][1], "888") 
                  + unbracketed(in_out_bracket[1], brackets_i + 1);
         }).join('');
     }
     
     function unquoted(line, quote_i) {        
-        if(quote_i == possible_quotes.length) 
+        if(quote_i == quotes.length) 
             return unbracketed(line, 0);
         var chunk_no = 0;
-        return line.split('\\' + possible_quotes[quote_i]).join('\n').split(possible_quotes[quote_i]).map(function (chunk) {
-            return chunk.split('\n').join('\\' + possible_quotes[quote_i]);}).map(function (chunk) {
-                return ++chunk_no % 2  == 1 ? unquoted(chunk, quote_i + 1) : painted_in(possible_quotes[quote_i] + chunk + possible_quotes[quote_i], "888");}).join('');
+        return line.split('\\' + quotes[quote_i]).join('\n').split(quotes[quote_i]).map(function (chunk) {
+            return chunk.split('\n').join('\\' + quotes[quote_i]);}).map(function (chunk) {
+                return ++chunk_no % 2  == 1 ? unquoted(chunk, quote_i + 1) : painted_in(quotes[quote_i] + chunk + quotes[quote_i], "888");}).join('');
     }
     
     function uncommented(line, comment_i) {
-        if(comment_i == possible_comments.length)
+        if(comment_i == comments.length)
             return unquoted(line, 0);
-        var code_and_comment = line.split(possible_comments[comment_i]);
-        return uncommented(code_and_comment[0], comment_i + 1) + painted_in([''].concat(code_and_comment.slice(1)).join(possible_comments[comment_i]), "888");
+        var code_and_comment = line.split(comments[comment_i]);
+        return uncommented(code_and_comment[0], comment_i + 1) + painted_in([''].concat(code_and_comment.slice(1)).join(comments[comment_i]), "888");
     }
 
     return (text.split('\n')).map(function(line) {return uncommented(line, 0);}).join('\n');
