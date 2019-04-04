@@ -11,8 +11,8 @@ body{
     <script language="JavaScript">
 function colorized_with_chalks(text) {
     const separators = ['&lt;', '&gt;', ' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '<', '>', '[', ']', '{', '}'];
-    const brackets = [['/*', '*/'], ['(*', '*)']];
-    const comments = ['//', '--', '#'];
+    const brackets = [['/*', '*/'], ['(*', '*)'], ['//', '\n'], ['--', '\n'], ['#', '\n']];
+/*    const comments = ['//', '--', '#'];*/
     const quotes = ['\'', '"']; 
 
     function painted_in(line, color) {
@@ -40,7 +40,7 @@ function colorized_with_chalks(text) {
         var chunks = line.split(brackets[i][0]);
         return unbracketed(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
             var in_out_bracket = chunk.split(brackets[i][1]);
-            return painted_in(brackets[i][0] + in_out_bracket[0] + brackets[i][1], "888") + unbracketed(in_out_bracket[1], i + 1);}).join('');
+            return painted_in(brackets[i][0] + in_out_bracket[0] + brackets[i][1], "888") + unbracketed(in_out_bracket.slice(1).join(brackets[i][1]), i + 1);}).join('');
     }
     
     function unquoted(line, i) {        
@@ -52,7 +52,7 @@ function colorized_with_chalks(text) {
                 return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "888");}).join('');
     }
     
-    function uncommented(line, i) {
+/*    function uncommented(line, i) {
         if(i == comments.length)
             return unquoted(line, 0);
         var code_and_comment = line.split(comments[i]);
@@ -60,6 +60,8 @@ function colorized_with_chalks(text) {
     }
 
     return (text.split('\n')).map(function(line) {return uncommented(line, 0);}).join('\n');
+    */
+    return unquoted(text, 0);
 }
     </script>
     <body>
@@ -83,7 +85,11 @@ function spline_for(p1, p1d, p2, p2d) {
 
 // comment // comment // comment-comment
 // comment -- comment # comment-comment
+# comment // comment -- comment-comment
+-- comment # comment // comment-comment
 not comment /* comment */ not comment
+not comment /*
+comment */ not comment
 a &lt; b;
 a &gt; b;
 word + wrod;
