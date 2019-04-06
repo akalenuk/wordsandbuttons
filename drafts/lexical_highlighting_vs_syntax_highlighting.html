@@ -148,8 +148,8 @@ function generate_highlighter_code() {
         code += "        if(i == quotes.length)\n"; 
         code += "            return separated(line, 0);\n";
         code += "        var chunk_no = 0;\n";
-        code += "        return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {\n";
-        code += "            return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {\n";
+        code += "        return line.split('\\\\' + quotes[i]).join('\\0').split(quotes[i]).map(function (chunk) {\n";
+        code += "            return chunk.split('\\0').join('\\\\' + quotes[i]);}).map(function (chunk) {\n";
         code += "                return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], \"888\");}).join('');\n";
         code += "    }\n";
     }
@@ -180,6 +180,24 @@ function generate_highlighter_code() {
     code += "}\n";
 
     document.getElementById("highlighter_code").innerHTML = code;
+    highlight_test_area();
+}
+
+function highlight_test_area() {
+    var code = document.getElementById("highlighter_code").innerHTML;
+    code = code.split('&lt;').join('<').split('&gt;').join('>');
+    var function_name_context = code.split('function ');
+    if(function_name_context.length == 1) 
+        return
+    function_name = function_name_context[1].split('(')[0];
+    eval(code);
+    
+    var text = document.getElementById("testing_area").innerHTML;
+    alert(text);    
+    chunks = text.split('<')
+    plain_text = chunks[0] + chunks.slice(1).map(function(chunk) {return chunk.split('>')[1]}).join('');
+    alert(eval(function_name + '(plain_text);'));
+    document.getElementById("testing_area").innerHTML = eval(function_name + '(plain_text);');
 }
     </script>
   </head>
@@ -221,6 +239,36 @@ Lexical highlighting vs. syntax highlighting
 ... here will be the highlighter code...
     </pre>
     </td></tr></table>
+    
+    <form>
+    Testing area. Code below should be highlighted when the highlighter is created:
+    <textarea id="testing_area" rows=25 onInput="highlight_test_area()">
+    movw   r0, #36852
+    movt   r0, #976
+.LBB0_6:
+    mov    r1, r4
+    ldr    r2, [r1, r5]!
+    cmp    r2, #1
+    bne    .LBB0_9
+@ BB#7:
+    ldr    r2, [r1, #4]
+    cmp    r2, #1
+    ldreq  r2, [r1, #8]
+    cmpeq  r2, #1
+    bne    .LBB0_9
+@ BB#8:
+    ldr    r1, [r1, #12]
+    cmp    r1, #1
+    ldreq  r1, [sp, #20]
+    addeq  r1, r1, #1
+    streq  r1, [sp, #20]
+.LBB0_9:
+    add    r5, r5, #4
+    cmp    r5, r0
+    bne    .LBB0_6
+@ BB#10:
+    mov    r0, sp</textarea>
+    </form>
 
     <p>
 ...
