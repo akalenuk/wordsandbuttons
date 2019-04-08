@@ -210,7 +210,7 @@ Lexical highlighting vs. syntax highlighting
     <form>
     Separators:
     <br>
-    <textarea id="separators_list" rows=2>['\n', '&amp;lt;', '&amp;gt;', ' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '<', '>', '[', ']', '{', '}']</textarea>
+    <textarea id="separators_list" rows=2>['\n', ' ', '\t', '.', ',', ':', '=', '[', ']']</textarea>
     <br>
     <br>
     <input type="checkbox" id="do_quotes" checked /><label for="do_quotes">Quotes</label>
@@ -220,7 +220,7 @@ Lexical highlighting vs. syntax highlighting
     <br>
     <input type="checkbox" id="do_brackets" checked /><label for="do_brackets">Brackets</label>
     <br>
-    <textarea id="brackets_list" rows=2>[['/*', '*/'], ['(*', '*)'], ['//', '\n'], ['--', '\n'], ['#', '\n']]</textarea>
+    <textarea id="brackets_list" rows=2>[['/*', '*/'], [';', '\n']]</textarea>
     <br>
     <br>
     Function name:
@@ -239,39 +239,37 @@ Lexical highlighting vs. syntax highlighting
     </td></tr></table>
     
     <form>
-    Testing area. Code below should be highlighted when the highlighter is created:
+    Testing area:
     <textarea id="testing_area" rows=25 onInput="highlight_test_area()">
-    movw   r0, #36852
-    movt   r0, #976
-.LBB0_6:
-    mov    r1, r4
-    ldr    r2, [r1, r5]!
-    cmp    r2, #1
-    bne    .LBB0_9
-@ BB#7:
-    ldr    r2, [r1, #4]
-    cmp    r2, #1
-    ldreq  r2, [r1, #8]
-    cmpeq  r2, #1
-    bne    .LBB0_9
-@ BB#8:
-    ldr    r1, [r1, #12]
-    cmp    r1, #1
-    ldreq  r1, [sp, #20]
-    addeq  r1, r1, #1
-    streq  r1, [sp, #20]
-.LBB0_9:
-    add    r5, r5, #4
-    cmp    r5, r0
-    bne    .LBB0_6
-@ BB#10:
-    mov    r0, sp</textarea>
+.data 
+/* some sample strings */
+ClassName db "SimpleWinClass", 0
+AppName  db " ", 0
+
+.code
+/* some sample code */
+
+; increment counter
+.elseif wParam=='I'
+    mov esi, offset counter_values
+    mov ecx, i
+    mov eax, [esi + ecx*4]
+    inc eax
+    mov [esi + ecx*4], eax
+; decrement counter
+.elseif wParam=='D'
+    mov esi, offset counter_values
+    mov ecx, i
+    mov eax, [esi + ecx*4]
+    dec eax
+    mov [esi + ecx*4], eax
+</textarea>
     <pre id="testing_pre"></pre>
     </form>
 
-    <p>
-...
-    </p>
+    <script language="JavaScript">
+    generate_highlighter_code();
+    </script>
 
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
