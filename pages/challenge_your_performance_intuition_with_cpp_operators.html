@@ -274,6 +274,42 @@ function reveal(no){
     document.getElementById("score").innerHTML = "<b>" + score.toFixed(0) + "</b>";
     document.getElementById("default_score").innerHTML = "<b>" + default_score.toFixed(0) + "</b>";
 }
+
+function colorized(text) {
+   const separators = ['\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')'];
+   const comments = [['/*', '*/'], ['#', '\n']];
+
+    function painted_in(line, color) {
+        return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+    }
+
+    function colorized(token) {
+        var code_sum = 0;
+        for(var i = 0; i < token.length; ++i)
+            code_sum += ((i+1) * token.charCodeAt(i));
+        var color = '' + ((code_sum % 4) * 2) + (2 + (code_sum % 3) * 2) + (2 + (code_sum % 2) * 4);
+        return painted_in(token, color);
+    }
+
+    function separated(line, i) {
+        if(i == separators.length)
+            return colorized(line);
+        return line.split(separators[i]).map(function(subline) {
+            return separated(subline, i + 1);}).join(separators[i]);
+    }
+
+    function uncommented(line, i) {
+        if(i == comments.length)
+            return separated(line, 0);
+        var chunks = line.split(comments[i][0]);
+        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+            var in_out_comment = chunk.split(comments[i][1]);
+            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "777") 
+                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+    }
+
+    return uncommented(text, 0);
+}
     </script>
   </head>
   <body>
@@ -370,56 +406,56 @@ They are almost the same. In fact, they generate almost the same code.
     </p>
     <table><tr>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#7:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -8(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#8:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -4(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#9:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, (%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#10:   #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11:  # %.<span style="color: #5e7876">_crit_edge</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
+    <pre id="code_1_1">
+  movq  %rax, %r14
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  cmpl  $1, -12(%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#7:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, -8(%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#8:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, -4(%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#9:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, (%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#10:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+  .align  16, 0x90
+.LBB0_11:  # %._crit_edge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
     </pre>
     </td>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>10
-<span style="color: #778877"># BB#7:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -8(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>10
-<span style="color: #778877"># BB#8:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -4(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>10
-<span style="color: #778877"># BB#9:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, (%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>10
-<span style="color: #778877"># BB#20:   #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>10:  # %.<span style="color: #04175e">backedge</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
+    <pre id="code_1_2">
+  movq  %rax, %r14
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  cmpl  $1, -12(%r12,%rbx,4)
+  jne  .LBB0_10
+# BB#7:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, -8(%r12,%rbx,4)
+  jne  .LBB0_10
+# BB#8:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, -4(%r12,%rbx,4)
+  jne  .LBB0_10
+# BB#9:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, (%r12,%rbx,4)
+  jne  .LBB0_10
+# BB#20:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+.LBB0_10:  # %.backedge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
     </pre>
     </td></tr></table>
     <p>
@@ -468,65 +504,65 @@ Surprisingly, they perform almost the same while their code is completely differ
     </p>
     <table><tr>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>10
-<span style="color: #778877"># BB#7:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -8(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>10
-<span style="color: #778877"># BB#8:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -4(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>10
-<span style="color: #778877"># BB#9:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, (%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>10
-<span style="color: #778877"># BB#20:   #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>10:  # %.<span style="color: #04175e">backedge</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
+    <pre id="code_2_1">
+  movq  %rax, %r14
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  cmpl  $1, -12(%r12,%rbx,4)
+  jne  .LBB0_10
+# BB#7:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, -8(%r12,%rbx,4)
+  jne  .LBB0_10
+# BB#8:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, -4(%r12,%rbx,4)
+  jne  .LBB0_10
+# BB#9:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, (%r12,%rbx,4)
+  jne  .LBB0_10
+# BB#20:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+.LBB0_10:  # %.backedge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
     </pre>
     </td>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  <span style="color: #665002">movl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #052546">eax</span>
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -4(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #317c62">sete</span>  %<span style="color: #2b3133">cl</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -8(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #665002">movl</span>  <span style="color: #417802">$</span>0, %<span style="color: #354a6d">edx</span>
-  <span style="color: #1b796f">cmovel</span>  %<span style="color: #052546">eax</span>, %<span style="color: #354a6d">edx</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #0b6721">movzbl</span>  %<span style="color: #2b3133">cl</span>, %<span style="color: #473411">ecx</span>
-  <span style="color: #661f21">je</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>8
-<span style="color: #778877"># BB#7:    # %select.false</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #3b152f">xorl</span>  %<span style="color: #354a6d">edx</span>, %<span style="color: #354a6d">edx</span>
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>8:   # %<span style="color: #64757f">select</span>.<span style="color: #1d3f2b">end</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #3d7d51">andl</span>  %<span style="color: #354a6d">edx</span>, %<span style="color: #473411">ecx</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, (%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #317c62">sete</span>  %<span style="color: #0e1070">dl</span>
-  <span style="color: #0b6721">movzbl</span>  %<span style="color: #0e1070">dl</span>, %<span style="color: #354a6d">edx</span>
-  <span style="color: #265c2a">negl</span>  %<span style="color: #473411">ecx</span>
-  <span style="color: #7b6d19">testl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #354a6d">edx</span>
-  <span style="color: #661f21">je</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>9
-<span style="color: #778877"># BB#19:   #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>9:   # %.<span style="color: #04175e">backedge</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
+    <pre id="code_2_2">
+  movq  %rax, %r14
+  movl  $-1, %eax
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  cmpl  $1, -4(%r12,%rbx,4)
+  sete  %cl
+  cmpl  $1, -8(%r12,%rbx,4)
+  movl  $0, %edx
+  cmovel  %eax, %edx
+  cmpl  $1, -12(%r12,%rbx,4)
+  movzbl  %cl, %ecx
+  je  .LBB0_8
+# BB#7:    # %select.false
+           #   in Loop: Header=BB0_6 Depth=1
+  xorl  %edx, %edx
+.LBB0_8:   # %select.end
+           #   in Loop: Header=BB0_6 Depth=1
+  andl  %edx, %ecx
+  cmpl  $1, (%r12,%rbx,4)
+  sete  %dl
+  movzbl  %dl, %edx
+  negl  %ecx
+  testl  %ecx, %edx
+  je  .LBB0_9
+# BB#19:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+.LBB0_9:   # %.backedge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
     </pre>
     </td></tr></table>
     <p>
@@ -580,63 +616,63 @@ And this works perfectly. The code is a few lines longer, but there are no compa
     </p>
     <table><tr>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#7:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -8(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#8:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -4(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#9:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, (%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#10:   #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11:  # %.<span style="color: #5e7876">_crit_edge</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
+    <pre id="code_3_1">
+  movq  %rax, %r14
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  cmpl  $1, -12(%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#7:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, -8(%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#8:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, -4(%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#9:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, (%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#10:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+  .align  16, 0x90
+.LBB0_11:  # %._crit_edge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
     </pre>
     </td>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #665002">movl</span>  -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #052546">eax</span>
-  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #052546">eax</span>
-  <span style="color: #744661">imull</span>  %<span style="color: #052546">eax</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #665002">movl</span>  -8(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #473411">ecx</span>
-  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #473411">ecx</span>
-  <span style="color: #744661">imull</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #473411">ecx</span>
-  <span style="color: #7b0d35">addl</span>  %<span style="color: #052546">eax</span>, %<span style="color: #473411">ecx</span>
-  <span style="color: #665002">movl</span>  -4(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #052546">eax</span>
-  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #052546">eax</span>
-  <span style="color: #744661">imull</span>  %<span style="color: #052546">eax</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #7b0d35">addl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #665002">movl</span>  (%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #473411">ecx</span>
-  <span style="color: #665002">movl</span>  <span style="color: #417802">$</span>1, %<span style="color: #354a6d">edx</span>
-  <span style="color: #24690f">subl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #354a6d">edx</span>
-  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #473411">ecx</span>
-  <span style="color: #744661">imull</span>  %<span style="color: #354a6d">edx</span>, %<span style="color: #473411">ecx</span>
-  <span style="color: #025d32">cmpl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>7
-<span style="color: #778877"># BB#17:   #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>7:   # %.<span style="color: #04175e">backedge</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
+    <pre id="code_3_2">
+  movq  %rax, %r14
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  movl  -12(%r12,%rbx,4), %eax
+  addl  $-1, %eax
+  imull  %eax, %eax
+  movl  -8(%r12,%rbx,4), %ecx
+  addl  $-1, %ecx
+  imull  %ecx, %ecx
+  addl  %eax, %ecx
+  movl  -4(%r12,%rbx,4), %eax
+  addl  $-1, %eax
+  imull  %eax, %eax
+  addl  %ecx, %eax
+  movl  (%r12,%rbx,4), %ecx
+  movl  $1, %edx
+  subl  %ecx, %edx
+  addl  $-1, %ecx
+  imull  %edx, %ecx
+  cmpl  %ecx, %eax
+  jne  .LBB0_7
+# BB#17:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+.LBB0_7:   # %.backedge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
     </pre>
     </td></tr></table>
     </div>
@@ -687,79 +723,79 @@ That's why. Getting an absolute value of an int is not a trivial job. It's not a
     </p>
     <table><tr>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #665002">movl</span>  -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #052546">eax</span>
-  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #052546">eax</span>
-  <span style="color: #744661">imull</span>  %<span style="color: #052546">eax</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #665002">movl</span>  -8(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #473411">ecx</span>
-  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #473411">ecx</span>
-  <span style="color: #744661">imull</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #473411">ecx</span>
-  <span style="color: #7b0d35">addl</span>  %<span style="color: #052546">eax</span>, %<span style="color: #473411">ecx</span>
-  <span style="color: #665002">movl</span>  -4(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #052546">eax</span>
-  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #052546">eax</span>
-  <span style="color: #744661">imull</span>  %<span style="color: #052546">eax</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #7b0d35">addl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #665002">movl</span>  (%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #473411">ecx</span>
-  <span style="color: #665002">movl</span>  <span style="color: #417802">$</span>1, %<span style="color: #354a6d">edx</span>
-  <span style="color: #24690f">subl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #354a6d">edx</span>
-  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #473411">ecx</span>
-  <span style="color: #744661">imull</span>  %<span style="color: #354a6d">edx</span>, %<span style="color: #473411">ecx</span>
-  <span style="color: #025d32">cmpl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>7
-<span style="color: #778877"># BB#17:   #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>7:   # %.<span style="color: #04175e">backedge</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
+    <pre id="code_4_1">
+  movq  %rax, %r14
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  movl  -12(%r12,%rbx,4), %eax
+  addl  $-1, %eax
+  imull  %eax, %eax
+  movl  -8(%r12,%rbx,4), %ecx
+  addl  $-1, %ecx
+  imull  %ecx, %ecx
+  addl  %eax, %ecx
+  movl  -4(%r12,%rbx,4), %eax
+  addl  $-1, %eax
+  imull  %eax, %eax
+  addl  %ecx, %eax
+  movl  (%r12,%rbx,4), %ecx
+  movl  $1, %edx
+  subl  %ecx, %edx
+  addl  $-1, %ecx
+  imull  %edx, %ecx
+  cmpl  %ecx, %eax
+  jne  .LBB0_7
+# BB#17:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+.LBB0_7:   # %.backedge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
     </pre>
     </td>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #665002">movl</span>  -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #052546">eax</span>
-  <span style="color: #265e08">leal</span>  -1(%<span style="color: #631f45">rax</span>), %<span style="color: #473411">ecx</span>
-  <span style="color: #665002">movl</span>  <span style="color: #417802">$</span>1, %<span style="color: #354a6d">edx</span>
-  <span style="color: #24690f">subl</span>  %<span style="color: #052546">eax</span>, %<span style="color: #354a6d">edx</span>
-  <span style="color: #7b6d19">testl</span>  %<span style="color: #052546">eax</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #072c34">cmovgl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #354a6d">edx</span>
-  <span style="color: #665002">movl</span>  -8(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #052546">eax</span>
-  <span style="color: #265e08">leal</span>  -1(%<span style="color: #631f45">rax</span>), %<span style="color: #473411">ecx</span>
-  <span style="color: #665002">movl</span>  <span style="color: #417802">$</span>1, %<span style="color: #4d4767">esi</span>
-  <span style="color: #24690f">subl</span>  %<span style="color: #052546">eax</span>, %<span style="color: #4d4767">esi</span>
-  <span style="color: #7b6d19">testl</span>  %<span style="color: #052546">eax</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #072c34">cmovgl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #4d4767">esi</span>
-  <span style="color: #7b0d35">addl</span>  %<span style="color: #354a6d">edx</span>, %<span style="color: #4d4767">esi</span>
-  <span style="color: #665002">movl</span>  -4(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #052546">eax</span>
-  <span style="color: #265e08">leal</span>  -1(%<span style="color: #631f45">rax</span>), %<span style="color: #473411">ecx</span>
-  <span style="color: #665002">movl</span>  <span style="color: #417802">$</span>1, %<span style="color: #354a6d">edx</span>
-  <span style="color: #24690f">subl</span>  %<span style="color: #052546">eax</span>, %<span style="color: #354a6d">edx</span>
-  <span style="color: #7b6d19">testl</span>  %<span style="color: #052546">eax</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #072c34">cmovgl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #354a6d">edx</span>
-  <span style="color: #7b0d35">addl</span>  %<span style="color: #4d4767">esi</span>, %<span style="color: #354a6d">edx</span>
-  <span style="color: #665002">movl</span>  (%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #052546">eax</span>
-  <span style="color: #265e08">leal</span>  -1(%<span style="color: #631f45">rax</span>), %<span style="color: #473411">ecx</span>
-  <span style="color: #665002">movl</span>  <span style="color: #417802">$</span>1, %<span style="color: #4d4767">esi</span>
-  <span style="color: #24690f">subl</span>  %<span style="color: #052546">eax</span>, %<span style="color: #4d4767">esi</span>
-  <span style="color: #7b6d19">testl</span>  %<span style="color: #052546">eax</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #072c34">cmovgl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #4d4767">esi</span>
-  <span style="color: #7b0d35">addl</span>  %<span style="color: #354a6d">edx</span>, %<span style="color: #4d4767">esi</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>7
-<span style="color: #778877"># BB#17:   #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>7:   # %.<span style="color: #04175e">backedge</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
+    <pre id="code_4_2">
+  movq  %rax, %r14
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  movl  -12(%r12,%rbx,4), %eax
+  leal  -1(%rax), %ecx
+  movl  $1, %edx
+  subl  %eax, %edx
+  testl  %eax, %eax
+  cmovgl  %ecx, %edx
+  movl  -8(%r12,%rbx,4), %eax
+  leal  -1(%rax), %ecx
+  movl  $1, %esi
+  subl  %eax, %esi
+  testl  %eax, %eax
+  cmovgl  %ecx, %esi
+  addl  %edx, %esi
+  movl  -4(%r12,%rbx,4), %eax
+  leal  -1(%rax), %ecx
+  movl  $1, %edx
+  subl  %eax, %edx
+  testl  %eax, %eax
+  cmovgl  %ecx, %edx
+  addl  %esi, %edx
+  movl  (%r12,%rbx,4), %eax
+  leal  -1(%rax), %ecx
+  movl  $1, %esi
+  subl  %eax, %esi
+  testl  %eax, %eax
+  cmovgl  %ecx, %esi
+  addl  %edx, %esi
+  jne  .LBB0_7
+# BB#17:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+.LBB0_7:   # %.backedge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
     </pre>
     </td></tr></table>
     <p>
@@ -814,65 +850,65 @@ Not really, no. The operations are different, but essentially the code is the sa
     </p>
     <table><tr>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#7:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -8(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#8:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -4(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#9:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, (%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#10:   #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11:  # %.<span style="color: #5e7876">_crit_edge</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
+    <pre id="code_5_1">
+  movq  %rax, %r14
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  cmpl  $1, -12(%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#7:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, -8(%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#8:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, -4(%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#9:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, (%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#10:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+  .align  16, 0x90
+.LBB0_11:  # %._crit_edge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
     </pre>
     </td>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #621369">vmovsd</span>  -24(%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0
-  <span style="color: #4d3309">vucomisd</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#7:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #621369">vmovsd</span>  -16(%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0
-  <span style="color: #4d3309">vucomisd</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#8:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #621369">vmovsd</span>  -8(%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0
-  <span style="color: #4d3309">vucomisd</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#9:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #621369">vmovsd</span>  (%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0
-  <span style="color: #4d3309">vucomisd</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#10:   #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11:  # %.<span style="color: #5e7876">_crit_edge</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
+    <pre id="code_5_2">
+  movq  %rax, %r14
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  vmovsd  -24(%r15,%rbx,8), %xmm0
+  vucomisd  .LCPI0_0(%rip), %xmm0
+  jne  .LBB0_11
+  jp  .LBB0_11
+# BB#7:    #   in Loop: Header=BB0_6 Depth=1
+  vmovsd  -16(%r15,%rbx,8), %xmm0
+  vucomisd  .LCPI0_0(%rip), %xmm0
+  jne  .LBB0_11
+  jp  .LBB0_11
+# BB#8:    #   in Loop: Header=BB0_6 Depth=1
+  vmovsd  -8(%r15,%rbx,8), %xmm0
+  vucomisd  .LCPI0_0(%rip), %xmm0
+  jne  .LBB0_11
+  jp  .LBB0_11
+# BB#9:    #   in Loop: Header=BB0_6 Depth=1
+  vmovsd  (%r15,%rbx,8), %xmm0
+  vucomisd  .LCPI0_0(%rip), %xmm0
+  jne  .LBB0_11
+  jp  .LBB0_11
+# BB#10:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+  .align  16, 0x90
+.LBB0_11:  # %._crit_edge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
     </pre>
     </td></tr></table>
     </div>
@@ -932,68 +968,68 @@ No. The code is conceptually the same though, so the loss is also not that drast
     </p>
     <table><tr>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #665002">movl</span>  -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #052546">eax</span>
-  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #052546">eax</span>
-  <span style="color: #744661">imull</span>  %<span style="color: #052546">eax</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #665002">movl</span>  -8(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #473411">ecx</span>
-  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #473411">ecx</span>
-  <span style="color: #744661">imull</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #473411">ecx</span>
-  <span style="color: #7b0d35">addl</span>  %<span style="color: #052546">eax</span>, %<span style="color: #473411">ecx</span>
-  <span style="color: #665002">movl</span>  -4(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #052546">eax</span>
-  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #052546">eax</span>
-  <span style="color: #744661">imull</span>  %<span style="color: #052546">eax</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #7b0d35">addl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #665002">movl</span>  (%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4), %<span style="color: #473411">ecx</span>
-  <span style="color: #665002">movl</span>  <span style="color: #417802">$</span>1, %<span style="color: #354a6d">edx</span>
-  <span style="color: #24690f">subl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #354a6d">edx</span>
-  <span style="color: #7b0d35">addl</span>  <span style="color: #417802">$</span>-1, %<span style="color: #473411">ecx</span>
-  <span style="color: #744661">imull</span>  %<span style="color: #354a6d">edx</span>, %<span style="color: #473411">ecx</span>
-  <span style="color: #025d32">cmpl</span>  %<span style="color: #473411">ecx</span>, %<span style="color: #052546">eax</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>7
-<span style="color: #778877"># BB#17:   #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>7:   # %.<span style="color: #04175e">backedge</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
+    <pre id="code_6_1">
+  movq  %rax, %r14
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  movl  -12(%r12,%rbx,4), %eax
+  addl  $-1, %eax
+  imull  %eax, %eax
+  movl  -8(%r12,%rbx,4), %ecx
+  addl  $-1, %ecx
+  imull  %ecx, %ecx
+  addl  %eax, %ecx
+  movl  -4(%r12,%rbx,4), %eax
+  addl  $-1, %eax
+  imull  %eax, %eax
+  addl  %ecx, %eax
+  movl  (%r12,%rbx,4), %ecx
+  movl  $1, %edx
+  subl  %ecx, %edx
+  addl  $-1, %ecx
+  imull  %edx, %ecx
+  cmpl  %ecx, %eax
+  jne  .LBB0_7
+# BB#17:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+.LBB0_7:   # %.backedge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
     </pre>
     </td>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  <span style="color: #621369">vmovsd</span>  .<span style="color: #3a453d">LCPI</span>1<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #122f54">vxorps</span>  %<span style="color: #356259">xmm</span>1, %<span style="color: #356259">xmm</span>1, %<span style="color: #356259">xmm</span>1
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>1<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #364c41">vaddsd</span>  -24(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0, %<span style="color: #356259">xmm</span>2
-  <span style="color: #5b081d">vmulsd</span>  %<span style="color: #356259">xmm</span>2, %<span style="color: #356259">xmm</span>2, %<span style="color: #356259">xmm</span>2
-  <span style="color: #364c41">vaddsd</span>  -16(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0, %<span style="color: #356259">xmm</span>3
-  <span style="color: #5b081d">vmulsd</span>  %<span style="color: #356259">xmm</span>3, %<span style="color: #356259">xmm</span>3, %<span style="color: #356259">xmm</span>3
-  <span style="color: #364c41">vaddsd</span>  %<span style="color: #356259">xmm</span>3, %<span style="color: #356259">xmm</span>2, %<span style="color: #356259">xmm</span>2
-  <span style="color: #364c41">vaddsd</span>  -8(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0, %<span style="color: #356259">xmm</span>3
-  <span style="color: #5b081d">vmulsd</span>  %<span style="color: #356259">xmm</span>3, %<span style="color: #356259">xmm</span>3, %<span style="color: #356259">xmm</span>3
-  <span style="color: #364c41">vaddsd</span>  %<span style="color: #356259">xmm</span>3, %<span style="color: #356259">xmm</span>2, %<span style="color: #356259">xmm</span>2
-  <span style="color: #364c41">vaddsd</span>  (%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0, %<span style="color: #356259">xmm</span>3
-  <span style="color: #5b081d">vmulsd</span>  %<span style="color: #356259">xmm</span>3, %<span style="color: #356259">xmm</span>3, %<span style="color: #356259">xmm</span>3
-  <span style="color: #364c41">vaddsd</span>  %<span style="color: #356259">xmm</span>3, %<span style="color: #356259">xmm</span>2, %<span style="color: #356259">xmm</span>2
-  <span style="color: #4d3309">vucomisd</span>  %<span style="color: #356259">xmm</span>1, %<span style="color: #356259">xmm</span>2
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>1<span style="color: #077d4b">_</span>9
-  <span style="color: #40165a">jnp</span>  .<span style="color: #500864">LBB</span>1<span style="color: #077d4b">_</span>8
-  <span style="color: #2b7409">jmp</span>  .<span style="color: #500864">LBB</span>1<span style="color: #077d4b">_</span>9
-.<span style="color: #500864">LBB</span>1<span style="color: #077d4b">_</span>8:   #   <span style="color: #59483a">in</span> <span style="color: #2d7955">Loop</span>: <span style="color: #08403e">Header</span>=<span style="color: #341059">BB</span>1<span style="color: #077d4b">_</span>6 <span style="color: #063135">Depth</span>=1
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-.<span style="color: #500864">LBB</span>1<span style="color: #077d4b">_</span>9:   # %.<span style="color: #04175e">backedge</span>
-<span style="color: #778877">           #   in Loop: Header=BB1_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>1<span style="color: #077d4b">_</span>6
+    <pre id="code_6_2">
+  movq  %rax, %r14
+  vmovsd  .LCPI1_0(%rip), %xmm0
+  vxorps  %xmm1, %xmm1, %xmm1
+  .align  16, 0x90
+.LBB1_6:
+  # =>This Inner Loop Header: Depth=1
+  vaddsd  -24(%r12,%rbx,8), %xmm0, %xmm2
+  vmulsd  %xmm2, %xmm2, %xmm2
+  vaddsd  -16(%r12,%rbx,8), %xmm0, %xmm3
+  vmulsd  %xmm3, %xmm3, %xmm3
+  vaddsd  %xmm3, %xmm2, %xmm2
+  vaddsd  -8(%r12,%rbx,8), %xmm0, %xmm3
+  vmulsd  %xmm3, %xmm3, %xmm3
+  vaddsd  %xmm3, %xmm2, %xmm2
+  vaddsd  (%r12,%rbx,8), %xmm0, %xmm3
+  vmulsd  %xmm3, %xmm3, %xmm3
+  vaddsd  %xmm3, %xmm2, %xmm2
+  vucomisd  %xmm1, %xmm2
+  jne  .LBB1_9
+  jnp  .LBB1_8
+  jmp  .LBB1_9
+.LBB1_8:   #   in Loop: Header=BB1_6 Depth=1
+  incl  4(%rsp)
+.LBB1_9:   # %.backedge
+           #   in Loop: Header=BB1_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB1_6
     </pre>
     </td></tr></table>
     </div>
@@ -1045,73 +1081,73 @@ And that's the most peculiar thing. Although the code now reads much less from t
     </p>
     <table><tr>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #621369">vmovsd</span>  -24(%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0
-  <span style="color: #4d3309">vucomisd</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#7:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #621369">vmovsd</span>  -16(%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0
-  <span style="color: #4d3309">vucomisd</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#8:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #621369">vmovsd</span>  -8(%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0
-  <span style="color: #4d3309">vucomisd</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#9:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #621369">vmovsd</span>  (%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,8), %<span style="color: #356259">xmm</span>0
-  <span style="color: #4d3309">vucomisd</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#10:   #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11:  # %.<span style="color: #5e7876">_crit_edge</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
+    <pre id="code_7_1">
+  movq  %rax, %r14
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  vmovsd  -24(%r15,%rbx,8), %xmm0
+  vucomisd  .LCPI0_0(%rip), %xmm0
+  jne  .LBB0_11
+  jp  .LBB0_11
+# BB#7:    #   in Loop: Header=BB0_6 Depth=1
+  vmovsd  -16(%r15,%rbx,8), %xmm0
+  vucomisd  .LCPI0_0(%rip), %xmm0
+  jne  .LBB0_11
+  jp  .LBB0_11
+# BB#8:    #   in Loop: Header=BB0_6 Depth=1
+  vmovsd  -8(%r15,%rbx,8), %xmm0
+  vucomisd  .LCPI0_0(%rip), %xmm0
+  jne  .LBB0_11
+  jp  .LBB0_11
+# BB#9:    #   in Loop: Header=BB0_6 Depth=1
+  vmovsd  (%r15,%rbx,8), %xmm0
+  vucomisd  .LCPI0_0(%rip), %xmm0
+  jne  .LBB0_11
+  jp  .LBB0_11
+# BB#10:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+  .align  16, 0x90
+.LBB0_11:  # %._crit_edge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
     </pre>
     </td>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #383463">vmovss</span>  -12(%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,4), %<span style="color: #356259">xmm</span>0
-  <span style="color: #467402">vucomiss</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#7:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #383463">vmovss</span>  -8(%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,4), %<span style="color: #356259">xmm</span>0
-  <span style="color: #467402">vucomiss</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#8:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #383463">vmovss</span>  -4(%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,4), %<span style="color: #356259">xmm</span>0
-  <span style="color: #467402">vucomiss</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#9:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #383463">vmovss</span>  (%<span style="color: #1c301d">r</span>15,%<span style="color: #322920">rbx</span>,4), %<span style="color: #356259">xmm</span>0
-  <span style="color: #467402">vucomiss</span>  .<span style="color: #3a453d">LCPI</span>0<span style="color: #077d4b">_</span>0(%<span style="color: #782724">rip</span>), %<span style="color: #356259">xmm</span>0
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-  <span style="color: #3e0e69">jp</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#10:   #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11:  # %.<span style="color: #5e7876">_crit_edge</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
+    <pre id="code_7_2">
+  movq  %rax, %r14
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  vmovss  -12(%r15,%rbx,4), %xmm0
+  vucomiss  .LCPI0_0(%rip), %xmm0
+  jne  .LBB0_11
+  jp  .LBB0_11
+# BB#7:    #   in Loop: Header=BB0_6 Depth=1
+  vmovss  -8(%r15,%rbx,4), %xmm0
+  vucomiss  .LCPI0_0(%rip), %xmm0
+  jne  .LBB0_11
+  jp  .LBB0_11
+# BB#8:    #   in Loop: Header=BB0_6 Depth=1
+  vmovss  -4(%r15,%rbx,4), %xmm0
+  vucomiss  .LCPI0_0(%rip), %xmm0
+  jne  .LBB0_11
+  jp  .LBB0_11
+# BB#9:    #   in Loop: Header=BB0_6 Depth=1
+  vmovss  (%r15,%rbx,4), %xmm0
+  vucomiss  .LCPI0_0(%rip), %xmm0
+  jne  .LBB0_11
+  jp  .LBB0_11
+# BB#10:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+  .align  16, 0x90
+.LBB0_11:  # %._crit_edge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
     </pre>
     </td></tr></table>
     <p>
@@ -1160,62 +1196,62 @@ Of course, it isn't. It may be contextually beneficial to check against zero bec
     </p>
     <table><tr>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#7:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -8(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#8:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, -4(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#9:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>1, (%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#10:   #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11:  # %.<span style="color: #5e7876">_crit_edge</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
+    <pre id="code_8_1">
+  movq  %rax, %r14
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  cmpl  $1, -12(%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#7:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, -8(%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#8:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, -4(%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#9:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $1, (%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#10:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+  .align  16, 0x90
+.LBB0_11:  # %._crit_edge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
     </pre>
     </td>
     <td>
-    <pre>
-  <span style="color: #3e312d">movq</span>  %<span style="color: #631f45">rax</span>, %<span style="color: #1c301d">r</span>14
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6:
-<span style="color: #778877">  # =&gt;This Inner Loop Header: Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>0, -12(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#7:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>0, -8(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#8:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>0, -4(%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#9:    #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #025d32">cmpl</span>  <span style="color: #417802">$</span>0, (%<span style="color: #1c301d">r</span>12,%<span style="color: #322920">rbx</span>,4)
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11
-<span style="color: #778877"># BB#10:   #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #140e66">incl</span>  4(%<span style="color: #104e13">rsp</span>)
-  .<span style="color: #204104">align</span>  16, 0<span style="color: #390958">x</span>90
-.<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>11:  # %.<span style="color: #5e7876">_crit_edge</span>
-<span style="color: #778877">           #   in Loop: Header=BB0_6 Depth=1</span>
-  <span style="color: #4d357a">addq</span>  <span style="color: #417802">$</span>1, %<span style="color: #322920">rbx</span>
-  <span style="color: #4b5540">cmpq</span>  <span style="color: #417802">$</span>160000000, %<span style="color: #322920">rbx</span>
-  <span style="color: #672e2d">jne</span>  .<span style="color: #500864">LBB</span>0<span style="color: #077d4b">_</span>6
+    <pre id="code_8_2">
+  movq  %rax, %r14
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  cmpl  $0, -12(%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#7:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $0, -8(%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#8:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $0, -4(%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#9:    #   in Loop: Header=BB0_6 Depth=1
+  cmpl  $0, (%r12,%rbx,4)
+  jne  .LBB0_11
+# BB#10:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+  .align  16, 0x90
+.LBB0_11:  # %._crit_edge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
     </pre>
     </td></tr></table>
     </div>
     <script language="JavaScript">
-    init_slider(7);
+    init_slider(7);    
     </script>
 
     <div id="show_in_the_end" style="display:none;">
@@ -1233,6 +1269,24 @@ Conclusion
 Truisms don't help performance. That's my conclusion. We all know that logical operations perform short-circuiting; that floats are shorter than doubles; that throwing away a sign from a number is easier than computing its square. It's all true. It's all irrelevant without a proper context.
     </p>
     </div>
+    <script language="JavaScript">
+    document.getElementById("code_1_1").innerHTML = colorized(document.getElementById("code_1_1").innerHTML);
+    document.getElementById("code_1_2").innerHTML = colorized(document.getElementById("code_1_2").innerHTML);
+    document.getElementById("code_2_1").innerHTML = colorized(document.getElementById("code_2_1").innerHTML);
+    document.getElementById("code_2_2").innerHTML = colorized(document.getElementById("code_2_2").innerHTML);
+    document.getElementById("code_3_1").innerHTML = colorized(document.getElementById("code_3_1").innerHTML);
+    document.getElementById("code_3_2").innerHTML = colorized(document.getElementById("code_3_2").innerHTML);
+    document.getElementById("code_4_1").innerHTML = colorized(document.getElementById("code_4_1").innerHTML);
+    document.getElementById("code_4_2").innerHTML = colorized(document.getElementById("code_4_2").innerHTML);
+    document.getElementById("code_5_1").innerHTML = colorized(document.getElementById("code_5_1").innerHTML);
+    document.getElementById("code_5_2").innerHTML = colorized(document.getElementById("code_5_2").innerHTML);
+    document.getElementById("code_6_1").innerHTML = colorized(document.getElementById("code_6_1").innerHTML);
+    document.getElementById("code_6_2").innerHTML = colorized(document.getElementById("code_6_2").innerHTML);
+    document.getElementById("code_7_1").innerHTML = colorized(document.getElementById("code_7_1").innerHTML);
+    document.getElementById("code_7_2").innerHTML = colorized(document.getElementById("code_7_2").innerHTML);
+    document.getElementById("code_8_1").innerHTML = colorized(document.getElementById("code_8_1").innerHTML);
+    document.getElementById("code_8_2").innerHTML = colorized(document.getElementById("code_8_2").innerHTML);
+    </script>
 
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
