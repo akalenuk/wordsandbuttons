@@ -109,15 +109,15 @@ textarea {
 function generate_highlighter_code() {
     var function_name = document.getElementById("function_name").value;
     var do_quotes = document.getElementById("do_quotes").checked;
-    var do_brackets = document.getElementById("do_brackets").checked;
+    var do_comments = document.getElementById("do_comments").checked;
     
     var code = "\n";
     code += "function " + function_name + "(text) {\n";
     code += "   const separators = " + document.getElementById("separators_list").value + ";\n"
     if(do_quotes)
         code += "   const quotes = " + document.getElementById("quotes_list").value + ";\n"
-    if(do_brackets)
-        code += "   const brackets = " + document.getElementById("brackets_list").value + ";\n"    
+    if(do_comments)
+        code += "   const comments = " + document.getElementById("comments_list").value + ";\n"    
 
     code += "\n";
     code += "    function painted_in(line, color) {\n";
@@ -154,25 +154,25 @@ function generate_highlighter_code() {
         code += "    }\n";
     }
     
-    if(do_brackets) {
+    if(do_comments) {
         code += "\n";
-        code += "    function unbracketed(line, i) {\n";
-        code += "        if(i == brackets.length)\n";
+        code += "    function uncommented(line, i) {\n";
+        code += "        if(i == comments.length)\n";
         if(do_quotes) 
             code += "            return unquoted(line, 0);\n";
         else
             code += "            return separated(line, 0);\n";
-        code += "        var chunks = line.split(brackets[i][0]);\n";
-        code += "        return unbracketed(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {\n";
-        code += "            var in_out_bracket = chunk.split(brackets[i][1]);\n";
-        code += "            return painted_in(brackets[i][0] + in_out_bracket[0] + (in_out_bracket.length > 1 ? brackets[i][1] : ''), \"888\") \n";
-        code += "                + unbracketed(in_out_bracket.slice(1).join(brackets[i][1]), i + 1);}).join('');\n";
+        code += "        var chunks = line.split(comments[i][0]);\n";
+        code += "        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {\n";
+        code += "            var in_out_comment = chunk.split(comments[i][1]);\n";
+        code += "            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), \"888\") \n";
+        code += "                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');\n";
         code += "    }\n";
     }
     
     code += "\n";
-    if(do_brackets)
-        code += "    return unbracketed(text, 0);\n";
+    if(do_comments)
+        code += "    return uncommented(text, 0);\n";
     else if(do_quotes)
         code += "    return unquoted(text, 0);\n";
     else 
@@ -218,9 +218,9 @@ Lexical highlighting vs. syntax highlighting
     <textarea id="quotes_list" rows=2>['\'', '"']</textarea>
     <br>
     <br>
-    <input type="checkbox" id="do_brackets" checked /><label for="do_brackets">Brackets</label>
+    <input type="checkbox" id="do_comments" checked /><label for="do_comments">Comments</label>
     <br>
-    <textarea id="brackets_list" rows=2>[['/*', '*/'], [';', '\n']]</textarea>
+    <textarea id="comments_list" rows=2>[['/*', '*/'], [';', '\n']]</textarea>
     <br>
     <br>
     Function name:
