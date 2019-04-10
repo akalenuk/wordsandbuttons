@@ -107,6 +107,42 @@ textarea {
 
     </style>
     <script language="JavaScript">
+function colorized_with_sample_highlighter(text) {
+   const separators = ['\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')'];
+   const comments = [['/*', '*/'], ['#', '\n']];
+
+    function painted_in(line, color) {
+        return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+    }
+
+    function colorized(token) {
+        var code_sum = 0;
+        for(var i = 0; i < token.length; ++i)
+            code_sum += ((i+1) * token.charCodeAt(i));
+        var color = '' + ((code_sum % 4) * 2) + (2 + (code_sum % 3) * 2) + (2 + (code_sum % 2) * 4);
+        return painted_in(token, color);
+    }
+
+    function separated(line, i) {
+        if(i == separators.length)
+            return colorized(line);
+        return line.split(separators[i]).map(function(subline) {
+            return separated(subline, i + 1);}).join(separators[i]);
+    }
+
+    function uncommented(line, i) {
+        if(i == comments.length)
+            return separated(line, 0);
+        var chunks = line.split(comments[i][0]);
+        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+            var in_out_comment = chunk.split(comments[i][1]);
+            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "777") 
+                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+    }
+
+    return uncommented(text, 0);
+}
+    
 function generate_highlighter_code() {
     var function_name = document.getElementById("function_name").value;
     var do_quotes = document.getElementById("do_quotes").checked;
@@ -208,6 +244,41 @@ Lexical highlighting vs. syntax highlighting
     <p>
 ...
     </p>
+    <table><tr>
+    <td>
+    <pre id="sample_code">
+  movq  %rax, %r14
+  .align  16, 0x90
+.LBB0_6:
+  # =>This Inner Loop Header: Depth=1
+  movl  -12(%r12,%rbx,4), %eax
+  addl  $-1, %eax
+  imull  %eax, %eax
+  movl  -8(%r12,%rbx,4), %ecx
+  addl  $-1, %ecx
+  imull  %ecx, %ecx
+  addl  %eax, %ecx
+  movl  -4(%r12,%rbx,4), %eax
+  addl  $-1, %eax
+  imull  %eax, %eax
+  addl  %ecx, %eax
+  movl  (%r12,%rbx,4), %ecx
+  movl  $1, %edx
+  subl  %ecx, %edx
+  addl  $-1, %ecx
+  imull  %edx, %ecx
+  cmpl  %ecx, %eax
+  jne  .LBB0_7
+# BB#17:   #   in Loop: Header=BB0_6 Depth=1
+  incl  4(%rsp)
+.LBB0_7:   # %.backedge
+           #   in Loop: Header=BB0_6 Depth=1
+  addq  $1, %rbx
+  cmpq  $160000000, %rbx
+  jne  .LBB0_6
+    </pre>
+    </td>
+    </tr></table>
     <form>
     Separators:
     <br>
@@ -278,6 +349,7 @@ AppName  db " ", 0
 
     <script language="JavaScript">
     generate_highlighter_code();
+    document.getElementById("sample_code").innerHTML = colorized_with_sample_highlighter(document.getElementById("sample_code").innerHTML);
     </script>
 
 
