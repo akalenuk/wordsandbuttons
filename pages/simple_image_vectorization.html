@@ -968,8 +968,11 @@ function colorized(text) {
     function colorized(token) {
         var code_sum = 0;
         for(var i = 0; i < token.length; ++i)
-            code_sum += ((i+1) * token.charCodeAt(i));
-        var color = '' + ((code_sum % 4) * 2) + (2 + (code_sum % 3) * 2) + (2 + (code_sum % 2) * 4);
+            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+        var zero_channel = code_sum % 3;
+        var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
+            + (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
+            + (zero_channel == 2 ? '0' : '');
         return painted_in(token, color);
     }
 
