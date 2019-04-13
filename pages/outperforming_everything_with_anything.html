@@ -179,6 +179,55 @@ function draw_results(){
 function init_results(){
     draw_results();
 }
+
+function colorized(text) {
+    const separators = ['\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')', '+', '-', '*', '/'];
+    const quotes = ['\'', '"'];
+    const comments = [['#', '\n']];
+
+    function painted_in(line, color) {
+        return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+    }
+
+    function colorized(token) {
+        var code_sum = 0;
+        for(var i = 0; i < token.length; ++i)
+            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+        var zero_channel = code_sum % 3;
+        var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
+            + (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
+            + (zero_channel == 2 ? '0' : '');
+        return painted_in(token, color);
+    }
+
+    function separated(line, i) {
+        if(i == separators.length)
+            return colorized(line);
+        return line.split(separators[i]).map(function(subline) {
+            return separated(subline, i + 1);}).join(separators[i]);
+    }
+
+    function unquoted(line, i) {
+        if(i == quotes.length)
+            return separated(line, 0);
+        var chunk_no = 0;
+        return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {
+            return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {
+                return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "555");}).join('');
+    }
+
+    function uncommented(line, i) {
+        if(i == comments.length)
+            return unquoted(line, 0);
+        var chunks = line.split(comments[i][0]);
+        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+            var in_out_comment = chunk.split(comments[i][1]);
+            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555") 
+                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+    }
+
+    return uncommented(text, 0);
+}
     </script>
   </head>
   <body>
@@ -262,30 +311,30 @@ We need a linear solver in Python just like we had with C and C++. Here it is:
     </p>
     <table><tr>
     <td>
-    <pre>
-<span style="color: #778877"># this generates n-solver in LLVM code with LLVMCode objects.</span>
-<span style="color: #778877"># No LLVM stuff yet, just completely Pythonic solution</span>
-<span style="color: #645406">def</span> <span style="color: #39505d">solve_linear_system</span>(<span style="color: #304622">a_array</span>, <span style="color: #106a75">b_array</span>, <span style="color: #4a383c">x_array</span>, <span style="color: #0c654d">n_value</span>):
-  <span style="color: #645406">def</span> <span style="color: #584a16">a</span>(<span style="color: #592715">i</span>, <span style="color: #602462">j</span>, <span style="color: #6d2251">n</span>):
-    <span style="color: #084f73">if</span> <span style="color: #6d2251">n</span> == <span style="color: #0c654d">n_value</span>:
-      <span style="color: #494b6a">return</span> <span style="color: #304622">a_array</span>[<span style="color: #592715">i</span> * <span style="color: #0c654d">n_value</span> + <span style="color: #602462">j</span>]
-    <span style="color: #494b6a">return</span> <span style="color: #584a16">a</span>(<span style="color: #592715">i</span>, <span style="color: #602462">j</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>)*<span style="color: #584a16">a</span>(<span style="color: #6d2251">n</span>, <span style="color: #6d2251">n</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>) - <span style="color: #584a16">a</span>(<span style="color: #592715">i</span>, <span style="color: #6d2251">n</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>)*<span style="color: #584a16">a</span>(<span style="color: #6d2251">n</span>, <span style="color: #602462">j</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>)
+    <pre id="code_1">
+# this generates n-solver in LLVM code with LLVMCode objects.
+# No LLVM stuff yet, just completely Pythonic solution
+def solve_linear_system(a_array, b_array, x_array, n_value):
+  def a(i, j, n):
+    if n == n_value:
+      return a_array[i * n_value + j]
+    return a(i, j, n+1)*a(n, n, n+1) - a(i, n, n+1)*a(n, j, n+1)
 
-  <span style="color: #645406">def</span> <span style="color: #037677">b</span>(<span style="color: #592715">i</span>, <span style="color: #6d2251">n</span>):
-    <span style="color: #084f73">if</span> <span style="color: #6d2251">n</span> == <span style="color: #0c654d">n_value</span>:
-      <span style="color: #494b6a">return</span> <span style="color: #106a75">b_array</span>[<span style="color: #592715">i</span>]
-    <span style="color: #494b6a">return</span> <span style="color: #584a16">a</span>(<span style="color: #6d2251">n</span>, <span style="color: #6d2251">n</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>)*<span style="color: #037677">b</span>(<span style="color: #592715">i</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>) - <span style="color: #584a16">a</span>(<span style="color: #592715">i</span>, <span style="color: #6d2251">n</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>)*<span style="color: #037677">b</span>(<span style="color: #6d2251">n</span>, <span style="color: #6d2251">n</span>+<span style="color: #4a4642">1</span>)
+  def b(i, n):
+    if n == n_value:
+      return b_array[i]
+    return a(n, n, n+1)*b(i, n+1) - a(i, n, n+1)*b(n, n+1)
 
-  <span style="color: #645406">def</span> <span style="color: #390958">x</span>(<span style="color: #592715">i</span>):
-    <span style="color: #3c2d3f">d</span> = <span style="color: #037677">b</span>(<span style="color: #592715">i</span>,<span style="color: #592715">i</span>+<span style="color: #4a4642">1</span>)
-    <span style="color: #096162">for</span> <span style="color: #602462">j</span> <span style="color: #59483a">in</span> <span style="color: #2c6a50">range</span>(<span style="color: #592715">i</span>):
-      <span style="color: #3c2d3f">d</span> -= <span style="color: #584a16">a</span>(<span style="color: #592715">i</span>, <span style="color: #602462">j</span>, <span style="color: #592715">i</span>+<span style="color: #4a4642">1</span>) * <span style="color: #4a383c">x_array</span>[<span style="color: #602462">j</span>]
-    <span style="color: #494b6a">return</span> <span style="color: #3c2d3f">d</span> / <span style="color: #584a16">a</span>(<span style="color: #592715">i</span>, <span style="color: #592715">i</span>, <span style="color: #592715">i</span>+<span style="color: #4a4642">1</span>)
+  def x(i):
+    d = b(i,i+1)
+    for j in range(i):
+      d -= a(i, j, i+1) * x_array[j]
+    return d / a(i, i, i+1)
 
-  <span style="color: #096162">for</span> <span style="color: #290e7a">k</span> <span style="color: #59483a">in</span> <span style="color: #2c6a50">range</span>(<span style="color: #0c654d">n_value</span>):
-    <span style="color: #4a383c">x_array</span>[<span style="color: #290e7a">k</span>] = <span style="color: #390958">x</span>(<span style="color: #290e7a">k</span>)
+  for k in range(n_value):
+    x_array[k] = x(k)
 
-<span style="color: #494b6a">return</span> <span style="color: #4a383c">x_array</span>
+return x_array
     </pre>
     </td>
     </tr></table>
@@ -294,55 +343,55 @@ When we run this on numbers, we have numbers. But we want the code. So let's mak
     </p>
     <table><tr>
     <td>
-    <pre>
-<span style="color: #778877"># this is basically the whole LLVM layer</span>
-<span style="color: #08327a">I</span> = <span style="color: #604b5f">0</span>
-<span style="color: #25683e">STACK</span> = []
+    <pre id="code_2">
+# this is basically the whole LLVM layer
+I = 0
+STACK = []
 
-<span style="color: #2e656c">class</span> <span style="color: #43382b">LLVMCode</span>:
-<span style="color: #778877">  # the only constructor for now is by double* instruction</span>
-  <span style="color: #645406">def</span> <span style="color: #3a3b70">__init__</span>(<span style="color: #007637">self</span>, <span style="color: #364561">io</span>, <span style="color: #173c3f">code</span> = ''):
-    <span style="color: #007637">self</span>.<span style="color: #364561">io</span> = <span style="color: #364561">io</span>
-    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> = <span style="color: #173c3f">code</span>
-  <span style="color: #645406">def</span> <span style="color: #607263">__getitem__</span>(<span style="color: #007637">self</span>, <span style="color: #592715">i</span>):
-    <span style="color: #222a54">global</span> <span style="color: #08327a">I</span>, <span style="color: #25683e">STACK</span>
-    <span style="color: #45213d">copy_code</span> = "%" + <span style="color: #3d114f">str</span>(<span style="color: #08327a">I</span>+<span style="color: #4a4642">1</span>)
-    <span style="color: #45213d">copy_code</span> += " = getelementptr inbounds double, double* "
-    <span style="color: #45213d">copy_code</span> += <span style="color: #007637">self</span>.<span style="color: #364561">io</span> +", i64 " + <span style="color: #3d114f">str</span>(<span style="color: #592715">i</span>) + "\n"
-    <span style="color: #45213d">copy_code</span> += "%" + <span style="color: #3d114f">str</span>(<span style="color: #08327a">I</span>+<span style="color: #6b0812">2</span>)
-    <span style="color: #45213d">copy_code</span> += " = load double, double* %" + <span style="color: #3d114f">str</span>(<span style="color: #08327a">I</span>+<span style="color: #4a4642">1</span>)
-    <span style="color: #45213d">copy_code</span> += ", align 8\n"
-    <span style="color: #08327a">I</span> += <span style="color: #6b0812">2</span>
-    <span style="color: #25683e">STACK</span> += [<span style="color: #08327a">I</span>]
-    <span style="color: #494b6a">return</span> <span style="color: #43382b">LLVMCode</span>(<span style="color: #007637">self</span>.<span style="color: #364561">io</span>, <span style="color: #45213d">copy_code</span>)
-  <span style="color: #645406">def</span> <span style="color: #6f6638">__setitem__</span>(<span style="color: #007637">self</span>, <span style="color: #592715">i</span>, <span style="color: #2f066f">other_llvcode</span>):
-    <span style="color: #222a54">global</span> <span style="color: #08327a">I</span>, <span style="color: #25683e">STACK</span>
-    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += <span style="color: #2f066f">other_llvcode</span>.<span style="color: #173c3f">code</span>
-    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += "%" + <span style="color: #3d114f">str</span>(<span style="color: #08327a">I</span>+<span style="color: #4a4642">1</span>)
-    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += " = getelementptr inbounds double, double* "
-    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += <span style="color: #007637">self</span>.<span style="color: #364561">io</span> +", i64 " + <span style="color: #3d114f">str</span>(<span style="color: #592715">i</span>) + "\n"
-    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += "store double %" + <span style="color: #3d114f">str</span>(<span style="color: #08327a">I</span>)
-    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += ", double* %" + <span style="color: #3d114f">str</span>(<span style="color: #08327a">I</span>+<span style="color: #4a4642">1</span>) + ", align 8\n"
-    <span style="color: #08327a">I</span> += <span style="color: #4a4642">1</span>
-    <span style="color: #25683e">STACK</span> = <span style="color: #25683e">STACK</span>[:-<span style="color: #4a4642">1</span>]
-    <span style="color: #494b6a">return</span> <span style="color: #007637">self</span>
-  <span style="color: #645406">def</span> <span style="color: #2f6c4d">general_arithmetics</span>(<span style="color: #007637">self</span>, <span style="color: #796703">operator</span>, <span style="color: #2f066f">other_llvcode</span>):
-    <span style="color: #222a54">global</span> <span style="color: #08327a">I</span>, <span style="color: #25683e">STACK</span>
-    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += <span style="color: #2f066f">other_llvcode</span>.<span style="color: #173c3f">code</span>;
-    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += "%" + <span style="color: #3d114f">str</span>(<span style="color: #08327a">I</span>+<span style="color: #4a4642">1</span>) + " = f" + <span style="color: #796703">operator</span>
-    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += " double %" + <span style="color: #3d114f">str</span>(<span style="color: #25683e">STACK</span>[-<span style="color: #6b0812">2</span>]) + ", %"
-    <span style="color: #007637">self</span>.<span style="color: #173c3f">code</span> += <span style="color: #3d114f">str</span>(<span style="color: #25683e">STACK</span>[-<span style="color: #4a4642">1</span>]) + "\n";
-    <span style="color: #08327a">I</span> += <span style="color: #4a4642">1</span>
-    <span style="color: #25683e">STACK</span> = <span style="color: #25683e">STACK</span>[:-<span style="color: #6b0812">2</span>] + [<span style="color: #08327a">I</span>]
-    <span style="color: #494b6a">return</span> <span style="color: #007637">self</span>
-  <span style="color: #645406">def</span> <span style="color: #2e5454">__add__</span>(<span style="color: #007637">self</span>, <span style="color: #2f066f">other_llvcode</span>):
-    <span style="color: #494b6a">return</span> <span style="color: #007637">self</span>.<span style="color: #2f6c4d">general_arithmetics</span>('add', <span style="color: #2f066f">other_llvcode</span>)
-  <span style="color: #645406">def</span> <span style="color: #4c5371">__sub__</span>(<span style="color: #007637">self</span>, <span style="color: #2f066f">other_llvcode</span>):
-    <span style="color: #494b6a">return</span> <span style="color: #007637">self</span>.<span style="color: #2f6c4d">general_arithmetics</span>('sub', <span style="color: #2f066f">other_llvcode</span>)
-  <span style="color: #645406">def</span> <span style="color: #737f3d">__mul__</span>(<span style="color: #007637">self</span>, <span style="color: #2f066f">other_llvcode</span>):
-    <span style="color: #494b6a">return</span> <span style="color: #007637">self</span>.<span style="color: #2f6c4d">general_arithmetics</span>('mul', <span style="color: #2f066f">other_llvcode</span>)
-  <span style="color: #645406">def</span> <span style="color: #625e58">__div__</span>(<span style="color: #007637">self</span>, <span style="color: #2f066f">other_llvcode</span>):
-    <span style="color: #494b6a">return</span> <span style="color: #007637">self</span>.<span style="color: #2f6c4d">general_arithmetics</span>('div', <span style="color: #2f066f">other_llvcode</span>)
+class LLVMCode:
+  # the only constructor for now is by double* instruction
+  def __init__(self, io, code = ''):
+    self.io = io
+    self.code = code
+  def __getitem__(self, i):
+    global I, STACK
+    copy_code = "%" + str(I+1)
+    copy_code += " = getelementptr inbounds double, double* "
+    copy_code += self.io +", i64 " + str(i) + "\n"
+    copy_code += "%" + str(I+2)
+    copy_code += " = load double, double* %" + str(I+1)
+    copy_code += ", align 8\n"
+    I += 2
+    STACK += [I]
+    return LLVMCode(self.io, copy_code)
+  def __setitem__(self, i, other_llvcode):
+    global I, STACK
+    self.code += other_llvcode.code
+    self.code += "%" + str(I+1)
+    self.code += " = getelementptr inbounds double, double* "
+    self.code += self.io +", i64 " + str(i) + "\n"
+    self.code += "store double %" + str(I)
+    self.code += ", double* %" + str(I+1) + ", align 8\n"
+    I += 1
+    STACK = STACK[:-1]
+    return self
+  def general_arithmetics(self, operator, other_llvcode):
+    global I, STACK
+    self.code += other_llvcode.code;
+    self.code += "%" + str(I+1) + " = f" + operator
+    self.code += " double %" + str(STACK[-2]) + ", %"
+    self.code += str(STACK[-1]) + "\n";
+    I += 1
+    STACK = STACK[:-2] + [I]
+    return self
+  def __add__(self, other_llvcode):
+    return self.general_arithmetics('add', other_llvcode)
+  def __sub__(self, other_llvcode):
+    return self.general_arithmetics('sub', other_llvcode)
+  def __mul__(self, other_llvcode):
+    return self.general_arithmetics('mul', other_llvcode)
+  def __div__(self, other_llvcode):
+    return self.general_arithmetics('div', other_llvcode)
     </pre>
     </td>
     </tr></table>
@@ -354,35 +403,35 @@ Instruction in LLVM are numbered and we want to preserve this enumeration, so th
     </p>
     <table><tr>
     <td>
-    <pre>
-<span style="color: #778877"># this replaces the function call</span>
-<span style="color: #778877"># and updates all the instructions' indices</span>
-<span style="color: #645406">def</span> <span style="color: #014039">replace_call</span>(<span style="color: #325a0c">text</span>, <span style="color: #041729">line</span>, <span style="color: #592927">params</span>):
-  <span style="color: #222a54">global</span> <span style="color: #08327a">I</span>, <span style="color: #25683e">STACK</span>
-<span style="color: #778877">  # '%12 ' -&gt; 12</span>
-  <span style="color: #08327a">I</span> = <span style="color: #1c4768">int</span>(''.<span style="color: #565f0b">join</span>(
-    [<span style="color: #3e5a18">xi</span> <span style="color: #096162">for</span> <span style="color: #3e5a18">xi</span> <span style="color: #59483a">in</span> <span style="color: #592927">params</span>[<span style="color: #6b0812">2</span>] <span style="color: #084f73">if</span> <span style="color: #3e5a18">xi</span>.<span style="color: #797d16">isdigit</span>()]
+    <pre id="code_3">
+# this replaces the function call
+# and updates all the instructions' indices
+def replace_call(text, line, params):
+  global I, STACK
+  # '%12 ' -> 12
+  I = int(''.join(
+    [xi for xi in params[2] if xi.isdigit()]
     ))
-  <span style="color: #656709">first_instruction_to_replace</span> = <span style="color: #08327a">I</span> + <span style="color: #4a4642">1</span>
-  <span style="color: #25683e">STACK</span> = []
-  <span style="color: #483706">replacement</span> = <span style="color: #39505d">solve_linear_system</span>(
-    <span style="color: #43382b">LLVMCode</span>(<span style="color: #592927">params</span>[<span style="color: #604b5f">0</span>]),
-    <span style="color: #43382b">LLVMCode</span>(<span style="color: #592927">params</span>[<span style="color: #4a4642">1</span>]),
-    <span style="color: #43382b">LLVMCode</span>(<span style="color: #592927">params</span>[<span style="color: #6b0812">2</span>]), <span style="color: #4d036b">5</span>).<span style="color: #173c3f">code</span>
-  <span style="color: #7b4c7c">delta_instruction</span> = <span style="color: #08327a">I</span> - <span style="color: #656709">first_instruction_to_replace</span> + <span style="color: #4a4642">1</span>
-  <span style="color: #096162">for</span> <span style="color: #592715">i</span> <span style="color: #59483a">in</span> <span style="color: #727a53">xrange</span>(<span style="color: #656709">first_instruction_to_replace</span>, <span style="color: #371934">sys</span>.<span style="color: #536d5e">maxint</span>):
-    <span style="color: #645e04">not_found</span> = <span style="color: #280944">sum</span>(
-      [<span style="color: #325a0c">text</span>.<span style="color: #595715">find</span>('%' + <span style="color: #3d114f">str</span>(<span style="color: #592715">i</span>) + <span style="color: #627424">c</span>) == -<span style="color: #4a4642">1</span>
-        <span style="color: #096162">for</span> <span style="color: #627424">c</span> <span style="color: #59483a">in</span> <span style="color: #656211">POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH</span>]
+  first_instruction_to_replace = I + 1
+  STACK = []
+  replacement = solve_linear_system(
+    LLVMCode(params[0]),
+    LLVMCode(params[1]),
+    LLVMCode(params[2]), 5).code
+  delta_instruction = I - first_instruction_to_replace + 1
+  for i in xrange(first_instruction_to_replace, sys.maxint):
+    not_found = sum(
+      [text.find('%' + str(i) + c) == -1
+        for c in POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH]
       )
-    <span style="color: #084f73">if</span> <span style="color: #645e04">not_found</span> == <span style="color: #6b4565">4</span>:
-<span style="color: #778877">      # the last instruction has already been substituted</span>
-      <span style="color: #3d714c">break</span>
-    <span style="color: #6d725f">new_i</span> = <span style="color: #592715">i</span> + <span style="color: #7b4c7c">delta_instruction</span>
-    <span style="color: #096162">for</span> <span style="color: #627424">c</span> <span style="color: #59483a">in</span> <span style="color: #656211">POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH</span>:
-<span style="color: #778877">      # substitute instruction number</span>
-      <span style="color: #325a0c">text</span> = <span style="color: #325a0c">text</span>.<span style="color: #3f7941">replace</span>('%' + <span style="color: #3d114f">str</span>(<span style="color: #592715">i</span>) + <span style="color: #627424">c</span>, '%' + <span style="color: #3d114f">str</span>(<span style="color: #6d725f">new_i</span>) + <span style="color: #627424">c</span>)
-<span style="color: #494b6a">return</span> <span style="color: #325a0c">text</span>.<span style="color: #3f7941">replace</span>(<span style="color: #041729">line</span>, <span style="color: #483706">replacement</span>)
+    if not_found == 4:
+      # the last instruction has already been substituted
+      break
+    new_i = i + delta_instruction
+    for c in POSSIBLE_CHARS_NUMBER_FOLLOWS_WITH:
+      # substitute instruction number
+      text = text.replace('%' + str(i) + c, '%' + str(new_i) + c)
+return text.replace(line, replacement)
     </pre>
     </td>
     </tr></table>
@@ -544,6 +593,9 @@ The C++ version was built with Clang and it runs for 60 ms.
     <canvas id="results" width=700 height=500></canvas>
     <script language="JavaScript">
     init_results();
+    document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
+    document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
+    document.getElementById("code_3").innerHTML = colorized(document.getElementById("code_3").innerHTML);        
     </script>
     <p>
 Of course, this speed-up is not something you would kill for. But it shows that you can write programs in Python that outperform their counterparts written in C or C++. You don't have to learn some special language to create high-performant applications or libraries.
