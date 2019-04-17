@@ -1,7 +1,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Splixels from an image</title>
+    <title>Image vectorization: PGM -> SVG</title>
     <meta name="keywords" content="iterative,algorithms,guide,tutorial,learning">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <style>
@@ -91,6 +91,12 @@ input[type="text"] {
     text-align: center;
 }
 
+input[type="radio"] {
+    height: 16pt;
+    width: 16pt;
+    font-size: 16pt;
+}
+
 button {
     width: 128pt;
     height: 26pt;
@@ -118,84 +124,24 @@ var w = 1024.0;
 var h = 1024.0;
 
 // algorithm
-var pixel_size = 64.0;
-var splixel_size = 64.0;
+var threshold = 0.5;
 
 // pixels
-var iw = Math.floor(w / pixel_size) + 1;
-var ih = Math.floor(h / pixel_size) + 1;
-var pixels = [
-// nothing
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-// a cat
-/*[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0],
-[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-[0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-[0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-[0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-[0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-[0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]*/
-];
+var pixels = [];
+var pixel_size;
 
-function reset_pixels() {
+function reset_pixels(w, h) {
     pixels = [];
-    for(var i = 0; i < ih; ++i) {
+    for(var i = 0; i < h; ++i) {
         pixelsi = []
-        for(var j = 0; j <iw; ++j)
+        for(var j = 0; j <w; ++j)
             pixelsi.push(0);
         pixels.push(pixelsi);
     }
 }
 
-// splixels
-const splixel = {
-    to_margin: 1, // 1 - outside, 0 - margin, -1 - inside (that might change to the quasi-distance)
-    xy_shift: [0.0, 0.0], // shift from a splixel center point (which is pixel's upper-left)
-    xy_normal: [0.0, 0.0], // unnormalized normal vector in the shifted point.
-    // neighbors
-    right: false,
-    left: false, 
-    top: false,
-    bottom: false
-};
-
-var splixels = [];
-
-function reset_splixels() {
-    var sw = 1 + Math.floor(w / splixel_size) + 1;
-    var sh = 1 + Math.floor(h / splixel_size) + 1;
-    splixels = [];
-    for(var i = 0; i < sh; ++i) {
-        splixelsi = []
-        for(var j = 0; j < sw; ++j)
-            splixelsi.push(Object.create(splixel));
-        splixels.push(splixelsi);
-    }
-}
+var points_and_tangents = [];
+var splines = [];
 
 // solver specific to [0..1] parametrized splines
 function spline_for(p1, p1d, p2, p2d) {
@@ -213,277 +159,276 @@ function spline_for(p1, p1d, p2, p2d) {
     ];
 }
 
-// solver than returns 0, 0 if there is no solution
-function solved_linear2_or_zero(A, B) {
-    var d = (A[0][0]*A[1][1] - A[0][1]*A[1][0])
-    if(d == 0.0)
-        return [0.0, 0.0];
-    var x1 = (-A[0][1]*B[1] + A[1][1]*B[0]) / d;
-    var x2 = ( A[0][0]*B[1] - A[1][0]*B[0]) / d;
-    return [x1, x2];
-}
-
 // polynomial
-function polynomial_in_x(A, x, n){
+function polynomial_in_x(A, x){
     var y = 0.0;
-    for(var i = 0; i < n; ++i){
+    for(var i = 0; i < A.length; ++i){
         y += A[i] * Math.pow(x, i);
     }
     return y;
 }
 
-// algorithm
-function pixel_in(x, y) {
-    var in_pixels_i = Math.floor(y / pixel_size);
-    var in_pixels_j = Math.floor(x / pixel_size);
-    if(in_pixels_i >= pixels.length)
-        return pixel_in(x, (pixels.length-1) * pixel_size);
-    if(in_pixels_i < 0) 
-        return pixel_in(x, 0);
-    if(in_pixels_j >= pixels[0].length)
-        return pixel_in((pixels[0].length-1) * pixel_size, y);
-    if(in_pixels_j < 0)
-        return pixel_in(0, y);
-    return pixels[in_pixels_i][in_pixels_j];
+// pixel value with out of bounds compenstaions
+function pixel_in(pixels, i, j) {
+    if(i >= pixels.length)
+        return pixel_in(pixels, pixels.length-1, j);
+    if(i < 0) 
+        return pixel_in(pixels, 0, j);
+    if(j >= pixels[0].length)
+        return pixel_in(pixels, i, pixels[0].length-1);
+    if(j < 0)
+        return pixel_in(pixels, i, 0);
+    return pixels[i][j];
 }
 
-
-var nd = 2.5;
-var weight = 4;
-var shiftd = 1.5;
-
-function weight_of_point(x, y, xj, yi) {
-    return Math.pow(2 * Math.pow(0.5, weight), 0.5)
-        / (Math.pow(Math.abs(x - xj), weight) + Math.pow(Math.abs(y - yi), weight));
+// linear interpolation
+function value_in(pixels, x, y) {
+    var j = Math.floor(x - 0.5);
+    var tj = x - 0.5 - j;
+    var i = Math.floor(y - 0.5);
+    var ti = y - 0.5 - i;
+    return pixel_in(pixels, i, j) * (1 - ti) * (1 - tj)
+         + pixel_in(pixels, i, j+1) * (1 - ti) * (tj)
+         + pixel_in(pixels, i+1, j+1) * (ti) * (tj)
+         + pixel_in(pixels, i+1, j) * (ti) * (1 - tj);
 }
 
-function dx_from_linear(x, y) {
-    var A = [[0.0, 0.0], [0.0, 0.0]];
-    var B = [0.0, 0.0];
-    for(var yi = y - nd * splixel_size; yi <= y + nd * splixel_size; yi += splixel_size) {
-        for(var xj = x - nd * splixel_size; xj <= x + nd * splixel_size; xj += splixel_size) {
-            var w = weight_of_point(x, y, xj, yi);
-            A[0][0] += w;
-            A[0][1] += w * (xj - x);
-            A[1][0] += w * (xj - x);
-            A[1][1] += w * Math.pow(xj - x, 2);
-            B[0] += w * pixel_in(xj, yi);
-            B[1] += w * (xj - x) * pixel_in(xj, yi);
-        }
-    }
-    var px = solved_linear2_or_zero(A, B);
-    return px;
+// gradient
+function gradient(pixels, x, y) {
+    const epsilon = 1e-5;
+    return [(value_in(pixels, x + epsilon, y) - value_in(pixels, x, y)) / epsilon,
+            (value_in(pixels, x, y + epsilon) - value_in(pixels, x, y)) / epsilon];
 }
 
-function dy_from_linear(x, y) {
-    var A = [[0.0, 0.0], [0.0, 0.0]];
-    var B = [0.0, 0.0];
-    for(var yi = y - nd * splixel_size; yi <= y + nd * splixel_size; yi += splixel_size) {
-        for(var xj = x - nd * splixel_size; xj <= x + nd * splixel_size; xj += splixel_size) {
-            var w = weight_of_point(x, y, xj, yi);
-            A[0][0] += w;
-            A[0][1] += w * (yi - y);
-            A[1][0] += w * (yi - y);
-            A[1][1] += w * Math.pow(yi - y, 2);
-            B[0] += w * pixel_in(xj, yi);
-            B[1] += w * (yi - y) * pixel_in(xj, yi);
-        }
-    }
-    var px = solved_linear2_or_zero(A, B);
-    return px;
+// how far should you shift the point to meet the isoline 
+// if value_in were a distance function
+function gradient_shift(pixels, threshold, x, y) {
+    var g = gradient(pixels, x, y);
+    var g_norm = Math.sqrt(g[0]*g[0] + g[1]*g[1]);
+    var d = threshold - value_in(pixels, x, y);
+    return [g[0] * d / g_norm / g_norm, g[1] * d / g_norm / g_norm];
 }
 
-function dxy(x, y) {
-    var dx = dx_from_linear(x, y)[1];
-    var dy = dy_from_linear(x, y)[1];
-    var len = Math.sqrt(dx * dx + dy * dy);
-    if(len < 1e-5)
-        return [0.0, 0.0];
-    return [dx / len, dy / len];
-}
-
-function splixel_size_limited(x) {
-    if(x < -splixel_size / 2)
-        return -splixel_size;
-    if(x > +splixel_size / 2)
-        return +splixel_size;
-    return x;
-}
-
-// gradient shift
-function gsx(x, y) {
-    return splixel_size_limited(dxy(x, y)[0] * (0.5 - dy_from_linear(x, y)[0]) * splixel_size * shiftd);
-}
-
-function gsy(x, y) {
-    return splixel_size_limited(dxy(x, y)[1] * (0.5 - dx_from_linear(x, y)[0]) * splixel_size * shiftd);
+// brings a point closer to the threshold isoline
+function fit_point_better(pixels, threshold, point) {
+    const small_enough_error = 1/255;
+    if(Math.abs(value_in(pixels, point[0], point[1]) - threshold) < small_enough_error)
+        return point;
+    gs = gradient_shift(pixels, threshold, point[0], point[1])
+    return fit_point_better(pixels, threshold, [point[0] + gs[0], point[1] + gs[1]]);
 }
 
 // the algorithm itself
-function fill_splixels_from_pixels() {
-    sign_0_positive = function(x){ // Math.sign like with no 0 option
-        if(x >= 0)
-            return 1.0;
-        return -1.0;
-    }
+function turn_pixels_into_points_and_tangents(pixels, threshold) {
+    var points = [];
+    var tangents = [];
 
-    for(var i = 0; i < h; i += splixel_size) {
-        for(var j = 0; j < w; j += splixel_size) {
-            var splixels_i = Math.floor(i / splixel_size);
-            var splixels_j = Math.floor(j / splixel_size);
-            
-            var margin_to_the_right = 
-                sign_0_positive(pixel_in(j + 0.5 * splixel_size, i - 0.5 * splixel_size) - 0.5) != 
-                sign_0_positive(pixel_in(j + 0.5 * splixel_size, i + 0.5 * splixel_size) - 0.5);
-            var margin_to_the_left = 
-                sign_0_positive(pixel_in(j - 0.5 * splixel_size, i - 0.5 * splixel_size) - 0.5) != 
-                sign_0_positive(pixel_in(j - 0.5 * splixel_size, i + 0.5 * splixel_size) - 0.5);
+    // "horizontal" pieces    
+    for(var i = 0; i <= pixels.length; i += 1) {
+        var old_point = [];
+        var old_tangent = [];
+        for(var j = 0; j <= pixels[0].length; j += 1) {
+            // if right, left, top, and bottom pixels have a sign change, there should be a spline there
+            var sign_change_on_the_right  = (pixel_in(pixels, i-1, j+0) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+            var sign_change_on_the_left   = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i+0, j-1) - threshold) < 0;
+            var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+            var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
+            if(sign_change_on_the_right || sign_change_on_the_left) {
+                // fits the point on a threshold isoline
+                var point = fit_point_better(pixels, threshold, [j, i]);
+                var g = gradient(pixels, point[0], point[1]);
                 
-            var margin_to_the_bottom = 
-                sign_0_positive(pixel_in(j - 0.5 * splixel_size, i + 0.5 * splixel_size) - 0.5) != 
-                sign_0_positive(pixel_in(j + 0.5 * splixel_size, i + 0.5 * splixel_size) - 0.5);
-            var margin_to_the_top = 
-                sign_0_positive(pixel_in(j - 0.5 * splixel_size, i - 0.5 * splixel_size) - 0.5) != 
-                sign_0_positive(pixel_in(j + 0.5 * splixel_size, i - 0.5 * splixel_size) - 0.5);
-
+                // we want our tangent to be X-positive for horizontal pieces
+                var tangent = g[1] >= 0 ? [g[1], -g[0]] : [-g[1], g[0]];
                 
-            if(margin_to_the_right || margin_to_the_left || margin_to_the_bottom || margin_to_the_top) {   
-                // filling splixels
-                splixels[splixels_i][splixels_j].to_margin = 0;
-                splixels[splixels_i][splixels_j].xy_shift = [gsx(j, i), gsy(j, i)];
-                var shifted_j = j + splixels[splixels_i][splixels_j].xy_shift[0];
-                var shifted_i = i + splixels[splixels_i][splixels_j].xy_shift[1];
-                splixels[splixels_i][splixels_j].xy_normal = dxy(shifted_j, shifted_i);
-                splixels[splixels_i][splixels_j].right = margin_to_the_right;
-                splixels[splixels_i][splixels_j].left = margin_to_the_left;
-                splixels[splixels_i][splixels_j].bottom = margin_to_the_bottom;
-                splixels[splixels_i][splixels_j].top = margin_to_the_top;
-            } else {
-                splixels[splixels_i][splixels_j] = Object.create(splixel);
-                splixels[splixels_i][splixels_j].to_margin = pixel_in(j, i) < 0.5 ? 1 : -1;
-            }
+                // this is an T or X junction, the tangent is ambiguous
+                if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
+                    tangent = [0., 0.];
+                    
+                // store the point+tangent and the previous point+tangent if there is one
+                if(sign_change_on_the_left && old_point) {                    
+                    points.push([old_point, point]);
+                    tangents.push([old_tangent, tangent]);
+                }
+                
+                // save the point+tangent for later
+                if(sign_change_on_the_right) {
+                    old_point = point;
+                    old_tangent = tangent;
+                }   
+            }      
         }
     }
-}
 
-
-function draw_the_splixels(context, splixels, do_colors) {
-    for(var i = 0; i < h; i += splixel_size) {
-        for(var j = 0; j < w; j += splixel_size) {
-            var si = Math.floor(i / splixel_size);
-            var sj = Math.floor(j / splixel_size);
-            
-            var do_horizontal = splixels[si][sj].right;
-            var do_vertical   = splixels[si][sj].bottom;
-                                
-            if(do_horizontal) {
-                context.beginPath();
-                var ds = pixel_in(j + 0.5 * splixel_size, i - 0.5 * splixel_size) < pixel_in(j + 0.5 * splixel_size, i + 0.5 * splixel_size) ? 1.0 : -1.0;                
-                var p1x = j + splixels[si][sj].xy_shift[0];
-                var p1y = i + splixels[si][sj].xy_shift[1];
-                var p2x = j + splixel_size + splixels[si][sj + 1].xy_shift[0];
-                var p2y = i + splixels[si][sj + 1].xy_shift[1];
-                var d1x = splixels[si][sj].xy_normal[0] * splixel_size;
-                var d1y = splixels[si][sj].xy_normal[1] * splixel_size;
-                var d2x = splixels[si][sj + 1].xy_normal[0] * splixel_size;
-                var d2y = splixels[si][sj + 1].xy_normal[1] * splixel_size;
-                        
-                var Px = spline_for(p1x , ds*d1y, p2x, ds*d2y);
-                var Py = spline_for(p1y, (-ds)*d1x, p2y, (-ds)*d2x);
- 
-                for(var k = 0; k < splixel_size; k += 1) {
-                    var t1 = (k) / splixel_size;
-                    var t2 = (k + 1) / splixel_size;
-                    var x1 = polynomial_in_x(Px, t1, 4);
-                    var y1 = polynomial_in_x(Py, t1, 4);
-                    var x2 = polynomial_in_x(Px, t2, 4);
-                    var y2 = polynomial_in_x(Py, t2, 4);
-                    context.moveTo(x1, y1);
-                    context.lineTo(x2, y2);
+    // "vertical" pieces
+    for(var j = 0; j <= pixels[0].length; j += 1) {
+        var old_point = [];
+        var old_tangent = [];
+        for(var i = 0; i <= pixels.length; i += 1) {
+            var sign_change_on_the_right  = (pixel_in(pixels, i-1, j+0) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+            var sign_change_on_the_left   = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i+0, j-1) - threshold) < 0;
+            var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+            var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
+            if(sign_change_on_the_bottom || sign_change_on_the_top) {
+                var point = fit_point_better(pixels, threshold, [j, i]);
+                var g = gradient(pixels, point[0], point[1]);             
+                var tangent = g[0] < 0 ? [g[1], -g[0]] : [-g[1], g[0]];
+                if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
+                    tangent = [0., 0.];
+                if(sign_change_on_the_top && old_point) {
+                    points.push([old_point, point]);
+                    tangents.push([old_tangent, tangent]);
                 }
-                if(do_colors)
-                    if((i / splixel_size + j / splixel_size) % 2 == 0)
-                        context.strokeStyle="#886633";
-                    else
-                        context.strokeStyle="#33AA66";
-                else
-                    context.strokeStyle="#AA3366";
-                context.lineWidth=3;
-                context.stroke();
-                context.closePath();
-            }
-            if(do_vertical) {
-                context.beginPath();
-                var ds = pixel_in(j - 0.5 * splixel_size, i + 0.5 * splixel_size) < pixel_in(j + 0.5 * splixel_size, i + 0.5 * splixel_size) ? -1.0 : 1.0;
-                var p1x = j + splixels[si][sj].xy_shift[0];
-                var p1y = i + splixels[si][sj].xy_shift[1];
-                var p2x = j + splixels[si + 1][sj].xy_shift[0];
-                var p2y = i + splixel_size + splixels[si + 1][sj].xy_shift[1];
-                var d1x = splixels[si][sj].xy_normal[0] * splixel_size;
-                var d1y = splixels[si][sj].xy_normal[1] * splixel_size;
-                var d2x = splixels[si + 1][sj].xy_normal[0] * splixel_size;
-                var d2y = splixels[si + 1][sj].xy_normal[1] * splixel_size;
-                
-                var Px = spline_for(p1x, ds*d1y, p2x, ds*d2y);
-                var Py = spline_for(p1y, (-ds)*d1x, p2y, (-ds)*d2x);
-
-                for(var k = 0; k < splixel_size; k += 1) {
-                    var t1 = k / splixel_size;
-                    var t2 = (k + 1) / splixel_size;
-                    var x1 = polynomial_in_x(Px, t1, 4);
-                    var y1 = polynomial_in_x(Py, t1, 4);
-                    var x2 = polynomial_in_x(Px, t2, 4);
-                    var y2 = polynomial_in_x(Py, t2, 4);
-                    context.moveTo(x1, y1);
-                    context.lineTo(x2, y2);
-                }
-                if(do_colors)
-                    if((i / splixel_size + j / splixel_size) % 2 == 0)
-                        context.strokeStyle="#AA3366";
-                    else
-                        context.strokeStyle="#3366AA";
-                else
-                    context.strokeStyle="#AA3366";
-                context.lineWidth=3;
-                context.stroke();
-                context.closePath();
-            }
-            
-            context.font = "16px Arial";
-            context.fillStyle = "#777777";
-            context.textAlign = "center";
-            context.textBaseline = "middle";
-            context.fillText(splixels[si][sj].to_margin, j, i-8);
-//            context.fillText(splixels[si][sj].xy_normal[0].toFixed(2), j, i-8);
-//            context.fillText(splixels[si][sj].xy_normal[1].toFixed(2), j, i+8);
+                if(sign_change_on_the_bottom) {
+                    old_point = point;
+                    old_tangent = tangent;
+                }   
+            }      
         }
     }
+    return [points, tangents];
 }
 
+function turn_points_and_tangents_into_splines(points_and_tangents)
+{
+    var splines = [];
+    var points = points_and_tangents[0];
+    var tangents = points_and_tangents[1];
+    for(var i = 0; i < points.length; ++i) {
+        var Px = spline_for(points[i][0][0], tangents[i][0][0], points[i][1][0], tangents[i][1][0]);
+        var Py = spline_for(points[i][0][1], tangents[i][0][1], points[i][1][1], tangents[i][1][1]);
+        splines.push([Px, Py]);
+    }
+    return splines
+}
 
+function draw_the_splines(context, splines) {
+    context.beginPath();
+    for(var i = 0; i < splines.length; ++i) {
+        for(var k = 0; k < pixel_size; k += 1) {
+            var t1 = (k) / pixel_size;
+            var t2 = (k + 1) / pixel_size;
+            var x1 = polynomial_in_x(splines[i][0], t1) * pixel_size;
+            var y1 = polynomial_in_x(splines[i][1], t1) * pixel_size;
+            var x2 = polynomial_in_x(splines[i][0], t2) * pixel_size;
+            var y2 = polynomial_in_x(splines[i][1], t2) * pixel_size;
+            context.moveTo(x1, y1);
+            context.lineTo(x2, y2);
+        }
+    }
+    
+    context.strokeStyle="#AA3366";
+    context.lineWidth = 3;
+    context.stroke();
+    context.closePath();    
+}
+
+var cur_point_indexes = [];
+var cur_point_in_pair_indexes = [];
+var cur_tangent_index = -1;
+var cur_tangent_in_pair_index = -1;
 function init_canvas(){
     var canvas = document.getElementById("canvas");
     canvas.addEventListener('mousedown', function(e){
         canvas_rect = canvas.getBoundingClientRect();
+        var x = e.clientX - canvas_rect.left;
+        var y = e.clientY - canvas_rect.top;
+        if(document.getElementById("tool_2").checked) { // points
+            cur_point_indexes = [];
+            cur_point_in_pair_indexes = [];
+            var points = points_and_tangents[0];
+            var min_d2 = (w+h)*(w+h);
+            for(var i = 0; i < points.length; ++i) {
+                for(var j = 0; j < 2; ++ j) {
+                    var px = pixel_size * points[i][j][0];
+                    var py = pixel_size * points[i][j][1];
+                    var d2 = (px - x)*(px - x) + (py - y)*(py - y);
+                    if(cur_point_indexes.length == 0 || d2 < min_d2) {
+                        cur_point_indexes = [i];
+                        cur_point_in_pair_indexes = [j];
+                        min_d2 = d2;
+                    }else if(d2 == min_d2) {
+                        cur_point_indexes.push(i);
+                        cur_point_in_pair_indexes.push(j);
+                    }
+                }
+            }
+        } else if(document.getElementById("tool_3").checked) { // tangents
+            cur_tangent_index = -1;
+            cur_tangent_in_pair_index = -1;
+            var points = points_and_tangents[0];
+            var tangents = points_and_tangents[1];
+            var min_d2 = (w+h)*(w+h);
+            for(var i = 0; i < points.length; ++i) {
+                for(var j = 0; j < 2; ++ j) {
+                    var px = pixel_size * (points[i][j][0] + tangents[i][j][0]);
+                    var py = pixel_size * (points[i][j][1] + tangents[i][j][1]);
+                    var d2 = (px - x)*(px - x) + (py - y)*(py - y);
+                    if(cur_tangent_index == -1 || d2 < min_d2) {
+                        cur_tangent_index = i;
+                        cur_tangent_in_pair_index = j;
+                        min_d2 = d2;
+                    }
+                }
+            }
+        }
+        
     }, false);
      
     canvas.addEventListener('mousemove', function(e){
         if(e.buttons == 1){
             canvas_rect = canvas.getBoundingClientRect();
+            var x = e.clientX - canvas_rect.left;
+            var y = e.clientY - canvas_rect.top;
+            if(document.getElementById("tool_2").checked) { // points
+                var points = points_and_tangents[0];
+                for(var i = 0; i < cur_point_indexes.length; ++i) {
+                    points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][0] = x / pixel_size;
+                    points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][1] = y / pixel_size;
+                }               
+            } else if(document.getElementById("tool_3").checked) { // tangents
+                var points = points_and_tangents[0];
+                var tangents = points_and_tangents[1];
+                tangents[cur_tangent_index][cur_tangent_in_pair_index][0] = x / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][0];
+                tangents[cur_tangent_index][cur_tangent_in_pair_index][1] = y / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][1];
+                splines = turn_points_and_tangents_into_splines(points_and_tangents);  
+            }
+            splines = turn_points_and_tangents_into_splines(points_and_tangents);
             draw_canvas();
         }
     }, false);
     
     canvas.addEventListener('mouseup', function(e){
         canvas_rect = canvas.getBoundingClientRect();
-        var j = e.clientX - canvas_rect.left;
-        var i = e.clientY - canvas_rect.top;
-        var in_pixels_i = Math.floor(i / pixel_size);
-        var in_pixels_j = Math.floor(j / pixel_size);
-        pixels[in_pixels_i][in_pixels_j] += 0.25;
-        if(pixels[in_pixels_i][in_pixels_j] == 1.25)
-            pixels[in_pixels_i][in_pixels_j] = 0.0;
-        draw_canvas();
+        var x = e.clientX - canvas_rect.left;
+        var y = e.clientY - canvas_rect.top;
+        if(document.getElementById("tool_1").checked) {
+            var in_pixels_i = Math.floor(y / pixel_size);
+            var in_pixels_j = Math.floor(x / pixel_size);
+            pixels[in_pixels_i][in_pixels_j] *= 7;
+            if(e.shiftKey)       
+                pixels[in_pixels_i][in_pixels_j] += 7;
+            else
+                pixels[in_pixels_i][in_pixels_j] += 1;
+            pixels[in_pixels_i][in_pixels_j] = Math.floor(pixels[in_pixels_i][in_pixels_j]) % 8;
+            pixels[in_pixels_i][in_pixels_j] /= 7;
+            points_and_tangents = turn_pixels_into_points_and_tangents(pixels, threshold);
+            splines = turn_points_and_tangents_into_splines(points_and_tangents);
+        } else if(document.getElementById("tool_2").checked) { // points
+            var points = points_and_tangents[0];
+            for(var i = 0; i < cur_point_indexes.length; ++i) {
+                points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][0] = x / pixel_size;
+                points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][1] = y / pixel_size;
+            }
+            splines = turn_points_and_tangents_into_splines(points_and_tangents);  
+        } else if(document.getElementById("tool_3").checked) { // tangents
+            var points = points_and_tangents[0];
+            var tangents = points_and_tangents[1];
+            tangents[cur_tangent_index][cur_tangent_in_pair_index][0] = x / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][0];
+            tangents[cur_tangent_index][cur_tangent_in_pair_index][1] = y / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][1];
+            splines = turn_points_and_tangents_into_splines(points_and_tangents);  
+        }
+        draw_canvas();            
     }, false);
     
     draw_canvas();
@@ -504,10 +449,11 @@ function draw_canvas(){
         var on_canvas_j = Math.floor(i / 4) % w;
         var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
         var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
-        pixel_field.data[i + 0] = 0xAA * pixels[in_pixels_i][in_pixels_j];
-        pixel_field.data[i + 1] = 0xAA * pixels[in_pixels_i][in_pixels_j];
-        pixel_field.data[i + 2] = 0xFF * pixels[in_pixels_i][in_pixels_j];
-        pixel_field.data[i + 3] = 0xFF * pixels[in_pixels_i][in_pixels_j];
+        var pixel_value = Math.max(Math.min(pixels[in_pixels_i][in_pixels_j], 1.0), 0.0);
+        pixel_field.data[i + 0] = 0xAA + (0xFF - 0xAA) * pixel_value;
+        pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
+        pixel_field.data[i + 2] = 0xFF;
+        pixel_field.data[i + 3] = 0xFF;
     }
     context.putImageData(pixel_field, -0.5, -0.5);
     
@@ -528,158 +474,70 @@ function draw_canvas(){
     context.setLineDash([]);
     context.closePath();
     
-    // spline grid
-    context.beginPath();
-    for(var i = splixel_size / 2 ; i <= h; i += splixel_size) {
-        context.moveTo(0.0, i);
-        context.lineTo(w, i);
-    }
-    for(var j = splixel_size / 2; j <= w; j += splixel_size) {
-        context.moveTo(j, 0.0);
-        context.lineTo(j, h);
-    }
-    context.strokeStyle="#bb7799";
-    context.lineWidth=1;
-    context.stroke();
-    context.closePath();    
-    
     // contour
-    var do_colors = document.getElementById("do_colors").checked;
-    fill_splixels_from_pixels();
-    draw_the_splixels(context, splixels, do_colors);
-}
-
-function reset_all() {
-    reset_pixels();
-    reset_splixels();
-    draw_canvas();
-}
-
-function reset_magic_numbers() {
-    nd = document.getElementById("nd").value;
-    weight = document.getElementById("weight").value;
-    shiftd = document.getElementById("shiftd").value;
-    draw_canvas();
-}
-
-// second canvas
-function copy_splixels() {
-    // copy
-    var new_splixels = [];
-    var sw = 1 + Math.floor(w / splixel_size) + 1;
-    var sh = 1 + Math.floor(h / splixel_size) + 1;
-    for(var i = 0; i < sh; ++i) {
-        splixelsi = []
-        for(var j = 0; j < sw; ++j) {
-            var new_splixel = Object.assign({}, splixels[i][j]);      
-            new_splixel.xy_shift = splixels[i][j].xy_shift.slice(); 
-            new_splixel.xy_normal = splixels[i][j].xy_normal.slice();
-            splixelsi.push(new_splixel);
-            }
-        new_splixels.push(splixelsi);
-    }
+    draw_the_splines(context, splines);
     
-    // draw
-    var canvas = document.getElementById("canvas_2");
-    var context = canvas.getContext("2d");
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
-    draw_the_splixels(context, new_splixels, false);
-}
-
-function dilate_splixels() {
-    // copy + dilate
-    var new_splixels = [];
-    var sw = 1 + Math.floor(w / splixel_size) + 1;
-    var sh = 1 + Math.floor(h / splixel_size) + 1;
-    for(var i = 0; i < sh; ++i) {
-        splixelsi = []
-        for(var j = 0; j < sw; ++j) {
-            var new_splixel = Object.create(splixel);      
-            new_splixel.xy_shift = [0., 0.];   
-            new_splixel.xy_normal = [0., 0.];
-            var touch_front = false;
-            var straight_count = 0;
-            var diagonal_count = 0;
-            
-            for(var ni = Math.max(0, i - 1); ni <= Math.min(sh - 1, i + 1); ++ni)
-                for(var nj = Math.max(0, j - 1); nj <= Math.min(sw - 1, j + 1); ++nj)
-                    if(splixels[ni][nj].to_margin == 0) {
-                        touch_front = true;
-                        if(ni == i || nj == j)
-                            straight_count++;
-                        else
-                            diagonal_count++;
-                    }
-                    
-            for(var ni = Math.max(0, i - 1); ni <= Math.min(sh - 1, i + 1); ++ni)
-                for(var nj = Math.max(0, j - 1); nj <= Math.min(sw - 1, j + 1); ++nj)
-                    if(splixels[ni][nj].to_margin == 0) {
-                        if(straight_count > 0 && (ni == i || nj == j)) {
-                            new_splixel.xy_shift[0] += splixels[ni][nj].xy_shift[0];
-                            new_splixel.xy_shift[1] += splixels[ni][nj].xy_shift[1];
-                        }
-                        if(straight_count == 0 && diagonal_count > 0 && !(ni == i || nj == j)) {
-                            new_splixel.xy_shift[0] += splixels[ni][nj].xy_shift[0];
-                            new_splixel.xy_shift[1] += splixels[ni][nj].xy_shift[1];
-                        }
-//                        new_splixel.xy_normal[0] += splixels[ni][nj].xy_normal[0];
-//                        new_splixel.xy_normal[1] += splixels[ni][nj].xy_normal[1];
-                    }
-            if(splixels[i][j].to_margin == 0)
-                new_splixel.to_margin = -1;
-            if(splixels[i][j].to_margin == 1 && touch_front) {
-                new_splixel.to_margin = 0;
-                if(straight_count > 0) {
-                    new_splixel.xy_shift[0] /= straight_count;
-                    new_splixel.xy_shift[1] /= straight_count;
-                } else if(diagonal_count > 0){
-                    new_splixel.xy_shift[0] /= diagonal_count / Math.sqrt(2);
-                    new_splixel.xy_shift[1] /= diagonal_count / Math.sqrt(2);
-                }
-//                new_splixel.xy_normal[0] /= front_count;
-//                new_splixel.xy_normal[1] /= front_count;
+    // points if needed
+    if(document.getElementById("tool_2").checked) {
+        var points = points_and_tangents[0];
+        for(var i = 0; i < points.length; ++i) {
+            for(var j = 0; j < 2; ++j) {
+                context.beginPath();
+                context.arc(pixel_size * points[i][j][0], pixel_size * points[i][j][1], 3, 0, 2*Math.PI);
+                context.fillStyle="#6633AA";
+                context.fill();
+                context.closePath();        
             }
-            splixelsi.push(new_splixel);   
         }
-        new_splixels.push(splixelsi);
-    }
-    // reset neighbors
-    for(var i = 1; i < sh; ++i) {
-        for(var j = 1; j < sw; ++j) {
-            if(new_splixels[i-1][j].to_margin == 0 && new_splixels[i][j].to_margin == 0){
-                new_splixels[i-1][j].bottom = true;
-                new_splixels[i][j].top = true;
-            }
-            if(new_splixels[i][j-1].to_margin == 0 && new_splixels[i][j].to_margin == 0){
-                new_splixels[i][j-1].right = true;
-                new_splixels[i][j].left = true;
-            }
-
-        }        
     }
     
-    // draw
-    var canvas = document.getElementById("canvas_2");
-    var context = canvas.getContext("2d");
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
-    draw_the_splixels(context, new_splixels, false);
-}
-
-function space_divided(text) {
-    var new_text = text.replace('\r', ' ');
-    new_text = new_text.replace('\n', ' ');
-    new_text = new_text.replace('\t', ' ');
-    while(true) {
-        new_new_text = new_text.replace('  ', ' ');
-        if(new_new_text.length == new_text.length)
-            return new_text;
-        new_text = new_new_text;    
+    // tangents if needed
+    if(document.getElementById("tool_3").checked) {
+        var points = points_and_tangents[0];
+        var tangents = points_and_tangents[1];
+        for(var i = 0; i < points.length; ++i) {
+            for(var j = 0; j < 2; ++j) {
+                context.beginPath();
+                context.arc(pixel_size * points[i][j][0], pixel_size * points[i][j][1], 3, 0, 2*Math.PI);
+                context.fillStyle="#AA3366";
+                context.fill();
+                context.closePath();
+                
+                context.beginPath();
+                context.lineWidth=1;
+                context.moveTo(pixel_size * points[i][j][0], pixel_size * points[i][j][1]);
+                context.lineTo(pixel_size * (points[i][j][0] + tangents[i][j][0]), pixel_size * (points[i][j][1] + tangents[i][j][1]));
+                context.strokeStyle="#6633AA";
+                context.setLineDash([2, 2]);
+                context.stroke();
+                context.setLineDash([]);
+                context.closePath();
+                
+                context.beginPath();
+                context.arc(
+                    pixel_size * (points[i][j][0] + tangents[i][j][0]), 
+                    pixel_size * (points[i][j][1] + tangents[i][j][1]), 3, 0, 2*Math.PI);
+                context.fillStyle="#6633AA";
+                context.fill();
+                context.closePath();        
+            }
+        }
     }
 }
 
+// import from PGM
 function reimport_image() {
+    space_divided = function(text) {
+        var new_text = text.replace('\r', ' ');
+        new_text = new_text.replace('\n', ' ');
+        new_text = new_text.replace('\t', ' ');
+        while(true) {
+            new_new_text = new_text.replace('  ', ' ');
+            if(new_new_text.length == new_text.length)
+                return new_text;
+            new_text = new_new_text;    
+        }
+    }
     var text = document.getElementById("import_PGM").value;
     document.getElementById("import_status").innerHTML = "";
     var lines = text.split("\n");
@@ -710,64 +568,146 @@ function reimport_image() {
         h = 1024.0 * new_h / new_w;
         document.getElementById("canvas").height = h;
         pixel_size = w / new_w;
-        splixel_size = pixel_size;
-        iw = Math.floor(w / pixel_size) + 1;
-        ih = Math.floor(h / pixel_size) + 1;
-        reset_pixels();
+        reset_pixels(new_w, new_h);
         for(var i = 0; i < new_h; ++i)
             for(var j = 0; j < new_w; ++j)
                 pixels[i][j] = parseInt(numbers[4 + i*new_w + j]) / new_depth;
-        reset_splixels();
-        draw_canvas();
+        points_and_tangents = turn_pixels_into_points_and_tangents(pixels, threshold);
+        splines = turn_points_and_tangents_into_splines(points_and_tangents);
     } catch (error) {
         document.getElementById("import_status").innerHTML = "Sorry, couldn't parse that. " + error.message;
-    }     
+    }
+    draw_canvas();  
+}
+
+
+// export to SVG
+function export_splines() {
+    const printable = function(x) {
+        return Math.floor(x * 100);
+    };
+    var svg = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
+    svg += "<svg width=\"" + printable(pixels[0].length) + "\" height=\"" + printable(pixels.length);
+    svg += "\" viewBox=\"0 0 " + printable(pixels[0].length) + " " + printable(pixels.length) + "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
+    for(var i = 0; i < points_and_tangents[0].length; ++i) {
+        var p1 = points_and_tangents[0][i][0];
+        var p2 = points_and_tangents[0][i][1];
+        var p1_n = points_and_tangents[1][i][0];
+        var p2_n = points_and_tangents[1][i][1];
+        svg += "<path fill=\"none\" stroke=\"rgb(0,0,0)\" d=\"M " + printable(p1[0]) + "," + printable(p1[1]) + " ";
+        svg += "C " + printable(p1[0] + p1_n[0] / 3.) + "," + printable(p1[1] + p1_n[1] / 3.); 
+        svg += " " +  printable(p2[0] - p2_n[0] / 3.) + "," + printable(p2[1] - p2_n[1] / 3.) + " " + printable(p2[0]) + "," + printable(p2[1]) + "\"/>\n";
+    }
+    svg += "</svg>\n";
+    document.getElementById("export_SVG").value = svg;
+}
+
+// ui
+function reset_threshold() {
+    threshold = parseFloat(document.getElementById("threshold").value);
 }
   </script>
   </head>
   <body>
     <center>
-    <br>
-    <br>
-    <textarea id="import_PGM" rows=24 onInput="reimport_image()">
+    <h1>
+Primitive image vectorization: PGM -> SVG
+    </h1>
+    <h2>
+Import PGM    
+    </h2>
+    <p>
+PGM is a 1-channel ASCII image format. You can make a PGM file in GIMP.
+    </p>
+    <textarea id="import_PGM" rows=20>
 P2
-# Shows the word "FEEP" (example from Netpbm man page on PGM)
-24 7
-15
-0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
-0  3  3  3  3  0  0  7  7  7  7  0  0 11 11 11 11  0  0 15 15 15 15  0
-0  3  0  0  0  0  0  7  0  0  0  0  0 11  0  0  0  0  0 15  0  0 15  0
-0  3  3  3  0  0  0  7  7  7  0  0  0 11 11 11  0  0  0 15 15 15 15  0
-0  3  0  0  0  0  0  7  0  0  0  0  0 11  0  0  0  0  0 15  0  0  0  0
-0  3  0  0  0  0  0  7  7  7  7  0  0 11 11 11 11  0  0 15  0  0  0  0
-0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 
+16 16
+255
+0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+0   77  125 38  0   0   0   0   0   0   0   0   0   0   0   0   
+0   120 255 254 203 144 96  3   0   0   0   0   0   0   0   0   
+0   34  253 255 255 255 255 230 154 94  8   0   0   0   0   0   
+0   0   196 255 255 255 255 255 255 252 241 139 83  6   0   0   
+0   0   149 255 255 255 255 255 255 255 255 255 250 213 80  0   
+0   0   98  255 255 255 255 255 255 255 255 255 255 224 58  0   
+0   0   2   224 255 255 255 255 255 255 255 242 152 4   0   0   
+0   0   0   145 255 255 255 255 255 255 255 154 1   0   0   0   
+0   0   0   82  251 255 255 255 255 255 255 253 156 1   0   0   
+0   0   0   6   237 255 255 255 255 255 255 255 252 146 3   0   
+0   0   0   0   149 255 255 243 149 252 255 255 255 240 21  0   
+0   0   0   0   69  249 255 152 1   150 252 255 238 71  0   0   
+0   0   0   0   0   211 224 4   0   1   137 240 86  0   0   0   
+0   0   0   0   0   73  57  0   0   0   2   20  0   0   0   0   
+0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
     </textarea>
+<!--
+    <textarea id="import_PGM" rows=14>    
+P2
+3 3
+15
+0 0 0
+0 14 0
+0 0 0
+    </textarea>
+-->
+    <form>
+        Grey value threshold: <input type="text" id="threshold" value="0.5">
+        <button type="button" style="width: 200pt;" onclick="reset_threshold(); reimport_image()">Reimport the PGM</button> 
+    </form>
     <p id="import_status" class="comment">
     </p>
-    <br>    
+    <br>
+    <h2>
+Edit image and vectors
+    </h2>
+    <p>
+Image editing overrides vectors. Click on a canvas to increase a pixel's luminosity. Click holding the Shift key to reduce it.
+    </p>
     <canvas id="canvas" width=1024 height=1024></canvas>
-    <div style="text-align:right; width:1024px; padding-bottom:12pt;">
-        nd: <input type="text" id="nd" value="1.5">
-        weight: <input type="text" id="weight" value="4">
-        shiftd: <input type="text" id="shiftd" value="1.5">
-        <button type="button" onclick="reset_magic_numbers()">&larr; Apply</button>
-        <input type="checkbox" id="do_colors" onclick="draw_canvas();"/><label for="do_colors">do colors</label>    
-        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset pixels</button>
-    </div>
+    <form>
+        Click to change: 
+        <input type="radio" name="tool" id="tool_1" value="image" checked=true onclick="draw_canvas()"><label for="tool_1">image; </label>
+        <input type="radio" name="tool" id="tool_2" value="points" onclick="draw_canvas()"><label for="tool_2">points; </label>
+        <input type="radio" name="tool" id="tool_3" value="tangents" onclick="draw_canvas()"><label for="tool_3">tangents; </label>
+        <br>  
+    </form>
     <br>
-    <button type="button" style="width: 128pt;" onclick="copy_splixels()">Copy</button>
-    <button type="button" style="width: 128pt;" onclick="dilate_splixels()">Dilate</button>
-    <br>
-    <canvas id="canvas_2" width=1024 height=1024></canvas>
     
-    <script language="JavaScript">
+    <h2>
+Vector export
+    </h2>
+    <p>
+Only the outline is supported. No filling, no coloring.
+    </p>
+    <form>
+        <button type="button" onclick="export_splines()">Export to SVG</button>  
+    </form>
+    <br>
+    <textarea id="export_SVG" rows=14>
 
-    reset_splixels();
-    init_canvas();    
-    reset_magic_numbers();
+    </textarea>
+
+    <script language="JavaScript">
     reimport_image();    
+    init_canvas();    
     </script>
-           
+    
+    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+    <tr>
+    <td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+        <a href="index.html"><img src="favicon.ico"></a>
+    </td>
+    <td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+        &nbsp;&larr; there's more.
+    </td>
+    <td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+        +
+        <a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+        <a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+        <a href="https://news.ycombinator.com/from?site=wordsandbuttons.online">Hacker News</a>
+    </td>
+    </tr>
+    </table>
     </center>
   </body>
 </html>
