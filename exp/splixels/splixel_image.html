@@ -313,8 +313,7 @@ function turn_pixels_into_points_and_tangents(pixels, threshold) {
     return [points, tangents];
 }
 
-function turn_points_and_tangents_into_splines(points_and_tangents)
-{
+function turn_points_and_tangents_into_splines(points_and_tangents) {
     var splines = [];
     var points = points_and_tangents[0];
     var tangents = points_and_tangents[1];
@@ -324,6 +323,39 @@ function turn_points_and_tangents_into_splines(points_and_tangents)
         splines.push([Px, Py]);
     }
     return splines
+}
+
+function turn_pixels_into_splixels(pixels, threshold) {
+    reset_splixels(pixels[0].length, pixels.length);
+    for(var i = 0; i <= pixels.length; i += 1) {
+        for(var j = 0; j <= pixels[0].length; j += 1) {
+            // value in splixel
+            var value = pixel_in(pixels, i-0.5, j+0.5) - threshold;
+            
+            // if right, left, top, and bottom pixels have a sign change, there should be a spline there
+            var sign_change_on_the_right  = (pixel_in(pixels, i-1, j+0) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+            var sign_change_on_the_left   = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i+0, j-1) - threshold) < 0;
+            var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+            var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
+
+            // fits the point on a threshold isoline
+            var point = fit_point_better(pixels, threshold, [j, i]);
+            
+            // get the gradient
+            var g = gradient(pixels, point[0], point[1]);
+            
+            if(sign_change_on_the_right || sign_change_on_the_left || sign_change_on_the_bottom || sign_change_on_the_top)
+                splixels[i][j].to_margin = 0;
+            else
+                splixels[i][j].to_margin = Math.sign(value);
+            splixels[i][j].xy_shift = [point[0] - j, point[1] - i];
+            splixels[i][j].xy_normal = g;
+            splixels[i][j].right = sign_change_on_the_right;
+            splixels[i][j].left = sign_change_on_the_left;
+            splixels[i][j].top = sign_change_on_the_bottom;
+            splixels[i][j].bottom = sign_change_on_the_top;
+        }
+    }
 }
 
 function draw_the_splines(context, splines) {
