@@ -358,6 +358,76 @@ function turn_pixels_into_splixels(pixels, threshold) {
     }
 }
 
+function turn_splixels_into_points_and_tangents(splixels, threshold) {
+    var points = [];
+    var tangents = [];
+
+    // "horizontal" pieces    
+    for(var i = 0; i <= pixels.length; i += 1) {
+        var old_point = [];
+        var old_tangent = [];
+        for(var j = 0; j <= pixels[0].length; j += 1) {
+            // if right, left, top, and bottom pixels have a sign change, there should be a spline there
+            var sign_change_on_the_right  = splixels[i][j].right;
+            var sign_change_on_the_left   = splixels[i][j].left;
+            var sign_change_on_the_bottom = splixels[i][j].top;
+            var sign_change_on_the_top    = splixels[i][j].bottom;
+            if(sign_change_on_the_right || sign_change_on_the_left) {
+                // fits the point on a threshold isoline
+                var point = [j + splixels[i][j].xy_shift[0], i + splixels[i][j].xy_shift[1]];
+                var g = splixels[i][j].xy_normal;
+                
+                // we want our tangent to be X-positive for horizontal pieces
+                var tangent = g[1] >= 0 ? [g[1], -g[0]] : [-g[1], g[0]];
+                
+                // this is an T or X junction, the tangent is ambiguous
+                if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
+                    tangent = [0., 0.];
+                    
+                // store the point+tangent and the previous point+tangent if there is one
+                if(sign_change_on_the_left && old_point) {                    
+                    points.push([old_point, point]);
+                    tangents.push([old_tangent, tangent]);
+                }
+                
+                // save the point+tangent for later
+                if(sign_change_on_the_right) {
+                    old_point = point;
+                    old_tangent = tangent;
+                }   
+            }      
+        }
+    }
+
+    // "vertical" pieces
+    for(var j = 0; j <= pixels[0].length; j += 1) {
+        var old_point = [];
+        var old_tangent = [];
+        for(var i = 0; i <= pixels.length; i += 1) {
+            var sign_change_on_the_right  = splixels[i][j].right;
+            var sign_change_on_the_left   = splixels[i][j].left;
+            var sign_change_on_the_bottom = splixels[i][j].top;
+            var sign_change_on_the_top    = splixels[i][j].bottom;
+            if(sign_change_on_the_bottom || sign_change_on_the_top) {
+                var point = [j + splixels[i][j].xy_shift[0], i + splixels[i][j].xy_shift[1]];
+                var g = splixels[i][j].xy_normal;            
+                var tangent = g[0] < 0 ? [g[1], -g[0]] : [-g[1], g[0]];
+                if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
+                    tangent = [0., 0.];
+                if(sign_change_on_the_top && old_point) {
+                    points.push([old_point, point]);
+                    tangents.push([old_tangent, tangent]);
+                }
+                if(sign_change_on_the_bottom) {
+                    old_point = point;
+                    old_tangent = tangent;
+                }   
+            }      
+        }
+    }
+    return [points, tangents];
+}
+
 function draw_the_splines(context, splines) {
     context.beginPath();
     for(var i = 0; i < splines.length; ++i) {
