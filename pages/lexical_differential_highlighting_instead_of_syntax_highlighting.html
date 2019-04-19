@@ -145,6 +145,56 @@ function colorized_with_sample_highlighter(text) {
 
     return uncommented(text, 0);
 }
+
+function colorized_with_js_highlighter(text) {
+    const separators = ['function ', ' if(', 'return ', 'var ', 'const ', ' for(', 
+        '\n', '&lt;', '&gt;', ' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '<', '>', '[', ']', '{', '}'];
+    const quotes = ['\'', '"'];
+    const comments = [['//', '\n'], ['/*', '*/']];
+
+    function painted_in(line, color) {
+        return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+    }
+
+    function colorized(token) {
+        var code_sum = 0;
+        for(var i = 0; i < token.length; ++i)
+            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+        var zero_channel = code_sum % 3;
+        var color = '' + (zero_channel == 0 ? '3' : '') + (1 + (code_sum % 5) * 2)
+            + (zero_channel == 1 ? '3' : '') + (4 + (code_sum % 2) * 5)
+            + (zero_channel == 2 ? '3' : '');
+        return painted_in(token, color);
+    }
+
+    function separated(line, i) {
+        if(i == separators.length)
+            return colorized(line);
+        return line.split(separators[i]).map(function(subline) {
+            return separated(subline, i + 1);}).join(separators[i]);
+    }
+
+    function unquoted(line, i) {
+        if(i == quotes.length)
+            return separated(line, 0);
+        var chunk_no = 0;
+        return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {
+            return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {
+                return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "555");}).join('');
+    }
+
+    function uncommented(line, i) {
+        if(i == comments.length)
+            return unquoted(line, 0);
+        var chunks = line.split(comments[i][0]);
+        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+            var in_out_comment = chunk.split(comments[i][1]);
+            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555") 
+                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+    }
+
+    return uncommented(text, 0);
+}
     
 function generate_highlighter_code() {
     var function_name = document.getElementById("function_name").value;
@@ -376,15 +426,71 @@ AppName  db " ", 0
     </tr>
     </table>
     </form>
-
-    <script language="JavaScript">
-    generate_highlighter_code();
-    document.getElementById("sample_code").innerHTML = colorized_with_sample_highlighter(document.getElementById("sample_code").innerHTML);
-    </script>
-
     <p>
 Feel free to use it however you like. Just as every other <a href="https://github.com/akalenuk/wordsandbuttons">piece of code</a> on Words and Buttons, it's properly <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/LICENSE">unlicensed</a>.
     </p>
+
+    <h2>
+P. S.    
+    </h2>
+    <table><tr>
+    <td style="border: 1px solid black;">
+    <pre id="js_sample">
+function colorized_with_js_highlighter(text) {
+    const separators = ['function ', ' if(', 'return ', 'var ', 'const ', ' for(', 
+        '\n', ' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '&lt;', '&gt;', '[', ']', '{', '}'];
+    const quotes = ['\'', '"'];
+    const comments = [['//', '\n'], ['/*', '*/']];
+
+    function painted_in(line, color) {
+        return line.length == 0 ? "" : "&lt;span style=\"color:#" + color + "\"&gt;" + line + "&lt;/span&gt;";
+    }
+
+    function colorized(token) {
+        var code_sum = 0;
+        for(var i = 0; i &lt; token.length; ++i)
+            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+        var zero_channel = code_sum % 3;
+        var color = '' + (zero_channel == 0 ? '3' : '') + (1 + (code_sum % 5) * 2)
+            + (zero_channel == 1 ? '3' : '') + (4 + (code_sum % 2) * 5)
+            + (zero_channel == 2 ? '3' : '');
+        return painted_in(token, color);
+    }
+
+    function separated(line, i) {
+        if(i == separators.length)
+            return colorized(line);
+        return line.split(separators[i]).map(function(subline) {
+            return separated(subline, i + 1);}).join(separators[i]);
+    }
+
+    function unquoted(line, i) {
+        if(i == quotes.length)
+            return separated(line, 0);
+        var chunk_no = 0;
+        return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {
+            return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {
+                return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "555");}).join('');
+    }
+
+    function uncommented(line, i) {
+        if(i == comments.length)
+            return unquoted(line, 0);
+        var chunks = line.split(comments[i][0]);
+        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+            var in_out_comment = chunk.split(comments[i][1]);
+            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length &gt; 1 ? comments[i][1] : ''), "555") 
+                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+    }
+    </pre>
+    </td></tr></table>
+    <script language="JavaScript">
+    generate_highlighter_code();
+    document.getElementById("sample_code").innerHTML = colorized_with_sample_highlighter(document.getElementById("sample_code").innerHTML);
+    document.getElementById("js_sample").innerHTML = colorized_with_js_highlighter(document.getElementById("js_sample").innerHTML);    
+    </script>
+    
+    
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
     <tr>
