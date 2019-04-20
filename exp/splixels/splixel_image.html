@@ -238,7 +238,7 @@ function fit_point_better(pixels, threshold, point) {
     const small_enough_error = 1/255;
     if(Math.abs(value_in(pixels, point[0], point[1]) - threshold) < small_enough_error)
         return point;
-    gs = gradient_shift(pixels, threshold, point[0], point[1])
+    var gs = gradient_shift(pixels, threshold, point[0], point[1]);
     return fit_point_better(pixels, threshold, [point[0] + gs[0], point[1] + gs[1]]);
 }
 
@@ -338,22 +338,23 @@ function turn_pixels_into_splixels(pixels, threshold) {
             var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
             var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
 
-            // fits the point on a threshold isoline
-            var point = fit_point_better(pixels, threshold, [j, i]);
+            if(sign_change_on_the_right || sign_change_on_the_left || sign_change_on_the_bottom || sign_change_on_the_top) {
+                // fits the point on a threshold isoline
+                var point = fit_point_better(pixels, threshold, [j, i]);
             
-            // get the gradient
-            var g = gradient(pixels, point[0], point[1]);
+                // get the gradient
+                var g = gradient(pixels, point[0], point[1]);
             
-            if(sign_change_on_the_right || sign_change_on_the_left || sign_change_on_the_bottom || sign_change_on_the_top)
                 splixels[i][j].to_margin = 0;
-            else
+                splixels[i][j].xy_shift = [point[0] - j, point[1] - i];
+                splixels[i][j].xy_normal = g;
+                splixels[i][j].right = sign_change_on_the_right;
+                splixels[i][j].left = sign_change_on_the_left;
+                splixels[i][j].top = sign_change_on_the_bottom;
+                splixels[i][j].bottom = sign_change_on_the_top;
+            } else {
                 splixels[i][j].to_margin = Math.sign(value);
-            splixels[i][j].xy_shift = [point[0] - j, point[1] - i];
-            splixels[i][j].xy_normal = g;
-            splixels[i][j].right = sign_change_on_the_right;
-            splixels[i][j].left = sign_change_on_the_left;
-            splixels[i][j].top = sign_change_on_the_bottom;
-            splixels[i][j].bottom = sign_change_on_the_top;
+            }
         }
     }
 }
@@ -510,7 +511,7 @@ function init_canvas(){
                 splines = turn_points_and_tangents_into_splines(points_and_tangents);  
             }
             splines = turn_points_and_tangents_into_splines(points_and_tangents);
-            draw_canvas();
+            draw_canvas(splines);
         }
     }, false);
     
@@ -544,14 +545,14 @@ function init_canvas(){
             tangents[cur_tangent_index][cur_tangent_in_pair_index][1] = y / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][1];
             splines = turn_points_and_tangents_into_splines(points_and_tangents);  
         }
-        draw_canvas();            
+        draw_canvas(splines);
     }, false);
     
-    draw_canvas();
+    draw_canvas(splines);
 }
 
 
-function draw_canvas(){
+function draw_canvas(splines){
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
     // background
@@ -693,7 +694,7 @@ function reimport_image() {
     } catch (error) {
         document.getElementById("import_status").innerHTML = "Sorry, couldn't parse that. " + error.message;
     }
-    draw_canvas();  
+    draw_canvas(splines);  
 }
 
 
@@ -721,6 +722,15 @@ function export_splines() {
 // ui
 function reset_threshold() {
     threshold = parseFloat(document.getElementById("threshold").value);
+}
+
+// splixel algorithms
+function erode_splixels() {
+    var splixels = turn_pixels_into_splixels(pixels, threshold);
+    var splines = 
+        turn_points_and_tangents_into_splines(
+            turn_splixels_into_points_and_tangents(splixels, threshold));
+    draw_canvas(splines);  
 }
   </script>
   </head>
@@ -782,11 +792,12 @@ Image editing overrides vectors. Click on a canvas to increase a pixel's luminos
     <canvas id="canvas" width=1024 height=1024></canvas>
     <form>
         Click to change: 
-        <input type="radio" name="tool" id="tool_1" value="image" checked=true onclick="draw_canvas()"><label for="tool_1">image; </label>
-        <input type="radio" name="tool" id="tool_2" value="points" onclick="draw_canvas()"><label for="tool_2">points; </label>
-        <input type="radio" name="tool" id="tool_3" value="tangents" onclick="draw_canvas()"><label for="tool_3">tangents; </label>
+        <input type="radio" name="tool" id="tool_1" value="image" checked=true onclick="draw_canvas(splines)"><label for="tool_1">image; </label>
+        <input type="radio" name="tool" id="tool_2" value="points" onclick="draw_canvas(splines)"><label for="tool_2">points; </label>
+        <input type="radio" name="tool" id="tool_3" value="tangents" onclick="draw_canvas(splines)"><label for="tool_3">tangents; </label>
         <br>  
     </form>
+    <button type="button" style="width: 200pt;" onclick="erode_splixels();">Erode</button>
     <br>
     
     <h2>
