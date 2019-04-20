@@ -155,16 +155,15 @@ const splixel = {
     bottom: false
 };
 
-var splixels = [];
-
-function reset_splixels(w, h) {
-    splixels = [];
+function new_splixels(w, h) {
+    var splixels = [];
     for(var i = 0; i < h; ++i) {
         splixelsi = []
         for(var j = 0; j < w; ++j)
             splixelsi.push(Object.create(splixel));
         splixels.push(splixelsi);
     }
+    return splixels;
 }
 
 // solver specific to [0..1] parametrized splines
@@ -328,7 +327,7 @@ function turn_points_and_tangents_into_splines(points_and_tangents) {
 }
 
 function turn_pixels_into_splixels(pixels, threshold) {
-    reset_splixels(pixels[0].length + 1, pixels.length + 1);
+    var splixels = new_splixels(pixels[0].length + 1, pixels.length + 1);
     for(var i = 0; i <= pixels.length; i += 1) {
         for(var j = 0; j <= pixels[0].length; j += 1) {
             // value in splixel
@@ -359,6 +358,7 @@ function turn_pixels_into_splixels(pixels, threshold) {
             }
         }
     }
+    return splixels;
 }
 
 function turn_splixels_into_points_and_tangents(splixels, threshold) {
