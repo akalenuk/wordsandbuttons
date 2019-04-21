@@ -421,7 +421,7 @@ function turn_splixels_into_points_and_tangents(splixels, threshold) {
     return [points, tangents];
 }
 
-function draw_the_splines(context, splines) {
+function draw_splines(context, splines) {
     context.beginPath();
     for(var i = 0; i < splines.length; ++i) {
         for(var k = 0; k < pixel_size; k += 1) {
@@ -437,6 +437,29 @@ function draw_the_splines(context, splines) {
     }
     
     context.strokeStyle="#AA3366";
+    context.lineWidth = 3;
+    context.stroke();
+    context.closePath();    
+}
+
+function draw_splixels(context, splixels) {
+    var splines = 
+        turn_points_and_tangents_into_splines(
+            turn_splixels_into_points_and_tangents(splixels, threshold));
+    context.beginPath();
+    for(var i = 0; i < splines.length; ++i) {
+        for(var k = 0; k < pixel_size; k += 1) {
+            var t1 = (k) / pixel_size;
+            var t2 = (k + 1) / pixel_size;
+            var x1 = polynomial_in_x(splines[i][0], t1) * pixel_size;
+            var y1 = polynomial_in_x(splines[i][1], t1) * pixel_size;
+            var x2 = polynomial_in_x(splines[i][0], t2) * pixel_size;
+            var y2 = polynomial_in_x(splines[i][1], t2) * pixel_size;
+            context.moveTo(x1, y1);
+            context.lineTo(x2, y2);
+        }
+    } 
+    context.strokeStyle="#AA6633";
     context.lineWidth = 3;
     context.stroke();
     context.closePath();    
@@ -513,7 +536,7 @@ function init_canvas(){
                 splines = turn_points_and_tangents_into_splines(points_and_tangents);  
             }
             splines = turn_points_and_tangents_into_splines(points_and_tangents);
-            draw_canvas(splines);
+            draw_canvas(splines, []);
         }
     }, false);
     
@@ -547,14 +570,14 @@ function init_canvas(){
             tangents[cur_tangent_index][cur_tangent_in_pair_index][1] = y / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][1];
             splines = turn_points_and_tangents_into_splines(points_and_tangents);  
         }
-        draw_canvas(splines);
+        draw_canvas(splines, []);
     }, false);
     
-    draw_canvas(splines);
+    draw_canvas(splines, []);
 }
 
 
-function draw_canvas(splines){
+function draw_canvas(splines, splixels){
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
     // background
@@ -594,8 +617,11 @@ function draw_canvas(splines){
     context.closePath();
     
     // contour
-    draw_the_splines(context, splines);
-    
+    if(splines.length > 0)
+        draw_splines(context, splines);
+    else if(splixels.length > 0)
+        draw_splixels(context, splixels);
+
     // points if needed
     if(document.getElementById("tool_2").checked) {
         var points = points_and_tangents[0];
@@ -696,7 +722,7 @@ function reimport_image() {
     } catch (error) {
         document.getElementById("import_status").innerHTML = "Sorry, couldn't parse that. " + error.message;
     }
-    draw_canvas(splines);  
+    draw_canvas(splines, []);  
 }
 
 
@@ -729,10 +755,7 @@ function reset_threshold() {
 // splixel algorithms
 function erode_splixels() {
     var splixels = turn_pixels_into_splixels(pixels, threshold);
-    var splines = 
-        turn_points_and_tangents_into_splines(
-            turn_splixels_into_points_and_tangents(splixels, threshold));
-    draw_canvas(splines);  
+    draw_canvas([], splixels);  
 }
   </script>
   </head>
@@ -794,12 +817,12 @@ Image editing overrides vectors. Click on a canvas to increase a pixel's luminos
     <canvas id="canvas" width=1024 height=1024></canvas>
     <form>
         Click to change: 
-        <input type="radio" name="tool" id="tool_1" value="image" checked=true onclick="draw_canvas(splines)"><label for="tool_1">image; </label>
-        <input type="radio" name="tool" id="tool_2" value="points" onclick="draw_canvas(splines)"><label for="tool_2">points; </label>
-        <input type="radio" name="tool" id="tool_3" value="tangents" onclick="draw_canvas(splines)"><label for="tool_3">tangents; </label>
+        <input type="radio" name="tool" id="tool_1" value="image" checked=true onclick="draw_canvas(splines, [])"><label for="tool_1">image; </label>
+        <input type="radio" name="tool" id="tool_2" value="points" onclick="draw_canvas(splines, [])"><label for="tool_2">points; </label>
+        <input type="radio" name="tool" id="tool_3" value="tangents" onclick="draw_canvas(splines, [])"><label for="tool_3">tangents; </label>
         <br>  
     </form>
-    <button type="button" style="width: 200pt;" onclick="erode_splixels();">Erode</button>
+    <button type="button" style="width: 200pt;" onclick="erode_splixels();">Show the splixels</button>
     <br>
     
     <h2>
