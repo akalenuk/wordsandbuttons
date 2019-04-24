@@ -155,6 +155,8 @@ const splixel = {
     bottom: false
 };
 
+const the_default_splixel = Object.create(splixel);
+
 function new_splixels(w, h) {
     var splixels = [];
     for(var i = 0; i < h; ++i) {
@@ -753,7 +755,15 @@ function reset_threshold() {
 }
 
 // splixel algorithms
-function erode_splixels() {
+function splixel_in(splixels, i, j) {
+    if(i < 0 || i >= splixels.length)
+        return the_default_splixel
+    if(j < 0 || j >= splixels[0].length)
+        return the_default_splixel        
+    return splixels[i][j];
+}
+
+function show_splixels() {
     var splixels = turn_pixels_into_splixels(pixels, threshold);
     draw_canvas([], splixels);  
 }
@@ -822,7 +832,7 @@ Image editing overrides vectors. Click on a canvas to increase a pixel's luminos
         <input type="radio" name="tool" id="tool_3" value="tangents" onclick="draw_canvas(splines, [])"><label for="tool_3">tangents; </label>
         <br>  
     </form>
-    <button type="button" style="width: 200pt;" onclick="erode_splixels();">Show the splixels</button>
+    <button type="button" style="width: 200pt;" onclick="show_splixels();">Show the splixels</button>
     <br>
     
     <h2>
