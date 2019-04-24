@@ -437,9 +437,6 @@ function draw_splines(context, splines) {
             context.lineTo(x2, y2);
         }
     }
-    
-    context.strokeStyle="#AA3366";
-    context.lineWidth = 3;
     context.stroke();
     context.closePath();    
 }
@@ -447,24 +444,8 @@ function draw_splines(context, splines) {
 function draw_splixels(context, splixels) {
     var splines = 
         turn_points_and_tangents_into_splines(
-            turn_splixels_into_points_and_tangents(splixels, threshold));
-    context.beginPath();
-    for(var i = 0; i < splines.length; ++i) {
-        for(var k = 0; k < pixel_size; k += 1) {
-            var t1 = (k) / pixel_size;
-            var t2 = (k + 1) / pixel_size;
-            var x1 = polynomial_in_x(splines[i][0], t1) * pixel_size;
-            var y1 = polynomial_in_x(splines[i][1], t1) * pixel_size;
-            var x2 = polynomial_in_x(splines[i][0], t2) * pixel_size;
-            var y2 = polynomial_in_x(splines[i][1], t2) * pixel_size;
-            context.moveTo(x1, y1);
-            context.lineTo(x2, y2);
-        }
-    } 
-    context.strokeStyle="#AA6633";
-    context.lineWidth = 3;
-    context.stroke();
-    context.closePath();    
+            turn_splixels_into_points_and_tangents(splixels, threshold)); 
+    draw_splines(context, splines);
 }
 
 var cur_point_indexes = [];
@@ -654,10 +635,14 @@ function draw_canvas(splines, splixels){
     }
     
     // contour
-    if(splines.length > 0)
+    context.lineWidth = 3;
+    if(splines.length > 0) {
+        context.strokeStyle="#AA3366";
         draw_splines(context, splines);
-    else if(splixels.length > 0)
+    } else if(splixels.length > 0) {
+        context.strokeStyle="#3366AA";
         draw_splixels(context, splixels);
+    }
 
     if(splines.length > 0) {
         // points if needed
