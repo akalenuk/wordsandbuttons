@@ -709,6 +709,20 @@ function draw_canvas(splines, splixels){
     }
 }
 
+function draw_arrow(context, x1, y1, x2, y2, color) {
+    var d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+    context.beginPath();
+    context.moveTo(x1, y1);
+    context.lineTo(x2, y2);
+    context.moveTo(x2 - (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d + (x2 - x1) * 6 / d);    
+    context.lineTo(x2, y2);
+    context.moveTo(x2 + (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d - (x2 - x1) * 6 / d);    
+    context.lineTo(x2, y2);    
+    context.strokeStyle = color;
+    context.stroke();
+    context.closePath();    
+}
+
 // import from PGM
 function reimport_image() {
     space_divided = function(text) {
@@ -802,7 +816,20 @@ function splixel_in(splixels, i, j) {
 
 function show_splixels() {
     var splixels = turn_pixels_into_splixels(pixels, threshold);
-    draw_canvas([], splixels);  
+    draw_canvas([], splixels);
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    
+    context.lineWidth = 1;
+    for(var i = 0; i < splixels.length; ++i)    
+        for(var j = 0; j < splixels[0].length; ++j) {
+            var xy_shift = splixel_in(splixels, i, j).xy_shift;
+            var xy_normal = splixel_in(splixels, i, j).xy_normal;
+            draw_arrow(context, pixel_size * j, pixel_size * i, 
+                pixel_size * (j + xy_shift[0]), pixel_size * (i + xy_shift[1]), "#933");
+            draw_arrow(context, pixel_size * (j + xy_shift[0]), pixel_size * (i + xy_shift[1]),
+                pixel_size * (j + xy_shift[0] - xy_normal[0]), pixel_size * (i + xy_shift[1] - xy_normal[1]), "#339");
+        }
 }
   </script>
   </head>
