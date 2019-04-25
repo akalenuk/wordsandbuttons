@@ -816,6 +816,83 @@ function show_splixels() {
                 pixel_size * (j + xy_shift[0] - xy_normal[0]), pixel_size * (i + xy_shift[1] - xy_normal[1]), "#339");
         }
 }
+
+function dilate_splixels() {
+    var splixels = turn_pixels_into_splixels(pixels, threshold);
+    
+        // copy + dilate
+    var new_splixels = [];
+    var sw = splixels[0].length;
+    var sh = splixels.length;
+    for(var i = 0; i < sh; ++i) {
+        splixelsi = []
+        for(var j = 0; j < sw; ++j) {
+            var new_splixel = Object.create(splixel);      
+            new_splixel.xy_shift = [0., 0.];   
+            new_splixel.xy_normal = [0., 0.];
+            var touch_front = false;
+            var straight_count = 0;
+            var diagonal_count = 0;
+            
+            for(var ni = Math.max(0, i - 1); ni <= Math.min(sh - 1, i + 1); ++ni)
+                for(var nj = Math.max(0, j - 1); nj <= Math.min(sw - 1, j + 1); ++nj)
+                    if(splixels[ni][nj].to_margin == 0) {
+                        touch_front = true;
+                        if(ni == i || nj == j)
+                            straight_count++;
+                        else
+                            diagonal_count++;
+                    }
+                    
+            for(var ni = Math.max(0, i - 1); ni <= Math.min(sh - 1, i + 1); ++ni)
+                for(var nj = Math.max(0, j - 1); nj <= Math.min(sw - 1, j + 1); ++nj)
+                    if(splixels[ni][nj].to_margin == 0) {
+                        if(straight_count > 0 && (ni == i || nj == j)) {
+                            new_splixel.xy_shift[0] += splixels[ni][nj].xy_shift[0];
+                            new_splixel.xy_shift[1] += splixels[ni][nj].xy_shift[1];
+                        }
+                        if(straight_count == 0 && diagonal_count > 0 && !(ni == i || nj == j)) {
+                            new_splixel.xy_shift[0] += splixels[ni][nj].xy_shift[0];
+                            new_splixel.xy_shift[1] += splixels[ni][nj].xy_shift[1];
+                        }
+//                        new_splixel.xy_normal[0] += splixels[ni][nj].xy_normal[0];
+//                        new_splixel.xy_normal[1] += splixels[ni][nj].xy_normal[1];
+                    }
+            if(splixels[i][j].to_margin == 0)
+                new_splixel.to_margin = -1;
+            if(splixels[i][j].to_margin == 1 && touch_front) {
+                new_splixel.to_margin = 0;
+                if(straight_count > 0) {
+                    new_splixel.xy_shift[0] /= straight_count;
+                    new_splixel.xy_shift[1] /= straight_count;
+                } else if(diagonal_count > 0){
+                    new_splixel.xy_shift[0] /= diagonal_count / Math.sqrt(2);
+                    new_splixel.xy_shift[1] /= diagonal_count / Math.sqrt(2);
+                }
+//                new_splixel.xy_normal[0] /= front_count;
+//                new_splixel.xy_normal[1] /= front_count;
+            }
+            splixelsi.push(new_splixel);   
+        }
+        new_splixels.push(splixelsi);
+    }
+    // reset neighbors
+    for(var i = 1; i < sh; ++i) {
+        for(var j = 1; j < sw; ++j) {
+            if(new_splixels[i-1][j].to_margin == 0 && new_splixels[i][j].to_margin == 0){
+                new_splixels[i-1][j].bottom = true;
+                new_splixels[i][j].top = true;
+            }
+            if(new_splixels[i][j-1].to_margin == 0 && new_splixels[i][j].to_margin == 0){
+                new_splixels[i][j-1].right = true;
+                new_splixels[i][j].left = true;
+            }
+
+        }        
+    }
+    
+    draw_canvas([], new_splixels);
+}
   </script>
   </head>
   <body>
@@ -882,6 +959,7 @@ Image editing overrides vectors. Click on a canvas to increase a pixel's luminos
         <br>  
     </form>
     <button type="button" style="width: 200pt;" onclick="show_splixels();">Show the splixels</button>
+    <button type="button" style="width: 200pt;" onclick="dilate_splixels();">Dilate the splixels</button>
     <br>
     
     <h2>
