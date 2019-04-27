@@ -882,15 +882,38 @@ function dilate_splixels() {
                 for(var dj = -1; dj <= 1; dj += 1) {
                     var contributor = splixel_in(splixels, i+di, j+dj);
                     if(contributor.to_margin == 0) {
-                        new_shift[0] += contributor.xy_shift[0];
-                        new_shift[1] += contributor.xy_shift[1];
-                        contributors++;
+                        var weight = Math.sqrt(1 / (di*di + dj*dj));
+                        new_shift[0] += contributor.xy_shift[0] * weight;
+                        new_shift[1] += contributor.xy_shift[1] * weight;
+                        contributors += weight;
                         }
                     }
             if(contributors > 0) {
                 dilated_splixels[i][j].xy_shift = [0., 0.];
                 dilated_splixels[i][j].xy_shift[0] = new_shift[0] / contributors;
                 dilated_splixels[i][j].xy_shift[1] = new_shift[1] / contributors;
+            }
+        }
+    }
+
+    for(var i = 0; i < sh; ++i) {
+        for(var j = 0; j < sw; ++j) {
+            var new_normal = [0., 0.];
+            var contributors = 0;
+            for(var di = -1; di <= 1; di += 1)
+                for(var dj = -1; dj <= 1; dj += 1) {
+                    var contributor = splixel_in(splixels, i+di, j+dj);
+                    if(contributor.to_margin == 0) {
+                        var weight = Math.sqrt(1 / (di*di + dj*dj));
+                        new_normal[0] += contributor.xy_normal[0] * weight;
+                        new_normal[1] += contributor.xy_normal[1] * weight;
+                        contributors += weight;
+                        }
+                    }
+            if(contributors > 0) {
+                dilated_splixels[i][j].xy_normal = [0., 0.];
+                dilated_splixels[i][j].xy_normal[0] = new_normal[0] / contributors;
+                dilated_splixels[i][j].xy_normal[1] = new_normal[1] / contributors;
             }
         }
     }
