@@ -808,6 +808,8 @@ function show_splixels() {
     context.lineWidth = 1;
     for(var i = 0; i < splixels.length; ++i)    
         for(var j = 0; j < splixels[0].length; ++j) {
+            if(splixel_in(splixels, i, j).to_margin != 0)
+                continue;
             var xy_shift = splixel_in(splixels, i, j).xy_shift;
             var xy_normal = splixel_in(splixels, i, j).xy_normal;
             draw_arrow(context, pixel_size * j, pixel_size * i, 
@@ -870,6 +872,26 @@ function dilate_splixels() {
             }
 
         }        
+    }
+
+   for(var i = 0; i < sh; ++i) {
+        for(var j = 0; j < sw; ++j) {
+            var new_shift = [0., 0.];
+            var contributors = 0;
+            for(var di = -1; di <= 1; di += 2)
+                for(var dj = -1; dj <= 1; dj += 2) {
+                    var contributor = splixel_in(splixels, i+di, j+dj);
+                    if(contributor.to_margin == 0) {
+                        new_shift[0] += contributor.xy_shift[0];
+                        new_shift[1] += contributor.xy_shift[1];
+                        contributors++;
+                        }
+                    }
+            if(contributors > 0) {
+                dilated_splixels[i][j].xy_shift[0] = new_shift[0] / contributors;
+                dilated_splixels[i][j].xy_shift[1] = new_shift[1] / contributors;
+            }
+        }
     }
     
     draw_canvas([], dilated_splixels);
