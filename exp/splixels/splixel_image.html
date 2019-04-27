@@ -852,11 +852,19 @@ function dilate_splixels() {
     // reset neighbors
     for(var i = 1; i < sh; ++i) {
         for(var j = 1; j < sw; ++j) {
-            if(dilated_splixels[i-1][j].to_margin == 0 && dilated_splixels[i][j].to_margin == 0){
+            if(dilated_splixels[i-1][j].to_margin == 0 && dilated_splixels[i][j].to_margin == 0 
+              && (splixel_in(dilated_splixels, i, j-1).to_margin == 1 
+                || splixel_in(dilated_splixels, i, j+1).to_margin == 1 
+                || splixel_in(dilated_splixels, i-1, j-1).to_margin == 1 
+                || splixel_in(dilated_splixels, i-1, j+1).to_margin == 1 )){
                 dilated_splixels[i][j].top = true;
                 dilated_splixels[i-1][j].bottom = true;
             }
-            if(dilated_splixels[i][j-1].to_margin == 0 && dilated_splixels[i][j].to_margin == 0){
+            if(dilated_splixels[i][j-1].to_margin == 0 && dilated_splixels[i][j].to_margin == 0
+              && (splixel_in(dilated_splixels, i-1, j).to_margin == 1 
+                || splixel_in(dilated_splixels, i+1, j).to_margin == 1 
+                || splixel_in(dilated_splixels, i-1, j-1).to_margin == 1 
+                || splixel_in(dilated_splixels, i+1, j-1).to_margin == 1 )){
                 dilated_splixels[i][j-1].right = true;
                 dilated_splixels[i][j].left = true;
             }
