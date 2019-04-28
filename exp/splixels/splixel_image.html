@@ -819,13 +819,13 @@ function show_splixels() {
         }
 }
 
-function dilate_splixels() {
+function morph_splixels(morph_how) {
     var splixels = turn_pixels_into_splixels(pixels, threshold);
     
-    // copy + dilate
+    // copy + morph
     var sw = splixels[0].length;
     var sh = splixels.length;
-    var dilated_splixels = new_splixels(sh, sw);
+    var morphd_splixels = new_splixels(sh, sw);
     for(var i = 0; i < sh; ++i) {
         for(var j = 0; j < sw; ++j) {
             var on_margin = 0;
@@ -842,33 +842,42 @@ function dilate_splixels() {
                         if(splixels[ni][nj].to_margin < 0)
                             out_margin ++;
                     }
-            if(splixels[i][j].to_margin == -1 && on_margin > 0)
-                dilated_splixels[i][j].to_margin = 0;
-            else if(splixels[i][j].to_margin == 0)
-                dilated_splixels[i][j].to_margin = 1;
-            else 
-                dilated_splixels[i][j].to_margin = splixels[i][j].to_margin;
+            if(morph_how == 'dilate') {
+                if(splixels[i][j].to_margin == -1 && on_margin > 0)
+                    morphd_splixels[i][j].to_margin = 0;
+                else if(splixels[i][j].to_margin == 0)
+                    morphd_splixels[i][j].to_margin = 1;
+                else 
+                    morphd_splixels[i][j].to_margin = splixels[i][j].to_margin;
+            } else if(morph_how == 'erode') {
+                if(splixels[i][j].to_margin == 1 && on_margin > 0)
+                    morphd_splixels[i][j].to_margin = 0;
+                else if(splixels[i][j].to_margin == 0)
+                    morphd_splixels[i][j].to_margin = -1;
+                else 
+                    morphd_splixels[i][j].to_margin = splixels[i][j].to_margin;
+            }
         }
     }
                     
     // reset neighbors
     for(var i = 1; i < sh; ++i) {
         for(var j = 1; j < sw; ++j) {
-            if(dilated_splixels[i-1][j].to_margin == 0 && dilated_splixels[i][j].to_margin == 0 
-              && (splixel_in(dilated_splixels, i, j-1).to_margin == 1 
-                || splixel_in(dilated_splixels, i, j+1).to_margin == 1 
-                || splixel_in(dilated_splixels, i-1, j-1).to_margin == 1 
-                || splixel_in(dilated_splixels, i-1, j+1).to_margin == 1 )){
-                dilated_splixels[i][j].top = true;
-                dilated_splixels[i-1][j].bottom = true;
+            if(morphd_splixels[i-1][j].to_margin == 0 && morphd_splixels[i][j].to_margin == 0 
+              && (splixel_in(morphd_splixels, i, j-1).to_margin == 1 
+                || splixel_in(morphd_splixels, i, j+1).to_margin == 1 
+                || splixel_in(morphd_splixels, i-1, j-1).to_margin == 1 
+                || splixel_in(morphd_splixels, i-1, j+1).to_margin == 1 )){
+                morphd_splixels[i][j].top = true;
+                morphd_splixels[i-1][j].bottom = true;
             }
-            if(dilated_splixels[i][j-1].to_margin == 0 && dilated_splixels[i][j].to_margin == 0
-              && (splixel_in(dilated_splixels, i-1, j).to_margin == 1 
-                || splixel_in(dilated_splixels, i+1, j).to_margin == 1 
-                || splixel_in(dilated_splixels, i-1, j-1).to_margin == 1 
-                || splixel_in(dilated_splixels, i+1, j-1).to_margin == 1 )){
-                dilated_splixels[i][j-1].right = true;
-                dilated_splixels[i][j].left = true;
+            if(morphd_splixels[i][j-1].to_margin == 0 && morphd_splixels[i][j].to_margin == 0
+              && (splixel_in(morphd_splixels, i-1, j).to_margin == 1 
+                || splixel_in(morphd_splixels, i+1, j).to_margin == 1 
+                || splixel_in(morphd_splixels, i-1, j-1).to_margin == 1 
+                || splixel_in(morphd_splixels, i+1, j-1).to_margin == 1 )){
+                morphd_splixels[i][j-1].right = true;
+                morphd_splixels[i][j].left = true;
             }
 
         }        
@@ -892,29 +901,29 @@ function dilate_splixels() {
                         }
                     }
             if(contributors > 0) {
-                dilated_splixels[i][j].xy_shift = [0., 0.];                
-                dilated_splixels[i][j].xy_normal = [0., 0.];
+                morphd_splixels[i][j].xy_shift = [0., 0.];                
+                morphd_splixels[i][j].xy_normal = [0., 0.];
                 var shift_d = Math.sqrt(Math.pow(new_shift[0] / contributors, 2) + Math.pow(new_shift[1] / contributors, 2));
                 var normal_d = Math.sqrt(Math.pow(new_normal[0] / contributors, 2) + Math.pow(new_normal[1] / contributors, 2));
-                dilated_splixels[i][j].xy_shift[0] = new_normal[0] / contributors * shift_d / normal_d;
-                dilated_splixels[i][j].xy_shift[1] = new_normal[1] / contributors * shift_d / normal_d;
-                dilated_splixels[i][j].xy_normal[0] = new_normal[0] / contributors;
-                dilated_splixels[i][j].xy_normal[1] = new_normal[1] / contributors;
+                morphd_splixels[i][j].xy_shift[0] = new_normal[0] / contributors * shift_d / normal_d;
+                morphd_splixels[i][j].xy_shift[1] = new_normal[1] / contributors * shift_d / normal_d;
+                morphd_splixels[i][j].xy_normal[0] = new_normal[0] / contributors;
+                morphd_splixels[i][j].xy_normal[1] = new_normal[1] / contributors;
             }
         }
     }
 
-    draw_canvas([], dilated_splixels);
+    draw_canvas([], morphd_splixels);
 
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
     context.lineWidth = 1;
-    for(var i = 0; i < dilated_splixels.length; ++i)    
-        for(var j = 0; j < dilated_splixels[0].length; ++j) {
-            if(splixel_in(dilated_splixels, i, j).to_margin != 0)
+    for(var i = 0; i < morphd_splixels.length; ++i)    
+        for(var j = 0; j < morphd_splixels[0].length; ++j) {
+            if(splixel_in(morphd_splixels, i, j).to_margin != 0)
                 continue;
-            var xy_shift = splixel_in(dilated_splixels, i, j).xy_shift;
-            var xy_normal = splixel_in(dilated_splixels, i, j).xy_normal;
+            var xy_shift = splixel_in(morphd_splixels, i, j).xy_shift;
+            var xy_normal = splixel_in(morphd_splixels, i, j).xy_normal;
             draw_arrow(context, pixel_size * j, pixel_size * i, 
                 pixel_size * (j + xy_shift[0]), pixel_size * (i + xy_shift[1]), "#933");
             draw_arrow(context, pixel_size * (j + xy_shift[0]), pixel_size * (i + xy_shift[1]),
@@ -988,7 +997,8 @@ Image editing overrides vectors. Click on a canvas to increase a pixel's luminos
         <br>  
     </form>
     <button type="button" style="width: 200pt;" onclick="show_splixels();">Show the splixels</button>
-    <button type="button" style="width: 200pt;" onclick="dilate_splixels();">Dilate the splixels</button>
+    <button type="button" style="width: 200pt;" onclick="morph_splixels('dilate');">Dilate the splixels</button>
+    <button type="button" style="width: 200pt;" onclick="morph_splixels('erode');">Erode the splixels</button>
     <br>
     
     <h2>
