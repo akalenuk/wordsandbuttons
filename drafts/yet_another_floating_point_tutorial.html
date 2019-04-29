@@ -354,12 +354,27 @@ function number_clear() {
 }
 
 function number_backspace() {
-    number_as_string = number_as_string.substr(0, -1);
+    number_as_string = number_as_string.substr(0, number_as_string.length - 1);
     instrumental_error_draw();
 }
 
 function number_add(digit) {
     number_as_string += digit;
+    instrumental_error_draw();
+}
+
+function number_invert_sign() {
+    if(number_as_string.length == 0)
+        return;
+    if(number_as_string[0] == '-')
+        number_as_string = number_as_string.substr(1, number_as_string.length - 1);
+    else 
+        number_as_string = '-' + number_as_string;
+    instrumental_error_draw();
+}
+
+function number_place_point() {
+    number_as_string = number_as_string.split('.').join('') + '.';
     instrumental_error_draw();
 }
     </script>
@@ -525,9 +540,9 @@ Yet another floating point tutorial
     <button type="button" id="button_2" onclick="number_add('2');">2</button>
     <button type="button" id="button_3" onclick="number_add('3');">3</button>
     <br>
-    <button type="button" id="button_minus" onclick="number_add('-');">-</button>
+    <button type="button" id="button_minus" onclick="number_invert_sign();">-</button>
     <button type="button" id="button_0" onclick="number_add('0');">0</button>
-    <button type="button" id="button_dot" onclick="number_add('.');">.</button>
+    <button type="button" id="button_dot" onclick="number_place_point();">.</button>
     </td>
     <td>
     <canvas id="instrumental_error" width=300 height=48></canvas>
