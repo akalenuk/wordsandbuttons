@@ -330,6 +330,38 @@ function floating_draw() {
         floating_context.fillText("which is " + sign * (n * Math.pow(2, e - 2 - (e > 0 ? 1 : 0))).toFixed(2) + " in real numbers", 20, 170);
     }
 }
+
+
+var number_as_string = "";
+function instrumental_error_draw() {
+    var instrumental_error = document.getElementById("instrumental_error");
+    var context = instrumental_error.getContext("2d");
+    
+    context.fillStyle="#cedecc";
+    context.fillRect(0, 0, 300, 48);
+    
+    context.fillStyle = "#220000";
+    context.textAlign = "left";
+    context.textBaseline = "alphabetic"; 
+    context.font = "20px sans-serif";
+    context.fillText(number_as_string, 20, 20);
+}
+
+
+function number_clear() {
+    number_as_string = "";
+    instrumental_error_draw();
+}
+
+function number_backspace() {
+    number_as_string = number_as_string.substr(0, -1);
+    instrumental_error_draw();
+}
+
+function number_add(digit) {
+    number_as_string += digit;
+    instrumental_error_draw();
+}
     </script>
   </head>
   <body>
@@ -479,14 +511,23 @@ Yet another floating point tutorial
     <table>
     <tr>
     <td align="right">
-    <button type="button" id="button_backspace">&larr;</button>
-    <button type="button" id="button_7">7</button><button type="button" id="button_8">8</button><button type="button" id="button_9">9</button>
+    <button type="button" id="button_clear" onclick="number_clear();" >C</button>
+    <button type="button" id="button_backspace" onclick="number_backspace();">&larr;</button>
+    <button type="button" id="button_7" onclick="number_add('7');">7</button>
+    <button type="button" id="button_8" onclick="number_add('8');">8</button>
+    <button type="button" id="button_9" onclick="number_add('9');">9</button>
     <br>
-    <button type="button" id="button_4">4</button><button type="button" id="button_5">5</button><button type="button" id="button_6">6</button>
+    <button type="button" id="button_4" onclick="number_add('4');">4</button>
+    <button type="button" id="button_5" onclick="number_add('5');">5</button>
+    <button type="button" id="button_6" onclick="number_add('6');">6</button>
     <br>
-    <button type="button" id="button_1">1</button><button type="button" id="button_2">2</button><button type="button" id="button_3">3</button>
+    <button type="button" id="button_1" onclick="number_add('1');">1</button>
+    <button type="button" id="button_2" onclick="number_add('2');">2</button>
+    <button type="button" id="button_3" onclick="number_add('3');">3</button>
     <br>
-    <button type="button" id="button_minus">-</button><button type="button" id="button_0">0</button><button type="button" id="button_dot">.</button>
+    <button type="button" id="button_minus" onclick="number_add('-');">-</button>
+    <button type="button" id="button_0" onclick="number_add('0');">0</button>
+    <button type="button" id="button_dot" onclick="number_add('.');">.</button>
     </td>
     <td>
     <canvas id="instrumental_error" width=300 height=48></canvas>
@@ -495,6 +536,9 @@ Yet another floating point tutorial
     </table>    
     </form>
     
+    <script language="JavaScript">
+        instrumental_error_draw();
+    </script>  
     
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
