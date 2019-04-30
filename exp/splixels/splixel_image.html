@@ -937,6 +937,32 @@ function morph_splixels(morph_how) {
             morphed_splixels[i][j].xy_normal = new_normal;
         }
     }
+    // second run to borrow from diagonals
+    for(var i = 0; i < sh; ++i) {
+        for(var j = 0; j < sw; ++j) {
+            if(morphed_splixels[i][j].xy_normal[0] != 0 || morphed_splixels[i][j].xy_normal[1] != 0)
+                continue;
+            var new_shift = [0., 0.];
+            var new_normal = [0., 0.];
+            var contributors = 0;
+            for(var di = -1; di <= 1; di += 1)
+                for(var dj = -1; dj <= 1; dj += 1)
+                    if(di != 0 && dj != 0) {
+                        var this_splixel = splixel_in(splixels, i+di, j+dj);
+                        var opposite_splixel = splixel_in(splixels, i-di, j-dj);
+                        if(this_splixel.to_margin == 0 && opposite_splixel.to_margin == 0) {
+                        // 0, 0 is fine
+                        } else if(this_splixel.to_margin == 0) {
+                            new_shift[0] = this_splixel.xy_shift[0];
+                            new_shift[1] = this_splixel.xy_shift[1];
+                            new_normal[0] = this_splixel.xy_normal[0];
+                            new_normal[1] = this_splixel.xy_normal[1];
+                        }
+                    }
+            morphed_splixels[i][j].xy_shift = new_shift;
+            morphed_splixels[i][j].xy_normal = new_normal;
+        }
+    }
 
     draw_canvas([], morphed_splixels);
 
