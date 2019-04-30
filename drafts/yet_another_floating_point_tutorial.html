@@ -414,13 +414,27 @@ function instrumental_error_draw() {
     var context = instrumental_error.getContext("2d");
     
     context.fillStyle="#cedecc";
-    context.fillRect(0, 0, 300, 48);
+    context.fillRect(0, 0, 300, 100);
     
     context.fillStyle = "#220000";
     context.textAlign = "left";
     context.textBaseline = "alphabetic"; 
     context.font = "20px sans-serif";
     context.fillText(number_as_string, 20, 20);
+
+    var fpn = parseFloat(number_as_string);
+    if(!isNaN(fpn)) {
+        for(var i = 1; i < 28; ++i) {        
+            if(parseFloat(all_6_bit_numbers[i][2]) > Math.abs(fpn)){
+                fpn = parseFloat(all_6_bit_numbers[i-1][2]) * Math.sign(fpn);
+                break;
+            }
+        }
+        if(parseFloat(all_6_bit_numbers[27][2]) < Math.abs(fpn)){
+           fpn = parseFloat(all_6_bit_numbers[27][2]) * Math.sign(fpn); 
+        }     
+        context.fillText(fpn, 20, 40);
+    }
 }
 
 
@@ -592,7 +606,7 @@ Yet another floating point tutorial
     <button type="button" id="button_dot" onclick="number_place_point();">.</button>
     </td>
     <td>
-    <canvas id="instrumental_error" width=300 height=48></canvas>
+    <canvas id="instrumental_error" width=300 height=100></canvas>
     </td>
     </tr>
     </table>    
