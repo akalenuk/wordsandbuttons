@@ -126,7 +126,7 @@ function init_integer() {
     var integer = document.getElementById("integer");
     integer_draw();
     
-    integer.addEventListener('click', function(e){
+    integer.addEventListener('mousedown', function(e){
         var canvas_rect = integer.getBoundingClientRect();
         var x = e.clientX - canvas_rect.left;
         var y = e.clientY - canvas_rect.top;
@@ -134,11 +134,18 @@ function init_integer() {
             if (x > integer_cell_xs[i] && x < integer_cell_xs[i] + cell_width && y > cell_y && y < cell_y + cell_height)
                 integer_cell_bits[i] = 1 - integer_cell_bits[i];
         }
-        integer_draw();
+        integer_draw('down', x, y);
+    }, false);
+    
+    integer.addEventListener('mouseup', function(e){
+        var canvas_rect = integer.getBoundingClientRect();
+        var x = e.clientX - canvas_rect.left;
+        var y = e.clientY - canvas_rect.top;    
+        integer_draw('up', x, y);
     }, false);
 }
 
-function integer_draw() {
+function integer_draw(mouse_state, x, y) {
     var integer = document.getElementById("integer");
     var integer_context = integer.getContext("2d");
 
@@ -148,6 +155,19 @@ function integer_draw() {
     
     // cells
     for(var i = 0; i < integer_cell_xs.length; ++i) {
+        if(mouse_state == "down" 
+        && x >= integer_cell_xs[i] && x - integer_cell_xs[i] < cell_width 
+        && y >= cell_y && y - cell_y < cell_height) {
+            integer_context.fillStyle = "#000";
+            integer_context.fillRect(integer_cell_xs[i] -1 , cell_y - 1, cell_width + 2, cell_height + 2);
+            integer_context.fillStyle = "#888";
+            integer_context.fillRect(integer_cell_xs[i], cell_y, cell_width + 1, cell_height + 2);            
+        } else {
+            integer_context.fillStyle = "#888";
+            integer_context.fillRect(integer_cell_xs[i] -1 , cell_y - 1, cell_width + 1, cell_height + 1);
+            integer_context.fillStyle = "#000";
+            integer_context.fillRect(integer_cell_xs[i], cell_y, cell_width + 1, cell_height + 1);                   
+        }
         integer_context.fillStyle = integer_cell_colors[i];
         integer_context.fillRect(integer_cell_xs[i], cell_y, cell_width, cell_height);
         
@@ -155,7 +175,7 @@ function integer_draw() {
         integer_context.textBaseline = "middle"; 
         integer_context.font = "48px sans-serif";
         integer_context.fillStyle = "#222222";        
-        integer_context.fillText(integer_cell_bits[i], integer_cell_xs[i] + cell_width / 2.0, cell_y + cell_height / 2.0 + 4);
+        integer_context.fillText(integer_cell_bits[i], integer_cell_xs[i] + cell_width / 2.0, cell_y + cell_height / 2.0 + 4);   
     }
     
     // the number
