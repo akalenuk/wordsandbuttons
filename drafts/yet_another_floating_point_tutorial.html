@@ -150,11 +150,11 @@ function init_integer() {
 
 function integer_draw(mouse_state, x, y) {
     var integer = document.getElementById("integer");
-    var integer_context = integer.getContext("2d");
+    var context = integer.getContext("2d");
 
     // background
-    integer_context.fillStyle="#dbd5a0";
-    integer_context.fillRect(0, 0, w, h);
+    context.fillStyle="#dbd5a0";
+    context.fillRect(0, 0, w, h);
     
     // cells
     for(var i = 0; i < integer_cell_xs.length; ++i) {
@@ -163,26 +163,26 @@ function integer_draw(mouse_state, x, y) {
         if(mouse_state == "down" 
         && x >= integer_cell_xs[i] && x - integer_cell_xs[i] < cell_width 
         && y >= cell_y && y - cell_y < cell_height) {
-            integer_context.fillStyle = button_shadow;
-            integer_context.fillRect(integer_cell_xs[i] -1 , cell_y - 1, cell_width + 2, cell_height + 2);
-            integer_context.fillStyle = button_border;
-            integer_context.fillRect(integer_cell_xs[i], cell_y, cell_width + 1, cell_height + 2);
+            context.fillStyle = button_shadow;
+            context.fillRect(integer_cell_xs[i] -1 , cell_y - 1, cell_width + 2, cell_height + 2);
+            context.fillStyle = button_border;
+            context.fillRect(integer_cell_xs[i], cell_y, cell_width + 1, cell_height + 2);
             text_dx = 1;
             text_dy = 1;
         } else {
-            integer_context.fillStyle = button_border;
-            integer_context.fillRect(integer_cell_xs[i] -1 , cell_y - 1, cell_width + 1, cell_height + 1);
-            integer_context.fillStyle = button_shadow;
-            integer_context.fillRect(integer_cell_xs[i], cell_y, cell_width + 1, cell_height + 1);                   
+            context.fillStyle = button_border;
+            context.fillRect(integer_cell_xs[i] -1 , cell_y - 1, cell_width + 1, cell_height + 1);
+            context.fillStyle = button_shadow;
+            context.fillRect(integer_cell_xs[i], cell_y, cell_width + 1, cell_height + 1);                   
         }
-        integer_context.fillStyle = integer_cell_colors[i];
-        integer_context.fillRect(integer_cell_xs[i], cell_y, cell_width, cell_height);
+        context.fillStyle = integer_cell_colors[i];
+        context.fillRect(integer_cell_xs[i], cell_y, cell_width, cell_height);
         
-        integer_context.textAlign = "center";
-        integer_context.textBaseline = "middle"; 
-        integer_context.font = "48px sans-serif";
-        integer_context.fillStyle = "#222222";        
-        integer_context.fillText(integer_cell_bits[i], text_dx + integer_cell_xs[i] + cell_width / 2.0, text_dx + cell_y + cell_height / 2.0 + 4);   
+        context.textAlign = "center";
+        context.textBaseline = "middle"; 
+        context.font = "48px sans-serif";
+        context.fillStyle = "#222222";        
+        context.fillText(integer_cell_bits[i], text_dx + integer_cell_xs[i] + cell_width / 2.0, text_dx + cell_y + cell_height / 2.0 + 4);   
     }
     
     // the number
@@ -192,15 +192,15 @@ function integer_draw(mouse_state, x, y) {
       n = 32 - n;
     
     // comment
-    integer_context.fillStyle = "#914853"
-    integer_context.textAlign = "left";
-    integer_context.textBaseline = "alphabetic"; 
-    integer_context.font = "20px sans-serif";
-    integer_context.fillText(sign == -1.0 ? "Negative number" : "Positive number", 20, 120);
-    integer_context.fillText("which is " + sign * n + ".", 20, 170);
+    context.fillStyle = "#914853"
+    context.textAlign = "left";
+    context.textBaseline = "alphabetic"; 
+    context.font = "20px sans-serif";
+    context.fillText(sign == -1.0 ? "Negative number" : "Positive number", 20, 120);
+    context.fillText("which is " + sign * n + ".", 20, 170);
     
-    integer_context.fillStyle = "#673670";
-    integer_context.fillText("of " + n + " things,", 20, 145);
+    context.fillStyle = "#673670";
+    context.fillText("of " + n + " things,", 20, 145);
 }
 
 // fixed point
@@ -212,7 +212,7 @@ function init_fixed() {
     var fixed = document.getElementById("fixed");
     fixed_draw();
     
-    fixed.addEventListener('click', function(e){
+    fixed.addEventListener('mousedown', function(e){
         var canvas_rect = fixed.getBoundingClientRect();
         var x = e.clientX - canvas_rect.left;
         var y = e.clientY - canvas_rect.top;
@@ -220,28 +220,52 @@ function init_fixed() {
             if (x > fixed_cell_xs[i] && x < fixed_cell_xs[i] + cell_width && y > cell_y && y < cell_y + cell_height)
                 fixed_cell_bits[i] = 1 - fixed_cell_bits[i];
         }
-        fixed_draw();
+        fixed_draw('down', x, y);
+    }, false);
+    
+    fixed.addEventListener('mouseup', function(e){
+        var canvas_rect = fixed.getBoundingClientRect();
+        var x = e.clientX - canvas_rect.left;
+        var y = e.clientY - canvas_rect.top;    
+        fixed_draw('up', x, y);
     }, false);
 }
 
-function fixed_draw() {
+function fixed_draw(mouse_state, x, y) {
     var fixed = document.getElementById("fixed");
-    var fixed_context = fixed.getContext("2d");
+    var context = fixed.getContext("2d");
 
     // background
-    fixed_context.fillStyle="#dbd5a0";
-    fixed_context.fillRect(0, 0, w, h);
+    context.fillStyle="#dbd5a0";
+    context.fillRect(0, 0, w, h);
     
     // cells
     for(var i = 0; i < fixed_cell_xs.length; ++i) {
-        fixed_context.fillStyle = fixed_cell_colors[i];
-        fixed_context.fillRect(fixed_cell_xs[i], cell_y, cell_width, cell_height);
+        var text_dx = 0;
+        var text_dy = 0;
+        if(mouse_state == "down" 
+        && x >= fixed_cell_xs[i] && x - fixed_cell_xs[i] < cell_width 
+        && y >= cell_y && y - cell_y < cell_height) {
+            context.fillStyle = button_shadow;
+            context.fillRect(fixed_cell_xs[i] -1 , cell_y - 1, cell_width + 2, cell_height + 2);
+            context.fillStyle = button_border;
+            context.fillRect(fixed_cell_xs[i], cell_y, cell_width + 1, cell_height + 2);
+            text_dx = 1;
+            text_dy = 1;
+        } else {
+            context.fillStyle = button_border;
+            context.fillRect(fixed_cell_xs[i] -1 , cell_y - 1, cell_width + 1, cell_height + 1);
+            context.fillStyle = button_shadow;
+            context.fillRect(fixed_cell_xs[i], cell_y, cell_width + 1, cell_height + 1);                   
+        }    
+        context.fillStyle = fixed_cell_colors[i];
+        context.fillRect(fixed_cell_xs[i], cell_y, cell_width, cell_height);
         
-        fixed_context.textAlign = "center";
-        fixed_context.textBaseline = "middle"; 
-        fixed_context.font = "48px sans-serif";
-        fixed_context.fillStyle = "#222222";        
-        fixed_context.fillText(fixed_cell_bits[i], fixed_cell_xs[i] + cell_width / 2.0, cell_y + cell_height / 2.0 + 4);
+        context.textAlign = "center";
+        context.textBaseline = "middle"; 
+        context.font = "48px sans-serif";
+        context.fillStyle = "#222222";        
+        context.fillText(fixed_cell_bits[i], text_dx + fixed_cell_xs[i] + cell_width / 2.0, text_dy + cell_y + cell_height / 2.0 + 4);
     }
     
     // the number
@@ -251,19 +275,19 @@ function fixed_draw() {
         n = 32 - n;
     
     // explicit point
-    fixed_context.fillStyle = "#597052";
-    fixed_context.fillText(".", 430, cell_y + cell_height / 2.0 + 4);
+    context.fillStyle = "#597052";
+    context.fillText(".", 430, cell_y + cell_height / 2.0 + 4);
     
     // comment
-    fixed_context.fillStyle = "#914853"
-    fixed_context.textAlign = "left";
-    fixed_context.textBaseline = "alphabetic"; 
-    fixed_context.font = "20px sans-serif";
-    fixed_context.fillText(sign == -1.0 ? "Negative number" : "Positive number", 20, 120);
+    context.fillStyle = "#914853"
+    context.textAlign = "left";
+    context.textBaseline = "alphabetic"; 
+    context.font = "20px sans-serif";
+    context.fillText(sign == -1.0 ? "Negative number" : "Positive number", 20, 120);
 
-    fixed_context.fillStyle = "#673670"
-    fixed_context.fillText("of " + n + " quarters,", 20, 145);
-    fixed_context.fillText("which is " + sign * (n / 4.0).toFixed(2) + " in real numbers.", 20, 170);
+    context.fillStyle = "#673670"
+    context.fillText("of " + n + " quarters,", 20, 145);
+    context.fillText("which is " + sign * (n / 4.0).toFixed(2) + " in real numbers.", 20, 170);
 }
 
 // floating point
@@ -275,7 +299,7 @@ function init_floating() {
     var floating = document.getElementById("floating");
     floating_draw();
     
-    floating.addEventListener('click', function(e){
+    floating.addEventListener('mousedown', function(e){
         var canvas_rect = floating.getBoundingClientRect();
         var x = e.clientX - canvas_rect.left;
         var y = e.clientY - canvas_rect.top;
@@ -283,28 +307,52 @@ function init_floating() {
             if (x > floating_cell_xs[i] && x < floating_cell_xs[i] + cell_width && y > cell_y && y < cell_y + cell_height)
                 floating_cell_bits[i] = 1 - floating_cell_bits[i];
         }
-        floating_draw();
+        floating_draw('down', x, y);
+    }, false);
+    
+    floating.addEventListener('mouseup', function(e){
+        var canvas_rect = floating.getBoundingClientRect();
+        var x = e.clientX - canvas_rect.left;
+        var y = e.clientY - canvas_rect.top;    
+        floating_draw('up', x, y);
     }, false);
 }
 
-function floating_draw() {
+function floating_draw(mouse_state, x, y) {
     var floating = document.getElementById("floating");
-    var floating_context = floating.getContext("2d");
+    var context = floating.getContext("2d");
 
     // background
-    floating_context.fillStyle="#dbd5a0";
-    floating_context.fillRect(0, 0, w, h);
+    context.fillStyle="#dbd5a0";
+    context.fillRect(0, 0, w, h);
     
     // cells
     for(var i = 0; i < floating_cell_xs.length; ++i) {
-        floating_context.fillStyle = floating_cell_colors[i];
-        floating_context.fillRect(floating_cell_xs[i], cell_y, cell_width, cell_height);
+        var text_dx = 0;
+        var text_dy = 0;
+        if(mouse_state == "down" 
+        && x >= floating_cell_xs[i] && x - floating_cell_xs[i] < cell_width 
+        && y >= cell_y && y - cell_y < cell_height) {
+            context.fillStyle = button_shadow;
+            context.fillRect(floating_cell_xs[i] -1 , cell_y - 1, cell_width + 2, cell_height + 2);
+            context.fillStyle = button_border;
+            context.fillRect(floating_cell_xs[i], cell_y, cell_width + 1, cell_height + 2);
+            text_dx = 1;
+            text_dy = 1;
+        } else {
+            context.fillStyle = button_border;
+            context.fillRect(floating_cell_xs[i] -1 , cell_y - 1, cell_width + 1, cell_height + 1);
+            context.fillStyle = button_shadow;
+            context.fillRect(floating_cell_xs[i], cell_y, cell_width + 1, cell_height + 1);                   
+        }        
+        context.fillStyle = floating_cell_colors[i];
+        context.fillRect(floating_cell_xs[i], cell_y, cell_width, cell_height);
         
-        floating_context.textAlign = "center";
-        floating_context.textBaseline = "middle"; 
-        floating_context.font = "48px sans-serif";
-        floating_context.fillStyle = "#222222";        
-        floating_context.fillText(floating_cell_bits[i], floating_cell_xs[i] + cell_width / 2.0, cell_y + cell_height / 2.0 + 4);
+        context.textAlign = "center";
+        context.textBaseline = "middle"; 
+        context.font = "48px sans-serif";
+        context.fillStyle = "#222222";        
+        context.fillText(floating_cell_bits[i], text_dx + floating_cell_xs[i] + cell_width / 2.0, text_dy + cell_y + cell_height / 2.0 + 4);
     }
     
     // the number
@@ -314,32 +362,32 @@ function floating_draw() {
     
     // explicit point
     if (e != 0 && e != 7) {
-        floating_context.fillStyle = "#673670";
-        floating_context.fillText("1", 420, cell_y + cell_height / 2.0 + 4);    
+        context.fillStyle = "#673670";
+        context.fillText("1", 420, cell_y + cell_height / 2.0 + 4);    
     }
     
     // comment
-    floating_context.textAlign = "left";
-    floating_context.textBaseline = "alphabetic"; 
-    floating_context.font = "20px sans-serif";
+    context.textAlign = "left";
+    context.textBaseline = "alphabetic"; 
+    context.font = "20px sans-serif";
             
     if( e == 7 ) {
         if ( n == 0 ) {
-            floating_context.fillStyle = "#914853";
-            floating_context.fillText(sign == -1.0 ? "Negative" : "Positive", 20, 120);
-            floating_context.fillStyle = "#673670";
-            floating_context.fillText("infinite number.", 20, 145);
+            context.fillStyle = "#914853";
+            context.fillText(sign == -1.0 ? "Negative" : "Positive", 20, 120);
+            context.fillStyle = "#673670";
+            context.fillText("infinite number.", 20, 145);
         } else {
-            floating_context.fillStyle = "#673670";
-            floating_context.fillText("Not a number.", 20, 120);
+            context.fillStyle = "#673670";
+            context.fillText("Not a number.", 20, 120);
         }
     } else {
-        floating_context.fillStyle = "#914853";
-        floating_context.fillText(sign == -1.0 ? "Negative number" : "Positive number", 20, 120);
+        context.fillStyle = "#914853";
+        context.fillText(sign == -1.0 ? "Negative number" : "Positive number", 20, 120);
         
-        floating_context.fillStyle = "#673670"
-        floating_context.fillText("of " + n, 20, 145);
-        floating_context.fillStyle = "#597052";
+        context.fillStyle = "#673670"
+        context.fillText("of " + n, 20, 145);
+        context.fillStyle = "#597052";
         var measures = "quarters,";
         if(e == 2)
             measures = "halves,";
@@ -351,10 +399,10 @@ function floating_draw() {
             measures = "four-packs,";
         if(e == 6)
             measures = "eight-packs,";
-        floating_context.fillText(measures, 64, 145);
+        context.fillText(measures, 64, 145);
         
-        floating_context.fillStyle = "#673670"
-        floating_context.fillText("which is " + sign * (n * Math.pow(2, e - 2 - (e > 0 ? 1 : 0))).toFixed(2) + " in real numbers", 20, 170);
+        context.fillStyle = "#673670"
+        context.fillText("which is " + sign * (n * Math.pow(2, e - 2 - (e > 0 ? 1 : 0))).toFixed(2) + " in real numbers", 20, 170);
     }
 }
 
@@ -517,6 +565,9 @@ Yet another floating point tutorial
     <script language="JavaScript">
         init_integer();
     </script>
+    <p class="comment">
+The number buttons are clickable.
+    </p>
     
     <table>
     <tr><td><b>Unsigned 1-digit decimal</b></td><td><b>Signed 1-digit decimal<b></td></tr>
