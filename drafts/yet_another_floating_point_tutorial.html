@@ -116,6 +116,9 @@ const h = 200;
 const cell_width = 64;    
 const cell_height = 64;
 const cell_y = 20;
+
+const button_border = "#999";
+const button_shadow = "#444";
     
 // integer point
 integer_cell_xs = [20, 20 + 90 + 43, 20 + 90*2 + 43 + 11, 20 + 90*3 + 43 + 11*2, 20 + 90*4 + 43 + 11*3, 20 + 90*5 + 43 + 11*4];
@@ -155,17 +158,21 @@ function integer_draw(mouse_state, x, y) {
     
     // cells
     for(var i = 0; i < integer_cell_xs.length; ++i) {
+        var text_dx = 0;
+        var text_dy = 0;
         if(mouse_state == "down" 
         && x >= integer_cell_xs[i] && x - integer_cell_xs[i] < cell_width 
         && y >= cell_y && y - cell_y < cell_height) {
-            integer_context.fillStyle = "#000";
+            integer_context.fillStyle = button_shadow;
             integer_context.fillRect(integer_cell_xs[i] -1 , cell_y - 1, cell_width + 2, cell_height + 2);
-            integer_context.fillStyle = "#888";
-            integer_context.fillRect(integer_cell_xs[i], cell_y, cell_width + 1, cell_height + 2);            
+            integer_context.fillStyle = button_border;
+            integer_context.fillRect(integer_cell_xs[i], cell_y, cell_width + 1, cell_height + 2);
+            text_dx = 1;
+            text_dy = 1;
         } else {
-            integer_context.fillStyle = "#888";
+            integer_context.fillStyle = button_border;
             integer_context.fillRect(integer_cell_xs[i] -1 , cell_y - 1, cell_width + 1, cell_height + 1);
-            integer_context.fillStyle = "#000";
+            integer_context.fillStyle = button_shadow;
             integer_context.fillRect(integer_cell_xs[i], cell_y, cell_width + 1, cell_height + 1);                   
         }
         integer_context.fillStyle = integer_cell_colors[i];
@@ -175,7 +182,7 @@ function integer_draw(mouse_state, x, y) {
         integer_context.textBaseline = "middle"; 
         integer_context.font = "48px sans-serif";
         integer_context.fillStyle = "#222222";        
-        integer_context.fillText(integer_cell_bits[i], integer_cell_xs[i] + cell_width / 2.0, cell_y + cell_height / 2.0 + 4);   
+        integer_context.fillText(integer_cell_bits[i], text_dx + integer_cell_xs[i] + cell_width / 2.0, text_dx + cell_y + cell_height / 2.0 + 4);   
     }
     
     // the number
