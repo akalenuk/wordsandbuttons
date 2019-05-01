@@ -91,10 +91,10 @@ form {
 }
 
 input[type="text"] {
-    width: 32pt;
+    width: 84pt;
     height: 22pt;
     font-size: 16pt;
-    text-align: center;
+    text-align: right;
 }
 
 button {
@@ -490,7 +490,7 @@ function fill_all_numbers_table() {
 }
 
 // "calculator"
-var number_as_string = "";
+var number_as_string = "0";
 
 function in_6_bit(fpn) {
     if(isNaN(fpn))
@@ -503,43 +503,47 @@ function in_6_bit(fpn) {
     return parseFloat(all_6_bit_numbers[27][2]) * Math.sign(fpn); 
 }
 
-function instrumental_error_draw() {
-    var instrumental_error = document.getElementById("instrumental_error");
-    var context = instrumental_error.getContext("2d");
-    
-    context.fillStyle="#cedecc";
-    context.fillRect(0, 0, 300, 100);
-    
-    context.fillStyle = "#220000";
-    context.textAlign = "left";
-    context.textBaseline = "alphabetic"; 
-    context.font = "20px monospace";
-    context.fillText(number_as_string, 20, 20);
+function instrumental_error_fill() {
+    var text1 = document.getElementById("number_as_string");
+    var text2 = document.getElementById("number_in_6_bit");
+    var text3 = document.getElementById("error_in_6_bit");
+
+    text1.value = number_as_string;
 
     var fpn = parseFloat(number_as_string);
     if(!isNaN(fpn)) {
-        context.fillText(in_6_bit(fpn), 20, 40);
+        text2.value = in_6_bit(fpn);
         const number_len = number_as_string.split('.').length < 2 ? 0 : number_as_string.split('.')[1].length;
-        context.fillText(Math.abs(fpn - in_6_bit(fpn)).toFixed(number_len), 20, 60);
+        text3.value = Math.abs(fpn - in_6_bit(fpn)).toFixed(number_len);
+    } else {
+        text2.value = "NaN";
+        text3.value = "?";
     }
 }
 
 
 function number_clear() {
-    number_as_string = "";
-    instrumental_error_draw();
+    number_as_string = "0";
+    instrumental_error_fill();
 }
 
 function number_backspace() {
     number_as_string = number_as_string.substr(0, number_as_string.length - 1);
     if(number_as_string.length > 0 && number_as_string[number_as_string.length-1] == '.')   // floating point
         number_as_string = number_as_string.substr(0, number_as_string.length - 1);
-    instrumental_error_draw();
+    if(number_as_string == "-" || number_as_string.length == 0)
+        number_as_string = "0";
+    instrumental_error_fill();
 }
 
 function number_add(digit) {
-    number_as_string += digit;
-    instrumental_error_draw();
+    if(number_as_string == "0")
+        number_as_string = digit;
+    else if(number_as_string == "-0")
+        number_as_string = "-" + digit;
+    else
+        number_as_string += digit;
+    instrumental_error_fill();
 }
 
 function number_invert_sign() {
@@ -549,12 +553,12 @@ function number_invert_sign() {
         number_as_string = number_as_string.substr(1, number_as_string.length - 1);
     else 
         number_as_string = '-' + number_as_string;
-    instrumental_error_draw();
+    instrumental_error_fill();
 }
 
 function number_place_point() {
     number_as_string = number_as_string.split('.').join('') + '.';
-    instrumental_error_draw();
+    instrumental_error_fill();
 }
     </script>
   </head>
@@ -697,7 +701,11 @@ The number buttons are clickable.
     <button type="button" id="button_0" onclick="number_add('0');">0</button>
     <button type="button" id="button_dot" onclick="number_place_point();">.</button>
     </td>
-    <td style="vertical-align: middle;">
+    <td align="right">
+    <label for="number_as_string">Input number: </label><input type="text" id="number_as_string" value="0"><br>
+    <label for="number_in_6_bit">As 6-bit FP: </label><input type="text" id="number_in_6_bit" value="0"><br>
+    <label for="error_in_6_bit">Instrumental error: </label><input type="text" id="error_in_6_bit" value="0"><br>    
+    
     <canvas id="instrumental_error" width=300 height=100></canvas>
     </td>
     </tr>
@@ -705,7 +713,7 @@ The number buttons are clickable.
     </form>
     
     <script language="JavaScript">
-        instrumental_error_draw();
+        instrumental_error_fill();
     </script>  
     
     <h2>
