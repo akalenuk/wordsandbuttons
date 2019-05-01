@@ -512,9 +512,12 @@ function instrumental_error_fill() {
 
     var fpn = parseFloat(number_as_string);
     if(!isNaN(fpn)) {
-        text2.value = in_6_bit(fpn);
+        const fpn_6_bit = in_6_bit(fpn);
+        text2.value = fpn_6_bit;
         const number_len = number_as_string.split('.').length < 2 ? 0 : number_as_string.split('.')[1].length;
-        text3.value = Math.abs(fpn - in_6_bit(fpn)).toFixed(number_len);
+        const another_number_len = fpn_6_bit.toString().split('.').length < 2 ? 0 : fpn_6_bit.toString().split('.')[1].length;
+        const real_number_len = another_number_len > number_len ? another_number_len : number_len;
+        text3.value = Math.abs(fpn - fpn_6_bit).toFixed(real_number_len);
     } else {
         text2.value = "NaN";
         text3.value = "?";
