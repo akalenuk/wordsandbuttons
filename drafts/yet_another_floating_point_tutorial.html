@@ -495,12 +495,17 @@ var number_as_string = "0";
 function in_6_bit(fpn) {
     if(isNaN(fpn))
         return NaN;
-    for(var i = 1; i < 28; ++i) {        
-        if(parseFloat(all_6_bit_numbers[i][2]) > Math.abs(fpn)){
-            return parseFloat(all_6_bit_numbers[i-1][2]) * Math.sign(fpn);
+    var min_diff = 56;
+    var best_i = 0;
+    for(var i = 1; i < 28; ++i) {
+        const in_table = parseFloat(all_6_bit_numbers[i][2]);
+        const diff = Math.abs((Math.abs(fpn) - in_table));
+        if(diff < min_diff){
+            min_diff = diff;
+            best_i = i;
         }
     }
-    return parseFloat(all_6_bit_numbers[27][2]) * Math.sign(fpn); 
+    return parseFloat(all_6_bit_numbers[best_i][2]) * Math.sign(fpn);
 }
 
 function instrumental_error_fill() {
