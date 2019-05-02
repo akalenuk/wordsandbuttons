@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cstdint>
+#include <cmath>
+#include <limits>
 
 using namespace std;
 
@@ -14,7 +16,8 @@ void print_32_bits(float x) {
 }
 
 int main() {
-    print_32_bits(0.5f);
-    print_32_bits(1.0f);
-    print_32_bits(2.0f);
+    cout << (static_cast<float>(nextafter(1., 2.)) == 1.f ? "one" : "not one") << "\n";
+    cout << (static_cast<float>(nextafter(1., 0.)) == 1.f ? "one" : "not one") << "\n";
+    cout << (static_cast<float>((nextafterf(1., 2.) - 1.) / 2. + 1.) == 1.f ? "one" : "not one") << "\n";
+    cout << (static_cast<float>((nextafterf(1., 2.) - 1.) / 2. + numeric_limits<double>::epsilon() + 1.) == 1.f ? "one" : "not one") << "\n";
 }
