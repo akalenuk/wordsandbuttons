@@ -3,21 +3,18 @@
 
 using namespace std;
 
-void print_8_bits(int8_t a) {
-    cout << ((a & 0x80) ? 1 : 0);    
-    cout << ((a & 0x40) ? 1 : 0);    
-    cout << ((a & 0x20) ? 1 : 0);    
-    cout << ((a & 0x10) ? 1 : 0);    
-    cout << ((a & 0x08) ? 1 : 0);    
-    cout << ((a & 0x04) ? 1 : 0);    
-    cout << ((a & 0x02) ? 1 : 0);    
-    cout << ((a & 0x01) ? 1 : 0);    
+void print_32_bits(float x) {
+    const uint32_t a = *(reinterpret_cast<const uint32_t*>(&x));
+    uint32_t mask = 0x80'00'00'00;
+    for(auto i = 0u; i < 32; ++i) {
+        cout << ((a & mask) ? 1 : 0);
+        mask >>= 1;
+    }
+    cout << "\n";
 }
 
 int main() {
-    int8_t a = -128;
-    for(auto i = 0u; i < 256; ++i) {
-        print_8_bits(a++);
-        cout << "\n";
-    } 
+    print_32_bits(0.5f);
+    print_32_bits(1.0f);
+    print_32_bits(2.0f);
 }
