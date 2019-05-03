@@ -508,6 +508,7 @@ function in_6_bit(fpn) {
     return parseFloat(all_6_bit_numbers[best_i][2]) * Math.sign(fpn);
 }
 
+var instrumental_error = NaN;
 function instrumental_error_fill() {
     var text1 = document.getElementById("number_as_string");
     var text2 = document.getElementById("number_in_6_bit");
@@ -523,6 +524,7 @@ function instrumental_error_fill() {
         const another_number_len = fpn_6_bit.toString().split('.').length < 2 ? 0 : fpn_6_bit.toString().split('.')[1].length;
         const real_number_len = another_number_len > number_len ? another_number_len : number_len;
         text3.value = Math.abs(fpn - fpn_6_bit).toFixed(real_number_len);
+        instrumental_error = text3.value;
     } else {
         text2.value = "NaN";
         text3.value = "?";
@@ -576,6 +578,17 @@ function sum_error_fill() {
     var result = Number(a) + Number(b);
     document.getElementById("sum_result").value = in_6_bit(result);
     document.getElementById("sum_error").value = result - in_6_bit(result);
+}
+
+/// quests
+function check_instrumental_error_quest_1() {
+    if(instrumental_error != "0.001"){
+        document.getElementById("reply_instrumental_error_quest_1").innerHTML = "That's not exactly 0.001. Please try again.";
+    } else {
+        document.getElementById("reply_instrumental_error_quest_1").innerHTML = "Yes! Since 0.001 don't fit 6-bit floating point, you can just add it to any number that does.";
+        document.getElementById("buttons_instrumental_error_quest_1").style.display = 'none';
+//        quests[3] = 1;
+    }
 }
     </script>
   </head>
@@ -729,7 +742,20 @@ The number buttons are clickable.
     
     <script language="JavaScript">
         instrumental_error_fill();
-    </script>  
+    </script>
+    <p>
+...
+    </p>
+    <form>
+        <b>Quest n.</b> Using the thing above, enter a number with exactly 0.001 error.
+        <div id="reply_instrumental_error_quest_1" style="padding-top:6pt;"></div>
+        <div id="buttons_instrumental_error_quest_1" style="text-align:right;">
+            <button type="button" id="button_instrumental_error_quest_1" onclick="check_instrumental_error_quest_1()" style="width: 108pt;">Check!</button>
+        </div>
+    </form>
+    <p>
+...
+    </p>
     
     <h2>
     Computational error
