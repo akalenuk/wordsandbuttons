@@ -455,7 +455,7 @@ var cur_point_in_pair_indexes = [];
 var cur_tangent_index = -1;
 var cur_tangent_in_pair_index = -1;
 function init_canvas(){
-    var canvas = document.getElementById("canvas");
+/*    var canvas = document.getElementById("canvas");
     canvas.addEventListener('mousedown', function(e){
         canvas_rect = canvas.getBoundingClientRect();
         var x = e.clientX - canvas_rect.left;
@@ -521,7 +521,7 @@ function init_canvas(){
                 splines = turn_points_and_tangents_into_splines(points_and_tangents);  
             }
             splines = turn_points_and_tangents_into_splines(points_and_tangents);
-            draw_canvas(splines, []);
+            //draw_canvas(splines, []);
         }
     }, false);
     
@@ -555,14 +555,16 @@ function init_canvas(){
             tangents[cur_tangent_index][cur_tangent_in_pair_index][1] = y / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][1];
             splines = turn_points_and_tangents_into_splines(points_and_tangents);  
         }
-        draw_canvas(splines, []);
+        //draw_canvas(splines, []);
     }, false);
     
-    draw_canvas(splines, []);
+    //draw_canvas(splines, []);
+    */
 }
 
 
 function draw_canvas(splines, splixels){
+/*    
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
     // background
@@ -695,7 +697,7 @@ function draw_canvas(splines, splixels){
                 }
             }
         }
-    }
+    }*/
 }
 
 function draw_arrow(context, x1, y1, x2, y2, color) {
@@ -715,8 +717,8 @@ function draw_arrow(context, x1, y1, x2, y2, color) {
 }
 
 // import from PGM
-function reimport_image(var n) {
-    var pixels = eval("pixels_" + n);
+function reimport_image(n) {
+    var pixels = [];
     space_divided = function(text) {
         var new_text = text.replace('\r', ' ');
         new_text = new_text.replace('\n', ' ');
@@ -740,7 +742,7 @@ function reimport_image(var n) {
     }
     var numbers = space_divided(no_comments.join(' ')).split(' ');
     if(numbers[0] != "P2") {
-        document.getElementById("import_status" + n).innerHTML = "Sorry, I can only import grayscale Netpbm (*.pgm = 'P2...')";
+        document.getElementById("import_status_" + n).innerHTML = "Sorry, I can only import grayscale Netpbm (*.pgm = 'P2...')";
         return;
     }
     try {
@@ -748,26 +750,27 @@ function reimport_image(var n) {
         var new_h = parseInt(numbers[2]);
         var new_depth = parseInt(numbers[3]);
         if(numbers.length > new_w * new_h + 4) {
-            document.getElementById("import_status" + n).innerHTML = "Sorry, there's some extra data I couldn't parse.";
+            document.getElementById("import_status_" + n).innerHTML = "Sorry, there's some extra data I couldn't parse.";
             return;
         }
         if(numbers.length < new_w * new_h + 4) {
-            document.getElementById("import_status" + n).innerHTML = "Sorry, not enough data to form an image.";
+            document.getElementById("import_status_" + n).innerHTML = "Sorry, not enough data to form an image.";
             return;
         }
         h = 1024.0 * new_h / new_w;
         document.getElementById("canvas").height = h;
         pixel_size = w / new_w;
-        reset_pixels(new_w, new_h);
+        pixels = new_pixels(new_w, new_h);
         for(var i = 0; i < new_h; ++i)
             for(var j = 0; j < new_w; ++j)
                 pixels[i][j] = parseInt(numbers[4 + i*new_w + j]) / new_depth;
         points_and_tangents = turn_pixels_into_points_and_tangents(pixels, threshold);
         splines = turn_points_and_tangents_into_splines(points_and_tangents);
     } catch (error) {
-        document.getElementById("import_status" + n).innerHTML = "Sorry, couldn't parse that. " + error.message;
+        document.getElementById("import_status_" + n).innerHTML = "Sorry, couldn't parse that. " + error.message;
     }
-    draw_canvas(splines, []);  
+    return pixels;
+    //draw_canvas(splines, []);  
 }
 
 
@@ -808,7 +811,7 @@ function splixel_in(splixels, i, j) {
 
 function show_splixels() {
     var splixels = turn_pixels_into_splixels(pixels, threshold);
-    draw_canvas([], splixels);
+    //draw_canvas([], splixels);
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
     
@@ -868,7 +871,7 @@ P2
     </textarea>
     <form>
         Grey value threshold: <input type="text" id="threshold" value="0.5">
-        <button type="button" style="width: 200pt;" onclick="reset_threshold(); reimport_image(1)">Reimport the PGM</button> 
+        <button type="button" style="width: 200pt;" onclick="reset_threshold(); pixels_1 = reimport_image(1);">Reimport the PGM</button> 
     </form>
     <p id="import_status_1" class="comment">
     </p>
@@ -900,7 +903,7 @@ P2
     </textarea>
     <form>
         Grey value threshold: <input type="text" id="threshold" value="0.5">
-        <button type="button" style="width: 200pt;" onclick="reset_threshold(); reimport_image(2)">Reimport the PGM</button> 
+        <button type="button" style="width: 200pt;" onclick="reset_threshold(); pixels_2 = reimport_image(2);">Reimport the PGM</button> 
     </form>
     <p id="import_status_2" class="comment">
     </p>
@@ -1042,8 +1045,8 @@ P2
     <br>
     
     <script language="JavaScript">
-    reimport_image(1);    
-    reimport_image(2);
+    pixels_1 = reimport_image(1);
+    pixels_2 = reimport_image(2);
     init_canvas();    
     </script>
     
