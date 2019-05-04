@@ -145,7 +145,7 @@ var splines = [];
 
 // splixels
 const splixel = {
-    to_margin: 1, // 1 - outside, 0 - margin, -1 - inside (that might change to the quasi-distance)
+    to_margin: 1, // -1 = outside; 1 = inside; 0 = margin
     xy_shift: [0.0, 0.0], // shift from a splixel center point (which is pixel's upper-left)
     xy_normal: [0.0, 0.0], // unnormalized normal vector in the shifted point.
     // neighbors
@@ -997,9 +997,10 @@ function cut_splixels() {
     // copy + morph
     var sw = splixels[0].length;
     var sh = splixels.length;
-    var f = function (x, y) {
-        return y > (sh / 3. + (x / sw) * sh * 0.3);
+    var y_x = function(x){
+        return (sh / 3. + (x / sw) * sh * 0.3);
     }
+    var f = function (x, y) { return y > y_x(x);}
     var t = function (x, y) { return !f(x, y);}
     var cut_splixels = new_splixels(sh, sw);
     for(var i = 0; i < sh; ++i) {
@@ -1016,8 +1017,46 @@ function cut_splixels() {
                 cut_splixels[i][j].to_margin = -1;
                 cut_splixels[i][j].xy_shift = [0, 0];
                 cut_splixels[i][j].xy_normal = [0, 0];
+            } else {
+                if(splixels[i][j].to_margin == -1) {
+                    cut_splixels[i][j].to_margin = -1;
+                    cut_splixels[i][j].xy_shift = [0, 0];
+                    cut_splixels[i][j].xy_normal = [0, 0];
+                } else if(splixels[i][j].to_margin == 1){
+                    cut_splixels[i][j].to_margin = 0;
+                    cut_splixels[i][j].xy_shift = [0, y_x(j) - i];
+                    cut_splixels[i][j].xy_normal = [0, 0];                    
+                } else if(splixels[i][j].to_margin == 0){
+                    cut_splixels[i][j].to_margin = 0;
+                    cut_splixels[i][j].xy_shift = [0, y_x(j) - i];
+                    //cut_splixels[i][j].xy_shift = [splixels[i][j].xy_shift[0], y_x(j + splixels[i][j].xy_shift[0]) - i];
+                    cut_splixels[i][j].xy_normal = [0, 0];                    
+                }
             }
         }
+    }
+
+    // reset neighbors
+    for(var i = 1; i < sh; ++i) {
+        for(var j = 1; j < sw; ++j) {
+            if(cut_splixels[i-1][j].to_margin == 0 && cut_splixels[i][j].to_margin == 0 
+              && (splixel_in(cut_splixels, i, j-1).to_margin == 1 
+                || splixel_in(cut_splixels, i, j+1).to_margin == 1 
+                || splixel_in(cut_splixels, i-1, j-1).to_margin == 1 
+                || splixel_in(cut_splixels, i-1, j+1).to_margin == 1 )){
+                cut_splixels[i][j].top = true;
+                cut_splixels[i-1][j].bottom = true;
+            }
+            if(cut_splixels[i][j-1].to_margin == 0 && cut_splixels[i][j].to_margin == 0
+              && (splixel_in(cut_splixels, i-1, j).to_margin == 1 
+                || splixel_in(cut_splixels, i+1, j).to_margin == 1 
+                || splixel_in(cut_splixels, i-1, j-1).to_margin == 1 
+                || splixel_in(cut_splixels, i+1, j-1).to_margin == 1 )){
+                cut_splixels[i][j-1].right = true;
+                cut_splixels[i][j].left = true;
+            }
+
+        }        
     }
     
     draw_canvas([], cut_splixels);
