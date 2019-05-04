@@ -989,7 +989,38 @@ function morph_splixels(morph_how) {
             draw_arrow(context, pixel_size * (j + xy_shift[0]), pixel_size * (i + xy_shift[1]),
                 pixel_size * (j + xy_shift[0] - xy_normal[0]), pixel_size * (i + xy_shift[1] - xy_normal[1]), "#339");
         }
+}
 
+function cut_splixels() {
+    var splixels = turn_pixels_into_splixels(pixels, threshold);
+    
+    // copy + morph
+    var sw = splixels[0].length;
+    var sh = splixels.length;
+    var f = function (x, y) {
+        return y > (sh / 3. + (x / sw) * sh * 0.3);
+    }
+    var t = function (x, y) { return !f(x, y);}
+    var cut_splixels = new_splixels(sh, sw);
+    for(var i = 0; i < sh; ++i) {
+        for(var j = 0; j < sw; ++j) {
+            if(f(j - 0.5, i - 0.5) && f(j + 0.5, i - 0.5) && f(j - 0.5, i + 0.5) && f(j + 0.5, i + 0.5)) {
+                cut_splixels[i][j].to_margin = splixels[i][j].to_margin;
+                cut_splixels[i][j].xy_shift = splixels[i][j].xy_shift.slice();
+                cut_splixels[i][j].xy_normal = splixels[i][j].xy_normal.slice();
+                cut_splixels[i][j].right = splixels[i][j].right;
+                cut_splixels[i][j].left = splixels[i][j].left;
+                cut_splixels[i][j].top = splixels[i][j].top;
+                cut_splixels[i][j].bottom = splixels[i][j].bottom;
+            } else if(t(j - 0.5, i - 0.5) && t(j + 0.5, i - 0.5) && t(j - 0.5, i + 0.5) && t(j + 0.5, i + 0.5)) {
+                cut_splixels[i][j].to_margin = -1;
+                cut_splixels[i][j].xy_shift = [0, 0];
+                cut_splixels[i][j].xy_normal = [0, 0];
+            }
+        }
+    }
+    
+    draw_canvas([], cut_splixels);
 }
   </script>
   </head>
@@ -1177,6 +1208,7 @@ Image editing overrides vectors. Click on a canvas to increase a pixel's luminos
     <button type="button" style="width: 200pt;" onclick="show_splixels();">Show the splixels</button>
     <button type="button" style="width: 200pt;" onclick="morph_splixels('dilate');">Dilate the splixels</button>
     <button type="button" style="width: 200pt;" onclick="morph_splixels('erode');">Erode the splixels</button>
+    <button type="button" style="width: 200pt;" onclick="cut_splixels();">Cut the splixels</button>
     <br>
     <input type="checkbox" id="show_shifts"/><label for="show_shifts">show shifts</label> 
     <input type="checkbox" id="show_normals"/><label for="show_normals">show normals</label> 
