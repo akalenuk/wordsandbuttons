@@ -837,6 +837,8 @@ function morph_splixels(morph_how) {
     var morphed_splixels = new_splixels(sh, sw);
     for(var i = 0; i < sh; ++i) {
         for(var j = 0; j < sw; ++j) {
+            morphed_splixels[i][j].xy_shift = [0., 0.];   // initial value
+            morphed_splixels[i][j].xy_normal = [0., 0.];  // initial value    
             var on_margin = 0;
             var in_margin = 0;
             var out_margin = 0;
@@ -891,103 +893,65 @@ function morph_splixels(morph_how) {
 
         }        
     }
-
-/*   for(var i = 0; i < sh; ++i) {
-        for(var j = 0; j < sw; ++j) {
-            var new_shift = [0., 0.];
-            var new_normal = [0., 0.];
-            var contributors = 0;
-            for(var di = -1; di <= 1; di += 1)
-                for(var dj = -1; dj <= 1; dj += 1) {
-                    var contributor = splixel_in(splixels, i+di, j+dj);
-                    if(contributor.to_margin == 0) {
-                        var weight = Math.sqrt(1 / (di*di + dj*dj));
-                        new_shift[0] += contributor.xy_shift[0] * weight;
-                        new_shift[1] += contributor.xy_shift[1] * weight;
-                        new_normal[0] += contributor.xy_normal[0] * weight;
-                        new_normal[1] += contributor.xy_normal[1] * weight;
-                        contributors += weight;
-                        }
-                    }
-            if(contributors > 0) {
-                morphed_splixels[i][j].xy_shift = [0., 0.];                
-                morphed_splixels[i][j].xy_normal = [0., 0.];
-                var shift_d = Math.sqrt(Math.pow(new_shift[0] / contributors, 2) + Math.pow(new_shift[1] / contributors, 2));
-                var normal_d = Math.sqrt(Math.pow(new_normal[0] / contributors, 2) + Math.pow(new_normal[1] / contributors, 2));
-                morphed_splixels[i][j].xy_shift[0] = new_normal[0] / contributors * shift_d / normal_d;
-                morphed_splixels[i][j].xy_shift[1] = new_normal[1] / contributors * shift_d / normal_d;
-                morphed_splixels[i][j].xy_normal[0] = new_normal[0] / contributors;
-                morphed_splixels[i][j].xy_normal[1] = new_normal[1] / contributors;
-            }
-        }
-    }*/
     
-    // "borrowing" strategy
-    for(var i = 0; i < sh; ++i) {
-        for(var j = 0; j < sw; ++j) {
-            var new_shift = [0., 0.];
-            var new_normal = [0., 0.];
-            var contributors = 0;
-            for(var di = -1; di <= 1; di += 1)
-                for(var dj = -1; dj <= 1; dj += 1)
-                    if((di == 0 || dj == 0) && !(di == 0 && dj == 0)) {
-                        var this_splixel = splixel_in(splixels, i+di, j+dj);
-                        var opposite_splixel = splixel_in(splixels, i-di, j-dj);
-                        if(this_splixel.to_margin == 0 && opposite_splixel.to_margin == 0) {
-                        // um...
-                        } else if(this_splixel.to_margin == 0) {
-                            new_shift[0] = this_splixel.xy_shift[0];
-                            new_shift[1] = this_splixel.xy_shift[1];
-                            new_normal[0] = this_splixel.xy_normal[0];
-                            new_normal[1] = this_splixel.xy_normal[1];
-                        }
-                    }
-            morphed_splixels[i][j].xy_shift = new_shift;
-            morphed_splixels[i][j].xy_normal = new_normal;
-        }
+    function d2(xy) {
+        return xy[0]*xy[0] + xy[1]*xy[1];
     }
-    // second run to borrow from diagonals
-    for(var i = 0; i < sh; ++i) {
-        for(var j = 0; j < sw; ++j) {
-            if(morphed_splixels[i][j].xy_normal[0] != 0 || morphed_splixels[i][j].xy_normal[1] != 0)
-                continue;
-            var new_shift = [0., 0.];
-            var new_normal = [0., 0.];
-            var contributors = 0;
-            for(var di = -1; di <= 1; di += 1)
-                for(var dj = -1; dj <= 1; dj += 1)
-                    if(di != 0 && dj != 0) {
-                        var this_splixel = splixel_in(splixels, i+di, j+dj);
-                        var opposite_splixel = splixel_in(splixels, i-di, j-dj);
-                        if(this_splixel.to_margin == 0 && opposite_splixel.to_margin == 0) {
-                        // 0, 0 is fine
-                        } else if(this_splixel.to_margin == 0) {
-                            new_shift[0] = this_splixel.xy_shift[0];
-                            new_shift[1] = this_splixel.xy_shift[1];
-                            new_normal[0] = this_splixel.xy_normal[0];
-                            new_normal[1] = this_splixel.xy_normal[1];
-                        }
+    
+    function normalized(xy) {
+        const d = Math.sqrt(d2(xy));
+        return [xy[0]/d, xy[1]/d];
+    }
+    var splines = 
+        turn_points_and_tangents_into_splines(
+            turn_splixels_into_points_and_tangents(splixels, threshold)); 
+    const detail = 10; // probes per spline
+    const dt = 0.001;
+    for(var i = 0; i < splines.length; ++i) {
+        for(var k = 0; k < detail; k += 1) {
+            var t = (k) / detail;
+            var x = polynomial_in_x(splines[i][0], t);
+            var y = polynomial_in_x(splines[i][1], t);
+            var dx = (polynomial_in_x(splines[i][0], t + dt) - x) / dt;
+            var dy = (polynomial_in_x(splines[i][1], t + dt) - y) / dt;            
+            var n1 = normalized([dy, -dx]);
+            for(var offset = -1; offset <= 1; offset += 2) {
+                var sx1 = [x + n1[0] * offset, y + n1[1] * offset];
+                var i1 = Math.floor(sx1[1]);
+                var j1 = Math.floor(sx1[0]);
+                if(i1 >= 0 && i1 < sh && j1 >= 0 && j1 < sw) {
+                    var dx1 = sx1[0] - j1;
+                    var dy1 = sx1[1] - i1;
+                    if((morphed_splixels[i1][j1].xy_shift[0] == 0. && morphed_splixels[i1][j1].xy_shift[1] == 0.) 
+                        || d2(morphed_splixels[i1][j1].xy_shift) > d2([dx1, dy1])) {
+                        morphed_splixels[i1][j1].xy_shift = [dx1, dy1];
+                        morphed_splixels[i1][j1].xy_normal = [n1[0] * Math.sign(offset), n1[1] * Math.sign(offset)];
                     }
-            morphed_splixels[i][j].xy_shift = new_shift;
-            morphed_splixels[i][j].xy_normal = new_normal;
+                }
+            }
         }
     }
 
     draw_canvas([], morphed_splixels);
 
+    var do_shifts = document.getElementById("show_shifts").checked;
+    var do_normals = document.getElementById("show_normals").checked;
+    
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
     context.lineWidth = 1;
     for(var i = 0; i < morphed_splixels.length; ++i)    
         for(var j = 0; j < morphed_splixels[0].length; ++j) {
-            if(splixel_in(morphed_splixels, i, j).to_margin != 0)
-                continue;
+            /*if(splixel_in(morphed_splixels, i, j).to_margin != 0)
+                continue;*/
             var xy_shift = splixel_in(morphed_splixels, i, j).xy_shift;
             var xy_normal = splixel_in(morphed_splixels, i, j).xy_normal;
-            draw_arrow(context, pixel_size * j, pixel_size * i, 
-                pixel_size * (j + xy_shift[0]), pixel_size * (i + xy_shift[1]), "#933");
-            draw_arrow(context, pixel_size * (j + xy_shift[0]), pixel_size * (i + xy_shift[1]),
-                pixel_size * (j + xy_shift[0] - xy_normal[0]), pixel_size * (i + xy_shift[1] - xy_normal[1]), "#339");
+            if(do_shifts)
+                draw_arrow(context, pixel_size * j, pixel_size * i, 
+                    pixel_size * (j + xy_shift[0]), pixel_size * (i + xy_shift[1]), "#933");
+            if(do_normals)
+                draw_arrow(context, pixel_size * (j + xy_shift[0]), pixel_size * (i + xy_shift[1]),
+                    pixel_size * (j + xy_shift[0] - xy_normal[0]), pixel_size * (i + xy_shift[1] - xy_normal[1]), "#339");
         }
 }
 
@@ -1029,7 +993,6 @@ function cut_splixels() {
                 } else if(splixels[i][j].to_margin == 0){
                     cut_splixels[i][j].to_margin = 0;
                     cut_splixels[i][j].xy_shift = [0, y_x(j) - i];
-                    //cut_splixels[i][j].xy_shift = [splixels[i][j].xy_shift[0], y_x(j + splixels[i][j].xy_shift[0]) - i];
                     cut_splixels[i][j].xy_normal = [0, 0];                    
                 }
             }
