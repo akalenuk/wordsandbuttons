@@ -617,6 +617,7 @@ function show_splixels() {
     var splixels_2 = turn_pixels_into_splixels(pixels_2, threshold);
     
     splixels = new_splixels(splixels_1[0].length, splixels_1.length);
+    // assign unabiguous splixels
     for(var i = 0; i < splixels_1.length; ++i) {
         for(var j = 0; j < splixels_1[0].length; ++j) {
             var splixel = splixel_in(splixels, i, j);
@@ -643,23 +644,45 @@ function show_splixels() {
                 splixel.xy_shift[1] = splixel_2.xy_shift[1];
                 splixel.xy_normal[0] = splixel_2.xy_normal[0];
                 splixel.xy_normal[1] = splixel_2.xy_normal[1];               
-            } else
-            if(splixel_1.to_margin == 0 && splixel_2.to_margin == 0) {
+            } else {
+                splixel.to_margin = NaN;
+            }
+        }
+    }
+    
+    // assign unabiguous splixels
+    for(var i = 0; i < splixels_1.length; ++i) {
+        for(var j = 0; j < splixels_1[0].length; ++j) {
+            var splixel = splixel_in(splixels, i, j);
+            var splixel_1 = splixel_in(splixels_1, i, j);
+            var splixel_2 = splixel_in(splixels_2, i, j);
+            if(isNaN(splixel.to_margin)) {                
+                var margins_for_1 = 0;
+                var margins_for_2 = 0;
+                for(var di = -1; di <= 1; ++di) {
+                    for(var dj = -1; dj <=1; ++dj) {
+                        if(splixel_in(splixels_1, i + di, j + dj).to_margin == 0)
+                            margins_for_1 = 0;
+                        if(splixel_in(splixels_2, i + di, j + dj).to_margin == 0)
+                            margins_for_2 = 0;
+                    }
+                }
                 splixel.to_margin = 0;
-                if(d2(splixel_1.xy_shift) < d2(splixel_2.xy_shift)) {
+                if(margins_for_1 > margins_for_2) {
                     splixel.xy_shift[0] = splixel_1.xy_shift[0];
                     splixel.xy_shift[1] = splixel_1.xy_shift[1];
                     splixel.xy_normal[0] = splixel_1.xy_normal[0];
-                    splixel.xy_normal[1] = splixel_1.xy_normal[1]; 
+                    splixel.xy_normal[1] = splixel_1.xy_normal[1];
                 } else {
                     splixel.xy_shift[0] = splixel_2.xy_shift[0];
                     splixel.xy_shift[1] = splixel_2.xy_shift[1];
                     splixel.xy_normal[0] = splixel_2.xy_normal[0];
                     splixel.xy_normal[1] = splixel_2.xy_normal[1]; 
-                }              
+                }
             }
         }
     }
+            
     
     // reset neighbors
     for(var i = 1; i < splixels.length; ++i) {
