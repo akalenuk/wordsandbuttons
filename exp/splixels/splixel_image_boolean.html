@@ -461,7 +461,7 @@ function draw_canvas(do_background, splixels, color){
         context.fillStyle="#eeeeee";
         context.fillRect(0, 0, w, h);
 
-/*        // splixels
+        // splixels
         var pixel_field = context.createImageData(w, h);
         for (var i = 0; i < pixel_field.data.length; i += 4) {
             var on_canvas_i = Math.floor(Math.floor(i / 4) / w)  + pixel_size / 2;
@@ -476,7 +476,7 @@ function draw_canvas(do_background, splixels, color){
             pixel_field.data[i + 3] = 0xFF;
         }
         context.putImageData(pixel_field, -0.5, -0.5);
- */  
+  
         // splixel grid
         context.beginPath();
         for(var i = pixel_size / 2; i <= h; i += pixel_size) {
@@ -614,7 +614,68 @@ function show_splixels() {
     var splixels_1 = turn_pixels_into_splixels(pixels_1, threshold);
     var splixels_2 = turn_pixels_into_splixels(pixels_2, threshold);
     
-    draw_canvas(true, splixels_1, "#A44");
+    splixels = new_splixels(splixels_1[0].length, splixels_1.length);
+    for(var i = 0; i < splixels_1.length; ++i) {
+        for(var j = 0; j < splixels_1[0].length; ++j) {
+            var splixel = splixel_in(splixels, i, j);
+            var splixel_1 = splixel_in(splixels_1, i, j);
+            var splixel_2 = splixel_in(splixels_2, i, j);
+            if(splixel_1.to_margin == 1 && splixel_2.to_margin == 1) {
+                splixel.to_margin = 1;
+            } else
+            if(splixel_1.to_margin == -1 || splixel_2.to_margin == -1) {
+                splixel.to_margin = -1;
+            } else
+            if(splixel_1.to_margin == 0 && splixel_2.to_margin != 0) {
+                splixel.to_margin = 0;
+                splixel.xy_shift[0] = splixel_1.xy_shift[0];
+                splixel.xy_shift[1] = splixel_1.xy_shift[1];
+                splixel.xy_normal[0] = splixel_1.xy_normal[0];
+                splixel.xy_normal[1] = splixel_1.xy_normal[1];               
+            } else
+            if(splixel_1.to_margin != 0 && splixel_2.to_margin == 0) {
+                splixel.to_margin = 0;
+                splixel.xy_shift[0] = splixel_2.xy_shift[0];
+                splixel.xy_shift[1] = splixel_2.xy_shift[1];
+                splixel.xy_normal[0] = splixel_2.xy_normal[0];
+                splixel.xy_normal[1] = splixel_2.xy_normal[1];               
+            } else
+            if(splixel_1.to_margin == 0 && splixel_2.to_margin == 0) {
+                splixel.to_margin = 0;
+                splixel.xy_shift[0] = (splixel_1.xy_shift[0] + splixel_2.xy_shift[0]) / 2;
+                splixel.xy_shift[1] = (splixel_1.xy_shift[1] + splixel_2.xy_shift[1]) / 2;
+                splixel.xy_normal[0] = 0;
+                splixel.xy_normal[1] = 0;               
+            }
+        }
+    }
+    
+    // reset neighbors
+/*    for(var i = 0; i < splixels.length; ++i) {
+        for(var j = 0; j < splixels[0].length; ++j) {
+            if(splixels[i-1][j].to_margin == 0 && splixels[i][j].to_margin == 0 
+              && (splixel_in(splixels, i, j-1).to_margin == 1 
+                || splixel_in(splixels, i, j+1).to_margin == 1 
+                || splixel_in(splixels, i-1, j-1).to_margin == 1 
+                || splixel_in(splixels, i-1, j+1).to_margin == 1 )){
+                splixels[i][j].top = true;
+                splixels[i-1][j].bottom = true;
+            }
+            if(splixels[i][j-1].to_margin == 0 && splixels[i][j].to_margin == 0
+              && (splixel_in(splixels, i-1, j).to_margin == 1 
+                || splixel_in(splixels, i+1, j).to_margin == 1 
+                || splixel_in(splixels, i-1, j-1).to_margin == 1 
+                || splixel_in(splixels, i+1, j-1).to_margin == 1 )){
+                splixels[i][j-1].right = true;
+                splixels[i][j].left = true;
+            }
+
+        }        
+    }*/
+    
+    draw_canvas(true, splixels, "#AA4");
+    
+    draw_canvas(false, splixels_1, "#A44");
     draw_canvas(false, splixels_2, "#4A4");    
 }
 
