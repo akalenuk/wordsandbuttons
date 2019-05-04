@@ -450,7 +450,7 @@ function draw_splixels(context, splixels) {
     draw_splines(context, splines);
 }
 
-function draw_canvas(do_background, splixels, color){
+function draw_canvas(do_background, splixels, color, thin){
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
 
@@ -494,10 +494,14 @@ function draw_canvas(do_background, splixels, color){
     }
     
     // contour
-    context.lineWidth=3;
+    if(thin)
+        context.lineWidth=2;
+    else
+        context.lineWidth=4;
     context.strokeStyle = color;
     draw_splixels(context, splixels);
     context.lineWidth=1;
+    context.setLineDash([]);
 }
 
 function draw_arrow(context, x1, y1, x2, y2, color) {
@@ -653,9 +657,7 @@ function show_splixels() {
     // assign unabiguous splixels
     for(var i = 0; i < splixels_1.length; ++i) {
         for(var j = 0; j < splixels_1[0].length; ++j) {
-            var splixel = splixel_in(splixels, i, j);
-            var splixel_1 = splixel_in(splixels_1, i, j);
-            var splixel_2 = splixel_in(splixels_2, i, j);
+            var splixel = splixel_in(splixels, i, j);            
             if(isNaN(splixel.to_margin)) {                
                 var margins_for_1 = 0;
                 var margins_for_2 = 0;
@@ -669,11 +671,13 @@ function show_splixels() {
                 }
                 splixel.to_margin = 0;
                 if(margins_for_1 > margins_for_2) {
+                    var splixel_1 = splixel_in(splixels_1, i, j);
                     splixel.xy_shift[0] = splixel_1.xy_shift[0];
                     splixel.xy_shift[1] = splixel_1.xy_shift[1];
                     splixel.xy_normal[0] = splixel_1.xy_normal[0];
                     splixel.xy_normal[1] = splixel_1.xy_normal[1];
                 } else {
+                    var splixel_2 = splixel_in(splixels_2, i, j);
                     splixel.xy_shift[0] = splixel_2.xy_shift[0];
                     splixel.xy_shift[1] = splixel_2.xy_shift[1];
                     splixel.xy_normal[0] = splixel_2.xy_normal[0];
@@ -707,12 +711,12 @@ function show_splixels() {
         }        
     }
     
-    draw_canvas(true, splixels, "#AA4");
+    draw_canvas(true, splixels, "#929", false);
     
-    draw_canvas(false, splixels_1, "#A44");
-    draw_canvas(false, splixels_2, "#4A4");
+    draw_canvas(false, splixels_1, "#B56", true);
+    draw_canvas(false, splixels_2, "#65B", true);
     
-    draw_canvas(false, splixels, "#AA4");      
+    draw_canvas(false, splixels, "#E0E", false);      
 }
 
   </script>
