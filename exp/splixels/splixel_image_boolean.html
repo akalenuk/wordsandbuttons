@@ -127,17 +127,19 @@ var h = 1024.0;
 var threshold = 0.5;
 
 // pixels
-var pixels = [];
+var pixels_1 = [];
+var pixels_2 = [];
 var pixel_size;
 
-function reset_pixels(w, h) {
-    pixels = [];
+function new_pixels(w, h) {
+    var pixels = [];
     for(var i = 0; i < h; ++i) {
         pixelsi = []
         for(var j = 0; j < w; ++j)
             pixelsi.push(0);
         pixels.push(pixelsi);
     }
+    return pixels;
 }
 
 var points_and_tangents = [];
@@ -713,7 +715,8 @@ function draw_arrow(context, x1, y1, x2, y2, color) {
 }
 
 // import from PGM
-function reimport_image() {
+function reimport_image(var n) {
+    var pixels = eval("pixels_" + n);
     space_divided = function(text) {
         var new_text = text.replace('\r', ' ');
         new_text = new_text.replace('\n', ' ');
@@ -725,8 +728,8 @@ function reimport_image() {
             new_text = new_new_text;    
         }
     }
-    var text = document.getElementById("import_PGM").value;
-    document.getElementById("import_status").innerHTML = "";
+    var text = document.getElementById("import_PGM_" + n).value;
+    document.getElementById("import_status_" + n).innerHTML = "";
     var lines = text.split("\n");
     var no_comments = []
     for(var i = 0; i < lines.length; ++i) {
@@ -737,7 +740,7 @@ function reimport_image() {
     }
     var numbers = space_divided(no_comments.join(' ')).split(' ');
     if(numbers[0] != "P2") {
-        document.getElementById("import_status").innerHTML = "Sorry, I can only import grayscale Netpbm (*.pgm = 'P2...')";
+        document.getElementById("import_status" + n).innerHTML = "Sorry, I can only import grayscale Netpbm (*.pgm = 'P2...')";
         return;
     }
     try {
@@ -745,11 +748,11 @@ function reimport_image() {
         var new_h = parseInt(numbers[2]);
         var new_depth = parseInt(numbers[3]);
         if(numbers.length > new_w * new_h + 4) {
-            document.getElementById("import_status").innerHTML = "Sorry, there's some extra data I couldn't parse.";
+            document.getElementById("import_status" + n).innerHTML = "Sorry, there's some extra data I couldn't parse.";
             return;
         }
         if(numbers.length < new_w * new_h + 4) {
-            document.getElementById("import_status").innerHTML = "Sorry, not enough data to form an image.";
+            document.getElementById("import_status" + n).innerHTML = "Sorry, not enough data to form an image.";
             return;
         }
         h = 1024.0 * new_h / new_w;
@@ -762,7 +765,7 @@ function reimport_image() {
         points_and_tangents = turn_pixels_into_points_and_tangents(pixels, threshold);
         splines = turn_points_and_tangents_into_splines(points_and_tangents);
     } catch (error) {
-        document.getElementById("import_status").innerHTML = "Sorry, couldn't parse that. " + error.message;
+        document.getElementById("import_status" + n).innerHTML = "Sorry, couldn't parse that. " + error.message;
     }
     draw_canvas(splines, []);  
 }
@@ -865,9 +868,9 @@ P2
     </textarea>
     <form>
         Grey value threshold: <input type="text" id="threshold" value="0.5">
-        <button type="button" style="width: 200pt;" onclick="reset_threshold(); reimport_image()">Reimport the PGM</button> 
+        <button type="button" style="width: 200pt;" onclick="reset_threshold(); reimport_image(1)">Reimport the PGM</button> 
     </form>
-    <p id="import_status" class="comment">
+    <p id="import_status_1" class="comment">
     </p>
     
     
@@ -897,9 +900,9 @@ P2
     </textarea>
     <form>
         Grey value threshold: <input type="text" id="threshold" value="0.5">
-        <button type="button" style="width: 200pt;" onclick="reset_threshold(); reimport_image()">Reimport the PGM</button> 
+        <button type="button" style="width: 200pt;" onclick="reset_threshold(); reimport_image(2)">Reimport the PGM</button> 
     </form>
-    <p id="import_status" class="comment">
+    <p id="import_status_2" class="comment">
     </p>
 <!--
     <textarea id="import_PGM" rows=20>
@@ -1027,52 +1030,20 @@ P2
 0 0 0
     </textarea>
 -->
-    <form>
-        Grey value threshold: <input type="text" id="threshold" value="0.5">
-        <button type="button" style="width: 200pt;" onclick="reset_threshold(); reimport_image()">Reimport the PGM</button> 
-    </form>
-    <p id="import_status" class="comment">
-    </p>
-    <br>
-    <h2>
-Edit image and vectors
-    </h2>
     <p>
-Image editing overrides vectors. Click on a canvas to increase a pixel's luminosity. Click holding the Shift key to reduce it.
+...    
     </p>
     <canvas id="canvas" width=1024 height=1024></canvas>
-    <form>
-        Click to change: 
-        <input type="radio" name="tool" id="tool_1" value="image" checked=true onclick="draw_canvas(splines, [])"><label for="tool_1">image; </label>
-        <input type="radio" name="tool" id="tool_2" value="points" onclick="draw_canvas(splines, [])"><label for="tool_2">points; </label>
-        <input type="radio" name="tool" id="tool_3" value="tangents" onclick="draw_canvas(splines, [])"><label for="tool_3">tangents; </label>
-        <br> 
-    </form>
     <button type="button" style="width: 200pt;" onclick="show_splixels();">Show the splixels</button>
-    <button type="button" style="width: 200pt;" onclick="morph_splixels('dilate');">Dilate the splixels</button>
-    <button type="button" style="width: 200pt;" onclick="morph_splixels('erode');">Erode the splixels</button>
     <br>
     <input type="checkbox" id="show_shifts"/><label for="show_shifts">show shifts</label> 
     <input type="checkbox" id="show_normals"/><label for="show_normals">show normals</label> 
     <input type="checkbox" id="show_background"/><label for="show_background">show background</label> 
     <br>
     
-    <h2>
-Vector export
-    </h2>
-    <p>
-Only the outline is supported. No filling, no coloring.
-    </p>
-    <form>
-        <button type="button" onclick="export_splines()">Export to SVG</button>  
-    </form>
-    <br>
-    <textarea id="export_SVG" rows=14>
-
-    </textarea>
-
     <script language="JavaScript">
-    reimport_image();    
+    reimport_image(1);    
+    reimport_image(2);
     init_canvas();    
     </script>
     
