@@ -459,112 +459,6 @@ var cur_point_indexes = [];
 var cur_point_in_pair_indexes = [];
 var cur_tangent_index = -1;
 var cur_tangent_in_pair_index = -1;
-function init_canvas(){
-    var canvas = document.getElementById("canvas");
-    canvas.addEventListener('mousedown', function(e){
-        canvas_rect = canvas.getBoundingClientRect();
-        var x = e.clientX - canvas_rect.left;
-        var y = e.clientY - canvas_rect.top;
-        if(document.getElementById("tool_2").checked) { // points
-            cur_point_indexes = [];
-            cur_point_in_pair_indexes = [];
-            var points = points_and_tangents[0];
-            var min_d2 = (w+h)*(w+h);
-            for(var i = 0; i < points.length; ++i) {
-                for(var j = 0; j < 2; ++ j) {
-                    var px = pixel_size * points[i][j][0];
-                    var py = pixel_size * points[i][j][1];
-                    var d2 = (px - x)*(px - x) + (py - y)*(py - y);
-                    if(cur_point_indexes.length == 0 || d2 < min_d2) {
-                        cur_point_indexes = [i];
-                        cur_point_in_pair_indexes = [j];
-                        min_d2 = d2;
-                    }else if(d2 == min_d2) {
-                        cur_point_indexes.push(i);
-                        cur_point_in_pair_indexes.push(j);
-                    }
-                }
-            }
-        } else if(document.getElementById("tool_3").checked) { // tangents
-            cur_tangent_index = -1;
-            cur_tangent_in_pair_index = -1;
-            var points = points_and_tangents[0];
-            var tangents = points_and_tangents[1];
-            var min_d2 = (w+h)*(w+h);
-            for(var i = 0; i < points.length; ++i) {
-                for(var j = 0; j < 2; ++ j) {
-                    var px = pixel_size * (points[i][j][0] + tangents[i][j][0]);
-                    var py = pixel_size * (points[i][j][1] + tangents[i][j][1]);
-                    var d2 = (px - x)*(px - x) + (py - y)*(py - y);
-                    if(cur_tangent_index == -1 || d2 < min_d2) {
-                        cur_tangent_index = i;
-                        cur_tangent_in_pair_index = j;
-                        min_d2 = d2;
-                    }
-                }
-            }
-        }
-        
-    }, false);
-     
-    canvas.addEventListener('mousemove', function(e){
-        if(e.buttons == 1){
-            canvas_rect = canvas.getBoundingClientRect();
-            var x = e.clientX - canvas_rect.left;
-            var y = e.clientY - canvas_rect.top;
-            if(document.getElementById("tool_2").checked) { // points
-                var points = points_and_tangents[0];
-                for(var i = 0; i < cur_point_indexes.length; ++i) {
-                    points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][0] = x / pixel_size;
-                    points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][1] = y / pixel_size;
-                }               
-            } else if(document.getElementById("tool_3").checked) { // tangents
-                var points = points_and_tangents[0];
-                var tangents = points_and_tangents[1];
-                tangents[cur_tangent_index][cur_tangent_in_pair_index][0] = x / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][0];
-                tangents[cur_tangent_index][cur_tangent_in_pair_index][1] = y / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][1];
-                splines = turn_points_and_tangents_into_splines(points_and_tangents);  
-            }
-            splines = turn_points_and_tangents_into_splines(points_and_tangents);
-            draw_canvas(splines, []);
-        }
-    }, false);
-    
-    canvas.addEventListener('mouseup', function(e){
-        canvas_rect = canvas.getBoundingClientRect();
-        var x = e.clientX - canvas_rect.left;
-        var y = e.clientY - canvas_rect.top;
-        if(document.getElementById("tool_1").checked) {
-            var in_pixels_i = Math.floor(y / pixel_size);
-            var in_pixels_j = Math.floor(x / pixel_size);
-            pixels[in_pixels_i][in_pixels_j] *= 7;
-            if(e.shiftKey)       
-                pixels[in_pixels_i][in_pixels_j] += 7;
-            else
-                pixels[in_pixels_i][in_pixels_j] += 1;
-            pixels[in_pixels_i][in_pixels_j] = Math.floor(pixels[in_pixels_i][in_pixels_j]) % 8;
-            pixels[in_pixels_i][in_pixels_j] /= 7;
-            points_and_tangents = turn_pixels_into_points_and_tangents(pixels, threshold);
-            splines = turn_points_and_tangents_into_splines(points_and_tangents);
-        } else if(document.getElementById("tool_2").checked) { // points
-            var points = points_and_tangents[0];
-            for(var i = 0; i < cur_point_indexes.length; ++i) {
-                points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][0] = x / pixel_size;
-                points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][1] = y / pixel_size;
-            }
-            splines = turn_points_and_tangents_into_splines(points_and_tangents);  
-        } else if(document.getElementById("tool_3").checked) { // tangents
-            var points = points_and_tangents[0];
-            var tangents = points_and_tangents[1];
-            tangents[cur_tangent_index][cur_tangent_in_pair_index][0] = x / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][0];
-            tangents[cur_tangent_index][cur_tangent_in_pair_index][1] = y / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][1];
-            splines = turn_points_and_tangents_into_splines(points_and_tangents);  
-        }
-        draw_canvas(splines, []);
-    }, false);
-    
-    draw_canvas(splines, []);
-}
 
 
 function draw_canvas(splines, splixels){
@@ -771,7 +665,7 @@ function reimport_image() {
     } catch (error) {
         document.getElementById("import_status").innerHTML = "Sorry, couldn't parse that. " + error.message;
     }
-    draw_canvas(splines, []);  
+    show_splixels();  
 }
 
 
@@ -1108,13 +1002,6 @@ Splixels
     </h2>
     <canvas id="canvas" width=1024 height=1024></canvas>
     <form>
-    <div style="visibility: hidden;">
-        Click to change: 
-        <input type="radio" name="tool" id="tool_1" value="image" checked=true onclick="draw_canvas(splines, [])"><label for="tool_1">image; </label>
-        <input type="radio" name="tool" id="tool_2" value="points" onclick="draw_canvas(splines, [])"><label for="tool_2">points; </label>
-        <input type="radio" name="tool" id="tool_3" value="tangents" onclick="draw_canvas(splines, [])"><label for="tool_3">tangents; </label>
-        <br> 
-    </div>
     <button type="button" style="width: 200pt;" onclick="show_splixels();">Show the splixels</button>
     <br>
     <button type="button" style="width: 200pt;" onclick="morph_splixels('dilate');">Dilate the splixels</button>
