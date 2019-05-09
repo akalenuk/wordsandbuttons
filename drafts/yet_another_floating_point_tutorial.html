@@ -123,6 +123,16 @@ pre {
     text-align: left;
     font-size: 16pt;
 }
+
+.colored1 {
+    font-weight: bold;
+    color: #d64562;
+}
+
+.colored2 {
+    font-weight: bold;
+    color: #457fd6;
+}
     </style>
     <script language="JavaScript">
 const w = 640;
@@ -608,7 +618,7 @@ Yet another floating point tutorial
 Why though?
     </h2>
     <p>
-I know, there are already excellent tutorials and explanations on the topic. To name a few, there are:
+I know, there are already excellent tutorials and explanations on the topic. To name a few,
     </p>
     <ul>
     <li>
@@ -634,10 +644,14 @@ So here we are.
     <h2>
 6-bit integer number
     </h2>
-    <p class="formula">
-<br>    
-1000 mm = 100 cm = 1 m
-<br><br>
+    <p>
+Floating point numbers were invented to represent real numbers. Like 0.5 or 3.1415926. The ones that can't be represented by integers like 1 or 3. But in fact, computers only have integers.
+    </p>
+    <p>
+Computers operate with bit tuples, and there are only as many different compinations of bits as 2<sup>n</sup> where <i>n</i> is the length of a tuple.
+    </p>    
+    <p>
+Here's a model of a 6-bit integer number. 
     </p>
     <canvas id="integer" width=640 height=200></canvas>
     <script language="JavaScript">
@@ -646,7 +660,12 @@ So here we are.
     <p class="comment">
 The number buttons are clickable.
     </p>
-    
+    <p>
+Integer numbers are not universally standartized but there are some common conventions. For instance, the most common way to represent negative integers is by using the higher half of the range.
+    </p>
+    <p>
+Bitwise, it looks a little odd, but it all makes perfect sense when we see all the range in one picture. 
+    </p>
     <table>
     <tr><td><b>Unsigned 1-digit decimal</b></td><td><b>Signed 1-digit decimal<b></td></tr>
     <tr><td>0</td><td>0</td></tr>
@@ -654,12 +673,44 @@ The number buttons are clickable.
     <tr><td>2</td><td>2</td></tr>
     <tr><td>3</td><td>3</td></tr>
     <tr><td>4</td><td>4</td></tr>
-    <tr><td>5</td><td><b>-5</b></td></tr>
+    <tr><td>5</td><td>-5</td></tr>
     <tr><td>6</td><td>-4</td></tr>
     <tr><td>7</td><td>-3</td></tr>
     <tr><td>8</td><td>-2</td></tr>
     <tr><td>9</td><td>-1</td></tr>
     </table>
+    <p>
+The first half of the range is shared between signed and unsigned types. Then there's a leap back for the signed ones. Then they diverge by exactly half a range.
+    </p>
+    <p>
+If you take overflows into consideration, it seems even more natural. Yes, signed numbers overflow at half-range, but unsigned numbers overflow too, only half a range later. It's like two continuous rolls of numbers going along each other.
+    </p>
+    <table>
+    <tr><td><b>Unsigned 1-digit decimal</b></td><td><b>Signed 1-digit decimal<b></td></tr>
+    <tr><td>...</td><td>...</td></tr>    
+    <tr><td>9</td><td>-1</td></tr>    
+    <tr><td><span class="colored1">0</span></td><td>0</td></tr>
+    <tr><td><span class="colored1">1</span></td><td>1</td></tr>
+    <tr><td><span class="colored1">2</span></td><td>2</td></tr>
+    <tr><td><span class="colored1">3</span></td><td>3</td></tr>
+    <tr><td><span class="colored1">4</span></td><td>4</td></tr>
+    <tr><td><span class="colored1">5</span></td><td><span class="colored2">-5</span></td></tr>
+    <tr><td><span class="colored1">6</span></td><td><span class="colored2">-4</span></td></tr>
+    <tr><td><span class="colored1">7</span></td><td><span class="colored2">-3</span></td></tr>
+    <tr><td><span class="colored1">8</span></td><td><span class="colored2">-2</span></td></tr>
+    <tr><td><span class="colored1">9</span></td><td><span class="colored2">-1</span></td></tr>
+    <tr><td>0</td><td><span class="colored2">0</span></td></tr>
+    <tr><td>1</td><td><span class="colored2">1</span></td></tr>
+    <tr><td>2</td><td><span class="colored2">2</span></td></tr>
+    <tr><td>3</td><td><span class="colored2">3</span></td></tr>
+    <tr><td>4</td><td><span class="colored2">4</span></td></tr>
+    <tr><td>5</td><td>-5</td></tr>
+    <tr><td>...</td><td>...</td></tr>
+    </table>    
+
+    <p>
+Please don't write your code expecting this behavior though. Integer overflows are not universally standartized. And even when they are, you'd be better off not exploiting them because it makes code obscure, error prone, and often non-portable.
+    </p>
 
     <table>
     <tr>
@@ -675,6 +726,21 @@ The number buttons are clickable.
 
     <p>
 18446744071914584320
+    </p>
+    
+    <p>
+Integer numbers may still be used to represent non-integer values. For instance, 0.45 of a meter is 45 centimeters. 45.6 centimeters is 456 millimeters, and so on.
+    </p>
+    <p class="formula">    
+    <br>    
+456 mm = 45.6 cm = 0.456 m
+    <br><br>
+    </p>
+    <p>
+It's just a matter of representation. It's all about where to put the decimal point.
+    </p>
+    <p>
+When we can agree on where to put the decimal point, we can turn integers into fixed point numbers.
     </p>
 
     <h2>
