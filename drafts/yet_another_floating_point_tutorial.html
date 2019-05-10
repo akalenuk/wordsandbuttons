@@ -800,8 +800,11 @@ and since its binary, and all the numbers except 0 start from 1, you don't have 
         init_floating();
     </script>    
     <p>
-Since you're still working with bits, and everything is actually integer, you can imagine a floating point number as an integer number of exponentially different values.
-    </p>    
+Since you're still working with bits, and every number is still just an integer in disguise, you can imagine a floating point number as an integer number of different powers of 2.
+    </p>
+    <p>
+Unlike integer numbers, floating point numbers are standartized, and the standard specifies several useful conventions. The whole range of possible bits consists not only of numbers, but of two distinct zeroes, two values for infinitely large values, and a whole subrange of "not a number"s.
+    </p>
     <br><br>
     
     <table id="all_numbers_table">
@@ -809,24 +812,33 @@ Since you're still working with bits, and everything is actually integer, you ca
     <script language="JavaScript">
         fill_all_numbers_table();
     </script> 
-    
+    <p>
+To understand why do you need special values for infinite numbers, you need to understand floating point zeroes first. They are not actual zeroes. They model anything that is absolutely smaller than the least representable number. Of course, the may represent actual zero, but they may be just some real small numbers, and as such they deserve to retatin their signs.
+    </p>
     <table>
     <tr>
     <td style="border: 1px solid black;">
     <pre>
-  std::cout << std::numeric_limits<float>::denorm_min() / 2 << ", ";
-  std::cout << -std::numeric_limits<float>::denorm_min() / 2 << ", ";  
-  std::cout << 0 - std::numeric_limits<float>::denorm_min() / 2 << ", ";
-  std::cout << (std::numeric_limits<float>::denorm_min() / 2) * 2<< "\n";
+  std::cout << std::numeric_limits<float>::denorm_min();  
+>> 1.4013e-45
 
-  std::cout << (std::numeric_limits<float>::denorm_min()) << "\n";      
+  std::cout << std::numeric_limits<float>::denorm_min() / 2.;
+>> 0
+  
+  std::cout << -std::numeric_limits<float>::denorm_min() / 2.;  
+>> -0
+
+  std::cout << 0 - (std::numeric_limits<float>::denorm_min() / 2.);
+>> 0
+
+  std::cout << (std::numeric_limits<float>::denorm_min() / 2.) * 2.;
+>> 0
     </pre>
     </td>
     </tr>
     </table>
     <p>
-0, -0, 0, 0
-1.4013e-45
+
     </p>
         
     <h2>
