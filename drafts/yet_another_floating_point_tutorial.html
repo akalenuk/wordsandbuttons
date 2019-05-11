@@ -136,14 +136,14 @@ pre {
     </style>
     <script language="JavaScript">
 const w = 640;
-const h = 200;    
-const cell_width = 64;    
+const h = 200;
+const cell_width = 64;
 const cell_height = 64;
 const cell_y = 20;
 
 const button_border = "#999";
 const button_shadow = "#444";
-    
+
 // integer point
 integer_cell_xs = [20, 20 + 90 + 43, 20 + 90*2 + 43 + 11, 20 + 90*3 + 43 + 11*2, 20 + 90*4 + 43 + 11*3, 20 + 90*5 + 43 + 11*4];
 integer_cell_colors = ["#dba0ac", "#cfa0db", "#cfa0db", "#cfa0db", "#cfa0db", "#cfa0db"];
@@ -152,7 +152,7 @@ integer_cell_bits = [0, 0, 0, 1, 1, 0];
 function init_integer() {
     var integer = document.getElementById("integer");
     integer_draw();
-    
+
     integer.addEventListener('mousedown', function(e){
         var canvas_rect = integer.getBoundingClientRect();
         var x = e.clientX - canvas_rect.left;
@@ -163,11 +163,11 @@ function init_integer() {
         }
         integer_draw('down', x, y);
     }, false);
-    
+
     integer.addEventListener('mouseup', function(e){
         var canvas_rect = integer.getBoundingClientRect();
         var x = e.clientX - canvas_rect.left;
-        var y = e.clientY - canvas_rect.top;    
+        var y = e.clientY - canvas_rect.top;
         integer_draw('up', x, y);
     }, false);
 }
@@ -180,13 +180,13 @@ function integer_draw(mouse_state, x, y) {
     // background
     context.fillStyle="#eeee99";
     context.fillRect(0, 0, w, h);
-    
+
     // cells
     for(var i = 0; i < integer_cell_xs.length; ++i) {
         var text_dx = 0;
         var text_dy = 0;
-        if(mouse_state == "down" 
-        && x >= integer_cell_xs[i] && x - integer_cell_xs[i] < cell_width 
+        if(mouse_state == "down"
+        && x >= integer_cell_xs[i] && x - integer_cell_xs[i] < cell_width
         && y >= cell_y && y - cell_y < cell_height) {
             context.fillStyle = button_shadow;
             context.fillRect(integer_cell_xs[i] -1 , cell_y - 1, cell_width + 2, cell_height + 2);
@@ -198,32 +198,32 @@ function integer_draw(mouse_state, x, y) {
             context.fillStyle = button_border;
             context.fillRect(integer_cell_xs[i] -1 , cell_y - 1, cell_width + 1, cell_height + 1);
             context.fillStyle = button_shadow;
-            context.fillRect(integer_cell_xs[i], cell_y, cell_width + 1, cell_height + 1);                   
+            context.fillRect(integer_cell_xs[i], cell_y, cell_width + 1, cell_height + 1);
         }
         context.fillStyle = integer_cell_colors[i];
         context.fillRect(integer_cell_xs[i], cell_y, cell_width, cell_height);
-        
+
         context.textAlign = "center";
-        context.textBaseline = "middle"; 
+        context.textBaseline = "middle";
         context.font = "48px sans-serif";
-        context.fillStyle = "#222222";        
-        context.fillText(integer_cell_bits[i], text_dx + integer_cell_xs[i] + cell_width / 2.0, text_dx + cell_y + cell_height / 2.0 + 4);   
+        context.fillStyle = "#222222";
+        context.fillText(integer_cell_bits[i], text_dx + integer_cell_xs[i] + cell_width / 2.0, text_dx + cell_y + cell_height / 2.0 + 4);
     }
-    
+
     // the number
-    var sign = integer_cell_bits[0] ? -1.0 : 1.0;    
+    var sign = integer_cell_bits[0] ? -1.0 : 1.0;
     var n = integer_cell_bits[5] + 2*integer_cell_bits[4] + 4*integer_cell_bits[3] + 8*integer_cell_bits[2] + 16*integer_cell_bits[1];
     if(sign == -1.0)
       n = 32 - n;
-    
+
     // comment
     context.fillStyle = "#914853"
     context.textAlign = "left";
-    context.textBaseline = "alphabetic"; 
+    context.textBaseline = "alphabetic";
     context.font = "20px sans-serif";
     context.fillText(sign == -1.0 ? "Negative number" : "Positive number", 20, 120);
     context.fillText("which is " + sign * n + ".", 20, 170);
-    
+
     context.fillStyle = "#673670";
     context.fillText("of " + n + " things,", 20, 145);
     cur_integer = sign * n;
@@ -237,7 +237,7 @@ fixed_cell_bits = [0, 0, 0, 1, 1, 0];
 function init_fixed() {
     var fixed = document.getElementById("fixed");
     fixed_draw();
-    
+
     fixed.addEventListener('mousedown', function(e){
         var canvas_rect = fixed.getBoundingClientRect();
         var x = e.clientX - canvas_rect.left;
@@ -248,11 +248,11 @@ function init_fixed() {
         }
         fixed_draw('down', x, y);
     }, false);
-    
+
     fixed.addEventListener('mouseup', function(e){
         var canvas_rect = fixed.getBoundingClientRect();
         var x = e.clientX - canvas_rect.left;
-        var y = e.clientY - canvas_rect.top;    
+        var y = e.clientY - canvas_rect.top;
         fixed_draw('up', x, y);
     }, false);
 }
@@ -265,13 +265,13 @@ function fixed_draw(mouse_state, x, y) {
     // background
     context.fillStyle="#eeee99";
     context.fillRect(0, 0, w, h);
-    
+
     // cells
     for(var i = 0; i < fixed_cell_xs.length; ++i) {
         var text_dx = 0;
         var text_dy = 0;
-        if(mouse_state == "down" 
-        && x >= fixed_cell_xs[i] && x - fixed_cell_xs[i] < cell_width 
+        if(mouse_state == "down"
+        && x >= fixed_cell_xs[i] && x - fixed_cell_xs[i] < cell_width
         && y >= cell_y && y - cell_y < cell_height) {
             context.fillStyle = button_shadow;
             context.fillRect(fixed_cell_xs[i] -1 , cell_y - 1, cell_width + 2, cell_height + 2);
@@ -283,39 +283,39 @@ function fixed_draw(mouse_state, x, y) {
             context.fillStyle = button_border;
             context.fillRect(fixed_cell_xs[i] -1 , cell_y - 1, cell_width + 1, cell_height + 1);
             context.fillStyle = button_shadow;
-            context.fillRect(fixed_cell_xs[i], cell_y, cell_width + 1, cell_height + 1);                   
-        }    
+            context.fillRect(fixed_cell_xs[i], cell_y, cell_width + 1, cell_height + 1);
+        }
         context.fillStyle = fixed_cell_colors[i];
         context.fillRect(fixed_cell_xs[i], cell_y, cell_width, cell_height);
-        
+
         context.textAlign = "center";
-        context.textBaseline = "middle"; 
+        context.textBaseline = "middle";
         context.font = "48px sans-serif";
-        context.fillStyle = "#222222";        
+        context.fillStyle = "#222222";
         context.fillText(fixed_cell_bits[i], text_dx + fixed_cell_xs[i] + cell_width / 2.0, text_dy + cell_y + cell_height / 2.0 + 4);
     }
-    
+
     // the number
-    var sign = fixed_cell_bits[0] ? -1.0 : 1.0;    
+    var sign = fixed_cell_bits[0] ? -1.0 : 1.0;
     var n = fixed_cell_bits[5] + 2*fixed_cell_bits[4] + 4*fixed_cell_bits[3] + 8*fixed_cell_bits[2] + 16*fixed_cell_bits[1];
     if(sign == -1.0)
         n = 32 - n;
-    
+
     // explicit point
     context.fillStyle = "#597052";
     context.fillText(".", 430, cell_y + cell_height / 2.0 + 4);
-    
+
     // comment
     context.fillStyle = "#914853"
     context.textAlign = "left";
-    context.textBaseline = "alphabetic"; 
+    context.textBaseline = "alphabetic";
     context.font = "20px sans-serif";
     context.fillText(sign == -1.0 ? "Negative number" : "Positive number", 20, 120);
 
     context.fillStyle = "#673670"
     context.fillText("of " + n + " quarters,", 20, 145);
     context.fillText("which is " + sign * (n / 4.0).toFixed(2) + " in real numbers.", 20, 170);
-    cur_fixed = sign * (n / 4.0).toFixed(2); 
+    cur_fixed = sign * (n / 4.0).toFixed(2);
 }
 
 // floating point
@@ -326,7 +326,7 @@ floating_cell_bits = [0, 0, 0, 1, 1, 0];
 function init_floating() {
     var floating = document.getElementById("floating");
     floating_draw();
-    
+
     floating.addEventListener('mousedown', function(e){
         var canvas_rect = floating.getBoundingClientRect();
         var x = e.clientX - canvas_rect.left;
@@ -337,11 +337,11 @@ function init_floating() {
         }
         floating_draw('down', x, y);
     }, false);
-    
+
     floating.addEventListener('mouseup', function(e){
         var canvas_rect = floating.getBoundingClientRect();
         var x = e.clientX - canvas_rect.left;
-        var y = e.clientY - canvas_rect.top;    
+        var y = e.clientY - canvas_rect.top;
         floating_draw('up', x, y);
     }, false);
 }
@@ -354,13 +354,13 @@ function floating_draw(mouse_state, x, y) {
     // background
     context.fillStyle="#eeee99";
     context.fillRect(0, 0, w, h);
-    
+
     // cells
     for(var i = 0; i < floating_cell_xs.length; ++i) {
         var text_dx = 0;
         var text_dy = 0;
-        if(mouse_state == "down" 
-        && x >= floating_cell_xs[i] && x - floating_cell_xs[i] < cell_width 
+        if(mouse_state == "down"
+        && x >= floating_cell_xs[i] && x - floating_cell_xs[i] < cell_width
         && y >= cell_y && y - cell_y < cell_height) {
             context.fillStyle = button_shadow;
             context.fillRect(floating_cell_xs[i] -1 , cell_y - 1, cell_width + 2, cell_height + 2);
@@ -372,34 +372,34 @@ function floating_draw(mouse_state, x, y) {
             context.fillStyle = button_border;
             context.fillRect(floating_cell_xs[i] -1 , cell_y - 1, cell_width + 1, cell_height + 1);
             context.fillStyle = button_shadow;
-            context.fillRect(floating_cell_xs[i], cell_y, cell_width + 1, cell_height + 1);                   
-        }        
+            context.fillRect(floating_cell_xs[i], cell_y, cell_width + 1, cell_height + 1);
+        }
         context.fillStyle = floating_cell_colors[i];
         context.fillRect(floating_cell_xs[i], cell_y, cell_width, cell_height);
-        
+
         context.textAlign = "center";
-        context.textBaseline = "middle"; 
+        context.textBaseline = "middle";
         context.font = "48px sans-serif";
-        context.fillStyle = "#222222";        
+        context.fillStyle = "#222222";
         context.fillText(floating_cell_bits[i], text_dx + floating_cell_xs[i] + cell_width / 2.0, text_dy + cell_y + cell_height / 2.0 + 4);
     }
-    
+
     // the number
     var sign = floating_cell_bits[0] ? -1.0 : 1.0;
     var e = floating_cell_bits[3] + floating_cell_bits[2] * 2 + floating_cell_bits[1] * 4;
     var n = floating_cell_bits[5] + floating_cell_bits[4] * 2 + ((e != 0 && e != 7) ? 4 : 0);
-    
+
     // explicit point
     if (e != 0 && e != 7) {
         context.fillStyle = "#673670";
-        context.fillText("1", 420, cell_y + cell_height / 2.0 + 4);    
+        context.fillText("1", 420, cell_y + cell_height / 2.0 + 4);
     }
-    
+
     // comment
     context.textAlign = "left";
-    context.textBaseline = "alphabetic"; 
+    context.textBaseline = "alphabetic";
     context.font = "20px sans-serif";
-            
+
     if( e == 7 ) {
         if ( n == 0 ) {
             context.fillStyle = "#914853";
@@ -414,7 +414,7 @@ function floating_draw(mouse_state, x, y) {
     } else {
         context.fillStyle = "#914853";
         context.fillText(sign == -1.0 ? "Negative number" : "Positive number", 20, 120);
-        
+
         context.fillStyle = "#673670"
         context.fillText("of " + n, 20, 145);
         context.fillStyle = "#597052";
@@ -430,79 +430,79 @@ function floating_draw(mouse_state, x, y) {
         if(e == 6)
             measures = "eight-packs,";
         context.fillText(measures, 64, 145);
-        
+
         context.fillStyle = "#673670"
         context.fillText("which is " + sign * (n * Math.pow(2, e - 2 - (e > 0 ? 1 : 0))).toFixed(2) + " in real numbers", 20, 170);
-        cur_float = sign * (n * Math.pow(2, e - 2 - (e > 0 ? 1 : 0))).toFixed(2); 
+        cur_float = sign * (n * Math.pow(2, e - 2 - (e > 0 ? 1 : 0))).toFixed(2);
     }
 }
 
 // numeric table: binary, fixed point, floating point
 const all_6_bit_numbers = [
-    ["000000", "0.00", "0"], 
-    ["000001", "0.25", "0.25"], 
-    ["000010", "0.50", "0.5"], 
-    ["000011", "0.75", "0.75"], 
-    ["000100", "1.00", "1"], 
-    ["000101", "1.25", "1.25"], 
-    ["000110", "1.50", "1.5"], 
-    ["000111", "1.75", "1.75"], 
-    ["001000", "2.00", "2"], 
-    ["001001", "2.25", "2.5"], 
-    ["001010", "2.50", "3"], 
-    ["001011", "2.75", "3.5"], 
-    ["001100", "3.00", "4"], 
-    ["001101", "3.25", "5"], 
-    ["001110", "3.50", "6"], 
-    ["001111", "3.75", "7"], 
-    ["010000", "4.00", "8"], 
-    ["010001", "4.25", "10"], 
-    ["010010", "4.50", "12"], 
-    ["010011", "4.75", "14"], 
-    ["010100", "5.00", "16"], 
-    ["010101", "5.25", "20"], 
-    ["010110", "5.50", "24"], 
-    ["010111", "5.75", "28"], 
-    ["011000", "6.00", "32"], 
-    ["011001", "6.25", "40"], 
-    ["011010", "6.50", "48"],     
-    ["011011", "6.75", "56"], 
-    ["011100", "7.00", "positive infinite"], 
-    ["011101", "7.25", "not a number"], 
-    ["011110", "7.50", "not a number"], 
+    ["000000", "0.00", "0"],
+    ["000001", "0.25", "0.25"],
+    ["000010", "0.50", "0.5"],
+    ["000011", "0.75", "0.75"],
+    ["000100", "1.00", "1"],
+    ["000101", "1.25", "1.25"],
+    ["000110", "1.50", "1.5"],
+    ["000111", "1.75", "1.75"],
+    ["001000", "2.00", "2"],
+    ["001001", "2.25", "2.5"],
+    ["001010", "2.50", "3"],
+    ["001011", "2.75", "3.5"],
+    ["001100", "3.00", "4"],
+    ["001101", "3.25", "5"],
+    ["001110", "3.50", "6"],
+    ["001111", "3.75", "7"],
+    ["010000", "4.00", "8"],
+    ["010001", "4.25", "10"],
+    ["010010", "4.50", "12"],
+    ["010011", "4.75", "14"],
+    ["010100", "5.00", "16"],
+    ["010101", "5.25", "20"],
+    ["010110", "5.50", "24"],
+    ["010111", "5.75", "28"],
+    ["011000", "6.00", "32"],
+    ["011001", "6.25", "40"],
+    ["011010", "6.50", "48"],
+    ["011011", "6.75", "56"],
+    ["011100", "7.00", "positive infinite"],
+    ["011101", "7.25", "not a number"],
+    ["011110", "7.50", "not a number"],
     ["011111", "7.75", "not a number"],
-    ["100000", "-8.00", "-0"],     
-    ["100001", "-7.75", "-0.25"], 
-    ["100010", "-7.50", "-0.5"], 
-    ["100011", "-7.25", "-0.75"], 
-    ["100100", "-7.00", "-1"], 
-    ["100101", "-6.75", "-1.25"], 
-    ["100110", "-6.50", "-1.5"], 
-    ["100111", "-6.25", "-1.75"], 
-    ["101000", "-6.00", "-2"], 
-    ["101001", "-5.75", "-2.5"], 
-    ["101010", "-5.50", "-3"], 
-    ["101011", "-5.25", "-3.5"], 
-    ["101100", "-5.00", "-4"], 
-    ["101101", "-4.75", "-5"], 
-    ["101110", "-4.50", "-6"], 
-    ["101111", "-4.25", "-7"], 
-    ["110000", "-4.00", "-8"], 
-    ["110001", "-3.75", "-10"], 
-    ["110010", "-3.50", "-12"], 
-    ["110011", "-3.25", "-14"], 
-    ["110100", "-3.00", "-16"], 
-    ["110101", "-2.75", "-20"], 
-    ["110110", "-2.50", "-24"], 
-    ["110111", "-2.25", "-28"], 
-    ["111000", "-2.00", "-32"], 
-    ["111001", "-1.75", "-40"], 
-    ["111010", "-1.50", "-48"],     
-    ["111011", "-1.25", "-56"], 
-    ["111100", "-1.00", "negative infinite"], 
-    ["111101", "-0.75", "not a number"], 
-    ["111110", "-0.50", "not a number"], 
-    ["111111", "-0.25", "not a number"] 
+    ["100000", "-8.00", "-0"],
+    ["100001", "-7.75", "-0.25"],
+    ["100010", "-7.50", "-0.5"],
+    ["100011", "-7.25", "-0.75"],
+    ["100100", "-7.00", "-1"],
+    ["100101", "-6.75", "-1.25"],
+    ["100110", "-6.50", "-1.5"],
+    ["100111", "-6.25", "-1.75"],
+    ["101000", "-6.00", "-2"],
+    ["101001", "-5.75", "-2.5"],
+    ["101010", "-5.50", "-3"],
+    ["101011", "-5.25", "-3.5"],
+    ["101100", "-5.00", "-4"],
+    ["101101", "-4.75", "-5"],
+    ["101110", "-4.50", "-6"],
+    ["101111", "-4.25", "-7"],
+    ["110000", "-4.00", "-8"],
+    ["110001", "-3.75", "-10"],
+    ["110010", "-3.50", "-12"],
+    ["110011", "-3.25", "-14"],
+    ["110100", "-3.00", "-16"],
+    ["110101", "-2.75", "-20"],
+    ["110110", "-2.50", "-24"],
+    ["110111", "-2.25", "-28"],
+    ["111000", "-2.00", "-32"],
+    ["111001", "-1.75", "-40"],
+    ["111010", "-1.50", "-48"],
+    ["111011", "-1.25", "-56"],
+    ["111100", "-1.00", "negative infinite"],
+    ["111101", "-0.75", "not a number"],
+    ["111110", "-0.50", "not a number"],
+    ["111111", "-0.25", "not a number"]
 ];
 
 function fill_all_numbers_table() {
@@ -512,7 +512,7 @@ function fill_all_numbers_table() {
         var colored_number = "<b><span style='color: #914853'>" + all_6_bit_numbers[i][0][0] + "</span>";
         colored_number += "<span style='color: #597052'>" + all_6_bit_numbers[i][0][1] + all_6_bit_numbers[i][0][2] + all_6_bit_numbers[i][0][3] + "</span>";
         colored_number += "<span style='color: #673670'>" + all_6_bit_numbers[i][0][4] + all_6_bit_numbers[i][0][5] + "</span></b>";
-        all_numbers_table.innerHTML += "<tr><td>" + colored_number + "</td><td>" + all_6_bit_numbers[i][1] + "</td><td>" + all_6_bit_numbers[i][2] + "</td></tr>";  
+        all_numbers_table.innerHTML += "<tr><td>" + colored_number + "</td><td>" + all_6_bit_numbers[i][1] + "</td><td>" + all_6_bit_numbers[i][2] + "</td></tr>";
     }
 }
 
@@ -588,7 +588,7 @@ function number_invert_sign() {
         return;
     if(number_as_string[0] == '-')
         number_as_string = number_as_string.substr(1, number_as_string.length - 1);
-    else 
+    else
         number_as_string = '-' + number_as_string;
     instrumental_error_fill();
 }
@@ -691,7 +691,7 @@ I know, there are already excellent tutorials and explanations on the topic. To 
     </li>
     <li>
 Bruce Dawson's <a href="https://randomascii.wordpress.com/category/floating-point/">blog posts</a>
-    </li>    
+    </li>
     </ul>
     <p>
 I still think that reexplaining the most obscure concepts with different words (and buttons) might help someone better understand floating point numbers as the instrument. To make less bugs, to make things faster, to create better software in general.
@@ -708,9 +708,9 @@ Floating point numbers were invented to represent real numbers. Like 0.5 or 3.14
     </p>
     <p>
 Computers operate with bit tuples, and there are only as many different compinations of bits as 2<sup>n</sup> where <i>n</i> is the length of a tuple.
-    </p>    
+    </p>
     <p>
-Here's a model of a 6-bit integer number. 
+Here's a model of a 6-bit integer number.
     </p>
     <canvas id="integer" width=640 height=200></canvas>
     <script language="JavaScript">
@@ -738,7 +738,7 @@ Integer numbers are not universally standartized but there are some common conve
         </div>
     </form>
     <p>
-Bitwise, it looks a little odd, but it all makes perfect sense when we see all the range in one picture. 
+Bitwise, it looks a little odd, but it all makes perfect sense when we see all the range in one picture.
     </p>
     <table>
     <tr><td><b>Unsigned 1-digit decimal</b></td><td><b>Signed 1-digit decimal<b></td></tr>
@@ -761,8 +761,8 @@ If you take overflows into consideration, it seems even more natural. Yes, signe
     </p>
     <table>
     <tr><td><b>Unsigned 1-digit decimal</b></td><td><b>Signed 1-digit decimal<b></td></tr>
-    <tr><td>...</td><td>...</td></tr>    
-    <tr><td>9</td><td>-1</td></tr>    
+    <tr><td>...</td><td>...</td></tr>
+    <tr><td>9</td><td>-1</td></tr>
     <tr><td><span class="colored1">0</span></td><td>0</td></tr>
     <tr><td><span class="colored1">1</span></td><td>1</td></tr>
     <tr><td><span class="colored1">2</span></td><td>2</td></tr>
@@ -780,7 +780,7 @@ If you take overflows into consideration, it seems even more natural. Yes, signe
     <tr><td>4</td><td><span class="colored2">4</span></td></tr>
     <tr><td>5</td><td>-5</td></tr>
     <tr><td>...</td><td>...</td></tr>
-    </table>    
+    </table>
 
     <p>
 Please don't write your code expecting this behavior though. Integer overflows are not universally standartized. And even when they are, you'd be better off not exploiting them because it makes code obscure, error prone, and often non-portable.
@@ -814,12 +814,12 @@ This puzzle requires significant C++ knowledge. If you're not familiar with the 
             <button type="button" id="button_puzzle_1" onclick="check_puzzle_1()" style="width: 108pt;">Check!</button>
         </div>
     </form>
-    
+
     <p>
 Integer numbers may still be used to represent non-integer values. For instance, 0.45 of a meter is 45 centimeters. 45.6 centimeters is 456 millimeters, and so on.
     </p>
-    <p class="formula">    
-    <br>    
+    <p class="formula">
+    <br>
 456 mm = 45.6 cm = 0.456 m
     <br><br>
     </p>
@@ -857,7 +857,7 @@ They are integers, but they are integer number of fractional numbers. In our cas
             <button type="button" id="button_quest_3" onclick="check_quest_3()" style="width: 108pt;">Check!</button>
         </div>
     </form>
- 
+
     <p>
 You can add and subtract them like the regular numbers, but you have to introduce more elaborate rules for division and multiplication. And you have to watch for overflows and underflows accordingly.
     </p>
@@ -866,27 +866,27 @@ You can add and subtract them like the regular numbers, but you have to introduc
 6-bit floating point number
     </h2>
     <p>
-Flosting point numbers are that popular, because you can use them even if you don't know where the decimal point should be or where is will appear after the computation. 
+Flosting point numbers are that popular, because you can use them even if you don't know where the decimal point should be or where is will appear after the computation.
     </p>
     <p>
 They come from scientific (AKA exponential) notation. With this notation, you can write down both astronomical and subatomic values.
     </p>
     <p class="formula">
     <br>
-    m<sub>Sun</sub>: <b>1.989e+30</b> kg 
+    m<sub>Sun</sub>: <b>1.989e+30</b> kg
     <br><br>
-    m<sub>e</sub>: <b>9.1093897e-31</b> kg 
+    m<sub>e</sub>: <b>9.1093897e-31</b> kg
     <br><br>
     </p>
     <p>
-Just like the numbers in scientific notation, a floating point number has a sign, some meaningful digits, and the exponent. The three major differences are: 
+Just like the numbers in scientific notation, a floating point number has a sign, some meaningful digits, and the exponent. The three major differences are:
     </p>
     <ol>
     <li>
-it's all binary not decimal; 
+it's all binary not decimal;
     </li>
     <li>
-the exponent value goes before meaningful digits; 
+the exponent value goes before meaningful digits;
     </li>
     <li>
 and since its binary, and all the numbers except 0 start from 1, you don't have to write down the first 1 most of the time. It will appear there implicitly.
@@ -896,7 +896,7 @@ and since its binary, and all the numbers except 0 start from 1, you don't have 
     <canvas id="floating" width=640 height=200></canvas>
     <script language="JavaScript">
         init_floating();
-    </script>    
+    </script>
     <p>
 Since you're still working with bits, and every number is still just an integer in disguise, you can imagine a floating point number as an integer number of 2<sup>n</sup>.
     </p>
@@ -904,12 +904,12 @@ Since you're still working with bits, and every number is still just an integer 
 Unlike integer numbers, floating point numbers are <a href="https://en.wikipedia.org/wiki/IEEE_754">standartized</a>, and the standard specifies several useful conventions. The whole range of possible bits consists not only of numbers, but of two distinct zeroes, two values for infinitely large values, and a whole subrange of "not a number"s.
     </p>
     <br><br>
-    
+
     <table id="all_numbers_table">
     </table>
     <script language="JavaScript">
         fill_all_numbers_table();
-    </script> 
+    </script>
     <p>
 To understand why do you need special values for infinite numbers, you need to understand floating point zeroes first. They are not actual zeroes. They model anything that is absolutely smaller than the least representable number. Of course, the may represent actual zero, but they may be just some real small numbers, and as such they deserve to retatin their signs.
     </p>
@@ -917,16 +917,16 @@ To understand why do you need special values for infinite numbers, you need to u
     <tr>
     <td style="border: 1px solid black;">
     <pre>
-  auto min_float = std::numeric_limits<float>::denorm_min();  
-  std::cout &lt;&lt; min_float;  
+  auto min_float = std::numeric_limits<float>::denorm_min();
+  std::cout &lt;&lt; min_float;
   &gt; 1.4013e-45
 
 
   std::cout &lt;&lt; min_float / 2.f;
   &gt; 0
 
-  
-  std::cout &lt;&lt; -min_float / 2.f;  
+
+  std::cout &lt;&lt; -min_float / 2.f;
   &gt; -0
 
 
@@ -946,7 +946,7 @@ When you divide a non-zero number by a zero, you get an infinite. And just like 
     <p>
 There are also numbers that can't possibly be represented in this model, like the square root of negative numbers. Technically, they are still numbers, but being complex numbers and not real, they don't have the representation. Operations that take numbers as input and can't provide numbers as output because of the input values return "not a number" then.
     </p>
-    
+
     <h2>
 Representation error
     </h2>
@@ -954,7 +954,7 @@ Representation error
 Of course, even real numbers are only represented partially. We have only that many bits, that many combinations, and thre real nummer's range is infinite.
     </p>
     <p>
-When a number doesn't have the representation, we pick a nearest number that have instead. 
+When a number doesn't have the representation, we pick a nearest number that have instead.
     </p>
     <form>
     <table>
@@ -981,10 +981,10 @@ When a number doesn't have the representation, we pick a nearest number that hav
     <td align="right">
     <label for="number_as_string">Input number: </label><input type="text" id="number_as_string" value="0"><br>
     <label for="number_in_6_bit">As 6-bit FP: </label><input type="text" id="number_in_6_bit" value="0"><br>
-    <label for="error_in_6_bit">Instrumental error: </label><input type="text" id="error_in_6_bit" value="0"><br>    
+    <label for="error_in_6_bit">Instrumental error: </label><input type="text" id="error_in_6_bit" value="0"><br>
     </td>
     </tr>
-    </table>    
+    </table>
     </form>
     <script language="JavaScript">
         instrumental_error_fill();
@@ -1002,7 +1002,7 @@ The difference between their values is our representation error.
     <p>
 The common misconception is, since out smallest representable numbers are small, the representation error should be small too. But remember, we are talking about integer numbers of 2<sup>n</sup>. The greater the <i>n</i>, the greater the possible representaion error is.
     </p>
-    
+
     <h2>
 Computational error
     </h2>
@@ -1012,7 +1012,7 @@ Representational error is not our worst enemy. The real world data, the values t
     <p>
 However, as we process the data, we introduce computational error, too.
     </p>
-    <form>    
+    <form>
     <select id="sum_a" onchange="sum_error_fill()">
         <option value="0.25">0.25</option>
         <option value="0.5">0.5</option>
@@ -1028,7 +1028,7 @@ However, as we process the data, we introduce computational error, too.
     </select>
     <label for="sum_result"> = </label><input type="text" id="sum_result" value="0.5">
     <label for="sum_error">, error: </label><input type="text" id="sum_error" value="0">
-    </form> 
+    </form>
     <script language="JavaScript">
         sum_error_fill();
     </script>
