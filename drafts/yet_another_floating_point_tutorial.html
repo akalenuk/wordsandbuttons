@@ -657,6 +657,27 @@ function check_quest_3() {
     }
 }
 
+function check_quest_4() {
+    if(cur_float != "1"){
+        document.getElementById("reply_quest_4").innerHTML = "That's not 1. Please try again.";
+    } else {
+        document.getElementById("reply_quest_4").innerHTML = "Right! In our tiny model, 1 comes from 4*2<sup>-2</sup>. And the 4 is 100 in binary. Implicit 1 and two zeroes.";
+        document.getElementById("buttons_quest_4").style.display = 'none';
+        quests[4] = 1;
+    }
+}
+
+function check_quest_5() {
+    if(cur_float != "0.25"){
+        document.getElementById("reply_quest_5").innerHTML = "That's not 0.25. Please try again.";
+    } else {
+        document.getElementById("reply_quest_5").innerHTML = "Yes! This is denormalized number. There is no implicit \"1\" and you can write meaningful digits less than 100 now.";
+        document.getElementById("buttons_quest_5").style.display = 'none';
+        quests[5] = 1;
+    }
+}
+
+
 function check_instrumental_error_quest_1() {
     if(instrumental_error != "0.001"){
         document.getElementById("reply_instrumental_error_quest_1").innerHTML = "That's not exactly 0.001. Please try again.";
@@ -879,7 +900,14 @@ They come from scientific (AKA exponential) notation. With this notation, you ca
     <br><br>
     </p>
     <p>
-Just like the numbers in scientific notation, a floating point number has a sign, some meaningful digits, and the exponent. The three major differences are:
+Just like the numbers in scientific notation, a floating point number has a sign, some meaningful digits, and the exponent. 
+    </p>
+    <canvas id="floating" width=640 height=200></canvas>
+    <script language="JavaScript">
+        init_floating();
+    </script>
+    <p>
+The three major differences are:
     </p>
     <ol>
     <li>
@@ -889,14 +917,30 @@ it's all binary not decimal;
 the exponent value goes before meaningful digits;
     </li>
     <li>
-and since its binary, and all the numbers except 0 start from 1, you don't have to write down the first 1 most of the time. It will appear there implicitly.
+and since its binary, and all the numbers except 0 start from "1", you don't have to write down the first "1" most of the time. It will be there implicitly.
     </li>
     </ol>
     </p>
-    <canvas id="floating" width=640 height=200></canvas>
-    <script language="JavaScript">
-        init_floating();
-    </script>
+    <form>
+        <b>Quest 4.</b> Please make a model from above show 1.
+        <div id="reply_quest_4" style="padding-top:6pt;"></div>
+        <div id="buttons_quest_4" style="text-align:right;">
+            <button type="button" id="button_quest_4" onclick="check_quest_4()" style="width: 108pt;">Check!</button>
+        </div>
+    </form>
+    <p>
+Only for the very small numbers, when we want our exponent to be smaller that we can afford,  we do not imply the "1". This is like writing "0.00123e-45", it's not normal. And we call these numbers subnormal or denormalized.
+    </p>
+    <form>
+        <b>Quest 5.</b> Please make a model from above show 0.25.
+        <div id="reply_quest_5" style="padding-top:6pt;"></div>
+        <div id="buttons_quest_5" style="text-align:right;">
+            <button type="button" id="button_quest_5" onclick="check_quest_5()" style="width: 108pt;">Check!</button>
+        </div>
+    </form>
+
+
+
     <p>
 Since you're still working with bits, and every number is still just an integer in disguise, you can imagine a floating point number as an integer number of 2<sup>n</sup>.
     </p>
