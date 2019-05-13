@@ -969,35 +969,58 @@ Unlike integer numbers, floating point numbers are <a href="https://en.wikipedia
         fill_all_numbers_table();
     </script>
     <p>
-To understand why do you need special values for infinite numbers, you need to understand floating point zeroes first. They are not actual zeroes. They model anything that is absolutely smaller than the least representable number. Of course, the may represent actual zero, but they may be just some real small numbers, and as such they deserve to retatin their signs.
+To understand why do you need special values for infinite numbers, you need to understand floating point zeroes first. They are not actual zeroes. They model anything that is absolutely smaller than the smallest representable number. Of course, the may represent actual zero, but they may be just some small numbers, and as such they deserve to retatin their signs.
     </p>
     <table>
     <tr>
     <td style="border: 1px solid black;">
     <pre>
-  auto min_float = std::numeric_limits<float>::denorm_min();
+  auto min_float 
+    = std::numeric_limits&lt;float&gt;::denorm_min();
   std::cout &lt;&lt; min_float;
-  &gt; 1.4013e-45
+  // prints 1.4013e-45
 
 
   std::cout &lt;&lt; min_float / 2.f;
-  &gt; 0
+  // prints 0
 
 
   std::cout &lt;&lt; -min_float / 2.f;
-  &gt; -0
-
-
-  std::cout &lt;&lt; 0 - (min_float / 2.f);
-  &gt; 0
-
-
-  std::cout &lt;&lt; (min_float / 2.f) * 2.f;
-  &gt; 0
+  // prints -0
     </pre>
     </td>
     </tr>
     </table>
+    <p>
+The smallest representable number is denormalized number. A half of it is semantically number, but pragmatically a zero.
+    </p>
+    <p>
+Denormalized values are not universally available. If you don't want that precision, you can win some performance by turning them off. Speaking of performance, some of the compiler optimizations are algebraic. This means that the compiler optimizes floating point numbers such as if they were real. Usually, it's not a problem. Sometimes it is.
+    </p>
+    <form>
+        <b>Puzzle 2.</b> What will this C++ programm print out?
+        <table>
+        <tr>
+        <td style="border: 1px solid black;">
+        <pre>
+  // built with Clang 3.8 on Intel Core i7
+  std::cout &lt;&lt; 0 - (min_float / 2.f);
+        </td>
+        </tr>
+        </table>
+        <div id="reply_puzzle_2" style="padding-top:6pt;"></div>
+        <div id="buttons_puzzle_2" style="text-align: right;">
+            <select id="puzzle_2_select" style="width: 250pt;">
+            <option value="-1.4013e-45">-1.4013e-45</option>
+            <option value="-0">-0</option>
+            <option value="0">0</option>
+            <option value="1.4013e-45">1.4013e-45</option>
+            <option value="It depends">It depends</option>
+            </select>
+            <button type="button" id="button_puzzle_2" onclick="check_puzzle_2()" style="width: 108pt;">Check!</button>
+        </div>
+    </form>
+
     <p>
 When you divide a non-zero number by a zero, you get an infinite. And just like zeroes are not zeroes, these are not inifinites. These are just numbers that are too big to be represented.
     </p>
