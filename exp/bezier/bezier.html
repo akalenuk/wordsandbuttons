@@ -186,18 +186,24 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
     var Py = spline_for(cubic_ys[1], cubic_ys[0] - cubic_ys[1], cubic_ys[2], cubic_ys[3] - cubic_ys[2]);
     
     context.beginPath();
-    for(var i = 0; i < w; ++i) {    
-        var t1 = (i) / w;
-        var t2 = (i + 1) / w;
+    context.lineWidth = 3;
+    for(var i = 0; i < 256; ++i) {    
+        var t1 = (i) / 256;
+        var t2 = (i + 1) / 256;
         var x1 = polynomial_in_t(Px, t1);
         var y1 = polynomial_in_t(Py, t1);
         var x2 = polynomial_in_t(Px, t2);
         var y2 = polynomial_in_t(Py, t2);
         context.moveTo(x1, y1);
         context.lineTo(x2, y2);
+	if(i % 32 == 31) {
+            context.strokeStyle=((i / 32)%2 < 1) ? "#AABBEE" : "#AA3366";
+            context.stroke();
+            context.closePath();
+            context.beginPath();
+        }
     }
     context.strokeStyle="#AA3366";
-    context.lineWidth = 3;
     context.stroke();
     context.closePath();
     context.lineWidth = 1;
