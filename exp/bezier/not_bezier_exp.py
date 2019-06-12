@@ -15,4 +15,7 @@ res = solve(
     arc_y.subs(t, t2) - (y2 + tl*dyx2), 
     (diff(arc_y, t) / diff(arc_x, t)).subs(t, t2) - dyx2
 ], (t1, t2, tl, x0, y0, r))
-print(res)
+
+for exp in res:
+    print(srepr(exp))
+    print("\n\n")
