@@ -22,7 +22,6 @@ for expr in the_system:
 res = solve(the_system,
  (a, b, c, d, e, f, g))
 
-for exp in res:
-#    print(srepr(exp))
-    print(exp)
+for var, exp in res.items():
+    print(var, srepr(exp))
     print('')
