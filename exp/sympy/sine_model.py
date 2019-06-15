@@ -1,4 +1,5 @@
 from sympy import *
+from math import pi
 
 a, b, c, d, e, f, g, x = symbols('a b c d e f g x')
 
@@ -15,9 +16,6 @@ the_system = [
     sine.subs(x, pi / 2) - 1, 
     sine.subs(x, pi) 
 ]
-
-for expr in the_system:
-    print(expr)
 
 res = solve(the_system,
  (a, b, c, d, e, f, g))
