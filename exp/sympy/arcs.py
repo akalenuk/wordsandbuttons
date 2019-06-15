@@ -16,8 +16,5 @@ res = solve(
     (diff(arc_y, t) / diff(arc_x, t)).subs(t, t2) - dyx2
 ], (t1, t2, tl, x0, y0, r))
 
-for solution in res:
-    for var, exp in solution.items():
-        print(var, srepr(exp))
-        print("\n")
-    print("\n")
+for exp in  res:
+    print(srepr(exp))
