@@ -64,14 +64,25 @@ button {
 }
 
 textarea {
-    width: 505pt;
+    width: 600pt;
     font-size: 12pt;
     font-family: monospace;
 }
 
     </style>
     <script language="JavaScript">
-function remove_two_stars() {
+function make_js() {
+    var source = document.getElementById("exprs").innerHTML;
+    var lines = source.split('\n');
+    var js = "";
+    for(var i = 0; i < lines.length; ++i) {
+        if(lines[i].includes(',') && lines[i].includes('(') && lines[i].includes('"')) {
+            var name = lines[i].split(',')[0].split('(')[1];
+            var expr = lines[i].split('\"')[1];
+            js += 'var ' + name + ' = ' + expr + '\n';
+        }
+    }
+    document.getElementById("exprs").innerHTML = js;
 }
     </script>
   </head>
@@ -82,8 +93,25 @@ Let sympy write your code
     </h1>
     <p>
     </p>
-    <textarea id="two_stars" rows=20></textarea>
-    <button type="button" id="destarstarfy" onclick="remove_two_stars();">De**fy</button>
+    <textarea id="exprs" rows=32>
+(bx, "Add(Mul(Integer(-1), Float('2.3333333333333335', precision=53), Symbol('x1')), Mul(Integer(-1), Float('0.66666666666666663', precision=53), Symbol('x2')), Mul(Float('0.33333333333333331', precision=53), Symbol('x3')), Mul(Float('2.6666666666666665', precision=53), Symbol('x4')))")
+
+(ax, "Add(Mul(Float('1.6666666666666667', precision=53), Symbol('x1')), Mul(Float('0.33333333333333331', precision=53), Symbol('x2')), Mul(Integer(-1), Float('0.33333333333333331', precision=53), Symbol('x3')), Mul(Integer(-1), Float('1.6666666666666667', precision=53), Symbol('x4')))")
+
+(dx, "Symbol('x1')")
+
+(cx, "Add(Mul(Integer(-1), Float('0.33333333333333331', precision=53), Symbol('x1')), Mul(Float('0.33333333333333331', precision=53), Symbol('x2')))")
+
+(cy, "Add(Mul(Integer(-1), Float('0.33333333333333331', precision=53), Symbol('y1')), Mul(Float('0.33333333333333331', precision=53), Symbol('y2')))")
+
+(dy, "Symbol('y1')")
+
+(ay, "Add(Mul(Float('1.6666666666666667', precision=53), Symbol('y1')), Mul(Float('0.33333333333333331', precision=53), Symbol('y2')), Mul(Integer(-1), Float('0.33333333333333331', precision=53), Symbol('y3')), Mul(Integer(-1), Float('1.6666666666666667', precision=53), Symbol('y4')))")
+
+(by, "Add(Mul(Integer(-1), Float('2.3333333333333335', precision=53), Symbol('y1')), Mul(Integer(-1), Float('0.66666666666666663', precision=53), Symbol('y2')), Mul(Float('0.33333333333333331', precision=53), Symbol('y3')), Mul(Float('2.6666666666666665', precision=53), Symbol('y4')))")
+    </textarea>
+    <br>
+    <button type="button" id="make_js" onclick="make_js();">Make JS</button>
     
     <p>
 ...
