@@ -83,10 +83,16 @@ function evaluated_sympy(expr) {
     }
 
     var Add = function() {
-        return '(' + arguments.join('+') + ')';
+        var args = [];
+        for(var i = 0; i < arguments.length; ++i)
+            args.push(arguments[i].toString());
+        return '(' + args.join('+') + ')';
     }
     var Mul = function() {
-        return '(' + arguments.join('*') + ')';
+        var args = [];
+        for(var i = 0; i < arguments.length; ++i)
+            args.push(arguments[i].toString());
+        return '(' + args.join('*') + ')';
     }
 
     return eval(expr);
@@ -100,7 +106,7 @@ function make_js() {
         if(lines[i].includes(',') && lines[i].includes('(') && lines[i].includes('"')) {
             var name = lines[i].split(',')[0].split('(')[1];
             var expr = lines[i].split('\"')[1];
-            js += 'var ' + name + ' = ' + expr + '\n';
+            js += 'var ' + name + ' = ' + evaluated_sympy(expr) + '\n';
         }
     }
     document.getElementById("exprs").innerHTML = js;
