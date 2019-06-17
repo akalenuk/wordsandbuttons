@@ -21,8 +21,8 @@ the_y_system = [
     diff(yt, t).subs(t, 1.) + (y3 - y4) / 3.
 ]
 
-resx = solve(the_x_system, (ax, bx, cx, dx))
-resy = solve(the_y_system, (ay, by, cy, dy))
+resx = solve(the_x_system, (ax, bx, cx, dx), rational = True)
+resy = solve(the_y_system, (ay, by, cy, dy), rational = True)
 
 for var, exp in resx.items():
     print(var, srepr(exp))
