@@ -12,7 +12,8 @@ t1t2 = solve(
     (diff(arc_y, t) / diff(arc_x, t)).subs(t, t2) - dyx2
 ], (t1, t2))
 
-print(t1t2[-1]) 
+print('t1', srepr(t1t2[-1][0])) 
+print('t2', srepr(t1t2[-1][1])) 
 
 tlx0y0r = solve(
    [arc_x.subs(t, t1) - x1, 
@@ -21,4 +22,5 @@ tlx0y0r = solve(
     arc_y.subs(t, t2) - (y2 + tl*dyx2), 
 ], (tl, x0, y0, r))
 
-print(tlx0y0r)
+for var, exp in tlx0y0r.items():
+    print(var, srepr(exp))
