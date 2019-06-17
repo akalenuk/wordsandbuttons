@@ -104,15 +104,16 @@ function evaluated_sympy(expr) {
 function make_js() {
     var source = document.getElementById("exprs").innerHTML;
     var lines = source.split('\n');
-    var js = "";
+    var js = [];
     for(var i = 0; i < lines.length; ++i) {
         if(lines[i].includes(',') && lines[i].includes('(') && lines[i].includes('"')) {
             var name = lines[i].split(',')[0].split('(')[1].replace('\'', '');
             var expr = lines[i].split('\"')[1];
-            js += 'var ' + name + ' = ' + evaluated_sympy(expr) + '\n';
+            js.push('var ' + name + ' = ' + evaluated_sympy(expr));
         }
     }
-    document.getElementById("exprs").innerHTML = js;
+    js.sort();
+    document.getElementById("exprs").innerHTML = js.join('\n');
 }
     </script>
   </head>
