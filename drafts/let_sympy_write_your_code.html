@@ -97,7 +97,11 @@ function evaluated_sympy(expr) {
             args.push(arguments[i].toString());
         return '(' + args.join('*') + ')';
     }
-
+    const math_fs = ['sin', 'cos', 'tan', 'asin', 'acos', 'atan'];
+    for(var i = 0; i < math_fs.length; ++i) {
+        // abusing lexical scoping
+        eval('var ' + math_fs[i] + ' = function(x) { return \'Math.' + math_fs[i] + '(\' + x + \')\'; }');
+    }
     return eval(expr);
 }
 
@@ -140,6 +144,9 @@ Let sympy write your code
 (ay, "Add(Mul(Rational(5, 3), Symbol('y1')), Mul(Rational(1, 3), Symbol('y2')), Mul(Integer(-1), Rational(1, 3), Symbol('y3')), Mul(Integer(-1), Rational(5, 3), Symbol('y4')))")
 
 (by, "Add(Mul(Integer(-1), Rational(7, 3), Symbol('y1')), Mul(Integer(-1), Rational(2, 3), Symbol('y2')), Mul(Rational(1, 3), Symbol('y3')), Mul(Rational(8, 3), Symbol('y4')))")
+
+    
+(y, "sin(Symbol('x'))")
     </textarea>
     <br>
     <button type="button" id="make_js" onclick="make_js();">Make JS</button>
