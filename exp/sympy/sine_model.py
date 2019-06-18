@@ -18,7 +18,7 @@ the_system = [
 ]
 
 res = solve(the_system,
- (a, b, c, d, e, f, g))
+ (a, b, c, d, e, f, g), rational = True)
 
 for var, exp in res.items():
     print(var, srepr(exp))
