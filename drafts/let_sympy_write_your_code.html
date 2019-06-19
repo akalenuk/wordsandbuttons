@@ -124,10 +124,14 @@ function make_js() {
     var js = [];
     try {
         for(var i = 0; i < lines.length; ++i) {
-            if(lines[i].includes(',') && lines[i].includes('(') && lines[i].includes('"')) {
-                var name = lines[i].split(',')[0].split('(')[1].replace('\'', '');
+            if(lines[i].includes(',') && lines[i].split(',')[0].split('"').length == 1 && lines[i].includes('(') && lines[i].includes('"')) {
                 var expr = lines[i].split('\"')[1];
-                js.push('var ' + name + ' = ' + evaluated_sympy(expr));
+                var name = lines[i].split(',')[0].split('(')[1].replace('\'', '');  // var name = expr;
+                js.push('var ' + name + ' = ' + evaluated_sympy(expr) + ';');
+            } else if(lines[i].includes('(') && lines[i].includes('\"')){
+                js.push(evaluated_sympy(lines[i].split('\"')[1])); // expression in quotes
+            } else if(lines[i].includes('(')){
+                js.push(evaluated_sympy(lines[i])); // even without quotes
             } else if(lines[i].trim().length > 0) {
                 document.getElementById("make_js_status").innerHTML = "Sorry, can't do this expression:<br>[" + lines[i] + "]";
                 return;
@@ -150,7 +154,7 @@ Let sympy write your code
     </h1>
     <p>
     </p>
-    <textarea id="exprs" rows=32>
+    <textarea id="exprs" rows=28>
 (bx, "Add(Mul(Integer(-1), Rational(7, 3), Symbol('x1')), Mul(Integer(-1), Rational(2, 3), Symbol('x2')), Mul(Rational(1, 3), Symbol('x3')), Mul(Rational(8, 3), Symbol('x4')))")
 
 (ax, "Add(Mul(Rational(5, 3), Symbol('x1')), Mul(Rational(1, 3), Symbol('x2')), Mul(Integer(-1), Rational(1, 3), Symbol('x3')), Mul(Integer(-1), Rational(5, 3), Symbol('x4')))")
@@ -166,9 +170,6 @@ Let sympy write your code
 (ay, "Add(Mul(Rational(5, 3), Symbol('y1')), Mul(Rational(1, 3), Symbol('y2')), Mul(Integer(-1), Rational(1, 3), Symbol('y3')), Mul(Integer(-1), Rational(5, 3), Symbol('y4')))")
 
 (by, "Add(Mul(Integer(-1), Rational(7, 3), Symbol('y1')), Mul(Integer(-1), Rational(2, 3), Symbol('y2')), Mul(Rational(1, 3), Symbol('y3')), Mul(Rational(8, 3), Symbol('y4')))")
-
-    
-(y, "sin(Symbol('x'))")
     </textarea>
     <br>
     <button type="button" id="make_js" onclick="make_js();">Make JS</button>
