@@ -17,8 +17,7 @@ the_system = [
     sine.subs(x, pi) 
 ]
 
-res = solve(the_system,
- (a, b, c, d, e, f, g), rational = True)
+res = solve(the_system, (a, b, c, d, e, f, g))
 
 for var, exp in res.items():
     print(var, srepr(exp))
