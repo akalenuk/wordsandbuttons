@@ -8,7 +8,7 @@ sine_d = diff(sine, x)
 sine_i = integrate(sine, x)
 
 the_system = [
-    sine_i.subs(x, pi) - sine_i.subs(x, 0) - 1,  
+    sine_i.subs(x, pi / 2) - sine_i.subs(x, 0) - 1,  
     sine_d.subs(x, 0) - 1, 
     sine_d.subs(x, pi / 2), 
     sine_d.subs(x, pi) + 1, 
