@@ -262,6 +262,36 @@ function draw_sine_model() {
 var px = Math.PI/2;
 var py = 1;
 
+function init_not_sine_model() {
+    plot = document.getElementById("not_sine");
+
+    plot.addEventListener('mousemove', function(e){
+       if(e.buttons == 1){
+           var canvas_rect = plot.getBoundingClientRect();
+           px = client_to_x(e.clientX - canvas_rect.left);
+           py = client_to_y(e.clientY - canvas_rect.top);
+           draw_not_sine_model();
+       }
+    }, false);
+
+    plot.addEventListener('mousedown', function(e){
+       var canvas_rect = plot.getBoundingClientRect();
+       px = client_to_x(e.clientX - canvas_rect.left);
+       py = client_to_y(e.clientY - canvas_rect.top);    
+        draw_not_sine_model()
+    }, false);
+
+    plot.addEventListener('mouseup', function(e){
+        draw_not_sine_model();
+    }, false);
+
+    plot.addEventListener('mouseleave', function(e){
+       draw_not_sine_model();
+    }, false);
+    
+    draw_not_sine_model();
+}
+
 function draw_not_sine_model() {
     plot = document.getElementById("not_sine");
     var context = plot.getContext("2d");
@@ -656,7 +686,7 @@ You can drag the point
     <script language="JavaScript">
     draw_sine();
     draw_sine_model();
-    draw_not_sine_model();
+    init_not_sine_model();
     document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
     document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
     document.getElementById("code_3").innerHTML = colorized(document.getElementById("code_3").innerHTML);        
