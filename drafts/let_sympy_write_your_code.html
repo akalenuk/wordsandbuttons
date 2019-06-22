@@ -421,7 +421,7 @@ It does integration and differentiation. It finds limits, and it expands series.
 It's a Python library that does the boring part of math for you. Moreover, it does it fast, accurate, and without angst. In other words, it is everything I'm not.
     </p>
     <h2>
-Example 1.
+Let SymPy do some math for us
     </h2>
     <p>
 Let's say you want to model the sine function with a polynomial. Let's pretend you have a reason. Now how do we do that?
@@ -437,13 +437,13 @@ How about, we gather all we know about the sine function in one bowl and let Sym
 We know that <i>sin(0) = 0</i>, right? Everybody knows that. Also, as you might have heard, you can approximate small sine with its own argument: <i>sin(0.001) ≃ 0.001</i>. This means that the derivative of sine in 0 is 1.
     </p>
     <p>
-So the sine function climbs from 0 to pi/2 and then it starts going down. In pi/2 it's either climbing or descending, it's in its peak. This means that the derivative of <i>sin(pi/2)' = 0</i>. Also, since sine only climbs to 1, <i>sin(pi/2) = 1</i>.
+So the sine function climbs from 0 to π/2 and then it starts going down. In π/2 it's either climbing or descending, it's in its peak. This means that the derivative of <i>sin(π/2)' = 0</i>. Also, since sine only climbs to 1, <i>sin(π/2) = 1</i>.
     </p>
     <p>
-The sine is symmetrical relative to pi/2. This means that it descends exactly as it climbs, and at the point where it reaches pi, its derivative is <i>sin(pi)' = -1</i>, and the function itself <i>sin(pi) = 0</i>.
+The sine is symmetrical relative to π/2. This means that it descends exactly as it climbs, and at the point where it reaches π, its derivative is <i>sin(π)' = -1</i>, and the function itself <i>sin(π) = 0</i>.
     </p>
     <p>
-Also, one less known (but easily decuctable) fact, the integral of sine from 0 to pi/2 is 1. Let's throw this into the system as well.
+Also, one less known (but easily decuctable) fact, the integral of sine from 0 to π/2 is 1. Let's throw this into the system as well.
     </p>
     <p>
 So, we have 7 facts. This implies 7 equations. This implies that our polynomial will have 7 coefficients and the highest degree will be then 6.
@@ -479,6 +479,9 @@ for var, exp in res.items():
     </pre>
     </td>
     </tr></table>
+    <p>
+You can browse <a href="https://docs.sympy.org/latest/tutorial/index.html">the tutorial</a> if you like but it seems more or less clear as it is. <i>sine</i> is our polynomial model. <i>diff</i> is differentiation. <i>integrate</i> is integration. <i>solve</i> is solve. Simple! The only cryptic thing here is <i>srepr</i>. It turns the solution into a special form of expression that looks like this:
+    </p>
     <p class="result">
 &nbsp;&nbsp;(f, 'Integer(1)') <br>
 &nbsp;&nbsp;(c, 'Mul(Integer(5), Pow(pi, Integer(-5)), Add(Mul(Integer(-1), Integer(288), pi), Mul(Integer(-1), Integer(19), Pow(pi, Integer(2))), Integer(1092)))') <br>
@@ -487,6 +490,12 @@ for var, exp in res.items():
 &nbsp;&nbsp;(e, 'Mul(Integer(12), Pow(pi, Integer(-3)), Add(Mul(Integer(-1), Integer(8), pi), Mul(Integer(-1), Pow(pi, Integer(2))), Integer(35)))') <br>
 &nbsp;&nbsp;(g, 'Integer(0)') <br>
 &nbsp;&nbsp;(b, 'Mul(Integer(84), Pow(pi, Integer(-6)), Add(Integer(-60), Pow(pi, Integer(2)), Mul(Integer(16), pi)))')
+    </p>
+    <p>
+Ok, this is not really helpful. We need the coefficients and SymPy gave us the way to compute these coefficients from <i>π</i>. Well, it's what it does, it computes things symbolically not numerically. Or does it?
+    </p>
+    <p>
+Look! I'll add one line and SymPy will compute our coefficients as floating point numbers.
     </p>
     <table><tr>
     <td>
@@ -517,6 +526,9 @@ for var, exp in res.items():
     </pre>
     </td>
     </tr></table>
+    <p>
+Have you notice which line it is? Anyway, the result is now this:
+    </p>
     <p class="result">
 (f, "Float('1.0', precision=53)") <br>
 (c, "Float('-0.0049207268278655082', precision=53)") <br>
@@ -526,12 +538,21 @@ for var, exp in res.items():
 (g, "Float('0.0', precision=53)") <br>
 (b, "Float('0.011803020246125803', precision=53)")
     </p>
+    <p>
+The line was <i>from math import pi</i>. This overloads the <i>pi</i> in the scope to be a floating point number not a symbol. And voilà — SymPy is now numeric. We can take these numbers, put them into our polynomial and have our model.
+    </p>
     <canvas id="sine_model" width=640 height=480></canvas>
     <p class="comment">
-Polynomial model over original sin(x)
+Polynomial model put over original sin(x)
+    </p>
+    <p>
+The model works wonders in the <i>[0; π]</i> range. Outside this range it diverges from the sine but we never specified that it shouldn't.
+    </p>
+    <p>
+The polynomial bears all the properties we told SymPy with our equations and nothing more.
     </p>
     <h2>
-Example 3.
+Now let SymPy write some code for us
     </h2>
     <table><tr>
     <td>
@@ -583,9 +604,7 @@ for var, exp in resy.items():
 &nbsp;&nbsp;(by, "Add(Mul(Integer(-1), Rational(7, 3), Symbol('y1')), Mul(Integer(-1), Rational(2, 3), Symbol('y2')), Mul(Rational(1, 3), Symbol('y3')), Mul(Rational(8, 3), Symbol('y4')))") <br>
     </p>
         
-    <h2>
-Math to code
-    </h2>
+
     <textarea id="exprs" rows=28>
   (bx, "Add(Mul(Integer(-1), Rational(7, 3), Symbol('x1')), Mul(Integer(-1), Rational(2, 3), Symbol('x2')), Mul(Rational(1, 3), Symbol('x3')), Mul(Rational(8, 3), Symbol('x4')))")
   (ax, "Add(Mul(Rational(5, 3), Symbol('x1')), Mul(Rational(1, 3), Symbol('x2')), Mul(Integer(-1), Rational(1, 3), Symbol('x3')), Mul(Integer(-1), Rational(5, 3), Symbol('x4')))")
