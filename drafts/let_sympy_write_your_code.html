@@ -259,6 +259,44 @@ function draw_sine_model() {
     context.closePath();    
 }
 
+var px = Math.PI/2;
+var py = 1;
+
+function draw_not_sine_model() {
+    plot = document.getElementById("not_sine");
+    var context = plot.getContext("2d");
+
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // grid
+    draw_grid_on(context);
+    
+    // not sine
+    function not_sin_model(x) {
+        var a = (-1*(2)*Math.pow(px, -2)*py*(((314159265358979)*px)+(-493480220054468))*Math.pow((((314159265358979)*Math.pow(px, 2))+(-1*(1973920880217872)*px)+(3100627668029980)), -1));
+        var b = (Math.pow(px, -2)*py*(((942477796076937)*Math.pow(px, 2))+(-3100627668029980))*Math.pow((((314159265358979)*Math.pow(px, 2))+(-1*(1973920880217872)*px)+(3100627668029980)), -1));
+        var c = (-1*(8)*Math.pow(px, -1)*py*(((370110165040851)*px)+(-775156917007495))*Math.pow((((314159265358979)*Math.pow(px, 2))+(-1*(1973920880217872)*px)+(3100627668029980)), -1));
+        var d = (0);
+        return a*x*x*x + b*x*x + c*x + d;
+    }
+    
+    context.lineWidth = 1;
+    context.beginPath();
+    context.strokeStyle = colors[2];
+    for(var j = 1; j < w; j += 1) {    
+	var x = client_to_x(j);
+	var x_ = client_to_x(j-1);
+	var y = not_sin_model(x);
+	var y_ = not_sin_model(x_);
+        context.moveTo(j-1, y_to_client(y_));
+        context.lineTo(j, y_to_client(y));
+        context.stroke();
+    }
+    context.closePath();
+}
+
 // for the tool
 function evaluated_sympy(expr) {
     var Symbol = function(x) {
@@ -268,7 +306,7 @@ function evaluated_sympy(expr) {
         return x.toString();
     }
     var Float = function(x) {
-        return parseFloat(x);
+        return '(' + parseFloat(x) + ')';
     }
     var Rational = function(x, y) {
         return x + '/' + y;
@@ -289,6 +327,9 @@ function evaluated_sympy(expr) {
     var Mod = function(x, y) {
         return '(' + x + '%' + y + ')';
     }
+    var Pow = function(x, y) {
+        return 'Math.pow(' + x + ', ' + y + ')';
+    }    
     const math_fs = ['abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'cbrt', 'ceil', 'clz32', 'cos', 'cosh', 'exp', 'expm1', 'floor', 'fround', 'log', 'log10', 'log1p', 'log2', 'random', 'round', 'sign', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'trunc'];
     for(var i = 0; i < math_fs.length; ++i) {
         // abusing lexical scoping
@@ -560,60 +601,44 @@ Now let SymPy write some code for us
 from sympy import *
 from math import pi
 
-ax, bx, cx, dx, ay, by, cy, dy, t = symbols('ax bx cx dx ay by cy dy t')
-x1, y1, x2, y2, x3, y3, x4, y4 = symbols('x1 y1 x2 y2 x3 y3 x4 y4')
+a, b, c, d, x, px, py = symbols('a b c d x px py')
 
-xt = ax*t**3 + bx*t**2 + cx*t + dx
-yt = ay*t**3 + by*t**2 + cy*t + dy
+sine = a*x**3 + b*x**2 + c*x + d
+sine_d = diff(sine, x)
 
-the_x_system = [
-    xt.subs(t, 0.) - x1,
-    diff(xt, t).subs(t, 0.) - (x2 - x1) / 3.,
-    xt.subs(t, 1.) - x4,
-    diff(xt, t).subs(t, 1.) + (x3 - x4) / 3.
+the_system = [
+    sine_d.subs(x, px), 
+    sine.subs(x, 0), 
+    sine.subs(x, px) - py, 
+    sine.subs(x, pi) 
 ]
 
-the_y_system = [
-    yt.subs(t, 0.) - y1,
-    diff(yt, t).subs(t, 0.) - (y2 - y1) / 3.,
-    yt.subs(t, 1.) - y4,
-    diff(yt, t).subs(t, 1.) + (y3 - y4) / 3.
-]
+res = solve(the_system, (a, b, c, d))
 
-resx = solve(the_x_system, (ax, bx, cx, dx), rational = True)
-resy = solve(the_y_system, (ay, by, cy, dy), rational = True)
-
-for var, exp in resx.items():
+for var, exp in res.items():
     print(var, srepr(exp))
-    print('')
-
-for var, exp in resy.items():
-    print(var, srepr(exp))
-    print('')
     </pre>
     </td>
     </tr></table>
     <p class="result">
-&nbsp;&nbsp;(bx, "Add(Mul(Integer(-1), Rational(7, 3), Symbol('x1')), Mul(Integer(-1), Rational(2, 3), Symbol('x2')), Mul(Rational(1, 3), Symbol('x3')), Mul(Rational(8, 3), Symbol('x4')))") <br>
-&nbsp;&nbsp;(ax, "Add(Mul(Rational(5, 3), Symbol('x1')), Mul(Rational(1, 3), Symbol('x2')), Mul(Integer(-1), Rational(1, 3), Symbol('x3')), Mul(Integer(-1), Rational(5, 3), Symbol('x4')))") <br>
-&nbsp;&nbsp;(dx, "Symbol('x1')") <br>
-&nbsp;&nbsp;(cx, "Add(Mul(Integer(-1), Rational(1, 3), Symbol('x1')), Mul(Rational(1, 3), Symbol('x2')))") <br>
-&nbsp;&nbsp;(cy, "Add(Mul(Integer(-1), Rational(1, 3), Symbol('y1')), Mul(Rational(1, 3), Symbol('y2')))") <br>
-&nbsp;&nbsp;(dy, "Symbol('y1')") <br>
-&nbsp;&nbsp;(ay, "Add(Mul(Rational(5, 3), Symbol('y1')), Mul(Rational(1, 3), Symbol('y2')), Mul(Integer(-1), Rational(1, 3), Symbol('y3')), Mul(Integer(-1), Rational(5, 3), Symbol('y4')))") <br>
-&nbsp;&nbsp;(by, "Add(Mul(Integer(-1), Rational(7, 3), Symbol('y1')), Mul(Integer(-1), Rational(2, 3), Symbol('y2')), Mul(Rational(1, 3), Symbol('y3')), Mul(Rational(8, 3), Symbol('y4')))") <br>
+&nbsp;&nbsp;(c, "Mul(Integer(-1), Float('8.0', precision=53), Pow(Symbol('px'), Integer(-1)), Symbol('py'), Add(Mul(Float('370110165040851.0', precision=53), Symbol('px')), Float('-775156917007495.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
+<br>
+&nbsp;&nbsp;(b, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Float('942477796076937.0', precision=53), Pow(Symbol('px'), Integer(2))), Float('-3100627668029980.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
+<br>
+&nbsp;&nbsp;(a, "Mul(Integer(-1), Float('2.0', precision=53), Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Float('314159265358979.0', precision=53), Symbol('px')), Float('-493480220054468.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
+<br>
+&nbsp;&nbsp;(d, "Float('0.0', precision=53)")
     </p>
-        
-
+    <canvas id="not_sine" width=640 height=480></canvas>        
+    <p class="comment">
+You can drag the point
+    </p>
+    
     <textarea id="exprs" rows=28>
-  (bx, "Add(Mul(Integer(-1), Rational(7, 3), Symbol('x1')), Mul(Integer(-1), Rational(2, 3), Symbol('x2')), Mul(Rational(1, 3), Symbol('x3')), Mul(Rational(8, 3), Symbol('x4')))")
-  (ax, "Add(Mul(Rational(5, 3), Symbol('x1')), Mul(Rational(1, 3), Symbol('x2')), Mul(Integer(-1), Rational(1, 3), Symbol('x3')), Mul(Integer(-1), Rational(5, 3), Symbol('x4')))")
-  (dx, "Symbol('x1')")
-  (cx, "Add(Mul(Integer(-1), Rational(1, 3), Symbol('x1')), Mul(Rational(1, 3), Symbol('x2')))")
-  (cy, "Add(Mul(Integer(-1), Rational(1, 3), Symbol('y1')), Mul(Rational(1, 3), Symbol('y2')))")
-  (dy, "Symbol('y1')")
-  (ay, "Add(Mul(Rational(5, 3), Symbol('y1')), Mul(Rational(1, 3), Symbol('y2')), Mul(Integer(-1), Rational(1, 3), Symbol('y3')), Mul(Integer(-1), Rational(5, 3), Symbol('y4')))")
-  (by, "Add(Mul(Integer(-1), Rational(7, 3), Symbol('y1')), Mul(Integer(-1), Rational(2, 3), Symbol('y2')), Mul(Rational(1, 3), Symbol('y3')), Mul(Rational(8, 3), Symbol('y4')))")
+  (c, "Mul(Integer(-1), Float('8.0', precision=53), Pow(Symbol('px'), Integer(-1)), Symbol('py'), Add(Mul(Float('370110165040851.0', precision=53), Symbol('px')), Float('-775156917007495.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
+  (b, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Float('942477796076937.0', precision=53), Pow(Symbol('px'), Integer(2))), Float('-3100627668029980.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
+  (a, "Mul(Integer(-1), Float('2.0', precision=53), Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Float('314159265358979.0', precision=53), Symbol('px')), Float('-493480220054468.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
+  (d, "Float('0.0', precision=53)")
     </textarea>
     <br>
     <button type="button" id="make_js" onclick="make_js();">Make JS</button>
@@ -625,6 +650,7 @@ for var, exp in resy.items():
     <script language="JavaScript">
     draw_sine();
     draw_sine_model();
+    draw_not_sine_model();
     document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
     document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
     document.getElementById("code_3").innerHTML = colorized(document.getElementById("code_3").innerHTML);        
