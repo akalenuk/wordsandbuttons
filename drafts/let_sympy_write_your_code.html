@@ -86,6 +86,106 @@ textarea {
 
     </style>
     <script language="JavaScript">
+// client
+var w = 640.0;
+var h = 480.0;
+
+// visible region
+var x_min = -1.0;
+var y_min = -3.0;
+var x_max = 7.0;
+var y_max = 3.0;
+
+// colors
+var colors = ["#d64562", "#457fd6", "#62d645"];
+
+var client_x_center = w*(0-x_min)/(x_max-x_min);
+var client_x_step = (w/(x_max-x_min));
+
+var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+var client_y_step = (h/(y_max-y_min));
+
+function client_to_x(client_x){
+    return (client_x - client_x_center) / client_x_step;
+}
+
+function client_to_y(client_y){
+    return (client_y_center - client_y) / client_y_step;
+}
+
+function x_to_client(x){
+    return x * client_x_step + client_x_center;
+}
+
+function y_to_client(y){
+    return client_y_center - y * client_y_step;
+}
+
+// for illustrations
+function draw_grid_on(context){
+    context.font = "16px sans-serif";
+    // axes
+    context.beginPath();
+    context.moveTo(0, client_y_center);
+    context.lineTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center - 5);
+    context.moveTo(w, client_y_center);
+    context.lineTo(w - 12, client_y_center + 5);
+    context.moveTo(client_x_center, h);
+    context.lineTo(client_x_center, 0);
+    context.lineTo(client_x_center - 5, 12);
+    context.moveTo(client_x_center, 0);
+    context.lineTo(client_x_center + 5, 12);
+    context.fillStyle="#000000";
+    // numbers
+    for(var i = x_min + 1; i <= x_max - 1; i++){
+        context.moveTo(client_x_center + i*client_x_step, client_y_center);
+        context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+        context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+    }
+    for(var i = y_min + 1; i <= y_max - 1; i++){
+        if(i != 0) {
+            context.moveTo(client_x_center, client_y_center - i*client_y_step);
+            context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+            context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+        }
+    }
+    // letters
+    context.fillText("x", client_x_center + x_max*client_x_step - 24, client_y_center - 16);
+    context.fillText("y", client_x_center - 30, client_y_center - y_max*client_y_step + 16);
+
+    context.strokeStyle="#000000";
+    context.stroke();
+    context.closePath();
+}
+
+function draw_sine() {
+    plot = document.getElementById("sine");
+    var context = plot.getContext("2d");
+
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // grid
+    draw_grid_on(context);
+    
+    // sine
+    context.lineWidth = 1;
+    context.beginPath();
+    for(var j = 1; j < w; ++j) {    
+	var x = client_to_x(j);
+	var x_ = client_to_x(j-1);
+	var y = Math.sin(x);
+	var y_ = Math.sin(x_);
+        context.moveTo(w_, y_to_client(y_));
+        context.lineTo(w, y_to_client(y));
+        context.stroke();
+    }
+    context.closePath();
+}
+
+// for the tool
 function evaluated_sympy(expr) {
     var Symbol = function(x) {
         return x;
@@ -255,6 +355,10 @@ Let's say you want to model the sine function with a polynomial. Let's pretend y
     <p>
 How about, we gather all we know about the sine function in one bowl and let SymPy do the rest? Sounds good?
     </p>
+    <canvas id="sine" width=640 height=480></canvas>
+    <p class="comment">
+    sin(x)
+    </p>
     <p>
 We know that <i>sin(0) = 0</i>, right? Everybody knows that. Also, as you might have heard, you can approximate small sine with its own argument: <i>sin(0.001) ≃ 0.001</i>. This means that the derivative of sine in 0 is 1.
     </p>
@@ -423,6 +527,7 @@ Math to code
 ...
     </p>
     <script language="JavaScript">
+    draw_sine();
     document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
     document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
     document.getElementById("code_3").innerHTML = colorized(document.getElementById("code_3").innerHTML);        
