@@ -249,7 +249,30 @@ It's a Python library that does the boring part of math for you. Moreover, it do
     <h2>
 Example 1.
     </h2>
-    
+    <p>
+Let's say you want to model the sine function with a polynomial. Let's pretend you have a reason. Now how do we do that?
+    </p> 
+    <p>
+How about, we gather all we know about the sine function in one bowl and let SymPy do the rest? Sounds good?
+    </p>
+    <p>
+We know that <i>sin(0) = 0</i>, right? Everybody knows that. Also, as you might have heard, you can approximate small sine with its own argument: <i>sin(0.001) ≃ 0.001</i>. This means that the derivative of sine in 0 is 1.
+    </p>
+    <p>
+So the sine function climbs from 0 to pi/2 and then it starts going down. In pi/2 it's either climbing or descending, it's in its peak. This means that the derivative of <i>sin(pi/2)' = 0</i>. Also, since sine only climbs to 1, <i>sin(pi/2) = 1</i>.
+    </p>
+    <p>
+The sine is symmetrical relative to pi/2. This means that it descends exactly as it climbs, and at the point where it reaches pi, its derivative is <i>sin(pi)' = -1</i>, and the function itself <i>sin(pi) = 0</i>.
+    </p>
+    <p>
+Also, one less known (but easily decuctable) fact, the integral of sine from 0 to pi/2 is 1. Let's throw this into the system as well.
+    </p>
+    <p>
+So, we have 7 facts. This implies 7 equations. This implies that our polynomial will have 7 coefficients and the highest degree will be then 6.
+    </p>
+    <p>
+Let's translate it all into Python.
+    </p>
     <table><tr>
     <td>
     <pre id="code_1">
@@ -262,8 +285,8 @@ sine_d = diff(sine, x)
 sine_i = integrate(sine, x)
 
 the_system = [
-    sine_i.subs(x, pi) - sine_i.subs(x, 0) - 1,  
-    sine_d.subs(x, 0) - 1, 
+    sine_i.subs(x, pi / 2) - sine_i.subs(x, 0) - 1,
+    sine_d.subs(x, 0) - 1,
     sine_d.subs(x, pi / 2), 
     sine_d.subs(x, pi) + 1, 
     sine.subs(x, 0), 
