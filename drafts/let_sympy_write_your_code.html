@@ -305,10 +305,10 @@ function draw_not_sine_model() {
     
     // not sine
     function not_sin_model(x) {
-        var a = (-1*(2)*Math.pow(px, -2)*py*(((314159265358979)*px)+(-493480220054468))*Math.pow((((314159265358979)*Math.pow(px, 2))+(-1*(1973920880217872)*px)+(3100627668029980)), -1));
-        var b = (Math.pow(px, -2)*py*(((942477796076937)*Math.pow(px, 2))+(-3100627668029980))*Math.pow((((314159265358979)*Math.pow(px, 2))+(-1*(1973920880217872)*px)+(3100627668029980)), -1));
-        var c = (-1*(8)*Math.pow(px, -1)*py*(((370110165040851)*px)+(-775156917007495))*Math.pow((((314159265358979)*Math.pow(px, 2))+(-1*(1973920880217872)*px)+(3100627668029980)), -1));
-        var d = (0);
+        var a = (Math.pow(px, -2)*py*(Math.PI+(-1*2*px))*Math.pow((Math.pow(px, 2)+(-1*2*Math.PI*px)+Math.pow(Math.PI, 2)), -1));
+        var b = (Math.pow(px, -2)*py*((3*Math.pow(px, 2))+(-1*Math.pow(Math.PI, 2)))*Math.pow((Math.pow(px, 2)+(-1*2*Math.PI*px)+Math.pow(Math.PI, 2)), -1));
+        var c = (Math.PI*Math.pow(px, -1)*py*((-1*3*px)+(2*Math.PI))*Math.pow((Math.pow(px, 2)+(-1*2*Math.PI*px)+Math.pow(Math.PI, 2)), -1));
+        var d = 0;
         return a*x*x*x + b*x*x + c*x + d;
     }
     
@@ -335,6 +335,8 @@ function draw_not_sine_model() {
 
 // for the tool
 function evaluated_sympy(expr) {
+    const pi = "Math.PI";
+    
     var Symbol = function(x) {
         return x;
     }
@@ -385,6 +387,10 @@ function make_js() {
         for(var i = 0; i < lines.length; ++i) {
             if(lines[i].includes(',') && lines[i].split(',')[0].split('"').length == 1 && lines[i].includes('(') && lines[i].includes('"')) {
                 var expr = lines[i].split('\"')[1];
+                var name = lines[i].split(',')[0].split('(')[1].replace('\'', '');  // var name = expr;
+                js.push('var ' + name + ' = ' + evaluated_sympy(expr) + ';');
+            } else if(lines[i].includes(',') && lines[i].split(',')[0].split('\'').length == 1 && lines[i].includes('(') && lines[i].includes('\'')) {
+                var expr = lines[i].split('\'')[1];
                 var name = lines[i].split(',')[0].split('(')[1].replace('\'', '');  // var name = expr;
                 js.push('var ' + name + ' = ' + evaluated_sympy(expr) + ';');
             } else if(lines[i].includes('(') && lines[i].includes('\"')){
@@ -644,7 +650,6 @@ The code that states the problem look like this:
     <td>
     <pre id="code_3">
 from sympy import *
-from math import pi
 
 a, b, c, d, x, px, py = symbols('a b c d x px py')
 
@@ -666,13 +671,13 @@ for var, exp in res.items():
     </td>
     </tr></table>
     <p class="result">
-&nbsp;&nbsp;(c, "Mul(Integer(-1), Float('8.0', precision=53), Pow(Symbol('px'), Integer(-1)), Symbol('py'), Add(Mul(Float('370110165040851.0', precision=53), Symbol('px')), Float('-775156917007495.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
+&nbsp;&nbsp;(c, "Mul(pi, Pow(Symbol('px'), Integer(-1)), Symbol('py'), Add(Mul(Integer(-1), Integer(3), Symbol('px')), Mul(Integer(2), pi)), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
 <br>
-&nbsp;&nbsp;(b, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Float('942477796076937.0', precision=53), Pow(Symbol('px'), Integer(2))), Float('-3100627668029980.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
+&nbsp;&nbsp;(b, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Integer(3), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Pow(pi, Integer(2)))), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
 <br>
-&nbsp;&nbsp;(a, "Mul(Integer(-1), Float('2.0', precision=53), Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Float('314159265358979.0', precision=53), Symbol('px')), Float('-493480220054468.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
+&nbsp;&nbsp;(a, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(pi, Mul(Integer(-1), Integer(2), Symbol('px'))), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
 <br>
-&nbsp;&nbsp;(d, "Float('0.0', precision=53)")
+&nbsp;&nbsp;(d, 'Integer(0)')
     </p>
     <canvas id="not_sine" width=640 height=480></canvas>        
     <p class="comment">
@@ -680,10 +685,13 @@ You can drag the point
     </p>
     
     <textarea id="exprs" rows=28>
-  (c, "Mul(Integer(-1), Float('8.0', precision=53), Pow(Symbol('px'), Integer(-1)), Symbol('py'), Add(Mul(Float('370110165040851.0', precision=53), Symbol('px')), Float('-775156917007495.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
-  (b, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Float('942477796076937.0', precision=53), Pow(Symbol('px'), Integer(2))), Float('-3100627668029980.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
-  (a, "Mul(Integer(-1), Float('2.0', precision=53), Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Float('314159265358979.0', precision=53), Symbol('px')), Float('-493480220054468.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
-  (d, "Float('0.0', precision=53)")
+(c, "Mul(pi, Pow(Symbol('px'), Integer(-1)), Symbol('py'), Add(Mul(Integer(-1), Integer(3), Symbol('px')), Mul(Integer(2), pi)), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
+
+(b, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Integer(3), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Pow(pi, Integer(2)))), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
+
+(a, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(pi, Mul(Integer(-1), Integer(2), Symbol('px'))), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
+
+(d, 'Integer(0)')
     </textarea>
     <br>
     <button type="button" id="make_js" onclick="make_js();">Make JS</button>
