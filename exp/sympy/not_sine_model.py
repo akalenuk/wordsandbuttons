@@ -1,5 +1,4 @@
 from sympy import *
-from math import pi
 
 a, b, c, d, x, px, py = symbols('a b c d x px py')
 
