@@ -71,7 +71,307 @@ u {
 }
     </style>
     <script language="JavaScript">
+// client
+var w = 640.0;
+var h = 640.0;
 
+// solver specific to [0..1] parametrized splines
+function spline_for(p1, p1d, p2, p2d) {
+//     A = [
+//         [1, 0, 0, 0],
+//         [0, 1, 0, 0],
+//         [1, 1, 1, 1],
+//         [0, 1, 2, 3]];
+//     B = [p1, p1d, p2, p2d]
+    return [
+        p1,
+        p1d,
+        3 * p2 - p2d - 3*p1 - 2*p1d,
+        p2d + p1d - 2*p2 + 2*p1
+    ];
+}
+
+// polynomial
+function polynomial_in_t(A, t){
+    var pt = 0.0;
+    for(var i = 0; i < A.length; ++i){
+        pt += A[i] * Math.pow(t, i);
+    }
+    return pt;
+}
+
+// cubic
+var cubic_xs = [300, 100, 300, 500];
+var cubic_ys = [300, 100, 300, 500];
+var cubic_n = 4;
+var cubic_i = 0;
+
+function init_cubic(){
+    cubic = document.getElementById("cubic_canvas");
+    var canvas_rect = cubic.getBoundingClientRect();
+    draw_cubic_canvas(0, 0, false);
+
+    cubic.addEventListener('mousemove', function(e){
+        var canvas_rect = cubic.getBoundingClientRect();
+        draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+            cubic_xs[cubic_i] = e.clientX - canvas_rect.left;
+            cubic_ys[cubic_i] = e.clientY - canvas_rect.top;
+            draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+        }
+    }, false);
+
+    cubic.addEventListener('mousedown', function(e){
+        var canvas_rect = cubic.getBoundingClientRect();
+        cubic_xs[cubic_i] = e.clientX - canvas_rect.left;
+        cubic_ys[cubic_i] = e.clientY - canvas_rect.top;
+        draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    cubic.addEventListener('mouseleave', function(e){
+        draw_cubic_canvas(0, 0, false);
+    }, false);
+}
+
+function si() {
+    var Px = spline_for(cubic_xs[1], 3*(cubic_xs[0] - cubic_xs[1]), cubic_xs[2], -3*(cubic_xs[3] - cubic_xs[2]));
+    var Py = spline_for(cubic_ys[1], 3*(cubic_ys[0] - cubic_ys[1]), cubic_ys[2], -3*(cubic_ys[3] - cubic_ys[2]));
+
+
+    //	constant speed equation
+    const ax = Px[3];
+    const bx = Px[2];
+    const cx = Px[1];
+    const dx = Px[0];
+    const ay = Py[3];
+    const by = Py[2];
+    const cy = Py[1];
+    const dy = Py[0];
+    const _si = 1296*ax*ax*ax*ax/7 + 432*ax*ax*ax*bx + 864*ax*ax*ax*cx/5 + 2592*ax*ax*ay*ay/7 + 432*ax*ax*ay*by 
+	    + 864*ax*ax*ay*cy/5 + 1872*ax*ax*bx*bx/5 + 288*ax*ax*bx*cx + 576*ax*ax*by*by/5 + 72*ax*ax*by*cy 
+	    + 48*ax*ax*cx*cx + 432*ax*ay*ay*bx + 864*ax*ay*ay*cx/5 + 2592*ax*ay*bx*by/5 + 216*ax*ay*bx*cy 
+	    + 216*ax*ay*by*cx + 96*ax*ay*cx*cy + 144*ax*bx*bx*bx + 160*ax*bx*bx*cx + 144*ax*bx*by*by 
+	    + 96*ax*bx*by*cy + 48*ax*bx*cx*cx + 64*ax*by*by*cx + 48*ax*by*cx*cy + 1296*ay*ay*ay*ay/7 
+	    + 432*ay*ay*ay*by + 864*ay*ay*ay*cy/5 + 576*ay*ay*bx*bx/5 + 72*ay*ay*bx*cx + 1872*ay*ay*by*by/5 
+	    + 288*ay*ax*by*cy + 48*ay*ay*cy*cy + 144*ay*bx*bx*by + 64*ay*bx*bx*cy + 96*ay*bx*by*cx 
+	    + 48*ay*bx*cx*cy + 144*ay*by*by*by + 160*ay*by*by*cy + 48*ay*by*cy*cy + 64*bx*bx*bx*bx/3 
+	    + 32*bx*bx*bx*cx + 128*bx*bx*by*by/3 + 32*bx*bx*by*cy + 16*bx*bx*cx*cx + 32*bx*by*by*cx 
+	    + 32*bx*by*cx*cy + 64*by*by*by*by/3 + 32*by*by*by*cy + 16*by*by*cy*cy;
+    return _si;
+}
+
+function draw_cubic_canvas(client_x, client_y, do_guides){
+    cubic = document.getElementById("cubic_canvas");
+    var context = cubic.getContext("2d");
+    context.font = "16px sans-serif";
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+ 
+    var Px = spline_for(cubic_xs[1], 3*(cubic_xs[0] - cubic_xs[1]), cubic_xs[2], -3*(cubic_xs[3] - cubic_xs[2]));
+    var Py = spline_for(cubic_ys[1], 3*(cubic_ys[0] - cubic_ys[1]), cubic_ys[2], -3*(cubic_ys[3] - cubic_ys[2]));
+
+/*   
+    var Px = spline_for(cubic_xs[1], cubic_xs[0] - cubic_xs[1], cubic_xs[2], cubic_xs[3] - cubic_xs[2]);
+    var Py = spline_for(cubic_ys[1], cubic_ys[0] - cubic_ys[1], cubic_ys[2], cubic_ys[3] - cubic_ys[2]);
+*/    
+    context.beginPath();
+    context.lineWidth = 3;
+    for(var i = 0; i < 256; ++i) {    
+        var t1 = (i) / 256;
+        var t2 = (i + 1) / 256;
+        var x1 = polynomial_in_t(Px, t1);
+        var y1 = polynomial_in_t(Py, t1);
+        var x2 = polynomial_in_t(Px, t2);
+        var y2 = polynomial_in_t(Py, t2);
+        context.moveTo(x1, y1);
+        context.lineTo(x2, y2);
+	if(i % 32 == 31) {
+            context.strokeStyle=((i / 32)%2 < 1) ? "#AABBEE" : "#AA3366";
+            context.stroke();
+            context.closePath();
+            context.beginPath();
+        }
+    }
+    context.strokeStyle="#AA3366";
+    context.stroke();
+    context.closePath();
+    context.lineWidth = 1;
+    
+    // dots
+    for(var i = 0; i < cubic_n; ++i){
+        context.beginPath();
+        context.arc(cubic_xs[i], cubic_ys[i], 3, 0, 2*Math.PI);
+        context.fillStyle="#6633AA";
+        context.fill();
+        context.closePath();    
+    }
+
+    // tangents
+    context.beginPath();
+    context.setLineDash([4, 4]);
+    context.moveTo(cubic_xs[0], cubic_ys[0]);
+    context.lineTo(cubic_xs[1], cubic_ys[1]);
+    context.moveTo(cubic_xs[cubic_n-2], cubic_ys[cubic_n-2]);
+    context.lineTo(cubic_xs[cubic_n-1], cubic_ys[cubic_n-1]);
+    context.strokeStyle="#6633AA";
+    context.stroke();
+    context.setLineDash([]);
+    context.closePath();
+
+    // guides
+    if(do_guides){
+        min_d = Math.pow(cubic_xs[0] - client_x, 2) + Math.pow(cubic_ys[0] - client_y, 2);
+        min_i = 0;
+        for(var i = 1; i < cubic_n; ++i){
+            var di = Math.pow(cubic_xs[i] - client_x, 2) + Math.pow(cubic_ys[i] - client_y, 2);
+            if(di < min_d){
+                min_d = di;
+                min_i = i;
+            }
+        }
+        cubic_i = min_i;
+        context.setLineDash([4, 4]);
+        context.beginPath();
+        context.moveTo(cubic_xs[min_i], cubic_ys[min_i]);
+        context.lineTo(client_x, client_y);
+        context.strokeStyle="#6633AA";
+        context.stroke();
+        context.closePath();
+        context.setLineDash([]);
+    }
+    
+    // labels
+    context.font = "14px Arial";
+    context.fillStyle = "#000000";
+    context.textBaseline = "middle"; 
+    context.textAlign = "right";
+    context.fillText("point 1", cubic_xs[1] - 8, cubic_ys[1]);
+    context.textAlign = "left";
+    context.fillText("point 2", cubic_xs[2] + 8, cubic_ys[2]);
+    context.textAlign = "center";
+    context.fillText("tangent 1", (cubic_xs[0] + cubic_xs[1]) / 2, (cubic_ys[0] + cubic_ys[1]) / 2);
+    context.fillText("tangent 2", (cubic_xs[2] + cubic_xs[3]) / 2, (cubic_ys[2] + cubic_ys[3]) / 2);
+
+
+    context.fillText(Math.log(Math.abs(si())).toFixed(2), 320, 64);
+
+    // minimized
+    const p0x = cubic_xs[1];
+    const p0y = cubic_ys[1];
+    const p1x = cubic_xs[2];
+    const p1y = cubic_ys[2];
+    const p0dx = cubic_xs[0] - cubic_xs[1];
+    const p0dy = cubic_ys[0] - cubic_ys[1];
+    const p1dy_to_dx = (cubic_ys[3] - cubic_ys[2]) / (cubic_xs[3] - cubic_xs[2]);
+
+    const Pmx = [
+        p0x,
+        p0dx,
+        (-2*p0dx*p1dy_to_dx*p1dy_to_dx - 2*p0dx - 3*p0x*p1dy_to_dx*p1dy_to_dx - 3*p0x + 3*p1dy_to_dx*p1dy_to_dx*p1x + 3*p1x + Math.sqrt(p0dx*p0dx*p1dy_to_dx*p1dy_to_dx + p0dx*p0dx + p0dy*p0dy*p1dy_to_dx*p1dy_to_dx + p0dy*p0dy))/(p1dy_to_dx*p1dy_to_dx + 1),
+        (p0dx*p1dy_to_dx*p1dy_to_dx + p0dx + 2*p0x*p1dy_to_dx*p1dy_to_dx + 2*p0x - 2*p1dy_to_dx*p1dy_to_dx*p1x - 2*p1x - Math.sqrt(p0dx*p0dx*p1dy_to_dx*p1dy_to_dx + p0dx**2 + p0dy*p0dy*p1dy_to_dx*p1dy_to_dx + p0dy*p0dy))/(p1dy_to_dx*p1dy_to_dx + 1)
+    ];
+    const Pmy = [
+        p0y,
+        p0dy,
+        -2*p0dy - 3*p0y + p1dy_to_dx*Math.sqrt((p0dx*p0dx + p0dy*p0dy)*(p1dy_to_dx*p1dy_to_dx + 1))/(p1dy_to_dx*p1dy_to_dx + 1) + 3*p1y,
+        (p0dy*p1dy_to_dx*p1dy_to_dx + p0dy + 2*p0y*p1dy_to_dx*p1dy_to_dx + 2*p0y - 2*p1dy_to_dx*p1dy_to_dx*p1y - p1dy_to_dx*Math.sqrt(p0dx*p0dx*p1dy_to_dx*p1dy_to_dx + p0dx*p0dx + p0dy*p0dy*p1dy_to_dx*p1dy_to_dx + p0dy*p0dy) - 2*p1y)/(p1dy_to_dx*p1dy_to_dx + 1)
+    ];
+
+    context.beginPath();
+    context.lineWidth = 3;
+    for(var i = 0; i < 256; ++i) {    
+        var t1 = (i) / 256;
+        var t2 = (i + 1) / 256;
+        var x1 = polynomial_in_t(Pmx, t1);
+        var y1 = polynomial_in_t(Pmy, t1);
+        var x2 = polynomial_in_t(Pmx, t2);
+        var y2 = polynomial_in_t(Pmy, t2);
+        context.moveTo(x1, y1);
+        context.lineTo(x2, y2);
+	if(i % 32 == 31) {
+            context.strokeStyle=((i / 32)%2 < 1) ? "#AABB00" : "#AA0000";
+            context.stroke();
+            context.closePath();
+            context.beginPath();
+        }
+    }
+    context.strokeStyle="#AA0000";
+    context.stroke();
+    context.closePath();
+    context.lineWidth = 1;
+
+
+    const Pnx = [
+        p0x,
+        p0dx,
+        (-2*p0dx*p1dy_to_dx*p1dy_to_dx - 2*p0dx - 3*p0x*p1dy_to_dx*p1dy_to_dx - 3*p0x + 3*p1dy_to_dx*p1dy_to_dx*p1x + 3*p1x - Math.sqrt(p0dx*p0dx*p1dy_to_dx*p1dy_to_dx + p0dx*p0dx + p0dy*p0dy*p1dy_to_dx*p1dy_to_dx + p0dy*p0dy))/(p1dy_to_dx*p1dy_to_dx + 1),
+        (p0dx*p1dy_to_dx*p1dy_to_dx + p0dx + 2*p0x*p1dy_to_dx*p1dy_to_dx + 2*p0x - 2*p1dy_to_dx*p1dy_to_dx*p1x - 2*p1x + Math.sqrt(p0dx*p0dx*p1dy_to_dx*p1dy_to_dx + p0dx*p0dx + p0dy*p0dy*p1dy_to_dx*p1dy_to_dx + p0dy*p0dy))/(p1dy_to_dx*p1dy_to_dx + 1)
+    ];
+    const Pny = [
+        p0y,
+        p0dy,
+        -2*p0dy - 3*p0y - p1dy_to_dx*Math.sqrt((p0dx*p0dx + p0dy*p0dy)*(p1dy_to_dx*p1dy_to_dx + 1))/(p1dy_to_dx*p1dy_to_dx + 1) + 3*p1y,
+        (p0dy*p1dy_to_dx*p1dy_to_dx + p0dy + 2*p0y*p1dy_to_dx*p1dy_to_dx + 2*p0y - 2*p1dy_to_dx*p1dy_to_dx*p1y + p1dy_to_dx*Math.sqrt(p0dx*p0dx*p1dy_to_dx*p1dy_to_dx + p0dx*p0dx + p0dy*p0dy*p1dy_to_dx*p1dy_to_dx + p0dy*p0dy) - 2*p1y)/(p1dy_to_dx*p1dy_to_dx + 1)
+    ];
+
+    context.beginPath();
+    context.lineWidth = 3;
+    for(var i = 0; i < 256; ++i) {    
+        var t1 = (i) / 256;
+        var t2 = (i + 1) / 256;
+        var x1 = polynomial_in_t(Pnx, t1);
+        var y1 = polynomial_in_t(Pny, t1);
+        var x2 = polynomial_in_t(Pnx, t2);
+        var y2 = polynomial_in_t(Pny, t2);
+        context.moveTo(x1, y1);
+        context.lineTo(x2, y2);
+	if(i % 32 == 31) {
+            context.strokeStyle=((i / 32)%2 < 1) ? "#00AABB" : "#00AA00";
+            context.stroke();
+            context.closePath();
+            context.beginPath();
+        }
+    }
+    context.strokeStyle="#00AA00";
+    context.stroke();
+    context.closePath();
+    context.lineWidth = 1;
+
+}
+
+function optimize(){
+    const _si = si();
+    const _x3 = cubic_xs[3];
+    const _y3 = cubic_ys[3];
+    cubic_xs[3] = _x3+1;
+    cubic_ys[3] = _y3;
+    if(si() < _si) {
+        draw_cubic_canvas(0, 0, false);
+        return;
+    }
+    cubic_xs[3] = _x3-1;
+    cubic_ys[3] = _y3;
+    if(si() < _si) {
+        draw_cubic_canvas(0, 0, false);
+        return;
+    }
+    cubic_xs[3] = _x3;
+    cubic_ys[3] = _y3+1;
+    if(si() < _si) {
+        draw_cubic_canvas(0, 0, false);
+        return;
+    }
+    cubic_xs[3] = _x3;
+    cubic_ys[3] = _y3-1;
+    if(si() < _si) {
+        draw_cubic_canvas(0, 0, false);
+        return;
+    }
+    cubic_xs[3] = _x3;
+    cubic_ys[3] = _y3;
+    draw_cubic_canvas(0, 0, false);
+}
     </script>
   </head>
   <body>
@@ -82,7 +382,11 @@ You don't have to go polynomial on everything
     <p>
 ...
     </p>
-
+    <canvas id="cubic_canvas" width=640 height=640></canvas>
+    
+    <script language="JavaScript">
+    init_cubic();
+    </script>
 
 
 
