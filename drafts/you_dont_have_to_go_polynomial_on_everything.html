@@ -101,8 +101,8 @@ function polynomial_in_t(A, t){
 }
 
 // cubic
-var cubic_xs = [300, 100, 300, 500];
-var cubic_ys = [300, 100, 300, 500];
+var cubic_xs = [200, 100, 500, 300];
+var cubic_ys = [300, 100, 500, 500];
 var cubic_n = 4;
 var cubic_i = 0;
 
@@ -178,14 +178,14 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
     context.beginPath();
     context.lineWidth = 3;
     for(var i = 0; i < 256; ++i) {    
-        var t1 = (i) / 256;
-        var t2 = (i + 1) / 256;
-        var x1 = polynomial_in_t(Px, t1);
-        var y1 = polynomial_in_t(Py, t1);
-        var x2 = polynomial_in_t(Px, t2);
-        var y2 = polynomial_in_t(Py, t2);
-        context.moveTo(x1, y1);
-        context.lineTo(x2, y2);
+        var _t1 = (i) / 256;
+        var _t2 = (i + 1) / 256;
+        var _x1 = polynomial_in_t(Px, _t1);
+        var _y1 = polynomial_in_t(Py, _t1);
+        var _x2 = polynomial_in_t(Px, _t2);
+        var _y2 = polynomial_in_t(Py, _t2);
+        context.moveTo(_x1, _y1);
+        context.lineTo(_x2, _y2);
 	if(i % 32 == 31) {
             context.strokeStyle=((i / 32)%2 < 1) ? "#AABBEE" : "#AA3366";
             context.stroke();
@@ -256,88 +256,32 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
 
     context.fillText(Math.log(Math.abs(si())).toFixed(2), 320, 64);
 
-    // minimized
-    const p0x = cubic_xs[1];
-    const p0y = cubic_ys[1];
-    const p1x = cubic_xs[2];
-    const p1y = cubic_ys[2];
-    const p0dx = cubic_xs[0] - cubic_xs[1];
-    const p0dy = cubic_ys[0] - cubic_ys[1];
-    const p1dy_to_dx = (cubic_ys[3] - cubic_ys[2]) / (cubic_xs[3] - cubic_xs[2]);
 
-    const Pmx = [
-        p0x,
-        p0dx,
-        (-2*p0dx*p1dy_to_dx*p1dy_to_dx - 2*p0dx - 3*p0x*p1dy_to_dx*p1dy_to_dx - 3*p0x + 3*p1dy_to_dx*p1dy_to_dx*p1x + 3*p1x + Math.sqrt(p0dx*p0dx*p1dy_to_dx*p1dy_to_dx + p0dx*p0dx + p0dy*p0dy*p1dy_to_dx*p1dy_to_dx + p0dy*p0dy))/(p1dy_to_dx*p1dy_to_dx + 1),
-        (p0dx*p1dy_to_dx*p1dy_to_dx + p0dx + 2*p0x*p1dy_to_dx*p1dy_to_dx + 2*p0x - 2*p1dy_to_dx*p1dy_to_dx*p1x - 2*p1x - Math.sqrt(p0dx*p0dx*p1dy_to_dx*p1dy_to_dx + p0dx**2 + p0dy*p0dy*p1dy_to_dx*p1dy_to_dx + p0dy*p0dy))/(p1dy_to_dx*p1dy_to_dx + 1)
-    ];
-    const Pmy = [
-        p0y,
-        p0dy,
-        -2*p0dy - 3*p0y + p1dy_to_dx*Math.sqrt((p0dx*p0dx + p0dy*p0dy)*(p1dy_to_dx*p1dy_to_dx + 1))/(p1dy_to_dx*p1dy_to_dx + 1) + 3*p1y,
-        (p0dy*p1dy_to_dx*p1dy_to_dx + p0dy + 2*p0y*p1dy_to_dx*p1dy_to_dx + 2*p0y - 2*p1dy_to_dx*p1dy_to_dx*p1y - p1dy_to_dx*Math.sqrt(p0dx*p0dx*p1dy_to_dx*p1dy_to_dx + p0dx*p0dx + p0dy*p0dy*p1dy_to_dx*p1dy_to_dx + p0dy*p0dy) - 2*p1y)/(p1dy_to_dx*p1dy_to_dx + 1)
-    ];
+    // arcs
+    const x1 = cubic_xs[1];
+    const y1 = cubic_ys[1];
+    const x2 = cubic_xs[2];
+    const y2 = cubic_ys[2];
+    const dyx1 = (cubic_ys[0] - cubic_ys[1]) / (cubic_xs[0] - cubic_xs[1]);
+    const dyx2 = (cubic_ys[3] - cubic_ys[2]) / (cubic_xs[3] - cubic_xs[2]);
+
+    var t1 = 2*Math.atan((Math.sqrt(Math.pow(dyx1, 2) + 1) + 1)/dyx1)
+    var t2 = 2*Math.atan((Math.sqrt(Math.pow(dyx2, 2) + 1) + 1)/dyx2)
+    var tl = (-x1*(Math.cos(t1) - Math.cos(t2)) + x2*(Math.cos(t1) - Math.cos(t2)) + y1*(Math.sin(t1) - Math.sin(t2)) - y2*(Math.sin(t1) - Math.sin(t2)))/(dyx2*Math.sin(t1) - dyx2*Math.sin(t2) - Math.cos(t1) + Math.cos(t2))
+    var x0 = (dyx2*x2*Math.sin(t1) - x1*(dyx2*Math.sin(t2) + Math.cos(t1) - Math.cos(t2)) + y1*Math.sin(t1) - y2*Math.sin(t1))/(dyx2*Math.sin(t1) - dyx2*Math.sin(t2) - Math.cos(t1) + Math.cos(t2))
+    var y0 = (-dyx2*x1*Math.cos(t1) + dyx2*x2*Math.cos(t1) + y1*(dyx2*Math.sin(t1) - dyx2*Math.sin(t2) + Math.cos(t2)) - y2*Math.cos(t1))/(dyx2*Math.sin(t1) - dyx2*Math.sin(t2) - Math.cos(t1) + Math.cos(t2))
+    var r = (dyx2*x1 - dyx2*x2 - y1 + y2)/(dyx2*Math.sin(t1) - dyx2*Math.sin(t2) - Math.cos(t1) + Math.cos(t2))
+
+    r = Math.abs(r);
 
     context.beginPath();
     context.lineWidth = 3;
-    for(var i = 0; i < 256; ++i) {    
-        var t1 = (i) / 256;
-        var t2 = (i + 1) / 256;
-        var x1 = polynomial_in_t(Pmx, t1);
-        var y1 = polynomial_in_t(Pmy, t1);
-        var x2 = polynomial_in_t(Pmx, t2);
-        var y2 = polynomial_in_t(Pmy, t2);
-        context.moveTo(x1, y1);
-        context.lineTo(x2, y2);
-	if(i % 32 == 31) {
-            context.strokeStyle=((i / 32)%2 < 1) ? "#AABB00" : "#AA0000";
-            context.stroke();
-            context.closePath();
-            context.beginPath();
-        }
-    }
-    context.strokeStyle="#AA0000";
-    context.stroke();
-    context.closePath();
-    context.lineWidth = 1;
-
-
-    const Pnx = [
-        p0x,
-        p0dx,
-        (-2*p0dx*p1dy_to_dx*p1dy_to_dx - 2*p0dx - 3*p0x*p1dy_to_dx*p1dy_to_dx - 3*p0x + 3*p1dy_to_dx*p1dy_to_dx*p1x + 3*p1x - Math.sqrt(p0dx*p0dx*p1dy_to_dx*p1dy_to_dx + p0dx*p0dx + p0dy*p0dy*p1dy_to_dx*p1dy_to_dx + p0dy*p0dy))/(p1dy_to_dx*p1dy_to_dx + 1),
-        (p0dx*p1dy_to_dx*p1dy_to_dx + p0dx + 2*p0x*p1dy_to_dx*p1dy_to_dx + 2*p0x - 2*p1dy_to_dx*p1dy_to_dx*p1x - 2*p1x + Math.sqrt(p0dx*p0dx*p1dy_to_dx*p1dy_to_dx + p0dx*p0dx + p0dy*p0dy*p1dy_to_dx*p1dy_to_dx + p0dy*p0dy))/(p1dy_to_dx*p1dy_to_dx + 1)
-    ];
-    const Pny = [
-        p0y,
-        p0dy,
-        -2*p0dy - 3*p0y - p1dy_to_dx*Math.sqrt((p0dx*p0dx + p0dy*p0dy)*(p1dy_to_dx*p1dy_to_dx + 1))/(p1dy_to_dx*p1dy_to_dx + 1) + 3*p1y,
-        (p0dy*p1dy_to_dx*p1dy_to_dx + p0dy + 2*p0y*p1dy_to_dx*p1dy_to_dx + 2*p0y - 2*p1dy_to_dx*p1dy_to_dx*p1y + p1dy_to_dx*Math.sqrt(p0dx*p0dx*p1dy_to_dx*p1dy_to_dx + p0dx*p0dx + p0dy*p0dy*p1dy_to_dx*p1dy_to_dx + p0dy*p0dy) - 2*p1y)/(p1dy_to_dx*p1dy_to_dx + 1)
-    ];
-
-    context.beginPath();
-    context.lineWidth = 3;
-    for(var i = 0; i < 256; ++i) {    
-        var t1 = (i) / 256;
-        var t2 = (i + 1) / 256;
-        var x1 = polynomial_in_t(Pnx, t1);
-        var y1 = polynomial_in_t(Pny, t1);
-        var x2 = polynomial_in_t(Pnx, t2);
-        var y2 = polynomial_in_t(Pny, t2);
-        context.moveTo(x1, y1);
-        context.lineTo(x2, y2);
-	if(i % 32 == 31) {
-            context.strokeStyle=((i / 32)%2 < 1) ? "#00AABB" : "#00AA00";
-            context.stroke();
-            context.closePath();
-            context.beginPath();
-        }
-    }
+//    alert([x0, y0, r, t1, t2]);
+    context.arc(x0, y0, r, t1, t2);
     context.strokeStyle="#00AA00";
     context.stroke();
     context.closePath();
     context.lineWidth = 1;
-
 }
 
 function optimize(){
