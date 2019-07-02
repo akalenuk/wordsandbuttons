@@ -1,6 +1,6 @@
 from sympy import *
 
-xc1, yc1, r1, xc2, yc2, r2, t = symbols('xc1 yc1 r1 xc2 yc2 r2 t')
+xc1, yc1, xc2, yc2, r, t = symbols('xc1 yc1 xc2 yc2 r t')
 
 arc1_x = xc1 + sin(t) * r
 arc1_y = yc1 + cos(t) * r
@@ -18,9 +18,9 @@ solution = solve(
     y1 + r * dyx1 - yc1,
     x2 + r - xc2,
     y2 + r * dyx2 - yc2,
-    arc1_x.subs(t, t1) - arc2_x(t, t2), 
-    arc1_y.subs(t, t1) - arc2_y(t, t2) 
-], (t1, xc1, yc1, t2, xc2, yc2, t1, r))
+    arc1_x.subs(t, t1) - arc2_x.subs(t, t2), 
+    arc1_y.subs(t, t1) - arc2_y.subs(t, t2) 
+], (t1, xc1, yc1, t2, xc2, yc2, r))
 
 for var, exp in solution.items():
     print('var ' + jscode(var) + ' = ' + jscode(exp))
