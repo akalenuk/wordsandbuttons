@@ -22,5 +22,7 @@ solution = solve(
     arc1_y.subs(t, t1) - arc2_y.subs(t, t2) 
 ], (t1, xc1, yc1, t2, xc2, yc2, r))
 
+print (solution)
+
 for var, exp in solution.items():
     print('var ' + jscode(var) + ' = ' + jscode(exp))
