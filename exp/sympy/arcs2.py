@@ -11,7 +11,7 @@ x1, y1, dyx1, x2, y2, dyx2, t1, t2 = symbols('x1 y1 dyx1 x2 y2 dyx2 t1 t2')
 
 
 
-solution = solve(
+solutions = solve(
    [
     t1 - t2 - pi,
     x1 + r - xc1,
@@ -22,7 +22,11 @@ solution = solve(
     arc1_y.subs(t, t1) - arc2_y.subs(t, t2) 
 ], (t1, xc1, yc1, t2, xc2, yc2, r))
 
-print (solution)
-
-for var, exp in solution.items():
-    print('var ' + jscode(var) + ' = ' + jscode(exp))
+for solution in solutions:
+    print('var t1 = ' + jscode(solution[0]))
+    print('var xc1 = ' + jscode(solution[1]))
+    print('var yc1 = ' + jscode(solution[2]))
+    print('var t2 = ' + jscode(solution[3]))
+    print('var xc2 = ' + jscode(solution[4]))
+    print('var yc2 = ' + jscode(solution[5]))
+    print('var r = ' + jscode(solution[6]))
