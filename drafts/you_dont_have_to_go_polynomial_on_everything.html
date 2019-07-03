@@ -265,25 +265,36 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
     const dyx1 = (cubic_ys[0] - cubic_ys[1]) / (cubic_xs[0] - cubic_xs[1]);
     const dyx2 = (cubic_ys[3] - cubic_ys[2]) / (cubic_xs[3] - cubic_xs[2]);
 
-    var t1 = 2*Math.atan((Math.sqrt(Math.pow(dyx1, 2) + 1) + 1)/dyx1)
-    var t2 = 2*Math.atan((Math.sqrt(Math.pow(dyx2, 2) + 1) + 1)/dyx2)
-    var tl = (-x1*(Math.cos(t1) - Math.cos(t2)) + x2*(Math.cos(t1) - Math.cos(t2)) + y1*(Math.sin(t1) - Math.sin(t2)) - y2*(Math.sin(t1) - Math.sin(t2)))/(dyx2*Math.sin(t1) - dyx2*Math.sin(t2) - Math.cos(t1) + Math.cos(t2))
-    var x0 = (dyx2*x2*Math.sin(t1) - x1*(dyx2*Math.sin(t2) + Math.cos(t1) - Math.cos(t2)) + y1*Math.sin(t1) - y2*Math.sin(t1))/(dyx2*Math.sin(t1) - dyx2*Math.sin(t2) - Math.cos(t1) + Math.cos(t2))
-    var y0 = (-dyx2*x1*Math.cos(t1) + dyx2*x2*Math.cos(t1) + y1*(dyx2*Math.sin(t1) - dyx2*Math.sin(t2) + Math.cos(t2)) - y2*Math.cos(t1))/(dyx2*Math.sin(t1) - dyx2*Math.sin(t2) - Math.cos(t1) + Math.cos(t2))
-    var r = (dyx2*x1 - dyx2*x2 - y1 + y2)/(dyx2*Math.sin(t1) - dyx2*Math.sin(t2) - Math.cos(t1) + Math.cos(t2))
+
+    var t1 = Math.PI - 2*Math.atan(((x1 - x2)*(dyx1 - dyx2 + 2)*Math.sqrt(-Math.pow(dyx1, 2)*Math.pow(x1, 2) + 2*Math.pow(dyx1, 2)*x1*x2 - Math.pow(dyx1, 2)*Math.pow(x2, 2) + 2*dyx1*dyx2*Math.pow(x1, 2) - 4*dyx1*dyx2*x1*x2 + 2*dyx1*dyx2*Math.pow(x2, 2) - Math.pow(dyx2, 2)*Math.pow(x1, 2) + 2*Math.pow(dyx2, 2)*x1*x2 - Math.pow(dyx2, 2)*Math.pow(x2, 2) + 4*Math.pow(x1, 2) - 8*x1*x2 + 4*Math.pow(x2, 2) + 4*Math.pow(y1, 2) - 8*y1*y2 + 4*Math.pow(y2, 2)) + 2*(y1 - y2)*(dyx1*x1 - dyx1*x2 - dyx2*x1 + dyx2*x2 + 2*x1 - 2*x2))/((x1 - x2)*(dyx1 - dyx2 + 2)*(dyx1*x1 - dyx1*x2 - dyx2*x1 + dyx2*x2 + 2*x1 - 2*x2)));
+
+    var xc1 = x1 - 1/2*(x1 - x2)/Math.sin(2*Math.atan(((x1 - x2)*(dyx1 - dyx2 + 2)*Math.sqrt(-Math.pow(dyx1, 2)*Math.pow(x1, 2) + 2*Math.pow(dyx1, 2)*x1*x2 - Math.pow(dyx1, 2)*Math.pow(x2, 2) + 2*dyx1*dyx2*Math.pow(x1, 2) - 4*dyx1*dyx2*x1*x2 + 2*dyx1*dyx2*Math.pow(x2, 2) - Math.pow(dyx2, 2)*Math.pow(x1, 2) + 2*Math.pow(dyx2, 2)*x1*x2 - Math.pow(dyx2, 2)*Math.pow(x2, 2) + 4*Math.pow(x1, 2) - 8*x1*x2 + 4*Math.pow(x2, 2) + 4*Math.pow(y1, 2) - 8*y1*y2 + 4*Math.pow(y2, 2)) + 2*(y1 - y2)*(dyx1*x1 - dyx1*x2 - dyx2*x1 + dyx2*x2 + 2*x1 - 2*x2))/((x1 - x2)*(dyx1 - dyx2 + 2)*(dyx1*x1 - dyx1*x2 - dyx2*x1 + dyx2*x2 + 2*x1 - 2*x2))));
+
+    var yc1 = -1/2*dyx1*(x1 - x2)/Math.sin(2*Math.atan(((x1 - x2)*(dyx1 - dyx2 + 2)*Math.sqrt(-Math.pow(dyx1, 2)*Math.pow(x1, 2) + 2*Math.pow(dyx1, 2)*x1*x2 - Math.pow(dyx1, 2)*Math.pow(x2, 2) + 2*dyx1*dyx2*Math.pow(x1, 2) - 4*dyx1*dyx2*x1*x2 + 2*dyx1*dyx2*Math.pow(x2, 2) - Math.pow(dyx2, 2)*Math.pow(x1, 2) + 2*Math.pow(dyx2, 2)*x1*x2 - Math.pow(dyx2, 2)*Math.pow(x2, 2) + 4*Math.pow(x1, 2) - 8*x1*x2 + 4*Math.pow(x2, 2) + 4*Math.pow(y1, 2) - 8*y1*y2 + 4*Math.pow(y2, 2)) + 2*(y1 - y2)*(dyx1*x1 - dyx1*x2 - dyx2*x1 + dyx2*x2 + 2*x1 - 2*x2))/((x1 - x2)*(dyx1 - dyx2 + 2)*(dyx1*x1 - dyx1*x2 - dyx2*x1 + dyx2*x2 + 2*x1 - 2*x2)))) + y1;
+
+    var t2 = -2*Math.atan(((x1 - x2)*(dyx1 - dyx2 + 2)*Math.sqrt(-Math.pow(dyx1, 2)*Math.pow(x1, 2) + 2*Math.pow(dyx1, 2)*x1*x2 - Math.pow(dyx1, 2)*Math.pow(x2, 2) + 2*dyx1*dyx2*Math.pow(x1, 2) - 4*dyx1*dyx2*x1*x2 + 2*dyx1*dyx2*Math.pow(x2, 2) - Math.pow(dyx2, 2)*Math.pow(x1, 2) + 2*Math.pow(dyx2, 2)*x1*x2 - Math.pow(dyx2, 2)*Math.pow(x2, 2) + 4*Math.pow(x1, 2) - 8*x1*x2 + 4*Math.pow(x2, 2) + 4*Math.pow(y1, 2) - 8*y1*y2 + 4*Math.pow(y2, 2)) + 2*(y1 - y2)*(dyx1*x1 - dyx1*x2 - dyx2*x1 + dyx2*x2 + 2*x1 - 2*x2))/((x1 - x2)*(dyx1 - dyx2 + 2)*(dyx1*x1 - dyx1*x2 - dyx2*x1 + dyx2*x2 + 2*x1 - 2*x2)));
+
+    var xc2 = x2 - 1/2*(x1 - x2)/Math.sin(2*Math.atan(((x1 - x2)*(dyx1 - dyx2 + 2)*Math.sqrt(-Math.pow(dyx1, 2)*Math.pow(x1, 2) + 2*Math.pow(dyx1, 2)*x1*x2 - Math.pow(dyx1, 2)*Math.pow(x2, 2) + 2*dyx1*dyx2*Math.pow(x1, 2) - 4*dyx1*dyx2*x1*x2 + 2*dyx1*dyx2*Math.pow(x2, 2) - Math.pow(dyx2, 2)*Math.pow(x1, 2) + 2*Math.pow(dyx2, 2)*x1*x2 - Math.pow(dyx2, 2)*Math.pow(x2, 2) + 4*Math.pow(x1, 2) - 8*x1*x2 + 4*Math.pow(x2, 2) + 4*Math.pow(y1, 2) - 8*y1*y2 + 4*Math.pow(y2, 2)) + 2*(y1 - y2)*(dyx1*x1 - dyx1*x2 - dyx2*x1 + dyx2*x2 + 2*x1 - 2*x2))/((x1 - x2)*(dyx1 - dyx2 + 2)*(dyx1*x1 - dyx1*x2 - dyx2*x1 + dyx2*x2 + 2*x1 - 2*x2))));
+
+    var yc2 = -1/2*dyx2*(x1 - x2)/Math.sin(2*Math.atan(((x1 - x2)*(dyx1 - dyx2 + 2)*Math.sqrt(-Math.pow(dyx1, 2)*Math.pow(x1, 2) + 2*Math.pow(dyx1, 2)*x1*x2 - Math.pow(dyx1, 2)*Math.pow(x2, 2) + 2*dyx1*dyx2*Math.pow(x1, 2) - 4*dyx1*dyx2*x1*x2 + 2*dyx1*dyx2*Math.pow(x2, 2) - Math.pow(dyx2, 2)*Math.pow(x1, 2) + 2*Math.pow(dyx2, 2)*x1*x2 - Math.pow(dyx2, 2)*Math.pow(x2, 2) + 4*Math.pow(x1, 2) - 8*x1*x2 + 4*Math.pow(x2, 2) + 4*Math.pow(y1, 2) - 8*y1*y2 + 4*Math.pow(y2, 2)) + 2*(y1 - y2)*(dyx1*x1 - dyx1*x2 - dyx2*x1 + dyx2*x2 + 2*x1 - 2*x2))/((x1 - x2)*(dyx1 - dyx2 + 2)*(dyx1*x1 - dyx1*x2 - dyx2*x1 + dyx2*x2 + 2*x1 - 2*x2)))) + y2;
+
+    var r = -1/2*(x1 - x2)/Math.sin(2*Math.atan(((x1 - x2)*(dyx1 - dyx2 + 2)*Math.sqrt(-Math.pow(dyx1, 2)*Math.pow(x1, 2) + 2*Math.pow(dyx1, 2)*x1*x2 - Math.pow(dyx1, 2)*Math.pow(x2, 2) + 2*dyx1*dyx2*Math.pow(x1, 2) - 4*dyx1*dyx2*x1*x2 + 2*dyx1*dyx2*Math.pow(x2, 2) - Math.pow(dyx2, 2)*Math.pow(x1, 2) + 2*Math.pow(dyx2, 2)*x1*x2 - Math.pow(dyx2, 2)*Math.pow(x2, 2) + 4*Math.pow(x1, 2) - 8*x1*x2 + 4*Math.pow(x2, 2) + 4*Math.pow(y1, 2) - 8*y1*y2 + 4*Math.pow(y2, 2)) + 2*(y1 - y2)*(dyx1*x1 - dyx1*x2 - dyx2*x1 + dyx2*x2 + 2*x1 - 2*x2))/((x1 - x2)*(dyx1 - dyx2 + 2)*(dyx1*x1 - dyx1*x2 - dyx2*x1 + dyx2*x2 + 2*x1 - 2*x2))));
 
     if(r < 0 ) {
-        x0 = x1 + (x1 - x0);
-        y0 = y1 + (y1 - y0);
+        xc1 = x1 + (x1 - xc1);
+        yc1 = y1 + (y1 - yc1);
+        xc2 = x2 + (x2 - xc2);
+        yc2 = y2 + (y2 - yc2);
         r = -r;
     }
-    t1 = 0;
-    t2 = Math.PI * 2;
+
 
     context.beginPath();
     context.lineWidth = 3;
 //    alert([x0, y0, r, t1, t2]);
-    context.arc(x0, y0, r, t1, t2);
+    context.arc(xc1, yc1, r, 0, Math.PI*2);
+    context.arc(xc2, yc2, r, 0, Math.PI*2);
+
     context.strokeStyle="#00AA00";
     context.stroke();
     context.closePath();
