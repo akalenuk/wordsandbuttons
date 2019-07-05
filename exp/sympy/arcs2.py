@@ -18,8 +18,8 @@ solutions = solve(
     y1 + r1 * dyx1 - yc1,
     x2 + r2 - xc2,
     y2 + r2 * dyx2 - yc2,
-    (r1 - xc1)**2 + (r1*dyx1 - xc1)**2 - r,
-    (r2 - xc2)**2 + (r2*dyx2 - xc2)**2 - r,
+    (r1 - xc1)**2 + (r1*dyx1 - xc1)**2 - r**2,
+    (r2 - xc2)**2 + (r2*dyx2 - xc2)**2 - r**2,
     arc1_x.subs(t, t1) - arc2_x.subs(t, t2), 
     arc1_y.subs(t, t1) - arc2_y.subs(t, t2), 
 ], (t1, xc1, yc1, t2, xc2, yc2, r1, r2, r))
