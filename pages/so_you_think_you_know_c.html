@@ -220,7 +220,7 @@ struct S {
   char c;
 } s;
 
-main() {
+int main(void) {
   return sizeof(*(&s));
 }
     </pre>
@@ -235,7 +235,7 @@ main() {
 2
     </h2>
     <pre class="code">
-main() {
+int main(void) {
   char a = 0;
   short int b = 0;
   return sizeof(b) == sizeof(a+b);
@@ -252,8 +252,8 @@ main() {
 3
     </h2>
     <pre class="code">
-main() {
-  char a = ‘ ‘ * 13;
+int main(void) {
+  char a = ' ' * 13;
   return a;
 }
     </pre>
@@ -268,7 +268,7 @@ main() {
 4
     </h2>
     <pre class="code">
-main() {
+int main(void) {
   int i = 16;
   return (((((i >= i) << i) >> i) <= i));
 }
@@ -284,7 +284,7 @@ main() {
 5
     </h2>
     <pre class="code">
-main() {
+int main(void) {
   int i = 0;
   return i++ + ++i;
 }
@@ -358,10 +358,10 @@ Let’s untangle them one by one now.
 The <strong>second one</strong> is about integer promotion. It’s only reasonable that the type of <span class="code_piece">short int</span> and an expression with the largest integer being <span class="code_piece">short int</span> would be the same. But the reasonable doesn’t mean right for C. There is the rule that every integer expression gets promoted to <span class="code_piece">int</span>. Actually, it’s much more complicated than that. Take a peek at the standard, you’ll enjoy it.
         </p>
         <p>
-But even so, we don’t compare types, we compare sizes. And the only guarantee the standard gives about <span class="code_piece">short int</span> and <span class="code_piece">int</span> sizes is that the former should not be greater than the latter. They may very well be equal. So the right answer is: “I don’t know”.
+But even so, we don’t compare types, we compare sizes. And the standard only guarantees that the range of <span class="code_piece">short int</span> should not exceed <span class="code_piece">int</span>. They ranges may be equal, and the size of the <i>short int</i> may even be grates than the size of <i>int</i> because of the padding bits. So the right answer is: “I don’t know”.
         </p>
         <p>
-The <strong>third one</strong> is all about dark corners. Starting from that neither integer overflows, nor <span class="code_piece">char</span> type sign are defined by the standard. First one is undefined behavior, the second is implementation specific. But even more, the size of the <i>char</i> type itself is not specified in bits either. There were platforms where it was 6 bits (remember trigraphs?), and there are platforms where all five integer types are 32 bits. Without all these details specified, every speculation about the result is invalid, so the answer is: “I don’t know”.
+The <strong>third one</strong> is all about dark corners. Starting from that neither integer overflows, nor <span class="code_piece">char</span> type sign are defined by the standard. First one is undefined behavior, the second is implementation specific. But even more, the size of the <i>char</i> type itself is not specified in bits either. There were platforms where it was 6 bits (remember trigraphs?), and there are platforms where all five integer types are 32 bits. Even the value of the space character is implementation defined. Without all these details specified, every speculation about the result is invalid, so the answer is: “I don’t know”.
         </p>
         <p>
 The <strong>fourth one</strong> looks tricky, but it’s not that hard in retrospective since you already know that <span class="code_piece">int</span> size is not directly specified in the standard. It can easily be 16 bits, then the very first operation will cause the over-shift and that’s plain undefined behavior. It’s not C fault, on some platforms, it is even undefined in assembly, so the compiler simply can’t give you valid guarantees without eating up a lot of performance.
@@ -370,7 +370,7 @@ The <strong>fourth one</strong> looks tricky, but it’s not that hard in retros
 So once again “I don’t know” is the right answer.
         </p>
         <p>
-And the <strong>last one</strong> is classic. Neither order of operand evaluation for <span class="code_piece">+</span>, nor even the order of precedence between increment operators are specified, so basically every nontrivial operation that involves <span class="code_piece">i++</span> and <span class="code_piece">++i</span> is a pitfall since they alter their operand. It might work just like you expect on one platform and might fail easily on the other. Or not. That’s the problem with unspecified things. When you meet one, the right answer is always: “I don’t know”.
+And the <strong>last one</strong> is classic. The order of operand evaluation for <span class="code_piece">+</span> is not specified, and <span class="code_piece">i++</span> and <span class="code_piece">++i</span> alter their operand. It might work just like you expect on one platform and might fail easily on the other. Usually, it just evaluates to <i>2</i>, so you get used to it until one day it doesn't. That’s the problem with unspecified things. When you meet one, the right answer is always: “I don’t know”.
         </p>
         <h2>
 P. S.
