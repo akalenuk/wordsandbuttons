@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Let sympy write your code</title>
+    <title>SymPy makes math fun again</title>
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <style>
 body{
@@ -79,7 +79,7 @@ button {
 }
 
 textarea {
-    width: 600pt;
+    width: 505pt;
     font-size: 12pt;
     font-family: monospace;
 }
@@ -303,12 +303,12 @@ function draw_not_sine_model() {
     // grid
     draw_grid_on(context);
     
-    // not sine
+    // This came directly out of the "Make JS" thing
     function not_sin_model(x) {
-        var a = (-1*(2)*Math.pow(px, -2)*py*(((314159265358979)*px)+(-493480220054468))*Math.pow((((314159265358979)*Math.pow(px, 2))+(-1*(1973920880217872)*px)+(3100627668029980)), -1));
-        var b = (Math.pow(px, -2)*py*(((942477796076937)*Math.pow(px, 2))+(-3100627668029980))*Math.pow((((314159265358979)*Math.pow(px, 2))+(-1*(1973920880217872)*px)+(3100627668029980)), -1));
-        var c = (-1*(8)*Math.pow(px, -1)*py*(((370110165040851)*px)+(-775156917007495))*Math.pow((((314159265358979)*Math.pow(px, 2))+(-1*(1973920880217872)*px)+(3100627668029980)), -1));
-        var d = (0);
+        var a = (Math.pow(px, -2)*py*(Math.PI+(-1*2*px))*Math.pow((Math.pow(px, 2)+(-1*2*Math.PI*px)+Math.pow(Math.PI, 2)), -1));
+        var b = (Math.pow(px, -2)*py*((3*Math.pow(px, 2))+(-1*Math.pow(Math.PI, 2)))*Math.pow((Math.pow(px, 2)+(-1*2*Math.PI*px)+Math.pow(Math.PI, 2)), -1));
+        var c = (Math.PI*Math.pow(px, -1)*py*((-1*3*px)+(2*Math.PI))*Math.pow((Math.pow(px, 2)+(-1*2*Math.PI*px)+Math.pow(Math.PI, 2)), -1));
+        var d = 0;
         return a*x*x*x + b*x*x + c*x + d;
     }
     
@@ -333,8 +333,10 @@ function draw_not_sine_model() {
     context.closePath();  
 }
 
-// for the tool
+// The partial interpreter for SymPy s-expressions
 function evaluated_sympy(expr) {
+    const pi = "Math.PI";
+    
     var Symbol = function(x) {
         return x;
     }
@@ -352,16 +354,16 @@ function evaluated_sympy(expr) {
         var args = [];
         for(var i = 0; i < arguments.length; ++i)
             args.push(arguments[i].toString());
-        return '(' + args.join('+') + ')';
+        return '(' + args.join(' + ') + ')';
     }
     var Mul = function() {
         var args = [];
         for(var i = 0; i < arguments.length; ++i)
             args.push(arguments[i].toString());
-        return '(' + args.join('*') + ')';
+        return '(' + args.join(' * ') + ')';
     }
     var Mod = function(x, y) {
-        return '(' + x + '%' + y + ')';
+        return '(' + x + ' % ' + y + ')';
     }
     var Pow = function(x, y) {
         return 'Math.pow(' + x + ', ' + y + ')';
@@ -385,6 +387,10 @@ function make_js() {
         for(var i = 0; i < lines.length; ++i) {
             if(lines[i].includes(',') && lines[i].split(',')[0].split('"').length == 1 && lines[i].includes('(') && lines[i].includes('"')) {
                 var expr = lines[i].split('\"')[1];
+                var name = lines[i].split(',')[0].split('(')[1].replace('\'', '');  // var name = expr;
+                js.push('var ' + name + ' = ' + evaluated_sympy(expr) + ';');
+            } else if(lines[i].includes(',') && lines[i].split(',')[0].split('\'').length == 1 && lines[i].includes('(') && lines[i].includes('\'')) {
+                var expr = lines[i].split('\'')[1];
                 var name = lines[i].split(',')[0].split('(')[1].replace('\'', '');  // var name = expr;
                 js.push('var ' + name + ' = ' + evaluated_sympy(expr) + ';');
             } else if(lines[i].includes('(') && lines[i].includes('\"')){
@@ -459,25 +465,25 @@ function colorized(text) {
   <body>
     <center>
     <h1>
-Let sympy write your code
+SymPy makes math fun again
     </h1>
     <p>
-I remember my own struggle with calculus at university. Limits, integrals, differential equiations. Lots of practice, lots of homework. Pages and pages of excercises. I loved the math, the connections between algebra and geometry, the very pleasure of solving the problems by making different concepts work together. But I hated doing the “paper work”.
+I remember my own struggle with calculus at university. Limits, integrals, differential equations. Lots of practice, lots of homework. Pages and pages of exercises. I loved math, the connection between algebra and geometry, the very pleasure of solving problems by making different concepts work together. But I hated doing the “paperwork”.
     </p>
     <p>
 Taking it seriously, I still studied through the semester, studied harder the week before the exam, studied even harder the night before. I got 62/100. That's 1 point above the lowest possible passing grade.
     </p>
     <p>
-Well, maybe I just suck at math. Now wait a minute! The next semester I took part in a math competition, went through the faculty round, then throught the university round, and scored quite some points on the nationals. That counted as a pass on that semester's exam. 
+Well, maybe math is not for everyone. But wait a minute! The next semester I took part in the Math Olympiad, went through the faculty round, then throught the university round, went to the national round and scored quite high there. Which counted as a pass on that semester's exam. 
     </p>
     <p>
 Professors were proud of me. They thought that the first semester's score was a mistake. The third semester I scored 65/100.
     </p>
-    <p class="comment">
+    <p class="comment" style="font-size: 36pt">
 ¯\_(ツ)_/¯
     </p>
     <p>
-Mathematics is a lot of things. It's a fun of problem solving, it's an excitement of discoveries, it's a pride of accomplishments, and it's a ton of tedious computations, too. I never liked the last part. That's why I'm so happy to live in the XXI century since I can give it away to computers and still enjoy the first three. 
+Mathematics is a lot of things. It's fun of problem-solving, it's an excitement of discoveries, it's a pride of accomplishments, and it's a ton of tedious computations, too. I never liked the last part. Couldn't make it right. That's why I'm so happy to live in the XXI century since I can give it away to computers and still enjoy the first three. 
     </p>
     <h2>
 SymPy it is
@@ -489,16 +495,16 @@ According to the <a href="https://www.sympy.org/en/index.html">official site</a>
 SymPy is a Python library for symbolic mathematics. It aims to become a full-featured computer algebra system (CAS) while keeping the code as simple as possible in order to be comprehensible and easily extensible.
     </i></p>
     <p>
-Symbolic mathematic? Algebra system? Sounds exclusive. Sounds like it's something for practicing mathematicians only. But it isn't. It's for practicing engineers who have just enough maths knowledge to state a problem but not enough skill and patience to solve it. 
+Symbolic mathematics? Algebra system? Sounds exclusive. Sounds like it's something for practicing mathematicians only. But it isn't. It's for practicing engineers who have just enough math knowledge to state a problem but not enough patience to solve it. 
     </p>
     <p>
-It does integration and differentiation. It finds limits, and it expands series. It solves equations and systems of equations. It can even do statistics. And it does it all just like you would do on an exam. It doesn't just compute numbers, it computes symbols.
+It does integration and differentiation. It finds limits, and it expands series. It solves equations and systems of equations. It can even do statistics. And it does it all just like you would do on an exam. It doesn't just compute numbers, it computes formulas.
     </p>
     <p>
 It's a Python library that does the boring part of math for you. Moreover, it does it fast, accurate, and without angst. In other words, it is everything I'm not.
     </p>
     <h2>
-Let SymPy do some math for us
+Let SymPy do some math for you
     </h2>
     <p>
 Let's say you want to model the sine function with a polynomial. Let's pretend you have a reason. Now how do we do that?
@@ -514,13 +520,13 @@ How about, we gather all we know about the sine function in one bowl and let Sym
 We know that <i>sin(0) = 0</i>, right? Everybody knows that. Also, as you might have heard, you can approximate small sine with its own argument: <i>sin(0.001) ≃ 0.001</i>. This means that the derivative of sine in 0 is 1.
     </p>
     <p>
-So the sine function climbs from 0 to π/2 and then it starts going down. In π/2 it's either climbing or descending, it's in its peak. This means that the derivative of <i>sin(π/2)' = 0</i>. Also, since sine only climbs to 1, <i>sin(π/2) = 1</i>.
+The sine function climbs from 0 to π/2 and then it starts going down. In π/2 it's neither climbing or descending, it's in its peak. This means that the derivative of <i>sin(π/2)' = 0</i>. Also, since the sine only climbs to 1, <i>sin(π/2) = 1</i>.
     </p>
     <p>
-The sine is symmetrical relative to π/2. This means that it descends exactly as it climbs, and at the point where it reaches π, its derivative is <i>sin(π)' = -1</i>, and the function itself <i>sin(π) = 0</i>.
+The sine is symmetrical relative to π/2. This means that it descends exactly as it climbs, and at the point where it reaches full π, its derivative is <i>sin(π)' = -1</i>, and the function itself <i>sin(π) = 0</i>.
     </p>
     <p>
-Also, one less known (but easily decuctable) fact, the integral of sine from 0 to π/2 is 1. Let's throw this into the system as well.
+Also, one less known (but easily computable) fact, the integral of the sine from 0 to π/2 is 1. Let's throw this into the system as well.
     </p>
     <p>
 So, we have 7 facts. This implies 7 equations. This implies that our polynomial will have 7 coefficients and the highest degree will be then 6.
@@ -572,7 +578,7 @@ You can browse <a href="https://docs.sympy.org/latest/tutorial/index.html">the t
 Ok, this is not really helpful. We need the coefficients and SymPy gave us the way to compute these coefficients from <i>π</i>. Well, it's what it does, it computes things symbolically not numerically. Or does it?
     </p>
     <p>
-Look! I'll add one line and SymPy will compute our coefficients as floating point numbers.
+Look! I'll add one more line and SymPy will compute our coefficients as floating point numbers.
     </p>
     <table><tr>
     <td>
@@ -604,7 +610,7 @@ for var, exp in res.items():
     </td>
     </tr></table>
     <p>
-Have you notice which line it is? Anyway, the result is now this:
+Have you noticed which line it is? Anyway, the result is now this:
     </p>
     <p class="result">
 (f, "Float('1.0', precision=53)") <br>
@@ -616,7 +622,7 @@ Have you notice which line it is? Anyway, the result is now this:
 (b, "Float('0.011803020246125803', precision=53)")
     </p>
     <p>
-The line was <i>from math import pi</i>. This overloads the <i>pi</i> in the scope to be a floating point number not a symbol. And voilà — SymPy is now numeric. We can take these numbers, put them into our polynomial and it will be our model.
+The line was <i>from math import pi</i>. This overloads the <i>pi</i> in the scope to be a floating point number, not a symbol. And voilà — SymPy is now numeric. We can take these numbers, put them into our polynomial and it will be our model.
     </p>
     <canvas id="sine_model" width=640 height=480></canvas>
     <p class="comment">
@@ -626,16 +632,16 @@ Polynomial model put over original sin(x)
 The model works wonders in the <i>[0; π]</i> range. Outside this range it diverges from the sine but we never specified that it shouldn't.
     </p>
     <p>
-The polynomial bears all the properties we told SymPy of with our equations and nothing more.
+The polynomial bears all the properties we told SymPy about with our equations and nothing more.
     </p>
     <h2>
 Now let SymPy write some code for us
     </h2>
     <p>
-Let's say we want something that looks like sine but isn't. Something we can tweak interactively. Like a sine but with the movable middle point.
+Let's say we want something that looks like the sine but isn't. Something we can tweak interactively. Like the sine but with the movable middle point.
     </p>
     <p>
-We can start the same way. Let's retain the point locations. The integral criterion along with the derivatives in the end points are better to be lifted. But that's just my opinion, you can try to retain them yourself and see what'll happen.
+We can start the same way. Let's retain the point locations. The integral criterion along with the derivatives in the endpoints are better to be lifted. But that's just my opinion, you can try to retain them yourself and see what'll happen.
     </p>
     <p>
 The code that states the problem look like this:
@@ -644,7 +650,6 @@ The code that states the problem look like this:
     <td>
     <pre id="code_3">
 from sympy import *
-from math import pi
 
 a, b, c, d, x, px, py = symbols('a b c d x px py')
 
@@ -665,32 +670,43 @@ for var, exp in res.items():
     </pre>
     </td>
     </tr></table>
+    <p>
+When run, it prints out that:
+    </p> 
     <p class="result">
-&nbsp;&nbsp;(c, "Mul(Integer(-1), Float('8.0', precision=53), Pow(Symbol('px'), Integer(-1)), Symbol('py'), Add(Mul(Float('370110165040851.0', precision=53), Symbol('px')), Float('-775156917007495.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
+&nbsp;&nbsp;(c, "Mul(pi, Pow(Symbol('px'), Integer(-1)), Symbol('py'), Add(Mul(Integer(-1), Integer(3), Symbol('px')), Mul(Integer(2), pi)), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
 <br>
-&nbsp;&nbsp;(b, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Float('942477796076937.0', precision=53), Pow(Symbol('px'), Integer(2))), Float('-3100627668029980.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
+&nbsp;&nbsp;(b, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Integer(3), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Pow(pi, Integer(2)))), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
 <br>
-&nbsp;&nbsp;(a, "Mul(Integer(-1), Float('2.0', precision=53), Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Float('314159265358979.0', precision=53), Symbol('px')), Float('-493480220054468.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
+&nbsp;&nbsp;(a, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(pi, Mul(Integer(-1), Integer(2), Symbol('px'))), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
 <br>
-&nbsp;&nbsp;(d, "Float('0.0', precision=53)")
+&nbsp;&nbsp;(d, 'Integer(0)')
     </p>
-    <canvas id="not_sine" width=640 height=480></canvas>        
-    <p class="comment">
-You can drag the point
+    <p>
+And now it's time to get back to that cryptic <i>srepr</i> thing from before. It stands for <i>symbolic expression</i>, and it's basically a ready-made syntax tree. It's like in Lisp only with somewhat more conventional parentheses. And since it's written in conventional C-style function form, it's incredibly easy to write an interpreter for it (see: <a href="https://github.com/akalenuk/wordsandbuttons/blob/cd585775b6b5176426c6a22ccbdb683b71fe62dc/pages/sympy_makes_math_fun_again.html#L336">the code on GitHub</a>). 
     </p>
-    
-    <textarea id="exprs" rows=28>
-  (c, "Mul(Integer(-1), Float('8.0', precision=53), Pow(Symbol('px'), Integer(-1)), Symbol('py'), Add(Mul(Float('370110165040851.0', precision=53), Symbol('px')), Float('-775156917007495.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
-  (b, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Float('942477796076937.0', precision=53), Pow(Symbol('px'), Integer(2))), Float('-3100627668029980.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
-  (a, "Mul(Integer(-1), Float('2.0', precision=53), Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Float('314159265358979.0', precision=53), Symbol('px')), Float('-493480220054468.0', precision=53)), Pow(Add(Mul(Float('314159265358979.0', precision=53), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Float('1973920880217872.0', precision=53), Symbol('px')), Float('3100627668029980.0', precision=53)), Integer(-1)))")
-  (d, "Float('0.0', precision=53)")
+    <p>
+Here is a simple tool that turns SymPy s-expressions into runable JavaScript code.
+    </p>
+    <textarea id="exprs" rows=20>
+(c, "Mul(pi, Pow(Symbol('px'), Integer(-1)), Symbol('py'), Add(Mul(Integer(-1), Integer(3), Symbol('px')), Mul(Integer(2), pi)), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
+
+(b, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Integer(3), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Pow(pi, Integer(2)))), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
+
+(a, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(pi, Mul(Integer(-1), Integer(2), Symbol('px'))), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
+
+(d, 'Integer(0)')
     </textarea>
     <br>
     <button type="button" id="make_js" onclick="make_js();">Make JS</button>
     <p id="make_js_status" class="comment">
     </p>    
     <p>
-...
+Just press the button — and that's it! Of course, you can prettify the code however you like. But you can also use in raw like this (see: <a href="https://github.com/akalenuk/wordsandbuttons/blob/cd585775b6b5176426c6a22ccbdb683b71fe62dc/pages/sympy_makes_math_fun_again.html#L306">the example from this very page</a>).
+    </p>
+    <canvas id="not_sine" width=640 height=480></canvas>        
+    <p class="comment">
+You can drag the point
     </p>
     <script language="JavaScript">
     draw_sine();
@@ -700,7 +716,21 @@ You can drag the point
     document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
     document.getElementById("code_3").innerHTML = colorized(document.getElementById("code_3").innerHTML);        
     </script>
-
+    <p>
+But the best part of it, unless you're writing in some esoteric languages, you don't even need an interpreter. SymPy can print out JavaScript code from the box with a single <i>jscode</i> function! It can also print in Rust, C++, Fortran, Matematica, and more. It's <a href="https://docs.sympy.org/latest/modules/printing.html">already there</a>.
+    </p>
+    <h2>
+Conclusion
+    </h2>
+    <p>
+I disagree with “math is not for everyone”. Math is vast and diverse. Surely there is enough math for everyone. But some parts of it are best left to computers.
+    </p>
+    <p>
+Hope this demonstration shows that computers are happy to help you. It's not that hard to state a problem and it's even easier to interpret results. And it's fun. 
+    </p>
+    <p>
+If my humble introduction to SymPy will help you enjoy math long after your final calculus exam, it'll make me happy too.
+    </p>
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
     <tr>
