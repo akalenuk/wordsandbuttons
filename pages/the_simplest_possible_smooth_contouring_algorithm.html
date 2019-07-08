@@ -67,6 +67,7 @@ form {
     text-align: left;
     width: 505pt;
     background-color: #eeee99;
+    color: #000;
 }
 
 input[type="checkbox"] {
@@ -123,16 +124,16 @@ var line_colors = ["#3561a3", "#d64562", "#457fd6", "#50a837"];
 
 // algorithm
 var grid_size = 64.0;
-var gradient_step = 1.0;  
+var gradient_step = 1.0;
 
 // distance function
 var distance = 84.0;
 var lines = [[[120, 250], [320, 500]], [[320, 500], [500, 120]]];
 
 function dot(a1, a2, b1, b2) {
-    return a1 * b1 + a2 * b2; 
+    return a1 * b1 + a2 * b2;
 }
-    
+
 function distance_to_segment(lp1x, lp1y, lp2x, lp2y, px, py) {
     var t_proj = dot(px - lp1x, py - lp1y, lp2x - lp1x, lp2y - lp1y) / dot(lp2x - lp1x, lp2y - lp1y, lp2x - lp1x, lp2y - lp1y);
     if (isNaN(t_proj))
@@ -198,7 +199,7 @@ function draw_contour_animated(context, d_f, w, h, grid_size) {
     const dy = function(x, y) {
         return ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
     }
-    
+
     for(var y = 0; y <= h; y += grid_size) {
         for(var x = 0; x <= w; x += grid_size) {
             for(var piece_no = 0; piece_no <= 1; ++piece_no) {
@@ -210,29 +211,29 @@ function draw_contour_animated(context, d_f, w, h, grid_size) {
                 var distance_on_side = [d_f(x + grid_size/2, y + grid_size/2),
                     d_f(x + grid_size/2 - y_step, y + grid_size/2 - x_step)];
 
-                 // sign change = border crossing         
-                if( Math.sign(distance_on_side[0]) != Math.sign(distance_on_side[1])) {                
+                 // sign change = border crossing
+                if( Math.sign(distance_on_side[0]) != Math.sign(distance_on_side[1])) {
                     // contour piece direction matters for normal calculations
                     var cpd = Math.sign(distance_on_side[piece_no]);
-                        
+
                     // p1
                     var distance_in_p1 = d_f(x, y);
                     var p1x = x - dx(x, y) * distance_in_p1  * _t1;
                     var p1y = y - dy(x, y) * distance_in_p1  * _t1;
                     var d1x = dx(p1x, p1y) * grid_size  * _t3;
                     var d1y = dy(p1x, p1y) * grid_size  * _t3;
-                        
-                    // p2          
-                    var distance_in_p2 = d_f(x + x_step, y + y_step);  
+
+                    // p2
+                    var distance_in_p2 = d_f(x + x_step, y + y_step);
                     var p2x = x + x_step - dx(x + x_step, y + y_step) * distance_in_p2  * _t1;
                     var p2y = y + y_step - dy(x + x_step, y + y_step) * distance_in_p2  * _t1;
                     var d2x = dx(p2x, p2y) * grid_size  * _t3;
                     var d2y = dy(p2x, p2y) * grid_size  * _t3;
-                    
+
                     // parametric curve
                     var Px = spline_for(p1x, cpd*d1y, p2x, cpd*d2y);
                     var Py = spline_for(p1y, (-cpd)*d1x, p2y, (-cpd)*d2x);
-                    
+
                     // draw contour
                     for(var k = 0; k < grid_size; k += 3) {
                         var t1 = (k + 0) / grid_size;
@@ -258,8 +259,8 @@ function reset_all() {
 function undo_last() {
     lines.splice(-1,1);
     draw_canvas();
-}    
-    
+}
+
 function tick() {
     // contours
     if((document.getElementById("do_optimized").checked || document.getElementById("do_smooth").checked) && _t1 != 1.0) {
@@ -289,7 +290,7 @@ function init_canvas_ver(ver_no){
         canvas_rect = canvas.getBoundingClientRect();
         lines.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
     }, false);
-     
+
     canvas.addEventListener('mousemove', function(e){
         if(e.buttons == 1){
             canvas_rect = canvas.getBoundingClientRect();
@@ -297,13 +298,13 @@ function init_canvas_ver(ver_no){
             draw_canvas();
         }
     }, false);
-    
+
     canvas.addEventListener('mouseup', function(e){
         canvas_rect = canvas.getBoundingClientRect();
         lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
         draw_canvas();
     }, false);
-    
+
     draw_canvas_ver(ver_no);
 }
 
@@ -334,7 +335,7 @@ function draw_canvas_ver(ver_no) {
     var distance_field = context.createImageData(w, h);
     for (var i = 0; i < distance_field.data.length; ++i)
         distance_field.data[i] = 0;
-    
+
     if((ver_no == 0 && document.getElementById("draw_expected_shape").checked) || ver_no > 0)
         for (var i = 0; i <= h; i += 2.0)
             for (var j = 0; j <= w; j += 2.0) {
@@ -347,7 +348,7 @@ function draw_canvas_ver(ver_no) {
                 }
             }
         context.putImageData(distance_field, -0.5, -0.5);
-    
+
     // grid
     if((ver_no == 0 && document.getElementById("draw_grid").checked) || ver_no == 1) {
         context.beginPath();
@@ -364,7 +365,7 @@ function draw_canvas_ver(ver_no) {
         context.stroke();
         context.closePath();
     }
-    
+
     context.beginPath();
     if(ver_no == 0) {
     // parametric animated contour
@@ -378,27 +379,27 @@ function draw_canvas_ver(ver_no) {
             eval("draw_contour_ver_" + ver_no + "(context, d_f, w, h, grid_size);");
         } catch (error) {
             document.getElementById("error_" + ver_no).innerHTML = "<b>Error:</b> " + error.message;
-        }        
+        }
     }
     context.strokeStyle = line_colors[ver_no];
     context.lineWidth = 3;
     context.stroke();
     context.closePath();
-    
-    
+
+
     // distance values
     if(((ver_no == 0 && document.getElementById("draw_distances").checked) || ver_no == 1 || ver_no == 2) && lines.length > 0) {
         context.font = "16px Arial";
         context.fillStyle = "#000000";
         context.textAlign = "center";
-        context.textBaseline = "middle"; 
+        context.textBaseline = "middle";
         for(var i = grid_size / 2 ; i <= h - grid_size / 2; i += grid_size) {
             for(var j = grid_size / 2; j <= w - grid_size / 2; j += grid_size) {
                 context.fillText(Math.round(d_f(j, i),1).toString(), j, i);
             }
         }
     }
-}  
+}
 
     </script>
   </head>
@@ -411,9 +412,9 @@ The simplest possible smooth contouring algorithm
 Contouring algorithm is something that turns your implicit function into a contour. <a href="interactive_explanation_of_marching_cubes_and_dual_contouring.html">Marching cubes and dual method</a> are the most noted examples.
     </p>
     <p>
-There is also a simpler algorithm. It may be not as efficient computationally, but due to it's simplicity, it can be easily improved to produce smooth contours and not just polylines. Here's an interactive plot to show how it works. 
+There is also a simpler algorithm. It may be not as efficient computationally, but due to it's simplicity, it can be easily improved to produce smooth contours and not just polylines. Here's an interactive plot to show how it works.
     </p>
-    
+
     <form onsubmit="return false;">
     <label>Show: </label><input type="checkbox" id="draw_distances"onclick="draw_canvas();"/><label for="draw_distances">distance; </label>
     <input type="checkbox" id="draw_expected_shape" checked onclick="draw_canvas();"/><label for="draw_expected_shape">expected shape; </label>
@@ -421,7 +422,7 @@ There is also a simpler algorithm. It may be not as efficient computationally, b
     <br>
     <label>Contour: </label><input type="radio" name="contour_type" id="do_grid" onclick="draw_canvas();"/><label for="do_grid">grid cells; </label>
     <input type="radio" name="contour_type" id="do_optimized" onclick="draw_canvas();"/><label for="do_optimized">linear; </label>
-    <input type="radio" name="contour_type" id="do_smooth" checked onclick="draw_canvas();"/><label for="do_smooth">smooth.</label>    
+    <input type="radio" name="contour_type" id="do_smooth" checked onclick="draw_canvas();"/><label for="do_smooth">smooth.</label>
     </form>
     <canvas id="canvas_ver_0" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
@@ -429,7 +430,7 @@ There is also a simpler algorithm. It may be not as efficient computationally, b
         <button type="button" style="width: 108pt;" onclick="reset_all()">Clear</button>
     </div>
     <p>
-The algorithm accepts a distance function for input. This function denotes the distance to the expected curve for every point on the plane. 
+The algorithm accepts a distance function for input. This function denotes the distance to the expected curve for every point on the plane.
     </p>
     <p>
 <b>The first phase</b> of the algorithm is finding the initial contour. Let's iterate through all the cells of a grid. If the distance function changes its sing between the neighboring cells' centers, we'll add a piece of contour between them. We have to put one horizontal and one vertical piece per cube to form a fully closed contour.
@@ -448,24 +449,24 @@ function draw_contour_ver_1(context, d_f, w, h, grid_size) {
         var d_in_square_above = d_f(x + grid_size/2, y - grid_size/2);
 
         // draw a horizontal piece if there is a sign change
-        if( Math.sign(d_in_square) != Math.sign(d_in_square_above)) {                
+        if( Math.sign(d_in_square) != Math.sign(d_in_square_above)) {
             // draw a contour piece
             context.moveTo(x, y);
             context.lineTo(x + grid_size, y);
         }
-        
+
         // draw a vertical piece if there is a sign change
-        if( Math.sign(d_in_square) != Math.sign(d_in_square_on_the_left)) {                
+        if( Math.sign(d_in_square) != Math.sign(d_in_square_on_the_left)) {
             // draw a contour piece
             context.moveTo(x, y);
             context.lineTo(x, y + grid_size);
         }
     }
-}   
+}
     </textarea>
     <p id="error_1" class="comment">
     </p>
-    
+
     <p>
 <b>The second phase</b> is attracting the contour nodes to the expected curve. The distance function shows how far every node is from the expected curve. And the direction to shift our node is also detectable from the distance function's <a href="https://en.wikipedia.org/wiki/Gradient">gradient</a>.
     </p>
@@ -486,7 +487,7 @@ function draw_contour_ver_2(context, d_f, w, h, grid_size) {
     const dy = function(x, y) {
         return ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
     }
-    
+
     for(var y = 0; y &lt;= h; y += grid_size)
     for(var x = 0; x &lt;= w; x += grid_size)
     for(var piece_no = 0; piece_no &lt;= 1; ++piece_no) {
@@ -500,27 +501,27 @@ function draw_contour_ver_2(context, d_f, w, h, grid_size) {
         var d_in_square = d_f(x_in_square, y_in_square);
         var d_in_neighbor = d_f(x_in_square - y_step, y_in_square - x_step);
 
-         // sign change = border crossing         
-        if( Math.sign(d_in_square) != Math.sign(d_in_neighbor)) {                           
+         // sign change = border crossing
+        if( Math.sign(d_in_square) != Math.sign(d_in_neighbor)) {
             // p1
             var d_in_p1 = d_f(x, y);
             var p1x = x - dx(x, y) * d_in_p1;
             var p1y = y - dy(x, y) * d_in_p1;
-                
-            // p2          
-            var d_in_p2 = d_f(x + x_step, y + y_step);  
+
+            // p2
+            var d_in_p2 = d_f(x + x_step, y + y_step);
             var p2x = x + x_step - dx(x + x_step, y + y_step) * d_in_p2;
             var p2y = y + y_step - dy(x + x_step, y + y_step) * d_in_p2;
-            
+
             // draw horizontal on piece_no = 0 or vertical on piece_no = 1
             context.moveTo(p1x, p1y);
             context.lineTo(p2x, p2y);
         }
     }
-}    
-    </textarea>     
+}
+    </textarea>
     <p id="error_2" class="comment">
-    </p> 
+    </p>
     <p>
 <b>The third phase</b> is adding curvature. Once again, we'll measure the function's gradient for every node. We'll use the <a href="https://en.wikipedia.org/wiki/Partial_derivative">partial derivatives</a> from it to form a <a href="quadric_splines_are_useful_too.html">parametric 3-rd degree polynomial</a>.
     </p>
@@ -535,7 +536,7 @@ a<sub>x</sub>t<sub>0</sub><sup>3</sup> + b<sub>x</sub>t<sub>0</sub><sup>2</sup> 
 3a<sub>x</sub>t<sub>0</sub><sup>2</sup> + 2b<sub>x</sub>t<sub>0</sub> + c<sub>x</sub> = dx<sub>0</sub> / dt<sub>0</sub><br>
 a<sub>x</sub>t<sub>1</sub><sup>3</sup> + b<sub>x</sub>t<sub>1</sub><sup>2</sup> + c<sub>x</sub>t<sub>1</sub> + d<sub>x</sub> = x<sub>1</sub><br>
 3a<sub>x</sub>t<sub>1</sub><sup>2</sup> + 2b<sub>x</sub>t<sub>1</sub> + c<sub>x</sub> = dx<sub>1</sub> / dt<sub>1</sub>
-    </p>    
+    </p>
     </td>
     <td style="width: 300pt; border: 0px;">
     <p class="formula" style="width: 300pt;">
@@ -543,7 +544,7 @@ a<sub>x</sub>t<sub>0</sub><sup>3</sup> + b<sub>x</sub>t<sub>0</sub><sup>2</sup> 
 3a<sub>x</sub>t<sub>0</sub><sup>2</sup> + 2b<sub>x</sub>t<sub>0</sub> + c<sub>x</sub> = dy<sub>0</sub> / dt<sub>0</sub><br>
 a<sub>x</sub>t<sub>1</sub><sup>3</sup> + b<sub>x</sub>t<sub>1</sub><sup>2</sup> + c<sub>x</sub>t<sub>1</sub> + d<sub>x</sub> = y<sub>1</sub><br>
 3a<sub>x</sub>t<sub>1</sub><sup>2</sup> + 2b<sub>x</sub>t<sub>1</sub> + c<sub>x</sub> = dy<sub>1</sub> / dt<sub>1</sub>
-    </p>    
+    </p>
     </td>
     </tr>
     </table>
@@ -558,7 +559,7 @@ d<sub>x</sub> = x<sub>0</sub><br>
 c<sub>x</sub> = dx<sub>0</sub> / dt<sub>0</sub><br>
 a<sub>x</sub> + b<sub>x</sub> + c<sub>x</sub> + d<sub>x</sub> = x<sub>1</sub><br>
 3a<sub>x</sub> + 2b<sub>x</sub> + c<sub>x</sub> = dx<sub>1</sub> / dt<sub>1</sub>
-    </p>    
+    </p>
     </td>
     <td style="width: 300pt; border: 0px;">
     <p class="formula" style="width: 300pt;">
@@ -566,11 +567,11 @@ d<sub>x</sub> = y<sub>0</sub><br>
 c<sub>x</sub> = dy<sub>0</sub> / dt<sub>0</sub><br>
 a<sub>x</sub> + b<sub>x</sub> + c<sub>x</sub> + d<sub>x</sub> = y<sub>1</sub><br>
 3a<sub>x</sub> + 2b<sub>x</sub> + c<sub>x</sub> = dy<sub>1</sub> / dt<sub>1</sub>
-    </p>    
+    </p>
     </td>
     </tr>
     </table>
-      
+
     <canvas id="canvas_ver_3" width=640 height=640></canvas>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
@@ -609,7 +610,7 @@ function draw_contour_ver_3(context, d_f, w, h, grid_size) {
     const dy = function(x, y) {
         return ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
     }
-    
+
     for(var y = 0; y &lt;= h; y += grid_size)
     for(var x = 0; x &lt;= w; x += grid_size)
     for(var piece_no = 0; piece_no &lt;= 1; ++piece_no) {
@@ -621,30 +622,30 @@ function draw_contour_ver_3(context, d_f, w, h, grid_size) {
         var d_in_square = [d_f(x + grid_size/2, y + grid_size/2),
             d_f(x + grid_size/2 - y_step, y + grid_size/2 - x_step)];
 
-         // sign change = border crossing         
+         // sign change = border crossing
         if( Math.sign(d_in_square[0]) != Math.sign(d_in_square[1])) {
 
             // contour piece direction matters for normal calculations
             var cpd = Math.sign(d_in_square[piece_no]);
-                
+
             // p1
             var d_in_p1 = d_f(x, y);
             var p1x = x - dx(x, y) * d_in_p1;
             var p1y = y - dy(x, y) * d_in_p1;
             var d1x = dx(p1x, p1y) * grid_size;
             var d1y = dy(p1x, p1y) * grid_size;
-                
-            // p2          
-            var d_in_p2 = d_f(x + x_step, y + y_step);  
+
+            // p2
+            var d_in_p2 = d_f(x + x_step, y + y_step);
             var p2x = x + x_step - dx(x + x_step, y + y_step) * d_in_p2;
             var p2y = y + y_step - dy(x + x_step, y + y_step) * d_in_p2;
             var d2x = dx(p2x, p2y) * grid_size;
             var d2y = dy(p2x, p2y) * grid_size;
-            
+
             // parametric curve
             var Px = spline_for(p1x, cpd*d1y, p2x, cpd*d2y);
             var Py = spline_for(p1y, (-cpd)*d1x, p2y, (-cpd)*d2x);
-            
+
             // draw contour
             for(var k = 0; k &lt; grid_size; k += 1) {
                 var t1 = (k + 0) / grid_size;
@@ -659,12 +660,12 @@ function draw_contour_ver_3(context, d_f, w, h, grid_size) {
         }
     }
 }
-    </textarea>     
+    </textarea>
     <p id="error_3" class="comment">
     </p>
-    
+
     <p>
-The concepts on which the algorithm is built may not be simple: partial derivatives, gradients, parametric polynomials. But the algorithm itself is: cells &rarr; lines &rarr; curves. 
+The concepts on which the algorithm is built may not be simple: partial derivatives, gradients, parametric polynomials. But the algorithm itself is: cells &rarr; lines &rarr; curves.
     </p>
 
     <script language="JavaScript">
@@ -673,7 +674,7 @@ The concepts on which the algorithm is built may not be simple: partial derivati
     init_canvas_ver(2);
     init_canvas_ver(3);
     tick(); // let it tick always
-    </script>    
+    </script>
 
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">

@@ -65,6 +65,7 @@ form {
     text-align: left;
     width: 505pt;
     background-color: #eeee99;
+    color: #000;
 }
 
 input[type="checkbox"] {
@@ -121,8 +122,8 @@ function colorized_with_sample_highlighter(text) {
         for(var i = 0; i < token.length; ++i)
             code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
         var zero_channel = code_sum % 3;
-        var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2) 
-            + (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5) 
+        var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
+            + (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
             + (zero_channel == 2 ? '0' : '');
         return painted_in(token, color);
     }
@@ -140,7 +141,7 @@ function colorized_with_sample_highlighter(text) {
         var chunks = line.split(comments[i][0]);
         return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
             var in_out_comment = chunk.split(comments[i][1]);
-            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555") 
+            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555")
                 + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
     }
 
@@ -148,7 +149,7 @@ function colorized_with_sample_highlighter(text) {
 }
 
 function colorized_with_js_highlighter(text) {
-    const separators = ['function ', ' if(', 'return ', 'var ', 'const ', ' for(', 
+    const separators = ['function ', ' if(', 'return ', 'var ', 'const ', ' for(',
         '\n', '&lt;', '&gt;', ' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '<', '>', '[', ']', '{', '}'];
     const quotes = ['\'', '"'];
     const comments = [['//', '\n'], ['/*', '*/']];
@@ -190,25 +191,25 @@ function colorized_with_js_highlighter(text) {
         var chunks = line.split(comments[i][0]);
         return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
             var in_out_comment = chunk.split(comments[i][1]);
-            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555") 
+            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555")
                 + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
     }
 
     return uncommented(text, 0);
 }
-    
+
 function generate_highlighter_code() {
     var function_name = document.getElementById("function_name").value;
     var do_quotes = document.getElementById("do_quotes").checked;
     var do_comments = document.getElementById("do_comments").checked;
-    
+
     var code = "\n";
     code += "function " + function_name + "(text) {\n";
     code += "    const separators = " + document.getElementById("separators_list").value + ";\n"
     if(do_quotes)
         code += "    const quotes = " + document.getElementById("quotes_list").value + ";\n"
     if(do_comments)
-        code += "    const comments = " + document.getElementById("comments_list").value + ";\n"    
+        code += "    const comments = " + document.getElementById("comments_list").value + ";\n"
 
     code += "\n";
     code += "    function painted_in(line, color) {\n";
@@ -226,7 +227,7 @@ function generate_highlighter_code() {
     code += "            + (zero_channel == 2 ? '0' : '');\n";
     code += "        return painted_in(token, color);\n";
     code += "    }\n";
-        
+
 
     code += "\n";
     code += "    function separated(line, i) {\n";
@@ -237,9 +238,9 @@ function generate_highlighter_code() {
     code += "    }\n";
 
     if(do_quotes) {
-        code += "\n";    
+        code += "\n";
         code += "    function unquoted(line, i) {\n";
-        code += "        if(i == quotes.length)\n"; 
+        code += "        if(i == quotes.length)\n";
         code += "            return separated(line, 0);\n";
         code += "        var chunk_no = 0;\n";
         code += "        return line.split('\\\\' + quotes[i]).join('\\0').split(quotes[i]).map(function (chunk) {\n";
@@ -247,12 +248,12 @@ function generate_highlighter_code() {
         code += "                return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], \"555\");}).join('');\n";
         code += "    }\n";
     }
-    
+
     if(do_comments) {
         code += "\n";
         code += "    function uncommented(line, i) {\n";
         code += "        if(i == comments.length)\n";
-        if(do_quotes) 
+        if(do_quotes)
             code += "            return unquoted(line, 0);\n";
         else
             code += "            return separated(line, 0);\n";
@@ -263,14 +264,14 @@ function generate_highlighter_code() {
         code += "                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');\n";
         code += "    }\n";
     }
-    
+
     code += "\n";
     if(do_comments)
         code += "    return uncommented(text, 0);\n";
     else if(do_quotes)
         code += "    return unquoted(text, 0);\n";
-    else 
-        code += "    return separated(text, 0);\n";        
+    else
+        code += "    return separated(text, 0);\n";
     code += "}\n";
 
     document.getElementById("highlighter_code").innerHTML = code;
@@ -281,11 +282,11 @@ function highlight_test_area() {
     var code = document.getElementById("highlighter_code").innerHTML;
     code = code.split('&lt;').join('<').split('&gt;').join('>');
     var function_name_context = code.split('function ');
-    if(function_name_context.length == 1) 
+    if(function_name_context.length == 1)
         return
     function_name = function_name_context[1].split('(')[0];
     eval(code);
-    
+
     var text = document.getElementById("testing_area").value;
     chunks = text.split('<')
     plain_text = chunks[0] + chunks.slice(1).map(function(chunk) {return chunk.split('>')[1]}).join('');
@@ -386,21 +387,21 @@ Highlighter generator
     <br>
     <button type="button" style="width: auto;" onclick="generate_highlighter_code()">Regenerate the highlighter</button><br>
     </form>
-    
+
     <table><tr>
     <td style="border: 1px solid black;">
     <pre id="highlighter_code">
 ... here will be the highlighter code...
     </pre>
     </td></tr></table>
-    
+
     <form style="width:600pt;">
     Testing area:
     <table style="width:100%;">
     <tr>
     <td style="width:50%;">
     <textarea id="testing_area" rows=25 onInput="highlight_test_area()">
-.data 
+.data
 /* some sample strings */
 ClassName db "SimpleWinClass", 0
 AppName  db " ", 0
@@ -435,7 +436,7 @@ Feel free to use it however you like. Just as every other <a href="https://githu
     </p>
 
     <h2>
-P. S.    
+P. S.
     </h2>
     <p>
 After a very fruitful <a href="https://www.reddit.com/r/programming/comments/bc943p/lexical_differential_highlighting_instead_of/">discussion on Reddit</a>, I've tried to emulate a bit of syntax highlighting to work together with the lexical highlighting. And it worked! Here's a quasi-sytnax-differential highlighter for JavaScript. It's highlighterd by itself.
@@ -444,7 +445,7 @@ After a very fruitful <a href="https://www.reddit.com/r/programming/comments/bc9
     <td style="border: 1px solid black;">
     <pre id="js_sample">
 function colorized_with_js_highlighter(text) {
-    const separators = ['function ', ' if(', 'return ', 'var ', 'const ', ' for(', 
+    const separators = ['function ', ' if(', 'return ', 'var ', 'const ', ' for(',
         '\n', ' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '&lt;', '&gt;', '[', ']', '{', '}'];
     const quotes = ['\'', '"'];
     const comments = [['//', '\n'], ['/*', '*/']];
@@ -486,7 +487,7 @@ function colorized_with_js_highlighter(text) {
         var chunks = line.split(comments[i][0]);
         return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
             var in_out_comment = chunk.split(comments[i][1]);
-            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length &gt; 1 ? comments[i][1] : ''), "555") 
+            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length &gt; 1 ? comments[i][1] : ''), "555")
                 + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
     }
 
@@ -497,10 +498,10 @@ function colorized_with_js_highlighter(text) {
     <script language="JavaScript">
     generate_highlighter_code();
     document.getElementById("sample_code").innerHTML = colorized_with_sample_highlighter(document.getElementById("sample_code").innerHTML);
-    document.getElementById("js_sample").innerHTML = colorized_with_js_highlighter(document.getElementById("js_sample").innerHTML);    
+    document.getElementById("js_sample").innerHTML = colorized_with_js_highlighter(document.getElementById("js_sample").innerHTML);
     </script>
-    
-    
+
+
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
     <tr>

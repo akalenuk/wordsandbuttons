@@ -54,7 +54,7 @@ td {
     padding: 6pt 12pt 6pt 12pt;
     font-size: 16pt;
     border: 1px solid black;
-    
+
 }
 
 .comment {
@@ -171,12 +171,12 @@ function draw_sine() {
 
     // grid
     draw_grid_on(context);
-    
+
     // sine
     context.lineWidth = 1;
     context.beginPath();
     context.strokeStyle = colors[0];
-    for(var j = 1; j < w; j += 1) {    
+    for(var j = 1; j < w; j += 1) {
 	var x = client_to_x(j);
 	var x_ = client_to_x(j-1);
 	var y = Math.sin(x);
@@ -186,7 +186,7 @@ function draw_sine() {
         context.stroke();
     }
     context.closePath();
-    
+
     context.lineWidth = 1;
     context.strokeStyle = "#444444";
     context.setLineDash([4, 4]);
@@ -198,11 +198,11 @@ function draw_sine() {
     context.moveTo(x_to_client(-1), y_to_client(-1));
     context.lineTo(x_to_client(2), y_to_client(2));
     context.moveTo(x_to_client(Math.PI+2), y_to_client(-2));
-    context.lineTo(x_to_client(Math.PI-2), y_to_client(2));    
+    context.lineTo(x_to_client(Math.PI-2), y_to_client(2));
     context.stroke();
     context.closePath();
     context.setLineDash([]);
-    
+
     context.fillStyle="#222222";
     context.fillText("π", x_to_client(Math.PI) + 4, y_to_client(0) - 4);
     context.fillText("π/2", x_to_client(Math.PI/2) + 4, y_to_client(0) - 4);
@@ -218,12 +218,12 @@ function draw_sine_model() {
 
     // grid
     draw_grid_on(context);
-    
+
     // sine
     context.lineWidth = 3;
     context.beginPath();
     context.strokeStyle = "#bbbbbb";
-    for(var j = 1; j < w; j += 1) {    
+    for(var j = 1; j < w; j += 1) {
 	var x = client_to_x(j);
 	var x_ = client_to_x(j-1);
 	var y = Math.sin(x);
@@ -233,7 +233,7 @@ function draw_sine_model() {
         context.stroke();
     }
     context.closePath();
-    
+
     // model
     function sin_model(x) {
         var a = -0.001252339343723109;
@@ -248,7 +248,7 @@ function draw_sine_model() {
     context.lineWidth = 1;
     context.beginPath();
     context.strokeStyle = colors[1];
-    for(var j = 1; j < w; j += 1) {    
+    for(var j = 1; j < w; j += 1) {
 	var x = client_to_x(j);
 	var x_ = client_to_x(j-1);
 	var y = sin_model(x);
@@ -257,7 +257,7 @@ function draw_sine_model() {
         context.lineTo(j, y_to_client(y));
         context.stroke();
     }
-    context.closePath();    
+    context.closePath();
 }
 
 var px = Math.PI/2;
@@ -278,7 +278,7 @@ function init_not_sine_model() {
     plot.addEventListener('mousedown', function(e){
        var canvas_rect = plot.getBoundingClientRect();
        px = client_to_x(e.clientX - canvas_rect.left);
-       py = client_to_y(e.clientY - canvas_rect.top);    
+       py = client_to_y(e.clientY - canvas_rect.top);
         draw_not_sine_model()
     }, false);
 
@@ -289,7 +289,7 @@ function init_not_sine_model() {
     plot.addEventListener('mouseleave', function(e){
        draw_not_sine_model();
     }, false);
-    
+
     draw_not_sine_model();
 }
 
@@ -303,7 +303,7 @@ function draw_not_sine_model() {
 
     // grid
     draw_grid_on(context);
-    
+
     // This came directly out of the "Make JS" thing
     function not_sin_model(x) {
         var a = (Math.pow(px, -2)*py*(Math.PI+(-1*2*px))*Math.pow((Math.pow(px, 2)+(-1*2*Math.PI*px)+Math.pow(Math.PI, 2)), -1));
@@ -312,11 +312,11 @@ function draw_not_sine_model() {
         var d = 0;
         return a*x*x*x + b*x*x + c*x + d;
     }
-    
+
     context.lineWidth = 1;
     context.beginPath();
     context.strokeStyle = colors[2];
-    for(var j = 1; j < w; j += 1) {    
+    for(var j = 1; j < w; j += 1) {
 	var x = client_to_x(j);
 	var x_ = client_to_x(j-1);
 	var y = not_sin_model(x);
@@ -326,18 +326,18 @@ function draw_not_sine_model() {
         context.stroke();
     }
     context.closePath();
-    
+
     context.beginPath();
     context.arc(x_to_client(px), y_to_client(py), 5, 0, 2*Math.PI);
     context.fillStyle = colors[2];
     context.fill();
-    context.closePath();  
+    context.closePath();
 }
 
 // The partial interpreter for SymPy s-expressions
 function evaluated_sympy(expr) {
     const pi = "Math.PI";
-    
+
     var Symbol = function(x) {
         return x;
     }
@@ -368,7 +368,7 @@ function evaluated_sympy(expr) {
     }
     var Pow = function(x, y) {
         return 'Math.pow(' + x + ', ' + y + ')';
-    }    
+    }
     const math_fs = ['abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'cbrt', 'ceil', 'clz32', 'cos', 'cosh', 'exp', 'expm1', 'floor', 'fround', 'log', 'log10', 'log1p', 'log2', 'random', 'round', 'sign', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'trunc'];
     for(var i = 0; i < math_fs.length; ++i) {
         // abusing lexical scoping
@@ -413,7 +413,7 @@ function make_js() {
 }
 
 function colorized(text) {
-    const separators = ['def ', ' for ', ' else', ' if ', ' break', 'return', 'class ', ' in ', 'global ', 
+    const separators = ['def ', ' for ', ' else', ' if ', ' break', 'return', 'class ', ' in ', 'global ',
         '\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')', '+', '-', '*', '/'];
     const quotes = ['\'', '"'];
     const comments = [['#', '\n']];
@@ -455,7 +455,7 @@ function colorized(text) {
         var chunks = line.split(comments[i][0]);
         return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
             var in_out_comment = chunk.split(comments[i][1]);
-            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555") 
+            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555")
                 + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
     }
 
@@ -475,7 +475,7 @@ I remember my own struggle with calculus at university. Limits, integrals, diffe
 Taking it seriously, I still studied through the semester, studied harder the week before the exam, studied even harder the night before. I got 62/100. That's 1 point above the lowest possible passing grade.
     </p>
     <p>
-Well, maybe math is not for everyone. But wait a minute! The next semester I took part in the Math Olympiad, went through the faculty round, then throught the university round, went to the national round and scored quite high there. Which counted as a pass on that semester's exam. 
+Well, maybe math is not for everyone. But wait a minute! The next semester I took part in the Math Olympiad, went through the faculty round, then throught the university round, went to the national round and scored quite high there. Which counted as a pass on that semester's exam.
     </p>
     <p>
 Professors were proud of me. They thought that the first semester's score was a mistake. The third semester I scored 65/100.
@@ -484,7 +484,7 @@ Professors were proud of me. They thought that the first semester's score was a 
 ¯\_(ツ)_/¯
     </p>
     <p>
-Mathematics is a lot of things. It's fun of problem-solving, it's an excitement of discoveries, it's a pride of accomplishments, and it's a ton of tedious computations, too. I never liked the last part. Couldn't make it right. That's why I'm so happy to live in the XXI century since I can give it away to computers and still enjoy the first three. 
+Mathematics is a lot of things. It's fun of problem-solving, it's an excitement of discoveries, it's a pride of accomplishments, and it's a ton of tedious computations, too. I never liked the last part. Couldn't make it right. That's why I'm so happy to live in the XXI century since I can give it away to computers and still enjoy the first three.
     </p>
     <h2>
 SymPy it is
@@ -496,7 +496,7 @@ According to the <a href="https://www.sympy.org/en/index.html">official site</a>
 SymPy is a Python library for symbolic mathematics. It aims to become a full-featured computer algebra system (CAS) while keeping the code as simple as possible in order to be comprehensible and easily extensible.
     </i></p>
     <p>
-Symbolic mathematics? Algebra system? Sounds exclusive. Sounds like it's something for practicing mathematicians only. But it isn't. It's for practicing engineers who have just enough math knowledge to state a problem but not enough patience to solve it. 
+Symbolic mathematics? Algebra system? Sounds exclusive. Sounds like it's something for practicing mathematicians only. But it isn't. It's for practicing engineers who have just enough math knowledge to state a problem but not enough patience to solve it.
     </p>
     <p>
 It does integration and differentiation. It finds limits, and it expands series. It solves equations and systems of equations. It can even do statistics. And it does it all just like you would do on an exam. It doesn't just compute numbers, it computes formulas.
@@ -509,7 +509,7 @@ Let SymPy do some math for you
     </h2>
     <p>
 Let's say you want to model the sine function with a polynomial. Let's pretend you have a reason. Now how do we do that?
-    </p> 
+    </p>
     <p>
 How about, we gather all we know about the sine function in one bowl and let SymPy do the rest? Sounds good?
     </p>
@@ -549,11 +549,11 @@ sine_i = integrate(sine, x)
 the_system = [
     sine_i.subs(x, pi / 2) - sine_i.subs(x, 0) - 1,
     sine_d.subs(x, 0) - 1,
-    sine_d.subs(x, pi / 2), 
-    sine_d.subs(x, pi) + 1, 
-    sine.subs(x, 0), 
-    sine.subs(x, pi / 2) - 1, 
-    sine.subs(x, pi) 
+    sine_d.subs(x, pi / 2),
+    sine_d.subs(x, pi) + 1,
+    sine.subs(x, 0),
+    sine.subs(x, pi / 2) - 1,
+    sine.subs(x, pi)
 ]
 
 res = solve(the_system, (a, b, c, d, e, f, g))
@@ -594,13 +594,13 @@ sine_d = diff(sine, x)
 sine_i = integrate(sine, x)
 
 the_system = [
-    sine_i.subs(x, pi / 2) - sine_i.subs(x, 0) - 1,  
-    sine_d.subs(x, 0) - 1, 
-    sine_d.subs(x, pi / 2), 
-    sine_d.subs(x, pi) + 1, 
-    sine.subs(x, 0), 
-    sine.subs(x, pi / 2) - 1, 
-    sine.subs(x, pi) 
+    sine_i.subs(x, pi / 2) - sine_i.subs(x, 0) - 1,
+    sine_d.subs(x, 0) - 1,
+    sine_d.subs(x, pi / 2),
+    sine_d.subs(x, pi) + 1,
+    sine.subs(x, 0),
+    sine.subs(x, pi / 2) - 1,
+    sine.subs(x, pi)
 ]
 
 res = solve(the_system, (a, b, c, d, e, f, g))
@@ -658,10 +658,10 @@ sine = a*x**3 + b*x**2 + c*x + d
 sine_d = diff(sine, x)
 
 the_system = [
-    sine_d.subs(x, px), 
-    sine.subs(x, 0), 
-    sine.subs(x, px) - py, 
-    sine.subs(x, pi) 
+    sine_d.subs(x, px),
+    sine.subs(x, 0),
+    sine.subs(x, px) - py,
+    sine.subs(x, pi)
 ]
 
 res = solve(the_system, (a, b, c, d))
@@ -673,7 +673,7 @@ for var, exp in res.items():
     </tr></table>
     <p>
 When run, it prints out that:
-    </p> 
+    </p>
     <p class="result">
 &nbsp;&nbsp;(c, "Mul(pi, Pow(Symbol('px'), Integer(-1)), Symbol('py'), Add(Mul(Integer(-1), Integer(3), Symbol('px')), Mul(Integer(2), pi)), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
 <br>
@@ -684,7 +684,7 @@ When run, it prints out that:
 &nbsp;&nbsp;(d, 'Integer(0)')
     </p>
     <p>
-And now it's time to get back to that cryptic <i>srepr</i> thing from before. It stands for <i>symbolic expression</i>, and it's basically a ready-made syntax tree. It's like in Lisp only with somewhat more conventional parentheses. And since it's written in conventional C-style function form, it's incredibly easy to write an interpreter for it (see: <a href="https://github.com/akalenuk/wordsandbuttons/blob/cd585775b6b5176426c6a22ccbdb683b71fe62dc/pages/sympy_makes_math_fun_again.html#L336">the code on GitHub</a>). 
+And now it's time to get back to that cryptic <i>srepr</i> thing from before. It stands for <i>symbolic expression</i>, and it's basically a ready-made syntax tree. It's like in Lisp only with somewhat more conventional parentheses. And since it's written in conventional C-style function form, it's incredibly easy to write an interpreter for it (see: <a href="https://github.com/akalenuk/wordsandbuttons/blob/cd585775b6b5176426c6a22ccbdb683b71fe62dc/pages/sympy_makes_math_fun_again.html#L336">the code on GitHub</a>).
     </p>
     <p>
 Here is a simple tool that turns SymPy s-expressions into runable JavaScript code.
@@ -701,11 +701,11 @@ Here is a simple tool that turns SymPy s-expressions into runable JavaScript cod
     <br>
     <button type="button" id="make_js" onclick="make_js();">Make JS</button>
     <p id="make_js_status" class="comment">
-    </p>    
+    </p>
     <p>
 Just press the button — and that's it! Of course, you can prettify the code however you like. But you can also use in raw like this (see: <a href="https://github.com/akalenuk/wordsandbuttons/blob/cd585775b6b5176426c6a22ccbdb683b71fe62dc/pages/sympy_makes_math_fun_again.html#L306">the example from this very page</a>).
     </p>
-    <canvas id="not_sine" width=640 height=480></canvas>        
+    <canvas id="not_sine" width=640 height=480></canvas>
     <p class="comment">
 You can drag the point
     </p>
@@ -715,7 +715,7 @@ You can drag the point
     init_not_sine_model();
     document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
     document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
-    document.getElementById("code_3").innerHTML = colorized(document.getElementById("code_3").innerHTML);        
+    document.getElementById("code_3").innerHTML = colorized(document.getElementById("code_3").innerHTML);
     </script>
     <p>
 But the best part of it, unless you're writing in some esoteric languages, you don't even need an interpreter. SymPy can print out JavaScript code from the box with a single <i>jscode</i> function! It can also print in Rust, C++, Fortran, Matematica, and more. It's <a href="https://docs.sympy.org/latest/modules/printing.html">already there</a>.
@@ -727,7 +727,7 @@ Conclusion
 I disagree with “math is not for everyone”. Math is vast and diverse. Surely there is enough math for everyone. But some parts of it are best left to computers.
     </p>
     <p>
-Hope this demonstration shows that computers are happy to help you. It's not that hard to state a problem and it's even easier to interpret results. And it's fun. 
+Hope this demonstration shows that computers are happy to help you. It's not that hard to state a problem and it's even easier to interpret results. And it's fun.
     </p>
     <p>
 If my humble introduction to SymPy will help you enjoy math long after your final calculus exam, it'll make me happy too.
