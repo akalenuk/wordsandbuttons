@@ -1,3 +1,4 @@
+#include <array>
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -25,7 +26,7 @@ bool check_if_magic(const std::string& square)
     || (square[2] + square[4] + square[6] != '5'*3))
     return false;
 
-  std::array<int> numbers_count;
+  std::array<int, 9> numbers_count{};
   for(auto i = 0u; i < 9; ++i)
     ++numbers_count[square[i]-'1'];
   for(auto i = 0u; i < 9; ++i)
