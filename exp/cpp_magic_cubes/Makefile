@@ -41,4 +41,18 @@ all:
 	rm ./64bits
 	rm ./64bits_in_set
 	rm ./64bits_in_unordered_set
-
+s:
+	g++ -O2 -S -std=c++11 empty_run.cpp -o empty_run.s
+	g++ -O2 -S -std=c++11 naive.cpp -o naive.s
+	g++ -O2 -S -std=c++11 naive_reversed.cpp -o naive_reversed.s
+	g++ -O2 -S -std=c++11 numbers.cpp -o numbers.s
+	g++ -O2 -S -std=c++11 numbers_5_heuristic.cpp -o numbers_5_heuristic.s
+	g++ -O2 -S -std=c++11 numbers_oddity_heuristic.cpp -o numbers_oddity_heuristic.s
+	g++ -O2 -S -std=c++11 numbers_permutation_shifts.cpp -o numbers_permutation_shifts.s
+	g++ -O2 -S -std=c++11 words.cpp -o words.s
+	g++ -O2 -S -std=c++11 words_in_set.cpp -o words_in_set.s
+	g++ -O2 -S -std=c++11 words_in_unordered_set.cpp -o words_in_unordered_set.s
+	g++ -O2 -S -std=c++11 words_oddity_heuristic.cpp -o words_oddity_heuristic.s
+	g++ -O2 -S -std=c++11 64bits.cpp -o 64bits.s
+	g++ -O2 -S -std=c++11 64bits_in_set.cpp -o 64bits_in_set.s
+	g++ -O2 -S -std=c++11 64bits_in_unordered_set.cpp -o 64bits_in_unordered_set.s
