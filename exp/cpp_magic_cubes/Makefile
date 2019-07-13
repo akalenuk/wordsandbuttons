@@ -1,4 +1,4 @@
-all: gcc run clang run o3 run clean
+all: gcc run1 clang run2 o3 run3 clean
 .PHONY: gcc
 gcc:
 	g++ -O2 -std=c++11 empty_run.cpp -o empty_run
@@ -67,8 +67,8 @@ o3:
 	g++ -O3 -std=c++11 64bits.cpp -o 64bits
 	g++ -O3 -std=c++11 64bits_in_set.cpp -o 64bits_in_set
 	g++ -O3 -std=c++11 64bits_in_unordered_set.cpp -o 64bits_in_unordered_set
-.PHONY: run
-run:	
+.PHONY: run1
+run1:
 	./empty_run
 	./naive
 	./naive_reversed
@@ -84,6 +84,40 @@ run:
 	./64bits
 	./64bits_in_set
 	./64bits_in_unordered_set
+.PHONY: run2
+run2:
+	./empty_run
+	./naive
+	./naive_reversed
+	./naive_less_code
+	./numbers
+	./numbers_5_heuristic
+	./numbers_oddity_heuristic
+	./numbers_permutation_shifts
+	./words
+	./words_in_set
+	./words_in_unordered_set
+	./words_oddity_heuristic
+	./64bits
+	./64bits_in_set
+	./64bits_in_unordered_set
+.PHONY: run3
+run3:
+	./empty_run
+	./naive
+	./naive_reversed
+	./naive_less_code
+	./numbers
+	./numbers_5_heuristic
+	./numbers_oddity_heuristic
+	./numbers_permutation_shifts
+	./words
+	./words_in_set
+	./words_in_unordered_set
+	./words_oddity_heuristic
+	./64bits
+	./64bits_in_set
+	./64bits_in_unordered_set	
 .PHONY: clean
 clean:	
 	rm ./empty_run	
