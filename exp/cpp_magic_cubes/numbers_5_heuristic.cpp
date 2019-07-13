@@ -18,7 +18,7 @@ uint_fast64_t ideal_char_map = static_cast<uint_fast64_t>(0x1FF) << 49;
 uint_fast64_t char_map_one = 1u;
 bool check_if_magic(const std::string& square)
   {
-  if(square[4] != '5')
+  if(square[4] != '5') // narrows to 1/9  (0.111...)
     return false;
 
   if ((square[0] + square[1] + square[2] != magic_number)

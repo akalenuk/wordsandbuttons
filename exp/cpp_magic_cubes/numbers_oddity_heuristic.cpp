@@ -20,6 +20,8 @@ uint_fast64_t ideal_char_map = static_cast<uint_fast64_t>(0x1FF) << 49;
 uint_fast64_t char_map_one = 1u;
 bool check_if_magic(const std::string& square)
   {
+  // narrows down to  5*4*5*4*5*4*5*4*5 / (9*9*9*9*9*9*9*9*9)
+  // which is roughly 0.002064939833370558
   if ( (square[0] & 1) != 0 || (square[1] & 1) == 0 
     || (square[2] & 1) != 0 || (square[3] & 1) == 0
     || (square[4] & 1) == 0 
