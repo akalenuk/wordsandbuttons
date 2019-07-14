@@ -14,6 +14,7 @@ using namespace std;
 //
 bool check_if_magic(const std::string& square)
   {
+  // one passes only 0.0836762688615
   if ((square[0] + square[1] + square[2] != '5'*3)
      || (square[3] + square[4] + square[5] != '5'*3)
 //    || (square[6] + square[7] + square[8] != '5'*3)
