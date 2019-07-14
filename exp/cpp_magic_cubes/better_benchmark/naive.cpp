@@ -1,3 +1,4 @@
+#include <array>
 #include <chrono>
 #include <iostream>
 #include <random>
@@ -5,7 +6,26 @@
 #include <vector>
 
 bool __attribute__ ((noinline)) check_if_magic(const std::string& square) {
+  if ((square[0] + square[1] + square[2] != '5'*3)
+    || (square[3] + square[4] + square[5] != '5'*3)
+    || (square[6] + square[7] + square[8] != '5'*3)
+
+    || (square[0] + square[3] + square[6] != '5'*3)
+    || (square[1] + square[4] + square[7] != '5'*3)
+    || (square[2] + square[5] + square[8] != '5'*3)
+
+    || (square[0] + square[4] + square[8] != '5'*3)
+    || (square[2] + square[4] + square[6] != '5'*3))
     return false;
+
+  std::array<int, 9> numbers_count{};
+  for(auto i = 0u; i < 9; ++i)
+    ++numbers_count[square[i]-'1'];
+  for(auto i = 0u; i < 9; ++i)
+    if(numbers_count[i] != 1)
+      return false;
+
+  return true;
 }
 
 void check(const std::vector<std::string> &test_strings) {

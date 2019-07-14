@@ -1,12 +1,35 @@
+#include <array>
 #include <chrono>
 #include <iostream>
 #include <random>
 #include <string>
 #include <vector>
 
-bool __attribute__ ((noinline)) check_if_magic(const std::string& square) {
+auto magic_number = '5' * 3;
+uint_fast64_t ideal_char_map = static_cast<uint_fast64_t>(0x1FF) << 49;
+uint_fast64_t char_map_one = 1u;
+bool __attribute__ ((noinline)) check_if_magic(const std::string& square)
+  {
+  if ((square[0] + square[1] + square[2] != magic_number)
+    || (square[3] + square[4] + square[5] != magic_number)
+    || (square[6] + square[7] + square[8] != magic_number)
+
+    || (square[0] + square[3] + square[6] != magic_number)
+    || (square[1] + square[4] + square[7] != magic_number)
+    || (square[2] + square[5] + square[8] != magic_number)
+
+    || (square[0] + square[4] + square[8] != magic_number)
+    || (square[2] + square[4] + square[6] != magic_number))
     return false;
-}
+
+  auto char_map = ideal_char_map;
+  for(auto i = 0u; i < 9; ++i)
+    char_map ^= char_map_one << square[i]; 
+  if (char_map != 0)
+    return false;
+
+  return true;
+  }
 
 void check(const std::vector<std::string> &test_strings) {
     for(const std::string& test_string : test_strings) {
@@ -30,4 +53,5 @@ int main() {
     auto end = std::chrono::system_clock::now();    std::chrono::duration<double> difference = end - start;
     std::cout << difference.count() << "\n\n";
 }
+
 
