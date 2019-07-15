@@ -1341,38 +1341,6 @@ bool check_if_magic(const std::string& square) {
     <p>
 It also exploits the same smart indexing idea, but it uses less instructions and no external calls whatsoever.
     </p>
-    <table><tr>
-    <td style="width: 505pt;">
-    <pre>
-_Z14check_if_magic ...
-.LFB1780:
-	.cfi_startproc
-	<a title="Move quadword">movq</a>	(%rdi), %rdx
-	<a title="Exclusive OR">xorl</a>	%eax, %eax
-	<a title="Compare operands">cmpb</a>	$53, 4(%rdx)
-	<a title="Jump if condition">je</a>	.L5
-	<a title="Repeat MOVS/STOS/CMPS/LODS/SCAS">rep ret</a>
-	.p2align 4,,10
-	.p2align 3
-.L5:
-	<a title="Move">movsbl</a>	1(%rdx), %eax
-	<a title="Move">movzbl</a>	(%rdx), %ecx
-	<a title="Move">movl</a>	(%rdx), %esi
-	<a title="Shift Arithmetically right (signed shift right)">sarl</a>	%eax
-	<a title="Logical AND">andl</a>	$7, %ecx
-	<a title="Logical AND">andl</a>	$1, %eax
-	<a title="Shift Arithmetically left (signed shift left)">salq</a>	$32, %rsi
-	<a title="Logical OR">orl</a>	%ecx, %eax
-	<a title="Move">movl</a>	5(%rdx), %ecx
-	cltq
-	<a title="Load Effective Address">leaq</a>	(%rsi,%rcx), %rdx
-	<a title="Compare operands">cmpq</a>	%rdx, _ZL13magic_numbers(,%rax,8)
-	<a title="Set byte to one on condition, zero otherwise">sete</a>	%al
-	<a title="Return from procedure">ret</a>
-	.cfi_endproc
-    </pre>
-    </td>
-    </td></tr></table>
     <p>
 Its Valgrind report is impressive too!
     </p>
