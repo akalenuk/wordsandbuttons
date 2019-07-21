@@ -17,7 +17,7 @@ solutions = solve(
     y1 + r1*dx1 - ay1,
     x2 + r2*dy2 - ax2,
     y2 + r2*dx2 - ay2,
-    (ax1-ax2)**2 + (ay1-ay2)**2 - (abs(r1)+abs(r2))**2
+    (ax1-ax2)**2 + (ay1-ay2)**2 - (r1+r2)**2
 ], (ax1, ay1, ax2, ay2, r1, r2))
 
 print (solutions)
