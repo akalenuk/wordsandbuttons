@@ -12,7 +12,7 @@ r1, r2 = symbols('r1 r2')
 
 solutions = solve(
    [
-    r2**2 - r1**2,  # radiuses are equal
+    r2 - r1,  # radiuses are equal
     x1 + r1*dy1 - ax1,
     y1 + r1*dx1 - ay1,
     x2 + r2*dy2 - ax2,
