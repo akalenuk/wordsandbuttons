@@ -27,4 +27,5 @@ for solution in solutions:
     print('var ay2 = ' + jscode(solution[3]))
     print('var r1 = ' + jscode(solution[4]))
     print('var r2 = ' + jscode(solution[5]))
+    print('')
 
