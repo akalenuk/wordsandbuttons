@@ -13,10 +13,10 @@ r1, r2 = symbols('r1 r2')
 solutions = solve(
    [
     r2 - r1,  # radiuses are equal
-    x1 - r1*dy1 - ax1,
-    y1 + r1*dx1 - ay1,
-    x2 - r2*dy2 - ax2,
-    y2 + r2*dx2 - ay2,
+    x1 + r1*dy1 - ax1,
+    y1 - r1*dx1 - ay1,
+    x2 + r2*dy2 - ax2,
+    y2 - r2*dx2 - ay2,
     (ax1-ax2)**2 + (ay1-ay2)**2 - (r1+r2)**2
 ], (ax1, ay1, ax2, ay2, r1, r2))
 
