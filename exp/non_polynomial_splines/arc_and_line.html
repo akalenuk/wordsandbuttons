@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>You don't have to go polynomial on everything</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+pre {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 12pt;
+    text-align: left;
+    width: 300pt;
+}
+
+table {
+    border-width: 0pt;
+}
+
+td {
+    vertical-align: top;
+    padding: 6pt 12pt 6pt 12pt;
+    font-size: 16pt;
+    border: 1px solid black;
+    width: 600pt;
+}
+
+button{
+    width: 248pt;
+    height: 42pt;
+    margin-left:4pt;
+    margin-right:4pt;
+    font-size: 16pt;
+}
+
+u {
+    border-bottom: 1px dotted #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+    </style>
+    <script language="JavaScript">
+// client
+var w = 640.0;
+var h = 640.0;
+
+// solver specific to [0..1] parametrized splines
+function spline_for(p1, p1d, p2, p2d) {
+//     A = [
+//         [1, 0, 0, 0],
+//         [0, 1, 0, 0],
+//         [1, 1, 1, 1],
+//         [0, 1, 2, 3]];
+//     B = [p1, p1d, p2, p2d]
+    return [
+        p1,
+        p1d,
+        3 * p2 - p2d - 3*p1 - 2*p1d,
+        p2d + p1d - 2*p2 + 2*p1
+    ];
+}
+
+// polynomial
+function polynomial_in_t(A, t){
+    var pt = 0.0;
+    for(var i = 0; i < A.length; ++i){
+        pt += A[i] * Math.pow(t, i);
+    }
+    return pt;
+}
+
+// cubic
+var cubic_xs = [300, 150, 400, 300];
+var cubic_ys = [200, 200, 400, 450];
+var cubic_n = 4;
+var cubic_i = 0;
+
+function init_cubic(){
+    cubic = document.getElementById("cubic_canvas");
+    var canvas_rect = cubic.getBoundingClientRect();
+    draw_cubic_canvas(0, 0, false);
+
+    cubic.addEventListener('mousemove', function(e){
+        var canvas_rect = cubic.getBoundingClientRect();
+        draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+            cubic_xs[cubic_i] = e.clientX - canvas_rect.left;
+            cubic_ys[cubic_i] = e.clientY - canvas_rect.top;
+            draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+        }
+    }, false);
+
+    cubic.addEventListener('mousedown', function(e){
+        var canvas_rect = cubic.getBoundingClientRect();
+        cubic_xs[cubic_i] = e.clientX - canvas_rect.left;
+        cubic_ys[cubic_i] = e.clientY - canvas_rect.top;
+        draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    cubic.addEventListener('mouseleave', function(e){
+        draw_cubic_canvas(0, 0, false);
+    }, false);
+}
+
+function si() {
+    var Px = spline_for(cubic_xs[1], 3*(cubic_xs[0] - cubic_xs[1]), cubic_xs[2], -3*(cubic_xs[3] - cubic_xs[2]));
+    var Py = spline_for(cubic_ys[1], 3*(cubic_ys[0] - cubic_ys[1]), cubic_ys[2], -3*(cubic_ys[3] - cubic_ys[2]));
+
+
+    //	constant speed equation
+    const ax = Px[3];
+    const bx = Px[2];
+    const cx = Px[1];
+    const dx = Px[0];
+    const ay = Py[3];
+    const by = Py[2];
+    const cy = Py[1];
+    const dy = Py[0];
+    const _si = 1296*ax*ax*ax*ax/7 + 432*ax*ax*ax*bx + 864*ax*ax*ax*cx/5 + 2592*ax*ax*ay*ay/7 + 432*ax*ax*ay*by 
+	    + 864*ax*ax*ay*cy/5 + 1872*ax*ax*bx*bx/5 + 288*ax*ax*bx*cx + 576*ax*ax*by*by/5 + 72*ax*ax*by*cy 
+	    + 48*ax*ax*cx*cx + 432*ax*ay*ay*bx + 864*ax*ay*ay*cx/5 + 2592*ax*ay*bx*by/5 + 216*ax*ay*bx*cy 
+	    + 216*ax*ay*by*cx + 96*ax*ay*cx*cy + 144*ax*bx*bx*bx + 160*ax*bx*bx*cx + 144*ax*bx*by*by 
+	    + 96*ax*bx*by*cy + 48*ax*bx*cx*cx + 64*ax*by*by*cx + 48*ax*by*cx*cy + 1296*ay*ay*ay*ay/7 
+	    + 432*ay*ay*ay*by + 864*ay*ay*ay*cy/5 + 576*ay*ay*bx*bx/5 + 72*ay*ay*bx*cx + 1872*ay*ay*by*by/5 
+	    + 288*ay*ax*by*cy + 48*ay*ay*cy*cy + 144*ay*bx*bx*by + 64*ay*bx*bx*cy + 96*ay*bx*by*cx 
+	    + 48*ay*bx*cx*cy + 144*ay*by*by*by + 160*ay*by*by*cy + 48*ay*by*cy*cy + 64*bx*bx*bx*bx/3 
+	    + 32*bx*bx*bx*cx + 128*bx*bx*by*by/3 + 32*bx*bx*by*cy + 16*bx*bx*cx*cx + 32*bx*by*by*cx 
+	    + 32*bx*by*cx*cy + 64*by*by*by*by/3 + 32*by*by*by*cy + 16*by*by*cy*cy;
+    return _si;
+}
+
+function draw_cubic_canvas(client_x, client_y, do_guides){
+    cubic = document.getElementById("cubic_canvas");
+    var context = cubic.getContext("2d");
+    context.font = "16px sans-serif";
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+ 
+    var Px = spline_for(cubic_xs[1], 3*(cubic_xs[0] - cubic_xs[1]), cubic_xs[2], -3*(cubic_xs[3] - cubic_xs[2]));
+    var Py = spline_for(cubic_ys[1], 3*(cubic_ys[0] - cubic_ys[1]), cubic_ys[2], -3*(cubic_ys[3] - cubic_ys[2]));
+
+/*   
+    var Px = spline_for(cubic_xs[1], cubic_xs[0] - cubic_xs[1], cubic_xs[2], cubic_xs[3] - cubic_xs[2]);
+    var Py = spline_for(cubic_ys[1], cubic_ys[0] - cubic_ys[1], cubic_ys[2], cubic_ys[3] - cubic_ys[2]);
+*/    
+    context.beginPath();
+    context.lineWidth = 3;
+    for(var i = 0; i < 256; ++i) {    
+        var _t1 = (i) / 256;
+        var _t2 = (i + 1) / 256;
+        var _x1 = polynomial_in_t(Px, _t1);
+        var _y1 = polynomial_in_t(Py, _t1);
+        var _x2 = polynomial_in_t(Px, _t2);
+        var _y2 = polynomial_in_t(Py, _t2);
+        context.moveTo(_x1, _y1);
+        context.lineTo(_x2, _y2);
+	if(i % 32 == 31) {
+            context.strokeStyle=((i / 32)%2 < 1) ? "#AABBEE" : "#AA3366";
+            context.stroke();
+            context.closePath();
+            context.beginPath();
+        }
+    }
+    context.strokeStyle="#AA3366";
+    context.stroke();
+    context.closePath();
+    context.lineWidth = 1;
+    
+    // dots
+    for(var i = 0; i < cubic_n; ++i){
+        context.beginPath();
+        context.arc(cubic_xs[i], cubic_ys[i], 3, 0, 2*Math.PI);
+        context.fillStyle="#6633AA";
+        context.fill();
+        context.closePath();    
+    }
+
+    // tangents
+    context.beginPath();
+    context.setLineDash([4, 4]);
+    context.moveTo(cubic_xs[0], cubic_ys[0]);
+    context.lineTo(cubic_xs[1], cubic_ys[1]);
+    context.moveTo(cubic_xs[cubic_n-2], cubic_ys[cubic_n-2]);
+    context.lineTo(cubic_xs[cubic_n-1], cubic_ys[cubic_n-1]);
+    context.strokeStyle="#6633AA";
+    context.stroke();
+    context.setLineDash([]);
+    context.closePath();
+
+    // guides
+    if(do_guides){
+        min_d = Math.pow(cubic_xs[0] - client_x, 2) + Math.pow(cubic_ys[0] - client_y, 2);
+        min_i = 0;
+        for(var i = 1; i < cubic_n; ++i){
+            var di = Math.pow(cubic_xs[i] - client_x, 2) + Math.pow(cubic_ys[i] - client_y, 2);
+            if(di < min_d){
+                min_d = di;
+                min_i = i;
+            }
+        }
+        cubic_i = min_i;
+        context.setLineDash([4, 4]);
+        context.beginPath();
+        context.moveTo(cubic_xs[min_i], cubic_ys[min_i]);
+        context.lineTo(client_x, client_y);
+        context.strokeStyle="#6633AA";
+        context.stroke();
+        context.closePath();
+        context.setLineDash([]);
+    }
+    
+    // labels
+    context.font = "14px Arial";
+    context.fillStyle = "#000000";
+    context.textBaseline = "middle"; 
+    context.textAlign = "right";
+    context.fillText("point 1", cubic_xs[1] - 8, cubic_ys[1]);
+    context.textAlign = "left";
+    context.fillText("point 2", cubic_xs[2] + 8, cubic_ys[2]);
+    context.textAlign = "center";
+    context.fillText("tangent 1", (cubic_xs[0] + cubic_xs[1]) / 2, (cubic_ys[0] + cubic_ys[1]) / 2);
+    context.fillText("tangent 2", (cubic_xs[2] + cubic_xs[3]) / 2, (cubic_ys[2] + cubic_ys[3]) / 2);
+
+
+//    context.fillText(Math.log(Math.abs(si())).toFixed(2), 320, 64);
+
+
+    // arcs
+    const x1 = cubic_xs[1];
+    const y1 = cubic_ys[1];
+    const x2 = cubic_xs[2];
+    const y2 = cubic_ys[2];
+    var dx1 = cubic_xs[0] - cubic_xs[1];
+    var dy1 = cubic_ys[0] - cubic_ys[1];
+    var dx2 = cubic_xs[3] - cubic_xs[2]; // for some reason, I have to invert them here and not in Python
+    var dy2 = cubic_ys[3] - cubic_ys[2];
+    const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+    const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+    dx1 /= norm1;
+    dy1 /= norm1;
+    dx2 /= norm2;
+    dy2 /= norm2;
+
+    // ...
+    const ax1 = (Math.pow(dx1, 2)*x1 - 2*dx1*dx2*x1 + dx1*dy1*y1 - dx1*dy1*y2 + Math.pow(dx2, 2)*x1 - dx2*dy1*y1 + dx2*dy1*y2 + Math.pow(dy1, 2)*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy1*Math.sqrt(-Math.pow(dx1, 2)*Math.pow(x1, 2) + 2*Math.pow(dx1, 2)*x1*x2 - Math.pow(dx1, 2)*Math.pow(x2, 2) + 2*dx1*dx2*Math.pow(x1, 2) - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*Math.pow(x2, 2) - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - Math.pow(dx2, 2)*Math.pow(x1, 2) + 2*Math.pow(dx2, 2)*x1*x2 - Math.pow(dx2, 2)*Math.pow(x2, 2) + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - Math.pow(dy1, 2)*Math.pow(y1, 2) + 2*Math.pow(dy1, 2)*y1*y2 - Math.pow(dy1, 2)*Math.pow(y2, 2) + 2*dy1*dy2*Math.pow(y1, 2) - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*Math.pow(y2, 2) - Math.pow(dy2, 2)*Math.pow(y1, 2) + 2*Math.pow(dy2, 2)*y1*y2 - Math.pow(dy2, 2)*Math.pow(y2, 2) + 4*Math.pow(x1, 2) - 8*x1*x2 + 4*Math.pow(x2, 2) + 4*Math.pow(y1, 2) - 8*y1*y2 + 4*Math.pow(y2, 2)) + Math.pow(dy2, 2)*x1 - 4*x1)/(Math.pow(dx1, 2) - 2*dx1*dx2 + Math.pow(dx2, 2) + Math.pow(dy1, 2) - 2*dy1*dy2 + Math.pow(dy2, 2) - 4)
+    const ay1 = (Math.pow(dx1, 2)*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy1*x1 - dx1*dy1*x2 - dx1*dy2*x1 + dx1*dy2*x2 - dx1*Math.sqrt(-Math.pow(dx1, 2)*Math.pow(x1, 2) + 2*Math.pow(dx1, 2)*x1*x2 - Math.pow(dx1, 2)*Math.pow(x2, 2) + 2*dx1*dx2*Math.pow(x1, 2) - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*Math.pow(x2, 2) - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - Math.pow(dx2, 2)*Math.pow(x1, 2) + 2*Math.pow(dx2, 2)*x1*x2 - Math.pow(dx2, 2)*Math.pow(x2, 2) + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - Math.pow(dy1, 2)*Math.pow(y1, 2) + 2*Math.pow(dy1, 2)*y1*y2 - Math.pow(dy1, 2)*Math.pow(y2, 2) + 2*dy1*dy2*Math.pow(y1, 2) - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*Math.pow(y2, 2) - Math.pow(dy2, 2)*Math.pow(y1, 2) + 2*Math.pow(dy2, 2)*y1*y2 - Math.pow(dy2, 2)*Math.pow(y2, 2) + 4*Math.pow(x1, 2) - 8*x1*x2 + 4*Math.pow(x2, 2) + 4*Math.pow(y1, 2) - 8*y1*y2 + 4*Math.pow(y2, 2)) + Math.pow(dx2, 2)*y1 + Math.pow(dy1, 2)*y1 - 2*dy1*dy2*y1 + Math.pow(dy2, 2)*y1 - 4*y1)/(Math.pow(dx1, 2) - 2*dx1*dx2 + Math.pow(dx2, 2) + Math.pow(dy1, 2) - 2*dy1*dy2 + Math.pow(dy2, 2) - 4)
+    const ax2 = (Math.pow(dx1, 2)*x2 - 2*dx1*dx2*x2 + dx1*dy2*y1 - dx1*dy2*y2 + Math.pow(dx2, 2)*x2 - dx2*dy2*y1 + dx2*dy2*y2 + Math.pow(dy1, 2)*x2 - dy1*dy2*x1 - dy1*dy2*x2 + Math.pow(dy2, 2)*x1 + dy2*Math.sqrt(-Math.pow(dx1, 2)*Math.pow(x1, 2) + 2*Math.pow(dx1, 2)*x1*x2 - Math.pow(dx1, 2)*Math.pow(x2, 2) + 2*dx1*dx2*Math.pow(x1, 2) - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*Math.pow(x2, 2) - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - Math.pow(dx2, 2)*Math.pow(x1, 2) + 2*Math.pow(dx2, 2)*x1*x2 - Math.pow(dx2, 2)*Math.pow(x2, 2) + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - Math.pow(dy1, 2)*Math.pow(y1, 2) + 2*Math.pow(dy1, 2)*y1*y2 - Math.pow(dy1, 2)*Math.pow(y2, 2) + 2*dy1*dy2*Math.pow(y1, 2) - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*Math.pow(y2, 2) - Math.pow(dy2, 2)*Math.pow(y1, 2) + 2*Math.pow(dy2, 2)*y1*y2 - Math.pow(dy2, 2)*Math.pow(y2, 2) + 4*Math.pow(x1, 2) - 8*x1*x2 + 4*Math.pow(x2, 2) + 4*Math.pow(y1, 2) - 8*y1*y2 + 4*Math.pow(y2, 2)) - 4*x2)/(Math.pow(dx1, 2) - 2*dx1*dx2 + Math.pow(dx2, 2) + Math.pow(dy1, 2) - 2*dy1*dy2 + Math.pow(dy2, 2) - 4)
+    const ay2 = (Math.pow(dx1, 2)*y2 - dx1*dx2*y1 - dx1*dx2*y2 + Math.pow(dx2, 2)*y1 + dx2*dy1*x1 - dx2*dy1*x2 - dx2*dy2*x1 + dx2*dy2*x2 - dx2*Math.sqrt(-Math.pow(dx1, 2)*Math.pow(x1, 2) + 2*Math.pow(dx1, 2)*x1*x2 - Math.pow(dx1, 2)*Math.pow(x2, 2) + 2*dx1*dx2*Math.pow(x1, 2) - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*Math.pow(x2, 2) - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - Math.pow(dx2, 2)*Math.pow(x1, 2) + 2*Math.pow(dx2, 2)*x1*x2 - Math.pow(dx2, 2)*Math.pow(x2, 2) + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - Math.pow(dy1, 2)*Math.pow(y1, 2) + 2*Math.pow(dy1, 2)*y1*y2 - Math.pow(dy1, 2)*Math.pow(y2, 2) + 2*dy1*dy2*Math.pow(y1, 2) - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*Math.pow(y2, 2) - Math.pow(dy2, 2)*Math.pow(y1, 2) + 2*Math.pow(dy2, 2)*y1*y2 - Math.pow(dy2, 2)*Math.pow(y2, 2) + 4*Math.pow(x1, 2) - 8*x1*x2 + 4*Math.pow(x2, 2) + 4*Math.pow(y1, 2) - 8*y1*y2 + 4*Math.pow(y2, 2)) + Math.pow(dy1, 2)*y2 - 2*dy1*dy2*y2 + Math.pow(dy2, 2)*y2 - 4*y2)/(Math.pow(dx1, 2) - 2*dx1*dx2 + Math.pow(dx2, 2) + Math.pow(dy1, 2) - 2*dy1*dy2 + Math.pow(dy2, 2) - 4)
+    const r1 = (-dx1*y1 + dx1*y2 + dx2*y1 - dx2*y2 + dy1*x1 - dy1*x2 - dy2*x1 + dy2*x2 - Math.sqrt(-Math.pow(dx1, 2)*Math.pow(x1, 2) + 2*Math.pow(dx1, 2)*x1*x2 - Math.pow(dx1, 2)*Math.pow(x2, 2) + 2*dx1*dx2*Math.pow(x1, 2) - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*Math.pow(x2, 2) - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - Math.pow(dx2, 2)*Math.pow(x1, 2) + 2*Math.pow(dx2, 2)*x1*x2 - Math.pow(dx2, 2)*Math.pow(x2, 2) + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - Math.pow(dy1, 2)*Math.pow(y1, 2) + 2*Math.pow(dy1, 2)*y1*y2 - Math.pow(dy1, 2)*Math.pow(y2, 2) + 2*dy1*dy2*Math.pow(y1, 2) - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*Math.pow(y2, 2) - Math.pow(dy2, 2)*Math.pow(y1, 2) + 2*Math.pow(dy2, 2)*y1*y2 - Math.pow(dy2, 2)*Math.pow(y2, 2) + 4*Math.pow(x1, 2) - 8*x1*x2 + 4*Math.pow(x2, 2) + 4*Math.pow(y1, 2) - 8*y1*y2 + 4*Math.pow(y2, 2)))/(Math.pow(dx1, 2) - 2*dx1*dx2 + Math.pow(dx2, 2) + Math.pow(dy1, 2) - 2*dy1*dy2 + Math.pow(dy2, 2) - 4)
+    const r2 = (-dx1*y1 + dx1*y2 + dx2*y1 - dx2*y2 + dy1*x1 - dy1*x2 - dy2*x1 + dy2*x2)/(Math.pow(dx1, 2) - 2*dx1*dx2 + Math.pow(dx2, 2) + Math.pow(dy1, 2) - 2*dy1*dy2 + Math.pow(dy2, 2) - 4) - Math.sqrt(-Math.pow(dx1, 2)*Math.pow(x1, 2) + 2*Math.pow(dx1, 2)*x1*x2 - Math.pow(dx1, 2)*Math.pow(x2, 2) + 2*dx1*dx2*Math.pow(x1, 2) - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*Math.pow(x2, 2) - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - Math.pow(dx2, 2)*Math.pow(x1, 2) + 2*Math.pow(dx2, 2)*x1*x2 - Math.pow(dx2, 2)*Math.pow(x2, 2) + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - Math.pow(dy1, 2)*Math.pow(y1, 2) + 2*Math.pow(dy1, 2)*y1*y2 - Math.pow(dy1, 2)*Math.pow(y2, 2) + 2*dy1*dy2*Math.pow(y1, 2) - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*Math.pow(y2, 2) - Math.pow(dy2, 2)*Math.pow(y1, 2) + 2*Math.pow(dy2, 2)*y1*y2 - Math.pow(dy2, 2)*Math.pow(y2, 2) + 4*Math.pow(x1, 2) - 8*x1*x2 + 4*Math.pow(x2, 2) + 4*Math.pow(y1, 2) - 8*y1*y2 + 4*Math.pow(y2, 2))/(Math.pow(dx1, 2) - 2*dx1*dx2 + Math.pow(dx2, 2) + Math.pow(dy1, 2) - 2*dy1*dy2 + Math.pow(dy2, 2) - 4)
+    // ...
+
+    const cx = (ax1 + ax2) / 2.;
+    const cy = (ay1 + ay2) / 2.;
+    const t11 = Math.PI/2 - Math.atan2(x1 - ax1, y1 - ay1)
+    const t12 = Math.PI/2 - Math.atan2(cx - ax1, cy - ay1)
+    const t21 = Math.PI/2 - Math.atan2(x2 - ax2, y2 - ay2)
+    const t22 = Math.PI/2 - Math.atan2(cx - ax2, cy - ay2)
+    if(Math.abs(t11-t12) + Math.abs(t21-t22) > Math.PI)
+        context.fillText("Flip it!", 100, 100);        
+
+    context.lineWidth = 3;
+    context.strokeStyle="#00AA00";    
+    
+    context.beginPath();
+    context.arc(ax1, ay1, Math.abs(r1), t11, t12);
+    context.stroke();
+    context.closePath();    
+
+    context.beginPath();    
+    context.arc(ax2, ay2, Math.abs(r2), t21, t22);
+    context.stroke();
+    context.closePath();
+    context.lineWidth = 1;
+}
+
+function optimize(){
+    const _si = si();
+    const _x3 = cubic_xs[3];
+    const _y3 = cubic_ys[3];
+    cubic_xs[3] = _x3+1;
+    cubic_ys[3] = _y3;
+    if(si() < _si) {
+        draw_cubic_canvas(0, 0, false);
+        return;
+    }
+    cubic_xs[3] = _x3-1;
+    cubic_ys[3] = _y3;
+    if(si() < _si) {
+        draw_cubic_canvas(0, 0, false);
+        return;
+    }
+    cubic_xs[3] = _x3;
+    cubic_ys[3] = _y3+1;
+    if(si() < _si) {
+        draw_cubic_canvas(0, 0, false);
+        return;
+    }
+    cubic_xs[3] = _x3;
+    cubic_ys[3] = _y3-1;
+    if(si() < _si) {
+        draw_cubic_canvas(0, 0, false);
+        return;
+    }
+    cubic_xs[3] = _x3;
+    cubic_ys[3] = _y3;
+    draw_cubic_canvas(0, 0, false);
+}
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+You don't have to go polynomial on everything
+    </h1>
+    <p>
+...
+    </p>
+    <canvas id="cubic_canvas" width=640 height=640></canvas>
+    
+    <script language="JavaScript">
+    init_cubic();
+    </script>
+
+
+
+    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+    <tr>
+    <td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+        <a href="index.html"><img src="favicon.ico"></a>
+    </td>
+    <td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+        &nbsp;&larr; there's more.
+    </td>
+    <td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+        +
+        <a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+        <a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+        <a href="https://news.ycombinator.com/from?site=wordsandbuttons.online">Hacker News</a>
+    </td>
+    </tr>
+    </table>
+    </center>
+  </body>
+</html>
