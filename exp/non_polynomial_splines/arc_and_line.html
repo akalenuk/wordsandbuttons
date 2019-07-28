@@ -133,33 +133,6 @@ function init_cubic(){
     }, false);
 }
 
-function si() {
-    var Px = spline_for(cubic_xs[1], 3*(cubic_xs[0] - cubic_xs[1]), cubic_xs[2], -3*(cubic_xs[3] - cubic_xs[2]));
-    var Py = spline_for(cubic_ys[1], 3*(cubic_ys[0] - cubic_ys[1]), cubic_ys[2], -3*(cubic_ys[3] - cubic_ys[2]));
-
-
-    //	constant speed equation
-    const ax = Px[3];
-    const bx = Px[2];
-    const cx = Px[1];
-    const dx = Px[0];
-    const ay = Py[3];
-    const by = Py[2];
-    const cy = Py[1];
-    const dy = Py[0];
-    const _si = 1296*ax*ax*ax*ax/7 + 432*ax*ax*ax*bx + 864*ax*ax*ax*cx/5 + 2592*ax*ax*ay*ay/7 + 432*ax*ax*ay*by 
-	    + 864*ax*ax*ay*cy/5 + 1872*ax*ax*bx*bx/5 + 288*ax*ax*bx*cx + 576*ax*ax*by*by/5 + 72*ax*ax*by*cy 
-	    + 48*ax*ax*cx*cx + 432*ax*ay*ay*bx + 864*ax*ay*ay*cx/5 + 2592*ax*ay*bx*by/5 + 216*ax*ay*bx*cy 
-	    + 216*ax*ay*by*cx + 96*ax*ay*cx*cy + 144*ax*bx*bx*bx + 160*ax*bx*bx*cx + 144*ax*bx*by*by 
-	    + 96*ax*bx*by*cy + 48*ax*bx*cx*cx + 64*ax*by*by*cx + 48*ax*by*cx*cy + 1296*ay*ay*ay*ay/7 
-	    + 432*ay*ay*ay*by + 864*ay*ay*ay*cy/5 + 576*ay*ay*bx*bx/5 + 72*ay*ay*bx*cx + 1872*ay*ay*by*by/5 
-	    + 288*ay*ax*by*cy + 48*ay*ay*cy*cy + 144*ay*bx*bx*by + 64*ay*bx*bx*cy + 96*ay*bx*by*cx 
-	    + 48*ay*bx*cx*cy + 144*ay*by*by*by + 160*ay*by*by*cy + 48*ay*by*cy*cy + 64*bx*bx*bx*bx/3 
-	    + 32*bx*bx*bx*cx + 128*bx*bx*by*by/3 + 32*bx*bx*by*cy + 16*bx*bx*cx*cx + 32*bx*by*by*cx 
-	    + 32*bx*by*cx*cy + 64*by*by*by*by/3 + 32*by*by*by*cy + 16*by*by*cy*cy;
-    return _si;
-}
-
 function draw_cubic_canvas(client_x, client_y, do_guides){
     cubic = document.getElementById("cubic_canvas");
     var context = cubic.getContext("2d");
@@ -254,9 +227,6 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
     context.fillText("tangent 2", (cubic_xs[2] + cubic_xs[3]) / 2, (cubic_ys[2] + cubic_ys[3]) / 2);
 
 
-//    context.fillText(Math.log(Math.abs(si())).toFixed(2), 320, 64);
-
-
     // arcs
     const x1 = cubic_xs[1];
     const y1 = cubic_ys[1];
@@ -304,39 +274,6 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
     context.stroke();
     context.closePath();
     context.lineWidth = 1;
-}
-
-function optimize(){
-    const _si = si();
-    const _x3 = cubic_xs[3];
-    const _y3 = cubic_ys[3];
-    cubic_xs[3] = _x3+1;
-    cubic_ys[3] = _y3;
-    if(si() < _si) {
-        draw_cubic_canvas(0, 0, false);
-        return;
-    }
-    cubic_xs[3] = _x3-1;
-    cubic_ys[3] = _y3;
-    if(si() < _si) {
-        draw_cubic_canvas(0, 0, false);
-        return;
-    }
-    cubic_xs[3] = _x3;
-    cubic_ys[3] = _y3+1;
-    if(si() < _si) {
-        draw_cubic_canvas(0, 0, false);
-        return;
-    }
-    cubic_xs[3] = _x3;
-    cubic_ys[3] = _y3-1;
-    if(si() < _si) {
-        draw_cubic_canvas(0, 0, false);
-        return;
-    }
-    cubic_xs[3] = _x3;
-    cubic_ys[3] = _y3;
-    draw_cubic_canvas(0, 0, false);
 }
     </script>
   </head>
