@@ -16,7 +16,8 @@ solutions = solve(
     y1 + r1*dx1 - ay1, #
     x2 + dx2 * t2 - ix,  # intersection point is on the tangent line of (x2, y2)
     y2 + dy2 * t2 - iy,  #
-    (ix-ax1)*(ix-ax1) + (iy-ay1)*(iy-ay1) - r1*r1,  # intersection point is on the arc
+#    (ix-ax1)*(ix-ax1) + (iy-ay1)*(iy-ay1) - r1*r1,  # intersection point is on the arc
+    ax1**2 - ax1*ix - ax1*x2 + ay1**2 - ay1*iy - ay1*y2 + ix*x2 + iy*y2 - r1**2,    # test: intersection - arc
     (ix-ax1)*(ix-x2)  + (iy-ay1)*(iy-y2)    # intersection is only touching the arc
 ], (ax1, ay1, r1, t2, ix, iy))
 
