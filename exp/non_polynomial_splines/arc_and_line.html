@@ -251,11 +251,14 @@ var t1 = (dx2*y1 - dx2*y2 - dy2*x1 + dy2*x2)/(dx1*dy2 - dx2*dy1)
 var a = (Math.atan2(x1 - x12, y1 - y12) - Math.atan2(x2 - x12, y2 - y12)) / 2.;
 var r = -Math.min(t1, t2) * Math.tan(a)
 
-    context.fillText("r: " + r.toFixed(2), 100, 100);
-    context.fillText("d1 < d2: " + (t1 < t2).toString(), 100, 120);
-
     const d1 = Math.sqrt((x1 - x12) * (x1 - x12) + (y1 - y12) * (y1 - y12))
     const d2 = Math.sqrt((x2 - x12) * (x2 - x12) + (y2 - y12) * (y2 - y12))
+
+    context.fillText("r: " + r.toFixed(2), 100, 100);
+    context.fillText("t1: " + (t1).toString(), 100, 120);
+    context.fillText("t2: " + (t2).toString(), 100, 140);
+    context.fillText("d1: " + (d1).toString(), 100, 160);
+    context.fillText("d2: " + (d2).toString(), 100, 180);
 
     if(d1 < d2) {
         var ax = -dy1*r + x1;
@@ -265,8 +268,8 @@ var r = -Math.min(t1, t2) * Math.tan(a)
         var iy = (dx1*Math.pow(dy2, 2)*r + Math.pow(dx2, 2)*y2 - dx2*dy1*dy2*r + dx2*dy2*x1 - dx2*dy2*x2 + Math.pow(dy2, 2)*y1)/(Math.pow(dx2, 2) + Math.pow(dy2, 2));
         var segx1 = x2;
         var segy1 = y2;
-        var segx2 = x2 + dx2 * (d2 - d1);
-        var segy2 = y2 + dy2 * (d2 - d1);
+        var segx2 = x2 + dx2 * (d2 - d1) * Math.sign(t2);
+        var segy2 = y2 + dy2 * (d2 - d1) * Math.sign(t2);
         var at1 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
         var at2 = Math.PI/2 - Math.atan2(x1 - ax, y1 - ay);
     } else {
@@ -277,10 +280,10 @@ var r = -Math.min(t1, t2) * Math.tan(a)
         var iy = (dx2*Math.pow(dy1, 2)*r + Math.pow(dx1, 2)*y1 - dx1*dy2*dy1*r + dx1*dy1*x2 - dx1*dy1*x1 + Math.pow(dy1, 2)*y2)/(Math.pow(dx1, 2) + Math.pow(dy1, 2));
         var segx1 = x1;
         var segy1 = y1;
-        var segx2 = x1 + dx1 * (d1 - d2);
-        var segy2 = y1 + dy1 * (d1 - d2);
-        var at1 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
-        var at2 = Math.PI/2 - Math.atan2(x2 - ax, y2 - ay);
+        var segx2 = x1 + dx1 * (d1 - d2) * Math.sign(t1);
+        var segy2 = y1 + dy1 * (d1 - d2) * Math.sign(t1);
+        var at1 = Math.PI/2 - Math.atan2(x2 - ax, y2 - ay);
+        var at2 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
     }
 
 
