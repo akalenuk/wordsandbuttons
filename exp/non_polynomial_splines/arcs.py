@@ -20,12 +20,12 @@ solutions = solve(
     (ax1-ax2)**2 + (ay1-ay2)**2 - (r1+r2)**2
 ], (ax1, ay1, ax2, ay2, r1, r2))
 
-for solution in solutions:
-    print('var ax1 = ' + jscode(solution[0]))
-    print('var ay1 = ' + jscode(solution[1]))
-    print('var ax2 = ' + jscode(solution[2]))
-    print('var ay2 = ' + jscode(solution[3]))
-    print('var r1 = ' + jscode(solution[4]))
-    print('var r2 = ' + jscode(solution[5]))
+for solution, i  in zip(solutions, range(1, len(solutions)+1)):
+    print('const ax1_'+str(i)+' = ' + jscode(solution[0]))
+    print('const ay1_'+str(i)+' = ' + jscode(solution[1]))
+    print('const ax2_'+str(i)+' = ' + jscode(solution[2]))
+    print('const ay2_'+str(i)+' = ' + jscode(solution[3]))
+    print('const r1_'+str(i)+' = ' + jscode(solution[4]))
+    print('const r2_'+str(i)+' = ' + jscode(solution[5]))
     print('')
 
