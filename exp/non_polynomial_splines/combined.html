@@ -133,6 +133,12 @@ function init_cubic(){
     }, false);
 }
 
+function t_distance(t1, t2) {
+    if(t2 < t1) 
+        return t_distance(t1, t2 + 2*Math.PI);
+    return t2-t1;
+}
+
 function draw_cubic_canvas(client_x, client_y, do_guides){
     cubic = document.getElementById("cubic_canvas");
     var context = cubic.getContext("2d");
@@ -289,7 +295,7 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
             at2 = tt;
         }
             
-        const len = Math.abs(r * (at1-at2)) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
+        const len = Math.abs(r * t_distance(at1, at2)) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
         context.fillText("len: " + (len).toString(), 100, 20);
 
         context.lineWidth = 3;
@@ -372,7 +378,7 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
             var t22 = Math.PI/2 - Math.atan2(cx - ax2, cy - ay2)
         }
         
-        const len = Math.abs(r1 * (t21-t11)) + Math.abs(r2 * (t22-t21));
+        const len = Math.abs(r1 * t_distance(t11, t12)) + Math.abs(r2 * t_distance(t21, t22));
         context.fillText("len: " + (len).toString(), 100, 20);
 
         context.lineWidth = 3;
