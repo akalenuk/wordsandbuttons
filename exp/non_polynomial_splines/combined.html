@@ -189,7 +189,6 @@ function patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
             at2 = tt;
         }
         const len = Math.abs(r * t_distance(at1, at2)) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
-        console.log(r);
         if(t1 < t2){
             const len1 = Math.abs(r * t_distance(at1, at2));  
             const fun = function(t) {
@@ -389,15 +388,17 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
     
     context.lineWidth = 3;
     context.strokeStyle="#00AA00";  
-    context.beginPath();    
-    for(var i = 0; i < len; ++i) {
+       
+    for(var i = 0; i < len; i += 4) {
+    context.beginPath(); 
         const xy1 = fun(i);
-        const xy2 = fun(i+1);
+        const xy2 = fun(i+4);
         context.moveTo(xy1[0], xy1[1]);
         context.lineTo(xy2[0], xy2[1]);
-    }
+        context.strokeStyle="rgb(" + (i % 256).toString() + ', 45, 65)';
     context.stroke();
-    context.closePath();
+    context.closePath();        
+    }
 
 
 
