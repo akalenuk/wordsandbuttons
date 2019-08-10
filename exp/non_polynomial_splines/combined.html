@@ -183,31 +183,23 @@ function patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
             var at1 = Math.PI/2 - Math.atan2(x2 - ax, y2 - ay);
             var at2 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
         }    
-        /*if(r > 0) {
-            const tt = at1;
-            at1 = at2;
-            at2 = tt;
-        }*/
         const len = Math.abs(r * t_distance(at1, at2)) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
         if(t1 < t2){
             const len1 = Math.abs(r * t_distance(at1, at2));  
             const fun = function(t) {
-                return [0, 0];
-                /*if(t < len1) {
-                    const d = r < 0 ? 1. - t / len1 : t / len1;
-                    const at = at1 + t_distance(at1, at2) * d;
-                    return [ax + Math.cos(at) * r, ay + Math.sin(at) * r];
-                } else {
-                    const d = (t - len1) / (len - len1);
+                if(t < len1) {
+                    const d = t / len1;
                     return [segx1 + (segx2 - segx1) * d, segy1 + (segy2 - segy1) * d];
-                }*/
+                } else {
+                    const d = r > 0 ? 1. - (t - len1) / (len - len1) : (t - len1) / (len - len1);
+                    const at = r > 0 ? at2 + t_distance(at2, at1) * d : at1 + t_distance(at1, at2) * d;
+                    return [ax + Math.cos(at) * Math.abs(r), ay + Math.sin(at) * Math.abs(r)];
+                }
             };
             return [fun, len];
         } else {
             const len1 = Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2)); 
-            console.log(r);
             const fun = function(t) {
-//                return [0, 0];
                 if(t < len1) {
                     const d = t / len1;
                     return [segx1 + (segx2 - segx1) * d, segy1 + (segy2 - segy1) * d];
