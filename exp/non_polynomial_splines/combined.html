@@ -101,8 +101,8 @@ function polynomial_in_t(A, t){
 }
 
 // cubic
-var cubic_xs = [320, 170, 420, 330];
-var cubic_ys = [240, 210, 440, 460];
+var cubic_xs = [200, 170, 420, 330];
+var cubic_ys = [300, 210, 440, 460];
 var cubic_n = 4;
 var cubic_i = 0;
 
@@ -194,7 +194,8 @@ function patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
             const fun = function(t) {
                 if(t < len1) {
                     const d = t / len1;
-                    return [ax + Math.sin(at1 + (at2 - at1) * d) * r, ay - Math.cos(at1 + (at2 - at1) * d) * r];
+                    const at = at1 + t_distance(at1, at2) * d;
+                    return [ax + Math.sin(at) * r, ay - Math.cos(at) * r];
                 } else {
                     const d = (t - len1) / (len - len1);
                     return [segx1 + (segx2 - segx1) * d, segy1 + (segy2 - segy1) * d];
@@ -210,7 +211,8 @@ function patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
                     
                 } else {
                     const d = (t - len1) / (len - len1);
-                    return [ax + Math.sin(at1 + (at2 - at1) * d) * r, ax - Math.cos(at1 + (at2 - at1) * d) * r];
+                    const at = at1 + t_distance(at1, at2) * d;
+                    return [ax + Math.sin(at) * r, ay - Math.cos(at) * r];
                 }
             }; 
             return [fun, len];
@@ -260,9 +262,6 @@ function patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
         
         const len = Math.abs(r1 * t_distance(t11, t12)) + Math.abs(r2 * t_distance(t21, t22));
         const len1 = Math.abs(r1 * t_distance(t11, t12));
-        console.log(len);
-        console.log(len1);
-        console.log(t11, t12);
         const fun = function(t) {
             if(t < len1) {
                 const d = t / len1;
@@ -272,7 +271,6 @@ function patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
                 const d = 1. - (t - len1) / (len - len1);
                 const at = t21 + t_distance(t21, t22) * d;
                 return [ax2 - Math.cos(at) * r2, ay2 - Math.sin(at) * r1];
-                return [0,0];
             }
         };
         return [fun, len];
