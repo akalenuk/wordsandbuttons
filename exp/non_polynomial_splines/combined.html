@@ -194,7 +194,7 @@ function patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
             const fun = function(t) {
                 if(t < len1) {
                     const d = t / len1;
-                    return [ax + Math.sin(at1 + (at2 - at1) * d) * r, ax - Math.cos(at1 + (at2 - at1) * d) * r];
+                    return [ax + Math.sin(at1 + (at2 - at1) * d) * r, ay - Math.cos(at1 + (at2 - at1) * d) * r];
                 } else {
                     const d = (t - len1) / (len - len1);
                     return [segx1 + (segx2 - segx1) * d, segy1 + (segy2 - segy1) * d];
@@ -258,8 +258,17 @@ function patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
         }
         
         const len = Math.abs(r1 * t_distance(t11, t12)) + Math.abs(r2 * t_distance(t21, t22));
-        var len1 = Math.abs(r1 * t_distance(t11, t12));
-        // todo: return function and len
+        const len1 = Math.abs(r1 * t_distance(t11, t12));
+        const fun = function(t) {
+            if(t < len1) {
+                const d = t / len1;
+                return [ax1 + Math.sin(t11 + (t12 - t11) * d) * r1, ay1 - Math.cos(t11 + (t12 - t11) * d) * r1];
+            } else {
+                const d = (t - len1) / (len - len1);
+                return [ax2 + Math.sin(t21 + (t22 - t21) * d) * r2, ay2 - Math.cos(t21 + (t22 - t21) * d) * r1];
+            }
+        };
+        return [len, fun];
     }
 }
 
