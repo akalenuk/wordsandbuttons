@@ -394,156 +394,15 @@ function draw_cubic_canvas(client_x, client_y, do_guides){
     context.lineWidth = 3;
     context.strokeStyle="#00AA00";  
        
-    for(var i = 0; i < len; i += 4) {
+    for(var i = 0; i < len; i += 2) {
     context.beginPath(); 
         const xy1 = fun(i);
-        const xy2 = fun(i+4);
+        const xy2 = fun(i+2);
         context.moveTo(xy1[0], xy1[1]);
         context.lineTo(xy2[0], xy2[1]);
-        context.strokeStyle="rgb(" + (i % 256).toString() + ', 0, 0)';
+        context.strokeStyle= ((i / 32) % 2) < 1 ? "#AA0000" : "#220000";
     context.stroke();
     context.closePath();        
-    }
-
-
-
-
-
-
-    var x12 = (dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy2*x2 - dx2*dy1*x1)/(dx1*dy2 - dx2*dy1)
-    var y12 = (dx1*dy2*y1 - dx2*dy1*y2 - dy1*dy2*x1 + dy1*dy2*x2)/(dx1*dy2 - dx2*dy1)
-    var t2 = (dx1*y1 - dx1*y2 - dy1*x1 + dy1*x2)/(dx1*dy2 - dx2*dy1)
-    var t1 = (dx2*y1 - dx2*y2 - dy2*x1 + dy2*x2)/(dx1*dy2 - dx2*dy1)
-        
-    if(Math.sign(t1) == Math.sign(t2)) {
-        var a = (Math.atan2(x1 - x12, y1 - y12) - Math.atan2(x2 - x12, y2 - y12)) / 2.;
-        var r = -Math.min(t1, t2) * Math.tan(a)
-
-        const d1 = Math.sqrt((x1 - x12) * (x1 - x12) + (y1 - y12) * (y1 - y12))
-        const d2 = Math.sqrt((x2 - x12) * (x2 - x12) + (y2 - y12) * (y2 - y12))
-
-        if(t1 < t2) {
-            var ax = -dy1*r + x1;
-            var ay = dx1*r + y1;
-            var t = (dx1*dy2*r - dx2*dy1*r + dx2*x1 - dx2*x2 + dy2*y1 - dy2*y2)/(dx2*dx2 + dy2*dy2);
-            var ix = (dx1*dx2*dy2*r - dx2*dx2*dy1*r + dx2*dx2*x1 + dx2*dy2*y1 - dx2*dy2*y2 + dy2*dy2*x2)/(dx2*dx2 + dy2*dy2);
-            var iy = (dx1*dy2*dy2*r + dx2*dx2*y2 - dx2*dy1*dy2*r + dx2*dy2*x1 - dx2*dy2*x2 + dy2*dy2*y1)/(dx2*dx2 + dy2*dy2);
-            var segx1 = x2;
-            var segy1 = y2;
-            var segx2 = x2 + dx2 * (d2 - d1) * Math.sign(t2);
-            var segy2 = y2 + dy2 * (d2 - d1) * Math.sign(t2);
-            var at1 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
-            var at2 = Math.PI/2 - Math.atan2(x1 - ax, y1 - ay);
-        } else {
-            var ax = dy2*r + x2;
-            var ay = -dx2*r + y2;
-            var t = (dx2*dy1*r - dx1*dy2*r + dx1*x2 - dx1*x1 + dy1*y2 - dy1*y1)/(dx1*dx1 + dy1*dy1);
-            var ix = (dx2*dx1*dy1*r - dx1*dx1*dy2*r + dx1*dx1*x2 + dx1*dy1*y2 - dx1*dy1*y1 + dy1*dy1*x1)/(dx1*dx1 + dy1*dy1);
-            var iy = (dx2*dy1*dy1*r + dx1*dx1*y1 - dx1*dy2*dy1*r + dx1*dy1*x2 - dx1*dy1*x1 + dy1*dy1*y2)/(dx1*dx1 + dy1*dy1);
-            var segx1 = x1;
-            var segy1 = y1;
-            var segx2 = x1 + dx1 * (d1 - d2) * Math.sign(t1);
-            var segy2 = y1 + dy1 * (d1 - d2) * Math.sign(t1);
-            var at1 = Math.PI/2 - Math.atan2(x2 - ax, y2 - ay);
-            var at2 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
-        }    
-        if(r > 0) {
-            const tt = at1;
-            at1 = at2;
-            at2 = tt;
-        }
-            
-        const len = Math.abs(r * t_distance(at1, at2)) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
-
-        context.lineWidth = 1;
-        context.strokeStyle="#000000";    
-        
-        context.beginPath();
-        context.arc(ax, ay, Math.abs(r), at1, at2);
-        context.moveTo(segx1, segy1);
-        context.lineTo(segx2, segy2);
-        context.stroke();
-        context.closePath();    
-
-        context.lineWidth = 1;
-    } else {
-        // arcs
-        const x1 = cubic_xs[1];
-        const y1 = cubic_ys[1];
-        const x2 = cubic_xs[2];
-        const y2 = cubic_ys[2];
-        var dx1 = cubic_xs[0] - cubic_xs[1];
-        var dy1 = cubic_ys[0] - cubic_ys[1];
-        var dx2 = cubic_xs[3] - cubic_xs[2];
-        var dy2 = cubic_ys[3] - cubic_ys[2];
-        const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
-        const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
-        dx1 /= norm1;
-        dy1 /= norm1;
-        dx2 /= norm2;
-        dy2 /= norm2;
-
-        // ...
-        const ax1_1 = (dx1*dx1*x1 - 2*dx1*dx2*x1 + dx1*dy1*y1 - dx1*dy1*y2 + dx2*dx2*x1 - dx2*dy1*y1 + dx2*dy1*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 - dy1*Math.sqrt(-dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2 + 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2 + 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2) + dy2*dy2*x1 - 4*x1)/(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
-        const ay1_1 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy1*x1 - dx1*dy1*x2 - dx1*dy2*x1 + dx1*dy2*x2 + dx1*Math.sqrt(-dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2 + 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2 + 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2) + dx2*dx2*y1 + dy1*dy1*y1 - 2*dy1*dy2*y1 + dy2*dy2*y1 - 4*y1)/(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
-        const ax2_1 = (dx1*dx1*x2 - 2*dx1*dx2*x2 + dx1*dy2*y1 - dx1*dy2*y2 + dx2*dx2*x2 - dx2*dy2*y1 + dx2*dy2*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy2*dy2*x1 - dy2*Math.sqrt(-dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2 + 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2 + 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2) - 4*x2)/(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
-        const ay2_1 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx2*dx2*y1 + dx2*dy1*x1 - dx2*dy1*x2 - dx2*dy2*x1 + dx2*dy2*x2 + dx2*Math.sqrt(-dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2 + 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2 + 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2) + dy1*dy1*y2 - 2*dy1*dy2*y2 + dy2*dy2*y2 - 4*y2)/(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
-        const r1_1 = (dx1*y1 - dx1*y2 - dx2*y1 + dx2*y2 - dy1*x1 + dy1*x2 + dy2*x1 - dy2*x2 - Math.sqrt(-dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2 + 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2 + 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2))/(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
-        const r2_1 = -(-dx1*y1 + dx1*y2 + dx2*y1 - dx2*y2 + dy1*x1 - dy1*x2 - dy2*x1 + dy2*x2)/(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4) - Math.sqrt(-dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2 + 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2 + 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2)/(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
-
-        const ax1_2 = (dx1*dx1*x1 - 2*dx1*dx2*x1 + dx1*dy1*y1 - dx1*dy1*y2 + dx2*dx2*x1 - dx2*dy1*y1 + dx2*dy1*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy1*Math.sqrt(-dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2 + 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2 + 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2) + dy2*dy2*x1 - 4*x1)/(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
-        const ay1_2 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy1*x1 - dx1*dy1*x2 - dx1*dy2*x1 + dx1*dy2*x2 - dx1*Math.sqrt(-dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2 + 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2 + 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2) + dx2*dx2*y1 + dy1*dy1*y1 - 2*dy1*dy2*y1 + dy2*dy2*y1 - 4*y1)/(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
-        const ax2_2 = (dx1*dx1*x2 - 2*dx1*dx2*x2 + dx1*dy2*y1 - dx1*dy2*y2 + dx2*dx2*x2 - dx2*dy2*y1 + dx2*dy2*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy2*dy2*x1 + dy2*Math.sqrt(-dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2 + 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2 + 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2) - 4*x2)/(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
-        const ay2_2 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx2*dx2*y1 + dx2*dy1*x1 - dx2*dy1*x2 - dx2*dy2*x1 + dx2*dy2*x2 - dx2*Math.sqrt(-dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2 + 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2 + 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2) + dy1*dy1*y2 - 2*dy1*dy2*y2 + dy2*dy2*y2 - 4*y2)/(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
-        const r1_2 = (dx1*y1 - dx1*y2 - dx2*y1 + dx2*y2 - dy1*x1 + dy1*x2 + dy2*x1 - dy2*x2 + Math.sqrt(-dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2 + 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2 + 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2))/(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
-        const r2_2 = -(-dx1*y1 + dx1*y2 + dx2*y1 - dx2*y2 + dy1*x1 - dy1*x2 - dy2*x1 + dy2*x2)/(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4) + Math.sqrt(-dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1 + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2 - dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2 - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2 + 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2 + 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2)/(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
-        // ...
-
-        if((Math.abs(r1_1) + Math.abs(r2_1)) < (Math.abs(r1_2) + Math.abs(r2_2))) {
-            var ax1 = ax1_1;
-            var ay1 = ay1_1;
-            var ax2 = ax2_1;
-            var ay2 = ay2_1;
-            var r1 = r1_1;
-            var r2 = r2_1;
-            var cx = (ax1 + ax2) / 2.;
-            var cy = (ay1 + ay2) / 2.;
-            var t12 = Math.PI/2 - Math.atan2(x1 - ax1, y1 - ay1)
-            var t11 = Math.PI/2 - Math.atan2(cx - ax1, cy - ay1)
-            var t22 = Math.PI/2 - Math.atan2(x2 - ax2, y2 - ay2)
-            var t21 = Math.PI/2 - Math.atan2(cx - ax2, cy - ay2)
-        } else {
-            var ax1 = ax1_2;
-            var ay1 = ay1_2;
-            var ax2 = ax2_2;
-            var ay2 = ay2_2;
-            var r1 = r1_2;
-            var r2 = r2_2;
-            var cx = (ax1 + ax2) / 2.;
-            var cy = (ay1 + ay2) / 2.;
-            var t11 = Math.PI/2 - Math.atan2(x1 - ax1, y1 - ay1)
-            var t12 = Math.PI/2 - Math.atan2(cx - ax1, cy - ay1)
-            var t21 = Math.PI/2 - Math.atan2(x2 - ax2, y2 - ay2)
-            var t22 = Math.PI/2 - Math.atan2(cx - ax2, cy - ay2)
-        }
-        
-        const len = Math.abs(r1 * t_distance(t11, t12)) + Math.abs(r2 * t_distance(t21, t22));
-
-        context.lineWidth = 1;
-        context.strokeStyle="#000000";    
-        
-        context.beginPath();
-        context.arc(ax1, ay1, Math.abs(r1), t11, t12);
-        context.stroke();
-        context.closePath();    
-
-        context.lineWidth = 1;
-        context.strokeStyle="#FF0000"; 
-        context.beginPath();    
-        context.arc(ax2, ay2, Math.abs(r2), t21, t22);
-        context.stroke();
-        context.closePath();
-        context.lineWidth = 1;
     }
 }
     </script>
