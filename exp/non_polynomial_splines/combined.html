@@ -182,10 +182,10 @@ function patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
             var segy2 = y1 + dy1 * (Math.abs(t1) - Math.abs(t2)) * Math.sign(t1);
             var at1 = Math.PI/2 - Math.atan2(x2 - ax, y2 - ay);
             var at2 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
-        }    
-        const len = Math.abs(r * t_distance(at1, at2)) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
+        }        
         if(t1 < t2){
-            const len1 = Math.abs(r * t_distance(at1, at2));
+            const len = Math.abs(r * t_distance(at2, at1)) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
+            const len1 = Math.abs(r * t_distance(at2, at1));
             const fun = function(t) {
                 if(t < len1) {
                     const d = r > 0 ? t / len1 : (1. - t / len1);
@@ -198,6 +198,7 @@ function patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
             };
             return [fun, len];
         } else {
+            const len = Math.abs(r * t_distance(at1, at2)) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
             const len1 = Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2)); 
             const fun = function(t) {
                 if(t < len1) {
