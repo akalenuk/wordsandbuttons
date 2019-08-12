@@ -100,45 +100,14 @@ function polynomial_in_t(A, t){
     return pt;
 }
 
-// cubic
-var cubic_xs = [200, 170, 420, 330];
-var cubic_ys = [300, 210, 440, 460];
-var cubic_n = 4;
-var cubic_i = 0;
-
-function init_cubic(){
-    cubic = document.getElementById("cubic_canvas");
-    var canvas_rect = cubic.getBoundingClientRect();
-    draw_cubic_canvas(0, 0, false);
-
-    cubic.addEventListener('mousemove', function(e){
-        var canvas_rect = cubic.getBoundingClientRect();
-        draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-        if(e.buttons == 1){
-            cubic_xs[cubic_i] = e.clientX - canvas_rect.left;
-            cubic_ys[cubic_i] = e.clientY - canvas_rect.top;
-            draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
-        }
-    }, false);
-
-    cubic.addEventListener('mousedown', function(e){
-        var canvas_rect = cubic.getBoundingClientRect();
-        cubic_xs[cubic_i] = e.clientX - canvas_rect.left;
-        cubic_ys[cubic_i] = e.clientY - canvas_rect.top;
-        draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-    }, false);
-
-    cubic.addEventListener('mouseleave', function(e){
-        draw_cubic_canvas(0, 0, false);
-    }, false);
-}
-
+// in radians
 function t_distance(t1, t2) {
     if(t2 < t1) 
         return t_distance(t1, t2 + 2*Math.PI);
     return t2-t1;
 }
 
+// arc + line & biarc
 function patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
     const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
     const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
@@ -282,6 +251,39 @@ function patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
     }
 }
 
+// cubic
+var cubic_xs = [200, 170, 420, 330];
+var cubic_ys = [300, 210, 440, 460];
+var cubic_n = 4;
+var cubic_i = 0;
+
+function init(canvas_name){
+    const canvas = document.getElementById(canvas_name + "_canvas");
+    const canvas_rect = canvas.getBoundingClientRect();
+    eval('draw_'+canvas_name+'_canvas(0, 0, false);');
+
+    canvas.addEventListener('mousemove', function(e){
+        var canvas_rect = canvas.getBoundingClientRect();
+        eval('draw_'+canvas_name+'_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);');
+        if(e.buttons == 1){
+            cubic_xs[cubic_i] = e.clientX - canvas_rect.left;
+            cubic_ys[cubic_i] = e.clientY - canvas_rect.top;
+            eval('draw_'+canvas_name+'_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);');
+        }
+    }, false);
+
+    canvas.addEventListener('mousedown', function(e){
+        var canvas_rect = canvas.getBoundingClientRect();
+        cubic_xs[cubic_i] = e.clientX - canvas_rect.left;
+        cubic_ys[cubic_i] = e.clientY - canvas_rect.top;
+        eval('draw_'+canvas_name+'_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);');
+    }, false);
+
+    canvas.addEventListener('mouseleave', function(e){
+        eval('draw_'+canvas_name+'_canvas(0, 0, false);');
+    }, false);
+}
+
 function draw_cubic_canvas(client_x, client_y, do_guides){
     cubic = document.getElementById("cubic_canvas");
     var context = cubic.getContext("2d");
@@ -419,7 +421,7 @@ Circles and lines vs. polynomial splines
     <canvas id="cubic_canvas" width=640 height=640></canvas>
     
     <script language="JavaScript">
-    init_cubic();
+    init("cubic");
     </script>
 
 
