@@ -414,15 +414,15 @@ var point_i = 0;
 function init(canvas_name){
     const canvas = document.getElementById(canvas_name + "_canvas");
     const canvas_rect = canvas.getBoundingClientRect();
-    eval('draw_'+canvas_name+'_canvas(0, 0, false);');
+    draw_batch(0, 0, false);
 
     canvas.addEventListener('mousemove', function(e){
         var canvas_rect = canvas.getBoundingClientRect();
-        eval('draw_'+canvas_name+'_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);');
+        draw_batch(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
         if(e.buttons == 1){
             xs[point_i] = e.clientX - canvas_rect.left;
             ys[point_i] = e.clientY - canvas_rect.top;
-            eval('draw_'+canvas_name+'_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);');
+            draw_batch(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
         }
     }, false);
 
@@ -430,11 +430,11 @@ function init(canvas_name){
         var canvas_rect = canvas.getBoundingClientRect();
         xs[point_i] = e.clientX - canvas_rect.left;
         ys[point_i] = e.clientY - canvas_rect.top;
-        eval('draw_'+canvas_name+'_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);');
+        draw_batch(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
     canvas.addEventListener('mouseleave', function(e){
-        eval('draw_'+canvas_name+'_canvas(0, 0, false);');
+        draw_batch(0, 0, false);
     }, false);
 }
 
@@ -494,6 +494,15 @@ function draw_common(context, client_x, client_y, do_guides) {
     context.textAlign = "center";
     context.fillText("tangent 1", (xs[0] + xs[1]) / 2, (ys[0] + ys[1]) / 2);
     context.fillText("tangent 2", (xs[2] + xs[3]) / 2, (ys[2] + ys[3]) / 2);
+}
+
+
+function draw_batch(client_x, client_y, do_guides) {
+    draw_cubic_canvas(client_x, client_y, do_guides);
+    draw_biarcs_canvas(client_x, client_y, do_guides);
+    draw_arcline_canvas(client_x, client_y, do_guides);
+    draw_combined_canvas(client_x, client_y, do_guides);
+    draw_param_canvas(client_x, client_y, do_guides);
 }
 
 function draw_cubic_canvas(client_x, client_y, do_guides) {
@@ -766,40 +775,35 @@ Circles and lines vs. polynomial splines
     </p>
     <h2>Cubic polynomial</h2>
     <canvas id="cubic_canvas" width=640 height=640></canvas>
-    <script language="JavaScript">
-    init("cubic");
-    </script>
+
     
     <h2>Biarcs</h2>
     <canvas id="biarcs_canvas" width=640 height=640></canvas>
-    <script language="JavaScript">
-    init("biarcs");
-    </script>
+
 
     <h2>Arc and line segment</h2>
     <canvas id="arcline_canvas" width=640 height=640></canvas>
-    <script language="JavaScript">
-    init("arcline");
-    </script>
+
     
     <h2>Combined method</h2>
     <canvas id="combined_canvas" width=640 height=640></canvas>
-    <script language="JavaScript">
-    init("combined");
-    </script>
   
     <h2>Parameterization</h2>
     <canvas id="param_canvas" width=640 height=640></canvas>
-    <script language="JavaScript">
-    init("param");
-    </script>
 
     <h2>Composite curve</h2>
     <canvas id="curve_canvas" width=640 height=640></canvas>
+            
     <script language="JavaScript">
+    // init all canvases in a batch
+    init("cubic");
+    init("biarcs");
+    init("arcline");
+    init("combined");
+    init("param");
     init_curve_canvas();
     </script>
-            
+                
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
     <tr>
     <td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
