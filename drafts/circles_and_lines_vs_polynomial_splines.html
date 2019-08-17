@@ -815,12 +815,35 @@ function set_arcline_3() {
     draw_batch(0, 0, false); 
 }
 
-var curve_xs = [0, 100, 200, 300, 400, 500, 600, 0]
-var curve_ys = [100, 200, 300, 400, 500, 600, 0, 100]
+var curve_xs = [80, 180, 560, 560, 560, 480,  80, 80]
+var curve_ys = [80,  80,  80, 160, 560, 560, 560, 480]
 var curve_point_i = 0;
 
 function init_curve_canvas() {
+    const canvas = document.getElementById("curve_canvas");
+    const canvas_rect = canvas.getBoundingClientRect();
     draw_curve_canvas(0, 0, false);
+
+    canvas.addEventListener('mousemove', function(e){
+        var canvas_rect = canvas.getBoundingClientRect();
+        draw_curve_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+            curve_xs[curve_point_i] = e.clientX - canvas_rect.left;
+            curve_ys[curve_point_i] = e.clientY - canvas_rect.top;
+            draw_curve_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+        }
+    }, false);
+
+    canvas.addEventListener('mousedown', function(e){
+        var canvas_rect = canvas.getBoundingClientRect();
+        curve_xs[curve_point_i] = e.clientX - canvas_rect.left;
+        curve_ys[curve_point_i] = e.clientY - canvas_rect.top;
+        draw_curve_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+    }, false);
+
+    canvas.addEventListener('mouseleave', function(e){
+        draw_curve_canvas(0, 0, false);
+    }, false);
 }
 
 function draw_curve_canvas(client_x, client_y, do_guides){
