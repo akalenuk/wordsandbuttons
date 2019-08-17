@@ -457,6 +457,22 @@ function init(canvas_name){
     }, false);
 }
 
+function draw_arrow(context, x1, y1, x2, y2, color) {
+    var d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+    context.beginPath();
+    context.moveTo(x1, y1);
+    context.lineTo(x2, y2);
+    context.moveTo(x2 - (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d + (x2 - x1) * 6 / d);
+    context.lineTo(x2, y2);
+    context.moveTo(x2 + (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d - (x2 - x1) * 6 / d);
+    context.lineTo(x2, y2);
+
+
+    context.strokeStyle = color;
+    context.stroke();
+    context.closePath();
+}
+
 function draw_common(context, client_x, client_y, do_guides) {
     // dots
     for(var i = 0; i < 4; ++i){
@@ -468,17 +484,9 @@ function draw_common(context, client_x, client_y, do_guides) {
     }
 
     // tangents
-    context.beginPath();
     context.lineWidth = 1;
-    context.setLineDash([4, 4]);
-    context.moveTo(xs[0], ys[0]);
-    context.lineTo(xs[1], ys[1]);
-    context.moveTo(xs[4-2], ys[4-2]);
-    context.lineTo(xs[4-1], ys[4-1]);
-    context.strokeStyle="#6633AA";
-    context.stroke();
-    context.setLineDash([]);
-    context.closePath();
+    draw_arrow(context, xs[1], ys[1], xs[0], ys[0], "#6633AA");
+    draw_arrow(context, xs[4-2], ys[4-2], xs[4-1], ys[4-1], "#6633AA");
 
     // guides
     if(do_guides){
@@ -904,17 +912,10 @@ function draw_curve_canvas(client_x, client_y, do_guides){
     }
 
     // tangents
-    context.beginPath();
     context.lineWidth = 1;
-    context.setLineDash([4, 4]);
     for(var i = 0; i < 4; ++i) {
-        context.moveTo(xs[i*2], ys[i*2]);
-        context.lineTo(xs[i*2+1], ys[i*2+1]);
+        draw_arrow(context, xs[i*2], ys[i*2], xs[i*2+1], ys[i*2+1], "#6633AA");
     }
-    context.strokeStyle="#6633AA";
-    context.stroke();
-    context.setLineDash([]);
-    context.closePath();
 
     // guides
     if(do_guides){
