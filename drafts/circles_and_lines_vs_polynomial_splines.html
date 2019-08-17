@@ -815,8 +815,8 @@ function set_arcline_3() {
     draw_batch(0, 0, false); 
 }
 
-var curve_xs = [80, 180, 560, 560, 560, 480,  80, 80]
-var curve_ys = [80,  80,  80, 160, 560, 560, 560, 480]
+var curve_xs = [ 115, 203, 560, 561, 504, 412, 193, 179 ];
+var curve_ys = [ 160, 134,  80, 191, 542, 518, 470, 414 ];
 var curve_point_i = 0;
 
 function init_curve_canvas() {
@@ -856,6 +856,44 @@ function draw_curve_canvas(client_x, client_y, do_guides){
 
     var xs = curve_xs;
     var ys = curve_ys;
+
+    // curve
+    for(var i = 0; i < 4; ++i) {
+        // arc and line
+        const x1 = xs[i*2];
+        const y1 = ys[i*2];
+        const x2 = xs[(i*2+2)%8];
+        const y2 = ys[(i*2+2)%8];
+        var dx1 = xs[i*2+1] - xs[i*2];
+        var dy1 = ys[i*2+1] - ys[i*2];
+        var dx2 = xs[(i*2+2)%8] - xs[(i*2+2+1)%8];
+        var dy2 = ys[(i*2+2)%8] - ys[(i*2+2+1)%8];
+        const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+        const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+        dx1 /= norm1;
+        dy1 /= norm1;
+        dx2 /= norm2;
+        dy2 /= norm2;
+        const fun_len = combined_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2);
+        const fun = fun_len[0];
+        const len = fun_len[1];
+    
+        context.lineWidth = 3;
+        context.strokeStyle="#00AA00";  
+        context.beginPath();
+        for(var j = 0; j < len; j += 2) {
+            const xy1 = fun(j);
+            const xy2 = fun(j+2);
+            if((xy1[0] >= 0 && xy1[0] <= 640 && xy1[1] >= 0 && xy1[1] <= 640)
+            || (xy2[0] >= 0 && xy2[0] <= 640 && xy2[1] >= 0 && xy2[1] <= 640)) {
+                context.moveTo(xy1[0], xy1[1]);
+                context.lineTo(xy2[0], xy2[1]);
+            }
+        }
+        context.stroke();  
+        context.closePath();
+    }
+
     // dots
     for(var i = 0; i < 8; ++i){
         context.beginPath();
@@ -899,7 +937,6 @@ function draw_curve_canvas(client_x, client_y, do_guides){
         context.closePath();
         context.setLineDash([]);
     }
-
 }
     </script>
   </head>
