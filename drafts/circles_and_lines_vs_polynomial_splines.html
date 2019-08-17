@@ -815,6 +815,10 @@ function set_arcline_3() {
     draw_batch(0, 0, false); 
 }
 
+var curve_xs = [0, 100, 200, 300, 400, 500, 600, 0]
+var curve_ys = [100, 200, 300, 400, 500, 600, 0, 100]
+var curve_point_i = 0;
+
 function init_curve_canvas() {
     draw_curve_canvas(0, 0, false);
 }
@@ -826,6 +830,53 @@ function draw_curve_canvas(client_x, client_y, do_guides){
     // background
     context.fillStyle="#eeeeee";
     context.fillRect(0, 0, w, h);
+
+    var xs = curve_xs;
+    var ys = curve_ys;
+    // dots
+    for(var i = 0; i < 8; ++i){
+        context.beginPath();
+        context.arc(xs[i], ys[i], 3, 0, 2*Math.PI);
+        context.fillStyle="#6633AA";
+        context.fill();
+        context.closePath();    
+    }
+
+    // tangents
+    context.beginPath();
+    context.lineWidth = 1;
+    context.setLineDash([4, 4]);
+    for(var i = 0; i < 4; ++i) {
+        context.moveTo(xs[i*2], ys[i*2]);
+        context.lineTo(xs[i*2+1], ys[i*2+1]);
+    }
+    context.strokeStyle="#6633AA";
+    context.stroke();
+    context.setLineDash([]);
+    context.closePath();
+
+    // guides
+    if(do_guides){
+        min_d = Math.pow(xs[0] - client_x, 2) + Math.pow(ys[0] - client_y, 2);
+        min_i = 0;
+        for(var i = 1; i < 8; ++i){
+            var di = Math.pow(xs[i] - client_x, 2) + Math.pow(ys[i] - client_y, 2);
+            if(di < min_d){
+                min_d = di;
+                min_i = i;
+            }
+        }
+        curve_point_i = min_i;
+        context.setLineDash([4, 4]);
+        context.beginPath();
+        context.moveTo(xs[min_i], ys[min_i]);
+        context.lineTo(client_x, client_y);
+        context.strokeStyle="#6633AA";
+        context.stroke();
+        context.closePath();
+        context.setLineDash([]);
+    }
+
 }
     </script>
   </head>
