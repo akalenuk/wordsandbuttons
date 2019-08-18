@@ -1047,7 +1047,7 @@ solutions = solve(
 ], (ax1, ay1, ax2, ay2, r1, r2))
     </pre>
     <p>
-Yes, this is a quadratic system. It results in not one but two solutions. Each circle may touch the tangent from the left or from the right so it would be logical to expect four but thanks to some geometric magic, only two of these configurations result in a touching circles case.
+Yes, this is a quadratic system. It results in not one but two solutions. Each circle may touch the tangent from the left or from the right so it would be logical to expect four but thanks to some geometric magic, only two of these configurations result in a touching circles case. You can see <a href="...">both cases on Github</a>.
     </p>
     <p>
 We only want one though, so let's just pick the one with the least sum of radiuses and see what will happen.
@@ -1068,6 +1068,42 @@ We have our building block. The problem is, it works ok only when tangents are c
 But that's easy to settle. Let's complement it with something else.
     </p>
     <h2>Arc and line segment</h2>
+    <p>
+And something else is an arc and a line segment. This should work with codirected tangents making nice cane-like curves where the biarc takes a giant detour.
+    </p>
+    <p>
+An arc and a segment is again a radius vector orthogonal to the tangent of the first point, plus a segment from the second point to the point where the circle touches the second tangent ray emited from the second point. Ok, the verbal description is a little messy, let's try SymPy equations.
+    </p>
+    <pre id="code_2">
+# input
+x1, y1, dx1, dy1 = symbols('x1 y1 dx1 dy1')
+x2, y2, dx2, dy2 = symbols('x2 y2 dx2 dy2')
+r1 = symbols('r1') # radius is the input
+
+# intermediate
+ix, iy = symbols('ix iy')   # circle with tangent ray intersection
+
+# output
+ax1, ay1, t2 = symbols('ax1 ay1 t2')
+
+solutions = solve(
+   [
+    x1 - r1*dy1 - ax1, # arc radius is orthogonal to (x1, y1)
+    y1 + r1*dx1 - ay1, #
+    x2 + dx2 * t2 - ix,  # intersection point is on the tangent line of (x2, y2)
+    y2 + dy2 * t2 - iy,  #
+    (ix-ax1)*(ix-x2)  + (iy-ay1)*(iy-y2)    # intersection is only touching the arc
+], (ax1, ay1, t2, ix, iy))
+    </pre>
+    <p>
+Ah, that's not it! You can add an equation so the SymPy will get the arc radius for you too but it takes some time. Not sure how much, let's just say more than 25 hours on my machine.
+    </p>
+    <p>
+It's easier to compute in numerically.
+    </p>
+    <p>
+To do that, you need to find an intersection point of the tangent rays. Then you compute the angle between the rays. Then the shortest distance from one of starting points to the point of tangent intersection mutiplied by the tangent function of the found angle is the radius. Also, the shortest distance determimnes which of the points will touch an arc and which will get the line segment. Again, I'm not sure that the words are helping, the <a href="...">code for this is on Github</a>.
+    </p>
     <canvas id="arcline_canvas" width=640 height=640></canvas>
     <form onsubmit="return false;">
         <center>
@@ -1076,7 +1112,10 @@ But that's easy to settle. Let's complement it with something else.
         <button type="button" id="arcline_button_2" onclick="set_arcline_2()">bad</button> &nbsp; 
         <button type="button" id="arcline_button_3" onclick="set_arcline_3()">ugly</button>
         </center>
-    </form>  
+    </form>
+    <p>
+This building block isn't perfect either. Where the tangents are controriented, the point where the arc meets the segment will appear sharp. Also, it still tends to take detours. But it complements the biarcs. In most of the cases biarcs fail, it works fine. 
+    </p>
     
     <h2>Combined method</h2>
     <canvas id="combined_canvas" width=640 height=640></canvas>
@@ -1103,6 +1142,7 @@ But that's easy to settle. Let's complement it with something else.
     init("param");
     init_curve_canvas();
     document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
+    document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
     </script>
                 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
