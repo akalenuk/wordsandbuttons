@@ -44,12 +44,12 @@ p {
 pre {
     margin: 0 0 0 0;
     padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
+    padding-left: 0pt;
+    padding-right: 0pt;
     padding-bottom: 12pt;
     font-size: 12pt;
     text-align: left;
-    width: 300pt;
+    width: 505pt;
 }
 
 table {
@@ -971,6 +971,31 @@ Two points imply two linear equations. Two tangents are two more. Four equations
     </p> 
 
     <h2>Biarcs</h2>
+    <p>
+We can construct an alternative building blocks by making two circles go through the points so the tangents will be orthogonal to the radius vector, and then touch. The point where the circles touch is the point where they share the tangent. Then we'll cut two arcs out of them, and that's it. The pair of arcs will be our building block.
+    </p>
+    <p>
+In SymPy equations, these conditions look like this:
+    </p>
+    <pre id="code_1">
+# input: point and tangent
+x1, y1, dx1, dy1 = symbols('x1 y1 dx1 dy1')
+x2, y2, dx2, dy2 = symbols('x2 y2 dx2 dy2')
+
+# output: arcs' centers and radiuses
+ax1, ay1, ax2, ay2 = symbols('ax1 ay1 ax2 ay2')
+r1, r2 = symbols('r1 r2')
+
+solutions = solve(
+   [
+    r2 - r1,  # radiuses are equal
+    x1 + r1*dy1 - ax1,  # radius vector is orthogonal to dx dy
+    y1 - r1*dx1 - ay1,
+    x2 + r2*dy2 - ax2,
+    y2 - r2*dx2 - ay2,
+    (ax1-ax2)**2 + (ay1-ay2)**2 - (r1+r2)**2 # circles touch
+], (ax1, ay1, ax2, ay2, r1, r2))
+    </pre>  
     <canvas id="biarcs_canvas" width=640 height=640></canvas>
     <form onsubmit="return false;">
         <center>
