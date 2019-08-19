@@ -334,14 +334,15 @@ function combined_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
             var segy2 = y1 + dy1 * (Math.abs(t1) - Math.abs(t2)) * Math.sign(t1);
             var at1 = Math.PI/2 - Math.atan2(x2 - ax, y2 - ay);
             var at2 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
-        }        
+        }
+        const arc_t_d = r > 0 ? t_distance(at2, at1) : t_distance(at1, at2);
         if(t1 < t2){
-            const len = Math.abs(r * t_distance(at2, at1)) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
-            const len1 = Math.abs(r * t_distance(at2, at1));
+            const len = Math.abs(r * arc_t_d) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
+            const len1 = Math.abs(r * arc_t_d);
             const fun = function(t) {
                 if(t < len1) {
                     const d = r > 0 ? t / len1 : (1. - t / len1);
-                    const at = r > 0 ? at2 + t_distance(at2, at1) * d : at1 + t_distance(at1, at2) * d;
+                    const at = r > 0 ? at2 + arc_t_d * d : at1 + arc_t_d * d;
                     return [ax + Math.cos(at) * Math.abs(r), ay + Math.sin(at) * Math.abs(r)];
                 } else {
                     const d = (t - len1) / (len - len1);
@@ -350,7 +351,7 @@ function combined_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
             };
             return [fun, len];
         } else {
-            const len = Math.abs(r * t_distance(at1, at2)) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
+            const len = Math.abs(r * arc_t_d) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
             const len1 = Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2)); 
             const fun = function(t) {
                 if(t < len1) {
@@ -358,7 +359,7 @@ function combined_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
                     return [segx1 + (segx2 - segx1) * d, segy1 + (segy2 - segy1) * d];
                 } else {
                     const d = r > 0 ? ((t - len1) / (len - len1)) : (1. - (t - len1) / (len - len1));
-                    const at = r > 0 ? at2 + t_distance(at2, at1) * d : at1 + t_distance(at1, at2) * d;
+                    const at = r > 0 ? at2 + arc_t_d * d : at1 + arc_t_d * d;
                     return [ax + Math.cos(at) * Math.abs(r), ay + Math.sin(at) * Math.abs(r)];
                 }
             }; 
