@@ -721,6 +721,10 @@ function draw_combined_canvas(client_x, client_y, do_guides){
     draw_common(context, client_x, client_y, do_guides);     
 }
 
+
+var param_Pxy;
+var param_Fd;
+var param_Fxy;
 function draw_param_canvas(client_x, client_y, do_guides){
     var canvas = document.getElementById("param_canvas");
     var context = canvas.getContext("2d");
@@ -734,7 +738,10 @@ function draw_param_canvas(client_x, client_y, do_guides){
     if(document.getElementById("method1").checked || document.getElementById("method12").checked) {
         var Px = spline_for(xs[1], 3*(xs[0] - xs[1]), xs[2], -3*(xs[3] - xs[2]));
         var Py = spline_for(ys[1], 3*(ys[0] - ys[1]), ys[2], -3*(ys[3] - ys[2]));
-
+        param_Pxy = function(t) {
+            return [polynomial_in_t(Px, t), polynomial_in_t(Py, t)];
+        }
+        
         context.beginPath();
         context.lineWidth = 3;
         for(var i = 0; i < 256; ++i) {    
@@ -778,6 +785,8 @@ function draw_param_canvas(client_x, client_y, do_guides){
         const fun_len = combined_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2);
         const fun = fun_len[0];
         const len = fun_len[1];
+        param_Fd = len;
+        param_Fxy = fun;
         
         context.lineWidth = 3;
         context.strokeStyle="#00AA00";  
@@ -998,6 +1007,37 @@ function colorized(text) {
 
     return uncommented(text, 0);
 }
+
+function draw_on_top_of_param() {
+    var canvas = document.getElementById("param_canvas");
+    var context = canvas.getContext("2d");
+    if(document.getElementById("method1").checked || document.getElementById("method12").checked) {
+        const t = (time / 1000 / 3) % 1.;
+        const xy = param_Pxy(t);
+        context.beginPath();
+        context.arc(xy[0], xy[1], 5, 0, 2*Math.PI);
+        context.fillStyle="#6633AA";
+        context.fill();
+        context.closePath();
+    }    
+    if(document.getElementById("method2").checked || document.getElementById("method12").checked) {
+        const t = ((time / 1000 / 3) * param_Fd) % param_Fd;
+        const xy = param_Fxy(t);
+        context.beginPath();
+        context.arc(xy[0], xy[1], 5, 0, 2*Math.PI);
+        context.fillStyle="#6633AA";
+        context.fill();
+        context.closePath();
+    }
+}
+
+var time = 0.;
+function animation_tick() {
+    time += 50;
+    setTimeout(animation_tick, 50);
+    
+    draw_on_top_of_param(); 
+}
     </script>
   </head>
   <body>
@@ -1169,6 +1209,7 @@ By the way, if you know a better option for regularily parametrized parametric c
     init("combined");
     init("param");
     init_curve_canvas();
+    animation_tick();
     document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
     document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
     </script>
