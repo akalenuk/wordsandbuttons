@@ -533,12 +533,20 @@ function draw_common(context, client_x, client_y, do_guides) {
 }
 
 
+var param_client_x;
+var param_client_y;
+var param_do_guides;
 function draw_batch(client_x, client_y, do_guides) {
     draw_cubic_canvas(client_x, client_y, do_guides);
     draw_biarcs_canvas(client_x, client_y, do_guides);
     draw_arcline_canvas(client_x, client_y, do_guides);
     draw_combined_canvas(client_x, client_y, do_guides);
-    compute_param_functions(); // for param functions AND animations
+    
+    // for param functions AND animations
+    param_client_x = client_x;
+    param_client_y = client_y;
+    param_do_guides = do_guides;
+    compute_param_functions(); 
     draw_param_canvas(client_x, client_y, do_guides);
 }
 
@@ -789,6 +797,15 @@ function draw_param_canvas(client_x, client_y, do_guides){
         context.stroke();
         context.closePath();
         context.lineWidth = 1;
+        
+        // animation        
+        const t = (time / 1000 / 3) % 1.;
+        const xy = param_Pxy(t);
+        context.beginPath();
+        context.arc(xy[0], xy[1], 5, 0, 2*Math.PI);
+        context.fillStyle="#6633AA";
+        context.fill();
+        context.closePath();
     }
     
     if(document.getElementById("method2").checked || document.getElementById("method12").checked) {
@@ -806,6 +823,15 @@ function draw_param_canvas(client_x, client_y, do_guides){
             context.stroke();
             context.closePath();        
         }
+        
+        // animation
+        const t = ((time / 1000 / 3) * param_Fd) % param_Fd;
+        const xy = param_Fxy(t);
+        context.beginPath();
+        context.arc(xy[0], xy[1], 5, 0, 2*Math.PI);
+        context.fillStyle="#6633AA";
+        context.fill();
+        context.closePath();
     }
     draw_common(context, client_x, client_y, do_guides);    
 }
@@ -1017,22 +1043,10 @@ function draw_on_top_of_param() {
     var canvas = document.getElementById("param_canvas");
     var context = canvas.getContext("2d");
     if(document.getElementById("method1").checked || document.getElementById("method12").checked) {
-        const t = (time / 1000 / 3) % 1.;
-        const xy = param_Pxy(t);
-        context.beginPath();
-        context.arc(xy[0], xy[1], 5, 0, 2*Math.PI);
-        context.fillStyle="#6633AA";
-        context.fill();
-        context.closePath();
+
     }    
     if(document.getElementById("method2").checked || document.getElementById("method12").checked) {
-        const t = ((time / 1000 / 3) * param_Fd) % param_Fd;
-        const xy = param_Fxy(t);
-        context.beginPath();
-        context.arc(xy[0], xy[1], 5, 0, 2*Math.PI);
-        context.fillStyle="#6633AA";
-        context.fill();
-        context.closePath();
+
     }
 }
 
@@ -1041,7 +1055,7 @@ function animation_tick() {
     time += 50;
     setTimeout(animation_tick, 50);
     
-    draw_on_top_of_param(); 
+    draw_param_canvas(param_client_x, param_client_y, param_do_guides);
 }
     </script>
   </head>
