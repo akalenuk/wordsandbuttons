@@ -538,6 +538,7 @@ function draw_batch(client_x, client_y, do_guides) {
     draw_biarcs_canvas(client_x, client_y, do_guides);
     draw_arcline_canvas(client_x, client_y, do_guides);
     draw_combined_canvas(client_x, client_y, do_guides);
+    compute_param_functions(); // for param functions AND animations
     draw_param_canvas(client_x, client_y, do_guides);
 }
 
@@ -725,6 +726,32 @@ function draw_combined_canvas(client_x, client_y, do_guides){
 var param_Pxy;
 var param_Fd;
 var param_Fxy;
+function compute_param_functions() {
+    var Px = spline_for(xs[1], 3*(xs[0] - xs[1]), xs[2], -3*(xs[3] - xs[2]));
+    var Py = spline_for(ys[1], 3*(ys[0] - ys[1]), ys[2], -3*(ys[3] - ys[2]));
+    param_Pxy = function(t) {
+        return [polynomial_in_t(Px, t), polynomial_in_t(Py, t)];
+    }
+    const x1 = xs[1];
+    const y1 = ys[1];
+    const x2 = xs[2];
+    const y2 = ys[2];
+    var dx1 = xs[0] - xs[1];
+    var dy1 = ys[0] - ys[1];
+    var dx2 = xs[3] - xs[2]; 
+    var dy2 = ys[3] - ys[2];
+    const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+    const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+    dx1 /= norm1;
+    dy1 /= norm1;
+    dx2 /= norm2;
+    dy2 /= norm2;
+    const fun_len = combined_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2);
+    param_Fd = fun_len[1];
+    param_Fxy = fun_len[0];
+}
+
+
 function draw_param_canvas(client_x, client_y, do_guides){
     var canvas = document.getElementById("param_canvas");
     var context = canvas.getContext("2d");
@@ -734,8 +761,8 @@ function draw_param_canvas(client_x, client_y, do_guides){
     context.fillRect(0, 0, w, h);
     draw_common(context, client_x, client_y, do_guides);
     
-    // cubic
     if(document.getElementById("method1").checked || document.getElementById("method12").checked) {
+        // cubic
         var Px = spline_for(xs[1], 3*(xs[0] - xs[1]), xs[2], -3*(xs[3] - xs[2]));
         var Py = spline_for(ys[1], 3*(ys[0] - ys[1]), ys[2], -3*(ys[3] - ys[2]));
         param_Pxy = function(t) {
@@ -745,14 +772,12 @@ function draw_param_canvas(client_x, client_y, do_guides){
         context.beginPath();
         context.lineWidth = 3;
         for(var i = 0; i < 256; ++i) {    
-            var _t1 = (i) / 256;
-            var _t2 = (i + 1) / 256;
-            var _x1 = polynomial_in_t(Px, _t1);
-            var _y1 = polynomial_in_t(Py, _t1);
-            var _x2 = polynomial_in_t(Px, _t2);
-            var _y2 = polynomial_in_t(Py, _t2);
-            context.moveTo(_x1, _y1);
-            context.lineTo(_x2, _y2);
+            const t1 = (i) / 256;
+            const t2 = (i + 1) / 256;
+            const xy1 = param_Pxy(t1);
+            const xy2 = param_Pxy(t2);
+            context.moveTo(xy1[0], xy1[1]);
+            context.lineTo(xy2[0], xy2[1]);
             if(i % 32 == 31) {
                 context.strokeStyle=((i / 32) % 2 < 1) ? "#AABBEE" : "#AA3366"; // stripes
                 context.stroke();
@@ -767,34 +792,14 @@ function draw_param_canvas(client_x, client_y, do_guides){
     }
     
     if(document.getElementById("method2").checked || document.getElementById("method12").checked) {
-        // arc and a line segment
-        const x1 = xs[1];
-        const y1 = ys[1];
-        const x2 = xs[2];
-        const y2 = ys[2];
-        var dx1 = xs[0] - xs[1];
-        var dy1 = ys[0] - ys[1];
-        var dx2 = xs[3] - xs[2]; 
-        var dy2 = ys[3] - ys[2];
-        const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
-        const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
-        dx1 /= norm1;
-        dy1 /= norm1;
-        dx2 /= norm2;
-        dy2 /= norm2;
-        const fun_len = combined_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2);
-        const fun = fun_len[0];
-        const len = fun_len[1];
-        param_Fd = len;
-        param_Fxy = fun;
-        
+        // arc and a line segment   
         context.lineWidth = 3;
         context.strokeStyle="#00AA00";  
            
-        for(var i = 0; i < len; i += 2) {
+        for(var i = 0; i < param_Fd; i += 2) {
             context.beginPath(); 
-            const xy1 = fun(i);
-            const xy2 = fun(i+2);
+            const xy1 = param_Fxy(i);
+            const xy2 = param_Fxy(i+2);
             context.moveTo(xy1[0], xy1[1]);
             context.lineTo(xy2[0], xy2[1]);
             context.strokeStyle= ((i / 32) % 2) < 1 ? "#AA0000" : "#220000"; // stripes
