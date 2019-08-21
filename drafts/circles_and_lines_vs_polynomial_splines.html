@@ -879,15 +879,15 @@ var curve_point_i = 0;
 function init_curve_canvas() {
     const canvas = document.getElementById("curve_canvas");
     const canvas_rect = canvas.getBoundingClientRect();
-    draw_curve_canvas(0, 0, false);
+    compute_and_draw_curve_canvas(0, 0, false);
 
     canvas.addEventListener('mousemove', function(e){
         var canvas_rect = canvas.getBoundingClientRect();
-        draw_curve_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        compute_and_draw_curve_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
         if(e.buttons == 1){
             curve_xs[curve_point_i] = e.clientX - canvas_rect.left;
             curve_ys[curve_point_i] = e.clientY - canvas_rect.top;
-            draw_curve_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+            compute_and_draw_curve_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
         }
     }, false);
 
@@ -895,26 +895,26 @@ function init_curve_canvas() {
         var canvas_rect = canvas.getBoundingClientRect();
         curve_xs[curve_point_i] = e.clientX - canvas_rect.left;
         curve_ys[curve_point_i] = e.clientY - canvas_rect.top;
-        draw_curve_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+        compute_and_draw_curve_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
     }, false);
 
     canvas.addEventListener('mouseleave', function(e){
-        draw_curve_canvas(0, 0, false);
+        compute_and_draw_curve_canvas(0, 0, false);
     }, false);
 }
 
-function draw_curve_canvas(client_x, client_y, do_guides){
-    var canvas = document.getElementById("curve_canvas");
-    var context = canvas.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
 
-    var xs = curve_xs;
-    var ys = curve_ys;
-
-    // curve
+var curve_client_x;
+var curve_client_y;
+var curve_do_guides;
+var curve_funs = [null, null, null, null];
+var curve_lens = [0, 0, 0, 0];
+function compute_and_draw_curve_canvas(client_x, client_y, do_guides){
+    curve_client_x = client_x;
+    curve_client_y = client_y;
+    curve_do_guides = do_guides;
+    const xs = curve_xs;
+    const ys = curve_ys;
     for(var i = 0; i < 4; ++i) {
         // arc and line
         const x1 = xs[i*2];
@@ -932,15 +932,32 @@ function draw_curve_canvas(client_x, client_y, do_guides){
         dx2 /= norm2;
         dy2 /= norm2;
         const fun_len = combined_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2);
-        const fun = fun_len[0];
-        const len = fun_len[1];
-    
+        curve_funs[i] = fun_len[0];
+        curve_lens[i] = fun_len[1];
+    }
+    draw_curve_canvas(client_x, client_y, do_guides);
+}
+
+function draw_curve_canvas(client_x, client_y, do_guides){
+    var canvas = document.getElementById("curve_canvas");
+    var context = canvas.getContext("2d");
+    context.font = "16px sans-serif";
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    const xs = curve_xs;
+    const ys = curve_ys;
+
+    // curve
+    for(var i = 0; i < 4; ++i) {
+        // arc and line 
         context.lineWidth = 3;
         context.strokeStyle="#00AA00";  
         context.beginPath();
-        for(var j = 0; j < len; j += 2) {
-            const xy1 = fun(j);
-            const xy2 = fun(j+2);
+        for(var j = 0; j < curve_lens[i]; j += 2) {
+            const xy1 = curve_funs[i](j);
+            const xy2 = curve_funs[i](j+2);
             if((xy1[0] >= 0 && xy1[0] <= 640 && xy1[1] >= 0 && xy1[1] <= 640)
             || (xy2[0] >= 0 && xy2[0] <= 640 && xy2[1] >= 0 && xy2[1] <= 640)) {
                 context.moveTo(xy1[0], xy1[1]);
