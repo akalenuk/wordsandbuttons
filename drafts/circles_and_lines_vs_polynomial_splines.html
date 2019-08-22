@@ -1116,10 +1116,10 @@ function animation_tick() {
 Circles and lines vs. polynomial splines
     </h1>
     <p>
-Usually, when you want to make a parametric curve, you should go for a polynomial spline. It can be a Bezier curve, which is very obviously a bunch of polynomials stacked on top of each other under a trench coat. Or in can be a NURBS which is essentially the same as Bezier but in slightly different space. It can also be a <a href="https://wordsandbuttons.online/quadric_splines_are_useful_too.html">hand-crafted spline</a> tailored for your specific task. Polynomial spline is a decent choice. But it's not the only one possible.
+Usually, when you want to make a parametric curve, you should go for a polynomial spline. It can be a Bezier curve, which is very obviously a bunch of polynomials stacked on top of each other under a trench coat. Or it can be a NURBS which is essentially the same as Bezier but in slightly different space. It can also be a <a href="https://wordsandbuttons.online/quadric_splines_are_useful_too.html">hand-crafted spline</a> tailored for your specific task. A polynomial spline is a decent choice. But it's not the only one possible.
     </p>
     <p>
-Sometimes, for the reasons mentioned only in the second half of this page to keep intrigue, you are not satisfied with polynomials. You have to look elsewhere. This page shows you one possible option apart from polynomials and it is an old-school parametric curve made from arcs and line segments stitched together. Yes, it's that simple. Euclid would have been proud.
+Sometimes, for the reasons mentioned only in the second half of this page to keep you intrigued, you are not satisfied with polynomials. You have to look elsewhere. This page shows you one possible option apart from polynomials and it is an old-school parametric curve made from arcs and line segments stitched together. Yes, it's that simple. Euclid would have been proud.
     </p>
     <h2>Cubic polynomial</h2>
     <p>
@@ -1173,7 +1173,7 @@ We only want one though, so let's just pick the one with the least sum of radius
         </center>
     </form>
     <p>
-We have our building block. The problem is, it only works ok when tangents are contdirected-ish. As tangents become codirected, it tends to “bubble”. And when they are also codirected with the points vector, the radiuses become too big and it introduces computational and performance problems. It's a building block for very particular kind of buildings.
+We have our building block. The problem is, it only works ok when tangents are contradirected-ish. As tangents become codirected, it tends to “bubble”. And when they are also codirected with the points vector, the radiuses become too big and it introduces computational and performance problems. It's a building block for very particular kind of buildings.
     </p>
     <p>
 But that's easy to fix. Let's complement it with something else.
@@ -1213,7 +1213,7 @@ Ah, that's not it! You can add an equation so the SymPy will get the arc radius 
 It's easier to compute in numerically.
     </p>
     <p>
-To do that, you need to find an intersection point of the tangent rays. Then you compute the angle between the rays. Then the shortest distance from one of starting points to the point of tangent intersection mutiplied by the tangent function of the found angle is the radius. Also, the shortest distance determimnes which of the points will touch an arc and which will get the line segment. Again, I'm not sure that the words are helping, the <a href="...">code for this is on Github</a>.
+To do that, you need to find an intersection point of the tangent rays. Then you compute the angle between the rays. Then the shortest distance from one of starting points to the point of tangent intersection multiplied by the tangent function of the found angle is the radius. Also, the shortest distance determines which of the points will touch an arc and which will get the line segment. Again, I'm not sure that the words are helping, the <a href="...">code for this is on Github</a>.
     </p>
     <canvas id="arcline_canvas" width=640 height=640></canvas>
     <form onsubmit="return false;">
@@ -1225,7 +1225,7 @@ To do that, you need to find an intersection point of the tangent rays. Then you
         </center>
     </form>
     <p>
-This building block isn't perfect either. Where the tangents are controriented, the point where the arc meets the segment will appear sharp. Also, it still tends to take detours. But it complements the biarcs. In most of the cases biarcs fail, it works fine. 
+This building block isn't perfect either. Where the tangents are contraoriented, the point where the arc meets the segment will appear sharp. Also, it still tends to take detours. But it complements the biarcs. In most of the cases biarcs fail, it works fine. 
     </p>
     
     <h2>Combined method</h2>
@@ -1233,7 +1233,7 @@ This building block isn't perfect either. Where the tangents are controriented, 
 Since we have biarcs that work half the time and arc-and-lines that work half of the time, why don't we combine them and hope this would work all the time? All we have to do is to decide when to run the former and when the latter.
     </p>
     <p>
-I think the nice criterion is how the tangents are oriented towards each other. If they share a half-plane, meaning they are more or less cooriented, then the arc and line would be the good choice. If they don't share the same halfplane, so more like controriented, then the biarcs should work.
+I think the nice criterion is how the tangents are oriented towards each other. If they share a half-plane, meaning they are more or less cooriented, then the arc and line would be a good choice. If they don't share the same halfplane, so more like contraoriented, then the biarcs should work.
     </p>
     <p>
 Again, it might be easier to read code than the explanation, so <a href="">it's also on GitHub</a> like everything else here.
@@ -1247,7 +1247,7 @@ Just a reminder, this is a live plot. Points and tangents are movable.
 And now for the “why bother” part. Let's say you want something to go along the curve with constant speed. With polynomials, this is possible but complicated. You'd have to measure polynomials' derivatives, compute the curve own “speed” and then compensate for it doing small steps of different parameter increment. It's doable but cumbersome.
     </p>
     <p>
-With arcs and segmetns, this task is trivial. Line segment is linear by definition and circle is parametrized by its radial coordinate, so like a motorcycle goes with constant speed with constant revs, the object will go along the curve with a constant speed if the parameterization changes constantly.
+With arcs and segments, this task is trivial. Line segments are linear by definition and circles are linearly parametrized by their radial coordinates, so as a motorcycle goes with the constant speed with constant revs, the object will go along the curve with the constant speed if the parameterization changes constantly.
     </p>
     <canvas id="param_canvas" width=640 height=640></canvas>
     <form onsubmit="return false;">
@@ -1268,13 +1268,13 @@ Also, since it's trivial to compute arcs length, it's easy to parametrize these 
     <button type="button" onclick="more_speed();" style="width: 32pt;">+</button>
     </form>
     <p>
-Of course, this approach has its flaws. It still doesn't work for when tangents and points all lie on the same line. It requires classification to chose among 4 possible solutions and this contributes to the algorithm size and perfromance. Polynomials are simpler.
+Of course, this approach has its flaws. It still doesn't work for when tangents and points all lie on the same line. It requires classification to chose among 4 possible solutions and this contributes to the algorithm size and performance. Polynomials are simpler.
     </p>
     <p>
-But it's only one possible approach of infinite number of possible approaches. This exercise shows that you can build your own parametric curves with desired properties and not rely on some particular mathematical apparatus. The options are limitles.
+But it's only one possible approach of an infinite number of possible approaches. This exercise shows that you can build your own parametric curves with desired properties and not rely on some particular mathematical apparatus. The options are limitless.
     </p>
     <p>
-By the way, if you know a better option for regularily parametrized parametric curves (wich are not NURBS), please <a href="mailto:ok@wordsandbuttons.online">let me know</a>.
+By the way, if you know a better option for regularly parametrized parametric curves (which are not NURBS), please <a href="mailto:ok@wordsandbuttons.online">let me know</a>.
     </p>
             
     <script language="JavaScript">
