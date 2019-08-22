@@ -968,6 +968,22 @@ function draw_curve_canvas(client_x, client_y, do_guides){
         context.closePath();
     }
 
+    // animation
+    const d = curve_lens[0] + curve_lens[1] + curve_lens[2] + curve_lens[3];
+    const t = (time / 1000 * 200) % d;
+    var di = 0;
+    for(var i = 0; i < 4; ++i) {
+        if (0 < t - di && t - di < curve_lens[i]) {
+            const xy = curve_funs[i](t - di);
+            context.beginPath();
+            context.arc(xy[0], xy[1], 5, 0, 2*Math.PI);
+            context.fillStyle="#6633AA";
+            context.fill();
+            context.closePath();
+        }
+        di += curve_lens[i];
+    }
+        
     // dots
     for(var i = 0; i < 4; ++i){
         context.beginPath();
@@ -1056,23 +1072,12 @@ function colorized(text) {
     return uncommented(text, 0);
 }
 
-function draw_on_top_of_param() {
-    var canvas = document.getElementById("param_canvas");
-    var context = canvas.getContext("2d");
-    if(document.getElementById("method1").checked || document.getElementById("method12").checked) {
-
-    }    
-    if(document.getElementById("method2").checked || document.getElementById("method12").checked) {
-
-    }
-}
-
 var time = 0.;
 function animation_tick() {
+    draw_param_canvas(param_client_x, param_client_y, param_do_guides);
+    draw_curve_canvas(curve_client_x, curve_client_y, curve_do_guides);
     time += 50;
     setTimeout(animation_tick, 50);
-    
-    draw_param_canvas(param_client_x, param_client_y, param_do_guides);
 }
     </script>
   </head>
@@ -1224,7 +1229,7 @@ With arcs and segmetns, this task is trivial. Line segment is linear by definiti
         </center>
     </form>    
     <p>
-Also, since it's trivial to compute arcs length, it's easy to parametrize these curves not only linearly but in their natural size. For instance, I can make a small circle run around the track with the speed of exactly 50 pixels per second.
+Also, since it's trivial to compute arcs length, it's easy to parametrize these curves not only linearly but in their natural size. For instance, I can make a small circle run around the track with the speed of exactly 200 pixels per second.
     </p>
     <canvas id="curve_canvas" width=640 height=640></canvas>
     <p>
