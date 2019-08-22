@@ -1116,7 +1116,7 @@ function animation_tick() {
 Circles and lines vs. polynomial splines
     </h1>
     <p>
-Usually, when you want to make a parametric curve, you should go for a polynomial spline of some sort. It can be a Bezier curve, which is very obviously a bunch of polynomials stacked on top of each other under a trench coat. Or in can be a NURBS which is essentially the same as Bezier but in slightly different space. It can also be a hand-crafted spline tailored for your specific task and hardly anything else. Polynomial spline is a decent choice. But it's not the only one possible.
+Usually, when you want to make a parametric curve, you should go for a polynomial spline. It can be a Bezier curve, which is very obviously a bunch of polynomials stacked on top of each other under a trench coat. Or in can be a NURBS which is essentially the same as Bezier but in slightly different space. It can also be a <a href="https://wordsandbuttons.online/quadric_splines_are_useful_too.html">hand-crafted spline</a> tailored for your specific task. Polynomial spline is a decent choice. But it's not the only one possible.
     </p>
     <p>
 Sometimes, for the reasons mentioned only in the second half of this page to keep intrigue, you are not satisfied with polynomials. You have to look elsewhere. This page shows you one possible option apart from polynomials and it is an old-school parametric curve made from arcs and line segments stitched together. Yes, it's that simple. Euclid would have been proud.
@@ -1133,7 +1133,7 @@ Two points imply two linear equations. Two tangents are two more. Four equations
 
     <h2>Biarcs</h2>
     <p>
-We can construct an alternative building blocks by making two circles go through the points so the tangents will be orthogonal to the radius vector, and then touch. The point where the circles touch is the point where they share the tangent. Then we'll cut two arcs out of them, and that's it. The pair of arcs will be our building block.
+We can construct an alternative building block by making two circles go through the points so the tangents will be orthogonal to the radius vector, and then touch. The point where the circles touch is the point where they share the tangent. Then we'll cut two arcs out of them, and that's it. The pair of arcs will be our building block.
     </p>
     <p>
 In SymPy equations, these conditions look like this:
@@ -1158,7 +1158,7 @@ solutions = solve(
 ], (ax1, ay1, ax2, ay2, r1, r2))
     </pre>
     <p>
-Yes, this is a quadratic system. It results in not one but two solutions. Each circle may touch the tangent from the left or from the right so it would be logical to expect four but thanks to some geometric magic, only two of these configurations result in a touching circles case. You can see <a href="...">both cases on Github</a>.
+Yes, this is a quadratic system. It results in not one but two solutions. You can see <a href="...">both cases on Github</a>.
     </p>
     <p>
 We only want one though, so let's just pick the one with the least sum of radiuses and see what will happen.
@@ -1173,10 +1173,10 @@ We only want one though, so let's just pick the one with the least sum of radius
         </center>
     </form>
     <p>
-We have our building block. The problem is, it works ok only when tangents are contdirected-ish. As tangents become codirected, it tends to “bubble”. And when they are also codirected with the points vector, the radiuses become too big and it introduces computational and performance problems. It's a building block for very particular kind of buildings.
+We have our building block. The problem is, it only works ok when tangents are contdirected-ish. As tangents become codirected, it tends to “bubble”. And when they are also codirected with the points vector, the radiuses become too big and it introduces computational and performance problems. It's a building block for very particular kind of buildings.
     </p>
     <p>
-But that's easy to settle. Let's complement it with something else.
+But that's easy to fix. Let's complement it with something else.
     </p>
     <h2>Arc and line segment</h2>
     <p>
@@ -1230,7 +1230,7 @@ This building block isn't perfect either. Where the tangents are controriented, 
     
     <h2>Combined method</h2>
     <p>
-Since we have biarcs that work half the time and arc-and-lines that works half of the time, why don't we combine them and hope this would work all the time? All we have to do is to decide when to run the former and when the latter.
+Since we have biarcs that work half the time and arc-and-lines that work half of the time, why don't we combine them and hope this would work all the time? All we have to do is to decide when to run the former and when the latter.
     </p>
     <p>
 I think the nice criterion is how the tangents are oriented towards each other. If they share a half-plane, meaning they are more or less cooriented, then the arc and line would be the good choice. If they don't share the same halfplane, so more like controriented, then the biarcs should work.
