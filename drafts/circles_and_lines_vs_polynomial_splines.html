@@ -77,9 +77,15 @@ form {
     color: #000;
 }
 
+input[type="text"] {
+    width: 64pt;
+    height: 22pt;
+    font-size: 16pt;
+    text-align: center;
+}
 
 button {
-    width: 128pt;
+    width: 84pt;
     height: 32pt;
     font-size: 16pt;
     text-align: center;
@@ -909,6 +915,7 @@ var curve_client_y;
 var curve_do_guides;
 var curve_funs = [null, null, null, null];
 var curve_lens = [0, 0, 0, 0];
+var curve_speed = 200;
 function compute_and_draw_curve_canvas(client_x, client_y, do_guides){
     curve_client_x = client_x;
     curve_client_y = client_y;
@@ -970,7 +977,7 @@ function draw_curve_canvas(client_x, client_y, do_guides){
 
     // animation
     const d = curve_lens[0] + curve_lens[1] + curve_lens[2] + curve_lens[3];
-    const t = (time / 1000 * 200) % d;
+    const t = (time / 1000 * curve_speed) % d;
     var di = 0;
     for(var i = 0; i < 4; ++i) {
         if (0 < t - di && t - di < curve_lens[i]) {
@@ -1070,6 +1077,28 @@ function colorized(text) {
     }
 
     return uncommented(text, 0);
+}
+
+function more_speed() {
+    curve_speed += 50;
+    document.getElementById("speed").value = curve_speed;
+}
+
+function change_speed() {
+    curve_speed = Number(document.getElementById("speed").value);
+    if(isNaN(curve_speed) || curve_speed < 0.0) {
+        curve_speed = 0.0;
+        document.getElementById("speed").value = 10;
+    }
+}
+
+function less_speed() {
+    curve_speed -= 50;
+    if(isNaN(curve_speed) || curve_speed < 0.0) {
+        curve_speed = 0.0;
+        document.getElementById("speed").value = 0;
+    } else    
+        document.getElementById("speed").value = curve_speed;
 }
 
 var time = 0.;
@@ -1232,6 +1261,12 @@ With arcs and segmetns, this task is trivial. Line segment is linear by definiti
 Also, since it's trivial to compute arcs length, it's easy to parametrize these curves not only linearly but in their natural size. For instance, I can make a small circle run around the track with the speed of exactly 200 pixels per second.
     </p>
     <canvas id="curve_canvas" width=640 height=640></canvas>
+    <form onsubmit="return false;">
+    Or you can set your own speed:
+    <button type="button" onclick="less_speed();" style="width: 32pt;">-</button>
+    <input type="text" id="speed" value="200" oninput="change_speed();">
+    <button type="button" onclick="more_speed();" style="width: 32pt;">+</button>
+    </form>
     <p>
 Of course, this approach has its flaws. It still doesn't work for when tangents and points all lie on the same line. It requires classification to chose among 4 possible solutions and this contributes to the algorithm size and perfromance. Polynomials are simpler.
     </p>
