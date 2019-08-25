@@ -404,23 +404,23 @@ Now place your bets!
     <table><tr>
     <td id="left_1">
     <pre>
-bool check_if_magic(const std::string& square)
+bool check_if_magic(const std::string& sq)
   {
-  if ((square[0] + square[1] + square[2] != '5'*3)
-    || (square[3] + square[4] + square[5] != '5'*3)
-    || (square[6] + square[7] + square[8] != '5'*3)
+  if ((sq[0] + sq[1] + sq[2] != '5'*3)
+    || (sq[3] + sq[4] + sq[5] != '5'*3)
+    || (sq[6] + sq[7] + sq[8] != '5'*3)
 
-    || (square[0] + square[3] + square[6] != '5'*3)
-    || (square[1] + square[4] + square[7] != '5'*3)
-    || (square[2] + square[5] + square[8] != '5'*3)
+    || (sq[0] + sq[3] + sq[6] != '5'*3)
+    || (sq[1] + sq[4] + sq[7] != '5'*3)
+    || (sq[2] + sq[5] + sq[8] != '5'*3)
 
-    || (square[0] + square[4] + square[8] != '5'*3)
-    || (square[2] + square[4] + square[6] != '5'*3))
+    || (sq[0] + sq[4] + sq[8] != '5'*3)
+    || (sq[2] + sq[4] + sq[6] != '5'*3))
     return false;
 
   std::array<int, 9> numbers_count{};
   for(auto i = 0u; i < 9; ++i)
-    ++numbers_count[square[i]-'1'];
+    ++numbers_count[sq[i]-'1'];
   for(auto i = 0u; i < 9; ++i)
     if(numbers_count[i] != 1)
       return false;
@@ -465,24 +465,35 @@ bool check_if_magic(const std::string& sq)
 They are equally fast.
     </p>
     <button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
-    <p id="the_truth_1" style="display:none;">
-The right is only slightly more than 10% faster. The thing is, although this heuristic is great in narrowing, it is rather heavy by itself. We gain some, we lose some.
+    <div id="the_truth_1" style="display:none;">
+    <p>
+The optimisation seems legit. It seems sane. Yet apparently, the optimization makes the code slightly slower. How come?
     </p>
+    <p>
+The thing is, it doesn't. It only works as a pesimisation with this particular processor, compiler, and enabled optimizations triplet. Here are my measurements on other configurations:
+    </p>
+    <p>
+ARMv7 (v71), clang 3.5.0, -O2: 24.8 vs 24.4   
+    </p>
+    <p>
+Intel i7-7700HQ, g++, -O3: 0.89 vs 0.75
+    </p>
+    <p>
+Intel i7-4700, MSVC 15.9.11, -O2: 4.0 vs 3.7
+    </p>
+    <p>
+So generally yes, the binary map in an integer is a good thing. But sometimes it just isn't. It all depends on the context.
+    </p>
+    </div>
     <script language="JavaScript">
     init_slider(0);
     </script>
     
     <h2>
-Round 2. Direct solution vs. the oddity heuristic
+Round 2. Microoptimized solution vs. the oddity heuristic
     </h1>
     <p>
-The direct solution would be to check every row, column, and diagonal sum and then assert that all the numbers are there. We don't have to parse actual numbers, we can go with ASCII codes just fine. Also the simplest way to check if the string is a permutation of digits is to make a simple binary map and assert it content after filling it with the input. Since we are here for the performance, we would use an <span class="code_piece">uint_fast64_t</span> instead of a real map.
-    </p>
-    <p>
 The heuristic proposed is meant to end the function as early as possible. It is based on a fact that in a magic square the corner values are always even and the rest are odd. If one of the numbers fails to pass the oddity test, then there is no point in the full magic check at all. Also, as you can see, this heuristic is rather effective. On random numbers it narrows down our cases with a pretty good 2<sup>9</sup> to 1 ratio. So only one string in 512 will get to the actual check. Well, technically our numbers are not entirely random, we have more odds than evens, but still.
-    </p>
-    <p>
-Now place your bets!
     </p>
     <table><tr>
     <td id="left_2">
@@ -558,7 +569,7 @@ bool check_if_magic(const std::string& sq)
     <p class="comment" id="comment_2">
 They are equally fast.
     </p>
-    <button type="button" onclick="reveal(0)" id="button_2">Reveal the truth</button>
+    <button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
     <p id="the_truth_2" style="display:none;">
 The right is only slightly more than 10% faster. The thing is, although this heuristic is great in narrowing, it is rather heavy by itself. We gain some, we lose some.
     </p>
@@ -646,7 +657,7 @@ bool check_if_magic(const std::string& sq)
     <p class="comment" id="comment_3">
 They are equally fast.
     </p>
-    <button type="button" onclick="reveal(1)" id="button_3">Reveal the truth</button>
+    <button type="button" onclick="reveal(2)" id="button_3">Reveal the truth</button>
     <p id="the_truth_3" style="display:none;">
 The right is more than 50% faster. The heuristic filters out 8 out of 9 strings, and it's cheap.
     </p>
