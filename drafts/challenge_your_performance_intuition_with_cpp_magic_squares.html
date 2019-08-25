@@ -105,9 +105,9 @@ button{
     <script language="JavaScript">
 var slider_set = [false, false, false, false,  false, false, false, false,  false, false];
 var slider_true_xs = [
+    0.77 / (0.77 + 0.94) * 512,
     1.0 / (1.0 + 0.9) * 512,
     1.0 / (1.0 + 0.6) * 512,
-    1.0 / (1.0 + 0.7) * 512,
     1.0 / (1.0 + 17.8) * 512,
 
     17.8 / (17.8 + 8.7) * 512,
@@ -389,9 +389,91 @@ Let's play a game. There will be ten rounds, each round is a match between two s
 All is measured on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz. <br>Compiled with g++ 5.4.0 -std=c++11 -O2.
     </p>
 
-
     <h2>
-Round 1. Direct solution vs. the oddity heuristic
+Round 1. Naïve solution vs. microoptimization
+    </h1>
+    <p>
+The naïve solution would be to check every row, column, and diagonal sum and then assert that all the numbers are there. We don't have to parse actual numbers, we can go with ASCII codes just fine. To check that all the numbers are there and each occurs only once, the array of counters is filled and then checked. 
+    </p>
+    <p>
+The microoptimization concerns the latter part. To check if the string is a permutation of digits, we want a binary map and assert it content after filling it with the input. Since we are here for the performance, we would use an <span class="code_piece">uint_fast64_t</span> instead of a real map and trigger its bits. The assertion then would be a mere integer comparison.
+    </p>
+    <p>
+Now place your bets!
+    </p>
+    <table><tr>
+    <td id="left_1">
+    <pre>
+bool check_if_magic(const std::string& square)
+  {
+  if ((square[0] + square[1] + square[2] != '5'*3)
+    || (square[3] + square[4] + square[5] != '5'*3)
+    || (square[6] + square[7] + square[8] != '5'*3)
+
+    || (square[0] + square[3] + square[6] != '5'*3)
+    || (square[1] + square[4] + square[7] != '5'*3)
+    || (square[2] + square[5] + square[8] != '5'*3)
+
+    || (square[0] + square[4] + square[8] != '5'*3)
+    || (square[2] + square[4] + square[6] != '5'*3))
+    return false;
+
+  std::array<int, 9> numbers_count{};
+  for(auto i = 0u; i < 9; ++i)
+    ++numbers_count[square[i]-'1'];
+  for(auto i = 0u; i < 9; ++i)
+    if(numbers_count[i] != 1)
+      return false;
+
+  return true;
+  }
+    </pre>
+    </td>
+    <td id="right_1">
+    <pre>
+auto c15 = '5' * 3;
+uint_fast64_t ideal_char_map =
+    static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
+uint_fast64_t char_map_one = 1u;
+
+bool check_if_magic(const std::string& sq)
+  {
+  if ((sq[0] + sq[1] + sq[2] != c15)
+    || (sq[3] + sq[4] + sq[5] != c15)
+    || (sq[6] + sq[7] + sq[8] != c15)
+
+    || (sq[0] + sq[3] + sq[6] != c15)
+    || (sq[1] + sq[4] + sq[7] != c15)
+    || (sq[2] + sq[5] + sq[8] != c15)
+
+    || (sq[0] + sq[4] + sq[8] != c15)
+    || (sq[2] + sq[4] + sq[6] != c15))
+    return false;
+
+  auto char_map = ideal_char_map;
+  for(auto i = 0u; i &lt; 9; ++i)
+    char_map ^= char_map_one &lt;&lt; sq[i];
+  if (char_map != 0)
+    return false;
+
+  return true;
+  }
+    </pre>
+    </td></tr></table>
+    <canvas id="slider_1" width=608 height=128></canvas>
+    <p class="comment" id="comment_1">
+They are equally fast.
+    </p>
+    <button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
+    <p id="the_truth_1" style="display:none;">
+The right is only slightly more than 10% faster. The thing is, although this heuristic is great in narrowing, it is rather heavy by itself. We gain some, we lose some.
+    </p>
+    <script language="JavaScript">
+    init_slider(0);
+    </script>
+    
+    <h2>
+Round 2. Direct solution vs. the oddity heuristic
     </h1>
     <p>
 The direct solution would be to check every row, column, and diagonal sum and then assert that all the numbers are there. We don't have to parse actual numbers, we can go with ASCII codes just fine. Also the simplest way to check if the string is a permutation of digits is to make a simple binary map and assert it content after filling it with the input. Since we are here for the performance, we would use an <span class="code_piece">uint_fast64_t</span> instead of a real map.
@@ -403,7 +485,7 @@ The heuristic proposed is meant to end the function as early as possible. It is 
 Now place your bets!
     </p>
     <table><tr>
-    <td id="left_1">
+    <td id="left_2">
     <pre>
 auto c15 = '5' * 3;
 uint_fast64_t ideal_char_map =
@@ -434,7 +516,7 @@ bool check_if_magic(const std::string& sq)
   }
     </pre>
     </td>
-    <td id="right_1">
+    <td id="right_2">
     <pre>
 auto c15 = '5' * 3;
 uint_fast64_t ideal_char_map =
@@ -472,101 +554,13 @@ bool check_if_magic(const std::string& sq)
   }
     </pre>
     </td></tr></table>
-    <canvas id="slider_1" width=608 height=128></canvas>
-    <p class="comment" id="comment_1">
-They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
-    <p id="the_truth_1" style="display:none;">
-The right is only slightly more than 10% faster. The thing is, although this heuristic is great in narrowing, it is rather heavy by itself. We gain some, we lose some.
-    </p>
-    <script language="JavaScript">
-    init_slider(0);
-    </script>
-
-
-    <h2>
-Round 2. Direct solution vs. the central 5 heuristic
-    </h1>
-    <p>
-We can choose less effective but cheaper heuristic. For instance, we know that all the 3x3 magic squares have 5 in the center. Let's try and exploit this fact.
-    </p>
-    <p>
-This also makes the main check a little bit cheaper as we now don't have to check for the central 5 in a sum.
-    </p>
-    <table><tr>
-    <td id="left_2">
-    <pre>
-auto c15 = '5' * 3;
-uint_fast64_t ideal_char_map =
-    static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
-uint_fast64_t char_map_one = 1u;
-
-bool check_if_magic(const std::string& sq)
-  {
-  if ((sq[0] + sq[1] + sq[2] != c15)
-    || (sq[3] + sq[4] + sq[5] != c15)
-    || (sq[6] + sq[7] + sq[8] != c15)
-
-    || (sq[0] + sq[3] + sq[6] != c15)
-    || (sq[1] + sq[4] + sq[7] != c15)
-    || (sq[2] + sq[5] + sq[8] != c15)
-
-    || (sq[0] + sq[4] + sq[8] != c15)
-    || (sq[2] + sq[4] + sq[6] != c15))
-    return false;
-
-  auto char_map = ideal_char_map;
-  for(auto i = 0u; i &lt; 9; ++i)
-    char_map ^= char_map_one &lt;&lt; sq[i];
-  if (char_map != 0)
-    return false;
-
-  return true;
-  }
-    </pre>
-    </td>
-    <td id="right_2">
-    <pre>
-auto magic_number = '5' * 3;
-auto not_so_magic_number = '5' * 2;
-uint_fast64_t ideal_char_map =
-  static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
-uint_fast64_t char_map_one = 1u;
-bool check_if_magic(const std::string& sq)
-  {
-  <b>if(sq[4] != '5')
-    return false;</b>
-
-  if ((sq[0] + sq[1] + sq[2] != magic_number)
-    || (sq[3] + sq[5] != not_so_magic_number)
-    || (sq[6] + sq[7] + sq[8] != magic_number)
-
-    || (sq[0] + sq[3] + sq[6] != magic_number)
-    || (sq[1] + sq[7] != not_so_magic_number)
-    || (sq[2] + sq[5] + sq[8] != magic_number)
-
-    || (sq[0] + sq[8] != not_so_magic_number)
-    || (sq[2] + sq[6] != not_so_magic_number))
-    return false;
-
-  auto char_map = ideal_char_map;
-  for(auto i = 0u; i &lt; 9; ++i)
-    char_map ^= char_map_one &lt;&lt; sq[i];
-  if (char_map != 0)
-    return false;
-
-  return true;
-  }
-    </pre>
-    </td></tr></table>
     <canvas id="slider_2" width=608 height=128></canvas>
     <p class="comment" id="comment_2">
 They are equally fast.
     </p>
-    <button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
+    <button type="button" onclick="reveal(0)" id="button_2">Reveal the truth</button>
     <p id="the_truth_2" style="display:none;">
-The right is more than 50% faster. The heuristic filters out 8 out of 9 strings, and it's cheap.
+The right is only slightly more than 10% faster. The thing is, although this heuristic is great in narrowing, it is rather heavy by itself. We gain some, we lose some.
     </p>
     <script language="JavaScript">
     init_slider(1);
@@ -574,10 +568,13 @@ The right is more than 50% faster. The heuristic filters out 8 out of 9 strings,
 
 
     <h2>
-Round 3. Shifts vs. no shifts
+Round 3. Direct solution vs. the central 5 heuristic
     </h1>
     <p>
-Heuristics are fun, but couldn't we squeeze a bit out of the original algorithm as it is? How about instead of doing a respectful number of trivial bit shifts, we store them in a special array?
+We can choose less effective but cheaper heuristic. For instance, we know that all the 3x3 magic squares have 5 in the center. Let's try and exploit this fact.
+    </p>
+    <p>
+This also makes the main check a little bit cheaper as we now don't have to check for the central 5 in a sum.
     </p>
     <table><tr>
     <td id="left_3">
@@ -615,20 +612,14 @@ bool check_if_magic(const std::string& sq)
     <pre>
 auto magic_number = '5' * 3;
 auto not_so_magic_number = '5' * 2;
-const std::array&lt;uint16_t, 58&gt; bit_shifts {
-  0, 0, 0, 0,   0, 0, 0, 0,
-  0, 0, 0, 0,   0, 0, 0, 0,
-  0, 0, 0, 0,   0, 0, 0, 0,
-  0, 0, 0, 0,   0, 0, 0, 0,
-
-  0, 0, 0, 0,   0, 0, 0, 0,
-  0, 0, 0, 0,   0, 0, 0, 0,
-  0, 1, 2, 4,   8, 16, 32, 64,
-  128, 256
-  };
-
+uint_fast64_t ideal_char_map =
+  static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
+uint_fast64_t char_map_one = 1u;
 bool check_if_magic(const std::string& sq)
   {
+  <b>if(sq[4] != '5')
+    return false;</b>
+
   if ((sq[0] + sq[1] + sq[2] != magic_number)
     || (sq[3] + sq[5] != not_so_magic_number)
     || (sq[6] + sq[7] + sq[8] != magic_number)
@@ -637,14 +628,14 @@ bool check_if_magic(const std::string& sq)
     || (sq[1] + sq[7] != not_so_magic_number)
     || (sq[2] + sq[5] + sq[8] != magic_number)
 
-    || (sq[0] + sq[4] + sq[8] != magic_number)
-    || (sq[2] + sq[4] + sq[6] != magic_number))
+    || (sq[0] + sq[8] != not_so_magic_number)
+    || (sq[2] + sq[6] != not_so_magic_number))
     return false;
 
-  auto char_map = 0u;
-  for(auto i = 0u; i < 9; ++i)
-    <b>char_map ^= bit_shifts[sq[i]];</b>
-  if (char_map != 511)
+  auto char_map = ideal_char_map;
+  for(auto i = 0u; i &lt; 9; ++i)
+    char_map ^= char_map_one &lt;&lt; sq[i];
+  if (char_map != 0)
     return false;
 
   return true;
@@ -655,14 +646,13 @@ bool check_if_magic(const std::string& sq)
     <p class="comment" id="comment_3">
 They are equally fast.
     </p>
-    <button type="button" onclick="reveal(2)" id="button_3">Reveal the truth</button>
+    <button type="button" onclick="reveal(1)" id="button_3">Reveal the truth</button>
     <p id="the_truth_3" style="display:none;">
-The right is less than 50% faster, but still considerably better then the left.
+The right is more than 50% faster. The heuristic filters out 8 out of 9 strings, and it's cheap.
     </p>
     <script language="JavaScript">
     init_slider(2);
     </script>
-
 
     <h2>
 Round 4. Fair magic test vs. precached answers
