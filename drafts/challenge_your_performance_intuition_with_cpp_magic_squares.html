@@ -423,10 +423,10 @@ bool check_if_magic(const std::string& sq)
     || (sq[2] + sq[4] + sq[6] != '5'*3))
     return false;
 
-  std::array<int, 9> numbers_count{};
-  for(auto i = 0u; i < 9; ++i)
+  std::array&lt;int, 9&gt; numbers_count{};
+  for(auto i = 0u; i &lt; 9; ++i)
     ++numbers_count[sq[i]-'1'];
-  for(auto i = 0u; i < 9; ++i)
+  for(auto i = 0u; i &lt; 9; ++i)
     if(numbers_count[i] != 1)
       return false;
 
@@ -438,10 +438,10 @@ bool check_if_magic(const std::string& sq)
     <pre>
 bool check_if_magic(const std::string& sq)
   {
-  std::array<int, 9> numbers_count{};
-  for(auto i = 0u; i < 9; ++i)
+  std::array&lt;int, 9&gt; numbers_count{};
+  for(auto i = 0u; i &lt; 9; ++i)
     ++numbers_count[sq[i]-'1'];
-  for(auto i = 0u; i < 9; ++i)
+  for(auto i = 0u; i &lt; 9; ++i)
     if(numbers_count[i] != 1)
       return false;
 
@@ -507,10 +507,10 @@ bool check_if_magic(const std::string& sq)
     || (sq[2] + sq[4] + sq[6] != '5'*3))
     return false;
 
-  std::array<int, 9> numbers_count{};
-  for(auto i = 0u; i < 9; ++i)
+  std::array&lt;int, 9&gt; numbers_count{};
+  for(auto i = 0u; i &lt; 9; ++i)
     ++numbers_count[sq[i]-'1'];
-  for(auto i = 0u; i < 9; ++i)
+  for(auto i = 0u; i &lt; 9; ++i)
     if(numbers_count[i] != 1)
       return false;
 
@@ -522,23 +522,22 @@ bool check_if_magic(const std::string& sq)
     <pre>
 bool check_if_magic(const std::string& sq)
   {
-  // one passes only 0.0836762688615
   if ((sq[0] + sq[1] + sq[2] != '5'*3)
      || (sq[3] + sq[4] + sq[5] != '5'*3)
-//    || (sq[6] + sq[7] + sq[8] != '5'*3)
+<b>//    || (sq[6] + sq[7] + sq[8] != '5'*3)</b>
 
     || (sq[0] + sq[3] + sq[6] != '5'*3)
     || (sq[1] + sq[4] + sq[7] != '5'*3)
-//    || (sq[2] + sq[5] + sq[8] != '5'*3)
+<b>//    || (sq[2] + sq[5] + sq[8] != '5'*3)</b>
 
     || (sq[0] + sq[4] + sq[8] != '5'*3)
     || (sq[2] + sq[4] + sq[6] != '5'*3))
     return false;
 
-  std::array<int, 9> numbers_count{};
-  for(auto i = 0u; i < 9; ++i)
+  std::array&lt;int, 9&gt; numbers_count{};
+  for(auto i = 0u; i &lt; 9; ++i)
     ++numbers_count[sq[i]-'1'];
-  for(auto i = 0u; i < 9; ++i)
+  for(auto i = 0u; i &lt; 9; ++i)
     if(numbers_count[i] != 1)
       return false;
 
@@ -566,9 +565,6 @@ Round 3. Naïve solution vs. microoptimization
     <p>
 The naïve solution is the eight sum check and the digits-are-unique check. The microoptimization concerns the latter part. To check if the string is a permutation of digits, we want a binary map and assert it content after filling it with the input. Since we are here for the performance, we would use an <span class="code_piece">uint_fast64_t</span> instead of a real map and trigger its bits. The assertion then would be a mere integer comparison.
     </p>
-    <p>
-Now place your bets!
-    </p>
     <table><tr>
     <td id="left_3">
     <pre>
@@ -586,10 +582,10 @@ bool check_if_magic(const std::string& sq)
     || (sq[2] + sq[4] + sq[6] != '5'*3))
     return false;
 
-  std::array<int, 9> numbers_count{};
-  for(auto i = 0u; i < 9; ++i)
+  std::array&lt;int, 9&gt; numbers_count{};
+  for(auto i = 0u; i &lt; 9; ++i)
     ++numbers_count[sq[i]-'1'];
-  for(auto i = 0u; i < 9; ++i)
+  for(auto i = 0u; i &lt; 9; ++i)
     if(numbers_count[i] != 1)
       return false;
 
@@ -618,11 +614,11 @@ bool check_if_magic(const std::string& sq)
     || (sq[2] + sq[4] + sq[6] != c15))
     return false;
 
-  auto char_map = ideal_char_map;
+<b>  auto char_map = ideal_char_map;
   for(auto i = 0u; i &lt; 9; ++i)
     char_map ^= char_map_one &lt;&lt; sq[i];
   if (char_map != 0)
-    return false;
+    return false;</b>
 
   return true;
   }
@@ -831,7 +827,7 @@ They are equally fast.
 The right is more than 50% faster. But it shouldn't be. Trying to understand why it is, I got it wrong the first time. Luckily, I was corrected.
     </p>
     <p>
-<b>[spoilers!]</b> <a href="https://medium.com/@veedrac/learning-the-value-of-good-benchmarking-technique-with-c-magic-squares-b61b3386c97f">Learning the value of good benchmarking technique with C++ magic squares</a> is an excellant explanaton of why my benchmark sucks. Long story short, branch prediction. 
+<b>[spoilers!]</b> <a href="https://medium.com/@veedrac/learning-the-value-of-good-benchmarking-technique-with-c-magic-squares-b61b3386c97f">Learning the value of good benchmarking technique with C++ magic squares</a> is an excellent explanaton of why my benchmark sucks. Long story short, branch prediction. 
     </p>
     <p>
 When the numbers come in order, this 5-check works in a very branch prediction friendly way. It has a pattern. It's 26244 not fives, then 6561 fives, then 52488 not fives, and then its 6561 fives again. Of course, it's cheap. 
