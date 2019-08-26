@@ -103,22 +103,24 @@ button{
 
     </style>
     <script language="JavaScript">
-var slider_set = [false, false, false, false,  false, false, false, false,  false, false];
+var slider_set = [false, false, false, false,  false, false, false, false,  false, false, false, false];
 var slider_true_xs = [
+    0.77 / (0.77 + 3.87) * 512,
+    0.77 / (0.77 + 0.96) * 512,     
+    0.77 / (0.77 + 0.94) * 512,
     1.0 / (1.0 + 0.9) * 512,
+    
     1.0 / (1.0 + 0.6) * 512,
-    1.0 / (1.0 + 0.7) * 512,
     1.0 / (1.0 + 17.8) * 512,
-
     17.8 / (17.8 + 8.7) * 512,
     8.7 / (8.7 + 12.7) * 512,
+    
     17.8 / (17.8 + 0.9) * 512,
     1.0 / (1.0 + 0.6) * 512,
-
     0.6 / (0.6 + 0.8) * 512,
     0.6 / (0.6 + 1.4) * 512];
-var slider_user_xs = [255, 255, 255, 255,  255, 255, 255, 255,  255, 255];
-var slider_xs = [255, 255, 255, 255,  255, 255, 255, 255,  255, 255];
+var slider_user_xs = [255, 255, 255, 255,  255, 255, 255, 255,  255, 255, 255, 255];
+var slider_xs = [255, 255, 255, 255,  255, 255, 255, 255,  255, 255, 255, 255];
 
 var slider_down = false;
 
@@ -276,7 +278,7 @@ function reveal(no){
     document.getElementById("the_truth_" + (no + 1)).style.display = "block";
     document.getElementById("button_" + (no + 1)).style.display = "none";
 
-    for(var i = 0; i < 10; i++){
+    for(var i = 0; i < 12; i++){
         if(slider_set[i] == false)
             return;
     }
@@ -284,7 +286,7 @@ function reveal(no){
     document.getElementById("show_in_the_end").style.display = "block";
     var score = 0;
     var default_score = 0;
-    for(var i = 0; i < 10; i++){
+    for(var i = 0; i < 12; i++){
         score += Math.abs(slider_user_xs[i] - slider_xs[i]);
         default_score += Math.abs(255 - slider_xs[i]);
     }
@@ -300,10 +302,10 @@ function reveal(no){
 Challenge your performance intuition with C++ magic squares
     </h1>
     <p>
-This was supposed to be a five minute interview question. I came up with it on Thursday, then spent a night looking for a good answer. Then the other night. Then the Saturday morning. Then it finally occurred to me that it might not work terribly well as a five minute question after all.
+This was supposed to be a five-minute interview question. I came up with it on Thursday, then spent a night looking for a good answer. Then the other night. Then the Saturday morning. Then it finally occurred to me that it's more like 500 minutes now and it wouldn't work for an interview.
     </p>
     <p>
-But it's still a great problem to fiddle with. And it goes like this.
+But it's still a fun problem to fiddle with. And it goes like this.
     </p>
     <p>
 Here is a magic square:
@@ -316,13 +318,13 @@ Here is a magic square:
     <td>6</td><td>7</td><td>2</td>
     </tr></table>
     <p>
-It has all the numbers from 1 to 9 each exactly once. The sum in every row is 15. The sum in every column is 15. And the sum in both diagonals is, of course, also 15. We can write it as a 9-character string like this: <span class="code">"834159672"</span>.
+It has all the numbers from 1 to 9 each occurring exactly once. The sum in every row is 15. The sum in every column is 15. And the sum in both diagonals is 15, too. We can write a square as a 9-character string like this: <span class="code">"834159672"</span>.
     </p>
     <p>
-<b>The problem:</b> propose a function that tells if a 3x3 square written as an ASCII string of digits is magic or not <i>in the most effective manner</i>.
+<b>The problem:</b> propose a function that tells if a 3x3 square written as an ASCII string of digits is magic or not <i>fast</i>.
     </p>
     <p>
-Here is some simple measuring code. It has no dependencies, and it's C++11 standard compliant, so it runs in basically every environment.
+Here is a benchmark. It has no dependencies, and it's C++11 standard compliant, so it runs in basically every environment.
     </p>
     <pre style="background-color: #bbbbff; width: 505pt; color: #000;">
 #include &lt;iostream&gt;
@@ -380,24 +382,26 @@ int main()
 }
     </pre>
     <p>
-I ran it with an empty checker to see how much time the generator takes. Then ran eleven different solutions three times each, and picked the best time for every solution. Now I know what works and what not.
+I ran it with an empty checker to see how much time the generator takes. Then ran thirteen different solutions three times each, and picked the best time for every solution. Now I know what works and what doesn't.
     </p>
     <p>
-Let's play a game. There will be ten rounds, each round is a match between two solutions. Or rather between their execution times. Using your intuition and best judgment, please estimate their <i>relative</i> performance. Use the slider below the code samples.
+Now let's play a game. There will be twelve rounds, each round is a match between two solutions. Or rather between their execution times. Using your intuition and best judgment, please estimate their <i>relative</i> performance. Use the sliders below the code samples.
     </p>
     <p class="comment">
 All is measured on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz. <br>Compiled with g++ 5.4.0 -std=c++11 -O2.
     </p>
 
-
     <h2>
-Round 1. Direct solution vs. the oddity heuristic
-    </h1>
+Round 1. Check 15 and check digits vs. check digits and then check 15
+    </h2>
     <p>
-The direct solution would be to check every row, column, and diagonal sum and then assert that all the numbers are there. We don't have to parse actual numbers, we can go with ASCII codes just fine. Also the simplest way to check if the string is a permutation of digits is to make a simple binary map and assert it content after filling it with the input. Since we are here for the performance, we would use an <span class="code_piece">uint_fast64_t</span> instead of a real map.
+The naïve solution would be to check every row, column, and diagonal sum and then assert that all the numbers are there. We don't have to parse actual numbers, we can go with ASCII. 
+    </p>
+    <p>    
+To check that all the numbers are there and each occurs only once, we can fill the array of counters and then check that every number has its counter set to 1.
     </p>
     <p>
-The heuristic proposed is meant to end the function as early as possible. It is based on a fact that in a magic square the corner values are always even and the rest are odd. If one of the numbers fails to pass the oddity test, then there is no point in the full magic check at all. Also, as you can see, this heuristic is rather effective. On random numbers it narrows down our cases with a pretty good 2<sup>9</sup> to 1 ratio. So only one string in 512 will get to the actual check. Well, technically our numbers are not entirely random, we have more odds than evens, but still.
+The question is, what should we do first? On the left, the rows, columns, and diagonals checks come first and then there's a counter check. On the right, the counter check comes first. Let's find out which one if faster. 
     </p>
     <p>
 Now place your bets!
@@ -405,30 +409,26 @@ Now place your bets!
     <table><tr>
     <td id="left_1">
     <pre>
-auto c15 = '5' * 3;
-uint_fast64_t ideal_char_map =
-    static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
-uint_fast64_t char_map_one = 1u;
-
 bool check_if_magic(const std::string& sq)
   {
-  if ((sq[0] + sq[1] + sq[2] != c15)
-    || (sq[3] + sq[4] + sq[5] != c15)
-    || (sq[6] + sq[7] + sq[8] != c15)
+  if ((sq[0] + sq[1] + sq[2] != '5'*3)
+    || (sq[3] + sq[4] + sq[5] != '5'*3)
+    || (sq[6] + sq[7] + sq[8] != '5'*3)
 
-    || (sq[0] + sq[3] + sq[6] != c15)
-    || (sq[1] + sq[4] + sq[7] != c15)
-    || (sq[2] + sq[5] + sq[8] != c15)
+    || (sq[0] + sq[3] + sq[6] != '5'*3)
+    || (sq[1] + sq[4] + sq[7] != '5'*3)
+    || (sq[2] + sq[5] + sq[8] != '5'*3)
 
-    || (sq[0] + sq[4] + sq[8] != c15)
-    || (sq[2] + sq[4] + sq[6] != c15))
+    || (sq[0] + sq[4] + sq[8] != '5'*3)
+    || (sq[2] + sq[4] + sq[6] != '5'*3))
     return false;
 
-  auto char_map = ideal_char_map;
+  std::array&lt;int, 9&gt; numbers_count{};
   for(auto i = 0u; i &lt; 9; ++i)
-    char_map ^= char_map_one &lt;&lt; sq[i];
-  if (char_map != 0)
-    return false;
+    ++numbers_count[sq[i]-'1'];
+  for(auto i = 0u; i &lt; 9; ++i)
+    if(numbers_count[i] != 1)
+      return false;
 
   return true;
   }
@@ -436,36 +436,25 @@ bool check_if_magic(const std::string& sq)
     </td>
     <td id="right_1">
     <pre>
-auto c15 = '5' * 3;
-uint_fast64_t ideal_char_map =
-    static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
-uint_fast64_t char_map_one = 1u;
-
 bool check_if_magic(const std::string& sq)
   {
-  <b>if ( (sq[0] & 1) != 0 || (sq[1] & 1) == 0
-    || (sq[2] & 1) != 0 || (sq[3] & 1) == 0
-    || (sq[4] & 1) == 0
-    || (sq[5] & 1) == 0 || (sq[6] & 1) != 0
-    || (sq[7] & 1) == 0 || (sq[8] & 1) != 0)
-    return false;</b>
-
-  if ((sq[0] + sq[1] + sq[2] != c15)
-    || (sq[3] + sq[4] + sq[5] != c15)
-    || (sq[6] + sq[7] + sq[8] != c15)
-
-    || (sq[0] + sq[3] + sq[6] != c15)
-    || (sq[1] + sq[4] + sq[7] != c15)
-    || (sq[2] + sq[5] + sq[8] != c15)
-
-    || (sq[0] + sq[4] + sq[8] != c15)
-    || (sq[2] + sq[4] + sq[6] != c15))
-    return false;
-
-  auto char_map = ideal_char_map;
+  std::array&lt;int, 9&gt; numbers_count{};
   for(auto i = 0u; i &lt; 9; ++i)
-    char_map ^= char_map_one &lt;&lt; sq[i];
-  if (char_map != 0)
+    ++numbers_count[sq[i]-'1'];
+  for(auto i = 0u; i &lt; 9; ++i)
+    if(numbers_count[i] != 1)
+      return false;
+
+  if ((sq[0] + sq[1] + sq[2] != '5'*3)
+    || (sq[3] + sq[4] + sq[5] != '5'*3)
+    || (sq[6] + sq[7] + sq[8] != '5'*3)
+
+    || (sq[0] + sq[3] + sq[6] != '5'*3)
+    || (sq[1] + sq[4] + sq[7] != '5'*3)
+    || (sq[2] + sq[5] + sq[8] != '5'*3)
+
+    || (sq[0] + sq[4] + sq[8] != '5'*3)
+    || (sq[2] + sq[4] + sq[6] != '5'*3))
     return false;
 
   return true;
@@ -477,50 +466,53 @@ bool check_if_magic(const std::string& sq)
 They are equally fast.
     </p>
     <button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
-    <p id="the_truth_1" style="display:none;">
-The right is only slightly more than 10% faster. The thing is, although this heuristic is great in narrowing, it is rather heavy by itself. We gain some, we lose some.
+    <div id="the_truth_1" style="display:none;">
+    <p>
+Yes, the difference is huge. The thing is, short-circuiting makes every line in 15-checks an independent optimizing heuristic. We only go past the first line when the numbers in the first row sum up to 15. Which only happens in 8.36% of all cases. So the very first line cuts out 91.74% of computation.
     </p>
+    <p>
+It's very effective.
+    </p>
+    </div>
     <script language="JavaScript">
     init_slider(0);
     </script>
-
-
+    
     <h2>
-Round 2. Direct solution vs. the central 5 heuristic
-    </h1>
+Round 2. All checks vs. fewer checks
+    </h2>
     <p>
-We can choose less effective but cheaper heuristic. For instance, we know that all the 3x3 magic squares have 5 in the center. Let's try and exploit this fact.
+Not all the checks are that effective though. Sure, the first three are independent but if you have established that all your rows sum up to 15 each that means that the total is 45. Now if we check that the first two columns sum up to 15, the third one has to be 45 - 15*2 = 15. The fifth check is redundant.
     </p>
     <p>
-This also makes the main check a little bit cheaper as we now don't have to check for the central 5 in a sum.
+And we will gain a bit of performance if we throw it away. But in fact, we can also throw away the third check as well. If we assert that the numbers are unique then the total sum is 45 anyway.
+    </p>
+    <p>
+So let's throw away two redundant lines and see what will happen.
     </p>
     <table><tr>
     <td id="left_2">
     <pre>
-auto c15 = '5' * 3;
-uint_fast64_t ideal_char_map =
-    static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
-uint_fast64_t char_map_one = 1u;
-
 bool check_if_magic(const std::string& sq)
   {
-  if ((sq[0] + sq[1] + sq[2] != c15)
-    || (sq[3] + sq[4] + sq[5] != c15)
-    || (sq[6] + sq[7] + sq[8] != c15)
+  if ((sq[0] + sq[1] + sq[2] != '5'*3)
+    || (sq[3] + sq[4] + sq[5] != '5'*3)
+    || (sq[6] + sq[7] + sq[8] != '5'*3)
 
-    || (sq[0] + sq[3] + sq[6] != c15)
-    || (sq[1] + sq[4] + sq[7] != c15)
-    || (sq[2] + sq[5] + sq[8] != c15)
+    || (sq[0] + sq[3] + sq[6] != '5'*3)
+    || (sq[1] + sq[4] + sq[7] != '5'*3)
+    || (sq[2] + sq[5] + sq[8] != '5'*3)
 
-    || (sq[0] + sq[4] + sq[8] != c15)
-    || (sq[2] + sq[4] + sq[6] != c15))
+    || (sq[0] + sq[4] + sq[8] != '5'*3)
+    || (sq[2] + sq[4] + sq[6] != '5'*3))
     return false;
 
-  auto char_map = ideal_char_map;
+  std::array&lt;int, 9&gt; numbers_count{};
   for(auto i = 0u; i &lt; 9; ++i)
-    char_map ^= char_map_one &lt;&lt; sq[i];
-  if (char_map != 0)
-    return false;
+    ++numbers_count[sq[i]-'1'];
+  for(auto i = 0u; i &lt; 9; ++i)
+    if(numbers_count[i] != 1)
+      return false;
 
   return true;
   }
@@ -528,33 +520,26 @@ bool check_if_magic(const std::string& sq)
     </td>
     <td id="right_2">
     <pre>
-auto magic_number = '5' * 3;
-auto not_so_magic_number = '5' * 2;
-uint_fast64_t ideal_char_map =
-  static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
-uint_fast64_t char_map_one = 1u;
 bool check_if_magic(const std::string& sq)
   {
-  <b>if(sq[4] != '5')
-    return false;</b>
+  if ((sq[0] + sq[1] + sq[2] != '5'*3)
+     || (sq[3] + sq[4] + sq[5] != '5'*3)
+<b>//    || (sq[6] + sq[7] + sq[8] != '5'*3)</b>
 
-  if ((sq[0] + sq[1] + sq[2] != magic_number)
-    || (sq[3] + sq[5] != not_so_magic_number)
-    || (sq[6] + sq[7] + sq[8] != magic_number)
+    || (sq[0] + sq[3] + sq[6] != '5'*3)
+    || (sq[1] + sq[4] + sq[7] != '5'*3)
+<b>//    || (sq[2] + sq[5] + sq[8] != '5'*3)</b>
 
-    || (sq[0] + sq[3] + sq[6] != magic_number)
-    || (sq[1] + sq[7] != not_so_magic_number)
-    || (sq[2] + sq[5] + sq[8] != magic_number)
-
-    || (sq[0] + sq[8] != not_so_magic_number)
-    || (sq[2] + sq[6] != not_so_magic_number))
+    || (sq[0] + sq[4] + sq[8] != '5'*3)
+    || (sq[2] + sq[4] + sq[6] != '5'*3))
     return false;
 
-  auto char_map = ideal_char_map;
+  std::array&lt;int, 9&gt; numbers_count{};
   for(auto i = 0u; i &lt; 9; ++i)
-    char_map ^= char_map_one &lt;&lt; sq[i];
-  if (char_map != 0)
-    return false;
+    ++numbers_count[sq[i]-'1'];
+  for(auto i = 0u; i &lt; 9; ++i)
+    if(numbers_count[i] != 1)
+      return false;
 
   return true;
   }
@@ -565,22 +550,53 @@ bool check_if_magic(const std::string& sq)
 They are equally fast.
     </p>
     <button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
-    <p id="the_truth_2" style="display:none;">
-The right is more than 50% faster. The heuristic filters out 8 out of 9 strings, and it's cheap.
+    <div id="the_truth_2" style="display:none;">
+    <p>
+Not the best idea. Yes, we do assert that the numbers are unique but we do this in the most expensive part of the code. The fifth check is redundant because of the first three, but the third — only because of the thing we still have to compute. We retire a line of code but we lose pretty effective heuristic.
     </p>
+    </div>
     <script language="JavaScript">
     init_slider(1);
     </script>
-
-
+    
     <h2>
-Round 3. Shifts vs. no shifts
-    </h1>
+Round 3. Naïve solution vs. micro-optimization
+    </h2>
     <p>
-Heuristics are fun, but couldn't we squeeze a bit out of the original algorithm as it is? How about instead of doing a respectful number of trivial bit shifts, we store them in a special array?
+The naïve solution is the eight sum-is-15 checks and the digits-are-unique check. The micro-optimization concerns the latter part. To check if the string is a permutation of digits, we want to fill a map of bools and assert that its content is all true. Yes, with a binary map, if there are three equal digits in a square, the value in the map for the digit will be true. But then we wouldn't have enough digits left to fill all nine positions so it works.
+    </p>
+    <p>
+Since we are here for the performance, we would use an <span class="code_piece">uint_fast64_t</span> instead of a real map and trigger its bits. The assertion then would be a mere integer comparison. Also, we will start with the loaded map and check it with 0. All for performance sake, right?
     </p>
     <table><tr>
     <td id="left_3">
+    <pre>
+bool check_if_magic(const std::string& sq)
+  {
+  if ((sq[0] + sq[1] + sq[2] != '5'*3)
+    || (sq[3] + sq[4] + sq[5] != '5'*3)
+    || (sq[6] + sq[7] + sq[8] != '5'*3)
+
+    || (sq[0] + sq[3] + sq[6] != '5'*3)
+    || (sq[1] + sq[4] + sq[7] != '5'*3)
+    || (sq[2] + sq[5] + sq[8] != '5'*3)
+
+    || (sq[0] + sq[4] + sq[8] != '5'*3)
+    || (sq[2] + sq[4] + sq[6] != '5'*3))
+    return false;
+
+  std::array&lt;int, 9&gt; numbers_count{};
+  for(auto i = 0u; i &lt; 9; ++i)
+    ++numbers_count[sq[i]-'1'];
+  for(auto i = 0u; i &lt; 9; ++i)
+    if(numbers_count[i] != 1)
+      return false;
+
+  return true;
+  }
+    </pre>
+    </td>
+    <td id="right_3">
     <pre>
 auto c15 = '5' * 3;
 uint_fast64_t ideal_char_map =
@@ -601,51 +617,11 @@ bool check_if_magic(const std::string& sq)
     || (sq[2] + sq[4] + sq[6] != c15))
     return false;
 
-  auto char_map = ideal_char_map;
+<b>  auto char_map = ideal_char_map;
   for(auto i = 0u; i &lt; 9; ++i)
     char_map ^= char_map_one &lt;&lt; sq[i];
   if (char_map != 0)
-    return false;
-
-  return true;
-  }
-    </pre>
-    </td>
-    <td id="right_3">
-    <pre>
-auto magic_number = '5' * 3;
-auto not_so_magic_number = '5' * 2;
-const std::array&lt;uint16_t, 58&gt; bit_shifts {
-  0, 0, 0, 0,   0, 0, 0, 0,
-  0, 0, 0, 0,   0, 0, 0, 0,
-  0, 0, 0, 0,   0, 0, 0, 0,
-  0, 0, 0, 0,   0, 0, 0, 0,
-
-  0, 0, 0, 0,   0, 0, 0, 0,
-  0, 0, 0, 0,   0, 0, 0, 0,
-  0, 1, 2, 4,   8, 16, 32, 64,
-  128, 256
-  };
-
-bool check_if_magic(const std::string& sq)
-  {
-  if ((sq[0] + sq[1] + sq[2] != magic_number)
-    || (sq[3] + sq[5] != not_so_magic_number)
-    || (sq[6] + sq[7] + sq[8] != magic_number)
-
-    || (sq[0] + sq[3] + sq[6] != magic_number)
-    || (sq[1] + sq[7] != not_so_magic_number)
-    || (sq[2] + sq[5] + sq[8] != magic_number)
-
-    || (sq[0] + sq[4] + sq[8] != magic_number)
-    || (sq[2] + sq[4] + sq[6] != magic_number))
-    return false;
-
-  auto char_map = 0u;
-  for(auto i = 0u; i < 9; ++i)
-    <b>char_map ^= bit_shifts[sq[i]];</b>
-  if (char_map != 511)
-    return false;
+    return false;</b>
 
   return true;
   }
@@ -656,19 +632,38 @@ bool check_if_magic(const std::string& sq)
 They are equally fast.
     </p>
     <button type="button" onclick="reveal(2)" id="button_3">Reveal the truth</button>
-    <p id="the_truth_3" style="display:none;">
-The right is less than 50% faster, but still considerably better then the left.
+    <div id="the_truth_3" style="display:none;">
+    <p>
+The optimization seems legit. It seems sane. Yet apparently, the optimization makes the code slightly slower. How come?
     </p>
+    <p>
+The thing is, it doesn't. Generally. The optimization only works as a pessimization with this particular processor, compiler, and compiling options. Here are my measurements for other configurations:
+    </p>
+    <p>
+ARMv7 (v71), clang 3.5.0, -O2: <b>24.8</b> vs <b>24.4</b>
+    </p>
+    <p>
+Intel i7-7700HQ, g++, -O3: <b>0.89</b> vs <b>0.75</b>
+    </p>
+    <p>
+Intel i7-4700, MSVC 15.9.11, -O2: <b>4.0</b> vs <b>3.7</b>
+    </p>
+    <p>
+So yes, using an integer as a binary map is a good thing. Generally. But sometimes it just isn't.
+    </p>
+    </div>
     <script language="JavaScript">
     init_slider(2);
     </script>
-
-
+    
     <h2>
-Round 4. Fair magic test vs. precached answers
+Round 4. Microoptimized solution vs. the oddity heuristic
     </h1>
     <p>
-The thing is, there are only 8 3x3 magic squares in existence. So do we really have to test the string against the magic definition? Why couldn't we precache the magic values somewhere and simply compare with that?
+The heuristic proposed is meant to end the function as early as possible. It is based on a fact that in a magic square, the corner values are always even and the rest are odd. If one of the numbers fails to pass the oddity test, then there is no point in the full magic check at all.
+    </p>
+    <p>
+This heuristic is rather effective. On random numbers, it narrows down our cases with a pretty good 2<sup>9</sup> to 1 ratio. So only one string in 512 will get to the actual check. Well, technically our numbers are not entirely random, we have more odds than evens, but still.
     </p>
     <table><tr>
     <td id="left_4">
@@ -704,22 +699,40 @@ bool check_if_magic(const std::string& sq)
     </td>
     <td id="right_4">
     <pre>
-const std::array&lt;std::string, 8&gt;
-  all_magic_squares = {
-  "816357492", "492357816",
-  "618753294", "294753618",
-  "834159672", "672159834",
-  "438951276", "276951438"
-};
+auto c15 = '5' * 3;
+uint_fast64_t ideal_char_map =
+    static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
+uint_fast64_t char_map_one = 1u;
 
 bool check_if_magic(const std::string& sq)
-{
-  for(auto i = 0u; i &lt; 8; ++i)
-    if(sq == all_magic_squares[i])
-      return true;
+  {
+  <b>if ( (sq[0] & 1) != 0 || (sq[1] & 1) == 0
+    || (sq[2] & 1) != 0 || (sq[3] & 1) == 0
+    || (sq[4] & 1) == 0
+    || (sq[5] & 1) == 0 || (sq[6] & 1) != 0
+    || (sq[7] & 1) == 0 || (sq[8] & 1) != 0)
+    return false;</b>
 
-  return false;
-}
+  if ((sq[0] + sq[1] + sq[2] != c15)
+    || (sq[3] + sq[4] + sq[5] != c15)
+    || (sq[6] + sq[7] + sq[8] != c15)
+
+    || (sq[0] + sq[3] + sq[6] != c15)
+    || (sq[1] + sq[4] + sq[7] != c15)
+    || (sq[2] + sq[5] + sq[8] != c15)
+
+    || (sq[0] + sq[4] + sq[8] != c15)
+    || (sq[2] + sq[4] + sq[6] != c15))
+    return false;
+
+  auto char_map = ideal_char_map;
+  for(auto i = 0u; i &lt; 9; ++i)
+    char_map ^= char_map_one &lt;&lt; sq[i];
+  if (char_map != 0)
+    return false;
+
+  return true;
+  }
     </pre>
     </td></tr></table>
     <canvas id="slider_4" width=608 height=128></canvas>
@@ -728,7 +741,7 @@ They are equally fast.
     </p>
     <button type="button" onclick="reveal(3)" id="button_4">Reveal the truth</button>
     <p id="the_truth_4" style="display:none;">
-The right is more than 10 times slower. Apparently, eight string comparisons are way heavier than the whole testing thing.
+The right is only slightly more than 10% faster. The thing is, although this heuristic is great in narrowing, the computation itself is so light, the cost of heuristic eats up its benefit.
     </p>
     <script language="JavaScript">
     init_slider(3);
@@ -736,194 +749,16 @@ The right is more than 10 times slower. Apparently, eight string comparisons are
 
 
     <h2>
-Round 5. String array vs. string set
+Round 5. Direct solution vs. the central 5 heuristic
     </h1>
     <p>
-Well, strings comparisons are relatively slow. But we don't have to do eight comparisons simply every time. If we organize our comparison work-flow as a tree-like structure, we could minimize the number of comparisons to somewhere form 1 to 3 per string.
+We can choose less effective but cheaper heuristic. For instance, we know that all the 3x3 magic squares have 5 in the center. Let's try and exploit this fact.
     </p>
     <p>
-Luckily we don't have to invent the tree, we can take the standard set instead. Technically, it might not necessary be a tree, but its performance guarantees are declared by the standard, so it will work for us any way.
+Also, this makes the main check a little bit cheaper since we don't have to check for the central 5 in a sum anymore.
     </p>
     <table><tr>
     <td id="left_5">
-    <pre>
-const std::array&lt;std::string, 8&gt;
-  all_magic_squares = {
-  "816357492", "492357816",
-  "618753294", "294753618",
-  "834159672", "672159834",
-  "438951276", "276951438"
-};
-
-bool check_if_magic(const std::string& sq)
-{
-  for(auto i = 0u; i < 8; ++i)
-    if(sq == all_magic_squares[i])
-      return true;
-
-  return false;
-}
-    </pre>
-    </td>
-    <td id="right_5">
-    <pre>
-const <b>std::set</b>&lt;std::string&gt;
-  all_magic_squares = {
-  "816357492", "492357816",
-  "618753294", "294753618",
-  "834159672", "672159834",
-  "438951276", "276951438"
-};
-
-bool check_if_magic(const std::string& sq)
-{
-  return all_magic_squares.find(sq) !=
-    all_magic_squares.end());
-}
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_5" width=608 height=128></canvas>
-    <p class="comment" id="comment_5">
-They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(4)" id="button_5">Reveal the truth</button>
-    <p id="the_truth_5" style="display:none;">
-The right is considerably better. Maybe, not as good as any of the numerical solutions, but better than the string array anyway.
-    </p>
-    <script language="JavaScript">
-    init_slider(4);
-    </script>
-
-
-    <h2>
-Round 6. String set vs. string unordered set
-    </h1>
-    <p>
-We have another structure that seems promising in terms of performance. The unordered set is known to have constant complexity for the cases with no collisions. Since our data is small, it is unlikely to cause collisions in a hash map. Let's try that.
-    </p>
-    <table><tr>
-    <td id="left_6">
-    <pre>
-const std::set&lt;std::string&gt;
-  all_magic_squares = {
-  "816357492", "492357816",
-  "618753294", "294753618",
-  "834159672", "672159834",
-  "438951276", "276951438"
-};
-
-bool check_if_magic(const std::string& sq)
-{
-  return all_magic_squares.find(sq) !=
-    all_magic_squares.end());
-}
-    </pre>
-    </td>
-    <td id="right_6">
-    <pre>
-const <b>std::unordered_set</b>&lt;std::string&gt;
-  all_magic_squares = {
-  "816357492", "492357816",
-  "618753294", "294753618",
-  "834159672", "672159834",
-  "438951276", "276951438"
-};
-
-bool check_if_magic(const std::string& sq)
-{
-  return all_magic_squares.find(sq) !=
-    all_magic_squares.end());
-}
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_6" width=608 height=128></canvas>
-    <p class="comment" id="comment_6">
-They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(5)" id="button_6">Reveal the truth</button>
-    <p id="the_truth_6" style="display:none;">
-The usual set works better here. Yes, we saved on comparisons, but the hash function for a string turns out to be rather heavy itself.
-    </p>
-    <script language="JavaScript">
-    init_slider(5);
-    </script>
-
-
-    <h2>
-Round 7. String array vs. string array plus the oddity heuristic
-    </h1>
-    <p>
-Now, when we have heavier body, maybe we can gain more from the heuristic. Let's try our oddity one here.
-    </p>
-    <table><tr>
-    <td id="left_7">
-    <pre>
-const std::array&lt;std::string, 8&gt;
-  all_magic_squares = {
-  "816357492", "492357816",
-  "618753294", "294753618",
-  "834159672", "672159834",
-  "438951276", "276951438"
-};
-
-bool check_if_magic(const std::string& sq)
-{
-  for(auto i = 0u; i < 8; ++i)
-    if(sq == all_magic_squares[i])
-      return true;
-
-  return false;
-}
-    </pre>
-    </td>
-    <td id="right_7">
-    <pre>
-const std::array&lt;std::string, 8&gt;
-  all_magic_squares = {
-  "816357492", "492357816",
-  "618753294", "294753618",
-  "834159672", "672159834",
-  "438951276", "276951438"
-};
-
-bool check_if_magic(const std::string& sq)
-{
-  <b>if ( (sq[0] & 1) != 0 || (sq[1] & 1) == 0
-    || (sq[2] & 1) != 0 || (sq[3] & 1) == 0
-    || (sq[4] & 1) == 0
-    || (sq[5] & 1) == 0 || (sq[6] & 1) != 0
-    || (sq[7] & 1) == 0 || (sq[8] & 1) != 0)
-    return false;</b>
-
-  for(auto i = 0u; i < 8; ++i)
-    if(sq == all_magic_squares[i])
-      return true;
-
-  return false;
-}
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_7" width=608 height=128></canvas>
-    <p class="comment" id="comment_7">
-They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(6)" id="button_7">Reveal the truth</button>
-    <p id="the_truth_7" style="display:none;">
-And it works like a charm. Although, the whole thing is now only a little faster than the original direct solution and slower than every other numeric one. Looks like storing answers in strings is not such a good idea.
-    </p>
-    <script language="JavaScript">
-    init_slider(6);
-    </script>
-
-
-    <h2>
-Round 8. Direct solution vs. answers in uint64_t.
-    </h1>
-    <p>
-Since we know that the center value is always five, we don't have to store it in our answers either. This leaves us with exactly 8 bytes per string that can be cheaply encoded as a single 64-bit value. Why don't we store these values instead of strings?
-    </p>
-    <table><tr>
-    <td id="left_8">
     <pre>
 auto c15 = '5' * 3;
 uint_fast64_t ideal_char_map =
@@ -954,7 +789,354 @@ bool check_if_magic(const std::string& sq)
   }
     </pre>
     </td>
+    <td id="right_5">
+    <pre>
+auto magic_number = '5' * 3;
+auto not_so_magic_number = '5' * 2;
+uint_fast64_t ideal_char_map =
+  static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
+uint_fast64_t char_map_one = 1u;
+bool check_if_magic(const std::string& sq)
+  {
+  <b>if(sq[4] != '5')
+    return false;</b>
+
+  if ((sq[0] + sq[1] + sq[2] != magic_number)
+    || (sq[3] + sq[5] != not_so_magic_number)
+    || (sq[6] + sq[7] + sq[8] != magic_number)
+
+    || (sq[0] + sq[3] + sq[6] != magic_number)
+    || (sq[1] + sq[7] != not_so_magic_number)
+    || (sq[2] + sq[5] + sq[8] != magic_number)
+
+    || (sq[0] + sq[8] != not_so_magic_number)
+    || (sq[2] + sq[6] != not_so_magic_number))
+    return false;
+
+  auto char_map = ideal_char_map;
+  for(auto i = 0u; i &lt; 9; ++i)
+    char_map ^= char_map_one &lt;&lt; sq[i];
+  if (char_map != 0)
+    return false;
+
+  return true;
+  }
+    </pre>
+    </td></tr></table>
+    <canvas id="slider_5" width=608 height=128></canvas>
+    <p class="comment" id="comment_5">
+They are equally fast.
+    </p>
+    <button type="button" onclick="reveal(4)" id="button_5">Reveal the truth</button>
+    <div id="the_truth_5" style="display:none;">
+    <p>
+The right is more than 50% faster. But it shouldn't be. Trying to understand why it is, I got it wrong the first time. Luckily, I was corrected.
+    </p>
+    <p>
+<b>[spoilers!]</b> <a href="https://medium.com/@veedrac/learning-the-value-of-good-benchmarking-technique-with-c-magic-squares-b61b3386c97f">Learning the value of good benchmarking technique with C++ magic squares</a> is an excellent explanation of why my benchmark sucks. Long story short, branch prediction. 
+    </p>
+    <p>
+When the numbers come in order, this 5-check works in a very branch prediction friendly way. The data have a pattern. It's 26244 not fives, then 6561 fives, then 52488 not fives, and then its 6561 fives again. Of course, it's cheap. 
+    </p>
+    <p>
+But with randomized input, <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/cpp_magic_cubes/better_benchmark">it isn't</a>. It's still cheap, sure, but not enough to pay off own weight. The code on the right loses a bit to the code on the left.
+    </p>
+    </div>
+    <script language="JavaScript">
+    init_slider(4);
+    </script>
+
+    <h2>
+Round 6. Fair magic test vs. precached answers
+    </h1>
+    <p>
+There are only 8 3x3 magic squares in existence. So do we really have to test the string against the magic definition? Why couldn't we precache the magic values somewhere and simply compare with that?
+    </p>
+    <table><tr>
+    <td id="left_6">
+    <pre>
+auto c15 = '5' * 3;
+uint_fast64_t ideal_char_map =
+    static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
+uint_fast64_t char_map_one = 1u;
+
+bool check_if_magic(const std::string& sq)
+  {
+  if ((sq[0] + sq[1] + sq[2] != c15)
+    || (sq[3] + sq[4] + sq[5] != c15)
+    || (sq[6] + sq[7] + sq[8] != c15)
+
+    || (sq[0] + sq[3] + sq[6] != c15)
+    || (sq[1] + sq[4] + sq[7] != c15)
+    || (sq[2] + sq[5] + sq[8] != c15)
+
+    || (sq[0] + sq[4] + sq[8] != c15)
+    || (sq[2] + sq[4] + sq[6] != c15))
+    return false;
+
+  auto char_map = ideal_char_map;
+  for(auto i = 0u; i &lt; 9; ++i)
+    char_map ^= char_map_one &lt;&lt; sq[i];
+  if (char_map != 0)
+    return false;
+
+  return true;
+  }
+    </pre>
+    </td>
+    <td id="right_6">
+    <pre>
+const std::array&lt;std::string, 8&gt;
+  all_magic_squares = {
+  "816357492", "492357816",
+  "618753294", "294753618",
+  "834159672", "672159834",
+  "438951276", "276951438"
+};
+
+bool check_if_magic(const std::string& sq)
+{
+  for(auto i = 0u; i &lt; 8; ++i)
+    if(sq == all_magic_squares[i])
+      return true;
+
+  return false;
+}
+    </pre>
+    </td></tr></table>
+    <canvas id="slider_6" width=608 height=128></canvas>
+    <p class="comment" id="comment_6">
+They are equally fast.
+    </p>
+    <button type="button" onclick="reveal(5)" id="button_6">Reveal the truth</button>
+    <p id="the_truth_6" style="display:none;">
+The right is more than 10 times slower. Apparently, string comparisons are way heavier than the whole testing thing.
+    </p>
+    <script language="JavaScript">
+    init_slider(5);
+    </script>
+
+
+    <h2>
+Round 7. String array vs. string set
+    </h1>
+    <p>
+Well, strings comparisons are relatively slow. But we don't have to do all eight comparisons every time. If we organize our comparison work-flow as a tree-like structure, we could minimize the number of comparisons to somewhere form 1 to 3 per string.
+    </p>
+    <p>
+Luckily we don't have to reinvent the tree, we can take the standard <i>set</i> instead. 
+    </p>
+    <table><tr>
+    <td id="left_7">
+    <pre>
+const std::array&lt;std::string, 8&gt;
+  all_magic_squares = {
+  "816357492", "492357816",
+  "618753294", "294753618",
+  "834159672", "672159834",
+  "438951276", "276951438"
+};
+
+bool check_if_magic(const std::string& sq)
+{
+  for(auto i = 0u; i < 8; ++i)
+    if(sq == all_magic_squares[i])
+      return true;
+
+  return false;
+}
+    </pre>
+    </td>
+    <td id="right_7">
+    <pre>
+const <b>std::set</b>&lt;std::string&gt;
+  all_magic_squares = {
+  "816357492", "492357816",
+  "618753294", "294753618",
+  "834159672", "672159834",
+  "438951276", "276951438"
+};
+
+bool check_if_magic(const std::string& sq)
+{
+  return all_magic_squares.find(sq) !=
+    all_magic_squares.end());
+}
+    </pre>
+    </td></tr></table>
+    <canvas id="slider_7" width=608 height=128></canvas>
+    <p class="comment" id="comment_7">
+They are equally fast.
+    </p>
+    <button type="button" onclick="reveal(6)" id="button_7">Reveal the truth</button>
+    <p id="the_truth_7" style="display:none;">
+The right is considerably better. Well, better than the string array.
+    </p>
+    <script language="JavaScript">
+    init_slider(6);
+    </script>
+
+
+    <h2>
+Round 8. String set vs. string unordered set
+    </h1>
+    <p>
+We have another structure that seems promising in terms of performance. The unordered set is known to have constant complexity for the cases with no collisions. Since our data is small, it is unlikely to cause collisions in a hash map. Let's try that.
+    </p>
+    <table><tr>
+    <td id="left_8">
+    <pre>
+const std::set&lt;std::string&gt;
+  all_magic_squares = {
+  "816357492", "492357816",
+  "618753294", "294753618",
+  "834159672", "672159834",
+  "438951276", "276951438"
+};
+
+bool check_if_magic(const std::string& sq)
+{
+  return all_magic_squares.find(sq) !=
+    all_magic_squares.end());
+}
+    </pre>
+    </td>
     <td id="right_8">
+    <pre>
+const <b>std::unordered_set</b>&lt;std::string&gt;
+  all_magic_squares = {
+  "816357492", "492357816",
+  "618753294", "294753618",
+  "834159672", "672159834",
+  "438951276", "276951438"
+};
+
+bool check_if_magic(const std::string& sq)
+{
+  return all_magic_squares.find(sq) !=
+    all_magic_squares.end());
+}
+    </pre>
+    </td></tr></table>
+    <canvas id="slider_8" width=608 height=128></canvas>
+    <p class="comment" id="comment_8">
+They are equally fast.
+    </p>
+    <button type="button" onclick="reveal(7)" id="button_8">Reveal the truth</button>
+    <p id="the_truth_8" style="display:none;">
+The usual set works better here. Yes, we saved on comparisons, but the hash function for a string turns out to be rather heavy itself.
+    </p>
+    <script language="JavaScript">
+    init_slider(7);
+    </script>
+
+
+    <h2>
+Round 9. String array vs. string array plus the oddity heuristic
+    </h1>
+    <p>
+Now, when we have heavier body, maybe we can gain more from the heuristic. Let's try our oddity one here.
+    </p>
+    <table><tr>
+    <td id="left_9">
+    <pre>
+const std::array&lt;std::string, 8&gt;
+  all_magic_squares = {
+  "816357492", "492357816",
+  "618753294", "294753618",
+  "834159672", "672159834",
+  "438951276", "276951438"
+};
+
+bool check_if_magic(const std::string& sq)
+{
+  for(auto i = 0u; i < 8; ++i)
+    if(sq == all_magic_squares[i])
+      return true;
+
+  return false;
+}
+    </pre>
+    </td>
+    <td id="right_9">
+    <pre>
+const std::array&lt;std::string, 8&gt;
+  all_magic_squares = {
+  "816357492", "492357816",
+  "618753294", "294753618",
+  "834159672", "672159834",
+  "438951276", "276951438"
+};
+
+bool check_if_magic(const std::string& sq)
+{
+  <b>if ( (sq[0] & 1) != 0 || (sq[1] & 1) == 0
+    || (sq[2] & 1) != 0 || (sq[3] & 1) == 0
+    || (sq[4] & 1) == 0
+    || (sq[5] & 1) == 0 || (sq[6] & 1) != 0
+    || (sq[7] & 1) == 0 || (sq[8] & 1) != 0)
+    return false;</b>
+
+  for(auto i = 0u; i &lt; 8; ++i)
+    if(sq == all_magic_squares[i])
+      return true;
+
+  return false;
+}
+    </pre>
+    </td></tr></table>
+    <canvas id="slider_9" width=608 height=128></canvas>
+    <p class="comment" id="comment_9">
+They are equally fast.
+    </p>
+    <button type="button" onclick="reveal(8)" id="button_9">Reveal the truth</button>
+    <p id="the_truth_9" style="display:none;">
+And it works like a charm. 
+    </p>
+    <script language="JavaScript">
+    init_slider(8);
+    </script>
+
+
+    <h2>
+Round 10. Direct solution vs. answers in uint64_t.
+    </h1>
+    <p>
+Since we know that the center value is always five, we don't have to store it in our answers either. This leaves us with exactly 8 bytes per string that can be cheaply encoded as a single 64-bit value. Why don't we store these values instead of strings?
+    </p>
+    <table><tr>
+    <td id="left_10">
+    <pre>
+auto c15 = '5' * 3;
+uint_fast64_t ideal_char_map =
+    static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
+uint_fast64_t char_map_one = 1u;
+
+bool check_if_magic(const std::string& sq)
+  {
+  if ((sq[0] + sq[1] + sq[2] != c15)
+    || (sq[3] + sq[4] + sq[5] != c15)
+    || (sq[6] + sq[7] + sq[8] != c15)
+
+    || (sq[0] + sq[3] + sq[6] != c15)
+    || (sq[1] + sq[4] + sq[7] != c15)
+    || (sq[2] + sq[5] + sq[8] != c15)
+
+    || (sq[0] + sq[4] + sq[8] != c15)
+    || (sq[2] + sq[4] + sq[6] != c15))
+    return false;
+
+  auto char_map = ideal_char_map;
+  for(auto i = 0u; i &lt; 9; ++i)
+    char_map ^= char_map_one &lt;&lt; sq[i];
+  if (char_map != 0)
+    return false;
+
+  return true;
+  }
+    </pre>
+    </td>
+    <td id="right_10">
     <pre>
 const std::array&lt;uint64_t, 8&gt; magic_numbers
 {
@@ -983,27 +1165,27 @@ bool check_if_magic(const std::string& sq)
 }
     </pre>
     </td></tr></table>
-    <canvas id="slider_8" width=608 height=128></canvas>
-    <p class="comment" id="comment_8">
+    <canvas id="slider_10" width=608 height=128></canvas>
+    <p class="comment" id="comment_10">
 They are equally fast.
     </p>
-    <button type="button" onclick="reveal(7)" id="button_8">Reveal the truth</button>
-    <p id="the_truth_8" style="display:none;">
+    <button type="button" onclick="reveal(9)" id="button_10">Reveal the truth</button>
+    <p id="the_truth_10" style="display:none;">
 It's fast! In fact, it is as fast as our best choice from the earlier.
     </p>
     <script language="JavaScript">
-    init_slider(7);
+    init_slider(9);
     </script>
 
 
     <h2>
-Round 9. Array on uint64_t vs. set of uint64_t.
+Round 11. An array on uint64_t vs. a set of uint64_t.
     </h1>
     <p>
-Let's now use set instead of array here. There should be less comparisons anyway, but would it help?
+Let's now use a set instead of an array here. There should be fewer comparisons anyway, but would it help?
     </p>
     <table><tr>
-    <td id="left_9">
+    <td id="left_11">
     <pre>
 const std::array&lt;uint64_t, 8&gt; magic_numbers
 {
@@ -1032,7 +1214,7 @@ bool check_if_magic(const std::string& sq)
 }
     </pre>
     </td>
-    <td id="right_9">
+    <td id="right_11">
     <pre>
 const <b>std::set</b>&lt;uint64_t&gt; magic_numbers
 {
@@ -1059,27 +1241,27 @@ bool check_if_magic(const std::string& sq)
 }
     </pre>
     </td></tr></table>
-    <canvas id="slider_9" width=608 height=128></canvas>
-    <p class="comment" id="comment_9">
+    <canvas id="slider_11" width=608 height=128></canvas>
+    <p class="comment" id="comment_11">
 They are equally fast.
     </p>
-    <button type="button" onclick="reveal(8)" id="button_9">Reveal the truth</button>
-    <p id="the_truth_9" style="display:none;">
-Well, on this data a simple loop works better. Perhaps, it's because we only need to go through 64 bytes and it fits into a single cache line. We loose this compactness with the set.
+    <button type="button" onclick="reveal(10)" id="button_11">Reveal the truth</button>
+    <p id="the_truth_11" style="display:none;">
+Well, on this data a simple loop works better. Perhaps, it's because we only need to go through 64 bytes and it fits into a single cache line. We lose this compactness with the set.
     </p>
     <script language="JavaScript">
-    init_slider(8);
+    init_slider(10);
     </script>
 
 
     <h2>
-Round 10. Array on uint64_t vs. unordered set of uint64_t.
+Round 12. An array on uint64_t vs. an unordered set of uint64_t.
     </h1>
     <p>
 Could we gain some speed from using unordered set?
     </p>
     <table><tr>
-    <td id="left_10">
+    <td id="left_12">
     <pre>
 const std::array&lt;uint64_t, 8&gt; magic_numbers
 {
@@ -1108,7 +1290,7 @@ bool check_if_magic(const std::string& sq)
 }
     </pre>
     </td>
-    <td id="right_10">
+    <td id="right_12">
     <pre>
 const <b>std::unordered_set</b>&lt;uint64_t&gt; magic_numbers
 {
@@ -1135,16 +1317,16 @@ bool check_if_magic(const std::string& sq)
 }
     </pre>
     </td></tr></table>
-    <canvas id="slider_10" width=608 height=128></canvas>
-    <p class="comment" id="comment_10">
+    <canvas id="slider_12" width=608 height=128></canvas>
+    <p class="comment" id="comment_12">
 They are equally fast.
     </p>
-    <button type="button" onclick="reveal(9)" id="button_10">Reveal the truth</button>
-    <p id="the_truth_10" style="display:none;">
-Apparently not. Unordered set may work wonders for large and uniformly distributed set of data. But we simply have our loop too effective to beat.
+    <button type="button" onclick="reveal(11)" id="button_12">Reveal the truth</button>
+    <p id="the_truth_12" style="display:none;">
+Apparently, not. Unordered sets may work wonders for large and uniformly distributed data. But our loop is just too small to beat.
     </p>
     <script language="JavaScript">
-    init_slider(9);
+    init_slider(11);
     </script>
 
     <div id="show_in_the_end" style="display:none;">
@@ -1160,12 +1342,24 @@ You scored <span id="score"></span> pixels of error. I'm not sure if it's good o
 Conclusion
     </h2>
     <p>
-Probably, I shouldn't talk for everyone but in my case the conclusion would have been: <i>“bad measurements beat good intuition nine times out of ten”</i>. Even though I do have a long history of making things run faster, this extreme case — small data, cheap body — neglected my experience to naught. String operations seemed to be cheaper, heuristics — more effective and there were also high hopes for the standard containers. Well, at least slightly higher hopes.
+Probably, I shouldn't talk for everyone but in my case, the conclusion would have been: <i>“bad measurements beat good intuition nine times out of ten”</i>. Even though I do have a long history of making things fast, this extreme case — small data, cheap body — neglected my experience to naught. String operations seemed to be cheaper, heuristics — more effective and there were also high hopes for the standard containers. Well, at least slightly higher hopes.
     </p>
     <p>
 I've learned something from this experience. Hope you did too. If so, then no matter what your score is, you are still a winner.
     </p>
-
+    <h2>
+Links
+    </h2>
+    <p>
+Further reading: <a href="https://medium.com/@veedrac/learning-the-value-of-good-benchmarking-technique-with-c-magic-squares-b61b3386c97f">Learning the value of good benchmarking technique with C++ magic squares</a>.
+    </p>
+    <p>
+Reddit discussions: <a href="https://www.reddit.com/r/programming/comments/7e9ty4/challenge_your_performance_intuition_with_c_magic/">r/programming</a>; <a href="https://www.reddit.com/r/cpp/comments/7e826b/challenge_your_performance_intuition_with_c_magic/">r/cpp</a>
+    </p>
+    <p>
+Github with <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/cpp_magic_cubes">all the experiments</a>.
+    </p>
+    
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
     <tr>
     <td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
