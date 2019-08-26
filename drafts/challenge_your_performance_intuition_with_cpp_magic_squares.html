@@ -302,10 +302,10 @@ function reveal(no){
 Challenge your performance intuition with C++ magic squares
     </h1>
     <p>
-This was supposed to be a five minute interview question. I came up with it on Thursday, then spent a night looking for a good answer. Then the other night. Then the Saturday morning. Then it finally occurred to me that it might not work terribly well as a five minute question after all.
+This was supposed to be a five minute interview question. I came up with it on Thursday, then spent a night looking for a good answer. Then the other night. Then the Saturday morning. Then it finally occurred to me that it's more like 500 minutes now and it wouldn't work for an interview.
     </p>
     <p>
-But it's still a great problem to fiddle with. And it goes like this.
+But it's still a fun problem to fiddle with. And it goes like this.
     </p>
     <p>
 Here is a magic square:
@@ -318,13 +318,13 @@ Here is a magic square:
     <td>6</td><td>7</td><td>2</td>
     </tr></table>
     <p>
-It has all the numbers from 1 to 9 each exactly once. The sum in every row is 15. The sum in every column is 15. And the sum in both diagonals is, of course, also 15. We can write it as a 9-character string like this: <span class="code">"834159672"</span>.
+It has all the numbers from 1 to 9 each occuring exactly once. The sum in every row is 15. The sum in every column is 15. And the sum in both diagonals is 15, too. We can write a square as a 9-character string like this: <span class="code">"834159672"</span>.
     </p>
     <p>
-<b>The problem:</b> propose a function that tells if a 3x3 square written as an ASCII string of digits is magic or not <i>in the most effective manner</i>.
+<b>The problem:</b> propose a function that tells if a 3x3 square written as an ASCII string of digits is magic or not <i>fast</i>.
     </p>
     <p>
-Here is some simple measuring code. It has no dependencies, and it's C++11 standard compliant, so it runs in basically every environment.
+Here is a benchmark. It has no dependencies, and it's C++11 standard compliant, so it runs in basically every environment.
     </p>
     <pre style="background-color: #bbbbff; width: 505pt; color: #000;">
 #include &lt;iostream&gt;
@@ -382,10 +382,10 @@ int main()
 }
     </pre>
     <p>
-I ran it with an empty checker to see how much time the generator takes. Then ran eleven different solutions three times each, and picked the best time for every solution. Now I know what works and what not.
+I ran it with an empty checker to see how much time the generator takes. Then ran thirteen different solutions three times each, and picked the best time for every solution. Now I know what works and what not.
     </p>
     <p>
-Let's play a game. There will be twelve rounds, each round is a match between two solutions. Or rather between their execution times. Using your intuition and best judgment, please estimate their <i>relative</i> performance. Use the slider below the code samples.
+Now let's play a game. There will be twelve rounds, each round is a match between two solutions. Or rather between their execution times. Using your intuition and best judgment, please estimate their <i>relative</i> performance. Use the sliders below the code samples.
     </p>
     <p class="comment">
 All is measured on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz. <br>Compiled with g++ 5.4.0 -std=c++11 -O2.
@@ -395,10 +395,10 @@ All is measured on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz. <br>Compiled with 
 Round 1. Check 15 and check digis vs. check digits and then check 15
     </h2>
     <p>
-The naïve solution would be to check every row, column, and diagonal sum and then assert that all the numbers are there. We don't have to parse actual numbers, we can go with ASCII codes just fine. 
+The naïve solution would be to check every row, column, and diagonal sum and then assert that all the numbers are there. We don't have to parse actual numbers, we can go with ASCII. 
     </p>
     <p>    
-To check that all the numbers are there and each occurs only once, we can fill the array of counters and then check that every number occurs exactly one time.
+To check that all the numbers are there and each occurs only once, we can fill the array of counters and then check that every number has its counter set to 1.
     </p>
     <p>
 The question is, what should we do first? On the left, the rows, columns, and diagonals checks come first and then there's a counter check. On the right, the counter check comes first. Let's find out which one if faster. 
@@ -482,7 +482,7 @@ It's very effective.
 Round 2. All checks vs. less checks
     </h2>
     <p>
-Not all the checks are that effective though. Sure, the first three are independent but if you established that all your rows sum up to 15 each that means that the total is 45. Now if we check that the first two columns sum up to 15, the third one has to be 45 - 15*2 = 15. The fifth check is redundant.
+Not all the checks are that effective though. Sure, the first three are independent but if you have established that all your rows sum up to 15 each that means that the total is 45. Now if we check that the first two columns sum up to 15, the third one has to be 45 - 15*2 = 15. The fifth check is redundant.
     </p>
     <p>
 And we will gain a bit of perfromance if we throw it away. But in fact, we can also throw away the third check as well. If we assert that the numbers are unique then the total sum is 45 anyway.
@@ -563,7 +563,10 @@ Not the best idea. Yes, we do assert that the numbers are unique but we do this 
 Round 3. Naïve solution vs. microoptimization
     </h2>
     <p>
-The naïve solution is the eight sum check and the digits-are-unique check. The microoptimization concerns the latter part. To check if the string is a permutation of digits, we want a binary map and assert it content after filling it with the input. Since we are here for the performance, we would use an <span class="code_piece">uint_fast64_t</span> instead of a real map and trigger its bits. The assertion then would be a mere integer comparison.
+The naïve solution is the eight sum-is-15 checks and the digits-are-unique check. The microoptimization concerns the latter part. To check if the string is a permutation of digits, we want to bill a map of bools and assert it content is all true. Yes, with binary map, if there are three equal digits in a square, the value in the map for the digit will be true. But then we wouldn't have enough digits left to fill all nine positions so it works.
+    </p>
+    <p>
+Since we are here for the performance, we would use an <span class="code_piece">uint_fast64_t</span> instead of a real map and trigger its bits. The assertion then would be a mere integer comparison. Also, we will start with the loaded map and check it with 0. All for performance sake, right?
     </p>
     <table><tr>
     <td id="left_3">
@@ -634,7 +637,7 @@ They are equally fast.
 The optimisation seems legit. It seems sane. Yet apparently, the optimization makes the code slightly slower. How come?
     </p>
     <p>
-The thing is, it doesn't. Generally. It only works as a pesimisation with this particular processor, compiler, and enabled optimizations triplet. Here are my measurements on other configurations:
+The thing is, it doesn't. Generally. It only works as a pesimisation with this particular processor, compiler, and enabled optimizations. Here are my measurements on other configurations:
     </p>
     <p>
 ARMv7 (v71), clang 3.5.0, -O2: 24.8 vs 24.4   
@@ -646,7 +649,7 @@ Intel i7-7700HQ, g++, -O3: 0.89 vs 0.75
 Intel i7-4700, MSVC 15.9.11, -O2: 4.0 vs 3.7
     </p>
     <p>
-So yes, using an integera as a binary map is a good thing. Generally. But sometimes it just isn't. It all depends on the context.
+So yes, using an integer as a binary map is a good thing. Generally. But sometimes it just isn't.
     </p>
     </div>
     <script language="JavaScript">
@@ -657,7 +660,10 @@ So yes, using an integera as a binary map is a good thing. Generally. But someti
 Round 4. Microoptimized solution vs. the oddity heuristic
     </h1>
     <p>
-The heuristic proposed is meant to end the function as early as possible. It is based on a fact that in a magic square the corner values are always even and the rest are odd. If one of the numbers fails to pass the oddity test, then there is no point in the full magic check at all. Also, as you can see, this heuristic is rather effective. On random numbers it narrows down our cases with a pretty good 2<sup>9</sup> to 1 ratio. So only one string in 512 will get to the actual check. Well, technically our numbers are not entirely random, we have more odds than evens, but still.
+The heuristic proposed is meant to end the function as early as possible. It is based on a fact that in a magic square, the corner values are always even and the rest are odd. If one of the numbers fails to pass the oddity test, then there is no point in the full magic check at all.
+    </p>
+    <p>
+This heuristic is rather effective. On random numbers it narrows down our cases with a pretty good 2<sup>9</sup> to 1 ratio. So only one string in 512 will get to the actual check. Well, technically our numbers are not entirely random, we have more odds than evens, but still.
     </p>
     <table><tr>
     <td id="left_4">
@@ -735,7 +741,7 @@ They are equally fast.
     </p>
     <button type="button" onclick="reveal(3)" id="button_4">Reveal the truth</button>
     <p id="the_truth_4" style="display:none;">
-The right is only slightly more than 10% faster. The thing is, although this heuristic is great in narrowing, it is rather heavy by itself. We gain some, we lose some.
+The right is only slightly more than 10% faster. The thing is, although this heuristic is great in narrowing, the computation itself is so light, the cost of heuristic eats up its benefit.
     </p>
     <script language="JavaScript">
     init_slider(3);
@@ -749,7 +755,7 @@ Round 5. Direct solution vs. the central 5 heuristic
 We can choose less effective but cheaper heuristic. For instance, we know that all the 3x3 magic squares have 5 in the center. Let's try and exploit this fact.
     </p>
     <p>
-This also makes the main check a little bit cheaper as we now don't have to check for the central 5 in a sum.
+Also, this makes the main check a little bit cheaper since we don't have to check for the central 5 in a sum anymore.
     </p>
     <table><tr>
     <td id="left_5">
@@ -830,10 +836,10 @@ The right is more than 50% faster. But it shouldn't be. Trying to understand why
 <b>[spoilers!]</b> <a href="https://medium.com/@veedrac/learning-the-value-of-good-benchmarking-technique-with-c-magic-squares-b61b3386c97f">Learning the value of good benchmarking technique with C++ magic squares</a> is an excellent explanaton of why my benchmark sucks. Long story short, branch prediction. 
     </p>
     <p>
-When the numbers come in order, this 5-check works in a very branch prediction friendly way. It has a pattern. It's 26244 not fives, then 6561 fives, then 52488 not fives, and then its 6561 fives again. Of course, it's cheap. 
+When the numbers come in order, this 5-check works in a very branch prediction friendly way. The data have a pattern. It's 26244 not fives, then 6561 fives, then 52488 not fives, and then its 6561 fives again. Of course, it's cheap. 
     </p>
     <p>
-But with randomized input, <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/cpp_magic_cubes/better_benchmark">it isn't</a>. It's still cheap, sure, but it doesn't even pay off. The code on the right actually loses a bit to the code on the left.
+But with randomized input, <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/cpp_magic_cubes/better_benchmark">it isn't</a>. It's still cheap, sure, but not enough to pay off own weight. The code on the right actually loses a bit to the code on the left.
     </p>
     </div>
     <script language="JavaScript">
@@ -844,7 +850,7 @@ But with randomized input, <a href="https://github.com/akalenuk/wordsandbuttons/
 Round 6. Fair magic test vs. precached answers
     </h1>
     <p>
-The thing is, there are only 8 3x3 magic squares in existence. So do we really have to test the string against the magic definition? Why couldn't we precache the magic values somewhere and simply compare with that?
+There are only 8 3x3 magic squares in existence. So do we really have to test the string against the magic definition? Why couldn't we precache the magic values somewhere and simply compare with that?
     </p>
     <table><tr>
     <td id="left_6">
@@ -915,10 +921,10 @@ The right is more than 10 times slower. Apparently, eight string comparisons are
 Round 7. String array vs. string set
     </h1>
     <p>
-Well, strings comparisons are relatively slow. But we don't have to do eight comparisons simply every time. If we organize our comparison work-flow as a tree-like structure, we could minimize the number of comparisons to somewhere form 1 to 3 per string.
+Well, strings comparisons are relatively slow. But we don't have to do all eight comparisons every time. If we organize our comparison work-flow as a tree-like structure, we could minimize the number of comparisons to somewhere form 1 to 3 per string.
     </p>
     <p>
-Luckily we don't have to invent the tree, we can take the standard set instead. Technically, it might not necessary be a tree, but its performance guarantees are declared by the standard, so it will work for us any way.
+Luckily we don't have to reinvent the tree, we can take the standard <i>set</i> instead. 
     </p>
     <table><tr>
     <td id="left_7">
@@ -964,7 +970,7 @@ They are equally fast.
     </p>
     <button type="button" onclick="reveal(6)" id="button_7">Reveal the truth</button>
     <p id="the_truth_7" style="display:none;">
-The right is considerably better. Maybe, not as good as any of the numerical solutions, but better than the string array anyway.
+The right is considerably better. Well, better than the string array.
     </p>
     <script language="JavaScript">
     init_slider(6);
@@ -1071,7 +1077,7 @@ bool check_if_magic(const std::string& sq)
     || (sq[7] & 1) == 0 || (sq[8] & 1) != 0)
     return false;</b>
 
-  for(auto i = 0u; i < 8; ++i)
+  for(auto i = 0u; i &lt; 8; ++i)
     if(sq == all_magic_squares[i])
       return true;
 
@@ -1085,7 +1091,7 @@ They are equally fast.
     </p>
     <button type="button" onclick="reveal(8)" id="button_9">Reveal the truth</button>
     <p id="the_truth_9" style="display:none;">
-And it works like a charm. Although, the whole thing is now only a little faster than the original direct solution and slower than every other numeric one. Looks like storing answers in strings is not such a good idea.
+And it works like a charm. 
     </p>
     <script language="JavaScript">
     init_slider(8);
@@ -1176,7 +1182,7 @@ It's fast! In fact, it is as fast as our best choice from the earlier.
 Round 11. Array on uint64_t vs. set of uint64_t.
     </h1>
     <p>
-Let's now use set instead of array here. There should be less comparisons anyway, but would it help?
+Let's now use a set instead of an array here. There should be less comparisons anyway, but would it help?
     </p>
     <table><tr>
     <td id="left_11">
@@ -1317,7 +1323,7 @@ They are equally fast.
     </p>
     <button type="button" onclick="reveal(11)" id="button_12">Reveal the truth</button>
     <p id="the_truth_12" style="display:none;">
-Apparently not. Unordered set may work wonders for large and uniformly distributed set of data. But we simply have our loop too effective to beat.
+Apparently, not. Unordered set may work wonders for large and uniformly distributed set of data. But our loop is just too small to beat.
     </p>
     <script language="JavaScript">
     init_slider(11);
@@ -1336,12 +1342,24 @@ You scored <span id="score"></span> pixels of error. I'm not sure if it's good o
 Conclusion
     </h2>
     <p>
-Probably, I shouldn't talk for everyone but in my case the conclusion would have been: <i>“bad measurements beat good intuition nine times out of ten”</i>. Even though I do have a long history of making things run faster, this extreme case — small data, cheap body — neglected my experience to naught. String operations seemed to be cheaper, heuristics — more effective and there were also high hopes for the standard containers. Well, at least slightly higher hopes.
+Probably, I shouldn't talk for everyone but in my case the conclusion would have been: <i>“bad measurements beat good intuition nine times out of ten”</i>. Even though I do have a long history of making things fast, this extreme case — small data, cheap body — neglected my experience to naught. String operations seemed to be cheaper, heuristics — more effective and there were also high hopes for the standard containers. Well, at least slightly higher hopes.
     </p>
     <p>
 I've learned something from this experience. Hope you did too. If so, then no matter what your score is, you are still a winner.
     </p>
-
+    <h2>
+Links
+    </h2>
+    <p>
+Further reading: <a href="https://medium.com/@veedrac/learning-the-value-of-good-benchmarking-technique-with-c-magic-squares-b61b3386c97f">Learning the value of good benchmarking technique with C++ magic squares</a>.
+    </p>
+    <p>
+Reddit discussions: <a href="https://www.reddit.com/r/programming/comments/7e9ty4/challenge_your_performance_intuition_with_c_magic/">r/programming</a>; <a href="https://www.reddit.com/r/cpp/comments/7e826b/challenge_your_performance_intuition_with_c_magic/">r/cpp</a>
+    </p>
+    <p>
+Github with <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/cpp_magic_cubes">all the experiments</a>.
+    </p>
+    
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
     <tr>
     <td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
