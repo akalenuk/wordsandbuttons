@@ -896,7 +896,7 @@ function dec(counter_name) {
 Quadratic splines are useful too
     </h1>
     <p>
-Usually, when people talk about splines, like at a party or in a pub, they talk about polynomial cubic splines. This makes sense as it is the simplest piece of function you can link together with any other two functions and expect continuity and smoothness at the joints. But can you get it even simpler than that?
+Usually, when people talk about splines, like at a party or in a pub, they talk about polynomial cubic splines. This makes sense as cubics are the simplest functions you can link together and expect continuity and smoothness at the joints. But can you get it even simpler than that?
     </p>
     <p>
 Consider this. A parametric curve is a curve that has its every point defined as a function of some parameter. Let's build a polynomial curve that runs through 4 points.
@@ -907,10 +907,10 @@ x(t) = a<sub>x</sub>t<sup>3</sup> + b<sub>x</sub>t<sup>2</sup> + c<sub>x</sub>t 
 y(t) = a<sub>y</sub>t<sup>3</sup> + b<sub>y</sub>t<sup>2</sup> + c<sub>y</sub>t + d<sub>y</sub>
     </p>
     <p>
-There is an explanation how to build an interpolating function in the <a href="https://wordsandbuttons.online/programmers_guide_to_polynomials_and_splines.html">Programmer's guide to polynomials and splines</a>. TL&DR, if you run a polynomial through some 4 points, it should be of 3rd degree minimum. Which is a cubic. Yes, we basically got ourselves a single cubic spline not conjoined with anything, but only constrained by the points.
+There is an explanation how to build an interpolating function in the <a href="https://wordsandbuttons.online/programmers_guide_to_polynomials_and_splines.html">Programmer's guide to polynomials and splines</a>. Long story short, if you run a polynomial through some 4 points, it could minimally be of 3rd degree. Which is a cubic.
     </p>
     <p>
-You can drag the points across the canvas to see how it reacts. It is rather predictable, especially in between the second and the third points. That's the piece we usually use to build aggregate spline functions.
+Here is an interactive example. You can drag the points across the canvas. The curve is rather predictable, especially in between the second and the third points. That's the piece we prefer to build aggregate spline functions.
     </p>
     <canvas id="parametric" width=640 height=512></canvas>
     <script language="JavaScript">
@@ -944,7 +944,7 @@ a<sub>yi</sub>(t+1)<sup>3</sup> + b<sub>yi</sub>(t+1)<sup>2</sup> + c<sub>yi</su
 6a<sub>yi</sub>t + 2b<sub>yi</sub> = 6a<sub>yi-1</sub>t + 2b<sub>yi-1</sub>
     </p>
     <p>
-The first and the second equations here are just the interpolation conditions. The third and the fourth are the ones that connect the derivatives of the i-th piece and of its successor's.
+The first and the second equations here are just the interpolation conditions. The third and the fourth are the ones that connect the derivatives of the i-th piece to the derivatives of its successor.
     </p>
     <p>
 Here is an example of a 3-piece curve made of such one-sided cubic splines. Feel free to drag the points.
@@ -952,10 +952,10 @@ Here is an example of a 3-piece curve made of such one-sided cubic splines. Feel
 
     <canvas id="spline3" width=640 height=512></canvas>
     <p>
-As you can see, it is smooth and continuous, so it's kind of a win. But it is nearly impossible to make it go where you want it to. It's even worse than with the Runge effect, it starts almost immediately.
+As you can see, it is smooth and continuous, so it's kind of a win. But it is nearly impossible to make it go where you want it to. It's even worse than with the Runge effect as the oscillations start almost immediately.
     </p>
     <p>
-You probably noticed that the first segment is straight. That's because both the initial derivatives, the first one and the second one, are zeros. The second segment is then quadratic, since its own second derivative on the left is still zero, and only the third one is fully cubic. But this is the least controllable one.
+You probably noticed that the first segment is straight. That's because both the initial derivatives, the first one and the second one, are zeros. The second segment is then quadratic, since its own second derivative on the left is still zero, and only the third one is fully cubic. And this is the least controllable one.
     </p>
     <p>
 Still, since we keep the second derivative continuous, we know that our first derivative is smooth. You can see it in the next plot. The “hair” is the depiction of the derivative vector's length in multiple points. And yes, since the curve is parametric, and it's formed by two functions, it has two derivatives in every point: <i>dx/dt</i> and <i>dy/dt</i>, and you can make a vector out of them.
@@ -963,7 +963,7 @@ Still, since we keep the second derivative continuous, we know that our first de
     <canvas id="spline3_derivatives" width=640 height=512></canvas>
 
     <p>
-Now here is a trick that may help us tame the curve we got. With a function's plot, we can expect it to be smooth only if the first derivative of a function is continuous. That's true for plots. But for parametric curves, the tangent is not the same as the derivative. It's the proportion of its derivatives. It doesn't have to be like this:
+Now here is a trick that may help us tame the curve we got. With <i>y(x)</i>, we can expect it to be smooth only if the first derivative of the function is continuous. That's true for <i>y(x)</i>. But for <i>x(t), y(t)</i>, the tangent is not the same as the derivative. It's the proportion of its derivatives. It doesn't have to be like that:
     </p>
     <p class="formula">
 dp<sub>xi</sub>(t) / dt = dp<sub>xi+1</sub>(t) / dt
@@ -971,7 +971,7 @@ dp<sub>xi</sub>(t) / dt = dp<sub>xi+1</sub>(t) / dt
 dp<sub>yi</sub>(t) / dt = dp<sub>yi+1</sub>(t) / dt
     </p>
     <p>
-We only need that:
+We only need this:
     </p>
     <table class="formula">
     <tr>
@@ -993,10 +993,10 @@ dp<sub>yi+1</sub>(t) / dt
     </tr>
     </table>
     <p>
-Simply put, this means that when your curve becomes uncontrollable, you can safely slow it down. Cut down its derivatives in every grip point to make it more like a piece-wise linear interpolation.
+When your curve becomes uncontrollable, you can safely calm it down. Cut down its derivatives in every point to make it more like a piece-wise linear interpolation.
     </p>
     <p>
-Here is the example when in every grid point the derivative gets divided by some divisor.
+Here is the example, increment the derivative divisor to cut down the derivatives:
     </p>
     <form onsubmit="return false;">
     Derivative divisor:
@@ -1009,7 +1009,7 @@ Here is the example when in every grid point the derivative gets divided by some
 Look at its hair! It's no longer continuous, it gets cut off after every grid point.
     </p>
     <p>
-We also have another way to calm down our curve and it's to drop its second derivative in every grid point effectively turning it... into a quadratic spline!
+We also have another way to calm down our curve, and it is to drop its second derivative in every grid point effectively turning it... into a quadratic spline!
     </p>
     <canvas id="spline2" width=640 height=512></canvas>
 
@@ -1037,10 +1037,10 @@ The first derivative is then continuous but it isn't smooth anymore. You can see
     </script>
 
     <p>
-Now, this has all been fun, but is it really a problem to solve? I mean, why would we want to have a curve that grows as we plot it? Well, we might not want exactly that. But there is a niche for building splines on the go, and it is the animation.
+Now, this has all been fun, but is it really a problem to solve? I mean, why would we want to have a curve that grows as we plot it? There is a niche for building splines on the go, and it is the animation.
     </p>
     <p>
-Here is an arrow. Just click somewhere on the canvas, and it will go there. Setup several way-points, it will run through them all. Note that it also accumulates derivatives, which is its speed, and becomes thin and uncontrollable. Let it rest and get fat again. It calms it down.
+Here is an arrow. Just click somewhere on the canvas, and it will go there. Setup several way-points, it will run through them all. Note that it also accumulates derivatives, which is its speed, and becomes thin and uncontrollable. Let it rest and get fat again. That calms it down.
     </p>
     <canvas id="animation" width=640 height=640></canvas>
     <script language="JavaScript">
@@ -1051,10 +1051,10 @@ Here is an arrow. Just click somewhere on the canvas, and it will go there. Setu
 Conclusion
     </h2>
     <p>
-Splines are more than just <a href="https://en.wikipedia.org/wiki/Non-uniform_rational_B-spline">NURBS</a>. Sometimes you need simple quadratic splines, sometimes you want 5-th degree ones with all the extra knots and weights. There are even non-polynomial splines, they have their applications too.
+Spline function is a broad concept, and you get to choose what you want. Sometimes you want simple quadratic splines, sometimes you want 5-th degree ones with all the extra knots and weights. There are even non-polynomial splines, they have their applications too.
     </p>
     <p>
-There is, however, some common body of knowledge that works for all splines, plots, and curves in general. I think, even if you wouldn't have to ever implement any kind of splines, you can benefit from learning about derivatives, parameterization, continuity, and smoothness. Simple quadratic splines are just the easy thing to study. It's a useful mental model in its own right.
+There is, however, some common body of knowledge that works for all splines, plots, and curves in general. I think, even if you wouldn't have to ever implement any kind of splines, you can benefit from learning about derivatives, parameterization, continuity, and smoothness. Quadratic splines demonstrate all that rather well.
     </p>
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
