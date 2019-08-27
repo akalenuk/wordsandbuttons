@@ -289,7 +289,6 @@ function draw_grid_on(context){
 
 function draw_dots_and_guides(context, grid_xs, grid_ys, grid_n, do_guides, client_x, client_y){
     // dots
-    context.fillStyle="#d64562";
     for(var i = 0; i < grid_n; ++i) {
         context.beginPath();
         context.arc(x_to_client(grid_xs[i]), y_to_client(grid_ys[i]), 5, 0, 2*Math.PI);
@@ -314,7 +313,6 @@ function draw_dots_and_guides(context, grid_xs, grid_ys, grid_n, do_guides, clie
         context.beginPath();
         context.moveTo(x_to_client(grid_xs[closest_i]), y_to_client(grid_ys[closest_i]));
         context.lineTo(client_x, client_y);
-        context.strokeStyle="#d64562";
         context.stroke();
         context.closePath();
         context.setLineDash([]);
@@ -392,6 +390,8 @@ function parametric_draw(client_x, client_y, do_guides){
     }
     Xy = solved_linear(Ay, By, parametric_n);
 
+    context.fillStyle="#d64562";
+    context.strokeStyle="#d64562";  
 
     context.beginPath();
     context.lineWidth = 3;
@@ -403,7 +403,6 @@ function parametric_draw(client_x, client_y, do_guides){
         context.moveTo(x_to_client(x1), y_to_client(y1));
         context.lineTo(x_to_client(x2), y_to_client(y2));
     }
-    context.strokeStyle="#d64562";
     context.stroke();
     context.lineWidth = 1;
     context.closePath();
@@ -469,13 +468,14 @@ function spline3_draw(client_x, client_y, do_guides){
     draw_grid_on(context);
 
     // spline3
+    context.fillStyle="#457fd6";
+    context.strokeStyle="#457fd6";  
     context.lineWidth = 3;
     context.beginPath();
     do_spline3(spline2_xs, spline2_ys, spline2_n, 1.0, function(ox, oy, x, y){
         context.moveTo(x_to_client(ox), y_to_client(oy));
         context.lineTo(x_to_client(x), y_to_client(y));
     })
-    context.strokeStyle="#d64562";
     context.stroke();
     context.closePath();
     context.lineWidth = 1;
@@ -525,6 +525,8 @@ function spline2_draw(client_x, client_y, do_guides){
     // grid
     draw_grid_on(context);
 
+    context.fillStyle="#62d645";
+    context.strokeStyle="#62d645";
     // spline2
     context.lineWidth = 3;
     context.beginPath();
@@ -532,7 +534,6 @@ function spline2_draw(client_x, client_y, do_guides){
         context.moveTo(x_to_client(ox), y_to_client(oy));
         context.lineTo(x_to_client(x), y_to_client(y));
     });
-    context.strokeStyle="#d64562";
     context.stroke();
     context.closePath();
     context.lineWidth = 1;
@@ -583,14 +584,14 @@ function spline2_derivatives_draw(client_x, client_y, do_guides){
     // grid
     draw_grid_on(context);
 
+    context.fillStyle="#62d645";
+    context.strokeStyle="#62d645";
     // spline2 derivatives
     context.beginPath();
     do_spline2(spline2_xs, spline2_ys, spline2_n, 1.0, function(ox, oy, x, y){
         context.moveTo(x_to_client(x), y_to_client(y));
         context.lineTo(x_to_client(x - 10.0*(y-oy)), y_to_client(y + 10.0*(x-ox)));
-    })
-
-    context.strokeStyle="#d64562";
+    });
     context.stroke();
     context.closePath();
 
@@ -600,8 +601,7 @@ function spline2_derivatives_draw(client_x, client_y, do_guides){
     do_spline2(spline2_xs, spline2_ys, spline2_n, 1.0, function(ox, oy, x, y){
         context.moveTo(x_to_client(ox), y_to_client(oy));
         context.lineTo(x_to_client(x), y_to_client(y));
-    })
-    context.strokeStyle="#d64562";
+    });
     context.stroke();
     context.closePath();
     context.lineWidth = 1;
@@ -652,14 +652,15 @@ function spline3_derivatives_draw(client_x, client_y, do_guides){
     // grid
     draw_grid_on(context);
 
-    // spline3derivatives
+    context.fillStyle="#457fd6";
+    context.strokeStyle="#457fd6";
+    
+    // spline3 derivatives
     context.beginPath();
     do_spline3(spline2_xs, spline2_ys, spline2_n, 1.0, function(ox, oy, x, y){
         context.moveTo(x_to_client(x), y_to_client(y));
         context.lineTo(x_to_client(x - 10.0*(y-oy)), y_to_client(y + 10.0*(x-ox)));
     })
-
-    context.strokeStyle="#d64562";
     context.stroke();
     context.closePath();
 
@@ -670,7 +671,6 @@ function spline3_derivatives_draw(client_x, client_y, do_guides){
         context.moveTo(x_to_client(ox), y_to_client(oy));
         context.lineTo(x_to_client(x), y_to_client(y));
     })
-    context.strokeStyle="#d64562";
     context.stroke();
     context.closePath();
     context.lineWidth = 1;
@@ -722,14 +722,14 @@ function compensated_spline3_derivatives_draw(client_x, client_y, do_guides){
     // grid
     draw_grid_on(context);
 
+    context.fillStyle="#457fd6";
+    context.strokeStyle="#457fd6";
     // spline3 derivatives
     context.beginPath();
-
     do_spline3(spline2_xs, spline2_ys, spline2_n, compensated_spline3_derivative_divisor, function(ox, oy, x, y){
         context.moveTo(x_to_client(x), y_to_client(y));
         context.lineTo(x_to_client(x - 10.0*(y-oy)), y_to_client(y + 10.0*(x-ox)));
     })
-    context.strokeStyle="#d64562";
     context.stroke();
     context.closePath();
 
@@ -740,7 +740,6 @@ function compensated_spline3_derivatives_draw(client_x, client_y, do_guides){
         context.moveTo(x_to_client(ox), y_to_client(oy));
         context.lineTo(x_to_client(x), y_to_client(y));
     })
-    context.strokeStyle="#d64562";
     context.stroke();
     context.closePath();
     context.lineWidth = 1;
