@@ -136,12 +136,24 @@ function in_edge(px, py, x1, y1, x2, y2) {
     return (a >= 0 && a <= 1);
 }
 
+// distance squared from (x1, y1) to (x2, y2)
 function d2(x1, y1, x2, y2) {
     return (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1);
 }
 
+// distance from (x1, y1) to (x2, y2)
 function d(x1, y1, x2, y2) {
     return Math.sqrt(d2(x1, y1, x2, y2));
+}
+
+// distance from (x, y) to edge [(x1, y1), (x2, y2)]
+function d_e(x, y, x1, y1, x2, y2) {
+    const dxe = x2-x1;
+    const dye = y2-y1;
+    const dx = x-x1;
+    const dy = y-y1;
+    const area = (dxe*dy - dye*dx) / 2
+    return area / d(x1, y1, x2, y2);
 }
 
 function closest_point_starting_from(x, y, i) {
@@ -175,7 +187,6 @@ function init_canvas(){
     
     draw_canvas();
 }
-
 
 function draw_canvas(){
     var canvas = document.getElementById("canvas");
