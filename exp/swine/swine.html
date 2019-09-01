@@ -114,6 +114,7 @@ var tris = [[1, 2, 3], [3, 4, 1]];
 var border = [[1, 2], [2, 3], [3, 4], [4, 1]];
 
 
+// point belongs to a triangle
 function in_tri(px, py, x1, y1, x2, y2, x3, y3) {
     /* shove it into sympy to get solution
     px, py, x1, y1, x2, y2, x3, y3, a, b = symbols('px py x1 y1 x2 y2 x3 y3 a b')
@@ -127,6 +128,7 @@ function in_tri(px, py, x1, y1, x2, y2, x3, y3) {
     return (a >= 0 && b >= 0 && a + b <= 1.);
 }
 
+// point projection belongs to an edge
 function in_edge(px, py, x1, y1, x2, y2) {
     if((px-x1)*(y2-y1)-(py-x1)*(x2-x1) < 0) // border shoul be ordered for that
         return false;
@@ -156,6 +158,19 @@ function d_e(x, y, x1, y1, x2, y2) {
     const dy = y-y1;
     const area = (dxe*dy - dye*dx) / 2
     return area / d(x1, y1, x2, y2);
+}
+
+const d_min = 1e-5; // too close
+
+// interpolation on the edge
+function z_in_edge(px, py, x1, y1, z1, x2, y2, z2) {
+    const d1 = d(px, py, x1, y1);
+    const d2 = d(px, py, x2, y2);
+    if(d1 < d_min)
+        return z1;
+    if(d2 < d_min)
+        return z2
+    return (z1 / d1 + z2 / d2) / (1./d1 + 1./d2);
 }
 
 function closest_point_starting_from(x, y, i) {
