@@ -113,7 +113,7 @@ var tris = [[1, 2, 3], [3, 4, 1]];
 // but the border's should be. This determines in and out of the model
 var border = [[1, 2], [2, 3], [3, 4], [4, 1]];
 
-const wf = function(x) {return 1./x;}    // weight funtion
+const wf = function(x) {return 1./Math.pow(x, 2);}    // weight funtion
 
 // point belongs to a triangle
 function in_tri(px, py, x1, y1, x2, y2, x3, y3) {
@@ -268,9 +268,10 @@ function draw_canvas(){
             z = z_in_edge(x, y, xs[border[3][0]], ys[border[3][0]], zs[border[3][0]], xs[border[3][1]], ys[border[3][1]], zs[border[3][1]]);
         else
             z = zs[closest_point(x, y)];
-        pixel_field.data[i + 0] = z;
-        pixel_field.data[i + 1] = z;
-        pixel_field.data[i + 2] = z;
+        const color = Math.trunc(z / 16) * 16;
+        pixel_field.data[i + 0] = color;
+        pixel_field.data[i + 1] = color;
+        pixel_field.data[i + 2] = color;
         pixel_field.data[i + 3] = 0xFF;
     }
     context.putImageData(pixel_field, -0.5, -0.5);
