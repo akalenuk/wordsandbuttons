@@ -217,20 +217,25 @@ function init_canvas(){
     var canvas = document.getElementById("canvas");
     canvas.addEventListener('mousedown', function(e){
         canvas_rect = canvas.getBoundingClientRect();
+        const x = e.clientX - canvas_rect.left;
+        const y = e.clientY - canvas_rect.top;
+        const point_i = closest_point(x, y);
+        xs[point_i] = x;
+        ys[point_i] = y;
+        draw_canvas(0, 0, false);
+    }, false);
+     
+    canvas.addEventListener('mousemove', function(e){
+         canvas_rect = canvas.getBoundingClientRect();
+        const x = e.clientX - canvas_rect.left;
+        const y = e.clientY - canvas_rect.top;    
         if(e.buttons == 1){
-            const x = e.clientX - canvas_rect.left;
-            const y = e.clientY - canvas_rect.top;
             const point_i = closest_point(x, y);
             xs[point_i] = x;
             ys[point_i] = y;
             draw_canvas(0, 0, false);
-        }
-    }, false);
-     
-    canvas.addEventListener('mousemove', function(e){
-        if(e.buttons == 1){
-            canvas_rect = canvas.getBoundingClientRect();
-            draw_canvas(0, 0, false);
+        } else {
+            draw_canvas(x, y, true);
         }
     }, false);
     
@@ -242,7 +247,7 @@ function init_canvas(){
     draw_canvas();
 }
 
-function draw_canvas(x, y, do_guides){
+function draw_canvas(client_x, client_y, do_guides){
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
     // background
@@ -293,6 +298,19 @@ function draw_canvas(x, y, do_guides){
         context.stroke();
         context.closePath();    
     }
+
+    // guides
+    if(do_guides){
+        const point_i = closest_point(client_x, client_y);
+        context.setLineDash([4, 4]);
+        context.beginPath();
+        context.moveTo(xs[point_i], ys[point_i]);
+        context.lineTo(client_x, client_y);
+        context.strokeStyle="#d64562";
+        context.stroke();
+        context.closePath();
+        context.setLineDash([]);
+    }    
 }
 
     </script>
