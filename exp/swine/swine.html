@@ -217,24 +217,32 @@ function init_canvas(){
     var canvas = document.getElementById("canvas");
     canvas.addEventListener('mousedown', function(e){
         canvas_rect = canvas.getBoundingClientRect();
+        if(e.buttons == 1){
+            const x = e.clientX - canvas_rect.left;
+            const y = e.clientY - canvas_rect.top;
+            const point_i = closest_point(x, y);
+            xs[point_i] = x;
+            ys[point_i] = y;
+            draw_canvas(0, 0, false);
+        }
     }, false);
      
     canvas.addEventListener('mousemove', function(e){
         if(e.buttons == 1){
             canvas_rect = canvas.getBoundingClientRect();
-            draw_canvas();
+            draw_canvas(0, 0, false);
         }
     }, false);
     
     canvas.addEventListener('mouseup', function(e){
         canvas_rect = canvas.getBoundingClientRect();
-        draw_canvas();
+        draw_canvas(0, 0, false);
     }, false);
     
     draw_canvas();
 }
 
-function draw_canvas(){
+function draw_canvas(x, y, do_guides){
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
     // background
@@ -275,6 +283,16 @@ function draw_canvas(){
         pixel_field.data[i + 3] = 0xFF;
     }
     context.putImageData(pixel_field, -0.5, -0.5);
+    
+    
+    // dots
+    for(var i = 1; i <= 4; ++i){
+        context.beginPath();
+        context.arc(xs[i], ys[i], 4, 0, 2*Math.PI);
+        context.strokeStyle="#d64562";
+        context.stroke();
+        context.closePath();    
+    }
 }
 
     </script>
