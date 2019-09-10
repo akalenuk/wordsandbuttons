@@ -279,17 +279,22 @@ function draw_canvas(client_x, client_y, do_guides){
                     xs[tris[j][2]], ys[tris[j][2]], zs[tris[j][2]]);
                 z_determined = true;
             }
-        if(!z_determined)    
-            if(in_edge(x, y, xs[border[0][0]], ys[border[0][0]], xs[border[0][1]], ys[border[0][1]]))
-                z = z_in_edge(x, y, xs[border[0][0]], ys[border[0][0]], zs[border[0][0]], xs[border[0][1]], ys[border[0][1]], zs[border[0][1]]);
-            else if(in_edge(x, y, xs[border[1][0]], ys[border[1][0]], xs[border[1][1]], ys[border[1][1]]))
-                z = z_in_edge(x, y, xs[border[1][0]], ys[border[1][0]], zs[border[1][0]], xs[border[1][1]], ys[border[1][1]], zs[border[1][1]]);
-            else if(in_edge(x, y, xs[border[2][0]], ys[border[2][0]], xs[border[2][1]], ys[border[2][1]]))
-                z = z_in_edge(x, y, xs[border[2][0]], ys[border[2][0]], zs[border[2][0]], xs[border[2][1]], ys[border[2][1]], zs[border[2][1]]);
-            else if(in_edge(x, y, xs[border[3][0]], ys[border[3][0]], xs[border[3][1]], ys[border[3][1]]))
-                z = z_in_edge(x, y, xs[border[3][0]], ys[border[3][0]], zs[border[3][0]], xs[border[3][1]], ys[border[3][1]], zs[border[3][1]]);
-            else
-                z = zs[closest_point(x, y)];
+        if(!z_determined) {
+            var d_min = 10e5;   // large enough
+            for(var j = 0; j < border.length; ++j) {
+                if(in_edge(x, y, xs[border[j][0]], ys[border[j][0]], xs[border[j][1]], ys[border[j][1]])) {
+                    const projected_xy = projected_on_edge(x, y, xs[border[j][0]], ys[border[j][0]], xs[border[j][1]], ys[border[j][1]]);
+                    const d_to_porjected_xy = d(x, y, projected_xy[0], projected_xy[1]);
+                    if(d_to_porjected_xy < d_min) {
+                        z = z_in_edge(x, y, xs[border[j][0]], ys[border[j][0]], zs[border[j][0]], xs[border[j][1]], ys[border[j][1]], zs[border[j][1]]);
+                        d_min = d_to_porjected_xy;
+                        z_determined = true;
+                    }
+                }
+            }
+        }
+        if(!z_determined)
+            z = zs[closest_point(x, y)];
         const color = Math.trunc(z / 16) * 16;
         pixel_field.data[i + 0] = color;
         pixel_field.data[i + 1] = color;
