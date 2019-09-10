@@ -270,26 +270,26 @@ function draw_canvas(client_x, client_y, do_guides){
         var y = Math.floor(Math.floor(i / 4) / w);
         var x = Math.floor(i / 4) % w;
         var z = 0;
-        if(in_tri(x, y, xs[tris[0][0]], ys[tris[0][0]], xs[tris[0][1]], ys[tris[0][1]], xs[tris[0][2]], ys[tris[0][2]]))
-            z = z_in_tri(x, y, 
-                xs[tris[0][0]], ys[tris[0][0]], zs[tris[0][0]], 
-                xs[tris[0][1]], ys[tris[0][1]], zs[tris[0][1]], 
-                xs[tris[0][2]], ys[tris[0][2]], zs[tris[0][2]]);
-        else if(in_tri(x, y, xs[tris[1][0]], ys[tris[1][0]], xs[tris[1][1]], ys[tris[1][1]], xs[tris[1][2]], ys[tris[1][2]]))
-            z = z_in_tri(x, y, 
-                xs[tris[1][0]], ys[tris[1][0]], zs[tris[1][0]], 
-                xs[tris[1][1]], ys[tris[1][1]], zs[tris[1][1]], 
-                xs[tris[1][2]], ys[tris[1][2]], zs[tris[1][2]]);
-        else if(in_edge(x, y, xs[border[0][0]], ys[border[0][0]], xs[border[0][1]], ys[border[0][1]]))
-            z = z_in_edge(x, y, xs[border[0][0]], ys[border[0][0]], zs[border[0][0]], xs[border[0][1]], ys[border[0][1]], zs[border[0][1]]);
-        else if(in_edge(x, y, xs[border[1][0]], ys[border[1][0]], xs[border[1][1]], ys[border[1][1]]))
-            z = z_in_edge(x, y, xs[border[1][0]], ys[border[1][0]], zs[border[1][0]], xs[border[1][1]], ys[border[1][1]], zs[border[1][1]]);
-        else if(in_edge(x, y, xs[border[2][0]], ys[border[2][0]], xs[border[2][1]], ys[border[2][1]]))
-            z = z_in_edge(x, y, xs[border[2][0]], ys[border[2][0]], zs[border[2][0]], xs[border[2][1]], ys[border[2][1]], zs[border[2][1]]);
-        else if(in_edge(x, y, xs[border[3][0]], ys[border[3][0]], xs[border[3][1]], ys[border[3][1]]))
-            z = z_in_edge(x, y, xs[border[3][0]], ys[border[3][0]], zs[border[3][0]], xs[border[3][1]], ys[border[3][1]], zs[border[3][1]]);
-        else
-            z = zs[closest_point(x, y)];
+        var z_determined = false;
+        for(var j = 0; j < tris.length; ++j)
+            if(in_tri(x, y, xs[tris[j][0]], ys[tris[j][0]], xs[tris[j][1]], ys[tris[j][1]], xs[tris[j][2]], ys[tris[j][2]])) {
+                z = z_in_tri(x, y, 
+                    xs[tris[j][0]], ys[tris[j][0]], zs[tris[j][0]], 
+                    xs[tris[j][1]], ys[tris[j][1]], zs[tris[j][1]], 
+                    xs[tris[j][2]], ys[tris[j][2]], zs[tris[j][2]]);
+                z_determined = true;
+            }
+        if(!z_determined)    
+            if(in_edge(x, y, xs[border[0][0]], ys[border[0][0]], xs[border[0][1]], ys[border[0][1]]))
+                z = z_in_edge(x, y, xs[border[0][0]], ys[border[0][0]], zs[border[0][0]], xs[border[0][1]], ys[border[0][1]], zs[border[0][1]]);
+            else if(in_edge(x, y, xs[border[1][0]], ys[border[1][0]], xs[border[1][1]], ys[border[1][1]]))
+                z = z_in_edge(x, y, xs[border[1][0]], ys[border[1][0]], zs[border[1][0]], xs[border[1][1]], ys[border[1][1]], zs[border[1][1]]);
+            else if(in_edge(x, y, xs[border[2][0]], ys[border[2][0]], xs[border[2][1]], ys[border[2][1]]))
+                z = z_in_edge(x, y, xs[border[2][0]], ys[border[2][0]], zs[border[2][0]], xs[border[2][1]], ys[border[2][1]], zs[border[2][1]]);
+            else if(in_edge(x, y, xs[border[3][0]], ys[border[3][0]], xs[border[3][1]], ys[border[3][1]]))
+                z = z_in_edge(x, y, xs[border[3][0]], ys[border[3][0]], zs[border[3][0]], xs[border[3][1]], ys[border[3][1]], zs[border[3][1]]);
+            else
+                z = zs[closest_point(x, y)];
         const color = Math.trunc(z / 16) * 16;
         pixel_field.data[i + 0] = color;
         pixel_field.data[i + 1] = color;
