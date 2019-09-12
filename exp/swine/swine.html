@@ -264,6 +264,27 @@ function draw_canvas(client_x, client_y, do_guides){
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
     
+    // compute edges (this doesn't have to be in the draw)
+    var edges = new Set();
+    var inner_edges = new Set();
+    var outer_edges = new Set();
+    for(var i = 0; i < tris.length; ++i) {
+        for(var j = 0; j < 3; ++j) {
+            const i1 = tris[i][j % 3];
+            const i2 = tris[i][(j+1) % 3];
+            const ordered_edge = i1 < i2 ? [i1, i2] : [i2, i1];
+            if(edges.has(ordered_edge))
+                inner_edges.add(ordered_edge);              
+            edges.add(ordered_edge)
+        }
+    }
+    edges = Array.from(edges.values());
+    for(var i = 0; i < edges.length; ++i)
+        if(!inner_edges.has(edges[i]))
+            outer_edges.add(edges[i]);
+    outer_edges = Array.from(outer_edges.values());
+    console.log(inner_edges);
+    
     // pixels
     var pixel_field = context.createImageData(w, h);
     for (var i = 0; i < pixel_field.data.length; i += 4) {
@@ -314,19 +335,7 @@ function draw_canvas(client_x, client_y, do_guides){
     }
         
     // complex
-    var edges = new Set();
-    for(var i = 0; i < tris.length; ++i) {
-        for(var j = 0; j < 3; ++j) {
-            const i1 = tris[i][j % 3];
-            const i2 = tris[i][(j+1) % 3];
-            if(i1 < i2)
-                edges.add([i1, i2]);
-            else
-                edges.add([i2, i1]);
-        }
-    }
     context.setLineDash([4, 4]);
-    edges = Array.from(edges.values());
     console.log(edges);
     for(var i = 0; i < edges.length; ++i) {
      context.beginPath();
