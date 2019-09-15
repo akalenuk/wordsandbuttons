@@ -113,7 +113,8 @@ var z3s = [-1,  64, 140, 180, 255];
 var tris = [[1, 2, 3], [3, 4, 1]];
 
 // weight funtion
-const wf = function(x) {return 1./Math.pow(x, 2);}
+var weight3d = 1;
+const wf = function(x) {return 1./Math.pow(x, weight3d);}
 
 // point belongs to a triangle
 function in_tri(px, py, x1, y1, x2, y2, x3, y3) {
@@ -223,7 +224,7 @@ function init_canvas3d(){
         x3s[point_i] = x;
         y3s[point_i] = y;
         compute_edges_and_z_field();
-        draw_canvas(0, 0, false);
+        draw_canvas3d(0, 0, false);
     }, false);
      
     canvas.addEventListener('mousemove', function(e){
@@ -235,19 +236,19 @@ function init_canvas3d(){
             x3s[point_i] = x;
             y3s[point_i] = y;
             compute_edges_and_z_field();
-            draw_canvas(0, 0, false);
+            draw_canvas3d(0, 0, false);
         } else {
-            draw_canvas(x, y, true);
+            draw_canvas3d(x, y, true);
         }
     }, false);
     
     canvas.addEventListener('mouseup', function(e){
         canvas_rect = canvas.getBoundingClientRect();
-        draw_canvas(0, 0, false);
+        draw_canvas3d(0, 0, false);
     }, false);
     
     compute_edges_and_z_field();
-    draw_canvas();
+    draw_canvas3d();
 }
 
 function draw_arrow(context, x1, y1, x2, y2) {
@@ -329,7 +330,7 @@ function compute_edges_and_z_field() {
     }
 }
 
-function draw_canvas(client_x, client_y, do_guides){
+function draw_canvas3d(client_x, client_y, do_guides){
     var canvas = document.getElementById("canvas3d");
     var context = canvas.getContext("2d");
     
@@ -370,11 +371,42 @@ function draw_canvas(client_x, client_y, do_guides){
     }
     context.setLineDash([]);
 }
+
+// UI
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) + 1;
+    eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) - 1;
+    eval('change_' + counter_name + '()');
+}
+
+function change_weight3d() {
+    weight3d = document.getElementById('weight3d').value;
+    compute_edges_and_z_field();
+    draw_canvas3d();
+}
     </script>
   </head>
   <body>
     <center>
     <canvas id="canvas3d" width=640 height=640></canvas>
+    <form id="weight3d_form">
+Please enter the weight coefficient:
+    <button type="button" onclick="dec('weight3d')">-</button>
+    <input type="text" style="width: 32pt;" id="weight3d" value="2" oninput="change_weight3d();">
+    <button type="button" onclick="inc('weight3d')">+</button>
+    <span id="transformed">
+    </span>
+    <script language="JavaScript">
+    init_w();
+    </script>
+    </form>
+    
     <script language="JavaScript">
     init_canvas3d();
     </script>
