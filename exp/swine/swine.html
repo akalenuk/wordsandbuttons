@@ -105,13 +105,11 @@ var w = 640.0;
 var h = 640.0;
 
 
-var xs = [-1, 140, 500, 500, 140];
-var ys = [-1, 140, 140, 500, 500];
-var zs = [-1,  64, 140, 180, 255];
-// triangles' points are not really ordered
+var x3s = [-1, 140, 500, 500, 140];
+var y3s = [-1, 140, 140, 500, 500];
+var z3s = [-1,  64, 140, 180, 255];
+// triangles' points are ordered clockwise
 var tris = [[1, 2, 3], [3, 4, 1]];
-// but the border's should be. This determines in and out of the model
-var border = [[1, 2], [2, 3], [3, 4], [4, 1]];
 
 const wf = function(x) {return 1./Math.pow(x, 2);}    // weight funtion
 
@@ -203,12 +201,12 @@ function z_in_tri(px, py, x1, y1, z1, x2, y2, z2, x3, y3, z3) {
 }
 
 function closest_point_starting_from(x, y, i) {
-    for(var j = i + 1; j < xs.length; ++j)
-        if(d2(x, y, xs[j], ys[j]) < d2(x, y, xs[i], ys[i]))
+    for(var j = i + 1; j < x3s.length; ++j)
+        if(d2(x, y, x3s[j], y3s[j]) < d2(x, y, x3s[i], y3s[i]))
             return closest_point_starting_from(x, y, j);
     return i;
 }
-// finds a closest point from xs, ys to x, y
+// finds a closest point from x3s, y3s to x, y
 function closest_point(x, y){
     return closest_point_starting_from(x, y, 1);
 }
@@ -220,8 +218,8 @@ function init_canvas(){
         const x = e.clientX - canvas_rect.left;
         const y = e.clientY - canvas_rect.top;
         const point_i = closest_point(x, y);
-        xs[point_i] = x;
-        ys[point_i] = y;
+        x3s[point_i] = x;
+        y3s[point_i] = y;
         draw_canvas(0, 0, false);
     }, false);
      
@@ -231,8 +229,8 @@ function init_canvas(){
         const y = e.clientY - canvas_rect.top;    
         if(e.buttons == 1){
             const point_i = closest_point(x, y);
-            xs[point_i] = x;
-            ys[point_i] = y;
+            x3s[point_i] = x;
+            y3s[point_i] = y;
             draw_canvas(0, 0, false);
         } else {
             draw_canvas(x, y, true);
@@ -306,23 +304,23 @@ function draw_canvas(client_x, client_y, do_guides){
         var z = 0;
         var z_determined = false;
         for(var j = 0; j < tris.length; ++j)
-            if(in_tri(x, y, xs[tris[j][0]], ys[tris[j][0]], xs[tris[j][1]], ys[tris[j][1]], xs[tris[j][2]], ys[tris[j][2]])) {
+            if(in_tri(x, y, x3s[tris[j][0]], y3s[tris[j][0]], x3s[tris[j][1]], y3s[tris[j][1]], x3s[tris[j][2]], y3s[tris[j][2]])) {
                 z = z_in_tri(x, y, 
-                    xs[tris[j][0]], ys[tris[j][0]], zs[tris[j][0]], 
-                    xs[tris[j][1]], ys[tris[j][1]], zs[tris[j][1]], 
-                    xs[tris[j][2]], ys[tris[j][2]], zs[tris[j][2]]);
+                    x3s[tris[j][0]], y3s[tris[j][0]], z3s[tris[j][0]], 
+                    x3s[tris[j][1]], y3s[tris[j][1]], z3s[tris[j][1]], 
+                    x3s[tris[j][2]], y3s[tris[j][2]], z3s[tris[j][2]]);
                 z_determined = true;
             }
         if(!z_determined) {
             for(var j = 0; j < outer_edges.length; ++j) {
-                if(in_edge(x, y, xs[outer_edges[j][0]], ys[outer_edges[j][0]], xs[outer_edges[j][1]], ys[outer_edges[j][1]])) {
-                    z = z_in_edge(x, y, xs[outer_edges[j][0]], ys[outer_edges[j][0]], zs[outer_edges[j][0]], xs[outer_edges[j][1]], ys[outer_edges[j][1]], zs[outer_edges[j][1]]);
+                if(in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]])) {
+                    z = z_in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], z3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]], z3s[outer_edges[j][1]]);
                     z_determined = true;
                 }
             }
         }
         if(!z_determined)
-            z = zs[closest_point(x, y)];
+            z = z3s[closest_point(x, y)];
         const color = Math.trunc(z / 16) * 16;
         pixel_field.data[i + 0] = color;
         pixel_field.data[i + 1] = color;
@@ -336,7 +334,7 @@ function draw_canvas(client_x, client_y, do_guides){
     context.strokeStyle="#d64562";    
     for(var i = 1; i <= 4; ++i){
         context.beginPath();
-        context.arc(xs[i], ys[i], 4, 0, 2*Math.PI);
+        context.arc(x3s[i], y3s[i], 4, 0, 2*Math.PI);
         context.stroke();
         context.closePath();    
     }
@@ -344,15 +342,15 @@ function draw_canvas(client_x, client_y, do_guides){
     // guides
     if(do_guides){
         const point_i = closest_point(client_x, client_y);
-        draw_arrow(context, xs[point_i], ys[point_i], client_x, client_y);
+        draw_arrow(context, x3s[point_i], y3s[point_i], client_x, client_y);
     }
         
     // complex
     context.setLineDash([4, 4]);
     for(var i = 0; i < edges.length; ++i) {
      context.beginPath();
-        context.moveTo(xs[edges[i][0]], ys[edges[i][0]]);
-        context.lineTo(xs[edges[i][1]], ys[edges[i][1]]);
+        context.moveTo(x3s[edges[i][0]], y3s[edges[i][0]]);
+        context.lineTo(x3s[edges[i][1]], y3s[edges[i][1]]);
         context.stroke();
         context.closePath();
     }
