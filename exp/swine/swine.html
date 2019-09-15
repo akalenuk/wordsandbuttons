@@ -220,17 +220,19 @@ function init_canvas(){
         const point_i = closest_point(x, y);
         x3s[point_i] = x;
         y3s[point_i] = y;
+        compute_edges_and_z_field();
         draw_canvas(0, 0, false);
     }, false);
      
     canvas.addEventListener('mousemove', function(e){
-         canvas_rect = canvas.getBoundingClientRect();
+        canvas_rect = canvas.getBoundingClientRect();
         const x = e.clientX - canvas_rect.left;
         const y = e.clientY - canvas_rect.top;    
         if(e.buttons == 1){
             const point_i = closest_point(x, y);
             x3s[point_i] = x;
             y3s[point_i] = y;
+            compute_edges_and_z_field();
             draw_canvas(0, 0, false);
         } else {
             draw_canvas(x, y, true);
@@ -242,6 +244,7 @@ function init_canvas(){
         draw_canvas(0, 0, false);
     }, false);
     
+    compute_edges_and_z_field();
     draw_canvas();
 }
 
@@ -266,26 +269,25 @@ function number_as_edge(number) {
     return [Math.floor(number / 10000), number % 10000];
 }
 
-function draw_canvas(client_x, client_y, do_guides){
-    var canvas = document.getElementById("canvas");
-    var context = canvas.getContext("2d");
-    
+var edges = [];
+var z_field = [];
+function compute_edges_and_z_field() {
     // compute edges; todo: get this recomputed on change
-    var edges = new Set();
+    var all_edges = new Set();
     var inner_edges = new Set();
     for(var i = 0; i < tris.length; ++i) {
         for(var j = 0; j < 3; ++j) {
             const i1 = tris[i][j % 3];
             const i2 = tris[i][(j+1) % 3];
             const ordered_edge = i1 < i2 ? [i1, i2] : [i2, i1];
-            if(edges.has(edge_as_number(ordered_edge)))
+            if(all_edges.has(edge_as_number(ordered_edge)))
                 inner_edges.add(edge_as_number(ordered_edge));              
-            edges.add(edge_as_number(ordered_edge))
+            all_edges.add(edge_as_number(ordered_edge))
         }
     }
-    edges = Array.from(edges.values()).map(number_as_edge);
+    edges = Array.from(all_edges.values()).map(number_as_edge);
     
-    // compute border; todo: same
+    // compute outer edges; todo: same
     var outer_edges = [];
     for(var i = 0; i < tris.length; ++i) {
         for(var j = 0; j < 3; ++j) {
@@ -296,39 +298,49 @@ function draw_canvas(client_x, client_y, do_guides){
         }
     }
     
-    // pixels; todo: get this to a separate z-field computed on point change
-    var pixel_field = context.createImageData(w, h);
-    for (var i = 0; i < pixel_field.data.length; i += 4) {
-        var y = Math.floor(Math.floor(i / 4) / w);
-        var x = Math.floor(i / 4) % w;
-        var z = 0;
-        var z_determined = false;
-        for(var j = 0; j < tris.length; ++j)
-            if(in_tri(x, y, x3s[tris[j][0]], y3s[tris[j][0]], x3s[tris[j][1]], y3s[tris[j][1]], x3s[tris[j][2]], y3s[tris[j][2]])) {
-                z = z_in_tri(x, y, 
-                    x3s[tris[j][0]], y3s[tris[j][0]], z3s[tris[j][0]], 
-                    x3s[tris[j][1]], y3s[tris[j][1]], z3s[tris[j][1]], 
-                    x3s[tris[j][2]], y3s[tris[j][2]], z3s[tris[j][2]]);
+    // compute z-field
+    z_field = [];
+    for (var i = 0; i < w*h; i += 1) {
+    var y = Math.floor(i / w);
+    var x = i % w;
+    var z = 0;
+    var z_determined = false;
+    for(var j = 0; j < tris.length; ++j)
+        if(in_tri(x, y, x3s[tris[j][0]], y3s[tris[j][0]], x3s[tris[j][1]], y3s[tris[j][1]], x3s[tris[j][2]], y3s[tris[j][2]])) {
+            z = z_in_tri(x, y, 
+                x3s[tris[j][0]], y3s[tris[j][0]], z3s[tris[j][0]], 
+                x3s[tris[j][1]], y3s[tris[j][1]], z3s[tris[j][1]], 
+                x3s[tris[j][2]], y3s[tris[j][2]], z3s[tris[j][2]]);
+            z_determined = true;
+        }
+    if(!z_determined) {
+        for(var j = 0; j < outer_edges.length; ++j) {
+            if(in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]])) {
+                z = z_in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], z3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]], z3s[outer_edges[j][1]]);
                 z_determined = true;
             }
-        if(!z_determined) {
-            for(var j = 0; j < outer_edges.length; ++j) {
-                if(in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]])) {
-                    z = z_in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], z3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]], z3s[outer_edges[j][1]]);
-                    z_determined = true;
-                }
-            }
         }
-        if(!z_determined)
-            z = z3s[closest_point(x, y)];
-        const color = Math.trunc(z / 16) * 16;
+    }
+    if(!z_determined)
+        z = z3s[closest_point(x, y)];
+    z_field.push(z);
+    }
+}
+
+function draw_canvas(client_x, client_y, do_guides){
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    
+    // draw z-field
+    var pixel_field = context.createImageData(w, h);
+    for (var i = 0; i < pixel_field.data.length; i += 4) {
+        const color = Math.trunc(z_field[Math.floor(i/4)] / 16) * 16;
         pixel_field.data[i + 0] = color;
         pixel_field.data[i + 1] = color;
         pixel_field.data[i + 2] = color;
         pixel_field.data[i + 3] = 0xFF;
     }
     context.putImageData(pixel_field, -0.5, -0.5);
-    
     
     // dots
     context.strokeStyle="#d64562";    
