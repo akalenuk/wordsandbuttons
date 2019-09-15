@@ -107,7 +107,7 @@ var h = 640.0;
 
 var xs = [-1, 140, 500, 500, 140];
 var ys = [-1, 140, 140, 500, 500];
-var zs = [-1,  64, 128, 196, 255];
+var zs = [-1,  64, 140, 180, 255];
 // triangles' points are not really ordered
 var tris = [[1, 2, 3], [3, 4, 1]];
 // but the border's should be. This determines in and out of the model
@@ -275,7 +275,6 @@ function draw_canvas(client_x, client_y, do_guides){
     // compute edges; todo: get this recomputed on change
     var edges = new Set();
     var inner_edges = new Set();
-    var outer_edges = new Set();
     for(var i = 0; i < tris.length; ++i) {
         for(var j = 0; j < 3; ++j) {
             const i1 = tris[i][j % 3];
@@ -286,12 +285,7 @@ function draw_canvas(client_x, client_y, do_guides){
             edges.add(edge_as_number(ordered_edge))
         }
     }
-    edges = Array.from(edges.values());
-    for(var i = 0; i < edges.length; ++i)
-        if(!inner_edges.has(edges[i]))
-            outer_edges.add(edges[i]);
-    outer_edges = Array.from(outer_edges.values());
-    console.log(outer_edges);
+    edges = Array.from(edges.values()).map(number_as_edge);
     
     // pixels; todo: get this to a separate z-field computed on point change
     var pixel_field = context.createImageData(w, h);
@@ -346,8 +340,8 @@ function draw_canvas(client_x, client_y, do_guides){
     context.setLineDash([4, 4]);
     for(var i = 0; i < edges.length; ++i) {
      context.beginPath();
-        context.moveTo(xs[number_as_edge(edges[i])[0]], ys[number_as_edge(edges[i])[0]]);
-        context.lineTo(xs[number_as_edge(edges[i])[1]], ys[number_as_edge(edges[i])[1]]);
+        context.moveTo(xs[edges[i][0]], ys[edges[i][0]]);
+        context.lineTo(xs[edges[i][1]], ys[edges[i][1]]);
         context.stroke();
         context.closePath();
     }
