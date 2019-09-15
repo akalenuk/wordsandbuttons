@@ -99,11 +99,12 @@ button {
 }
     </style>
     <script language="JavaScript">
+// todo: basis functions
+// todo: planar version: weights and basis functions
 
 // client
-var w = 640.0;
-var h = 640.0;
-
+const w = 640.0;
+const h = 640.0;
 
 var x3s = [-1, 140, 500, 500, 140];
 var y3s = [-1, 140, 140, 500, 500];
@@ -111,7 +112,8 @@ var z3s = [-1,  64, 140, 180, 255];
 // triangles' points are ordered clockwise
 var tris = [[1, 2, 3], [3, 4, 1]];
 
-const wf = function(x) {return 1./Math.pow(x, 2);}    // weight funtion
+// weight funtion
+const wf = function(x) {return 1./Math.pow(x, 2);}
 
 // point belongs to a triangle
 function in_tri(px, py, x1, y1, x2, y2, x3, y3) {
@@ -211,8 +213,8 @@ function closest_point(x, y){
     return closest_point_starting_from(x, y, 1);
 }
 
-function init_canvas(){
-    var canvas = document.getElementById("canvas");
+function init_canvas3d(){
+    var canvas = document.getElementById("canvas3d");
     canvas.addEventListener('mousedown', function(e){
         canvas_rect = canvas.getBoundingClientRect();
         const x = e.clientX - canvas_rect.left;
@@ -272,7 +274,7 @@ function number_as_edge(number) {
 var edges = [];
 var z_field = [];
 function compute_edges_and_z_field() {
-    // compute edges; todo: get this recomputed on change
+    // compute all edges
     var all_edges = new Set();
     var inner_edges = new Set();
     for(var i = 0; i < tris.length; ++i) {
@@ -287,7 +289,7 @@ function compute_edges_and_z_field() {
     }
     edges = Array.from(all_edges.values()).map(number_as_edge);
     
-    // compute outer edges; todo: same
+    // compute outer edges
     var outer_edges = [];
     for(var i = 0; i < tris.length; ++i) {
         for(var j = 0; j < 3; ++j) {
@@ -328,7 +330,7 @@ function compute_edges_and_z_field() {
 }
 
 function draw_canvas(client_x, client_y, do_guides){
-    var canvas = document.getElementById("canvas");
+    var canvas = document.getElementById("canvas3d");
     var context = canvas.getContext("2d");
     
     // draw z-field
@@ -343,7 +345,7 @@ function draw_canvas(client_x, client_y, do_guides){
     context.putImageData(pixel_field, -0.5, -0.5);
     
     // dots
-    context.strokeStyle="#d64562";    
+    context.strokeStyle="#f71134";    
     for(var i = 1; i <= 4; ++i){
         context.beginPath();
         context.arc(x3s[i], y3s[i], 4, 0, 2*Math.PI);
@@ -368,14 +370,13 @@ function draw_canvas(client_x, client_y, do_guides){
     }
     context.setLineDash([]);
 }
-
     </script>
   </head>
   <body>
     <center>
-    <canvas id="canvas" width=640 height=640></canvas>
+    <canvas id="canvas3d" width=640 height=640></canvas>
     <script language="JavaScript">
-    init_canvas();
+    init_canvas3d();
     </script>
     </center>
   </body>
