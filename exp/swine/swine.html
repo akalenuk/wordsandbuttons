@@ -108,11 +108,108 @@ button {
 const w = 640.0;
 const h = 640.0;
 
-// 2d
+//// 2d
+// visible region
+var x2d_min = -1.0;
+var y2d_min = -1.0;
+var x2d_max = 4.0;
+var y2d_max = 4.0;
+
+var client_x2d_center = w*(0-x2d_min)/(x2d_max-x2d_min);
+var client_x2d_step = (w/(x2d_max-x2d_min));
+
+var client_y2d_center = h - h*(0-y2d_min)/(y2d_max-y2d_min);
+var client_y2d_step = (h/(y2d_max-y2d_min));
+
+function client_to_x(client_x){
+    return (client_x - client_x2d_center) / client_x2d_step;
+}
+
+function client_to_y(client_y){
+    return (client_y2d_center - client_y) / client_y2d_step;
+}
+
+function x2d_to_client(x){
+    return x * client_x2d_step + client_x2d_center;
+}
+
+function y2d_to_client(y){
+    return client_y2d_center - y * client_y2d_step;
+}
+
+function draw_grid_on(context){
+    // grid
+    context.font = "16px sans-serif";
+    context.beginPath();
+    context.moveTo(0, client_y2d_center);
+    context.lineTo(w, client_y2d_center);
+    context.lineTo(w - 12, client_y2d_center - 5);
+    context.moveTo(w, client_y2d_center);
+    context.lineTo(w - 12, client_y2d_center + 5);
+    context.moveTo(client_x2d_center, h);
+    context.lineTo(client_x2d_center, 0);
+    context.lineTo(client_x2d_center - 5, 12);
+    context.moveTo(client_x2d_center, 0);
+    context.lineTo(client_x2d_center + 5, 12);
+    context.fillStyle="#000000";
+    for(var i = x2d_min + 1; i <= x2d_max - 1; i++){
+        if(i != 0) {
+            context.moveTo(client_x2d_center + i*client_x2d_step, client_y2d_center);
+            context.lineTo(client_x2d_center + i*client_x2d_step, client_y2d_center - 5);
+            context.fillText(i, client_x2d_center + i*client_x2d_step + 4, client_y2d_center + 16);
+        }
+    }
+    for(var i = y2d_min + 1; i <= y2d_max - 1; i++){
+        if(i != 0) {
+            context.moveTo(client_x2d_center, client_y2d_center - i*client_y2d_step);
+            context.lineTo(client_x2d_center + 5, client_y2d_center - i*client_y2d_step);
+        }
+        context.fillText(i, client_x2d_center + 5, client_y2d_center - i*client_y2d_step + 16);
+    }
+    context.strokeStyle = "#000000";
+    context.stroke();
+    context.closePath();
+}
+
+// params
 var weight2d = 1;
 var basis2d = 0;
 
-// 3d
+function init_canvas2d1(){
+    draw_canvas2d1(0, 0, false);
+}
+
+function draw_canvas2d1(client_x, client_y, do_guides){
+    var canvas = document.getElementById("canvas2d1");
+    var context = canvas.getContext("2d");
+    
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    
+    draw_grid_on(context);
+}
+    
+function init_canvas2d2(){
+    draw_canvas2d2(0, 0, false);
+}
+
+function draw_canvas2d2(client_x, client_y, do_guides){
+    var canvas = document.getElementById("canvas2d2");
+    var context = canvas.getContext("2d");
+    
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    
+    draw_grid_on(context);
+}
+
+
+
+
+//// 3d
+// points
 var x3s = [-1, 140, 500, 500, 140];
 var y3s = [-1, 140, 140, 500, 500];
 var z3s = [-1,  64, 140, 180, 255];
@@ -414,7 +511,7 @@ function change_weight3d() {
     <p>
 ...
     </p>
-    <canvas id="canvas2d1" width=640 height=512></canvas>
+    <canvas id="canvas2d1" width=640 height=640></canvas>
     <form>
 Please enter the weight coefficient:
     <button type="button" onclick="dec('weight2d')">-</button>
@@ -424,7 +521,7 @@ Please enter the weight coefficient:
     <p>
 ...
     </p>
-    <canvas id="canvas2d2" width=640 height=512></canvas>
+    <canvas id="canvas2d2" width=640 height=640></canvas>
     <form>
 Please enter the basis function order:
     <button type="button" onclick="dec('basis2d')">-</button>
@@ -443,6 +540,8 @@ Please enter the weight coefficient:
     </form>
     
     <script language="JavaScript">
+    init_canvas2d1();
+    init_canvas2d2();
     init_canvas3d();
     </script>
     </center>
