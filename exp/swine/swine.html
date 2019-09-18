@@ -205,6 +205,35 @@ function ie_no_basis(x, xs, ys) {
         / (wf2d(x - xs[i]) + wf2d(xs[i+1] - x));
 }
 
+// returns [a, b] for ax+b basis function
+function linear_basis(x1, y1, x2, y2) {
+    /*
+    x1, y1, x2, y2, a, b = symbols('x1 y1 x2 y2 a b')
+    print(solve([
+        a * x1 + b - y1,
+        a * x2 + b - y2
+        ], (a, b)))
+    */
+    return [(y1 - y2)/(x1 - x2), (x1*y2 - x2*y1)/(x1 - x2)];
+}
+
+function quadratic_basis(x1, y1, x2, y2, x3, y3) {
+    /*
+    x1, y1, x2, y2, x3, y3, a, b, c = symbols('x1 y1 x2 y2 x3 y3 a b c')
+
+    print(solve([
+        a * x1 * x1 + b * x1 + c - y1,
+        a * x2 * x2 + b * x2 + c - y2,
+        a * x3 * x3 + b * x3 + c - y3,
+        ], (a, b, c)))
+    */
+    return [
+        (y1*(x2 - x3) - y2*(x1 - x3) + y3*(x1 - x2))/(x1*x1*x2 - x1*x1*x3 - x1*x2*x2 + x1*x3*x3 + x2*x2*x3 - x2*x3*x3),
+        (-y1*(x2*x2 - x3*x3) + y2*(x1*x1 - x3*x3) - y3*(x1*x1 - x2*x2))/(x1*x1*x2 - x1*x1*x3 - x1*x2*x2 + x1*x3*x3 + x2*x2*x3 - x2*x3*x3),
+        (x1*x2*y3*(x1 - x2) - x1*x3*y2*(x1 - x3) + x2*x3*y1*(x2 - x3))/(x1*x1*x2 - x1*x1*x3 - x1*x2*x2 + x1*x3*x3 + x2*x2*x3 - x2*x3*x3)
+    ];
+}
+
 var x2s1 = [128*2, 128*4];
 var y2s1 = [128*3, 128*1];
 
