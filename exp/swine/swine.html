@@ -260,10 +260,14 @@ function draw_canvas2d1(client_x, client_y, do_guides){
     context.lineWidth = 3;
     context.beginPath()
     for(var i = 0; i < w; ++i) {
-        const y1 = ie_no_basis(i, x2s1, y2s1);
-        const y2 = ie_no_basis(i+1, x2s1, y2s1);
-        context.moveTo(i, y1);
-        context.lineTo(i+1, y2);
+        var do_segment =  ((i < x2s1[0] || i > x2s1[x2s1.length - 1]) && do_extrapolation)
+                       || ((i >= x2s1[0] && i <= x2s1[x2s1.length - 1]) && do_interpolation);
+        if(do_segment) {
+            const y1 = ie_no_basis(i, x2s1, y2s1);
+            const y2 = ie_no_basis(i+1, x2s1, y2s1);
+            context.moveTo(i, y1);
+            context.lineTo(i+1, y2);
+        }
     }
     context.stroke();
     context.closePath();     
