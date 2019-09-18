@@ -187,7 +187,23 @@ function closest_point(x, y, xs, ys){
 
 // params
 var weight2d = 1;
+const wf2d = function(x) {return 1./Math.pow(x, weight2d);}
 var basis2d = 0;
+
+// interpolation/extrapolation no basis
+function ie_no_basis(x, xs, ys) {
+    if(x < xs[0])
+        return ys[0];
+    if(x > xs[xs.length- 1])
+        return ys[xs.length - 1];
+        
+    var i = -1;
+    for(var j = 0; j < xs.length; ++j)
+        if(x > xs[j])
+            i = j;        
+    return (ys[i] * wf2d(x - xs[i]) + ys[i+1] * wf2d(xs[i+1] - x))
+        / (wf2d(x - xs[i]) + wf2d(xs[i+1] - x));
+}
 
 var x2s1 = [140, 500];
 var y2s1 = [500, 140];
@@ -237,10 +253,27 @@ function draw_canvas2d1(client_x, client_y, do_guides){
     context.fillStyle="#eeeeee";
     context.fillRect(0, 0, w, h);
         
+    const do_interpolation = document.getElementById("i").checked || document.getElementById("ie").checked;    
+    const do_extrapolation = document.getElementById("e").checked || document.getElementById("ie").checked;
+    // interpolation/extrapolation
+    context.strokeStyle="#888888";
+    context.lineWidth = 3;
+    context.beginPath()
+    for(var i = 0; i < w; ++i) {
+        const y1 = ie_no_basis(i, x2s1, y2s1);
+        const y2 = ie_no_basis(i+1, x2s1, y2s1);
+        context.moveTo(i, y1);
+        context.lineTo(i+1, y2);
+    }
+    context.stroke();
+    context.closePath();     
+    context.lineWidth = 1;
+    
+    // grid
     draw_grid_on(context);
     
     // dots
-    context.strokeStyle="#f71134";    
+    context.strokeStyle="#f71134";
     for(var i = 0; i <= x2s1.length; ++i){
         context.beginPath();
         context.arc(x2s1[i], y2s1[i], 4, 0, 2*Math.PI);
