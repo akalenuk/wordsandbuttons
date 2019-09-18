@@ -241,7 +241,7 @@ function draw_canvas2d1(client_x, client_y, do_guides){
     
     // dots
     context.strokeStyle="#f71134";    
-    for(var i = 0; i <= 2; ++i){
+    for(var i = 0; i <= x2s1.length; ++i){
         context.beginPath();
         context.arc(x2s1[i], y2s1[i], 4, 0, 2*Math.PI);
         context.stroke();
@@ -256,7 +256,37 @@ function draw_canvas2d1(client_x, client_y, do_guides){
 }
     
 function init_canvas2d2(){
-    draw_canvas2d2(0, 0, false);
+    var canvas = document.getElementById("canvas2d2");
+    canvas.addEventListener('mousedown', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        const x = e.clientX - canvas_rect.left;
+        const y = e.clientY - canvas_rect.top;
+        const point_i = closest_point(x, y, x2s2, y2s2);
+        x2s2[point_i] = x;
+        y2s2[point_i] = y;
+        draw_canvas2d2(0, 0, false);
+    }, false);
+     
+    canvas.addEventListener('mousemove', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        const x = e.clientX - canvas_rect.left;
+        const y = e.clientY - canvas_rect.top;    
+        if(e.buttons == 1){
+            const point_i = closest_point(x, y, x2s2, y2s2);
+            x2s2[point_i] = x;
+            y2s2[point_i] = y;
+            draw_canvas2d2(0, 0, false);
+        } else {
+            draw_canvas2d2(x, y, true);
+        }
+    }, false);
+    
+    canvas.addEventListener('mouseup', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        draw_canvas2d2(0, 0, false);
+    }, false);
+    
+    draw_canvas2d2();
 }
 
 function draw_canvas2d2(client_x, client_y, do_guides){
@@ -268,6 +298,21 @@ function draw_canvas2d2(client_x, client_y, do_guides){
     context.fillRect(0, 0, w, h);
     
     draw_grid_on(context);
+    
+    // dots
+    context.strokeStyle="#f71134";    
+    for(var i = 0; i <= x2s2.length; ++i){
+        context.beginPath();
+        context.arc(x2s2[i], y2s2[i], 4, 0, 2*Math.PI);
+        context.stroke();
+        context.closePath();    
+    }
+
+    // guides
+    if(do_guides){
+        const point_i = closest_point(client_x, client_y, x2s2, y2s2);
+        draw_arrow(context, x2s2[point_i], y2s2[point_i], client_x, client_y);
+    }    
 }
 
 
@@ -511,7 +556,7 @@ function draw_canvas3d(client_x, client_y, do_guides){
     
     // dots
     context.strokeStyle="#f71134";    
-    for(var i = 1; i <= 4; ++i){
+    for(var i = 1; i <= x3s.length; ++i){
         context.beginPath();
         context.arc(x3s[i], y3s[i], 4, 0, 2*Math.PI);
         context.stroke();
