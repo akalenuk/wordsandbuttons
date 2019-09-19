@@ -100,9 +100,6 @@ button {
     </style>
     <script language="JavaScript">
 // todo: basis functions
-// todo: planar version: weights and basis functions
-// a) 2 points, weights
-// b) 4 points, basis: linear, quadratic
 
 // client
 const w = 640.0;
@@ -188,7 +185,6 @@ function closest_point(x, y, xs, ys){
 // params
 var weight2d = 2;
 const wf2d = function(x) {return 1./Math.pow(x, weight2d);}
-var basis2d = 0;
 
 // interpolation/extrapolation no basis
 function ie_no_basis(x, xs, ys) {
@@ -244,8 +240,8 @@ function quadratic_basis(x1, y1, x2, y2, x3, y3) {
 var x2s1 = [128*2, 128*4];
 var y2s1 = [128*3, 128*1];
 
-var x2s2 = [140, 200, 300, 500];
-var y2s2 = [500, 140, 300, 400];
+var x2s2 = [128*1, 128*2, 128*3, 128*4];
+var y2s2 = [300, 240, 350, 400];
 
 function init_canvas2d1() {
     var canvas = document.getElementById("canvas2d1");
@@ -327,6 +323,10 @@ function draw_canvas2d1(client_x, client_y, do_guides){
         draw_arrow(context, x2s1[point_i], y2s1[point_i], client_x, client_y);
     }
 }
+
+function recalculate_basis() {
+    // todo
+}
     
 function init_canvas2d2(){
     var canvas = document.getElementById("canvas2d2");
@@ -359,6 +359,7 @@ function init_canvas2d2(){
         draw_canvas2d2(0, 0, false);
     }, false);
     
+    recalculate_basis();
     draw_canvas2d2();
 }
 
@@ -708,10 +709,19 @@ function change_weight3d() {
     </p>
     <canvas id="canvas2d2" width=640 height=640></canvas>
     <form>
-Please enter the basis function order:
-    <button type="button" onclick="dec('basis2d')">-</button>
-    <input type="text" style="width: 32pt;" id="basis2d" value="1" oninput="change_basis2d();">
-    <button type="button" onclick="inc('basis2d')">+</button>
+    Please select one of the following configurations:
+    <br>
+    <input type="radio" name="basis" id="cccc" value="cccc" onclick="recalculate_basis();draw_canvas2d2(0, 0, false);"><label for="i">constant-constant-constant-constant</label> 
+    <br>
+    <input type="radio" name="basis" id="cllc" value="cllc" checked="true" onclick="recalculate_basis();draw_canvas2d2(0, 0, false);"><label for="e">constant-linear-linear-constant</label>  
+    <br>
+    <input type="radio" name="basis" id="llll" value="llll" onclick="recalculate_basis();draw_canvas2d2(0, 0, false);"><label for="ie">linear-linear-linear-linear</label>
+    <br>
+    <input type="radio" name="basis" id="cqqc" value="cqqc" onclick="recalculate_basis();draw_canvas2d2(0, 0, false);"><label for="ie">constant-quadratic-quadratic-constant</label>
+    <br>
+    <input type="radio" name="basis" id="lqql" value="lqql" onclick="recalculate_basis();draw_canvas2d2(0, 0, false);"><label for="ie">linear-quadratic-quadratic-linear</label>
+    <br>
+    <input type="radio" name="basis" id="qqqq" value="qqqq" onclick="recalculate_basis();draw_canvas2d2(0, 0, false);"><label for="ie">quadratic-quadratic-quadratic-quadratic</label>
     </form>        
     <p>
 ...
