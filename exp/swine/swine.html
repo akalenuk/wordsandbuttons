@@ -324,8 +324,29 @@ function draw_canvas2d1(client_x, client_y, do_guides){
     }
 }
 
-function recalculate_basis() {
-    // todo
+var basis2d = [];
+function recalculate_basis2d() {
+    /*
+    cccc onstant-constant-constant-constant 
+    cllc constant-linear-linear-constant  
+    llll linear-linear-linear-linear
+    cqqc constant-quadratic-quadratic-constant
+    lqql linear-quadratic-quadratic-linear
+    qqqq quadratic-quadratic-quadratic-quadratic
+    */
+    if(document.getElementById("cccc").checked) {
+        basis2d[0] = function(x) {return y2s2[0];};
+        basis2d[1] = function(x) {return y2s2[1];};
+        basis2d[2] = function(x) {return y2s2[2];};
+        basis2d[3] = function(x) {return y2s2[3];};
+    } else if(document.getElementById("cllc").checked) {
+        const b1 = fit_linear_to(linear_basis(x2s2[0], y2s2[0], x2s2[2], y2s2[2]), x2s2[1], y2s2[1]);
+        const b2 = fit_linear_to(linear_basis(x2s2[1], y2s2[1], x2s2[3], y2s2[3]), x2s2[2], y2s2[2]);
+        basis2d[0] = function(x) {return y2s2[0];};
+        basis2d[1] = function(x) {return b1[0]*x + b1[1];};
+        basis2d[2] = function(x) {return b2[0]*x + b2[1];};
+        basis2d[3] = function(x) {return y2s2[3];};
+    }    // todo
 }
     
 function init_canvas2d2(){
@@ -337,6 +358,7 @@ function init_canvas2d2(){
         const point_i = closest_point(x, y, x2s2, y2s2);
         x2s2[point_i] = x;
         y2s2[point_i] = y;
+        recalculate_basis2d();
         draw_canvas2d2(0, 0, false);
     }, false);
      
@@ -348,6 +370,7 @@ function init_canvas2d2(){
             const point_i = closest_point(x, y, x2s2, y2s2);
             x2s2[point_i] = x;
             y2s2[point_i] = y;
+            recalculate_basis2d();
             draw_canvas2d2(0, 0, false);
         } else {
             draw_canvas2d2(x, y, true);
@@ -359,7 +382,7 @@ function init_canvas2d2(){
         draw_canvas2d2(0, 0, false);
     }, false);
     
-    recalculate_basis();
+    recalculate_basis2d();
     draw_canvas2d2();
 }
 
@@ -711,17 +734,17 @@ function change_weight3d() {
     <form>
     Please select one of the following configurations:
     <br>
-    <input type="radio" name="basis" id="cccc" value="cccc" onclick="recalculate_basis();draw_canvas2d2(0, 0, false);"><label for="i">constant-constant-constant-constant</label> 
+    <input type="radio" name="basis" id="cccc" value="cccc" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="i">constant-constant-constant-constant</label> 
     <br>
-    <input type="radio" name="basis" id="cllc" value="cllc" checked="true" onclick="recalculate_basis();draw_canvas2d2(0, 0, false);"><label for="e">constant-linear-linear-constant</label>  
+    <input type="radio" name="basis" id="cllc" value="cllc" checked="true" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="e">constant-linear-linear-constant</label>  
     <br>
-    <input type="radio" name="basis" id="llll" value="llll" onclick="recalculate_basis();draw_canvas2d2(0, 0, false);"><label for="ie">linear-linear-linear-linear</label>
+    <input type="radio" name="basis" id="llll" value="llll" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="ie">linear-linear-linear-linear</label>
     <br>
-    <input type="radio" name="basis" id="cqqc" value="cqqc" onclick="recalculate_basis();draw_canvas2d2(0, 0, false);"><label for="ie">constant-quadratic-quadratic-constant</label>
+    <input type="radio" name="basis" id="cqqc" value="cqqc" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="ie">constant-quadratic-quadratic-constant</label>
     <br>
-    <input type="radio" name="basis" id="lqql" value="lqql" onclick="recalculate_basis();draw_canvas2d2(0, 0, false);"><label for="ie">linear-quadratic-quadratic-linear</label>
+    <input type="radio" name="basis" id="lqql" value="lqql" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="ie">linear-quadratic-quadratic-linear</label>
     <br>
-    <input type="radio" name="basis" id="qqqq" value="qqqq" onclick="recalculate_basis();draw_canvas2d2(0, 0, false);"><label for="ie">quadratic-quadratic-quadratic-quadratic</label>
+    <input type="radio" name="basis" id="qqqq" value="qqqq" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="ie">quadratic-quadratic-quadratic-quadratic</label>
     </form>        
     <p>
 ...
