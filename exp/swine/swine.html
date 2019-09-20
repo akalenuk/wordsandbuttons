@@ -99,7 +99,7 @@ button {
 }
     </style>
     <script language="JavaScript">
-// todo: basis functions
+// todo: basis functions for 3d
 
 // client
 const w = 640.0;
@@ -394,8 +394,6 @@ function recalculate_basis2d() {
         basis2d[2] = function(x) {return b2[0]*x*x + b2[1]*x + b2[2];};
         basis2d[3] = function(x) {return b2[0]*x*x + b2[1]*x + b2[2];};
     }
-    
-    // todo
 }
     
 function init_canvas2d2(){
@@ -582,6 +580,25 @@ function z_in_tri(px, py, x1, y1, z1, x2, y2, z2, x3, y3, z3) {
           + z_in_edge(px, py, x2, y2, z2, x3, y3, z3) * wf(d2) 
           + z_in_edge(px, py, x3, y3, z3, x1, y1, z1) * wf(d3)) 
         / (wf(d1) + wf(d2) + wf(d3));
+}
+
+// general purpose minimizer
+function minimize(f, args, iterations) {
+    var best_args = args.slice();
+    var best_f = f.apply(null, args);
+    for(var i = 0; i < iterations; ++i) {
+        var args_i = args.slice();
+        for(var j = 0; j < args_i.length(); ++j) {
+            args_i[j] += Math.random() >= 0.5 
+                ? + Math.atan(Math.random() * Math.PI)
+                : - Math.atan(Math.random() * Math.PI);
+            var f_i = f.apply(null, args_i);
+            if(f_i < best_f) {
+                best_f = f_i;
+                best_args = args_i.slice();
+            }
+        }
+    }
 }
 
 function init_canvas3d(){
