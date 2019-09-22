@@ -689,6 +689,22 @@ function compute_edges_and_z_field() {
         }
     }
     
+    const do_linear_basis = document.getElementById("basis3d_linear").checked;
+    if(do_linear_basis) {
+        // find neighbors
+        var all_neighbors = [[]]; // starts with 1 (0 is empty)
+        for(var i = 1; i < x3s.length; ++i) {
+            var neighbors_i = [];
+            for(var j = 0; j < edges.length; ++j) {
+                if(edges[j][0] == i)
+                    neighbors_i.push(edges[j][1]);
+                if(edges[j][1] == i)
+                    neighbors_i.push(edges[j][0]);
+            }
+            all_neighbors.push(neighbors_i);
+        }
+    }
+    
     // compute z-field
     z_field = [];
     for (var i = 0; i < w*h; i += 1) {
@@ -777,11 +793,6 @@ function change_weight2d() {
     weight2d = document.getElementById('weight2d').value;
     draw_canvas2d1();
     draw_canvas2d2();
-}
-
-function change_basis2d() {
-    basis2d = document.getElementById('basis2d').value;
-    // ...
 }
 
 function change_weight3d() {
