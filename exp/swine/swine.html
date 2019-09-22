@@ -588,18 +588,19 @@ function minimize(f, args, iterations) {
     var best_args = args.slice();
     var best_f = f.apply(null, args);
     for(var i = 0; i < iterations; ++i) {
-        var args_i = args.slice();
-        for(var j = 0; j < args_i.length(); ++j) {
+        var args_i = best_args.slice();
+        for(var j = 0; j < args_i.length; ++j) {
             args_i[j] += Math.random() >= 0.5 
-                ? + Math.atan(Math.random() * Math.PI)
-                : - Math.atan(Math.random() * Math.PI);
-            var f_i = f.apply(null, args_i);
-            if(f_i < best_f) {
-                best_f = f_i;
-                best_args = args_i.slice();
-            }
+                ? + Math.tan(Math.random() * Math.PI / 2)
+                : - Math.tan(Math.random() * Math.PI / 2);
+        }
+        var f_i = f.apply(null, args_i);
+        if(f_i < best_f) {
+            best_f = f_i;
+            best_args = args_i.slice();
         }
     }
+    return best_args;
 }
 
 function init_canvas3d(){
@@ -661,6 +662,7 @@ function number_as_edge(number) {
 }
 
 var edges = [];
+var basis_3d = [];
 var z_field = [];
 function compute_edges_and_z_field() {
     // compute all edges
@@ -691,18 +693,30 @@ function compute_edges_and_z_field() {
     
     const do_linear_basis = document.getElementById("basis3d_linear").checked;
     if(do_linear_basis) {
-        // find neighbors
-        var all_neighbors = [[]]; // starts with 1 (0 is empty)
+        basis_3d = [[]]; // starts with 1 (0 is empty)
+                
         for(var i = 1; i < x3s.length; ++i) {
-            var neighbors_i = [];
+            var points_i = [i];
+            // find neighbors
             for(var j = 0; j < edges.length; ++j) {
                 if(edges[j][0] == i)
-                    neighbors_i.push(edges[j][1]);
+                    points_i.push(edges[j][1]);
                 if(edges[j][1] == i)
-                    neighbors_i.push(edges[j][0]);
+                    points_i.push(edges[j][0]);
             }
-            all_neighbors.push(neighbors_i);
-        }
+            
+            // difference between the model and the points
+            var target = function(a, b, c) {
+                var diff2 = 0.;
+                for(var j = 0; j < points_i.length; ++j) {
+                    diff2 += Math.pow((x3s[points_i[j]] * a + y3s[points_i[j]] * b + c) - z3s[points_i[j]], 2);
+                }
+                return diff2;
+            }
+            
+            var abc = [0., 0., 0.];
+            var optimized_abc = minimize(target, abc, 100000);
+        } 
     }
     
     // compute z-field
