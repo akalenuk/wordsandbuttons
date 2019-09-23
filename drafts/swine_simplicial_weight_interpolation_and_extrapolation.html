@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>SWInE</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.results {
+    font-family: sans-serif;
+    font-size: 14pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.formula {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: italic;
+    width: 505pt;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+}
+
+input[type="text"] {
+    width: 32pt;
+    height: 22pt;
+    font-size: 16pt;
+    text-align: center;
+}
+
+button {
+    width: 32pt;
+    height: 26pt;
+    font-size: 16pt;
+    text-align: center;
+}
+    </style>
+    <script language="JavaScript">
+// todo: basis functions for 3d
+
+// client
+const w = 640.0;
+const h = 640.0;
+
+//// 2d
+// visible region
+var x2d_min = -1.0;
+var y2d_min = -1.0;
+var x2d_max = 4.0;
+var y2d_max = 4.0;
+
+var client_x2d_center = w*(0-x2d_min)/(x2d_max-x2d_min);
+var client_x2d_step = (w/(x2d_max-x2d_min));
+
+var client_y2d_center = h - h*(0-y2d_min)/(y2d_max-y2d_min);
+var client_y2d_step = (h/(y2d_max-y2d_min));
+
+function client_to_x(client_x){
+    return (client_x - client_x2d_center) / client_x2d_step;
+}
+
+function client_to_y(client_y){
+    return (client_y2d_center - client_y) / client_y2d_step;
+}
+
+function x2d_to_client(x){
+    return x * client_x2d_step + client_x2d_center;
+}
+
+function y2d_to_client(y){
+    return client_y2d_center - y * client_y2d_step;
+}
+
+function draw_grid_on(context){
+    // grid
+    context.font = "16px sans-serif";
+    context.beginPath();
+    context.moveTo(0, client_y2d_center);
+    context.lineTo(w, client_y2d_center);
+    context.lineTo(w - 12, client_y2d_center - 5);
+    context.moveTo(w, client_y2d_center);
+    context.lineTo(w - 12, client_y2d_center + 5);
+    context.moveTo(client_x2d_center, h);
+    context.lineTo(client_x2d_center, 0);
+    context.lineTo(client_x2d_center - 5, 12);
+    context.moveTo(client_x2d_center, 0);
+    context.lineTo(client_x2d_center + 5, 12);
+    context.fillStyle="#000000";
+    for(var i = x2d_min + 1; i <= x2d_max - 1; i++){
+        if(i != 0) {
+            context.moveTo(client_x2d_center + i*client_x2d_step, client_y2d_center);
+            context.lineTo(client_x2d_center + i*client_x2d_step, client_y2d_center - 5);
+            context.fillText(i, client_x2d_center + i*client_x2d_step + 4, client_y2d_center + 16);
+        }
+    }
+    for(var i = y2d_min + 1; i <= y2d_max - 1; i++){
+        if(i != 0) {
+            context.moveTo(client_x2d_center, client_y2d_center - i*client_y2d_step);
+            context.lineTo(client_x2d_center + 5, client_y2d_center - i*client_y2d_step);
+        }
+        context.fillText(i, client_x2d_center + 5, client_y2d_center - i*client_y2d_step + 16);
+    }
+    context.strokeStyle = "#000000";
+    context.stroke();
+    context.closePath();
+}
+
+function closest_point_starting_from(x, y, xs, ys, i) {
+    for(var j = i + 1; j < xs.length; ++j)
+        if(d2(x, y, xs[j], ys[j]) < d2(x, y, xs[i], ys[i]))
+            return closest_point_starting_from(x, y, xs, ys, j);
+    return i;
+}
+
+// finds a closest point from xs, ys to x, y
+function closest_point(x, y, xs, ys){
+    return closest_point_starting_from(x, y, xs, ys, 0);
+}
+
+
+
+// params
+var weight2d = 2;
+const wf2d = function(x) {return 1./Math.pow(x, weight2d);}
+
+// interpolation/extrapolation no basis
+function ie_no_basis(x, xs, ys) {
+    if(x < xs[0])
+        return ys[0];
+    if(x > xs[xs.length- 1])
+        return ys[xs.length - 1];
+        
+    var i = 0;
+    for(var j = 0; j < xs.length; ++j)
+        if(x > xs[j])
+            i = j;        
+    return (ys[i] * wf2d(x - xs[i]) + ys[i+1] * wf2d(xs[i+1] - x))
+        / (wf2d(x - xs[i]) + wf2d(xs[i+1] - x));
+}
+
+// interpolation/extrapolation with basis functions
+function ie_basis(x, xs, bs) {
+    if(x < xs[0])
+        return bs[0](x);
+    if(x > xs[xs.length- 1])
+        return bs[xs.length - 1](x);
+        
+    var i = 0;
+    for(var j = 0; j < xs.length; ++j)
+        if(x > xs[j])
+            i = j;
+    return (bs[i](x) * wf2d(x - xs[i]) + bs[i+1](x) * wf2d(xs[i+1] - x))
+        / (wf2d(x - xs[i]) + wf2d(xs[i+1] - x));
+}
+
+// returns [a, b] for ax+b basis function
+function linear_basis(x1, y1, x2, y2) {
+    /*
+    x1, y1, x2, y2, a, b = symbols('x1 y1 x2 y2 a b')
+    print(solve([
+        a * x1 + b - y1,
+        a * x2 + b - y2
+        ], (a, b)))
+    */
+    return [(y1 - y2)/(x1 - x2), (x1*y2 - x2*y1)/(x1 - x2)];
+}
+
+// fits linear functon to go trough the point (retaining the slope)
+function fit_linear_to(basis, x, y) {
+    const delta_b = y - (basis[0] * x + basis[1]);
+    return [basis[0], basis[1] + delta_b];
+}
+
+// returns [a, b, c] for a*x*x + b*x + c
+function quadratic_basis(x1, y1, x2, y2, x3, y3) {
+    /*
+    x1, y1, x2, y2, x3, y3, a, b, c = symbols('x1 y1 x2 y2 x3 y3 a b c')
+
+    print(solve([
+        a * x1 * x1 + b * x1 + c - y1,
+        a * x2 * x2 + b * x2 + c - y2,
+        a * x3 * x3 + b * x3 + c - y3,
+        ], (a, b, c)))
+    */
+    return [
+        (y1*(x2 - x3) - y2*(x1 - x3) + y3*(x1 - x2))/(x1*x1*x2 - x1*x1*x3 - x1*x2*x2 + x1*x3*x3 + x2*x2*x3 - x2*x3*x3),
+        (-y1*(x2*x2 - x3*x3) + y2*(x1*x1 - x3*x3) - y3*(x1*x1 - x2*x2))/(x1*x1*x2 - x1*x1*x3 - x1*x2*x2 + x1*x3*x3 + x2*x2*x3 - x2*x3*x3),
+        (x1*x2*y3*(x1 - x2) - x1*x3*y2*(x1 - x3) + x2*x3*y1*(x2 - x3))/(x1*x1*x2 - x1*x1*x3 - x1*x2*x2 + x1*x3*x3 + x2*x2*x3 - x2*x3*x3)
+    ];
+}
+
+var x2s1 = [128*2, 128*4];
+var y2s1 = [128*3, 128*1];
+
+var x2s2 = [128*1, 128*2, 128*3, 128*4];
+var y2s2 = [128*2, 128*1, 128*2, 128*3];
+
+function init_canvas2d1() {
+    var canvas = document.getElementById("canvas2d1");
+    canvas.addEventListener('mousedown', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        const x = e.clientX - canvas_rect.left;
+        const y = e.clientY - canvas_rect.top;
+        const point_i = closest_point(x, y, x2s1, y2s1);
+        x2s1[point_i] = x;
+        y2s1[point_i] = y;
+        draw_canvas2d1(0, 0, false);
+    }, false);
+     
+    canvas.addEventListener('mousemove', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        const x = e.clientX - canvas_rect.left;
+        const y = e.clientY - canvas_rect.top;    
+        if(e.buttons == 1){
+            const point_i = closest_point(x, y, x2s1, y2s1);
+            x2s1[point_i] = x;
+            y2s1[point_i] = y;
+            draw_canvas2d1(0, 0, false);
+        } else {
+            draw_canvas2d1(x, y, true);
+        }
+    }, false);
+    
+    canvas.addEventListener('mouseup', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        draw_canvas2d1(0, 0, false);
+    }, false);
+    
+    draw_canvas2d1();
+}
+
+function draw_canvas2d1(client_x, client_y, do_guides){
+    var canvas = document.getElementById("canvas2d1");
+    var context = canvas.getContext("2d");
+    
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+        
+    const do_interpolation = document.getElementById("i").checked || document.getElementById("ie").checked;    
+    const do_extrapolation = document.getElementById("e").checked || document.getElementById("ie").checked;
+    // interpolation/extrapolation
+    context.strokeStyle="#888888";
+    context.lineWidth = 3;
+    context.beginPath()
+    for(var i = 0; i < w; ++i) {
+        var do_segment =  ((i < x2s1[0]-1 || i > x2s1[x2s1.length - 1]) && do_extrapolation)
+                       || ((i >= x2s1[0]-1 && i <= x2s1[x2s1.length - 1]) && do_interpolation);
+        if(do_segment) {
+            const y1 = ie_no_basis(i, x2s1, y2s1);
+            const y2 = ie_no_basis(i+1, x2s1, y2s1);
+            context.moveTo(i, y1);
+            context.lineTo(i+1, y2);
+        }
+    }
+    context.stroke();
+    context.closePath();     
+    context.lineWidth = 1;
+    
+    // grid
+    draw_grid_on(context);
+    
+    // dots
+    context.strokeStyle="#f71134";
+    for(var i = 0; i <= x2s1.length; ++i){
+        context.beginPath();
+        context.arc(x2s1[i], y2s1[i], 4, 0, 2*Math.PI);
+        context.stroke();
+        context.closePath();    
+    }
+
+    // guides
+    if(do_guides){
+        const point_i = closest_point(client_x, client_y, x2s1, y2s1);
+        draw_arrow(context, x2s1[point_i], y2s1[point_i], client_x, client_y);
+    }
+}
+
+var basis2d = [];
+function recalculate_basis2d() {
+    /*
+    cccc onstant-constant-constant-constant 
+    cllc constant-linear-linear-constant  
+    llll linear-linear-linear-linear
+    cqqc constant-quadratic-quadratic-constant
+    lqql linear-quadratic-quadratic-linear
+    qqqq quadratic-quadratic-quadratic-quadratic
+    */
+    if(document.getElementById("cccc").checked) {
+        basis2d[0] = function(x) {return y2s2[0];};
+        basis2d[1] = function(x) {return y2s2[1];};
+        basis2d[2] = function(x) {return y2s2[2];};
+        basis2d[3] = function(x) {return y2s2[3];};
+    } else if(document.getElementById("cllc").checked) {
+        const b1 = fit_linear_to(linear_basis(x2s2[0], y2s2[0], x2s2[2], y2s2[2]), x2s2[1], y2s2[1]);
+        const b2 = fit_linear_to(linear_basis(x2s2[1], y2s2[1], x2s2[3], y2s2[3]), x2s2[2], y2s2[2]);
+        basis2d[0] = function(x) {return y2s2[0];};
+        basis2d[1] = function(x) {return b1[0]*x + b1[1];};
+        basis2d[2] = function(x) {return b2[0]*x + b2[1];};
+        basis2d[3] = function(x) {return y2s2[3];};
+    } else if(document.getElementById("llll").checked) {
+        const b0 = linear_basis(x2s2[0], y2s2[0], x2s2[1], y2s2[1]);
+        const b1 = fit_linear_to(linear_basis(x2s2[0], y2s2[0], x2s2[2], y2s2[2]), x2s2[1], y2s2[1]);
+        const b2 = fit_linear_to(linear_basis(x2s2[1], y2s2[1], x2s2[3], y2s2[3]), x2s2[2], y2s2[2]);
+        const b3 = linear_basis(x2s2[2], y2s2[2], x2s2[3], y2s2[3]);
+        basis2d[0] = function(x) {return b0[0]*x + b0[1];};
+        basis2d[1] = function(x) {return b1[0]*x + b1[1];};
+        basis2d[2] = function(x) {return b2[0]*x + b2[1];};
+        basis2d[3] = function(x) {return b3[0]*x + b3[1];};
+    } else if(document.getElementById("cqqc").checked) {
+        const b1 = quadratic_basis(x2s2[0], y2s2[0], x2s2[1], y2s2[1], x2s2[2], y2s2[2]);
+        const b2 = quadratic_basis(x2s2[1], y2s2[1], x2s2[2], y2s2[2], x2s2[3], y2s2[3]);
+        basis2d[0] = function(x) {return y2s2[0];};
+        basis2d[1] = function(x) {return b1[0]*x*x + b1[1]*x + b1[2];};
+        basis2d[2] = function(x) {return b2[0]*x*x + b2[1]*x + b2[2];};
+        basis2d[3] = function(x) {return y2s2[3];};
+    } else if(document.getElementById("lqql").checked) {
+        const b0 = linear_basis(x2s2[0], y2s2[0], x2s2[1], y2s2[1]);
+        const b1 = quadratic_basis(x2s2[0], y2s2[0], x2s2[1], y2s2[1], x2s2[2], y2s2[2]);
+        const b2 = quadratic_basis(x2s2[1], y2s2[1], x2s2[2], y2s2[2], x2s2[3], y2s2[3]);
+        const b3 = linear_basis(x2s2[2], y2s2[2], x2s2[3], y2s2[3]);
+        basis2d[0] = function(x) {return b0[0]*x + b0[1];};
+        basis2d[1] = function(x) {return b1[0]*x*x + b1[1]*x + b1[2];};
+        basis2d[2] = function(x) {return b2[0]*x*x + b2[1]*x + b2[2];};
+        basis2d[3] = function(x) {return b3[0]*x + b3[1];};
+    } else if(document.getElementById("qqqq").checked) {
+        const b1 = quadratic_basis(x2s2[0], y2s2[0], x2s2[1], y2s2[1], x2s2[2], y2s2[2]);
+        const b2 = quadratic_basis(x2s2[1], y2s2[1], x2s2[2], y2s2[2], x2s2[3], y2s2[3]);
+        basis2d[0] = function(x) {return b1[0]*x*x + b1[1]*x + b1[2];};
+        basis2d[1] = function(x) {return b1[0]*x*x + b1[1]*x + b1[2];};
+        basis2d[2] = function(x) {return b2[0]*x*x + b2[1]*x + b2[2];};
+        basis2d[3] = function(x) {return b2[0]*x*x + b2[1]*x + b2[2];};
+    }
+}
+    
+function init_canvas2d2(){
+    var canvas = document.getElementById("canvas2d2");
+    canvas.addEventListener('mousedown', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        const x = e.clientX - canvas_rect.left;
+        const y = e.clientY - canvas_rect.top;
+        const point_i = closest_point(x, y, x2s2, y2s2);
+        x2s2[point_i] = x;
+        y2s2[point_i] = y;
+        recalculate_basis2d();
+        draw_canvas2d2(0, 0, false);
+    }, false);
+     
+    canvas.addEventListener('mousemove', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        const x = e.clientX - canvas_rect.left;
+        const y = e.clientY - canvas_rect.top;    
+        if(e.buttons == 1){
+            const point_i = closest_point(x, y, x2s2, y2s2);
+            x2s2[point_i] = x;
+            y2s2[point_i] = y;
+            recalculate_basis2d();
+            draw_canvas2d2(0, 0, false);
+        } else {
+            draw_canvas2d2(x, y, true);
+        }
+    }, false);
+    
+    canvas.addEventListener('mouseup', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        draw_canvas2d2(0, 0, false);
+    }, false);
+    
+    recalculate_basis2d();
+    draw_canvas2d2();
+}
+
+function draw_canvas2d2(client_x, client_y, do_guides){
+    var canvas = document.getElementById("canvas2d2");
+    var context = canvas.getContext("2d");
+    
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    
+    // interpolation/extrapolation
+    context.strokeStyle="#888888";
+    context.lineWidth = 3;
+    context.beginPath()
+    for(var i = 0; i < w; ++i) {
+        const y1 = ie_basis(i, x2s2, basis2d);
+        const y2 = ie_basis(i+1, x2s2, basis2d);
+        context.moveTo(i, y1);
+        context.lineTo(i+1, y2);
+    }
+    context.stroke();
+    context.closePath();     
+    context.lineWidth = 1;
+    
+    // grid
+    draw_grid_on(context);
+    
+    // dots
+    context.strokeStyle="#f71134";    
+    for(var i = 0; i <= x2s2.length; ++i){
+        context.beginPath();
+        context.arc(x2s2[i], y2s2[i], 4, 0, 2*Math.PI);
+        context.stroke();
+        context.closePath();    
+    }
+
+    // guides
+    if(do_guides){
+        const point_i = closest_point(client_x, client_y, x2s2, y2s2);
+        draw_arrow(context, x2s2[point_i], y2s2[point_i], client_x, client_y);
+    }    
+}
+
+
+
+
+//// 3d
+// points
+const a = 256;
+var x3s = [-1, 320, 320 - a/2, 320 + a/2, 320 + a, 320 + a/2, 320 - a/2, 320 - a];
+var y3s = [-1, 320, 320 - a  , 320 - a  , 320    , 320 + a  , 320 + a  , 320    ];
+var z3s = [-1,  90, 140      , 180      , 230    , 160      , 100      , 40     ];
+// triangles' points are ordered clockwise
+var tris = [[2, 3, 1], [3, 4, 1], [4, 5, 1], [5, 6, 1], [6, 7, 1], [7, 2, 1]];
+
+// weight funtion
+var weight3d = 2;
+const wf = function(x) {return 1./Math.pow(x, weight3d);}
+
+
+// finds a closest point from x3s, y3s to x, y
+function closest_3d_point(x, y){
+    return closest_point_starting_from(x, y, x3s, y3s, 1);
+}
+
+// point belongs to a triangle
+function in_tri(px, py, x1, y1, x2, y2, x3, y3) {
+    /* shove it into sympy to get solution
+    px, py, x1, y1, x2, y2, x3, y3, a, b = symbols('px py x1 y1 x2 y2 x3 y3 a b')
+    solve([
+    x1 + a * (x2-x1) + b * (x3-x1) - px,
+    y1 + a * (y2-y1) + b * (y3-y1) - py
+    ], (a, b))
+    */
+    var a = (-(px - x1)*(y1 - y3) + (py - y1)*(x1 - x3))/((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2));
+    var b = ((px - x1)*(y1 - y2) - (py - y1)*(x1 - x2))/((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2));
+    return (a >= 0 && b >= 0 && a + b <= 1.);
+}
+
+// point projection belongs to an edge
+function in_edge(px, py, x1, y1, x2, y2) {
+    if((px-x1)*(y2-y1)-(py-y1)*(x2-x1) < 0) // border should be ordered for that
+        return false;
+    /*
+    px, py, x1, y1, x2, y2, a = symbols('px py x1 y1 x2 y2 a')
+    solve([(x1 + (x2 - x1) * a - px) * (x2 - x1) + (y1 + (y2 - y1) * a - py) * (y2 - y1)], (a))
+    */
+    var a = (-px*x1 + px*x2 - py*y1 + py*y2 + x1*x1 - x1*x2 + y1*y1 - y1*y2)/(x1*x1 - 2*x1*x2 + x2*x2 + y1*y1 - 2*y1*y2 + y2*y2);
+    return (a >= 0 && a <= 1);
+}
+
+// distance squared from (x1, y1) to (x2, y2)
+function d2(x1, y1, x2, y2) {
+    return (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1);
+}
+
+// project point on edge
+function projected_on_edge(px, py, x1, y1, x2, y2) {
+     /*
+    px, py, x1, y1, x2, y2, a = symbols('px py x1 y1 x2 y2 a')
+    solve([(x1 + (x2 - x1) * a - px) * (x2 - x1) + (y1 + (y2 - y1) * a - py) * (y2 - y1)], (a))
+    */
+    var a = (-px*x1 + px*x2 - py*y1 + py*y2 + x1*x1 - x1*x2 + y1*y1 - y1*y2)/(x1*x1 - 2*x1*x2 + x2*x2 + y1*y1 - 2*y1*y2 + y2*y2);
+    return [x1 + (x2 - x1) * a, y1 + (y2 - y1) * a];
+}
+
+// distance from (x1, y1) to (x2, y2)
+function d(x1, y1, x2, y2) {
+    return Math.sqrt(d2(x1, y1, x2, y2));
+}
+
+// distance from (x, y) to edge [(x1, y1), (x2, y2)]
+function d_e(x, y, x1, y1, x2, y2) {
+    const dxe = x2-x1;
+    const dye = y2-y1;
+    const dx = x-x1;
+    const dy = y-y1;
+    const area = Math.abs(dxe*dy - dye*dx);
+    return area / d(x1, y1, x2, y2);
+}
+
+const d_min = 1e-5; // too close
+
+// interpolation on the edge
+function z_in_edge(px, py, x1, y1, z1, x2, y2, z2) {
+    const pp = projected_on_edge(px, py, x1, y1, x2, y2);
+    const d1 = d(pp[0], pp[1], x1, y1);
+    const d2 = d(pp[0], pp[1], x2, y2);
+    if(d1 < d_min)
+        return z1;
+    if(d2 < d_min)
+        return z2;
+    return (z1 * wf(d1) + z2 * wf(d2)) / (wf(d1) + wf(d2));
+}
+
+function z_in_edge_by_basis(px, py, x1, y1, b1, x2, y2, b2) {
+    const pp = projected_on_edge(px, py, x1, y1, x2, y2);
+    const d1 = d(pp[0], pp[1], x1, y1);
+    const d2 = d(pp[0], pp[1], x2, y2);
+    if(d1 < d_min)
+        return b1(x1, y1);
+    if(d2 < d_min)
+        return b2(x2, y2);
+    return (b1(px, py) * wf(d1) + b2(px, py) * wf(d2)) / (wf(d1) + wf(d2));
+}
+
+// interpolation in tri
+function z_in_tri(px, py, x1, y1, z1, x2, y2, z2, x3, y3, z3) {
+    const d1 = d_e(px, py, x1, y1, x2, y2);
+    const d2 = d_e(px, py, x2, y2, x3, y3);
+    const d3 = d_e(px, py, x3, y3, x1, y1);
+    if(d1 < d_min)
+        return z_in_edge(px, py, x1, y1, z1, x2, y2, z2);
+    if(d2 < d_min)
+        return z_in_edge(px, py, x2, y2, z2, x3, y3, z3);
+    if(d3 < d_min)
+        return z_in_edge(px, py, x3, y3, z3, x1, y1, z1);
+    return (z_in_edge(px, py, x1, y1, z1, x2, y2, z2) * wf(d1) 
+          + z_in_edge(px, py, x2, y2, z2, x3, y3, z3) * wf(d2) 
+          + z_in_edge(px, py, x3, y3, z3, x1, y1, z1) * wf(d3)) 
+        / (wf(d1) + wf(d2) + wf(d3));
+}
+
+function z_in_tri_by_basis(px, py, x1, y1, b1, x2, y2, b2, x3, y3, b3) {
+    const d1 = d_e(px, py, x1, y1, x2, y2);
+    const d2 = d_e(px, py, x2, y2, x3, y3);
+    const d3 = d_e(px, py, x3, y3, x1, y1);
+    if(d1 < d_min)
+        return z_in_edge_by_basis(px, py, x1, y1, b1, x2, y2, b2);
+    if(d2 < d_min)
+        return z_in_edge_by_basis(px, py, x2, y2, b2, x3, y3, b3);
+    if(d3 < d_min)
+        return z_in_edge_by_basis(px, py, x3, y3, b3, x1, y1, b1);
+    return (z_in_edge_by_basis(px, py, x1, y1, b1, x2, y2, b2) * wf(d1) 
+          + z_in_edge_by_basis(px, py, x2, y2, b2, x3, y3, b3) * wf(d2) 
+          + z_in_edge_by_basis(px, py, x3, y3, b3, x1, y1, b1) * wf(d3)) 
+        / (wf(d1) + wf(d2) + wf(d3));
+}
+
+// general purpose minimizer
+function minimize(f, args, iterations) {
+    var best_args = args.slice();
+    var best_f = f.apply(null, args);
+    for(var i = 0; i < iterations; ++i) {
+        var args_i = best_args.slice();
+        args_i[i % args_i.length] += Math.random() >= 0.5 
+            ? + Math.tan(Math.random() * Math.PI / 2)
+            : - Math.tan(Math.random() * Math.PI / 2);
+        var f_i = f.apply(null, args_i);
+        if(f_i < best_f) {
+            best_f = f_i;
+            best_args = args_i.slice();
+        }
+    }
+    return best_args;
+}
+
+function init_canvas3d(){
+    var canvas = document.getElementById("canvas3d");
+    canvas.addEventListener('mousedown', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        const x = e.clientX - canvas_rect.left;
+        const y = e.clientY - canvas_rect.top;
+        const point_i = closest_3d_point(x, y);
+        x3s[point_i] = x;
+        y3s[point_i] = y;
+        compute_edges_and_z_field();
+        draw_canvas3d(0, 0, false);
+    }, false);
+     
+    canvas.addEventListener('mousemove', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        const x = e.clientX - canvas_rect.left;
+        const y = e.clientY - canvas_rect.top;    
+        if(e.buttons == 1){
+            const point_i = closest_3d_point(x, y);
+            x3s[point_i] = x;
+            y3s[point_i] = y;
+            compute_edges_and_z_field();
+            draw_canvas3d(0, 0, false);
+        } else {
+            draw_canvas3d(x, y, true);
+        }
+    }, false);
+    
+    canvas.addEventListener('mouseup', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        draw_canvas3d(0, 0, false);
+    }, false);
+    
+    compute_edges_and_z_field();
+    draw_canvas3d();
+}
+
+function draw_arrow(context, x1, y1, x2, y2) {
+    var d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+    context.beginPath();
+    context.moveTo(x1, y1);
+    context.lineTo(x2, y2);
+    context.moveTo(x2 - (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d + (x2 - x1) * 6 / d);
+    context.lineTo(x2, y2);
+    context.moveTo(x2 + (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d - (x2 - x1) * 6 / d);
+    context.lineTo(x2, y2);
+    context.stroke();
+    context.closePath();
+}
+
+function edge_as_number(edge) {
+    return edge[0] * 10000 + edge[1];
+}
+
+function number_as_edge(number) {
+    return [Math.floor(number / 10000), number % 10000];
+}
+
+var edges = [];
+var basis_3d = [];
+var z_field = [];
+function compute_edges_and_z_field() {
+    // compute all edges
+    var all_edges = new Set();
+    var inner_edges = new Set();
+    for(var i = 0; i < tris.length; ++i) {
+        for(var j = 0; j < 3; ++j) {
+            const i1 = tris[i][j % 3];
+            const i2 = tris[i][(j+1) % 3];
+            const ordered_edge = i1 < i2 ? [i1, i2] : [i2, i1];
+            if(all_edges.has(edge_as_number(ordered_edge)))
+                inner_edges.add(edge_as_number(ordered_edge));              
+            all_edges.add(edge_as_number(ordered_edge))
+        }
+    }
+    edges = Array.from(all_edges.values()).map(number_as_edge);
+    
+    // compute outer edges
+    var outer_edges = [];
+    for(var i = 0; i < tris.length; ++i) {
+        for(var j = 0; j < 3; ++j) {
+            const edge = [tris[i][j % 3], tris[i][(j+1) % 3]];
+            const egde = [tris[i][(j+1) % 3], tris[i][j % 3]];
+            if(!(inner_edges.has(edge_as_number(edge)) || inner_edges.has(edge_as_number(egde))))
+                outer_edges.push(edge);
+        }
+    }
+    
+    const do_linear_basis = document.getElementById("basis3d_linear").checked;
+    if(do_linear_basis) {
+        basis_3d = [[]]; // starts with 1 (0 is empty)
+                
+        for(var i = 1; i < x3s.length; ++i) {
+            var points_i = [i];
+            // find neighbors
+            for(var j = 0; j < edges.length; ++j) {
+                if(edges[j][0] == i)
+                    points_i.push(edges[j][1]);
+                if(edges[j][1] == i)
+                    points_i.push(edges[j][0]);
+            }
+            
+            // difference between the model and the points
+            var target = function(a, b, c) {
+                var diff2 = 0.;
+                for(var j = 0; j < points_i.length; ++j) {
+                    diff2 += Math.pow((x3s[points_i[j]] * a + y3s[points_i[j]] * b + c) - z3s[points_i[j]], 2);
+                }
+                return diff2;
+            }
+            
+            // 3-point plane used as a first guess
+            const x1 = x3s[points_i[0]];
+            const y1 = y3s[points_i[0]];
+            const z1 = z3s[points_i[0]];
+            const x2 = x3s[points_i[1]];
+            const y2 = y3s[points_i[1]];
+            const z2 = z3s[points_i[1]];
+            const x3 = x3s[points_i[2]];
+            const y3 = y3s[points_i[2]];
+            const z3 = z3s[points_i[2]];
+            const a = (z1*(y2 - y3) - z2*(y1 - y3) + z3*(y1 - y2))/(x1*y2 - x1*y3 - x2*y1 + x2*y3 + x3*y1 - x3*y2);
+            const b = (-z1*(x2 - x3) + z2*(x1 - x3) - z3*(x1 - x2))/(x1*y2 - x1*y3 - x2*y1 + x2*y3 + x3*y1 - x3*y2);
+            const c = (z1*(x2*y3 - x3*y2) - z2*(x1*y3 - x3*y1) + z3*(x1*y2 - x2*y1))/(x1*y2 - x1*y3 - x2*y1 + x2*y3 + x3*y1 - x3*y2);
+            var abc = [a, b, c];
+            const optimized_abc = minimize(target, abc, 40000);   // the better option is then calculated with Monte-Carlo optimizer
+            const oa = optimized_abc[0];
+            const ob = optimized_abc[1];
+            const oc = optimized_abc[2];
+            const dz = z3s[i] - (oa*x3s[i] + ob*y3s[i] + oc);
+            basis_3d.push(function(x, y) {return oa * x + ob * y + oc + dz;}); 
+        }
+        
+        // compute z-field with linear basis
+        z_field = [];
+        for (var i = 0; i < w*h; i += 1) {
+            var y = Math.floor(i / w);
+            var x = i % w;
+            var z = 0;
+            var z_determined = false;
+            for(var j = 0; j < tris.length; ++j)
+                if(in_tri(x, y, x3s[tris[j][0]], y3s[tris[j][0]], x3s[tris[j][1]], y3s[tris[j][1]], x3s[tris[j][2]], y3s[tris[j][2]])) {
+                    z = z_in_tri_by_basis(x, y, 
+                        x3s[tris[j][0]], y3s[tris[j][0]], basis_3d[tris[j][0]], 
+                        x3s[tris[j][1]], y3s[tris[j][1]], basis_3d[tris[j][1]], 
+                        x3s[tris[j][2]], y3s[tris[j][2]], basis_3d[tris[j][2]]);
+                    z_determined = true;
+                }
+            if(!z_determined) {
+                for(var j = 0; j < outer_edges.length; ++j) {
+                    if(in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]])) {
+                        z = z_in_edge_by_basis(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], basis_3d[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]], basis_3d[outer_edges[j][1]]);
+                        z_determined = true;
+                    }
+                }
+            }
+            if(!z_determined)
+                z = basis_3d[closest_3d_point(x, y)](x, y);
+            z_field.push(z);
+        }
+    } else {
+        // compute z-field with constant values instead of basis
+        z_field = [];
+        for (var i = 0; i < w*h; i += 1) {
+            var y = Math.floor(i / w);
+            var x = i % w;
+            var z = 0;
+            var z_determined = false;
+            for(var j = 0; j < tris.length; ++j)
+                if(in_tri(x, y, x3s[tris[j][0]], y3s[tris[j][0]], x3s[tris[j][1]], y3s[tris[j][1]], x3s[tris[j][2]], y3s[tris[j][2]])) {
+                    z = z_in_tri(x, y, 
+                        x3s[tris[j][0]], y3s[tris[j][0]], z3s[tris[j][0]], 
+                        x3s[tris[j][1]], y3s[tris[j][1]], z3s[tris[j][1]], 
+                        x3s[tris[j][2]], y3s[tris[j][2]], z3s[tris[j][2]]);
+                    z_determined = true;
+                }
+            if(!z_determined) {
+                for(var j = 0; j < outer_edges.length; ++j) {
+                    if(in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]])) {
+                        z = z_in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], z3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]], z3s[outer_edges[j][1]]);
+                        z_determined = true;
+                    }
+                }
+            }
+            if(!z_determined)
+                z = z3s[closest_3d_point(x, y)];
+            z_field.push(z);
+        }
+    }
+}
+
+function draw_canvas3d(client_x, client_y, do_guides){
+    var canvas = document.getElementById("canvas3d");
+    var context = canvas.getContext("2d");
+    
+    // draw z-field
+    var pixel_field = context.createImageData(w, h);
+    for (var i = 0; i < pixel_field.data.length; i += 4) {
+        const color = Math.trunc(z_field[Math.floor(i/4)] / 16) * 16;
+        pixel_field.data[i + 0] = color;
+        pixel_field.data[i + 1] = color;
+        pixel_field.data[i + 2] = color;
+        pixel_field.data[i + 3] = 0xFF;
+    }
+    context.putImageData(pixel_field, -0.5, -0.5);
+    
+    // dots
+    context.strokeStyle="#f71134";    
+    for(var i = 1; i <= x3s.length; ++i){
+        context.beginPath();
+        context.arc(x3s[i], y3s[i], 4, 0, 2*Math.PI);
+        context.stroke();
+        context.closePath();    
+    }
+
+    // guides
+    if(do_guides){
+        const point_i = closest_3d_point(client_x, client_y);
+        draw_arrow(context, x3s[point_i], y3s[point_i], client_x, client_y);
+    }
+        
+    // complex
+    context.setLineDash([4, 4]);
+    for(var i = 0; i < edges.length; ++i) {
+     context.beginPath();
+        context.moveTo(x3s[edges[i][0]], y3s[edges[i][0]]);
+        context.lineTo(x3s[edges[i][1]], y3s[edges[i][1]]);
+        context.stroke();
+        context.closePath();
+    }
+    context.setLineDash([]);
+}
+
+// UI
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) + 1;
+    eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) - 1;
+    eval('change_' + counter_name + '()');
+}
+
+function change_weight2d() {
+    weight2d = document.getElementById('weight2d').value;
+    draw_canvas2d1();
+    draw_canvas2d2();
+}
+
+function change_weight3d() {
+    weight3d = document.getElementById('weight3d').value;
+    compute_edges_and_z_field();
+    draw_canvas3d();
+}
+    </script>
+  </head>
+  <body>
+    <center>
+    <p>
+...
+    </p>
+    <canvas id="canvas2d1" width=640 height=640></canvas>
+    <form>
+    Do: 
+    <input type="radio" name="ie" id="i" value="i" onclick="draw_canvas2d1(0, 0, false);"><label for="i">interpolation</label> 
+    <input type="radio" name="ie" id="e" value="e" onclick="draw_canvas2d1(0, 0, false);"><label for="e">extrapolation</label>  
+    <input type="radio" name="ie" id="ie" value="ie" checked="true" onclick="draw_canvas2d1(0, 0, false);"><label for="ie">both</label> 
+    <br>
+    <br>
+    With the weight coefficient:
+    <button type="button" onclick="dec('weight2d')">-</button>
+    <input type="text" style="width: 32pt;" id="weight2d" value="2" oninput="change_weight2d();">
+    <button type="button" onclick="inc('weight2d')">+</button>
+    </form>
+    <p>
+...
+    </p>
+    <canvas id="canvas2d2" width=640 height=640></canvas>
+    <form>
+    Please select one of the following configurations:
+    <br>
+    <input type="radio" name="basis" id="cccc" value="cccc" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="i">constant-constant-constant-constant</label> 
+    <br>
+    <input type="radio" name="basis" id="cllc" value="cllc" checked="true" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="e">constant-linear-linear-constant</label>  
+    <br>
+    <input type="radio" name="basis" id="llll" value="llll" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="ie">linear-linear-linear-linear</label>
+    <br>
+    <input type="radio" name="basis" id="cqqc" value="cqqc" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="ie">constant-quadratic-quadratic-constant</label>
+    <br>
+    <input type="radio" name="basis" id="lqql" value="lqql" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="ie">linear-quadratic-quadratic-linear</label>
+    <br>
+    <input type="radio" name="basis" id="qqqq" value="qqqq" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="ie">quadratic-quadratic-quadratic-quadratic</label>
+    </form>        
+    <p>
+...
+    </p>
+    <canvas id="canvas3d" width=640 height=640></canvas>
+    <form>
+Please select basis function:
+    <input type="radio" name="basis3d" id="basis3d_constant" value="basis3d_constant" onclick="change_weight3d();"><label for="basis3d_constant">constant</label>;
+    <input type="radio" name="basis3d" checked="true" id="basis3d_linear" value="basis3d_linear" onclick="change_weight3d();"><label for="basis3d_linear">linear</label>.
+    <br>
+    <br>
+And the weight coefficient:
+    <button type="button" onclick="dec('weight3d')">-</button>
+    <input type="text" style="width: 32pt;" id="weight3d" value="2" oninput="change_weight3d();">
+    <button type="button" onclick="inc('weight3d')">+</button>
+    </form>
+    
+    <script language="JavaScript">
+    init_canvas2d1();
+    init_canvas2d2();
+    init_canvas3d();
+    </script>
+    </center>
+  </body>
+</html>
