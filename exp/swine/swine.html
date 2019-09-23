@@ -752,10 +752,13 @@ function compute_edges_and_z_field() {
             const a = (z1*(y2 - y3) - z2*(y1 - y3) + z3*(y1 - y2))/(x1*y2 - x1*y3 - x2*y1 + x2*y3 + x3*y1 - x3*y2);
             const b = (-z1*(x2 - x3) + z2*(x1 - x3) - z3*(x1 - x2))/(x1*y2 - x1*y3 - x2*y1 + x2*y3 + x3*y1 - x3*y2);
             const c = (z1*(x2*y3 - x3*y2) - z2*(x1*y3 - x3*y1) + z3*(x1*y2 - x2*y1))/(x1*y2 - x1*y3 - x2*y1 + x2*y3 + x3*y1 - x3*y2);
-            const dz = z3s[i] - (a*x3s[i] + b*y3s[i] + c);
-            var abc = [a, b, c + dz];
-            const optimized_abc = minimize(target, abc, 20000);   // the better option is then calculated with Monte-Carlo optimizer
-            basis_3d.push(function(x, y) {return optimized_abc[0] * x + optimized_abc[1] * y + optimized_abc[2];});
+            var abc = [a, b, c];
+            const optimized_abc = minimize(target, abc, 40000);   // the better option is then calculated with Monte-Carlo optimizer
+            const oa = optimized_abc[0];
+            const ob = optimized_abc[1];
+            const oc = optimized_abc[2];
+            const dz = z3s[i] - (oa*x3s[i] + ob*y3s[i] + oc);
+            basis_3d.push(function(x, y) {return oa * x + ob * y + oc + dz;}); 
         }
         
         // compute z-field with linear basis
