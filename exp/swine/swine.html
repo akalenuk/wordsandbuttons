@@ -566,6 +566,17 @@ function z_in_edge(px, py, x1, y1, z1, x2, y2, z2) {
     return (z1 * wf(d1) + z2 * wf(d2)) / (wf(d1) + wf(d2));
 }
 
+function z_in_edge_by_basis(px, py, x1, y1, b1, x2, y2, b2) {
+    const pp = projected_on_edge(px, py, x1, y1, x2, y2);
+    const d1 = d(pp[0], pp[1], x1, y1);
+    const d2 = d(pp[0], pp[1], x2, y2);
+    if(d1 < d_min)
+        return b1(x1, y1);
+    if(d2 < d_min)
+        return b2(x2, y2);
+    return (b1(px, py) * wf(d1) + b2(px, py) * wf(d2)) / (wf(d1) + wf(d2));
+}
+
 // interpolation in tri
 function z_in_tri(px, py, x1, y1, z1, x2, y2, z2, x3, y3, z3) {
     const d1 = d_e(px, py, x1, y1, x2, y2);
@@ -580,6 +591,22 @@ function z_in_tri(px, py, x1, y1, z1, x2, y2, z2, x3, y3, z3) {
     return (z_in_edge(px, py, x1, y1, z1, x2, y2, z2) * wf(d1) 
           + z_in_edge(px, py, x2, y2, z2, x3, y3, z3) * wf(d2) 
           + z_in_edge(px, py, x3, y3, z3, x1, y1, z1) * wf(d3)) 
+        / (wf(d1) + wf(d2) + wf(d3));
+}
+
+function z_in_tri_by_basis(px, py, x1, y1, b1, x2, y2, b2, x3, y3, b3) {
+    const d1 = d_e(px, py, x1, y1, x2, y2);
+    const d2 = d_e(px, py, x2, y2, x3, y3);
+    const d3 = d_e(px, py, x3, y3, x1, y1);
+    if(d1 < d_min)
+        return z_in_edge_by_basis(px, py, x1, y1, b1, x2, y2, b2);
+    if(d2 < d_min)
+        return z_in_edge_by_basis(px, py, x2, y2, b2, x3, y3, b3);
+    if(d3 < d_min)
+        return z_in_edge_by_basis(px, py, x3, y3, b3, x1, y1, b1);
+    return (z_in_edge_by_basis(px, py, x1, y1, b1, x2, y2, b2) * wf(d1) 
+          + z_in_edge_by_basis(px, py, x2, y2, b2, x3, y3, b3) * wf(d2) 
+          + z_in_edge_by_basis(px, py, x3, y3, b3, x1, y1, b1) * wf(d3)) 
         / (wf(d1) + wf(d2) + wf(d3));
 }
 
@@ -728,35 +755,37 @@ function compute_edges_and_z_field() {
             var abc = [a, b, c];
             const optimized_abc = minimize(target, abc, 20000);   // the better option is then calculated with Monte-Carlo optimizer
             basis_3d.push(function(x, y) {return optimized_abc[0] * x + optimized_abc[1] * y + optimized_abc[2];});
-        } 
-    }
-    
-    // compute z-field
-    z_field = [];
-    for (var i = 0; i < w*h; i += 1) {
-    var y = Math.floor(i / w);
-    var x = i % w;
-    var z = 0;
-    var z_determined = false;
-    for(var j = 0; j < tris.length; ++j)
-        if(in_tri(x, y, x3s[tris[j][0]], y3s[tris[j][0]], x3s[tris[j][1]], y3s[tris[j][1]], x3s[tris[j][2]], y3s[tris[j][2]])) {
-            z = z_in_tri(x, y, 
-                x3s[tris[j][0]], y3s[tris[j][0]], z3s[tris[j][0]], 
-                x3s[tris[j][1]], y3s[tris[j][1]], z3s[tris[j][1]], 
-                x3s[tris[j][2]], y3s[tris[j][2]], z3s[tris[j][2]]);
-            z_determined = true;
         }
-    if(!z_determined) {
-        for(var j = 0; j < outer_edges.length; ++j) {
-            if(in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]])) {
-                z = z_in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], z3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]], z3s[outer_edges[j][1]]);
+        
+        // compute z-field with linear basis
+    } else {
+        // compute z-field with constant values instead of basis
+        z_field = [];
+        for (var i = 0; i < w*h; i += 1) {
+        var y = Math.floor(i / w);
+        var x = i % w;
+        var z = 0;
+        var z_determined = false;
+        for(var j = 0; j < tris.length; ++j)
+            if(in_tri(x, y, x3s[tris[j][0]], y3s[tris[j][0]], x3s[tris[j][1]], y3s[tris[j][1]], x3s[tris[j][2]], y3s[tris[j][2]])) {
+                z = z_in_tri(x, y, 
+                    x3s[tris[j][0]], y3s[tris[j][0]], z3s[tris[j][0]], 
+                    x3s[tris[j][1]], y3s[tris[j][1]], z3s[tris[j][1]], 
+                    x3s[tris[j][2]], y3s[tris[j][2]], z3s[tris[j][2]]);
                 z_determined = true;
             }
+        if(!z_determined) {
+            for(var j = 0; j < outer_edges.length; ++j) {
+                if(in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]])) {
+                    z = z_in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], z3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]], z3s[outer_edges[j][1]]);
+                    z_determined = true;
+                }
+            }
         }
-    }
-    if(!z_determined)
-        z = z3s[closest_3d_point(x, y)];
-    z_field.push(z);
+        if(!z_determined)
+            z = z3s[closest_3d_point(x, y)];
+        z_field.push(z);
+        }
     }
 }
 
