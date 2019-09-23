@@ -714,8 +714,22 @@ function compute_edges_and_z_field() {
                 return diff2;
             }
             
-            var abc = [0., 0., 0.]; // todo: use 3-point plane as a first guess
-            const optimized_abc = minimize(target, abc, 100000);
+            // 3-point plane used as a first guess
+            const x1 = x3s[points_i[0]];
+            const y1 = y3s[points_i[0]];
+            const z1 = z3s[points_i[0]];
+            const x2 = x3s[points_i[1]];
+            const y2 = y3s[points_i[1]];
+            const z2 = z3s[points_i[1]];
+            const x3 = x3s[points_i[2]];
+            const y3 = y3s[points_i[2]];
+            const z3 = z3s[points_i[2]];
+            const a = (z1*(y2 - y3) - z2*(y1 - y3) + z3*(y1 - y2))/(x1*y2 - x1*y3 - x2*y1 + x2*y3 + x3*y1 - x3*y2);
+            const b = (-z1*(x2 - x3) + z2*(x1 - x3) - z3*(x1 - x2))/(x1*y2 - x1*y3 - x2*y1 + x2*y3 + x3*y1 - x3*y2);
+            const c = (z1*(x2*y3 - x3*y2) - z2*(x1*y3 - x3*y1) + z3*(x1*y2 - x2*y1))/(x1*y2 - x1*y3 - x2*y1 + x2*y3 + x3*y1 - x3*y2);
+            var abc = [a, b, c];
+            const optimized_abc = minimize(target, abc, 10000);   // the better option is then calculated with Monte-Carlo optimizer
+            console.log(optimized_abc);
             basis_3d.push(function(x, y) {return optimized_abc[0] * x + optimized_abc[1] * y + optimized_abc[2];});
         } 
     }
