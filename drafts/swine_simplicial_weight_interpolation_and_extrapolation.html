@@ -256,7 +256,7 @@ var x2s1 = [128*2, 128*4];
 var y2s1 = [128*3, 128*1];
 
 var x2s2 = [128*1, 128*2, 128*3, 128*4];
-var y2s2 = [128*2, 128*1, 128*2, 128*3];
+var y2s2 = [128*2, 128*1, 128*2.5, 128*3];
 
 function init_canvas2d1() {
     var canvas = document.getElementById("canvas2d1");
@@ -454,6 +454,22 @@ function draw_canvas2d2(client_x, client_y, do_guides){
     context.stroke();
     context.closePath();     
     context.lineWidth = 1;
+    
+    // basis
+    context.strokeStyle="#f71134";
+    for(var j = 0; j < x2s2.length; ++j) {
+        context.beginPath()
+        for(var i = 0; i < w; ++i) {
+            if(Math.abs(i - x2s2[j]) < 64) {
+                const y1 = basis2d[j](i);
+                const y2 = basis2d[j](i+1);
+                context.moveTo(i, y1);
+                context.lineTo(i+1, y2);
+            }
+        }
+        context.stroke();
+        context.closePath();
+    }
     
     // grid
     draw_grid_on(context);
