@@ -285,7 +285,10 @@ function init_canvas2d1() {
     }, false);
     
     canvas.addEventListener('mouseup', function(e){
-        canvas_rect = canvas.getBoundingClientRect();
+        draw_canvas2d1(0, 0, false);
+    }, false);
+    
+    canvas.addEventListener('mouseleave', function(e){
         draw_canvas2d1(0, 0, false);
     }, false);
     
@@ -425,10 +428,13 @@ function init_canvas2d2(){
     }, false);
     
     canvas.addEventListener('mouseup', function(e){
-        canvas_rect = canvas.getBoundingClientRect();
         draw_canvas2d2(0, 0, false);
     }, false);
-    
+   
+    canvas.addEventListener('mouseleave', function(e){
+        draw_canvas2d2(0, 0, false);
+    }, false);
+        
     recalculate_basis2d();
     draw_canvas2d2();
 }
@@ -523,7 +529,7 @@ function in_tri(px, py, x1, y1, x2, y2, x3, y3) {
     */
     var a = (-(px - x1)*(y1 - y3) + (py - y1)*(x1 - x3))/((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2));
     var b = ((px - x1)*(y1 - y2) - (py - y1)*(x1 - x2))/((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2));
-    return (a >= 0 && b >= 0 && a + b <= 1.);
+    return (a > 0 && b > 0 && a + b < 1.);
 }
 
 // point projection belongs to an edge
@@ -535,7 +541,7 @@ function in_edge(px, py, x1, y1, x2, y2) {
     solve([(x1 + (x2 - x1) * a - px) * (x2 - x1) + (y1 + (y2 - y1) * a - py) * (y2 - y1)], (a))
     */
     var a = (-px*x1 + px*x2 - py*y1 + py*y2 + x1*x1 - x1*x2 + y1*y1 - y1*y2)/(x1*x1 - 2*x1*x2 + x2*x2 + y1*y1 - 2*y1*y2 + y2*y2);
-    return (a >= 0 && a <= 1);
+    return (a > 0 && a < 1);
 }
 
 // distance squared from (x1, y1) to (x2, y2)
@@ -673,10 +679,13 @@ function init_canvas3d(){
     }, false);
     
     canvas.addEventListener('mouseup', function(e){
-        canvas_rect = canvas.getBoundingClientRect();
         draw_canvas3d(0, 0, false);
     }, false);
     
+    canvas.addEventListener('mouseleave', function(e){
+        draw_canvas3d(0, 0, false);
+    }, false);
+        
     compute_edges_and_z_field();
     draw_canvas3d();
 }
@@ -917,9 +926,9 @@ I had my fun playing with the concept but the conclusion I had to put into my th
     <p>
 But still, I think that the three ideas behind it are prominent. And if an algorihtm helps show them while not being very purposeful by itself then maybe this is the purpose of the algorithm.
     </p>
-    <h1>
+    <h2>
 Idea 1: inverse weights
-    </h1>
+    </h2>
     <p>
 ...
     </p>
@@ -959,12 +968,12 @@ Idea 1: inverse weights
     <canvas id="canvas2d1" width=640 height=640></canvas>
     <form>
     Do: 
-    <input type="radio" name="ie" id="i" value="i" onclick="draw_canvas2d1(0, 0, false);"><label for="i">interpolation</label> 
-    <input type="radio" name="ie" id="e" value="e" onclick="draw_canvas2d1(0, 0, false);"><label for="e">extrapolation</label>  
-    <input type="radio" name="ie" id="ie" value="ie" checked="true" onclick="draw_canvas2d1(0, 0, false);"><label for="ie">both</label> 
+    <input type="radio" name="ie" id="i" value="i" onclick="draw_canvas2d1(0, 0, false);"><label for="i">interpolation</label>, 
+    <input type="radio" name="ie" id="e" value="e" onclick="draw_canvas2d1(0, 0, false);"><label for="e">extrapolation</label>,  
+    <input type="radio" name="ie" id="ie" value="ie" checked="true" onclick="draw_canvas2d1(0, 0, false);"><label for="ie">both</label>; 
     <br>
     <br>
-    With the weight coefficient:
+    with the weight coefficient:
     <button type="button" onclick="dec('weight2d')">-</button>
     <input type="text" style="width: 32pt;" id="weight2d" value="2" oninput="change_weight2d();">
     <button type="button" onclick="inc('weight2d')">+</button>
@@ -972,9 +981,9 @@ Idea 1: inverse weights
     <p>
 ...
     </p>
-    <h1>
+    <h2>
 Idea 2: basis functions
-    </h1>
+    </h2>
     <p>
 ...
     </p>
@@ -1015,6 +1024,7 @@ Idea 2: basis functions
     
     <canvas id="canvas2d2" width=640 height=640></canvas>
     <form>
+    <span style="line-height: 1.42;">
     Please select one of the following configurations:
     <br>
     <input type="radio" name="basis" id="cccc" value="cccc" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="i">constant-constant-constant-constant</label> 
@@ -1028,6 +1038,7 @@ Idea 2: basis functions
     <input type="radio" name="basis" id="lqql" value="lqql" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="ie">linear-quadratic-quadratic-linear</label>
     <br>
     <input type="radio" name="basis" id="qqqq" value="qqqq" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="ie">quadratic-quadratic-quadratic-quadratic</label>
+    </span>
     </form>        
     <p>
 ...
