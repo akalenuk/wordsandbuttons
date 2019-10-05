@@ -160,8 +160,10 @@ function closest_point(x, y, xs, ys){
 
 
 // params
-var weight2d = 2;
-const wf2d = function(x) {return 1./Math.pow(x, weight2d);}
+var weight2d1 = 2;
+const wf2d1 = function(x) {return 1./Math.pow(x, weight2d1);}
+var weight2d2 = 2;
+const wf2d2 = function(x) {return 1./Math.pow(x, weight2d2);}
 
 // interpolation/extrapolation no basis
 function ie_no_basis(x, xs, ys) {
@@ -174,8 +176,8 @@ function ie_no_basis(x, xs, ys) {
     for(var j = 0; j < xs.length; ++j)
         if(x > xs[j])
             i = j;
-    return (ys[i] * wf2d(x - xs[i]) + ys[i+1] * wf2d(xs[i+1] - x))
-        / (wf2d(x - xs[i]) + wf2d(xs[i+1] - x));
+    return (ys[i] * wf2d1(x - xs[i]) + ys[i+1] * wf2d1(xs[i+1] - x))
+        / (wf2d1(x - xs[i]) + wf2d1(xs[i+1] - x));
 }
 
 // interpolation/extrapolation with basis functions
@@ -189,8 +191,8 @@ function ie_basis(x, xs, bs) {
     for(var j = 0; j < xs.length; ++j)
         if(x > xs[j])
             i = j;
-    return (bs[i](x) * wf2d(x - xs[i]) + bs[i+1](x) * wf2d(xs[i+1] - x))
-        / (wf2d(x - xs[i]) + wf2d(xs[i+1] - x));
+    return (bs[i](x) * wf2d2(x - xs[i]) + bs[i+1](x) * wf2d2(xs[i+1] - x))
+        / (wf2d2(x - xs[i]) + wf2d2(xs[i+1] - x));
 }
 
 // returns [a, b] for ax+b basis function
@@ -876,9 +878,13 @@ function dec(counter_name) {
     eval('change_' + counter_name + '()');
 }
 
-function change_weight2d() {
-    weight2d = document.getElementById('weight2d').value;
+function change_weight2d1() {
+    weight2d1 = document.getElementById('weight2d1').value;
     draw_canvas2d1();
+}
+
+function change_weight2d2() {
+    weight2d2 = document.getElementById('weight2d2').value;
     draw_canvas2d2();
 }
 
@@ -963,9 +969,9 @@ The n-coefficient in the weight function affects the way the function looks. You
     <br>
     <br>
     with the weight coefficient:
-    <button type="button" onclick="dec('weight2d')">-</button>
-    <input type="text" style="width: 32pt;" id="weight2d" value="2" oninput="change_weight2d();">
-    <button type="button" onclick="inc('weight2d')">+</button>
+    <button type="button" onclick="dec('weight2d1')">-</button>
+    <input type="text" style="width: 32pt;" id="weight2d1" value="2" oninput="change_weight2d1();">
+    <button type="button" onclick="inc('weight2d1')">+</button>
     </form>
     <p>
 Inverse weights are simple mathematically but of course computation bring new challenges. There is no such thing as a limit in floating point computation so the function should be technically discontinuous. You have to define the intrpolating function as its basis values not only in xi points but in some proximity too.
@@ -1041,6 +1047,11 @@ On this interactive plot, you can see how different types of basis functions wor
     <br>
     <input type="radio" name="basis" id="qqqq" value="qqqq" onclick="recalculate_basis2d();draw_canvas2d2(0, 0, false);"><label for="ie">quadratic-quadratic-quadratic-quadratic</label>
     </span>
+    <br><br>
+    And the weight coefficient:
+    <button type="button" onclick="dec('weight2d2')">-</button>
+    <input type="text" style="width: 32pt;" id="weight2d2" value="2" oninput="change_weight2d2();">
+    <button type="button" onclick="inc('weight2d2')">+</button>
     </form>
     <p>
 With inverse weights and basis functions, we have almost too much freedom. We can have our function smooth on some interval, and then have a sharp dent. We can make it lay on a platoe near some point, and then fit some curvature on a range.
