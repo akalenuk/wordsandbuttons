@@ -237,6 +237,17 @@ var y2s1 = [128*3, 128*1];
 var x2s2 = [128*1, 128*2, 128*3, 128*4];
 var y2s2 = [128*2, 128*1, 128*2.5, 128*3];
 
+function order_points_s1() {
+    if(x2s1[0] > x2s1[1]) {
+        x = x2s1[0];
+        y = y2s1[0];
+        x2s1[0] = x2s1[1];
+        y2s1[0] = y2s1[1];
+        x2s1[1] = x;
+        y2s1[1] = y;
+    }
+}
+
 function init_canvas2d1() {
     var canvas = document.getElementById("canvas2d1");
     canvas.addEventListener('mousedown', function(e){
@@ -246,6 +257,7 @@ function init_canvas2d1() {
         const point_i = closest_point(x, y, x2s1, y2s1);
         x2s1[point_i] = x;
         y2s1[point_i] = y;
+        order_points_s1();
         draw_canvas2d1(0, 0, false);
     }, false);
 
@@ -257,6 +269,7 @@ function init_canvas2d1() {
             const point_i = closest_point(x, y, x2s1, y2s1);
             x2s1[point_i] = x;
             y2s1[point_i] = y;
+            order_points_s1();
             draw_canvas2d1(0, 0, false);
         } else {
             draw_canvas2d1(x, y, true);
@@ -264,6 +277,7 @@ function init_canvas2d1() {
     }, false);
 
     canvas.addEventListener('mouseup', function(e){
+        order_points_s1();
         draw_canvas2d1(0, 0, false);
     }, false);
 
