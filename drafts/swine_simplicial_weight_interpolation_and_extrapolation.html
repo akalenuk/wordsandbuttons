@@ -159,13 +159,13 @@ function closest_point(x, y, xs, ys){
 
 
 
-// params
+// weights
 var weight2d1 = 2;
 const wf2d1 = function(x) {return 1./Math.pow(x, weight2d1);}
 var weight2d2 = 2;
 const wf2d2 = function(x) {return 1./Math.pow(x, weight2d2);}
 
-// interpolation/extrapolation no basis
+// interpolation/extrapolation with no basis functions
 function ie_no_basis(x, xs, ys) {
     if(x < xs[0])
         return ys[0];
@@ -495,9 +495,9 @@ function draw_canvas2d2(client_x, client_y, do_guides){
 //// 3d
 // points
 const a = 256;
-var x3s = [-1, 320, 320 - a/2, 320 + a/2, 320 + a, 320 + a/2, 320 - a/2, 320 - a];
-var y3s = [-1, 320, 320 - a  , 320 - a  , 320    , 320 + a  , 320 + a  , 320    ];
-var z3s = [-1,  90, 140      , 180      , 230    , 160      , 100      , 40     ];
+var x3s = [-1, 320   , 320 - a/2, 320 + a/2, 320 + a, 320 + a/2, 320 - a/2, 320 - a];
+var y3s = [-1, 320   , 320 - a  , 320 - a  , 320    , 320 + a  , 320 + a  , 320    ];
+var z3s = [-1, 8*8+4 , 8*16+4   , 8*28+4   , 8*24+4 , 8*20+4   , 8*12+4   , 8*4+4  ];
 // triangles' points are ordered clockwise
 var tris = [[2, 3, 1], [3, 4, 1], [4, 5, 1], [5, 6, 1], [6, 7, 1], [7, 2, 1]];
 
@@ -844,7 +844,7 @@ function draw_canvas3d(client_x, client_y, do_guides){
     // draw z-field
     var pixel_field = context.createImageData(w, h);
     for (var i = 0; i < pixel_field.data.length; i += 4) {
-        const color = Math.trunc(z_field[Math.floor(i/4)] / 16) * 16;
+        const color = Math.trunc(z_field[Math.floor(i/4)] / 8) * 8;
         pixel_field.data[i + 0] = color;
         pixel_field.data[i + 1] = color;
         pixel_field.data[i + 2] = color;
@@ -1165,7 +1165,7 @@ You can see the code for all the examples on GitHub:
     <h2>
 The score
     </h2>
-    <div id="score">"
+    <div id="score">
     <p>
 If you just scrolled the page to the bottom, you might have not noticed that it's also a game. There are hidden pieces of knowledge kept in the interactive plots. Find them all to win.
     </p>
