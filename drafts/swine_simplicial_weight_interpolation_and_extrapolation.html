@@ -707,6 +707,8 @@ function number_as_edge(number) {
 var edges = [];
 var basis_3d = [];
 var z_field = [];
+const Z_NOT_DETERMINED = Number.NEGATIVE_INFINITY;
+const Z_NOT_APLICABLE = Number.POSITIVE_INFINITY;
 function compute_edges_and_z_field() {
     // compute all edges
     var all_edges = new Set();
@@ -733,7 +735,9 @@ function compute_edges_and_z_field() {
                 outer_edges.push(edge);
         }
     }
-
+    
+    const do_interpolation = document.getElementById("i3d").checked || document.getElementById("ie3d").checked;
+    const do_extrapolation = document.getElementById("e3d").checked || document.getElementById("ie3d").checked;
     const do_linear_basis = document.getElementById("basis3d_linear").checked;
     if(do_linear_basis) {
         basis_3d = [[]]; // starts with 1 (0 is empty)
@@ -784,25 +788,25 @@ function compute_edges_and_z_field() {
         for (var i = 0; i < w*h; i += 1) {
             var y = Math.floor(i / w);
             var x = i % w;
-            var z = 0;
-            var z_determined = false;
+            var z = Z_NOT_DETERMINED;
             for(var j = 0; j < tris.length; ++j)
                 if(in_tri(x, y, x3s[tris[j][0]], y3s[tris[j][0]], x3s[tris[j][1]], y3s[tris[j][1]], x3s[tris[j][2]], y3s[tris[j][2]])) {
-                    z = z_in_tri_by_basis(x, y,
-                        x3s[tris[j][0]], y3s[tris[j][0]], basis_3d[tris[j][0]],
-                        x3s[tris[j][1]], y3s[tris[j][1]], basis_3d[tris[j][1]],
-                        x3s[tris[j][2]], y3s[tris[j][2]], basis_3d[tris[j][2]]);
-                    z_determined = true;
+                    if(do_interpolation)                    
+                        z = z_in_tri_by_basis(x, y,
+                            x3s[tris[j][0]], y3s[tris[j][0]], basis_3d[tris[j][0]],
+                            x3s[tris[j][1]], y3s[tris[j][1]], basis_3d[tris[j][1]],
+                            x3s[tris[j][2]], y3s[tris[j][2]], basis_3d[tris[j][2]]);
+                    else
+                        z = Z_NOT_APLICABLE;
                 }
-            if(!z_determined) {
+            if(do_extrapolation && z == Z_NOT_DETERMINED) {
                 for(var j = 0; j < outer_edges.length; ++j) {
                     if(in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]])) {
                         z = z_in_edge_by_basis(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], basis_3d[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]], basis_3d[outer_edges[j][1]]);
-                        z_determined = true;
                     }
                 }
             }
-            if(!z_determined)
+            if(do_extrapolation && z == Z_NOT_DETERMINED)
                 z = basis_3d[closest_3d_point(x, y)](x, y);
             z_field.push(z);
         }
@@ -812,25 +816,26 @@ function compute_edges_and_z_field() {
         for (var i = 0; i < w*h; i += 1) {
             var y = Math.floor(i / w);
             var x = i % w;
-            var z = 0;
-            var z_determined = false;
+            var z = Z_NOT_DETERMINED;
+            
             for(var j = 0; j < tris.length; ++j)
                 if(in_tri(x, y, x3s[tris[j][0]], y3s[tris[j][0]], x3s[tris[j][1]], y3s[tris[j][1]], x3s[tris[j][2]], y3s[tris[j][2]])) {
-                    z = z_in_tri(x, y,
-                        x3s[tris[j][0]], y3s[tris[j][0]], z3s[tris[j][0]],
-                        x3s[tris[j][1]], y3s[tris[j][1]], z3s[tris[j][1]],
-                        x3s[tris[j][2]], y3s[tris[j][2]], z3s[tris[j][2]]);
-                    z_determined = true;
+                    if(do_interpolation)
+                        z = z_in_tri(x, y,
+                            x3s[tris[j][0]], y3s[tris[j][0]], z3s[tris[j][0]],
+                            x3s[tris[j][1]], y3s[tris[j][1]], z3s[tris[j][1]],
+                            x3s[tris[j][2]], y3s[tris[j][2]], z3s[tris[j][2]]);
+                    else
+                        z = Z_NOT_APLICABLE;  
                 }
-            if(!z_determined) {
+            if(do_extrapolation && z == Z_NOT_DETERMINED) {
                 for(var j = 0; j < outer_edges.length; ++j) {
                     if(in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]])) {
                         z = z_in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], z3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]], z3s[outer_edges[j][1]]);
-                        z_determined = true;
                     }
                 }
             }
-            if(!z_determined)
+            if(do_extrapolation && z == Z_NOT_DETERMINED)
                 z = z3s[closest_3d_point(x, y)];
             z_field.push(z);
         }
@@ -844,11 +849,18 @@ function draw_canvas3d(client_x, client_y, do_guides){
     // draw z-field
     var pixel_field = context.createImageData(w, h);
     for (var i = 0; i < pixel_field.data.length; i += 4) {
-        const color = Math.trunc(z_field[Math.floor(i/4)] / 8) * 8;
-        pixel_field.data[i + 0] = color;
-        pixel_field.data[i + 1] = color;
-        pixel_field.data[i + 2] = color;
-        pixel_field.data[i + 3] = 0xFF;
+        if(z_field[Math.floor(i/4)] == Z_NOT_APLICABLE || z_field[Math.floor(i/4)] == Z_NOT_DETERMINED) {
+            pixel_field.data[i + 0] = 0x00;
+            pixel_field.data[i + 1] = 0x00;
+            pixel_field.data[i + 2] = 0x00;
+            pixel_field.data[i + 3] = 0x00;
+        } else {
+            const color = Math.trunc(z_field[Math.floor(i/4)] / 8) * 8;
+            pixel_field.data[i + 0] = color;
+            pixel_field.data[i + 1] = color;
+            pixel_field.data[i + 2] = color;
+            pixel_field.data[i + 3] = 0xFF;
+        }
     }
     context.putImageData(pixel_field, -0.5, -0.5);
 
@@ -1135,7 +1147,13 @@ When we have a bunch of simplices that touch each other but never overlap, this 
     </p>
     <canvas id="canvas3d" width=640 height=640></canvas>
     <form>
-Please select basis function:
+Do:
+    <input type="radio" name="ie3d" id="i3d" onclick="compute_edges_and_z_field();draw_canvas3d(0, 0, false);"><label for="i3d">interpolation</label>,
+    <input type="radio" name="ie3d" id="e3d" onclick="compute_edges_and_z_field();draw_canvas3d(0, 0, false);"><label for="e3d">extrapolation</label>,
+    <input type="radio" name="ie3d" id="ie3d" checked="true" onclick="compute_edges_and_z_field();draw_canvas3d(0, 0, false);"><label for="ie3d">both</label>.
+    <br>
+    <br>
+With basis function:
     <input type="radio" name="basis3d" id="basis3d_constant" value="basis3d_constant" onclick="change_weight3d();"><label for="basis3d_constant">constant</label>;
     <input type="radio" name="basis3d" checked="true" id="basis3d_linear" value="basis3d_linear" onclick="change_weight3d();"><label for="basis3d_linear">linear</label>.
     <br>
