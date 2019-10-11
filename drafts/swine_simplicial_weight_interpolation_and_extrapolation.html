@@ -626,14 +626,15 @@ function z_in_tri_by_basis(px, py, x1, y1, b1, x2, y2, b2, x3, y3, b3) {
 }
 
 // general purpose minimizer
+const minimizer_valve = 0.01;
 function minimize(f, args, iterations) {
     var best_args = args.slice();
     var best_f = f.apply(null, args);
     for(var i = 0; i < iterations; ++i) {
         var args_i = best_args.slice();
         args_i[i % args_i.length] += Math.random() >= 0.5
-            ? + Math.tan(Math.random() * Math.PI / 2)
-            : - Math.tan(Math.random() * Math.PI / 2);
+            ? + minimizer_valve * Math.tan(Math.random() * Math.PI / 2)
+            : - minimizer_valve * Math.tan(Math.random() * Math.PI / 2);
         var f_i = f.apply(null, args_i);
         if(f_i < best_f) {
             best_f = f_i;
@@ -775,7 +776,7 @@ function compute_edges_and_z_field() {
             const b = (-z1*(x2 - x3) + z2*(x1 - x3) - z3*(x1 - x2))/(x1*y2 - x1*y3 - x2*y1 + x2*y3 + x3*y1 - x3*y2);
             const c = (z1*(x2*y3 - x3*y2) - z2*(x1*y3 - x3*y1) + z3*(x1*y2 - x2*y1))/(x1*y2 - x1*y3 - x2*y1 + x2*y3 + x3*y1 - x3*y2);
             var abc = [a, b, c];
-            const optimized_abc = minimize(target, abc, 40000);   // the better option is then calculated with Monte-Carlo optimizer
+            const optimized_abc = minimize(target, abc, 10000);   // the better option is then calculated with random tangent optimizer
             const oa = optimized_abc[0];
             const ob = optimized_abc[1];
             const oc = optimized_abc[2];
