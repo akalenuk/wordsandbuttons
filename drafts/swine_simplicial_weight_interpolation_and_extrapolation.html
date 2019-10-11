@@ -518,8 +518,9 @@ function in_tri(px, py, x1, y1, x2, y2, x3, y3) {
     y1 + a * (y2-y1) + b * (y3-y1) - py
     ], (a, b))
     */
-    var a = (-(px - x1)*(y1 - y3) + (py - y1)*(x1 - x3))/((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2));
-    var b = ((px - x1)*(y1 - y2) - (py - y1)*(x1 - x2))/((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2));
+    var d = 1.0 / ((x1 - x2)*(y1 - y3) - (x1 - x3)*(y1 - y2));
+    var a = (-(px - x1)*(y1 - y3) + (py - y1)*(x1 - x3)) * d;
+    var b = ((px - x1)*(y1 - y2) - (py - y1)*(x1 - x2)) * d;
     return (a >= 0 && b >= 0 && a + b <= 1.);
 }
 
@@ -737,6 +738,7 @@ function draw_arrow(context, x1, y1, x2, y2) {
     context.closePath();
 }
 
+// these hacks are here to store edges in sets
 function edge_as_number(edge) {
     return edge[0] * 10000 + edge[1];
 }
@@ -821,11 +823,13 @@ function compute_edges_and_z_field() {
                             x3s[tris[j][2]], y3s[tris[j][2]], basis_3d[tris[j][2]]);
                     else
                         z = Z_NOT_APLICABLE;
+                    break;
                 }
             if(do_extrapolation && z == Z_NOT_DETERMINED) {
                 for(var j = 0; j < outer_edges.length; ++j) {
                     if(in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]])) {
                         z = z_in_edge_by_basis(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], basis_3d[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]], basis_3d[outer_edges[j][1]]);
+                        break;
                     }
                 }
             }
@@ -850,11 +854,13 @@ function compute_edges_and_z_field() {
                             x3s[tris[j][2]], y3s[tris[j][2]], z3s[tris[j][2]]);
                     else
                         z = Z_NOT_APLICABLE;
+                    break;
                 }
             if(do_extrapolation && z == Z_NOT_DETERMINED) {
                 for(var j = 0; j < outer_edges.length; ++j) {
                     if(in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]])) {
                         z = z_in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], z3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]], z3s[outer_edges[j][1]]);
+                        break;
                     }
                 }
             }
