@@ -625,6 +625,67 @@ function z_in_tri_by_basis(px, py, x1, y1, b1, x2, y2, b2, x3, y3, b3) {
         / (wf(d1) + wf(d2) + wf(d3));
 }
 
+// approximator (used to build a linear basis)
+function solved_linear(A, B, n){
+    function underflow_padded(x){
+        function sign_0_positive(x){ // Math.sign like with no 0 option
+            if(x >= 0)
+                return 1.0;
+            return -1.0;
+        }
+        if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
+            return 1.e-5 * sign_0_positive(x);
+        return x;
+    }
+    var X = [];
+    for (var i = 0; i < n; ++i)
+        X.push(0.0);
+
+    // triangulize
+    for (var i = 0; i < n-1; ++i)
+        for (var j = 0; j < i+1; ++j) {
+            r = A[i+1][j] / underflow_padded(A[j][j]);
+            A[i+1][j] = 0.;
+            for (var b_j = j+1; b_j < n; ++b_j){
+                A[i+1][b_j] -= A[j][b_j]*r;
+            }
+            B[i+1] -= B[j]*r;
+        }
+
+    // calculate xs
+    X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
+    for (var i = n-2; i >= 0; --i){
+        var s = 0.0;
+        for (var j = i; j < n; ++j){
+            s = s + A[i][j]*X[j];
+        }
+        X[i] = (B[i] - s) / underflow_padded(A[i][i]);
+    }
+    return X;
+}
+
+function approximation_polynomial_coefficients_for(points, n) {
+    const N = points.length;
+    var A = [];
+    var B = [];
+
+    for (var i = 0; i < n; ++i){
+        var Ai = []
+        for (var j = 0; j < n; ++j){
+            Ai.push(0);
+            for(var k = 0; k < N; ++k){
+                Ai[j] += Math.pow(points[k][0], i + j);
+            }
+        }
+        A.push(Ai);
+        B.push(0);
+        for(var k = 0; k < N; ++k){
+            B[i] += points[k][1] * Math.pow(points[k][0], i);
+        }
+    }
+    return solved_linear(A, B, n);
+}
+
 // general purpose minimizer
 const minimizer_valve = 0.01;
 function minimize(f, args, iterations) {
@@ -752,37 +813,18 @@ function compute_edges_and_z_field() {
                 if(edges[j][1] == i)
                     points_i.push(edges[j][0]);
             }
-
-            // difference between the model and the points
-            var target = function(a, b, c) {
-                var diff2 = 0.;
-                for(var j = 0; j < points_i.length; ++j) {
-                    diff2 += Math.pow((x3s[points_i[j]] * a + y3s[points_i[j]] * b + c) - z3s[points_i[j]], 2);
-                }
-                return diff2;
+            var x_points = [];
+            var y_points = [];
+            for(var j = 0; j < points_i.length; ++j) {
+                x_points.push([x3s[points_i[j]],z3s[points_i[j]]]);
+                y_points.push([y3s[points_i[j]],z3s[points_i[j]]]);
             }
-
-            // 3-point plane used as a first guess
-            const x1 = x3s[points_i[0]];
-            const y1 = y3s[points_i[0]];
-            const z1 = z3s[points_i[0]];
-            const x2 = x3s[points_i[1]];
-            const y2 = y3s[points_i[1]];
-            const z2 = z3s[points_i[1]];
-            const x3 = x3s[points_i[2]];
-            const y3 = y3s[points_i[2]];
-            const z3 = z3s[points_i[2]];
-            const a = (z1*(y2 - y3) - z2*(y1 - y3) + z3*(y1 - y2))/(x1*y2 - x1*y3 - x2*y1 + x2*y3 + x3*y1 - x3*y2);
-            const b = (-z1*(x2 - x3) + z2*(x1 - x3) - z3*(x1 - x2))/(x1*y2 - x1*y3 - x2*y1 + x2*y3 + x3*y1 - x3*y2);
-            const c = (z1*(x2*y3 - x3*y2) - z2*(x1*y3 - x3*y1) + z3*(x1*y2 - x2*y1))/(x1*y2 - x1*y3 - x2*y1 + x2*y3 + x3*y1 - x3*y2);
-            var abc = [a, b, c];
-            const optimized_abc = minimize(target, abc, 40000);   // the better option is then calculated with random tangent optimizer
-            // todo: real fitting
-            const oa = optimized_abc[0];
-            const ob = optimized_abc[1];
-            const oc = optimized_abc[2];
-            const dz = z3s[i] - (oa*x3s[i] + ob*y3s[i] + oc);
-            basis_3d.push(function(x, y) {return oa * x + ob * y + oc + dz;});
+            const x_line = approximation_polynomial_coefficients_for(x_points, 2);
+            const y_line = approximation_polynomial_coefficients_for(y_points, 2);
+            const oa = x_line[1];
+            const ob = y_line[1];
+            const oc = z3s[i] - (oa*x3s[i] + ob*y3s[i]);
+            basis_3d.push(function(x, y) {return oa * x + ob * y + oc;});
         }
 
         // compute z-field with linear basis
