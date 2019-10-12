@@ -215,7 +215,11 @@ function linear_basis(x1, y1, x2, y2) {
         a * x2 + b - y2
         ], (a, b)))
     */
-    return [(y1 - y2)/(x1 - x2), (x1*y2 - x2*y1)/(x1 - x2)];
+    const ab = [(y1 - y2)/(x1 - x2), (x1*y2 - x2*y1)/(x1 - x2)];
+    // constant degeneration check
+    if(Math.abs(ab[0]) < 1e-2)
+        document.getElementById('hpok5').style.display = "block";
+    return ab
 }
 
 // fits linear functon to go trough the point (retaining the slope)
@@ -235,11 +239,15 @@ function quadratic_basis(x1, y1, x2, y2, x3, y3) {
         a * x3 * x3 + b * x3 + c - y3,
         ], (a, b, c)))
     */
-    return [
+    const abc = [
         (y1*(x2 - x3) - y2*(x1 - x3) + y3*(x1 - x2))/(x1*x1*x2 - x1*x1*x3 - x1*x2*x2 + x1*x3*x3 + x2*x2*x3 - x2*x3*x3),
         (-y1*(x2*x2 - x3*x3) + y2*(x1*x1 - x3*x3) - y3*(x1*x1 - x2*x2))/(x1*x1*x2 - x1*x1*x3 - x1*x2*x2 + x1*x3*x3 + x2*x2*x3 - x2*x3*x3),
         (x1*x2*y3*(x1 - x2) - x1*x3*y2*(x1 - x3) + x2*x3*y1*(x2 - x3))/(x1*x1*x2 - x1*x1*x3 - x1*x2*x2 + x1*x3*x3 + x2*x2*x3 - x2*x3*x3)
     ];
+    // constant degeneration check
+    if(Math.abs(abc[0]) < 1e-2 && Math.abs(abc[1]) < 1e-1)
+        document.getElementById('hpok5').style.display = "block";
+    return abc;
 }
 
 var x2s1 = [128*2, 128*4];
@@ -401,6 +409,10 @@ function recalculate_basis2d() {
         basis2d[2] = function(x) {return b2[0]*x*x + b2[1]*x + b2[2];};
         basis2d[3] = function(x) {return b2[0]*x*x + b2[1]*x + b2[2];};
     }
+    // x-order post-check
+    for(var i = 1; i < x2s2.length; ++i)
+        if(x2s2[i-1] >= x2s2[i])        
+            document.getElementById('hpok4').style.display = "block";
 }
 
 function init_canvas2d2(){
