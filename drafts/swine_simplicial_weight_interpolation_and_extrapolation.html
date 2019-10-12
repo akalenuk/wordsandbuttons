@@ -217,8 +217,10 @@ function linear_basis(x1, y1, x2, y2) {
     */
     const ab = [(y1 - y2)/(x1 - x2), (x1*y2 - x2*y1)/(x1 - x2)];
     // constant degeneration check
-    if(Math.abs(ab[0]) < 1e-2)
+    if(Math.abs(ab[0]) < 1e-2) {
         document.getElementById('hpok5').style.display = "block";
+        count_score();
+    }
     return ab
 }
 
@@ -245,8 +247,10 @@ function quadratic_basis(x1, y1, x2, y2, x3, y3) {
         (x1*x2*y3*(x1 - x2) - x1*x3*y2*(x1 - x3) + x2*x3*y1*(x2 - x3))/(x1*x1*x2 - x1*x1*x3 - x1*x2*x2 + x1*x3*x3 + x2*x2*x3 - x2*x3*x3)
     ];
     // constant degeneration check
-    if(Math.abs(abc[0]) < 1e-2 && Math.abs(abc[1]) < 1e-2)
+    if(Math.abs(abc[0]) < 1e-2 && Math.abs(abc[1]) < 1e-2) {
         document.getElementById('hpok5').style.display = "block";
+        count_score();
+    }
     return abc;
 }
 
@@ -411,8 +415,10 @@ function recalculate_basis2d() {
     }
     // x-order post-check
     for(var i = 1; i < x2s2.length; ++i)
-        if(x2s2[i-1] >= x2s2[i])        
+        if(x2s2[i-1] >= x2s2[i]) {
             document.getElementById('hpok4').style.display = "block";
+            count_score();
+        }
 }
 
 function init_canvas2d2(){
@@ -853,6 +859,7 @@ function compute_edges_and_z_field() {
                     if(in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]])) {
                         if(z != Z_NOT_DETERMINED && z != Z_NOT_APLICABLE) {
                             document.getElementById('hpok6').style.display = "block";
+                            count_score();
                             break
                         }
                         z = z_in_edge_by_basis(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], basis_3d[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]], basis_3d[outer_edges[j][1]]);
@@ -887,6 +894,7 @@ function compute_edges_and_z_field() {
                     if(in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]])) {
                         if(z != Z_NOT_DETERMINED && z != Z_NOT_APLICABLE) {
                             document.getElementById('hpok6').style.display = "block";
+                            count_score();
                             break
                         }
                         z = z_in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], z3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]], z3s[outer_edges[j][1]]);
@@ -968,10 +976,13 @@ function change_weight2d1() {
     // hpoks
     if(weight2d1 == 0.) {
         document.getElementById('hpok1').style.display = "block";
+        count_score();
     } else if(weight2d1 < 0.) {
         document.getElementById('hpok2').style.display = "block";
+        count_score();
     } else if(weight2d1 != Math.floor(weight2d1)) {
         document.getElementById('hpok3').style.display = "block";
+        count_score();
     }
 }
 
@@ -984,6 +995,29 @@ function change_weight3d() {
     weight3d = document.getElementById('weight3d').value;
     compute_edges_and_z_field();
     draw_canvas3d();
+}
+
+function count_score() {
+    const score 
+      = (document.getElementById('hpok1').style.display == "block" ? 1 : 0)
+      + (document.getElementById('hpok2').style.display == "block" ? 1 : 0)
+      + (document.getElementById('hpok3').style.display == "block" ? 1 : 0)
+      + (document.getElementById('hpok4').style.display == "block" ? 1 : 0)
+      + (document.getElementById('hpok5').style.display == "block" ? 1 : 0)
+      + (document.getElementById('hpok6').style.display == "block" ? 1 : 0);
+   if(score == 1) {
+       document.getElementById('score').innerHTML = "1";
+   } else if(score == 2) {
+       document.getElementById('score').innerHTML = "2";
+   } else if(score == 3) {
+       document.getElementById('score').innerHTML = "3";
+   } else if(score == 4) {
+       document.getElementById('score').innerHTML = "4";
+   } else if(score == 5) {
+       document.getElementById('score').innerHTML = "5";
+   } else if(score == 6) {
+       document.getElementById('score').innerHTML = "6";
+   }
 }
     </script>
   </head>
