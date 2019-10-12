@@ -1025,9 +1025,15 @@ The function outside the points can be defined as the first point on the left, a
     <p>
 The n-coefficient in the weight function affects the way the function looks. You can try it out on the following interative plot:
     </p>
-    <p class="hpok">
+    <p class="hpok" id="hpok1">
 <b>Hidden piece of knowledge #1.</b> The function becomes discontinuous when the weight coefficient = 0.
-    </p>    
+    </p>
+    <p class="hpok" id="hpok2">
+<b>Hidden piece of knowledge #2.</b> Negative values for the weight coefficient are useless for interpolation.
+    </p>
+    <p class="hpok" id="hpok3">
+<b>Hidden piece of knowledge #3.</b> But non-integer values for the weight coefficient are useful! They give you more freedom over the function with no additional changes in the algorithm. Cudos for finding that!
+    </p>     
     <canvas id="canvas2d1" width=640 height=640></canvas>
     <form>
     Do:
@@ -1097,6 +1103,12 @@ The magic of inverse weights is in their indifference. They can work with any ba
     <p>
 On this interactive plot, you can see how different types of basis functions work together in different configurations:
     </p>
+    <p class="hpok" id="hpok4">
+<b>Hidden piece of knowledge #4.</b> In order for this interpolation to work, the points should be x-ordered.
+    </p>
+    <p class="hpok" id="hpok5">
+<b>Hidden piece of knowledge #5.</b> Polynomial basis functions may reduce themselves into constants if the input suggests that.
+    </p>   
     <canvas id="canvas2d2" width=640 height=640></canvas>
     <form>
     <span style="line-height: 1.42;">
@@ -1184,8 +1196,27 @@ Speaking of which, since we want to interpolate basis functions in an n-simplex,
 The rest is all like before. Weight functions, basis functions, and now the (n-1)-simplex projections. This is enough to define an interpolation function on a triangle or a tertrahedron. But what about more complex shapes?
     </p>
     <p>
-When we have a bunch of simplices that touch each other but never overlap, this is a simplicial complex. If you're ok with some representation error, you can cover any shape with a simplicial complex. Here is an interactive plot that has 6 triangles combined in a complex. Every point has its own shade of gray and the rest of the picture is the result of interpolation. The points are moveable, but the relations between triangles are hard-coded.
+When we have a bunch of simplices that touch each other but never overlap, this is a simplicial complex. If you're ok with some representation error, you can cover any shape with a simplicial complex. 
     </p>
+    <p>
+But we can find a function even for the domain that is not covered by the complext. We need spatical interpolation for that. 
+    </p>
+    <p>
+With weight and basis functions, you can mix your interpolating function in n-simplices with interpolating functions on (n-1)-simplices. Now if a point isn't in an n-simplex but has a projection on an (n-1)-simplex, then computing the weights on this projection and applying them to the basis functions will make an extrapolation that will seamlessly merge with the interpolation.
+    </p>
+    <p>
+The same goes to (n-2)-simplices, (n-3) or (n-k) ones. Let's device an algorithm by dividing interpolation and extrapolation into 3 cases.
+    </p>
+    <p>
+If a point is in a triangle, then the <i>F<sub>2</sub></i> applies; if a point has a projection on the complex border line segments, then the <i>F<sub>1</sub></i> works instead; if a point doesn't have the projection, then the basis function of a nearest point <i>f<sub>i</sub></i> is the extrapolator.
+    </p>    
+    <p>
+Here is an interactive plot that has 6 triangles combined in a complex. Every point has its own shade of gray and the rest of the picture is the result of interpolation. The points are moveable, but the relations between triangles are hard-coded.
+    </p>
+    
+    <p class="hpok" id="hpok6">
+<b>Hidden piece of knowledge #6.</b> Ah! Yes, this algorithm doesn't work with concave shapes. Technically, we can turn any concave simplicial complex into a convex one by adding more simplices but that makes the algorithm more complex.
+    </p>    
     <canvas id="canvas3d" width=640 height=640></canvas>
     <form>
 Do:
@@ -1204,23 +1235,10 @@ And the weight coefficient:
     <input type="text" style="width: 32pt;" id="weight3d" value="2" oninput="change_weight3d();">
     <button type="button" onclick="inc('weight3d')">+</button>
     </form>
-    <p>
-As you might have noticed, the grey values are not only defined in the simplicial complex but outside of it. That's the extrapolation. With weight and basis functions, you can mix your interpolating function in n-simplices with interpolating functions on (n-1)-simplices. Now if a point isn't in an n-simplex but has a projection on an (n-1)-simplex, then computing the weights on this projection and applying them to the basis functions will make an extrapolation that will seamlessly merge with the interpolation.
-    </p>
-    <p>
-The same goes to (n-2)-simplices, (n-3) or (n-k) ones. In this case, the interpolation and extrapolation divides into 3 cases. If a point is in a triangle, then the <i>F<sub>2</sub></i> applies; if a point has a projection on the complex border line segments, then the <i>F<sub>1</sub></i> works instead; if a point doesn't have the projection, then the basis function of a nearest point <i>f<sub>i</sub></i> is the extrapolator.
-    </p>
+
     <p>
 And that's how we got to Simplicial Weight Interpolation and Extrapolation. Just as promised in the title.
     </p>
-    <p>
-You can see the code for all the examples on GitHub:
-    </p>
-    <ul>
-    <li>inverse weights;</li>
-    <li>basis functions;</li>
-    <li>simplicial interpolation and extrapolation.</li>
-    </ul>
     <h2>
 The score
     </h2>
@@ -1228,6 +1246,17 @@ The score
     <p>
 If you just scrolled the page to the bottom, you might have not noticed that it's also a game. There are hidden pieces of knowledge kept in the interactive plots. Find them all to win.
     </p>
+    <h2>
+P. S.
+    </h2>
+    <p>
+You can see the code for all the plots on GitHub:
+    </p>
+    <ul>
+    <li>inverse weights;</li>
+    <li>basis functions;</li>
+    <li>simplicial interpolation and extrapolation.</li>
+    </ul>    
     </div>
     <script language="JavaScript">
     init_canvas2d1();
