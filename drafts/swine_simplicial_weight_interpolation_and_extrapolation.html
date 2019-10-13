@@ -1048,7 +1048,7 @@ Finally, I came up with this argument. The three ideas behind the algorithm are 
 Idea 1: inverse weights
     </h2>
     <p>
-Let's say we have two points <i>(x<sub>1</sub>, y<sub>1</sub>)</i> and <i>(x<sub>2</sub>, y<sub>2</sub>)</i>. There is a function <i>F(x)</i> that fits these points. Fits means this:
+Let's say we have two points <i>(x<sub>1</sub>, y<sub>1</sub>)</i> and <i>(x<sub>2</sub>, y<sub>2</sub>)</i>. There is a function <i>F(x)</i> that fits these points. Fits means that
     </p>
     <p class="formula">
 F(x<sub>1</sub>) = y<sub>1</sub>
@@ -1056,7 +1056,7 @@ F(x<sub>1</sub>) = y<sub>1</sub>
 F(x<sub>2</sub>) = y<sub>2</sub>
     </p>
     <p>
-When we want to determine this function in between points, it is called <b>interpolation</b>. When we want to determine it on the left and on the right of the points — <b>extrapolation</b>.
+When we determine this function in between points, it is called <b>interpolation</b>. When do that on the left and on the right of the points — <b>extrapolation</b>.
     </p>
     <p>
 The <b>inverse weights</b> is the way to build the interpolating function everywhere apart the points themselves.
@@ -1064,7 +1064,7 @@ The <b>inverse weights</b> is the way to build the interpolating function everyw
     <table class="formula">
     <tr>
     <td rowspan=2>
-    F(x) = &nbsp;
+    &forall; x, x<sub>i</sub> &lt; x &lt x<sub>i+1</sub>; F(x) = &nbsp;
     </td>
     <td style="border-bottom: 1px solid black">
     y<sub>i</sub> * k(x - x<sub>i</sub>) + y<sub>i+1</sub> * k(x<sub>i+1</sub> - x)
@@ -1092,16 +1092,16 @@ The <b>inverse weights</b> is the way to build the interpolating function everyw
     </tr>
     </table>
     <p>
-Yes, there is a zero division in <i>x<sub>i</sub></i>. It is odd that the function that should be interpolating the points isn't defined in the points themselves. But the magic of limits makes it work. The function becomes infinitely close to the points in their respected proximities, so this undefined points problem can be simply patched by this:
+Yes, there would be a zero division in <i>x<sub>i</sub></i> so the function is left undefined there. But we can fix that with the magic of limits. The function becomes infinitely close to the points in their respected proximities, so we can make it continuous by defining it in the points explicitly
     </p>
     <p class="formula">
 F(x<sub>i</sub>) = y<sub>i</sub>
     </p>
     <p>
-The function outside the points can be defined as the first point on the left, and as the last point on the right. This will work as a primitive extrapolation.
+Also, the function outside the points can be defined as the first point on the left, and as the last point on the right. This will work as a primitive extrapolation.
     </p>
     <p>
-The n-coefficient in the weight function affects the way the function looks. You can try it out on the following interative plot:
+The n-coefficient in the weight function affects the way the function looks. You can experiment with it on the following interative plot.
     </p>
     <p class="hpok" id="hpok1">
 <b>Hidden piece of knowledge #1.</b> The function becomes discontinuous when the weight coefficient = 0.
@@ -1126,7 +1126,7 @@ The n-coefficient in the weight function affects the way the function looks. You
     <button type="button" onclick="inc('weight2d1')">+</button>
     </form>
     <p>
-Mathematically, the inverse weights are simple. Of course, real computation brings more challenges. There is no such thing as a limit in floating point computation so the function should be technically discontinuous. You have to define the interpolating function as its basis values not only in <i>x<sub>i</sub></i> points but in some proximity too.
+Mathematically, the inverse weights are simple. But there is no such thing as a limit in floating point computation, there is no infinitely small proximity. There is no grace, only digits and errors. You have to define the interpolating function explicitly not only in <i>x<sub>i</sub></i> points but in some measurable proximity too.
     </p>
     <p>
 Then again, every computation on floating point numbers is discrete so pragmatically this is just one more “quess an epsilon” problem.
@@ -1135,7 +1135,7 @@ Then again, every computation on floating point numbers is discrete so pragmatic
 Idea 2: basis functions
     </h2>
     <p>
-Ok, so we can now interpolate values to get new values between them. But with inverse weights, we see that the interpolating function makes a platoe near the <i>x<sub>i</sub></i> points. Perhaps, we would like something else.
+We can now turn points into functions. That's awesome. But with inverse weights, the interpolating function always makes a platoe near the <i>x<sub>i</sub></i> points. What if we want it to have a slope instead?
     </p>
     <p>
 The idea of <b>basis functions</b> is: we can interpolate functions instead of points.
@@ -1179,7 +1179,7 @@ Technically, every function <i>f(x)</i> such as <i>f(x<sub>i</sub>) = y<sub>i</s
 The magic of inverse weights is in their indifference. They can work with any basis functions and it's easy to mix them up in a single formula to get something you want.
     </p>
     <p>
-On this interactive plot, you can see how different types of basis functions work together in different configurations:
+On this interactive plot, you can see how different types of basis functions work together in different configurations.
     </p>
     <p class="hpok" id="hpok4">
 <b>Hidden piece of knowledge #4.</b> In order for this interpolation to work, the points should be x-ordered.
@@ -1211,10 +1211,10 @@ On this interactive plot, you can see how different types of basis functions wor
     <button type="button" onclick="inc('weight2d2')">+</button>
     </form>
     <p>
-With inverse weights and basis functions, we have almost too much freedom. We can have our function smooth on some interval, and then have a sharp dent. We can make it lay on a platoe near some point, and then fit some curvature on a range.
+With inverse weights and basis functions, we have almost too much freedom. We can have our function smooth on some interval, and sharp on another dent. We can make it lay on a platoe near some point, and then fit some curvature near another.
     </p>
     <p>
-But so far it only concerns functions of a single variable. Or two-dimensional parametric curves. If we want to generalize weight interpolation to n-dimensional case, we have to use an n-dimentional structure.
+But so far it only concerns single variable functions. If we want to generalize weight interpolation to n-dimensional case, we have to use an n-dimentional interval generalization.
     </p>
     <h2>
 Idea 3: self-referencial n-simplex data structure
@@ -1226,7 +1226,7 @@ A point is a 0-simplex. A line segment, a piece of line between two points, is a
 An <b>n-simplex</b> is the space between n+1 (n-1)-simplices.
     </p>
     <p>
-This makes it self-referencial. If we want to define an interpolating function on a line, on atriangle, and on a tetrahedron, we only have to define it once on an n-simplex.
+This makes it self-referencial. If we want to define an interpolating function F<sub>1</sub> on a line, F<sub>2</sub> on a triangle, and F<sub>3</sub> on a tetrahedron, we only have to define F<sub>n</sub> once on an n-simplex.
     </p>
     <p>
 With basis functions weight interpolation, you already have your interpolating function defined in the basis points.
@@ -1265,19 +1265,19 @@ Consequently, this defines <i>F<sub>0</sub></i>. For all the other <i>n</i>, the
     <p>
     </p>
     <p>
-The formula looks almost like the one with the basis functions except now all the variables in bold type are vectors: <i><b>x</b></i>, <i><b>x<sub>i</sub></b></i>, <i><b>x<sub>j</sub></b></i>.
+The formula looks almost like the one with the basis functions except now all the variables in bold are vectors: <i><b>x</b></i>, <i><b>x<sub>i</sub></b></i>, <i><b>x<sub>j</sub></b></i>.
     </p>
     <p>
 Speaking of which, since we want to interpolate basis functions in an n-simplex, we should compute our basis functions out of distances to (n-1)-simplices. The <i><b>x</b><sub>j</sub></i> is the projection of <i><b>x</b></i> onto the j-th (n-1)-simplex. The <i>|<b>x<sub>j</sub></b> - <b>x</b>|</i> is then the distance from a point to its projection.
     </p>
     <p>
-The rest is all like before. Weight functions, basis functions, and now the (n-1)-simplex projections. This is enough to define an interpolation function on a triangle or a tertrahedron. But what about more complex shapes?
+Weight functions, basis functions, and now the (n-1)-simplex projections. This is enough to define an interpolation function on a triangle or a tertrahedron. But what about more complex shapes?
     </p>
     <p>
 When we have a bunch of simplices that touch each other but never overlap, this is a simplicial complex. If you're ok with some representation error, you can cover any shape with a simplicial complex. 
     </p>
     <p>
-But we can find a function even for the domain that is not covered by the complext. We need spatical interpolation for that. 
+And what we can't cover with a complex, we can cover with spatical extrapolation. 
     </p>
     <p>
 With weight and basis functions, you can mix your interpolating function in n-simplices with interpolating functions on (n-1)-simplices. Now if a point isn't in an n-simplex but has a projection on an (n-1)-simplex, then computing the weights on this projection and applying them to the basis functions will make an extrapolation that will seamlessly merge with the interpolation.
@@ -1285,9 +1285,11 @@ With weight and basis functions, you can mix your interpolating function in n-si
     <p>
 The same goes to (n-2)-simplices, (n-3) or (n-k) ones. Let's device an algorithm by dividing interpolation and extrapolation into 3 cases.
     </p>
-    <p>
-If a point is in a triangle, then the <i>F<sub>2</sub></i> applies; if a point has a projection on the complex border line segments, then the <i>F<sub>1</sub></i> works instead; if a point doesn't have the projection, then the basis function of a nearest point <i>f<sub>i</sub></i> is the extrapolator.
-    </p>    
+    <ol>
+<li>If a point is in a triangle, then the <i>F<sub>2</sub></i> applies; </li>
+<li>if a point has a projection on the complex border line segments, then the <i>F<sub>1</sub></i> works instead; </li>
+<li>if a point doesn't have the projection, then the basis function of a nearest point <i>f<sub>i</sub></i> is the extrapolator.</li>
+    </ol>    
     <p>
 Here is an interactive plot that has 6 triangles combined in a complex. Every point has its own shade of gray and the rest of the picture is the result of interpolation. The points are moveable, but the relations between triangles are hard-coded.
     </p>
@@ -1318,7 +1320,7 @@ And the weight coefficient:
 And that's how we got from a pair of points to Simplicial Weight Interpolation and Extrapolation. Just as promised in the title.
     </p>
     <h2>
-The score
+The hidden pieces of knowledge score
     </h2>
     <div id="score">
     <p>
