@@ -36,17 +36,25 @@ int main() {
         }
 		auto end = std::chrono::system_clock::now();
 		std::chrono::duration<double> difference = end - start;
-		std::cout << difference.count() << " - sort \n\n";
+		std::cout << difference.count() << " - sort \n";
 	}
-    std::cout << "missorts: " << TestData() << "\n";
+    std::cout << "missorts: " << TestData() << "\n\n";
 
 	ResetData();
 	if (true) {
 		auto start = std::chrono::system_clock::now();
+        for(auto& t : g_data) {
+            const auto a = t[0];
+            const auto b = t[1];
+            const auto c = t[2];
+            t[int(a > b) + int(a > c)] = a;
+            t[int(b >= a) + int(b > c)] = b;
+            t[int(c >= a) + int(c >= b)] = c;
+        }
 		auto end = std::chrono::system_clock::now();
 		std::chrono::duration<double> difference = end - start;
-		std::cout << difference.count() << " - BubleSortDeterministic \n\n";
+		std::cout << difference.count() << " - triplet-sort \n";
 	}
-    std::cout << "missorts: " << TestData() << "\n";
+    std::cout << "missorts: " << TestData() << "\n\n";
 }
 
