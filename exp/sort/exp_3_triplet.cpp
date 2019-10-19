@@ -27,6 +27,24 @@ int TestData() {
     return missorts;
 }
 
+template <long unsigned int N> 
+std::array<int, N> nano_sort(const std::array<int, N>& a) {
+    std::array<int, N> b;
+    for(auto i = 0u; i < N; ++i)
+    {
+        auto k = 0u;
+        for(auto j = 0u; j < N; ++j) 
+        {
+            if(j > i)
+                k += int(a[i] > a[j]);
+            else if(j < i)
+                k += int(a[i] >= a[j]);
+        }
+        b[k] = a[i];
+    }
+    return b;
+}
+
 int main() {
 	ResetData();
 	if (true) {
@@ -40,7 +58,7 @@ int main() {
 	}
     std::cout << "missorts: " << TestData() << "\n\n";
 
-	ResetData();
+		ResetData();
 	if (true) {
 		auto start = std::chrono::system_clock::now();
         for(auto& t : g_data) {
@@ -54,6 +72,18 @@ int main() {
 		auto end = std::chrono::system_clock::now();
 		std::chrono::duration<double> difference = end - start;
 		std::cout << difference.count() << " - triplet-sort \n";
+	}
+    std::cout << "missorts: " << TestData() << "\n\n";
+
+    ResetData();
+	if (true) {
+		auto start = std::chrono::system_clock::now();
+        for(auto& t : g_data) {
+            t = nano_sort(t);
+        }
+		auto end = std::chrono::system_clock::now();
+		std::chrono::duration<double> difference = end - start;
+		std::cout << difference.count() << " - nano-sort \n";
 	}
     std::cout << "missorts: " << TestData() << "\n\n";
 }
