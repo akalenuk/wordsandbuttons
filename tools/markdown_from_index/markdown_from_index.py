@@ -11,4 +11,7 @@ for h in hs:
         link = li.split('href="')[1].split('"')[0].strip()
         title = li.split('</a>')[0].split('>')[-1].strip()
         comment = li.split('</a>')[1].split('</li>')[0].strip()
+        comment = comment.replace('&nbsp;', ' ')
+        if comment != '' and comment[0] == '.':
+            comment = comment[1:].strip();
         print('- ['+title+'](https://wordsandbuttons.online/'+link+') '+comment)
