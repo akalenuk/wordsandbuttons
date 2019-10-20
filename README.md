@@ -1,4 +1,4 @@
-# wordsandbuttons.online
+# Words and Buttons Online
 
 This is the source code for [Words and Buttons Online](https://wordsandbuttons.online/) — a growing collection of interactive tutorials, guides, and quizzes about things generally considered boring. Maths, algorithms, programming languages.
 
