@@ -30,11 +30,9 @@ int TestData() {
 template <long unsigned int N> 
 void nano_sort(std::array<int, N>& t) {
     std::array<int, N> a = t;
-    for(auto i = 0u; i < N; ++i)
-    {
+    for(auto i = 0u; i < N; ++i) {
         auto k = 0u;
-        for(auto j = 0u; j < N; ++j) 
-        {
+        for(auto j = 0u; j < N; ++j) {
             if(j > i)
                 k += int(a[i] > a[j]);
             else if(j < i)
@@ -44,7 +42,22 @@ void nano_sort(std::array<int, N>& t) {
     }
 }
 
-void sort_swap_3(std::array<int, 3>& a) {
+template <long unsigned int N> 
+void nano_sort_fast_t(std::array<int, N>& t) {
+    std::array<int, N> a = t;
+    for(uint_fast8_t i = 0u; i < N; ++i) {
+        uint_fast8_t k = 0u;
+        for(uint_fast8_t j = 0u; j < N; ++j) {
+            if(j > i)
+                k += uint_fast8_t(a[i] > a[j]);
+            else if(j < i)
+                k += uint_fast8_t(a[i] >= a[j]);
+        }
+        t[k] = a[i];
+    }
+}
+
+void swap_sort(std::array<int, 3>& a) {
     if (a[0] > a[1])
         std::swap(a[0], a[1]);
     if (a[0] > a[2])
@@ -52,6 +65,8 @@ void sort_swap_3(std::array<int, 3>& a) {
     if (a[1] > a[2])
         std::swap(a[1], a[2]);
 }
+
+
 
 int main() {
     ResetData();
@@ -99,7 +114,7 @@ int main() {
     if (true) {
         auto start = std::chrono::system_clock::now();
         for(auto& t : g_data) {
-            sort_swap_3(t);
+            swap_sort(t);
         }
         auto end = std::chrono::system_clock::now();
         std::chrono::duration<double> difference = end - start;
