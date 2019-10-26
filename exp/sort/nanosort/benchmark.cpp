@@ -1,9 +1,10 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
-#include <vector>
-#include <random>
+#include <climits>
 #include <iostream>
+#include <random>
+#include <vector>
 
 constexpr size_t samples = 10000000;
 std::array<std::array<int, 3>, samples> g_data;
@@ -57,16 +58,48 @@ void nano_sort_fast_t(std::array<int, N>& t) {
     }
 }
 
-void swap_sort(std::array<int, 3>& a) {
-    if (a[0] > a[1])
-        std::swap(a[0], a[1]);
-    if (a[0] > a[2])
-        std::swap(a[0], a[2]);
-    if (a[1] > a[2])
-        std::swap(a[1], a[2]);
+void swap_sort(std::array<int, 3>& t) {
+    if (t[0] > t[1])
+        std::swap(t[0], t[1]);
+    if (t[0] > t[2])
+        std::swap(t[0], t[2]);
+    if (t[1] > t[2])
+        std::swap(t[1], t[2]);
 }
 
+void swap_sort_noif(std::array<int, 3>& t) {
+    auto sort_ = [](auto& a, auto& b) {
+        const auto temp = std::min(a, b);
+        b = std::max(a, b);
+        a = temp;
+    };
+    sort_(t[0], t[1]);
+    sort_(t[1], t[2]);
+    sort_(t[0], t[1]);
+}
 
+void swap_sort_deterministic(std::array<int, 3>& t) {
+    auto sort_ = [](auto& a, auto& b) {
+        auto sum = a+b;
+        auto diff = std::abs(a-b);
+        a = (sum - diff) / 2;
+        b = (sum + diff) / 2;
+    };
+    sort_(t[0], t[1]);
+    sort_(t[1], t[2]);
+    sort_(t[0], t[1]);
+}
+
+void swap_sort_hack(std::array<int, 3>& t) {
+    auto sort_ = [](auto& x, auto& y) {
+        const auto temp = y + ((x - y) & ((x - y) >>(sizeof(int) * CHAR_BIT - 1)));
+        y = x - ((x - y) & ((x - y) >> (sizeof(int) * CHAR_BIT - 1)));
+        x = temp;
+    };
+    sort_(t[0], t[1]);
+    sort_(t[1], t[2]);
+    sort_(t[0], t[1]);
+}
 
 int main() {
     ResetData();
@@ -114,11 +147,59 @@ int main() {
     if (true) {
         auto start = std::chrono::system_clock::now();
         for(auto& t : g_data) {
+            nano_sort_fast_t(t);
+        }
+        auto end = std::chrono::system_clock::now();
+        std::chrono::duration<double> difference = end - start;
+        std::cout << difference.count() << " - nano-sort fast_t \n";
+    }
+    std::cout << "missorts: " << TestData() << "\n\n";
+
+    ResetData();
+    if (true) {
+        auto start = std::chrono::system_clock::now();
+        for(auto& t : g_data) {
             swap_sort(t);
         }
         auto end = std::chrono::system_clock::now();
         std::chrono::duration<double> difference = end - start;
         std::cout << difference.count() << " - swap-sort \n";
+    }
+    std::cout << "missorts: " << TestData() << "\n\n";
+    
+    ResetData();
+    if (true) {
+        auto start = std::chrono::system_clock::now();
+        for(auto& t : g_data) {
+            swap_sort_noif(t);
+        }
+        auto end = std::chrono::system_clock::now();
+        std::chrono::duration<double> difference = end - start;
+        std::cout << difference.count() << " - swap-sort no ifs \n";
+    }
+    std::cout << "missorts: " << TestData() << "\n\n";
+
+    ResetData();
+    if (true) {
+        auto start = std::chrono::system_clock::now();
+        for(auto& t : g_data) {
+            swap_sort_deterministic(t);
+        }
+        auto end = std::chrono::system_clock::now();
+        std::chrono::duration<double> difference = end - start;
+        std::cout << difference.count() << " - swap-sort deterministic \n";
+    }
+    std::cout << "missorts: " << TestData() << "\n\n";
+    
+    ResetData();
+    if (true) {
+        auto start = std::chrono::system_clock::now();
+        for(auto& t : g_data) {
+            swap_sort_hack(t);
+        }
+        auto end = std::chrono::system_clock::now();
+        std::chrono::duration<double> difference = end - start;
+        std::cout << difference.count() << " - swap-sort hack \n";
     }
     std::cout << "missorts: " << TestData() << "\n\n";
 }
