@@ -6,7 +6,7 @@
 #include <random>
 #include <vector>
 
-constexpr size_t samples = 10000000;
+constexpr size_t samples = 10'000'000;
 std::array<std::array<int, 3>, samples> g_data;
 
 static void ResetData() {
