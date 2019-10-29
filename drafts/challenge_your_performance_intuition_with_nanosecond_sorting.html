@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Challenge your performance intuition with nanosecond sorting</title>
+    <meta name="keywords" content="cpp,quiz,game,learning,c++">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 36pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 64pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    line-height: 1.42;
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.comment {
+    font-size: 14pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+pre {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 12pt;
+    text-align: left;
+    width: 360pt;
+}
+
+table {
+    text-align: center;
+    border-width: 0pt;
+}
+
+td {
+    padding: 6pt 12pt 6pt 12pt;
+    font-size: 16pt;
+    border: 1px solid black;
+}
+
+button{
+    width: 304pt;
+    height: 42pt;
+    margin-left:4pt;
+    margin-right:4pt;
+    font-size: 18pt;
+}
+
+    </style>
+    <script language="JavaScript">
+var slider_set = [false, false, false, false,  false, false, false, false,  false, false];
+var slider_true_xs = [
+    7.6 / (7.6 + 7.6) * 512,
+    7.6 / (7.6 + 8.2) * 512,
+    7.6 / (7.6 + 3.1) * 512,
+    3.1 / (3.1 + 4.2) * 512,
+
+    7.6 / (7.6 + 7.7) * 512,
+    3.1 / (3.1 + 4.2) * 512,
+    7.7 / (7.6 + 7.6) * 512,
+    7.6 / (7.6 + 7.6) * 512
+    ];
+var slider_user_xs = [256, 256, 256, 256,  256, 256, 256, 256];
+var slider_xs = [256, 256, 256, 256,  256, 256, 256, 256];
+
+var slider_down = false;
+
+function comment_on_slider(no){
+    var left = document.getElementById("left_" + (no + 1));
+    var right = document.getElementById("right_" + (no + 1));
+    var x = slider_xs[no]
+    var xl = x;
+    var xr = 511 - x;
+    if(x < 255){
+        left.style.backgroundColor = "#" + (Math.round(xl)).toString(16) + "ff" + (Math.round(xl)).toString(16);
+        right.style.backgroundColor = "#ff" + (Math.round(xl)).toString(16) + (Math.round(xl)).toString(16);
+    }else{
+        right.style.backgroundColor = "#" + (Math.round(xr)).toString(16) + "ff" + (Math.round(xr)).toString(16);
+        left.style.backgroundColor = "#ff" + (Math.round(xr)).toString(16) + (Math.round(xr)).toString(16);
+    }
+
+    var comment = document.getElementById("comment_" + (no + 1));
+    if(Math.abs(xl - xr) < 3){
+        comment.innerHTML = "They are almost the same.";
+    }else if(xl > xr){
+        if(xl > 20*xr){
+            comment.innerHTML = "Right is more than 20 times faster!";
+        }else if(xl > 10*xr){
+            comment.innerHTML = "Right is more than 10 times faster!";
+        }else if(xl > 5*xr){
+            comment.innerHTML = "Right is more than 5 times faster!";
+        }else if(xl > 3*xr){
+            comment.innerHTML = "Right is more than 3 times faster!";
+        }else if(xl > 2*xr){
+            comment.innerHTML = "Right is more than 2 times faster!";
+        }else if(xl > 1.5*xr){
+            comment.innerHTML = "Right is more than 50% faster.";
+        }else if(xl > 1.25*xr){
+            comment.innerHTML = "Right is more than 25% faster.";
+        }else if(xl > 1.1*xr){
+            comment.innerHTML = "Right is more than 10% faster.";
+        }else{
+            comment.innerHTML = "Right is slightly faster.";
+        }
+    }else if(xr > xl){
+        if(xr > 20*xl){
+            comment.innerHTML = "Left is more than 20 times faster!";
+        }else if(xr > 10*xl){
+            comment.innerHTML = "Left is more than 10 times faster!";
+        }else if(xr > 5*xl){
+            comment.innerHTML = "Left is more than 5 times faster!";
+        }else if(xr > 3*xl){
+            comment.innerHTML = "Left is more than 3 times faster!";
+        }else if(xr > 2*xl){
+            comment.innerHTML = "Left is more than 2 times faster!";
+        }else if(xr > 1.5*xl){
+            comment.innerHTML = "Left is more than 50% faster.";
+        }else if(xr > 1.25*xl){
+            comment.innerHTML = "Left is more than 25% faster.";
+        }else if(xr > 1.1*xl){
+            comment.innerHTML = "Left is more than 10% faster.";
+        }else{
+            comment.innerHTML = "Left is slightly faster.";
+        }
+    }
+}
+
+function position_slider(no, client_x){
+    if(!slider_set[no]){
+        var slider = document.getElementById("slider_" + (no + 1));
+        var canvas_rect = slider.getBoundingClientRect();
+        var x = client_x - canvas_rect.left - 48;
+        if(x < 16)
+            x = 16;
+        if(x > 511 - 16)
+            x = 511 - 16;
+        slider_xs[no] = x;
+
+        comment_on_slider(no);
+    }
+}
+
+function init_slider(no){
+    draw_slider(no);
+    var slider = document.getElementById("slider_" + (no + 1));
+
+    slider.addEventListener('mouseleave', function(e){
+        slider_down = false;
+    }, false);
+
+    slider.addEventListener('mouseup', function(e){
+        slider_down = false;
+    }, false);
+
+    slider.addEventListener('mousedown', function(e){
+        slider_down = true;
+        position_slider(no, e.clientX);
+        draw_slider(no);
+    }, false);
+
+    slider.addEventListener('mousemove', function(e){
+        if(slider_down){
+            position_slider(no, e.clientX);
+            draw_slider(no);
+        }
+    }, false);
+}
+
+function draw_slider(no){
+    ctx = document.getElementById("slider_" + (no + 1)).getContext("2d");
+    x = slider_xs[no] + 48 + 0.5;
+
+    ctx.clearRect(0, 0, 608, 128);
+    ctx.beginPath();
+    ctx.moveTo(64.5-16, 32.5);
+    ctx.lineTo(0.5 + 16, 127.5 - 32);
+    ctx.lineTo(607.5 - 16, 127.5 - 32);
+    ctx.lineTo(607.5 - 64 + 16, 32.5);
+    ctx.lineTo(64.5-16, 32.5);
+    ctx.strokeStyle="#000000";
+    ctx.stroke();
+    ctx.closePath();
+    ctx.fillStyle="#999999";
+    ctx.fill();
+
+    if(slider_set[no]){
+        x_red = slider_user_xs[no] + 48 + 0.5;
+        ctx.beginPath();
+        ctx.moveTo(x_red, 0);
+        ctx.lineTo(x_red - 64, 127);
+        ctx.lineTo(x_red + 64, 127);
+        ctx.lineTo(x_red, 0);
+        ctx.strokeStyle="#660000";
+        ctx.stroke();
+        ctx.closePath();
+        ctx.fillStyle="#ffcccc";
+        ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x - 64, 127);
+    ctx.lineTo(x + 64, 127);
+    ctx.lineTo(x, 0);
+    ctx.strokeStyle="#000000";
+    ctx.stroke();
+    ctx.closePath();
+    ctx.fillStyle="#cccccc";
+    ctx.fill();
+}
+
+function reveal(no){
+    slider_set[no] = true;
+    slider_user_xs[no] = slider_xs[no];
+    slider_xs[no] = slider_true_xs[no];
+    draw_slider(no);
+    comment_on_slider(no);
+    document.getElementById("the_truth_" + (no + 1)).style.display = "block";
+    document.getElementById("button_" + (no + 1)).style.display = "none";
+
+    for(var i = 0; i < 8; i++){
+        if(slider_set[i] == false)
+            return;
+    }
+
+    document.getElementById("show_in_the_end").style.display = "block";
+    var score = 0;
+    var default_score = 0;
+    for(var i = 0; i < 8; i++){
+        score += Math.abs(slider_user_xs[i] - slider_xs[i]);
+        default_score += Math.abs(256 - slider_xs[i]);
+    }
+
+    document.getElementById("score").innerHTML = "<b>" + score.toFixed(0) + "</b>";
+    document.getElementById("default_score").innerHTML = "<b>" + default_score.toFixed(0) + "</b>";
+}
+
+function colorized(text) {
+    const separators = ['\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')'];
+    const comments = [['/*', '*/'], ['#', '\n']];
+
+    function painted_in(line, color) {
+        return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+    }
+
+    function colorized(token) {
+        var code_sum = 0;
+        for(var i = 0; i < token.length; ++i)
+            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+        var zero_channel = code_sum % 3;
+        var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
+            + (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
+            + (zero_channel == 2 ? '0' : '');
+        return painted_in(token, color);
+    }
+
+    function separated(line, i) {
+        if(i == separators.length)
+            return colorized(line);
+        return line.split(separators[i]).map(function(subline) {
+            return separated(subline, i + 1);}).join(separators[i]);
+    }
+
+    function uncommented(line, i) {
+        if(i == comments.length)
+            return separated(line, 0);
+        var chunks = line.split(comments[i][0]);
+        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+            var in_out_comment = chunk.split(comments[i][1]);
+            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "777")
+                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+    }
+
+    return uncommented(text, 0);
+}
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+Challenge your performance intuition with nanosecond sorting
+    </h1>
+    <p>
+...
+    </p>
+    <p>
+So here is the benchmark example.
+    </p>
+    <table><tr>
+    <td>
+    <pre style="width: 505pt;">
+    </pre>
+    </td></tr></table>
+    <p>
+I've made several variants of this code, compiled it with clang 3.8.0-2ubuntu4 -std=c++14 -O3, and measured their run time on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz.
+    </p>
+    <p>
+Using your intuition and best judgment, please estimate their relative performance. Please use the slider below the code samples.
+    </p>
+
+    <h2>
+Round 1.
+    </h2>
+    <p>
+...
+    </p>
+    <table><tr>
+    <td id="left_1">
+    <pre>
+1
+    </pre>
+    </td>
+    <td id="right_1">
+    <pre>
+2
+    </pre>
+    </td></tr></table>
+    <canvas id="slider_1" width=608 height=128></canvas>
+    <p class="comment" id="comment_1">
+They are almost the same.
+    </p>
+    <button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
+    <div id="the_truth_1" style="display:none;">
+    <p>
+...
+    </p>
+    <table><tr>
+    <td>
+    <pre id="code_1_1">
+ASM1
+    </pre>
+    </td>
+    <td>
+    <pre id="code_1_2">
+ASM2
+    </pre>
+    </td></tr></table>
+    <p>
+...
+    </p>
+    </div>
+    <script language="JavaScript">
+    init_slider(0);
+    </script>
+
+
+
+    <div id="show_in_the_end" style="display:none;">
+    <h2>
+Congratulations!
+    </h2>
+    <p>
+You scored <span id="score"></span> pixels of error. As a reference, if you leave every slider untouched there would be exactly <span id="default_score"></span> pixels of error.
+    </p>
+
+    <h2>
+Conclusion
+    </h2>
+    <p>
+...
+    </p>
+    </div>
+    <script language="JavaScript">
+    document.getElementById("code_1_1").innerHTML = colorized(document.getElementById("code_1_1").innerHTML);
+    document.getElementById("code_1_2").innerHTML = colorized(document.getElementById("code_1_2").innerHTML);
+    </script>
+
+
+    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+    <tr>
+    <td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+        <a href="index.html"><img src="favicon.ico"></a>
+    </td>
+    <td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+        &nbsp;&larr; there's more.
+    </td>
+    <td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+        +
+        <a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+        <a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+        <a href="https://news.ycombinator.com/from?site=wordsandbuttons.online">Hacker News</a>
+    </td>
+    </tr>
+    </table>
+    </center>
+  </body>
+</html>
