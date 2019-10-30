@@ -28,7 +28,7 @@ int TestData() {
     return missorts;
 }
 
-template <unsigned int N> 
+template <size_t N> 
 void nano_sort(std::array<int, N>& t) {
     std::array<int, N> a = t;
     for(auto i = 0u; i < N; ++i) {
@@ -43,7 +43,7 @@ void nano_sort(std::array<int, N>& t) {
     }
 }
 
-template <unsigned int N> 
+template <size_t N> 
 void nano_sort_fast_t(std::array<int, N>& t) {
     std::array<int, N> a = t;
     for(uint_fast8_t i = 0u; i < N; ++i) {
