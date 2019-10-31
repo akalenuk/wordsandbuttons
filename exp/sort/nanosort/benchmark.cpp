@@ -50,7 +50,7 @@ void swap_sort(std::array<int, 3>& t) {
 }
 
 /* Min-max instead of ifs */
-void swap_sort_noif(std::array<int, 3>& t) {
+void swap_sort_no_ifs(std::array<int, 3>& t) {
     auto sort_ = [](auto& a, auto& b) {
         const auto temp = std::min(a, b);
         b = std::max(a, b);
@@ -62,7 +62,7 @@ void swap_sort_noif(std::array<int, 3>& t) {
 }
 
 /* Integer arithmetic trick instead of conditional swaps */
-void swap_sort_deterministic(std::array<int, 3>& t) {
+void swap_sort_arithmetic_hack(std::array<int, 3>& t) {
     auto sort_ = [](auto& a, auto& b) {
         auto sum = a+b;
         auto diff = std::abs(a-b);
@@ -75,7 +75,7 @@ void swap_sort_deterministic(std::array<int, 3>& t) {
 }
 
 /* Integer bit-hack instead of conditional swaps */
-void swap_sort_hack(std::array<int, 3>& t) {
+void swap_sort_bit_hack(std::array<int, 3>& t) {
     auto sort_ = [](auto& x, auto& y) {
         const auto temp = y + ((x - y) & ((x - y) >>(sizeof(int) * CHAR_BIT - 1)));
         y = x - ((x - y) & ((x - y) >> (sizeof(int) * CHAR_BIT - 1)));
@@ -99,7 +99,7 @@ static void ResetData() {
     }
 }
 
-int TestData() {
+int CheckDataForMissorts() {
     int missorts = 0; 
     for (auto& numbers : g_data) {
         if(numbers[1] < numbers[0] || numbers[2] < numbers[1])
@@ -108,105 +108,31 @@ int TestData() {
     return missorts;
 }
 
-int main() {
-    ResetData();
-    if (true) {
-        auto start = std::chrono::system_clock::now();
-        for(auto& t : g_data) {
-            std::sort(t.begin(), t.end());
-        }
-        auto end = std::chrono::system_clock::now();
-        std::chrono::duration<double> difference = end - start;
-        std::cout << difference.count() << " - sort \n";
+#define MEASURE(CODE_TO_MEASURE, NAME_TO_PRINT) \
+    { \
+    ResetData();    \
+    auto start = std::chrono::system_clock::now(); \
+    for(auto& t : g_data) { \
+        CODE_TO_MEASURE \
+    }   \
+    auto end = std::chrono::system_clock::now(); \
+    std::chrono::duration<double> difference = end - start; \
+    std::cout << difference.count() << " - " << NAME_TO_PRINT << "\n";    \
+    std::cout << "missorts: " << CheckDataForMissorts() << "\n\n"; \
     }
-    std::cout << "missorts: " << TestData() << "\n\n";
 
-    ResetData();
-    if (true) {
-        auto start = std::chrono::system_clock::now();
-        for(auto& t : g_data) {
-            const auto a = t[0];
+int main() {
+    MEASURE(std::sort(t.begin(), t.end());, "std::sort");
+    MEASURE(const auto a = t[0];
             const auto b = t[1];
             const auto c = t[2];
             t[int(a > b) + int(a > c)] = a;
             t[int(b >= a) + int(b > c)] = b;
-            t[int(c >= a) + int(c >= b)] = c;
-        }
-        auto end = std::chrono::system_clock::now();
-        std::chrono::duration<double> difference = end - start;
-        std::cout << difference.count() << " - triplet index sort \n";
-    }
-    std::cout << "missorts: " << TestData() << "\n\n";
-
-    ResetData();
-    if (true) {
-        auto start = std::chrono::system_clock::now();
-        for(auto& t : g_data) {
-            index_sort(t);
-        }
-        auto end = std::chrono::system_clock::now();
-        std::chrono::duration<double> difference = end - start;
-        std::cout << difference.count() << " - templated index sort \n";
-    }
-    std::cout << "missorts: " << TestData() << "\n\n";
-
-    ResetData();
-    if (true) {
-        auto start = std::chrono::system_clock::now();
-        for(auto& t : g_data) {
-            index_sort_fast_t(t);
-        }
-        auto end = std::chrono::system_clock::now();
-        std::chrono::duration<double> difference = end - start;
-        std::cout << difference.count() << " - templated index sort fast_t \n";
-    }
-    std::cout << "missorts: " << TestData() << "\n\n";
-
-    ResetData();
-    if (true) {
-        auto start = std::chrono::system_clock::now();
-        for(auto& t : g_data) {
-            swap_sort(t);
-        }
-        auto end = std::chrono::system_clock::now();
-        std::chrono::duration<double> difference = end - start;
-        std::cout << difference.count() << " - swap-sort \n";
-    }
-    std::cout << "missorts: " << TestData() << "\n\n";
-    
-    ResetData();
-    if (true) {
-        auto start = std::chrono::system_clock::now();
-        for(auto& t : g_data) {
-            swap_sort_noif(t);
-        }
-        auto end = std::chrono::system_clock::now();
-        std::chrono::duration<double> difference = end - start;
-        std::cout << difference.count() << " - swap-sort no ifs \n";
-    }
-    std::cout << "missorts: " << TestData() << "\n\n";
-
-    ResetData();
-    if (true) {
-        auto start = std::chrono::system_clock::now();
-        for(auto& t : g_data) {
-            swap_sort_deterministic(t);
-        }
-        auto end = std::chrono::system_clock::now();
-        std::chrono::duration<double> difference = end - start;
-        std::cout << difference.count() << " - swap-sort arithmetic hack \n";
-    }
-    std::cout << "missorts: " << TestData() << "\n\n";
-    
-    ResetData();
-    if (true) {
-        auto start = std::chrono::system_clock::now();
-        for(auto& t : g_data) {
-            swap_sort_hack(t);
-        }
-        auto end = std::chrono::system_clock::now();
-        std::chrono::duration<double> difference = end - start;
-        std::cout << difference.count() << " - swap-sort bit hack \n";
-    }
-    std::cout << "missorts: " << TestData() << "\n\n";
+            t[int(c >= a) + int(c >= b)] = c;, "triplet index sort");
+    MEASURE(index_sort(t);, "templated index sort");
+    MEASURE(index_sort_fast_t(t);, "templated index sort fast_t");
+    MEASURE(swap_sort(t);, "swap-sort");
+    MEASURE(swap_sort_no_ifs(t);, "swap-sort no ifs");
+    MEASURE(swap_sort_arithmetic_hack(t);, "swap-sort arithmetic hack");
+    MEASURE(swap_sort_bit_hack(t);, "swap-sort bit hack");
 }
