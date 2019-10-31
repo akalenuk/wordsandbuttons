@@ -1,9 +1,10 @@
 all:
-	g++ benchmark.cpp -std=c++14 -O3 -o benchmark
-clang:
-	clang++ benchmark.cpp -std=c++14 -O3 -o benchmark
+	g++ benchmark.cpp -std=c++14 -O3 -o benchmark_gcc
+	clang++ benchmark.cpp -std=c++14 -O3 -o benchmark_clang
 measurements:
-	valgrind --tool=cachegrind ./benchmark
+	./benchmark_gcc
+	./benchmark_clang
 clean:
-	rm benchmark
+	rm benchmark_gcc
+	rm benchmark_clang
 
