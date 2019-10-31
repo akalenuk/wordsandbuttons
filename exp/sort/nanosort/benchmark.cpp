@@ -6,6 +6,86 @@
 #include <random>
 #include <vector>
 
+/* Index sort. Supposed to be branch-less on small N */
+template <size_t N> 
+void index_sort(std::array<int, N>& t) {
+    std::array<int, N> a = t;
+    for(auto i = 0u; i < N; ++i) {
+        auto k = 0u;
+        for(auto j = 0u; j < N; ++j) {
+            if(j > i)
+                k += int(a[i] > a[j]);
+            else if(j < i)
+                k += int(a[i] >= a[j]);
+        }
+        t[k] = a[i];
+    }
+}
+
+/* Index sort with presumably shorter index types */
+template <size_t N> 
+void index_sort_fast_t(std::array<int, N>& t) {
+    std::array<int, N> a = t;
+    for(uint_fast8_t i = 0u; i < N; ++i) {
+        uint_fast8_t k = 0u;
+        for(uint_fast8_t j = 0u; j < N; ++j) {
+            if(j > i)
+                k += uint_fast8_t(a[i] > a[j]);
+            else if(j < i)
+                k += uint_fast8_t(a[i] >= a[j]);
+        }
+        t[k] = a[i];
+    }
+}
+
+/* Simple sort for triplets. Conditional swaps */
+void swap_sort(std::array<int, 3>& t) {
+    auto sort_ = [](auto& a, auto& b) {
+        if (a > b)
+            std::swap(a, b);
+    };
+    sort_(t[0], t[1]);
+    sort_(t[1], t[2]);
+    sort_(t[0], t[1]);
+}
+
+/* Min-max instead of ifs */
+void swap_sort_noif(std::array<int, 3>& t) {
+    auto sort_ = [](auto& a, auto& b) {
+        const auto temp = std::min(a, b);
+        b = std::max(a, b);
+        a = temp;
+    };
+    sort_(t[0], t[1]);
+    sort_(t[1], t[2]);
+    sort_(t[0], t[1]);
+}
+
+/* Integer arithmetic trick instead of conditional swaps */
+void swap_sort_deterministic(std::array<int, 3>& t) {
+    auto sort_ = [](auto& a, auto& b) {
+        auto sum = a+b;
+        auto diff = std::abs(a-b);
+        a = (sum - diff) / 2;
+        b = (sum + diff) / 2;
+    };
+    sort_(t[0], t[1]);
+    sort_(t[1], t[2]);
+    sort_(t[0], t[1]);
+}
+
+/* Integer bit-hack instead of conditional swaps */
+void swap_sort_hack(std::array<int, 3>& t) {
+    auto sort_ = [](auto& x, auto& y) {
+        const auto temp = y + ((x - y) & ((x - y) >>(sizeof(int) * CHAR_BIT - 1)));
+        y = x - ((x - y) & ((x - y) >> (sizeof(int) * CHAR_BIT - 1)));
+        x = temp;
+    };
+    sort_(t[0], t[1]);
+    sort_(t[1], t[2]);
+    sort_(t[0], t[1]);
+}
+
 constexpr size_t samples = 10'000'000;
 std::array<std::array<int, 3>, samples> g_data;
 
@@ -26,79 +106,6 @@ int TestData() {
             missorts++;
     }
     return missorts;
-}
-
-template <size_t N> 
-void nano_sort(std::array<int, N>& t) {
-    std::array<int, N> a = t;
-    for(auto i = 0u; i < N; ++i) {
-        auto k = 0u;
-        for(auto j = 0u; j < N; ++j) {
-            if(j > i)
-                k += int(a[i] > a[j]);
-            else if(j < i)
-                k += int(a[i] >= a[j]);
-        }
-        t[k] = a[i];
-    }
-}
-
-template <size_t N> 
-void nano_sort_fast_t(std::array<int, N>& t) {
-    std::array<int, N> a = t;
-    for(uint_fast8_t i = 0u; i < N; ++i) {
-        uint_fast8_t k = 0u;
-        for(uint_fast8_t j = 0u; j < N; ++j) {
-            if(j > i)
-                k += uint_fast8_t(a[i] > a[j]);
-            else if(j < i)
-                k += uint_fast8_t(a[i] >= a[j]);
-        }
-        t[k] = a[i];
-    }
-}
-
-void swap_sort(std::array<int, 3>& t) {
-    if (t[0] > t[1])
-        std::swap(t[0], t[1]);
-    if (t[0] > t[2])
-        std::swap(t[0], t[2]);
-    if (t[1] > t[2])
-        std::swap(t[1], t[2]);
-}
-
-void swap_sort_noif(std::array<int, 3>& t) {
-    auto sort_ = [](auto& a, auto& b) {
-        const auto temp = std::min(a, b);
-        b = std::max(a, b);
-        a = temp;
-    };
-    sort_(t[0], t[1]);
-    sort_(t[1], t[2]);
-    sort_(t[0], t[1]);
-}
-
-void swap_sort_deterministic(std::array<int, 3>& t) {
-    auto sort_ = [](auto& a, auto& b) {
-        auto sum = a+b;
-        auto diff = std::abs(a-b);
-        a = (sum - diff) / 2;
-        b = (sum + diff) / 2;
-    };
-    sort_(t[0], t[1]);
-    sort_(t[1], t[2]);
-    sort_(t[0], t[1]);
-}
-
-void swap_sort_hack(std::array<int, 3>& t) {
-    auto sort_ = [](auto& x, auto& y) {
-        const auto temp = y + ((x - y) & ((x - y) >>(sizeof(int) * CHAR_BIT - 1)));
-        y = x - ((x - y) & ((x - y) >> (sizeof(int) * CHAR_BIT - 1)));
-        x = temp;
-    };
-    sort_(t[0], t[1]);
-    sort_(t[1], t[2]);
-    sort_(t[0], t[1]);
 }
 
 int main() {
@@ -127,7 +134,7 @@ int main() {
         }
         auto end = std::chrono::system_clock::now();
         std::chrono::duration<double> difference = end - start;
-        std::cout << difference.count() << " - triplet-sort \n";
+        std::cout << difference.count() << " - triplet index sort \n";
     }
     std::cout << "missorts: " << TestData() << "\n\n";
 
@@ -135,11 +142,11 @@ int main() {
     if (true) {
         auto start = std::chrono::system_clock::now();
         for(auto& t : g_data) {
-            nano_sort(t);
+            index_sort(t);
         }
         auto end = std::chrono::system_clock::now();
         std::chrono::duration<double> difference = end - start;
-        std::cout << difference.count() << " - nano-sort \n";
+        std::cout << difference.count() << " - templated index sort \n";
     }
     std::cout << "missorts: " << TestData() << "\n\n";
 
@@ -147,11 +154,11 @@ int main() {
     if (true) {
         auto start = std::chrono::system_clock::now();
         for(auto& t : g_data) {
-            nano_sort_fast_t(t);
+            index_sort_fast_t(t);
         }
         auto end = std::chrono::system_clock::now();
         std::chrono::duration<double> difference = end - start;
-        std::cout << difference.count() << " - nano-sort fast_t \n";
+        std::cout << difference.count() << " - templated index sort fast_t \n";
     }
     std::cout << "missorts: " << TestData() << "\n\n";
 
@@ -187,7 +194,7 @@ int main() {
         }
         auto end = std::chrono::system_clock::now();
         std::chrono::duration<double> difference = end - start;
-        std::cout << difference.count() << " - swap-sort deterministic \n";
+        std::cout << difference.count() << " - swap-sort arithmetic hack \n";
     }
     std::cout << "missorts: " << TestData() << "\n\n";
     
@@ -199,7 +206,7 @@ int main() {
         }
         auto end = std::chrono::system_clock::now();
         std::chrono::duration<double> difference = end - start;
-        std::cout << difference.count() << " - swap-sort hack \n";
+        std::cout << difference.count() << " - swap-sort bit hack \n";
     }
     std::cout << "missorts: " << TestData() << "\n\n";
 }
