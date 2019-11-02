@@ -339,6 +339,42 @@ So here is the benchmark example.
     <table><tr>
     <td>
     <pre style="width: 505pt;">
+constexpr size_t samples = 10'000'000;
+std::array&lt;std::array&lt;int, 3&gt;, samples&gt; g_data;
+
+static void ResetData() {
+    std::mt19937 rng(0);
+    std::uniform_int_distribution&lt;int&gt; random_number(1, 100);
+    for (auto& numbers : g_data) {
+        numbers[0] = random_number(rng);
+        numbers[1] = random_number(rng);
+        numbers[2] = random_number(rng);
+    }
+}
+
+int CheckDataForMissorts() {
+    int missorts = 0; 
+    for (auto& numbers : g_data) {
+        if(numbers[1] &lt; numbers[0] || numbers[2] &lt; numbers[1])
+            missorts++;
+    }
+    return missorts;
+}
+
+#define MEASURE(CODE_TO_MEASURE, NAME_TO_PRINT) \
+    { \
+    ResetData();    \
+    auto start = std::chrono::system_clock::now(); \
+    for(auto& t : g_data) { \
+        CODE_TO_MEASURE \
+    }   \
+    auto end = std::chrono::system_clock::now(); \
+    std::chrono::duration&lt;double&gt; time = end - start; \
+    std::cout &lt;&lt; time.count() &lt;&lt; " - " &lt;&lt; NAME_TO_PRINT; \
+    std::cout &lt;&lt; "\n"; \
+    std::cout &lt;&lt; "missorts: " &lt;&lt; CheckDataForMissorts(); \
+    std::cout &lt;&lt; "\n\n"; \
+    }
     </pre>
     </td></tr></table>
     <p>
