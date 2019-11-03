@@ -1002,7 +1002,7 @@ With GCC, there is virtually no difference.
 Again, the code is accidentally different but it's essentially the same thing.
     </p>
     <p>
-However, with Clang, we do see the difference.
+However, with Clang the difference is obvious.
     </p>
     <table><tr>
     <td>
@@ -1075,7 +1075,13 @@ The min/max version is branchless! Clang uses the conditional moves instead and 
 Round 5.
     </h2>
     <p>
-...
+You don't have to rely on the compiler to make deterministic conditional swap. There is an arithmetic trick that lets you sort a pair of numbers.
+    </p>
+    <p>
+A half-sum of a pair minus half-diference is the lowest number; a half-sum plus a half-difference is the greatest. Of course, if they are the same when their half-difference is 0.
+    </p>
+    <p>
+This limits the application of this sort. With integers you can accidentally overflow, and with floating point numbers you can loose precision if the numbers have different exponent. But lets just presume this works for us. Let's see which is faster.
     </p>
     <table><tr>
     <td id="left_5">
@@ -1114,21 +1120,116 @@ They are almost the same.
     <button type="button" onclick="reveal(4)" id="button_5">Reveal the truth</button>
     <div id="the_truth_5" style="display:none;">
     <p>
-...
+The code is a little excessive but it is deterministic. It is branchless.
     </p>
     <table><tr>
     <td>
     <pre id="code_5_1">
-ASM1
+        mov     edx, DWORD PTR [rdi+4]
+        mov     eax, DWORD PTR [rdi]
+        cmp     edx, eax
+        jl      .L8
+        mov     esi, eax
+        jle     .L2
+        mov     ecx, DWORD PTR [rdi+8]
+        cmp     ecx, edx
+        jl      .L10
+.L15:
+        mov     eax, edx
+        jle     .L4
+.L5:
+        cmp     eax, esi
+        mov     DWORD PTR [rdi+8], ecx
+        jl      .L12
+        mov     edx, esi
+        jle     .L6
+        mov     DWORD PTR [rdi+4], eax
+        mov     DWORD PTR [rdi], edx
+        ret
+.L12:
+        mov     edx, eax
+.L6:
+        mov     eax, esi
+        mov     DWORD PTR [rdi], edx
+        mov     DWORD PTR [rdi+4], eax
+        ret
+.L8:
+        mov     esi, edx
+.L2:
+        mov     ecx, DWORD PTR [rdi+8]
+        mov     edx, eax
+        cmp     ecx, edx
+        jge     .L15
+.L10:
+        mov     eax, ecx
+.L4:
+        mov     ecx, edx
+        jmp     .L5
     </pre>
     </td>
     <td>
     <pre id="code_5_2">
-ASM2
+        mov     edx, DWORD PTR [rdi+4]
+        mov     eax, DWORD PTR [rdi]
+        lea     ecx, [rax+rdx]
+        sub     eax, edx
+        cdq
+        xor     eax, edx
+        sub     eax, edx
+        mov     edx, ecx
+        sub     edx, eax
+        add     eax, ecx
+        mov     ecx, eax
+        mov     esi, edx
+        shr     ecx, 31
+        shr     esi, 31
+        add     eax, ecx
+        mov     ecx, DWORD PTR [rdi+8]
+        add     edx, esi
+        sar     eax
+        sar     edx
+        lea     r8d, [rcx+rax]
+        sub     eax, ecx
+        mov     ecx, eax
+        sar     ecx, 31
+        xor     eax, ecx
+        sub     eax, ecx
+        mov     ecx, r8d
+        sub     ecx, eax
+        add     eax, r8d
+        mov     esi, ecx
+        shr     esi, 31
+        add     esi, ecx
+        mov     ecx, eax
+        shr     ecx, 31
+        sar     esi
+        add     eax, ecx
+        lea     ecx, [rsi+rdx]
+        sar     eax
+        mov     DWORD PTR [rdi+8], eax
+        mov     eax, edx
+        sub     eax, esi
+        cdq
+        xor     eax, edx
+        sub     eax, edx
+        mov     edx, ecx
+        sub     edx, eax
+        mov     esi, edx
+        shr     esi, 31
+        add     edx, esi
+        sar     edx
+        add     eax, ecx
+        mov     DWORD PTR [rdi], edx
+        mov     edx, eax
+        shr     edx, 31
+        add     eax, edx
+        sar     eax
+        mov     DWORD PTR [rdi+4], eax
+        ret
     </pre>
     </td></tr></table>
     <p>
-...
+Since we're already knee-deep into limitations, why don't we try a truly integer-specific hack?
     </p>
     </div>
     <script language="JavaScript">
@@ -1140,7 +1241,7 @@ ASM2
 Round 6.
     </h2>
     <p>
-...
+I'll be honest, I stole this from somewhere in the Internet and I don't know how exactly it works. Apparently, it works just fine on a half-range just like the previous version. But would it be faster?
     </p>
     <table><tr>
     <td id="left_6">
@@ -1180,21 +1281,104 @@ They are almost the same.
     <button type="button" onclick="reveal(5)" id="button_6">Reveal the truth</button>
     <div id="the_truth_6" style="display:none;">
     <p>
-...
+It is even fater and it generates even better code.
     </p>
     <table><tr>
     <td>
     <pre id="code_6_1">
-ASM1
+        mov     edx, DWORD PTR [rdi+4]
+        mov     eax, DWORD PTR [rdi]
+        lea     ecx, [rax+rdx]
+        sub     eax, edx
+        cdq
+        xor     eax, edx
+        sub     eax, edx
+        mov     edx, ecx
+        sub     edx, eax
+        add     eax, ecx
+        mov     ecx, eax
+        mov     esi, edx
+        shr     ecx, 31
+        shr     esi, 31
+        add     eax, ecx
+        mov     ecx, DWORD PTR [rdi+8]
+        add     edx, esi
+        sar     eax
+        sar     edx
+        lea     r8d, [rcx+rax]
+        sub     eax, ecx
+        mov     ecx, eax
+        sar     ecx, 31
+        xor     eax, ecx
+        sub     eax, ecx
+        mov     ecx, r8d
+        sub     ecx, eax
+        add     eax, r8d
+        mov     esi, ecx
+        shr     esi, 31
+        add     esi, ecx
+        mov     ecx, eax
+        shr     ecx, 31
+        sar     esi
+        add     eax, ecx
+        lea     ecx, [rsi+rdx]
+        sar     eax
+        mov     DWORD PTR [rdi+8], eax
+        mov     eax, edx
+        sub     eax, esi
+        cdq
+        xor     eax, edx
+        sub     eax, edx
+        mov     edx, ecx
+        sub     edx, eax
+        mov     esi, edx
+        shr     esi, 31
+        add     edx, esi
+        sar     edx
+        add     eax, ecx
+        mov     DWORD PTR [rdi], edx
+        mov     edx, eax
+        shr     edx, 31
+        add     eax, edx
+        sar     eax
+        mov     DWORD PTR [rdi+4], eax
+        ret
     </pre>
     </td>
     <td>
     <pre id="code_6_2">
-ASM2
+        mov     ecx, DWORD PTR [rdi]
+        mov     edx, DWORD PTR [rdi+4]
+        mov     eax, ecx
+        sub     eax, edx
+        mov     esi, eax
+        sar     esi, 31
+        and     eax, esi
+        add     edx, eax
+        sub     ecx, eax
+        mov     eax, DWORD PTR [rdi+8]
+        mov     esi, ecx
+        sub     esi, eax
+        mov     r8d, esi
+        sar     r8d, 31
+        and     esi, r8d
+        sub     ecx, esi
+        add     eax, esi
+        mov     DWORD PTR [rdi+8], ecx
+        mov     ecx, edx
+        sub     ecx, eax
+        mov     esi, ecx
+        sar     esi, 31
+        and     ecx, esi
+        sub     edx, ecx
+        add     eax, ecx
+        mov     DWORD PTR [rdi+4], edx
+        mov     DWORD PTR [rdi], eax
+        ret
     </pre>
     </td></tr></table>
     <p>
-...
+Ii is GCC-specific though. On Clang, the better code comes from min/max swaps. 
     </p>
     </div>
     <script language="JavaScript">
@@ -1203,10 +1387,10 @@ ASM2
     
     
     <h2>
-Round 7.
+Bonus round.
     </h2>
     <p>
-...
+Since we know that the algorithm is supposed to work with small arrays, maybe we can help the compiler to pick the type better. I was always curious to try uint_fast8_t somewhere.
     </p>
     <table><tr>
     <td id="left_7">
