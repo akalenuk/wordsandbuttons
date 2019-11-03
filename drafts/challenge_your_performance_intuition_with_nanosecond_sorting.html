@@ -393,12 +393,17 @@ Round 1.
     <table><tr>
     <td id="left_1">
     <pre>
-1
+std::sort(t.begin(), t.end());
     </pre>
     </td>
     <td id="right_1">
     <pre>
-2
+const auto a = t[0];
+const auto b = t[1];
+const auto c = t[2];
+t[int(a > b) + int(a > c)] = a;
+t[int(b >= a) + int(b > c)] = b;
+t[int(c >= a) + int(c >= b)] = c;
     </pre>
     </td></tr></table>
     <canvas id="slider_1" width=608 height=128></canvas>
@@ -438,12 +443,30 @@ Round 2.
     <table><tr>
     <td id="left_2">
     <pre>
-1
+const auto a = t[0];
+const auto b = t[1];
+const auto c = t[2];
+t[int(a &gt; b) + int(a &gt; c)] = a;
+t[int(b &gt;= a) + int(b &gt; c)] = b;
+t[int(c &gt;= a) + int(c &gt;= b)] = c;
     </pre>
     </td>
     <td id="right_2">
     <pre>
-2
+template &lt;size_t N&gt; 
+void index_sort(std::array&lt;int, N&gt;& t) {
+    std::array&lt;int, N&gt; a = t;
+    for(auto i = 0u; i &lt; N; ++i) {
+        auto k = 0u;
+        for(auto j = 0u; j &lt; N; ++j) {
+            if(j &gt; i)
+                k += int(a[i] &gt; a[j]);
+            else if(j &lt; i)
+                k += int(a[i] &gt;= a[j]);
+        }
+        t[k] = a[i];
+    }
+}
     </pre>
     </td></tr></table>
     <canvas id="slider_2" width=608 height=128></canvas>
@@ -484,12 +507,33 @@ Round 3.
     <table><tr>
     <td id="left_3">
     <pre>
-1
+template &lt;size_t N&gt; 
+void index_sort(std::array&lt;int, N&gt;& t) {
+    std::array&lt;int, N&gt; a = t;
+    for(auto i = 0u; i &lt; N; ++i) {
+        auto k = 0u;
+        for(auto j = 0u; j &lt; N; ++j) {
+            if(j &gt; i)
+                k += int(a[i] &gt; a[j]);
+            else if(j &lt; i)
+                k += int(a[i] &gt;= a[j]);
+        }
+        t[k] = a[i];
+    }
+}
     </pre>
     </td>
     <td id="right_3">
     <pre>
-2
+void swap_sort(std::array&lt;int, 3&gt;& t) {
+    auto sort_ = [](auto& a, auto& b) {
+        if (a &gt; b)
+            std::swap(a, b);
+    };
+    sort_(t[0], t[1]);
+    sort_(t[1], t[2]);
+    sort_(t[0], t[1]);
+}
     </pre>
     </td></tr></table>
     <canvas id="slider_3" width=608 height=128></canvas>
@@ -530,12 +574,29 @@ Round 4.
     <table><tr>
     <td id="left_4">
     <pre>
-1
+void swap_sort(std::array&lt;int, 3&gt;& t) {
+    auto sort_ = [](auto& a, auto& b) {
+        if (a &gt; b)
+            std::swap(a, b);
+    };
+    sort_(t[0], t[1]);
+    sort_(t[1], t[2]);
+    sort_(t[0], t[1]);
+}
     </pre>
     </td>
     <td id="right_4">
     <pre>
-2
+void swap_sort_no_ifs(std::array&lt;int, 3&gt;& t) {
+    auto sort_ = [](auto& a, auto& b) {
+        const auto temp = std::min(a, b);
+        b = std::max(a, b);
+        a = temp;
+    };
+    sort_(t[0], t[1]);
+    sort_(t[1], t[2]);
+    sort_(t[0], t[1]);
+}
     </pre>
     </td></tr></table>
     <canvas id="slider_4" width=608 height=128></canvas>
@@ -576,12 +637,31 @@ Round 5.
     <table><tr>
     <td id="left_5">
     <pre>
-1
+void swap_sort_no_ifs(std::array&lt;int, 3&gt;& t) {
+    auto sort_ = [](auto& a, auto& b) {
+        const auto temp = std::min(a, b);
+        b = std::max(a, b);
+        a = temp;
+    };
+    sort_(t[0], t[1]);
+    sort_(t[1], t[2]);
+    sort_(t[0], t[1]);
+}
     </pre>
     </td>
     <td id="right_5">
     <pre>
-2
+void swap_sort_arithmetic_hack(std::array&lt;int, 3&gt;& t) {
+    auto sort_ = [](auto& a, auto& b) {
+        auto sum = a+b;
+        auto diff = std::abs(a-b);
+        a = (sum - diff) / 2;
+        b = (sum + diff) / 2;
+    };
+    sort_(t[0], t[1]);
+    sort_(t[1], t[2]);
+    sort_(t[0], t[1]);
+}
     </pre>
     </td></tr></table>
     <canvas id="slider_5" width=608 height=128></canvas>
@@ -622,12 +702,32 @@ Round 6.
     <table><tr>
     <td id="left_6">
     <pre>
-1
+void swap_sort_arithmetic_hack(std::array&lt;int, 3&gt;& t) {
+    auto sort_ = [](auto& a, auto& b) {
+        auto sum = a+b;
+        auto diff = std::abs(a-b);
+        a = (sum - diff) / 2;
+        b = (sum + diff) / 2;
+    };
+    sort_(t[0], t[1]);
+    sort_(t[1], t[2]);
+    sort_(t[0], t[1]);
+}
     </pre>
     </td>
     <td id="right_6">
     <pre>
-2
+void swap_sort_bit_hack(std::array&lt;int, 3&gt;& t) {
+    auto sort_ = [](auto& x, auto& y) {
+        constexpr auto shift = (sizeof(int) * CHAR_BIT - 1);
+        const auto temp = y + ((x - y) & ((x - y) &gt;&gt; shift));
+        y = x - ((x - y) & ((x - y) &gt;&gt; shift));
+        x = temp;
+    };
+    sort_(t[0], t[1]);
+    sort_(t[1], t[2]);
+    sort_(t[0], t[1]);
+}
     </pre>
     </td></tr></table>
     <canvas id="slider_6" width=608 height=128></canvas>
@@ -668,12 +768,38 @@ Round 7.
     <table><tr>
     <td id="left_7">
     <pre>
-1
+template &lt;size_t N&gt; 
+void index_sort(std::array&lt;int, N&gt;& t) {
+    std::array&lt;int, N&gt; a = t;
+    for(auto i = 0u; i &lt; N; ++i) {
+        auto k = 0u;
+        for(auto j = 0u; j &lt; N; ++j) {
+            if(j &gt; i)
+                k += int(a[i] &gt; a[j]);
+            else if(j &lt; i)
+                k += int(a[i] &gt;= a[j]);
+        }
+        t[k] = a[i];
+    }
+}
     </pre>
     </td>
     <td id="right_7">
     <pre>
-2
+template &lt;size_t N&gt; 
+void index_sort_fast_t(std::array&lt;int, N&gt;& t) {
+    std::array&lt;int, N&gt; a = t;
+    for(uint_fast8_t i = 0u; i &lt; N; ++i) {
+        uint_fast8_t k = 0u;
+        for(uint_fast8_t j = 0u; j &lt; N; ++j) {
+            if(j &gt; i)
+                k += uint_fast8_t(a[i] &gt; a[j]);
+            else if(j &lt; i)
+                k += uint_fast8_t(a[i] &gt;= a[j]);
+        }
+        t[k] = a[i];
+    }
+}
     </pre>
     </td></tr></table>
     <canvas id="slider_7" width=608 height=128></canvas>
@@ -703,53 +829,6 @@ ASM2
     <script language="JavaScript">
     init_slider(6);
     </script>
-    
-    
-    <h2>
-Round 8.
-    </h2>
-    <p>
-...
-    </p>
-    <table><tr>
-    <td id="left_8">
-    <pre>
-1
-    </pre>
-    </td>
-    <td id="right_8">
-    <pre>
-2
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_8" width=608 height=128></canvas>
-    <p class="comment" id="comment_8">
-They are almost the same.
-    </p>
-    <button type="button" onclick="reveal(7)" id="button_8">Reveal the truth</button>
-    <div id="the_truth_8" style="display:none;">
-    <p>
-...
-    </p>
-    <table><tr>
-    <td>
-    <pre id="code_8_1">
-ASM1
-    </pre>
-    </td>
-    <td>
-    <pre id="code_8_2">
-ASM2
-    </pre>
-    </td></tr></table>
-    <p>
-...
-    </p>
-    </div>
-    <script language="JavaScript">
-    init_slider(7);
-    </script>                            
-
 
 
     <div id="show_in_the_end" style="display:none;">
