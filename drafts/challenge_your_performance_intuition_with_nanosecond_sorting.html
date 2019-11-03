@@ -597,7 +597,7 @@ Using your intuition and best judgment, please estimate their relative performan
 Round 1.
     </h2>
     <p>
-...
+The main question, the question #1 that has to be answered before anything else: why don't you use std::sort?
     </p>
     <table><tr>
     <td id="left_1">
@@ -622,21 +622,10 @@ They are almost the same.
     <button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
     <div id="the_truth_1" style="display:none;">
     <p>
-...
+Index sort is five times faster in this context. But in different context it might not work all that well. For instance, on ARMv7 (v7l) it's only 2 times faster. And with clang (Debian clang 3.5.0) it's even less drastic. 
     </p>
-    <table><tr>
-    <td>
-    <pre id="code_1_1">
-ASM1
-    </pre>
-    </td>
-    <td>
-    <pre id="code_1_2">
-ASM2
-    </pre>
-    </td></tr></table>
     <p>
-...
+Clang's sort seems to be slightly better on small arrays generally. On testing Intel i7 it's also 20% faster than the GCC version. Still, not enough to make it interesting so let's move along with index sort.
     </p>
     </div>
     <script language="JavaScript">
@@ -647,7 +636,7 @@ ASM2
 Round 2.
     </h2>
     <p>
-...
+Sorting triplets is fun but can we generalise it with no overhead?
     </p>
     <table><tr>
     <td id="left_2">
@@ -685,21 +674,82 @@ They are almost the same.
     <button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
     <div id="the_truth_2" style="display:none;">
     <p>
-...
+Yes, we can. And even with... negative overhead?
+    </p>
+    <p>
+The difference doesn't show much on <a href="https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(j:1,lang:c%2B%2B,source:'%23include+%3Carray%3E%0A%0Atemplate+%3Clong+unsigned+int+N%3E+%0Avoid+index_sort(std::array%3Cint,+N%3E%26+t)+%7B%0A++++std::array%3Cint,+N%3E+a+%3D+t%3B%0A++++for(auto+i+%3D+0u%3B+i+%3C+N%3B+%2B%2Bi)%0A++++%7B%0A++++++++auto+k+%3D+0u%3B%0A++++++++for(auto+j+%3D+0u%3B+j+%3C+N%3B+%2B%2Bj)+%0A++++++++%7B%0A++++++++++++if(j+%3E+i)%0A++++++++++++++++k+%2B%3D+int(a%5Bi%5D+%3E+a%5Bj%5D)%3B%0A++++++++++++else+if(j+%3C+i)%0A++++++++++++++++k+%2B%3D+int(a%5Bi%5D+%3E%3D+a%5Bj%5D)%3B%0A++++++++%7D%0A++++++++t%5Bk%5D+%3D+a%5Bi%5D%3B%0A++++%7D%0A%7D%0A%0Avoid+sort(std::array%3Cint,+3%3E%26+t)+%7B%0A++++index_sort(t)%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:33.333333333333336,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:g540,filters:(b:'0',binary:'1',commentOnly:'0',demangle:'0',directives:'0',execute:'1',intel:'0',libraryCode:'1',trim:'1'),lang:c%2B%2B,libs:!(),options:'-O3+--std%3Dc%2B%2B14',source:1),l:'5',n:'0',o:'x86-64+gcc+5.4+(Editor+%231,+Compiler+%231)+C%2B%2B',t:'0')),k:48.02304268133018,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compiler:1,editor:1,wrap:'1'),l:'5',n:'0',o:'%231+with+x86-64+gcc+5.4',t:'0')),k:18.643623985336475,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4">godbolt</a>.
     </p>
     <table><tr>
     <td>
     <pre id="code_2_1">
-ASM1
+        mov     eax, DWORD PTR [rdi]
+        mov     ecx, DWORD PTR [rdi+4]
+        xor     r8d, r8d
+        mov     edx, DWORD PTR [rdi+8]
+        cmp     eax, ecx
+        setg    r8b
+        xor     esi, esi
+        cmp     eax, edx
+        setg    sil
+        add     esi, r8d
+        xor     r8d, r8d
+        cmp     eax, ecx
+        movsx   rsi, esi
+        setle   r8b
+        mov     DWORD PTR [rdi+rsi*4], eax
+        xor     esi, esi
+        cmp     ecx, edx
+        setg    sil
+        add     esi, r8d
+        movsx   rsi, esi
+        mov     DWORD PTR [rdi+rsi*4], ecx
+        xor     esi, esi
+        cmp     eax, edx
+        setle   sil
+        xor     eax, eax
+        cmp     ecx, edx
+        setle   al
+        add     eax, esi
+        cdqe
+        mov     DWORD PTR [rdi+rax*4], edx
+        ret
     </pre>
     </td>
     <td>
     <pre id="code_2_2">
-ASM2
+        mov     rax, QWORD PTR [rdi]
+        mov     ecx, DWORD PTR [rdi+8]
+        xor     esi, esi
+        mov     edx, eax
+        shr     rax, 32
+        cmp     edx, eax
+        setg    sil
+        xor     r8d, r8d
+        cmp     edx, ecx
+        setg    r8b
+        add     esi, r8d
+        mov     DWORD PTR [rdi+rsi*4], edx
+        xor     esi, esi
+        cmp     edx, eax
+        setle   sil
+        xor     r8d, r8d
+        cmp     ecx, eax
+        setl    r8b
+        add     esi, r8d
+        cmp     edx, ecx
+        setle   dl
+        cmp     ecx, eax
+        mov     DWORD PTR [rdi+rsi*4], eax
+        setge   al
+        movzx   edx, dl
+        movzx   eax, al
+        add     eax, edx
+        mov     DWORD PTR [rdi+rax*4], ecx
+        ret
     </pre>
     </td></tr></table>
     <p>
-...
+It's not drastically different and it has no reason to be so. My theory is that this gain is accidental. However, it reprocudes well across compilers and CPUs.
     </p>
     </div>
     <script language="JavaScript">
@@ -1056,8 +1106,8 @@ Conclusion
     </p>
     </div>
     <script language="JavaScript">
-    document.getElementById("code_1_1").innerHTML = colorized(document.getElementById("code_1_1").innerHTML);
-    document.getElementById("code_1_2").innerHTML = colorized(document.getElementById("code_1_2").innerHTML);
+    document.getElementById("code_2_1").innerHTML = colorized(document.getElementById("code_2_1").innerHTML);
+    document.getElementById("code_2_2").innerHTML = colorized(document.getElementById("code_2_2").innerHTML);
     </script>
 
 
