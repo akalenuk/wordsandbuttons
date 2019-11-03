@@ -87,6 +87,11 @@ button{
     font-size: 18pt;
 }
 
+u {
+    text-decoration: none;
+    font-weight: bold;
+    color: #e30707;
+}
     </style>
     <script language="JavaScript">
 const slider_set = [false, false, false, false, false, false, false];
@@ -277,6 +282,39 @@ function reveal(no){
     document.getElementById("default_score").innerHTML = "<b>" + default_score.toFixed(0) + "</b>";
 }
 
+function next(slides){
+    // show the next slide
+    var first_slide = document.getElementById(slides + "_" + 1);
+    for(var i = 1; i < 9; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if(this_slide)
+            if(this_slide.style.display == "block")
+                {
+                this_slide.style.display = "none";
+                if(next_slide)
+                    next_slide.style.display = "block";
+                else
+                    first_slide.style.display = "block";
+                break;
+                }
+    }
+    // name the button
+    var button = document.getElementById(slides + "_button")
+    for(var i = 1; i < 9; ++i)
+    {
+        var this_slide = document.getElementById(slides + "_" + i);
+        var next_slide = document.getElementById(slides + "_" + (i+1));
+        if (this_slide && !next_slide && this_slide.style.display == "block") {
+            button.innerHTML = "Back to the 1-st slide";
+            break;
+        }
+        else
+            button.innerHTML = "Next slide";
+    }
+}
+
 function colorized(text) {
     const separators = ['\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')'];
     const comments = [['/*', '*/'], ['#', '\n']];
@@ -331,11 +369,178 @@ Surprisingly, a very similar effect happens in computation. If the operation you
     <p>
 The most effective algorithms become mediocre while the absolutely useless come from the oblivion to shine and amaze. One of these algorithms is the index sort. It has unconditional <i>O(n<sup>2</sup>)</i> complexity and this makes it probably the least performant sorting algorithm you never heard about. It's useless on the macro-scale. But on the nano-scale it excells.
     </p>
+    <h2>
+Index sort
+    </h2>
     <p>
-...
+The idea of index sort is this. For every item in the assorted array you can find its index in the sorder array by comparing it to all the others. 
+    </p>
+    
+    <table><tr>
+    <td style="width:505pt;">
+    <pre><span id="slides_is_1" style="display:block;"><div style="color:#994466"><b>Example</b></div>
+Assorted: 6 4 8 4
+
+   Xi   Comparisons                     Index
+        6       4       8       4
+    6           >       >       >       ?
+
+    4   >=              >       >       ?
+
+    8   >=      >=              >       ?
+
+    4   >=      >=      >=              ?
+
+
+
+
+</span><span id="slides_is_2" style="display:none;"><div style="color:#994466"><b>Example</b></div>
+Assorted: 6 4 8 4
+
+   Xi   Comparisons                     Index
+        6       4       8       4
+    6           <u>></u>       >       >       1+?
+
+    4   >=              >       >       ?
+
+    8   >=      >=              >       ?
+
+    4   >=      >=      >=              ?
+
+
+
+
+</span><span id="slides_is_3" style="display:none;"><div style="color:#994466"><b>Example</b></div>
+Assorted: 6 4 8 4
+
+   Xi   Comparisons                     Index
+        6       4       8       4
+    6           <b>></b>       >       <u>></u>       <u>2</u>
+
+    4   >=              >       >       ?
+
+    8   >=      >=              >       ?
+
+    4   >=      >=      >=              ?
+
+
+
+
+</span><span id="slides_is_4" style="display:none;"><div style="color:#994466"><b>Example</b></div>
+Assorted: 6 4 8 4
+
+   Xi   Comparisons                     Index
+        6       4       8       4
+    6           <b>></b>       >       <b>></b>       2
+
+    4   >=              >       >       <u>0</u>
+
+    8   >=      >=              >       ?
+
+    4   >=      >=      >=              ?
+
+
+
+
+</span><span id="slides_is_5" style="display:none;"><div style="color:#994466"><b>Example</b></div>
+Assorted: 6 4 8 4
+
+   Xi   Comparisons                     Index
+        6       4       8       4
+    6           <b>></b>       >       <b>></b>       2
+
+    4   >=              >       >       0
+
+    8   <u>>=</u>      >=              >       1+?
+
+    4   >=      >=      >=              ?
+
+
+
+
+</span><span id="slides_is_6" style="display:none;"><div style="color:#994466"><b>Example</b></div>
+Assorted: 6 4 8 4
+
+   Xi   Comparisons                     Index
+        6       4       8       4
+    6           <b>></b>       >       <b>></b>       2
+
+    4   >=              >       >       0
+
+    8   <b>>=</b>      <u>>=</u>              >       2+?
+
+    4   >=      >=      >=              ?
+
+
+
+
+</span><span id="slides_is_3" style="display:none;"><div style="color:#994466"><b>Example</b></div>
+Assorted: 6 4 8 4
+
+   Xi   Comparisons                     Index
+        6       4       8       4
+    6           <b>></b>       >       <b>></b>       2
+
+    4   >=              >       >       0
+
+    8   <b>>=</b>      <b>>=</b>              <u>></u>       <u>3</u>
+
+    4   >=      >=      >=              ?
+
+
+
+
+</span><span id="slides_is_7" style="display:none;"><div style="color:#994466"><b>Example</b></div>
+Assorted: 6 4 8 4
+
+   Xi   Comparisons                     Index
+        6       4       8       4
+    6           <b>></b>       >       <b>></b>       2
+
+    4   >=              >       >       0
+
+    8   <b>>=</b>      <b>>=</b>              <b>></b>       3
+
+    4   >=      <u>>=</u>      >=              <u>1</u>
+
+
+
+
+</span><span id="slides_is_8" style="display:none;"><div style="color:#994466"><b>Example</b></div>
+Assorted: 6 4 8 4
+
+   Xi   Comparisons                     Index
+        6       4       8       4
+    6           >       >       >       2
+
+    4   >=              >       >       0
+
+    8   >=      >=              >       3
+
+    4   >=      >=      >=              1
+
+
+                                Sorted: <u>4 4 6 8</u>
+
+</span></pre></td>
+    </td></tr></table>
+    <p style="text-align:right">
+    <button type="button" id="slides_is_button" onclick="next('slides_is')">Next step</button>
     </p>
     <p>
-Here is my benchmark.
+It's not algorithmically elegant. But it's deterministic meaning that you can avoid branching completely. On small arrays this should be a noticeable advantage.
+    </p>
+    <h2>
+And now for the challenge
+    </h2>
+    <p>
+Let's compare how different sorting work on triplets — arrays of three elements. You might think that this is a rare task but when you work with 3D graphics it's comes up surprisingly often. Last year alone I did triplet sorting for triangles' indices, for cubic equation roots, and for axis-oriented bounding box dimensions. 
+    </p>
+    <p>
+Tasks like that are rarely bottlenecks but if you can speed up your algorihtm for even 5% with no measurable effort, it's probably worth doing.
+    </p>
+    <p>
+Anyway, here is my benchmark.
     </p>
     <table><tr>
     <td>
@@ -378,6 +583,9 @@ int CheckDataForMissorts() {
     }
     </pre>
     </td></tr></table>
+    <p>
+It generates a lot of triplets, runs a piece of code a lot of times(I deliberately made it as a macro to avoid contextual compiler optimizations with inlined functions), and reports the total running time.
+    </p>
     <p>
 All the pieces of code are compiled with GCC 5.4.0: <i>g++ -std=c++14 -O3</i>, and measured on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz.
     </p>
