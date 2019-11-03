@@ -884,7 +884,7 @@ It's three pairs of jump and compare.
 Round 4.
     </h2>
     <p>
-...
+What if we do std::min std::max instead of conditional swaps?
     </p>
     <table><tr>
     <td id="left_4">
@@ -921,21 +921,149 @@ They are almost the same.
     <button type="button" onclick="reveal(3)" id="button_4">Reveal the truth</button>
     <div id="the_truth_4" style="display:none;">
     <p>
-...
+With GCC, there is virtually no difference.
     </p>
     <table><tr>
     <td>
     <pre id="code_4_1">
-ASM1
+        mov     eax, DWORD PTR [rdi]
+        mov     edx, DWORD PTR [rdi+4]
+        cmp     eax, edx
+        jle     .L2
+        mov     ecx, DWORD PTR [rdi+8]
+        mov     DWORD PTR [rdi], edx
+        mov     DWORD PTR [rdi+4], eax
+        cmp     ecx, eax
+        jge     .L1
+        mov     esi, edx
+        mov     edx, eax
+        mov     eax, esi
+.L6:
+        cmp     eax, ecx
+        mov     DWORD PTR [rdi+4], ecx
+        mov     DWORD PTR [rdi+8], edx
+        jle     .L1
+        mov     DWORD PTR [rdi], ecx
+        mov     DWORD PTR [rdi+4], eax
+        ret
+.L2:
+        mov     ecx, DWORD PTR [rdi+8]
+        cmp     edx, ecx
+        jg      .L6
+.L1:
+        rep ret
     </pre>
     </td>
     <td>
     <pre id="code_4_2">
-ASM2
+        mov     edx, DWORD PTR [rdi+4]
+        mov     eax, DWORD PTR [rdi]
+        cmp     edx, eax
+        jl      .L8
+        mov     esi, eax
+        jle     .L2
+        mov     ecx, DWORD PTR [rdi+8]
+        cmp     ecx, edx
+        jl      .L10
+.L15:
+        mov     eax, edx
+        jle     .L4
+.L5:
+        cmp     eax, esi
+        mov     DWORD PTR [rdi+8], ecx
+        jl      .L12
+        mov     edx, esi
+        jle     .L6
+        mov     DWORD PTR [rdi+4], eax
+        mov     DWORD PTR [rdi], edx
+        ret
+.L12:
+        mov     edx, eax
+.L6:
+        mov     eax, esi
+        mov     DWORD PTR [rdi], edx
+        mov     DWORD PTR [rdi+4], eax
+        ret
+.L8:
+        mov     esi, edx
+.L2:
+        mov     ecx, DWORD PTR [rdi+8]
+        mov     edx, eax
+        cmp     ecx, edx
+        jge     .L15
+.L10:
+        mov     eax, ecx
+.L4:
+        mov     ecx, edx
+        jmp     .L5
     </pre>
     </td></tr></table>
     <p>
-...
+Again, the code is accidentally different but it's essentially the same thing.
+    </p>
+    <p>
+However, with Clang, we do see the difference.
+    </p>
+    <table><tr>
+    <td>
+    <pre id="code_4_1_">
+        mov     ecx, dword ptr [rdi]
+        mov     edx, dword ptr [rdi + 4]
+        cmp     ecx, edx
+        jle     .LBB0_1
+        mov     dword ptr [rdi], edx
+        mov     dword ptr [rdi + 4], ecx
+        mov     eax, edx
+        jmp     .LBB0_3
+.LBB0_1:
+        mov     eax, ecx
+        mov     ecx, edx
+.LBB0_3:
+        mov     edx, dword ptr [rdi + 8]
+        cmp     ecx, edx
+        jle     .LBB0_4
+        mov     dword ptr [rdi + 4], edx
+        mov     dword ptr [rdi + 8], ecx
+        jmp     .LBB0_6
+.LBB0_4:
+        mov     edx, ecx
+.LBB0_6:
+        cmp     eax, edx
+        jle     .LBB0_8
+        mov     dword ptr [rdi], edx
+        mov     dword ptr [rdi + 4], eax
+.LBB0_8:
+        ret
+    </pre>
+    </td>
+    <td>
+    <pre id="code_4_2_">
+        mov     eax, dword ptr [rdi]
+        mov     ecx, dword ptr [rdi + 4]
+        cmp     ecx, eax
+        mov     edx, eax
+        cmovle  edx, ecx
+        cmp     eax, ecx
+        cmovl   eax, ecx
+        mov     ecx, dword ptr [rdi + 8]
+        cmp     ecx, eax
+        mov     esi, eax
+        cmovle  esi, ecx
+        cmp     eax, ecx
+        cmovl   eax, ecx
+        mov     dword ptr [rdi + 8], eax
+        cmp     esi, edx
+        mov     eax, edx
+        cmovle  eax, esi
+        cmp     edx, esi
+        cmovge  esi, edx
+        mov     dword ptr [rdi + 4], esi
+        mov     dword ptr [rdi], eax
+        ret
+    </pre>
+    </td></tr></table>    
+    <p>
+The min/max version is branchless! Clang uses the conditional moves instead and this makes the code on the right five times faster on the very same CPU.
     </p>
     </div>
     <script language="JavaScript">
@@ -1165,7 +1293,11 @@ Conclusion
     document.getElementById("code_2_1").innerHTML = colorized(document.getElementById("code_2_1").innerHTML);
     document.getElementById("code_2_2").innerHTML = colorized(document.getElementById("code_2_2").innerHTML);
     document.getElementById("code_3_1").innerHTML = colorized(document.getElementById("code_3_1").innerHTML);
-    document.getElementById("code_3_2").innerHTML = colorized(document.getElementById("code_3_2").innerHTML);    
+    document.getElementById("code_3_2").innerHTML = colorized(document.getElementById("code_3_2").innerHTML);
+    document.getElementById("code_4_1").innerHTML = colorized(document.getElementById("code_4_1").innerHTML);
+    document.getElementById("code_4_2").innerHTML = colorized(document.getElementById("code_4_2").innerHTML);  
+    document.getElementById("code_4_1_").innerHTML = colorized(document.getElementById("code_4_1_").innerHTML);
+    document.getElementById("code_4_2_").innerHTML = colorized(document.getElementById("code_4_2_").innerHTML);  
     </script>
 
 
