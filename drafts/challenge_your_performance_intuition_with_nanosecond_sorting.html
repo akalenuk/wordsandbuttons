@@ -361,13 +361,13 @@ function colorized(text) {
 Challenge your performance intuition with nanosecond sorting
     </h1>
     <p>
-In physical world, nanotechnology predictably brings us surprises. Being structured on nano-scale, the most common materials, such as carbon, iron or copper, gain new unforseen properties. What we know about them in the macro-scale world do not apply then.
+In physical world, nanotechnology predictably brings us surprises. Being structured on nano-scale, the most common materials, such as carbon, iron or copper, gain new unforseen properties. What we know about them on the macro-scale do not apply anymore.
     </p>
     <p>
-Surprisingly, a very similar effect happens in computation. If the operation you want to speed-up already runs in a few nano-seconds, your reasoning about algorithmic complexity and operations count probably don't apply.
+Surprisingly, a very similar effect happens in computation. If the operation you want to speed-up already runs in a few nano-seconds, your reasoning about algorithmic complexity probably wouldn't apply.
     </p>
     <p>
-The most effective algorithms become mediocre while the absolutely useless come from the oblivion to shine and amaze. One of these algorithms is the index sort. It has unconditional <i>O(n<sup>2</sup>)</i> complexity and this makes it probably the least performant sorting algorithm you never heard about. It's useless on the macro-scale. But on the nano-scale it excells.
+The most effective algorithms become mediocre while the absolutely useless rise from the oblivion to shine and amaze. One of these algorithms is the index sort. It has unconditional <i>O(n<sup>2</sup>)</i> complexity and this makes it probably the least performant sorting algorithm you never heard about. It's useless on the macro-scale. But on the nano-scale it excells.
     </p>
     <h2>
 Index sort
@@ -534,7 +534,7 @@ It's not algorithmically elegant. But it's deterministic meaning that you can av
 And now for the challenge
     </h2>
     <p>
-Let's compare how different sorting work on triplets — arrays of three elements. You might think that this is a rare task but when you work with 3D graphics it's comes up surprisingly often. Last year alone I did triplet sorting for triangles' indices, for cubic equation roots, and for axis-oriented bounding box dimensions. 
+Let's compare how different sorting works on triplets — arrays of three elements. You might think that this is a rare task but when you work with 3D graphics it's comes up surprisingly often. Last year alone I did triplet sorting for triangles' indices, for cubic equation roots, and for axis-oriented bounding box' dimensions. 
     </p>
     <p>
 Tasks like that are rarely bottlenecks but if you can speed up your algorihtm for even 5% with no measurable effort, it's probably worth doing.
@@ -584,7 +584,7 @@ int CheckDataForMissorts() {
     </pre>
     </td></tr></table>
     <p>
-It generates a lot of triplets, runs a piece of code a lot of times(I deliberately made it as a macro to avoid contextual compiler optimizations with inlined functions), and reports the total running time.
+It generates a lot of triplets, runs a piece of code a lot of times, and reports the total running time.
     </p>
     <p>
 All the pieces of code are compiled with GCC 5.4.0: <i>g++ -std=c++14 -O3</i>, and measured on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz.
@@ -622,10 +622,13 @@ They are almost the same.
     <button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
     <div id="the_truth_1" style="display:none;">
     <p>
-Index sort is five times faster in this context. But in different context it might not work all that well. For instance, on ARMv7 (v7l) it's only 2 times faster. And with clang (Debian clang 3.5.0) it's even less drastic. 
+Index sort is five times faster in this context. 
     </p>
     <p>
-Clang's sort seems to be slightly better on small arrays generally. On testing Intel i7 it's also 20% faster than the GCC version. Still, not enough to make it interesting so let's move along with index sort.
+But in different context it might not work all that well. For instance, on ARMv7 (v7l) it's only 2 times faster. And with clang (Debian clang 3.5.0) it's even less drastic. 
+    </p>
+    <p>
+Clang's sort seems to be slightly better on small arrays generally. On my testing Intel i7 it's also 20% faster than the GCC version. Still, not enough to make it interesting so let's move along with the index sort.
     </p>
     </div>
     <script language="JavaScript">
@@ -636,7 +639,7 @@ Clang's sort seems to be slightly better on small arrays generally. On testing I
 Round 2.
     </h2>
     <p>
-Sorting triplets is fun but can we generalise it with no overhead?
+Sorting triplets is fun but can we generalise it with no additional overhead?
     </p>
     <table><tr>
     <td id="left_2">
@@ -677,7 +680,7 @@ They are almost the same.
 Yes, we can. And even with... negative overhead?
     </p>
     <p>
-<a href="https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(j:1,lang:c%2B%2B,source:'%23include+%3Carray%3E%0A%0Atemplate+%3Clong+unsigned+int+N%3E+%0Avoid+index_sort(std::array%3Cint,+N%3E%26+t)+%7B%0A++++std::array%3Cint,+N%3E+a+%3D+t%3B%0A++++for(auto+i+%3D+0u%3B+i+%3C+N%3B+%2B%2Bi)%0A++++%7B%0A++++++++auto+k+%3D+0u%3B%0A++++++++for(auto+j+%3D+0u%3B+j+%3C+N%3B+%2B%2Bj)+%0A++++++++%7B%0A++++++++++++if(j+%3E+i)%0A++++++++++++++++k+%2B%3D+int(a%5Bi%5D+%3E+a%5Bj%5D)%3B%0A++++++++++++else+if(j+%3C+i)%0A++++++++++++++++k+%2B%3D+int(a%5Bi%5D+%3E%3D+a%5Bj%5D)%3B%0A++++++++%7D%0A++++++++t%5Bk%5D+%3D+a%5Bi%5D%3B%0A++++%7D%0A%7D%0A%0Avoid+sort(std::array%3Cint,+3%3E%26+t)+%7B%0A++++index_sort(t)%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:33.333333333333336,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:g540,filters:(b:'0',binary:'1',commentOnly:'0',demangle:'0',directives:'0',execute:'1',intel:'0',libraryCode:'1',trim:'1'),lang:c%2B%2B,libs:!(),options:'-O3+--std%3Dc%2B%2B14',source:1),l:'5',n:'0',o:'x86-64+gcc+5.4+(Editor+%231,+Compiler+%231)+C%2B%2B',t:'0')),k:48.02304268133018,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compiler:1,editor:1,wrap:'1'),l:'5',n:'0',o:'%231+with+x86-64+gcc+5.4',t:'0')),k:18.643623985336475,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4">godbolt</a> doesn't show conceptual difference. 
+<a href="https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(j:1,lang:c%2B%2B,source:'%23include+%3Carray%3E%0A%0Atemplate+%3Clong+unsigned+int+N%3E+%0Avoid+index_sort(std::array%3Cint,+N%3E%26+t)+%7B%0A++++std::array%3Cint,+N%3E+a+%3D+t%3B%0A++++for(auto+i+%3D+0u%3B+i+%3C+N%3B+%2B%2Bi)%0A++++%7B%0A++++++++auto+k+%3D+0u%3B%0A++++++++for(auto+j+%3D+0u%3B+j+%3C+N%3B+%2B%2Bj)+%0A++++++++%7B%0A++++++++++++if(j+%3E+i)%0A++++++++++++++++k+%2B%3D+int(a%5Bi%5D+%3E+a%5Bj%5D)%3B%0A++++++++++++else+if(j+%3C+i)%0A++++++++++++++++k+%2B%3D+int(a%5Bi%5D+%3E%3D+a%5Bj%5D)%3B%0A++++++++%7D%0A++++++++t%5Bk%5D+%3D+a%5Bi%5D%3B%0A++++%7D%0A%7D%0A%0Avoid+sort(std::array%3Cint,+3%3E%26+t)+%7B%0A++++index_sort(t)%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:33.333333333333336,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:g540,filters:(b:'0',binary:'1',commentOnly:'0',demangle:'0',directives:'0',execute:'1',intel:'0',libraryCode:'1',trim:'1'),lang:c%2B%2B,libs:!(),options:'-O3+--std%3Dc%2B%2B14',source:1),l:'5',n:'0',o:'x86-64+gcc+5.4+(Editor+%231,+Compiler+%231)+C%2B%2B',t:'0')),k:48.02304268133018,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compiler:1,editor:1,wrap:'1'),l:'5',n:'0',o:'%231+with+x86-64+gcc+5.4',t:'0')),k:18.643623985336475,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4">godbolt</a> doesn't show any conceptual advantage. 
     </p>
     <table><tr>
     <td>
@@ -749,7 +752,7 @@ Yes, we can. And even with... negative overhead?
     </pre>
     </td></tr></table>
     <p>
-The code is not drastically different and it has no reason to be. My theory is that this gain is accidental. However, it reprocudes well across compilers and CPUs.
+The code is not drastically different and it has no reason to be. My theory is that this gain is accidental. The most surprisingly, it reprocudes well across compilers and CPUs.
     </p>
     </div>
     <script language="JavaScript">
@@ -802,10 +805,10 @@ They are almost the same.
     <button type="button" onclick="reveal(2)" id="button_3">Reveal the truth</button>
     <div id="the_truth_3" style="display:none;">
     <p>
-They still work faster than std::sort though. However, that's on modern Intel. On ARMv7 branching doesn't make all that difference and the measurements are almost identical.
+They still work faster than std::sort but not as fast as the index sort. However, that's on modern Intel. On ARMv7 branching doesn't make all that difference and the measurements are almost identical.
     </p>
     <p>
-The code is pretty streightforward.
+The code is pretty straightforward.
     </p>
     <table><tr>
     <td>
@@ -884,7 +887,7 @@ It's three pairs of jump and compare.
 Round 4.
     </h2>
     <p>
-What if we do std::min std::max instead of conditional swaps?
+What if we do std::min/std::max instead of conditional swaps?
     </p>
     <table><tr>
     <td id="left_4">
@@ -1063,7 +1066,7 @@ However, with Clang the difference is obvious.
     </pre>
     </td></tr></table>    
     <p>
-The min/max version is branchless! Clang uses the conditional moves instead and this makes the code on the right five times faster on the very same CPU.
+The min/max version is branchless! Clang uses the conditional moves instead of conditional jumps and this makes the code on the right five times faster on the very same CPU.
     </p>
     </div>
     <script language="JavaScript">
@@ -1241,7 +1244,10 @@ Since we're already knee-deep into limitations, why don't we try a truly integer
 Round 6.
     </h2>
     <p>
-I'll be honest, I stole this from somewhere in the Internet and I don't know how exactly it works. Apparently, it works just fine on a half-range just like the previous version. But would it be faster?
+I'll be honest, I stole this from somewhere on the Internet and I don't know how exactly this works. Apparently, it works just fine on an integer half-range so it's also limited. 
+    </p>
+    <p>
+But would it be faster?
     </p>
     <table><tr>
     <td id="left_6">
@@ -1378,7 +1384,7 @@ It is even fater and it generates even better code.
     </pre>
     </td></tr></table>
     <p>
-Ii is GCC-specific though. On Clang, the better code comes from min/max swaps. 
+Yes. It is GCC-specific though. On Clang, the best code still comes from min/max swaps. 
     </p>
     </div>
     <script language="JavaScript">
@@ -1390,7 +1396,7 @@ Ii is GCC-specific though. On Clang, the better code comes from min/max swaps.
 Bonus round.
     </h2>
     <p>
-Since we know that the algorithm is supposed to work with small arrays, maybe we can help the compiler to pick the type better. I was always curious to try uint_fast8_t somewhere.
+Since we know that the algorithm is supposed to work with small arrays, maybe we can help the compiler to pick the types better. I was always curious to try uint_fast8_t somewhere.
     </p>
     <table><tr>
     <td id="left_7">
@@ -1503,7 +1509,7 @@ There is no meaningful difference.
     </pre>
     </td></tr></table>
     <p>
-The code is accidentally different but the difference is too small. This is consistent across compilers and CPUs. 
+The code is accidentally different but the difference is too small. This is consistent across compilers and CPUs. No magics gains here.
     </p>
     </div>
     <script language="JavaScript">
@@ -1523,7 +1529,7 @@ You scored <span id="score"></span> pixels of error. As a reference, if you leav
 Conclusion
     </h2>
     <p>
-You can always win some performance by using clever tricks. Something type-specific or compiler-specific or processor-specific. However in nano-world, the simplest solution often works the the best.
+You can always win some performance by using clever tricks. Something type-specific or compiler-specific or processor-specific. However in nano-world, the simplest solution often works the best.
     </p>
     </div>
     <script language="JavaScript">
