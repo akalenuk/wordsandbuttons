@@ -24,6 +24,7 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 - [Interactive introduction to&nbsp;iterative algorithms](https://wordsandbuttons.online/interactive_introduction_to_iterative_algorithms.html) 
 
 ## Performance
+- [Challenge your performance intuition with nanosecond sorting](https://wordsandbuttons.online/challenge_your_performance_intuition_with_nanosecond_sorting.html) 
 - [Challenge your performance intuition with C++ operators](https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_operators.html) , and the follow-up: [Using logical operations for logical operators is good](https://wordsandbuttons.online/using_logical_operators_for_logical_operations_is_good.html)
 - [Cheap trick to speed up recursion in C++](https://wordsandbuttons.online/cheap_trick_to_speed_up_recursion_in_cpp.html) 
 - [Outperforming everything with anything. Python? Sure, why&nbsp;not?](https://wordsandbuttons.online/outperforming_everything_with_anything.html) 100 lines of Python that generate LLVM code outperforming C and C++ solutions.
