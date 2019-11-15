@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Cubes test</title>
+    <title>Metapoles</title>
     <meta name="keywords" content="iterative,algorithms,guide,tutorial,learning">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
     <style>
@@ -107,10 +107,10 @@ var h = 640.0;
 
 // algorithm
 var grid_size = 32.0;
-var distance = 32.0 * 2;
+var distance = 32.0;
 var gradient_step = 1.0;
 
-var lines = [];
+var lines = [[[100, 100], [500, 500]], [[150, 450], [550, 200]]];
 
 // animation, not essencial for the algorithm
 var animation_d = distance;
@@ -131,7 +131,10 @@ function dot(a1, a2, b1, b2) {
 }
 
 function t_to_segment(lp1x, lp1y, lp2x, lp2y, px, py) {
-    return dot(px - lp1x, py - lp1y, lp2x - lp1x, lp2y - lp1y) / dot(lp2x - lp1x, lp2y - lp1y, lp2x - lp1x, lp2y - lp1y);
+    const t = dot(px - lp1x, py - lp1y, lp2x - lp1x, lp2y - lp1y) / dot(lp2x - lp1x, lp2y - lp1y, lp2x - lp1x, lp2y - lp1y);
+    if(t < 0.) return 0.;
+    if(t > 1.) return 1.;
+    return t;
 }
 
 function t_to_line_segment(line, px, py) {
@@ -183,51 +186,39 @@ function eval_d_f() {
     draw_canvas();
 }
 
-function put_d_f(d_f_code_string){
-    var df_code_textarea = document.getElementById("d_f_code");
-    df_code_textarea.value = d_f_code_string;
+function put_metapole_d_f() {
+    var code = `
+function smooth() {
+    return Math.sqrt(3);
 }
 
-function put_simple_lines_d_f() {
-    var code = `function d_f(x, y) {
-    var d = Number.MAX_VALUE; // everything is out
+function qi(x) {
+    const a = distance * smooth();
+    if(x == 0) return Number.MAX_VALUE;
+    if(x < 0) return qi(-x);
+    if(x > a) return 0.;
+    return (a-x)*(a-x)/x;
+}
+
+function qii(x) {
+  const a = distance / smooth();
+  if(x == 0) return a;
+  if(x < 0) return qii(-x);
+  return (a+2*x) / 2 + Math.sqrt(a*(a + 4 *x)) / 2;
+  }
+
+function d_f(x, y) {
+    var min_d = Number.MAX_VALUE;
+    if(lines.length == 0)
+        return min_d;
+    var d = 0.;
     for (var i = 0; i < lines.length; ++i) {
         var di = distance_to_line_segment(lines[i], x, y);
-        if (di < d)
-            d = di;
+        d += qi(di);
     }
-    return d;
-}`;
-    put_d_f(code);
-    eval_d_f();
+    return qii(qi(distance)) - qii(d);
 }
-
-function put_hollow_lines_d_f() {
-    var code = `function d_f(x, y) {
-    radius = 90;
-    var d = Number.MAX_VALUE; // everything is out
-    for (var i = 0; i < lines.length; ++i) {
-        var di = distance_to_line_segment(lines[i], x, y);
-        if (di < d)
-            d = di;
-    }
-    if(d < radius)
-        return radius - d;
-    return d - radius;
-}`;
-    put_d_f(code);
-    eval_d_f();
-}
-
-function put_metaball_d_f() {
-    var code = `function d_f(x, y) {
-    var d = 0;
-    for (var i = 0; i < lines.length; ++i) {
-        //ignore first points d += 1/Math.sqrt((lines[i][0][0]-x)*(lines[i][0][0]-x) + (lines[i][0][1]-y)*(lines[i][0][1]-y));
-        d += 1/Math.sqrt((lines[i][1][0]-x)*(lines[i][1][0]-x) + (lines[i][1][1]-y)*(lines[i][1][1]-y));
-    }
-    return 1/d;
-}`;
+`;
     
     put_d_f(code);
     eval_d_f();
@@ -356,7 +347,7 @@ function draw_canvas(){
         for (var i = 0; i <= h; i += 2.0)
             for (var j = 0; j <= w; j += 2.0) {
                 d = d_f(j, i);
-                if (d <= distance) {
+                if (d <= 0) {
                     distance_field.data[(i*w + j) * 4 + 0] = 0x55;
                     distance_field.data[(i*w + j) * 4 + 1] = 0x55;
                     distance_field.data[(i*w + j) * 4 + 2] = 0xAA;
@@ -386,9 +377,11 @@ function draw_canvas(){
     if(document.getElementById("draw_distances").checked && lines.length > 0) {
         context.font = "16px Arial";
         context.fillStyle = "#000000";
-        for(var i = 0; i <= h - grid_size; i += grid_size) {
-            for(var j = 0; j <= w - grid_size; j += grid_size) {
-                context.fillText(Math.round(d_f(j, i),1).toString(), j+5, i-5);
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        for(var i = grid_size / 2 ; i <= h - grid_size / 2; i += grid_size) {
+            for(var j = grid_size / 2; j <= w - grid_size / 2; j += grid_size) {
+                context.fillText(Math.round(d_f(j, i),1).toString(), j, i);
             }
         }
     }
@@ -505,21 +498,18 @@ tick(); // let it tick always
     <input type="text" id="grid_size_input" value="32" onchange="change_grid_size();">
     <button type="button" onclick="inc('grid_size')">+</button>
     <br>
-    Distance:
-    <button type="button" onclick="alter_animation_d(-grid_size)">&lt;&lt;</button>
+    Thickness:
+    <button type="button" onclick="alter_animation_d(-grid_size/2)">&lt;&lt;</button>
     <button type="button" onclick="dec('distance')">-</button>
-    <input type="text" id="distance_input" value="64" onchange="change_distance();">
+    <input type="text" id="distance_input" value="48" onchange="change_distance();">
     <button type="button" onclick="inc('distance')">+</button>
-    <button type="button" onclick="alter_animation_d(+grid_size)">&gt;&gt;</button>
+    <button type="button" onclick="alter_animation_d(+grid_size/2)">&gt;&gt;</button>
     <br>
     <input type="checkbox" id="draw_distances"onclick="draw_canvas();"/><label for="draw_distances">Show Distance</label>
     <input type="checkbox" id="draw_expected_shape" checked onclick="draw_canvas();"/><label for="draw_expected_shape">Show Expected Shape</label>
     <input type="checkbox" id="draw_grid" checked onclick="draw_canvas();"/><label for="draw_grid">Show Grid</label>
     </form>
     <canvas id="canvas" width=640 height=640></canvas>
-    <script language="JavaScript">
-    init_canvas();
-    </script>
     <div style="text-align:right; width:640px; padding-bottom:12pt;">
         <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
         <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
@@ -527,12 +517,14 @@ tick(); // let it tick always
     <div style="text-align:right; width:640px">
     <textarea id="d_f_code" rows="20" style="width:100%">
     </textarea><br>
-    <button type="button" style="width: 108pt;" onclick="put_simple_lines_d_f()">Just Lines</button>
-    <button type="button" style="width: 108pt;" onclick="put_hollow_lines_d_f()">Hollow Lines</button>
-    <button type="button" style="width: 108pt;" onclick="put_metaball_d_f()">MetaBalls</button>
-    <button type="button" style="width: 108pt;" onclick="eval_d_f()">Compile</button>
+    <button type="button" style="width: 168pt;" onclick="eval_d_f()">Reevaluate</button>
     </div>
-    </center>
-    
+    <script language="JavaScript">
+    init_canvas();
+    change_distance();
+    put_metapole_d_f();
+    eval_d_f();
+    </script>
+    </center>   
   </body>
 </html>
