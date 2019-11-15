@@ -35,7 +35,7 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 ## Programming languages
 - [Fortran is still a thing](https://wordsandbuttons.online/fortran_is_still_a_thing.html) 
 - [Why Erlang is among the few true computer languages](https://wordsandbuttons.online/why_erlang_is_among_the_few_true_computer_languages.html) 
-- [Logic programming in C++](https://wordsandbuttons.online/logic_programming_in_cpp.html) 
+- [Logic programming in C++](https://wordsandbuttons.online/logic_programming_in_cpp.html) There is a hidden Prolog in every C++ compiler.
 - [APL deserves its renaissance too](https://wordsandbuttons.online/apl_deserves_its_renaissance_too.html) A brief introduction to APL explaining the meaning of life←{↑1 ⍵∨.∧3 4= /,¯1 0 1∘.⊖¯1 0 1∘.⌽⊂⍵}.
 - [How much math can you do in 10 lines of Python?](https://wordsandbuttons.online/how_much_math_can_you_do_in_10_lines_of_python.html) Several examples of Python features that make code ultra-concise.
 - [You don't have to learn assembly to read disassembly](https://wordsandbuttons.online/you_dont_have_to_learn_assembly_to_read_disassembly.html) Three examples of how the deduction alone is enough to get some useful information from the code.
