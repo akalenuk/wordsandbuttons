@@ -72,6 +72,49 @@ u {
 }
     </style>
     <script language="JavaScript">
+
+const w = 640;
+const h = 640;
+const scale = 4;
+var a = 0.;
+
+function xy_to_screen(x, y) {
+    return [w / 2 + (x * Math.sin(a) / scale) * w / 2 + (y * Math.cos(a) / scale) * h / 2
+           ,h / 2 - (x * Math.cos(a) / scale) * w / 2 - (y * Math.sin(a) / scale) * h / 2];
+}
+
+function draw_arrow(context, x1, y1, x2, y2, color) {
+    var d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+    context.beginPath();
+    context.moveTo(x1, y1);
+    context.lineTo(x2, y2);
+    context.moveTo(x2 - (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d + (x2 - x1) * 6 / d);
+    context.lineTo(x2, y2);
+    context.moveTo(x2 + (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d - (x2 - x1) * 6 / d);
+    context.lineTo(x2, y2);
+
+
+    context.strokeStyle = color;
+    context.stroke();
+    context.closePath();
+}
+    
+function draw_sine() {
+    var canvas = document.getElementById("sine");
+    var context = canvas.getContext("2d");
+    context.font = "16px sans-serif";
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    
+    // axes
+    const left =    xy_to_screen(-scale, 0);
+    const right =   xy_to_screen(+scale, 0);
+    const up =      xy_to_screen(0, +scale);
+    const down = xy_to_screen(0, -scale);
+    draw_arrow(context, left[0], left[1], right[0], right[1], "#000");
+    draw_arrow(context, down[0], down[1], up[0], up[1], "#000");
+}
     </script>
   </head>
   <body>
@@ -82,12 +125,16 @@ Sine and cosine
     <p>
 ...
     </p>
-
+    <canvas id="sine" width=640 height=640></canvas>
 
     <p>
 ...
     </p>
-
+    
+    <script language="JavaScript">
+    draw_sine()
+    </script>
+    
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
     <tr>
