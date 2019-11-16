@@ -77,19 +77,6 @@ form {
     background-color: #eeee99;
 }
 
-.hpok {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 16pt;
-    text-align: left;
-    width: 505pt;
-    background-color: #99ee99;
-    display: none;
-}
-
 .score {
     font-size: 48pt;
     padding-top: 12pt;
@@ -220,13 +207,7 @@ function linear_basis(x1, y1, x2, y2) {
         a * x2 + b - y2
         ], (a, b)))
     */
-    const ab = [(y1 - y2)/(x1 - x2), (x1*y2 - x2*y1)/(x1 - x2)];
-    // constant degeneration check
-    if(Math.abs(ab[0]) < 1e-2) {
-        document.getElementById('hpok5').style.display = "block";
-        count_score();
-    }
-    return ab
+    return ab = [(y1 - y2)/(x1 - x2), (x1*y2 - x2*y1)/(x1 - x2)];
 }
 
 // fits linear functon to go trough the point (retaining the slope)
@@ -246,17 +227,11 @@ function quadratic_basis(x1, y1, x2, y2, x3, y3) {
         a * x3 * x3 + b * x3 + c - y3,
         ], (a, b, c)))
     */
-    const abc = [
+    return abc = [
         (y1*(x2 - x3) - y2*(x1 - x3) + y3*(x1 - x2))/(x1*x1*x2 - x1*x1*x3 - x1*x2*x2 + x1*x3*x3 + x2*x2*x3 - x2*x3*x3),
         (-y1*(x2*x2 - x3*x3) + y2*(x1*x1 - x3*x3) - y3*(x1*x1 - x2*x2))/(x1*x1*x2 - x1*x1*x3 - x1*x2*x2 + x1*x3*x3 + x2*x2*x3 - x2*x3*x3),
         (x1*x2*y3*(x1 - x2) - x1*x3*y2*(x1 - x3) + x2*x3*y1*(x2 - x3))/(x1*x1*x2 - x1*x1*x3 - x1*x2*x2 + x1*x3*x3 + x2*x2*x3 - x2*x3*x3)
     ];
-    // constant degeneration check
-    if(Math.abs(abc[0]) < 1e-2 && Math.abs(abc[1]) < 1e-2) {
-        document.getElementById('hpok5').style.display = "block";
-        count_score();
-    }
-    return abc;
 }
 
 var x2s1 = [128*2, 128*4];
@@ -420,12 +395,6 @@ function recalculate_basis2d() {
         basis2d[2] = function(x) {return b2[0]*x*x + b2[1]*x + b2[2];};
         basis2d[3] = function(x) {return b2[0]*x*x + b2[1]*x + b2[2];};
     }
-    // x-order post-check
-    for(var i = 1; i < x2s2.length; ++i)
-        if(x2s2[i-1] >= x2s2[i]) {
-            document.getElementById('hpok4').style.display = "block";
-            count_score();
-        }
 }
 
 function init_canvas2d2(){
@@ -865,8 +834,6 @@ function compute_edges_and_z_field() {
                 for(var j = 0; j < outer_edges.length; ++j) {
                     if(in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]])) {
                         if(z != Z_NOT_DETERMINED && z != Z_NOT_APLICABLE) {
-                            document.getElementById('hpok6').style.display = "block";
-                            count_score();
                             break
                         }
                         z = z_in_edge_by_basis(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], basis_3d[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]], basis_3d[outer_edges[j][1]]);
@@ -900,8 +867,6 @@ function compute_edges_and_z_field() {
                 for(var j = 0; j < outer_edges.length; ++j) {
                     if(in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]])) {
                         if(z != Z_NOT_DETERMINED && z != Z_NOT_APLICABLE) {
-                            document.getElementById('hpok6').style.display = "block";
-                            count_score();
                             break
                         }
                         z = z_in_edge(x, y, x3s[outer_edges[j][0]], y3s[outer_edges[j][0]], z3s[outer_edges[j][0]], x3s[outer_edges[j][1]], y3s[outer_edges[j][1]], z3s[outer_edges[j][1]]);
@@ -980,17 +945,6 @@ function dec(counter_name) {
 function change_weight2d1() {
     weight2d1 = document.getElementById('weight2d1').value;
     draw_canvas2d1();
-    // hpoks
-    if(weight2d1 == 0.) {
-        document.getElementById('hpok1').style.display = "block";
-        count_score();
-    } else if(weight2d1 < 0.) {
-        document.getElementById('hpok2').style.display = "block";
-        count_score();
-    } else if(weight2d1 != Math.floor(weight2d1)) {
-        document.getElementById('hpok3').style.display = "block";
-        count_score();
-    }
 }
 
 function change_weight2d2() {
@@ -1002,29 +956,6 @@ function change_weight3d() {
     weight3d = document.getElementById('weight3d').value;
     compute_edges_and_z_field();
     draw_canvas3d();
-}
-
-function count_score() {
-    const score 
-      = (document.getElementById('hpok1').style.display == "block" ? 1 : 0)
-      + (document.getElementById('hpok2').style.display == "block" ? 1 : 0)
-      + (document.getElementById('hpok3').style.display == "block" ? 1 : 0)
-      + (document.getElementById('hpok4').style.display == "block" ? 1 : 0)
-      + (document.getElementById('hpok5').style.display == "block" ? 1 : 0)
-      + (document.getElementById('hpok6').style.display == "block" ? 1 : 0);
-   if(score == 1) {
-       document.getElementById('score').innerHTML = "<p class='score'>1 / 6</p><p>There are 6 hidden pieces of knowledge. Find them all to win!</p>";
-   } else if(score == 2) {
-       document.getElementById('score').innerHTML = "<p class='score'>2/6</p><p>There are 6 hidden pieces of knowledge. Find them all to win!</p>";
-   } else if(score == 3) {
-       document.getElementById('score').innerHTML = "<p class='score'>3/6</p><p>There are 6 hidden pieces of knowledge. Find them all to win!</p>";
-   } else if(score == 4) {
-       document.getElementById('score').innerHTML = "<p class='score'>4/6</p><p>There are 6 hidden pieces of knowledge. Find them all to win!</p>";
-   } else if(score == 5) {
-       document.getElementById('score').innerHTML = "<p class='score'>5/6</p><p>There are 6 hidden pieces of knowledge. You've almost found them all!</p>";
-   } else if(score == 6) {
-       document.getElementById('score').innerHTML = "<p class='score'>6/6</p><p>Congratulations! You won the hidden knowledge game!</p>";
-   }
 }
     </script>
   </head>
@@ -1100,16 +1031,7 @@ Also, the function outside the points can be defined as the first point on the l
     </p>
     <p>
 The n-coefficient in the weight function affects the way the function looks. You can experiment with it on the following interactive plot.
-    </p>
-    <p class="hpok" id="hpok1">
-<b>Hidden piece of knowledge #1.</b> The function becomes discontinuous when the weight coefficient equals zero.
-    </p>
-    <p class="hpok" id="hpok2">
-<b>Hidden piece of knowledge #2.</b> Negative values for the weight coefficient are useless for interpolation.
-    </p>
-    <p class="hpok" id="hpok3">
-<b>Hidden piece of knowledge #3.</b> But non-integer values for the weight coefficient are useful! They give you more freedom over the function with no additional changes in the algorithm. Cudos for finding that!
-    </p>     
+    </p>  
     <canvas id="canvas2d1" width=640 height=640></canvas>
     <form>
     Do:
@@ -1123,6 +1045,9 @@ The n-coefficient in the weight function affects the way the function looks. You
     <input type="text" style="width: 32pt;" id="weight2d1" value="2" oninput="change_weight2d1();">
     <button type="button" onclick="inc('weight2d1')">+</button>
     </form>
+    <p>
+When the weight coefficient equals zero, the function becomes discontinuous. Negative coefficients are useless for interpolation. However, fractional coefficients may be useful. They bring more control over the function with no additional changes in the algorithm.
+    </p>
     <p>
 Mathematically, the inverse weights are simple. But there is no such thing as a limit in floating-point computation, there is no infinitely small proximity. There is no grace, only digits and errors. You have to define the interpolating function explicitly not only in <i>x<sub>i</sub></i> points but in some measurable proximity too.
     </p>
@@ -1182,13 +1107,7 @@ The magic of inverse weights is in their indifference. They can work with any ba
     <p>
 On this interactive plot, you can see how different types of basis functions work together in different configurations.
     </p>
-    <p class="hpok" id="hpok4">
-<b>Hidden piece of knowledge #4.</b> In order for this interpolation to work, the points should be x-ordered.
-    </p>
     <canvas id="canvas2d2" width=640 height=640></canvas>
-    <p class="hpok" id="hpok5">
-<b>Hidden piece of knowledge #5.</b> Polynomial basis functions may reduce themselves into constants automatically if the input suggests that.
-    </p>       
     <form>
     <span style="line-height: 1.42;">
     Please select one of the following configurations:
@@ -1290,14 +1209,14 @@ The same goes to (n-2)-simplices, (n-3) or (n-k) ones. Let's devise an algorithm
 <li>If a point is in a triangle, then the <i>F<sub>2</sub></i> applies; </li>
 <li>if a point has a projection on the complex border line segments, then the <i>F<sub>1</sub></i> works instead; </li>
 <li>if a point doesn't have the projection, then the basis function of the nearest point <i>f<sub>i</sub></i> is the extrapolation function.</li>
-    </ol>    
+    </ol>
     <p>
-Here is an interactive plot that has 6 triangles combined in a complex. Every point has its own shade of gray assigned, and the rest of the picture is the result of interpolation and extrapolation. The points are moveable, but the relations between triangles are hard-coded.
-    </p>
-    
-    <p class="hpok" id="hpok6">
-<b>Hidden piece of knowledge #6.</b> Ah! Yes, this algorithm doesn't work with concave shapes. Technically, we can turn any concave simplicial complex into a convex one by adding more simplices but that makes the algorithm more complex.
+Well, this particular algorithm doesn't work with concave shapes. Technically, we can still turn any concave simplicial complex into a convex one by adding more simplices. That's just more coding.
     </p>    
+    <p>
+Here is an interactive plot. It has 6 triangles combined in a complex. Every point carries its own shade of gray, and the rest of the picture is the result of simplicial weight interpolation and extrapolation. The points are moveable, but the relations between triangles are hard-coded.
+    </p>
+
     <canvas id="canvas3d" width=640 height=640></canvas>
     <form>
 Do:
@@ -1316,23 +1235,14 @@ And the weight coefficient:
     <input type="text" style="width: 32pt;" id="weight3d" value="2" oninput="change_weight3d();">
     <button type="button" onclick="inc('weight3d')">+</button>
     </form>
-
     <p>
 And that's how we got from a pair of points to Simplicial Weight Interpolation and Extrapolation. Just as promised in the title.
     </p>
     <h2>
-The hidden pieces of knowledge score
-    </h2>
-    <div id="score">
-    <p>
-If you just scrolled the page to the bottom, you might have not noticed that it's also a game. There are hidden pieces of knowledge kept in the interactive plots. Find them all to win.
-    </p>
-    </div>
-    <h2>
 P. S.
     </h2>
     <p>
-The code for all the algorithms whown on plots on GitHub:
+The code for all the plots on GitHub:
     </p>
     <ul>
     <li><a href="https://github.com/akalenuk/wordsandbuttons/blob/a65c9fb1208c18bb04d71e56c71c3eb8d6c2f594/pages/swine_simplicial_weight_interpolation_and_extrapolation.html#L178">inverse weights interpolation</a>;</li>
