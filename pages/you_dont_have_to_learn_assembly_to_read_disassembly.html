@@ -98,6 +98,45 @@ function show(n){
     document.getElementById("shown_" + n).style.display = "none";
     document.getElementById("hidden_" + n).style.display = "inline";
 }
+
+function colorized(text) {
+    const separators = ['\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')'];
+    const comments = [['/*', '*/'], ['#', '\n']];
+
+    function painted_in(line, color) {
+        return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+    }
+
+    function colorized(token) {
+        var code_sum = 0;
+        for(var i = 0; i < token.length; ++i)
+            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+        var zero_channel = code_sum % 3;
+        var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
+            + (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
+            + (zero_channel == 2 ? '0' : '');
+        return painted_in(token, color);
+    }
+
+    function separated(line, i) {
+        if(i == separators.length)
+            return colorized(line);
+        return line.split(separators[i]).map(function(subline) {
+            return separated(subline, i + 1);}).join(separators[i]);
+    }
+
+    function uncommented(line, i) {
+        if(i == comments.length)
+            return separated(line, 0);
+        var chunks = line.split(comments[i][0]);
+        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+            var in_out_comment = chunk.split(comments[i][1]);
+            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "777")
+                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+    }
+
+    return uncommented(text, 0);
+}
     </script>
   </head>
   <body>
@@ -142,7 +181,7 @@ Now look at two possible disassemblies for this source code and decide what vari
     </p>
     <table><tr>
     <td>
-    <pre>
+    <pre id="code_1_1">
 BITS_IN_BYTE:
   .long 8
 main:
@@ -152,7 +191,7 @@ main:
   ret</pre>
     </td>
     <td>
-    <pre>
+    <pre id="code_1_2">
 main:
   mov eax, 32
   ret</pre>
@@ -217,14 +256,14 @@ Now look at these two disassembly variants below and choose the one where the fu
     </p>
     <table><tr>
     <td>
-    <pre>
+    <pre id="code_2_1">
 main:
   imul edi, edi
   mov eax, edi
   ret</pre>
     </td>
     <td>
-    <pre>
+    <pre id="code_2_2">
 square(int):
   imul edi, edi
   mov eax, edi
@@ -277,7 +316,7 @@ Which disassembly has the unrolled loop?
     </p>
     <table><tr>
     <td>
-    <pre>
+    <pre id="code_3_1">
 main:
   mov eax, 1
   mov ecx, 3
@@ -288,7 +327,7 @@ main:
   ret</pre>
     </td>
     <td>
-    <pre>
+    <pre id="code_3_2">
 main:
   mov eax, edi
   imul eax, edi
@@ -331,6 +370,14 @@ P. S.
 I would like to thank people of Reddit for <a href="https://www.reddit.com/r/programming/comments/7if9bw/you_dont_have_to_learn_assembly_to_read/">constructive criticism</a>, and especially <a href="https://www.reddit.com/user/IJzerbaard">IJzerbaard</a> for his splendid mini-intro to disassembly. I liked it so much, I had to incorporate some of it into my expandable texts.
     </p>
 
+    <script language="JavaScript">
+    document.getElementById("code_1_1").innerHTML = colorized(document.getElementById("code_1_1").innerHTML);
+    document.getElementById("code_1_2").innerHTML = colorized(document.getElementById("code_1_2").innerHTML);
+    document.getElementById("code_2_1").innerHTML = colorized(document.getElementById("code_2_1").innerHTML);
+    document.getElementById("code_2_2").innerHTML = colorized(document.getElementById("code_2_2").innerHTML);
+    document.getElementById("code_3_1").innerHTML = colorized(document.getElementById("code_3_1").innerHTML);
+    document.getElementById("code_3_2").innerHTML = colorized(document.getElementById("code_3_2").innerHTML);
+    </script>
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
     <tr>
     <td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
