@@ -216,6 +216,122 @@ function draw_sine() {
     context.fillText("π", x_to_client(Math.PI) + 4, y_to_client(0) - 4);
     context.fillText("π/2", x_to_client(Math.PI/2) + 4, y_to_client(0) - 4);
 }
+
+function draw_cosine() {
+    // client
+    const w = 640.0;
+    const h = 480.0;
+
+    // visible region
+    const x_min = -4.5;
+    const y_min = -3.0;
+    const x_max = 4.5;
+    const y_max = 3.0;
+    const client_x_center = w*(0-x_min)/(x_max-x_min);
+    const client_x_step = (w/(x_max-x_min));
+    const client_y_center = h - h*(0-y_min)/(y_max-y_min);
+    const client_y_step = (h/(y_max-y_min));
+    
+    function client_to_x(client_x){
+        return (client_x - client_x_center) / client_x_step;
+    }
+
+    function client_to_y(client_y){
+        return (client_y_center - client_y) / client_y_step;
+    }
+    
+    function x_to_client(x){
+        return x * client_x_step + client_x_center;
+    }
+
+    function y_to_client(y){
+        return client_y_center - y * client_y_step;
+    }
+
+    function draw_grid_on(context){
+        context.font = "16px sans-serif";
+        // axes
+        context.beginPath();
+        context.moveTo(0, client_y_center);
+        context.lineTo(w, client_y_center);
+        context.lineTo(w - 12, client_y_center - 5);
+        context.moveTo(w, client_y_center);
+        context.lineTo(w - 12, client_y_center + 5);
+        context.moveTo(client_x_center, h);
+        context.lineTo(client_x_center, 0);
+        context.lineTo(client_x_center - 5, 12);
+        context.moveTo(client_x_center, 0);
+        context.lineTo(client_x_center + 5, 12);
+        context.fillStyle="#000000";
+        // numbers
+        for(var i = x_min + 1; i <= x_max - 1; i++){
+            context.moveTo(client_x_center + i*client_x_step, client_y_center);
+            context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+            if(i < 0)
+                context.fillText(i, client_x_center + i*client_x_step - 28, client_y_center - 12);
+            else
+                context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center - 12);
+        }
+        for(var i = y_min + 1; i <= y_max - 1; i++){
+            if(i != 0) {
+                context.moveTo(client_x_center, client_y_center - i*client_y_step);
+                context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+                context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+            }
+        }
+        // letters
+        context.fillText("x", client_x_center + x_max*client_x_step - 24, client_y_center - 8);
+        context.fillText("y", client_x_center - 18, client_y_center - y_max*client_y_step + 16);
+
+        context.strokeStyle="#000000";
+        context.stroke();
+        context.closePath();
+    }
+
+    plot = document.getElementById("cosine");
+    var context = plot.getContext("2d");
+
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // grid
+    draw_grid_on(context);
+
+    // sine
+    context.lineWidth = 1;
+    context.beginPath();
+    context.strokeStyle = "#457fd6";
+    for(var j = 1; j < w; j += 1) {
+	var x = client_to_x(j);
+	var x_ = client_to_x(j-1);
+	var y = Math.cos(x);
+	var y_ = Math.cos(x_);
+        context.moveTo(j-1, y_to_client(y_));
+        context.lineTo(j, y_to_client(y));
+        context.stroke();
+    }
+    context.closePath();
+
+    context.lineWidth = 1;
+    context.strokeStyle = "#444444";
+    context.setLineDash([4, 4]);
+    context.beginPath();
+    context.moveTo(x_to_client(-4.5), y_to_client(1));
+    context.lineTo(x_to_client(4.5), y_to_client(1));
+    context.moveTo(x_to_client(Math.PI/2+3), y_to_client(-3));
+    context.lineTo(x_to_client(Math.PI/2-3), y_to_client(3));
+    context.moveTo(x_to_client(-Math.PI/2+3), y_to_client(3));
+    context.lineTo(x_to_client(-Math.PI/2-3), y_to_client(-3));
+    
+    context.stroke();
+    context.closePath();
+    context.setLineDash([]);
+
+    context.fillStyle="#222222";
+    context.fillText("-π/2", x_to_client(-Math.PI/2), y_to_client(0) + 20);
+    context.fillText("π/2", x_to_client(Math.PI/2) - 24, y_to_client(0) + 20);
+}
     
 function draw_sine_mnemonic() {
     var canvas = document.getElementById("sine_mnemonic");
@@ -246,6 +362,10 @@ Sine and cosine
     <canvas id="sine" width=640 height=480></canvas>
     <p>
 ...
+    </p>
+    <canvas id="cosine" width=640 height=480></canvas>    
+    <p>
+...
     </p>    
     <canvas id="sine_mnemonic" width=640 height=640></canvas>
 
@@ -255,6 +375,7 @@ Sine and cosine
     
     <script language="JavaScript">
     draw_sine();
+    draw_cosine();
     draw_sine_mnemonic();
     </script>
     
