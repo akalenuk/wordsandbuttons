@@ -78,8 +78,8 @@ const h = 640;
 const scale = 4;
 
 function xy_to_screen(x, y, a) {
-    return [w / 2 + (x * Math.cos(a) / scale) * w / 2 + (y * Math.sin(a) / scale) * h / 2
-           ,h / 2 + (x * Math.sin(a) / scale) * w / 2 - (y * Math.cos(a) / scale) * h / 2];
+    return [w / 2 + (x * Math.cos(a) / scale) * w / 2 - (y * Math.sin(a) / scale) * h / 2
+           ,h / 2 - (x * Math.sin(a) / scale) * w / 2 - (y * Math.cos(a) / scale) * h / 2];
 }
 
 function smooth_01_to_0PI_2(x) {
@@ -344,28 +344,28 @@ function draw_sine_mnemonic() {
     
     // letters
     if(sin_a > 0) {
-        const height = Math.PI/2*sin_a;
+        const height = 2*(Math.PI/2-1)*sin_a;
         context.beginPath();
         context.strokeStyle = "#d64562";
-        const i1 = xy_to_screen(+height, Math.PI/2, sin_a);
-        const i2 = xy_to_screen(-height, Math.PI/2, sin_a);
+        const i1 = xy_to_screen(-height, -Math.PI/2, sin_a);
+        const i2 = xy_to_screen(+height, -Math.PI/2, sin_a);
         context.moveTo(i1[0], i1[1]);
         context.lineTo(i2[0], i2[1]);
-        const d = Math.PI/2 - 1;
-        const n1 = xy_to_screen(+height, Math.PI/2 + d, sin_a);
-        const n2 = xy_to_screen(-height, Math.PI/2 + d, sin_a);
-        const n3 = xy_to_screen(+height, Math.PI/2 + 2*d, sin_a);
-        const n4 = xy_to_screen(-height, Math.PI/2 + 2*d, sin_a);
+        const d = -(Math.PI/2 - 1);
+        const n1 = xy_to_screen(-height, -Math.PI/2 + d, sin_a);
+        const n2 = xy_to_screen(+height, -Math.PI/2 + d, sin_a);
+        const n3 = xy_to_screen(-height, -Math.PI/2 + 2*d, sin_a);
+        const n4 = xy_to_screen(+height, -Math.PI/2 + 2*d, sin_a);
         context.moveTo(n1[0], n1[1]);
         context.lineTo(n2[0], n2[1]);
         context.lineTo(n3[0], n3[1]);
         context.lineTo(n4[0], n4[1]);
-        const e1 = xy_to_screen(+height, Math.PI/2 + 3*d, sin_a);        
-        const e2 = xy_to_screen(-0.33*height, Math.PI/2 + 3*d, sin_a);
-        const e3 = xy_to_screen(-height, Math.PI/2 + 3*d, sin_a);
-        const e4 = xy_to_screen(+height, Math.PI/2 + 4*d, sin_a);
-        const e5 = xy_to_screen(-0.33*height, Math.PI/2 + 3.66*d, sin_a);
-        const e6 = xy_to_screen(-height, Math.PI/2 + 4*d, sin_a);  
+        const e1 = xy_to_screen(-height,        -Math.PI/2 + 3*d, sin_a);        
+        const e2 = xy_to_screen(+0.33*height,   -Math.PI/2 + 3*d, sin_a);
+        const e3 = xy_to_screen(+height,        -Math.PI/2 + 3*d, sin_a);
+        const e4 = xy_to_screen(-height,        -Math.PI/2 + 4*d, sin_a);
+        const e5 = xy_to_screen(+0.33*height,   -Math.PI/2 + 3.66*d, sin_a);
+        const e6 = xy_to_screen(+height,        -Math.PI/2 + 4*d, sin_a);  
         context.moveTo(e1[0], e1[1]);              
         context.lineTo(e3[0], e3[1]);
         context.moveTo(e1[0], e1[1]);              
