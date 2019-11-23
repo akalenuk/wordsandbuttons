@@ -322,18 +322,56 @@ function draw_sine_mnemonic() {
     draw_arrow(context, down[0], down[1], up[0], up[1], "#000");
     
     // sine
+    const plus = (scale - Math.PI) * a / (Math.PI/2);
     context.lineWidth = 2;
     context.beginPath();
     context.strokeStyle = "#d64562";
-    for(var i = -scale; i < scale; i += 0.02) {
+    for(var i = -scale + plus; i < scale - plus; i += 0.02) {
         const p = xy_to_screen(i, Math.sin(i));
-        if(i == -scale)
+        if(i == -scale + plus)
             context.moveTo(p[0], p[1]);
         else
             context.lineTo(p[0], p[1]);
     }
     context.stroke();
     context.closePath();
+    
+    // letters
+    if(a > 0) {
+        context.beginPath();
+        context.strokeStyle = "#d64562";
+        const i1 = xy_to_screen(+Math.PI/2*a, Math.PI/2);
+        const i2 = xy_to_screen(-Math.PI/2*a, Math.PI/2);
+        context.moveTo(i1[0], i1[1]);
+        context.lineTo(i2[0], i2[1]);
+        
+        const d = Math.PI/2 - 1;
+        const n1 = xy_to_screen(+Math.PI/2*a, Math.PI/2 + d);
+        const n2 = xy_to_screen(-Math.PI/2*a, Math.PI/2 + d);
+        const n3 = xy_to_screen(+Math.PI/2*a, Math.PI/2 + 2*d);
+        const n4 = xy_to_screen(-Math.PI/2*a, Math.PI/2 + 2*d);
+        context.moveTo(n1[0], n1[1]);
+        context.lineTo(n2[0], n2[1]);
+        context.lineTo(n3[0], n3[1]);
+        context.lineTo(n4[0], n4[1]);
+        
+        const e1 = xy_to_screen(+Math.PI/2*a, Math.PI/2 + 3*d);        
+        const e2 = xy_to_screen(-0.33*Math.PI/2*a, Math.PI/2 + 3*d);
+        const e3 = xy_to_screen(-Math.PI/2*a, Math.PI/2 + 3*d);
+        const e4 = xy_to_screen(+Math.PI/2*a, Math.PI/2 + 4*d);
+        const e5 = xy_to_screen(-0.33*Math.PI/2*a, Math.PI/2 + 3.66*d);
+        const e6 = xy_to_screen(-Math.PI/2*a, Math.PI/2 + 4*d);  
+        context.moveTo(e1[0], e1[1]);              
+        context.lineTo(e3[0], e3[1]);
+        context.moveTo(e1[0], e1[1]);              
+        context.lineTo(e4[0], e4[1]);
+        context.moveTo(e2[0], e2[1]);              
+        context.lineTo(e5[0], e5[1]);
+        context.moveTo(e3[0], e3[1]);
+        context.lineTo(e6[0], e6[1]);
+        context.stroke();
+        context.closePath();
+    }
     context.lineWidth = 1;
 }
 
