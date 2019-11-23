@@ -76,11 +76,14 @@ u {
 const w = 640;
 const h = 640;
 const scale = 4;
-var a = 0.;
 
-function xy_to_screen(x, y) {
+function xy_to_screen(x, y, a) {
     return [w / 2 + (x * Math.cos(a) / scale) * w / 2 + (y * Math.sin(a) / scale) * h / 2
            ,h / 2 + (x * Math.sin(a) / scale) * w / 2 - (y * Math.cos(a) / scale) * h / 2];
+}
+
+function smooth_01_to_0PI_2(x) {
+    return Math.PI * (Math.sin((x - 0.5) * Math.PI) + 1.) / 4;
 }
 
 function draw_arrow(context, x1, y1, x2, y2, color) {
@@ -304,7 +307,9 @@ function draw_cosine() {
     context.fillText("-π/2", x_to_client(-Math.PI/2), y_to_client(0) + 20);
     context.fillText("π/2", x_to_client(Math.PI/2) - 24, y_to_client(0) + 20);
 }
-    
+
+// sine mnemonic
+var sin_a = 0.;
 function draw_sine_mnemonic() {
     var canvas = document.getElementById("sine_mnemonic");
     var context = canvas.getContext("2d");
@@ -314,20 +319,21 @@ function draw_sine_mnemonic() {
     context.fillRect(0, 0, w, h);
     
     // axes
-    const left =    xy_to_screen(-scale-4*a, 0);
-    const right =   xy_to_screen(+scale+4*a, 0);
-    const up =      xy_to_screen(0, +scale+4*a);
-    const down =    xy_to_screen(0, -scale-4*a);
+    const axis_plus = 10*sin_a;
+    const left =    xy_to_screen(-scale-axis_plus, 0, sin_a);
+    const right =   xy_to_screen(+scale+axis_plus, 0, sin_a);
+    const up =      xy_to_screen(0, +scale+axis_plus, sin_a);
+    const down =    xy_to_screen(0, -scale-axis_plus, sin_a);
     draw_arrow(context, left[0], left[1], right[0], right[1], "#000");
     draw_arrow(context, down[0], down[1], up[0], up[1], "#000");
     
     // sine
-    const plus = (scale - Math.PI) * a / (Math.PI/2);
+    const plus = (scale - Math.PI) * sin_a / (Math.PI/2);
     context.lineWidth = 2;
     context.beginPath();
     context.strokeStyle = "#d64562";
     for(var i = -scale + plus; i < scale - plus; i += 0.02) {
-        const p = xy_to_screen(i, Math.sin(i));
+        const p = xy_to_screen(i, Math.sin(i), sin_a);
         if(i == -scale + plus)
             context.moveTo(p[0], p[1]);
         else
@@ -337,28 +343,29 @@ function draw_sine_mnemonic() {
     context.closePath();
     
     // letters
-    if(a > 0) {
+    if(sin_a > 0) {
+        const height = Math.PI/2*sin_a;
         context.beginPath();
         context.strokeStyle = "#d64562";
-        const i1 = xy_to_screen(+Math.PI/2*a, Math.PI/2);
-        const i2 = xy_to_screen(-Math.PI/2*a, Math.PI/2);
+        const i1 = xy_to_screen(+height, Math.PI/2, sin_a);
+        const i2 = xy_to_screen(-height, Math.PI/2, sin_a);
         context.moveTo(i1[0], i1[1]);
         context.lineTo(i2[0], i2[1]);
         const d = Math.PI/2 - 1;
-        const n1 = xy_to_screen(+Math.PI/2*a, Math.PI/2 + d);
-        const n2 = xy_to_screen(-Math.PI/2*a, Math.PI/2 + d);
-        const n3 = xy_to_screen(+Math.PI/2*a, Math.PI/2 + 2*d);
-        const n4 = xy_to_screen(-Math.PI/2*a, Math.PI/2 + 2*d);
+        const n1 = xy_to_screen(+height, Math.PI/2 + d, sin_a);
+        const n2 = xy_to_screen(-height, Math.PI/2 + d, sin_a);
+        const n3 = xy_to_screen(+height, Math.PI/2 + 2*d, sin_a);
+        const n4 = xy_to_screen(-height, Math.PI/2 + 2*d, sin_a);
         context.moveTo(n1[0], n1[1]);
         context.lineTo(n2[0], n2[1]);
         context.lineTo(n3[0], n3[1]);
         context.lineTo(n4[0], n4[1]);
-        const e1 = xy_to_screen(+Math.PI/2*a, Math.PI/2 + 3*d);        
-        const e2 = xy_to_screen(-0.33*Math.PI/2*a, Math.PI/2 + 3*d);
-        const e3 = xy_to_screen(-Math.PI/2*a, Math.PI/2 + 3*d);
-        const e4 = xy_to_screen(+Math.PI/2*a, Math.PI/2 + 4*d);
-        const e5 = xy_to_screen(-0.33*Math.PI/2*a, Math.PI/2 + 3.66*d);
-        const e6 = xy_to_screen(-Math.PI/2*a, Math.PI/2 + 4*d);  
+        const e1 = xy_to_screen(+height, Math.PI/2 + 3*d, sin_a);        
+        const e2 = xy_to_screen(-0.33*height, Math.PI/2 + 3*d, sin_a);
+        const e3 = xy_to_screen(-height, Math.PI/2 + 3*d, sin_a);
+        const e4 = xy_to_screen(+height, Math.PI/2 + 4*d, sin_a);
+        const e5 = xy_to_screen(-0.33*height, Math.PI/2 + 3.66*d, sin_a);
+        const e6 = xy_to_screen(-height, Math.PI/2 + 4*d, sin_a);  
         context.moveTo(e1[0], e1[1]);              
         context.lineTo(e3[0], e3[1]);
         context.moveTo(e1[0], e1[1]);              
@@ -373,16 +380,12 @@ function draw_sine_mnemonic() {
     context.lineWidth = 1;
 }
 
-function smooth_01_to_0PI_2(x) {
-    return Math.PI * (Math.sin((x - 0.5) * Math.PI) + 1.) / 4;
-}
-
 var sin_t = 0.;
 var sin_dt = 0.;
 function sin_animation() {
     if(sin_dt != 0) {
         sin_t += sin_dt;
-        a = smooth_01_to_0PI_2(sin_t);
+        sin_a = smooth_01_to_0PI_2(sin_t);
         draw_sine_mnemonic();
         if(sin_t <= 0.) {
             sin_t = 0.;
@@ -396,12 +399,85 @@ function sin_animation() {
 }
 
 function start_sin() {
-    if(a == 0) {
+    if(sin_a == 0) {
         sin_dt = 0.01;
         sin_animation();
     } else {
         sin_dt = -0.01;
         sin_animation();
+    }
+}
+
+// cos mnemonic
+var cos_a = 0.;
+function draw_cos_mnemonic() {
+    var canvas = document.getElementById("cos_mnemonic");
+    var context = canvas.getContext("2d");
+    context.font = "16px sans-serif";
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    
+    // axes
+    const axis_plus = 10*cos_a;
+    const left =    xy_to_screen(-scale-axis_plus, 0, cos_a);
+    const right =   xy_to_screen(+scale+axis_plus, 0, cos_a);
+    const up =      xy_to_screen(0, +scale+axis_plus, cos_a);
+    const down =    xy_to_screen(0, -scale-axis_plus, cos_a);
+    draw_arrow(context, left[0], left[1], right[0], right[1], "#000");
+    draw_arrow(context, down[0], down[1], up[0], up[1], "#000");
+    
+    // cos
+    const plus = (scale - Math.PI) * cos_a / (Math.PI/2);
+    context.lineWidth = 2;
+    context.beginPath();
+    context.strokeStyle = "#457fd6";
+    for(var i = -scale + plus; i < scale - plus; i += 0.02) {
+        const p = xy_to_screen(i, Math.cos(i), cos_a);
+        if(i == -scale + plus)
+            context.moveTo(p[0], p[1]);
+        else
+            context.lineTo(p[0], p[1]);
+    }
+    context.stroke();
+    context.closePath();
+    
+    // letters
+    if(cos_a > 0) {
+        context.beginPath();
+        context.strokeStyle = "#457fd6";
+
+        context.stroke();
+        context.closePath();
+    }
+    context.lineWidth = 1;
+}
+
+var cos_t = 0.;
+var cos_dt = 0.;
+function cos_animation() {
+    if(cos_dt != 0) {
+        cos_t += cos_dt;
+        cos_a = smooth_01_to_0PI_2(cos_t);
+        draw_cos_mnemonic();
+        if(cos_t <= 0.) {
+            cos_t = 0.;
+            cos_dt = 0.;
+        } else if(cos_t >= 1.) {
+            cos_t = 1.;
+            cos_dt = 0.;
+        } else
+            setTimeout(cos_animation, 20);
+    }
+}
+
+function start_cos() {
+    if(cos_a == 0) {
+        cos_dt = 0.01;
+        cos_animation();
+    } else {
+        cos_dt = -0.01;
+        cos_animation();
     }
 }
     </script>
@@ -428,11 +504,18 @@ Sine and cosine
     <p>
 ...
     </p>
-    
+    <canvas id="cos_mnemonic" width=640 height=640></canvas>
+    <br>
+    <button type="button" onclick="start_cos()" id="cos_button">Toggle the mnemonic</button>    
+    <p>
+...
+    </p>
+        
     <script language="JavaScript">
     draw_sine();
     draw_cosine();
     draw_sine_mnemonic();
+    draw_cos_mnemonic();    
     </script>
     
 
