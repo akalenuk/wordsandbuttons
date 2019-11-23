@@ -321,6 +321,38 @@ function draw_sine_mnemonic() {
     draw_arrow(context, left[0], left[1], right[0], right[1], "#000");
     draw_arrow(context, down[0], down[1], up[0], up[1], "#000");
 }
+
+function smooth_01_to_0PI_2(x) {
+    return Math.PI * (Math.sin((x - 0.5) * Math.PI) + 1.) / 4;
+}
+
+var sin_t = 0.;
+var sin_dt = 0.;
+function sin_animation() {
+    if(sin_dt != 0) {
+        sin_t += sin_dt;
+        a = smooth_01_to_0PI_2(sin_t);
+        draw_sine_mnemonic();
+        if(sin_t <= 0.) {
+            sin_t = 0.;
+            sin_dt = 0.;
+        } else if(sin_t >= 1.) {
+            sin_t = 1.;
+            sin_dt = 0.;
+        } else
+            setTimeout(sin_animation, 20);
+    }
+}
+
+function start_sin() {
+    if(a == 0) {
+        sin_dt = 0.01;
+        sin_animation();
+    } else {
+        sin_dt = -0.01;
+        sin_animation();
+    }
+}
     </script>
   </head>
   <body>
@@ -341,7 +373,7 @@ Sine and cosine
     </p>    
     <canvas id="sine_mnemonic" width=640 height=640></canvas>
     <br>
-    <button type="button" onclick="start_sin()" id="sin_button">Show the mnemonic</button>
+    <button type="button" onclick="start_sin()" id="sin_button">Toggle the mnemonic</button>
     <p>
 ...
     </p>
