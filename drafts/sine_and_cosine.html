@@ -428,7 +428,7 @@ function draw_cos_mnemonic() {
     draw_arrow(context, down[0], down[1], up[0], up[1], "#000");
     
     // cos
-    const plus = (scale - Math.PI) * cos_a / (Math.PI/2);
+    const plus = (scale - Math.PI / 2) * cos_a / (Math.PI/2);
     context.lineWidth = 2;
     context.beginPath();
     context.strokeStyle = "#457fd6";
@@ -446,7 +446,14 @@ function draw_cos_mnemonic() {
     if(cos_a > 0) {
         context.beginPath();
         context.strokeStyle = "#457fd6";
-
+        const d = -(Math.PI/2 - 1);
+        for(var a = 0; a <= 2*Math.PI; a+=0.01) {
+            const pa = xy_to_screen((0 + Math.sin(a) * d) * cos_a, -Math.PI / 2 + Math.cos(a) * d, cos_a);
+            if(a == 0)
+                context.moveTo(pa[0], pa[1]);
+            else
+                context.lineTo(pa[0], pa[1]);
+        }
         context.stroke();
         context.closePath();
     }
