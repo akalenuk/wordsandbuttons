@@ -497,6 +497,37 @@ function start_cos() {
         cos_animation();
     }
 }
+
+// rotation
+var t_ms = 0.;
+setInterval(function(){t_ms+=20;draw_rotation();}, 20);
+
+function draw_rotation() {
+    var canvas = document.getElementById("rotation");
+    var context = canvas.getContext("2d");
+    context.font = "16px sans-serif";
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+    context.beginPath();
+    context.strokeStyle = "#457fd6";
+    
+    const cx = 320;
+    const cy = 320;
+    const a = t_ms / 1000;
+    function x_rotated(x, y) {
+        return cx - (x - cx) * Math.cos(a) - (y - cy) * Math.sin(a);
+    }
+    function y_rotated(x, y) {
+        return cy - (x - cx) * Math.sin(a) + (y - cy) * Math.cos(a);
+    }    
+
+    context.moveTo(x_rotated(cx, cy), y_rotated(cx, cy));
+    context.lineTo(x_rotated(cx+100, cy), y_rotated(cx+100, cy));
+    
+    context.stroke();
+    context.closePath();
+}
     </script>
   </head>
   <body>
@@ -533,6 +564,7 @@ Rotation
     <p>
 ...
     </p>
+    <canvas id="rotation" width=640 height=640></canvas>    
     <h2>
 Smoothness
     </h2>
