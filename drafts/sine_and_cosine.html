@@ -511,20 +511,30 @@ function draw_rotation() {
     context.fillRect(0, 0, w, h);
     context.beginPath();
     context.strokeStyle = "#457fd6";
+    context.lineWidth = 3;    
+    function cos(x) {return Math.cos(x);};
+    function sin(x) {return Math.sin(x);};
     
     const cx = 320;
     const cy = 320;
-    const a = t_ms / 1000;
+    const a = - t_ms / 1000;
     function x_rotated(x, y) {
-        return cx - (x - cx) * Math.cos(a) - (y - cy) * Math.sin(a);
+        return - x * cos(a) + y * sin(a);
     }
     function y_rotated(x, y) {
-        return cy - (x - cx) * Math.sin(a) + (y - cy) * Math.cos(a);
+        return + x * sin(a) + y * cos(a);
     }    
-
-    context.moveTo(x_rotated(cx, cy), y_rotated(cx, cy));
-    context.lineTo(x_rotated(cx+100, cy), y_rotated(cx+100, cy));
     
+    arrow = [[0, 0], [200, 0], [180, -7], [200, 0], [180, 7]];  
+    
+    context.moveTo(
+        cx + x_rotated(arrow[0][0], arrow[0][1]), 
+        cy + y_rotated(arrow[0][0], arrow[0][1]));
+    for(var i = 1; i < arrow.length; ++i)
+        context.lineTo(
+            cx + x_rotated(arrow[i][0], arrow[i][1]), 
+            cy + y_rotated(arrow[i][0], arrow[i][1]));
+        
     context.stroke();
     context.closePath();
 }
