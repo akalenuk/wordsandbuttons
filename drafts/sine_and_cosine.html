@@ -65,10 +65,26 @@ button {
     font-size: 16pt;
 }
 
-u {
-    border-bottom: 1px dotted #000;
-    text-decoration: none;
-    cursor: pointer;
+textarea {
+    width: 505pt;
+    font-size: 12pt;
+    font-family: monospace;
+}
+
+.formula {
+    font-family: sans-serif;
+    font-size: 15pt;
+    font-style: italic;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+.comment {
+    font-size: 12pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
 }
     </style>
     <script language="JavaScript">
@@ -531,25 +547,13 @@ function draw_rotation() {
     function cos(x) {return Math.cos(x);};
     function sin(x) {return Math.sin(x);};
     
-    const cx = 320;
-    const cy = 320;
-    const a = - t_ms / 1000;
-    function x_rotated(x, y) {
-        return - x * cos(a) + y * sin(a);
+    const rotation_code = document.getElementById("rotation_code").value;
+    document.getElementById("rotation_comment").innerHTML = "This code is changeable.";
+    try {
+        eval(rotation_code);
+    } catch (error) {
+        document.getElementById("rotation_comment").innerHTML = "<b>Error:</b> " + error.message;
     }
-    function y_rotated(x, y) {
-        return + x * sin(a) + y * cos(a);
-    }    
-    
-    arrow = [[0, 0], [200, 0], [180, -7], [200, 0], [180, 7]];  
-    
-    context.moveTo(
-        cx + x_rotated(arrow[0][0], arrow[0][1]), 
-        cy + y_rotated(arrow[0][0], arrow[0][1]));
-    for(var i = 1; i < arrow.length; ++i)
-        context.lineTo(
-            cx + x_rotated(arrow[i][0], arrow[i][1]), 
-            cy + y_rotated(arrow[i][0], arrow[i][1]));
         
     context.stroke();
     context.closePath();
@@ -590,7 +594,30 @@ Rotation
     <p>
 ...
     </p>
-    <canvas id="rotation" width=640 height=640></canvas>    
+    <canvas id="rotation" width=640 height=640></canvas>
+    <br>
+    <textarea id="rotation_code" rows=20>
+    const cx = 320;
+    const cy = 320;
+    const a = - t_ms / 1000;
+    function x_rotated(x, y) {
+        return - x * cos(a) + y * sin(a);
+    }
+    function y_rotated(x, y) {
+        return + x * sin(a) + y * cos(a);
+    }    
+    
+    arrow = [[0, 0], [200, 0], [180, -7], [200, 0], [180, 7]];  
+    
+    context.moveTo(
+        cx + x_rotated(arrow[0][0], arrow[0][1]), 
+        cy + y_rotated(arrow[0][0], arrow[0][1]));
+    for(var i = 1; i &lt; arrow.length; ++i)
+        context.lineTo(
+            cx + x_rotated(arrow[i][0], arrow[i][1]), 
+            cy + y_rotated(arrow[i][0], arrow[i][1]));
+    </textarea>
+    <p id="rotation_comment" class="comment">
     <h2>
 Smoothness
     </h2>
