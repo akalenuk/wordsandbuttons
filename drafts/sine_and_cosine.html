@@ -665,25 +665,24 @@ Curves
     <canvas id="curves" width=640 height=640></canvas>
     <br>
     <textarea id="curves_code" rows=20>
-    const cx = 320;
-    const cy = 320;
-    const a = t_ms / 1000;
-    function x_rotated(x, y) {
-        return - x * cos(a) + y * sin(a);
+    const w = 640;
+    const h = 640;
+    const d = 280;
+    
+    function x(a) {
+        return w / 2 + sin(a) * d;
     }
-    function y_rotated(x, y) {
-        return + x * sin(a) + y * cos(a);
-    }    
     
-    arrow = [[0, 0], [200, 0], [180, -7], [200, 0], [180, 7]];  
+    function y(a) {
+        return h / 2 - PI / 2 * sin(a)*cos(a) * d;
+    }
     
-    context.moveTo(
-        cx + x_rotated(arrow[0][0], arrow[0][1]), 
-        cy + y_rotated(arrow[0][0], arrow[0][1]));
-    for(var i = 1; i &lt; arrow.length; ++i)
-        context.lineTo(
-            cx + x_rotated(arrow[i][0], arrow[i][1]), 
-            cy + y_rotated(arrow[i][0], arrow[i][1]));
+    for(var a = -0.75 * PI; a <= 0.75 * PI; a += 0.01) {        
+        if(a == -0.75 * Math.PI)
+            context.moveTo(x(a), y(a));
+        else
+            context.lineTo(x(a), y(a));
+    }
     </textarea>
     <p id="curves_comment" class="comment"></p>
 
