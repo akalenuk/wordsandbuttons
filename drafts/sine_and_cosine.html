@@ -88,7 +88,6 @@ textarea {
 }
     </style>
     <script language="JavaScript">
-
 const w = 640;
 const h = 640;
 const scale = 4;
@@ -377,13 +376,15 @@ function draw_sine_mnemonic() {
     // letters
     if(sin_a > 0) {
         const height = 2*(Math.PI/2-1)*sin_a;
+        const d = -(Math.PI/2 - 1);
         context.beginPath();
         context.strokeStyle = "#d64562";
+        // I
         const i1 = xy_to_screen(-height, -Math.PI/2, sin_a);
         const i2 = xy_to_screen(+height, -Math.PI/2, sin_a);
         context.moveTo(i1[0], i1[1]);
         context.lineTo(i2[0], i2[1]);
-        const d = -(Math.PI/2 - 1);
+        // N
         const n1 = xy_to_screen(-height, -Math.PI/2 + d, sin_a);
         const n2 = xy_to_screen(+height, -Math.PI/2 + d, sin_a);
         const n3 = xy_to_screen(-height, -Math.PI/2 + 2*d, sin_a);
@@ -392,6 +393,7 @@ function draw_sine_mnemonic() {
         context.lineTo(n2[0], n2[1]);
         context.lineTo(n3[0], n3[1]);
         context.lineTo(n4[0], n4[1]);
+        // E
         const e1 = xy_to_screen(-height,        -Math.PI/2 + 3*d, sin_a);
         const e2 = xy_to_screen(+0.33*height,   -Math.PI/2 + 3*d, sin_a);
         const e3 = xy_to_screen(+height,        -Math.PI/2 + 3*d, sin_a);
@@ -549,9 +551,11 @@ function draw(thing) {
     context.fillRect(0, 0, w, h);
     context.beginPath();
     context.strokeStyle = "#d67f45";
+    context.fillStyle="#d67f45";
     context.lineWidth = 3;    
     function cos(x) {return Math.cos(x);};
     function sin(x) {return Math.sin(x);};
+    const PI = Math.PI;
     
     const thing_code = document.getElementById(thing + "_code").value;
     document.getElementById(thing + "_comment").innerHTML = "This code is changeable.";
@@ -633,25 +637,23 @@ Smoothness
     <canvas id="smoothness" width=640 height=640></canvas>
     <br>
     <textarea id="smoothness_code" rows=20>
-    const cx = 320;
-    const cy = 320;
-    const a = t_ms / 1000;
-    function x_rotated(x, y) {
-        return - x * cos(a) + y * sin(a);
+    const w = 640;
+    const h = 480;
+    function f(x) {
+        return (sin((x - 0.5)*PI) + 1) / 2;
     }
-    function y_rotated(x, y) {
-        return + x * sin(a) + y * cos(a);
-    }    
     
-    arrow = [[0, 0], [200, 0], [180, -7], [200, 0], [180, 7]];  
+    for(var j = 0; j &lt; w ; ++j) {
+        const i = h - h * f(j / w);
+        if(i == 0)
+            context.moveTo(j, i);
+        else
+            context.lineTo(j, i);
+    }
     
-    context.moveTo(
-        cx + x_rotated(arrow[0][0], arrow[0][1]), 
-        cy + y_rotated(arrow[0][0], arrow[0][1]));
-    for(var i = 1; i &lt; arrow.length; ++i)
-        context.lineTo(
-            cx + x_rotated(arrow[i][0], arrow[i][1]), 
-            cy + y_rotated(arrow[i][0], arrow[i][1]));
+    const t = (t_ms / 5000) % 1;
+    context.moveTo(f(t) * w + 8, 560);
+    context.arc(f(t) * w, 560, 8, 0, PI*2);
     </textarea>
     <p id="smoothness_comment" class="comment"></p>
     <h2>
