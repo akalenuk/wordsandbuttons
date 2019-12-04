@@ -621,9 +621,7 @@ function y_rotated(x, y) {
 // the illustration
 const arrow = [[0, 0], [200, 0], [180, -7], [200, 0], [180, 7]];  
 
-context.moveTo(
-    screen_center[0] + x_rotated(arrow[0][0], arrow[0][1]), 
-    screen_center[1] + y_rotated(arrow[0][0], arrow[0][1]));
+context.moveTo(screen_center[0], screen_center[1]);
 for(var i = 1; i &lt; arrow.length; ++i)
     context.lineTo(
         screen_center[0] + x_rotated(arrow[i][0], arrow[i][1]), 
@@ -640,7 +638,7 @@ Smoothness
     <br>
     <textarea id="smoothness_code" rows=22>
     const w = 640;
-    const h = 480;
+    const h = 640;
     
     // the function f: x -> y; x ∈ [0, 1], y ∈ [0, 1]
     function f(x) {
@@ -650,16 +648,16 @@ Smoothness
     // the plot
     for(var j = 0; j &lt; w ; ++j) {
         const i = h - h * f(j / w);
-        if(i == 0)
+        if(j == 0)
             context.moveTo(j, i);
         else
             context.lineTo(j, i);
     }
     
-    // the dot
+    // the moving line
     const t = (t_ms / 5000) % 1;
-    context.moveTo(f(t) * w + 8, 560);
-    context.arc(f(t) * w, 560, 8, 0, PI*2);
+    context.moveTo(f(t) * w, 0);
+    context.lineTo(f(t) * w, h);
     </textarea>
     <p id="smoothness_comment" class="comment"></p>
     <h2>
