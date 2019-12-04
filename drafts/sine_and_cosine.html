@@ -606,26 +606,28 @@ Rotation
     </p>
     <canvas id="rotation" width=640 height=640></canvas>
     <br>
-    <textarea id="rotation_code" rows=20>
-    const cx = 320;
-    const cy = 320;
-    const a = - t_ms / 1000;
-    function x_rotated(x, y) {
-        return - x * cos(a) + y * sin(a);
-    }
-    function y_rotated(x, y) {
-        return + x * sin(a) + y * cos(a);
-    }    
-    
-    arrow = [[0, 0], [200, 0], [180, -7], [200, 0], [180, 7]];  
-    
-    context.moveTo(
-        cx + x_rotated(arrow[0][0], arrow[0][1]), 
-        cy + y_rotated(arrow[0][0], arrow[0][1]));
-    for(var i = 1; i &lt; arrow.length; ++i)
-        context.lineTo(
-            cx + x_rotated(arrow[i][0], arrow[i][1]), 
-            cy + y_rotated(arrow[i][0], arrow[i][1]));
+    <textarea id="rotation_code" rows=22>
+const screen_center = [320, 320];
+const a = - t_ms / 1000; // time to angle proportion
+
+// this is how you rotate: x, y, a -> x_rotated, y_rotated
+function x_rotated(x, y) {
+    return - x * cos(a) + y * sin(a);
+}
+function y_rotated(x, y) {
+    return + x * sin(a) + y * cos(a);
+}    
+
+// the illustration
+const arrow = [[0, 0], [200, 0], [180, -7], [200, 0], [180, 7]];  
+
+context.moveTo(
+    screen_center[0] + x_rotated(arrow[0][0], arrow[0][1]), 
+    screen_center[1] + y_rotated(arrow[0][0], arrow[0][1]));
+for(var i = 1; i &lt; arrow.length; ++i)
+    context.lineTo(
+        screen_center[0] + x_rotated(arrow[i][0], arrow[i][1]), 
+        screen_center[1] + y_rotated(arrow[i][0], arrow[i][1]));
     </textarea>
     <p id="rotation_comment" class="comment"></p>
     <h2>
@@ -636,13 +638,16 @@ Smoothness
     </p>
     <canvas id="smoothness" width=640 height=640></canvas>
     <br>
-    <textarea id="smoothness_code" rows=20>
+    <textarea id="smoothness_code" rows=22>
     const w = 640;
     const h = 480;
+    
+    // the function f: x -> y; x ∈ [0, 1], y ∈ [0, 1]
     function f(x) {
         return (sin((x - 0.5)*PI) + 1) / 2;
     }
     
+    // the plot
     for(var j = 0; j &lt; w ; ++j) {
         const i = h - h * f(j / w);
         if(i == 0)
@@ -651,6 +656,7 @@ Smoothness
             context.lineTo(j, i);
     }
     
+    // the dot
     const t = (t_ms / 5000) % 1;
     context.moveTo(f(t) * w + 8, 560);
     context.arc(f(t) * w, 560, 8, 0, PI*2);
@@ -664,21 +670,23 @@ Curves
     </p>
     <canvas id="curves" width=640 height=640></canvas>
     <br>
-    <textarea id="curves_code" rows=20>
+    <textarea id="curves_code" rows=22>
     const w = 640;
     const h = 640;
-    const d = 280;
-    
+    const size = 280;
+        
+    // parametric curve is: a -> (x, y)
     function x(a) {
-        return w / 2 + sin(a) * d;
+        return w / 2 + sin(a) * size;
     }
-    
     function y(a) {
-        return h / 2 - PI / 2 * sin(a)*cos(a) * d;
+        return h / 2 - PI / 2 * sin(a)*cos(a) * size;
     }
     
-    for(var a = -0.75 * PI; a <= 0.75 * PI; a += 0.01) {        
-        if(a == -0.75 * Math.PI)
+    // this draws the function in a range
+    const range = [-0.75 * PI, 0.75 * PI];
+    for(var a = range[0]; a <= range[1]; a += 0.01) {        
+        if(a == range[0])
             context.moveTo(x(a), y(a));
         else
             context.lineTo(x(a), y(a));
