@@ -542,6 +542,25 @@ function draw_things() {
     draw("curves");
 }
 
+</script>
+<script language="JavaScript" id="rotation_script">
+function draw_user_rotation(context) {
+}
+</script>
+<script language="JavaScript" id="smoothness_script">
+function draw_user_smoothness(context) {
+}
+</script>
+<script language="JavaScript" id="curves_script">
+function draw_user_curves(context) {
+}
+</script>
+
+<script language="JavaScript">
+function cos(x) {return Math.cos(x);};
+function sin(x) {return Math.sin(x);};
+const PI = Math.PI;
+    
 var rotation_background = null;
 var smoothness_background = null;
 var curves_background = null;
@@ -644,20 +663,38 @@ function draw(thing) {
     context.strokeStyle = "#d67f45";
     context.fillStyle="#d67f45";
     context.lineWidth = 3;    
-    function cos(x) {return Math.cos(x);};
-    function sin(x) {return Math.sin(x);};
-    const PI = Math.PI;
     
-    const thing_code = document.getElementById(thing + "_code").value;
-    document.getElementById(thing + "_comment").innerHTML = "This code is changeable.";
-    try {
-        eval(thing_code);
-    } catch (error) {
-        document.getElementById(thing + "_comment").innerHTML = "<b>Error:</b> " + error.message;
+    if(thing == "rotation") {
+        draw_user_rotation(context);
+    } else if(thing == "smoothness") {
+        draw_user_smoothness(context);
+    } else if(thing == "curves") {
+        draw_user_curves(context);
     }
+    
         
     context.stroke();
     context.closePath();
+}
+
+function reevaluate(thing) {
+    var script = document.getElementById(thing + "_script");
+    if (script) {
+        script.parentNode.removeChild(script);
+    }
+    var code = document.getElementById(thing + "_code");
+    script = document.createElement('script');    
+    script.id = thing + "_script";
+    
+    script.text = "function draw_user_" + thing + "(context){" 
+    + "document.getElementById('" + thing + "_comment').innerHTML = 'This code is changeable.';"
+    + "try{"
+    + code.value
+    + "}catch(error){"
+    + "document.getElementById('" + thing + "_comment').innerHTML = '<b>Error:</b> ' + error.message;"
+    + "}}";
+    
+    document.body.appendChild(script);
 }
     </script>
   </head>
@@ -697,7 +734,7 @@ Rotation
     </p>
     <canvas id="rotation" width=640 height=640></canvas>
     <br>
-    <textarea id="rotation_code" rows=22>
+    <textarea id="rotation_code" rows=22 onInput="reevaluate('rotation')">
 const screen_center = [320, 320];
 const a = - t_ms / 1000; // time to angle proportion
 
@@ -727,7 +764,7 @@ Smoothness
     </p>
     <canvas id="smoothness" width=640 height=640></canvas>
     <br>
-    <textarea id="smoothness_code" rows=22>
+    <textarea id="smoothness_code" rows=22 onInput="reevaluate('smoothness')">
     const w = 640;
     const h = 640;
     
@@ -759,7 +796,7 @@ Curves
     </p>
     <canvas id="curves" width=640 height=640></canvas>
     <br>
-    <textarea id="curves_code" rows=22>
+    <textarea id="curves_code" rows=22 onInput="reevaluate('curves')">
     const w = 640;
     const h = 640;
     const size = 280;
@@ -788,6 +825,9 @@ Curves
     draw_cosine();
     draw_sine_mnemonic();
     draw_cos_mnemonic();
+    reevaluate("rotation");
+    reevaluate("smoothness");
+    reevaluate("curves");
     </script>
 
 
