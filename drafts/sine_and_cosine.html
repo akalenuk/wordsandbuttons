@@ -548,12 +548,12 @@ var curves_background = null;
 function draw(thing) {
     const canvas = document.getElementById(thing);
     const context = canvas.getContext("2d");
-    context.font = "16px sans-serif";
+
     // background
-    context.fillStyle="#eeeeee";
-    
     if(thing == "rotation") {
         if(rotation_background == null) {
+            context.font = "16px sans-serif";
+            context.fillStyle="#eeeeee";
             context.fillRect(0, 0, w, h);
             context.beginPath();
             context.strokeStyle = "#000";
@@ -581,13 +581,14 @@ function draw(thing) {
             }
             context.stroke();
             context.closePath();
-            rotation_background = new Image();
-            rotation_background.src = canvas.toDataURL('image/png');
+            rotation_background = context.getImageData(0, 0, 640, 640);
         } else {
-            context.drawImage(rotation_background, 0, 0);
+            context.putImageData(rotation_background, 0, 0);
         }
     } else if (thing == "smoothness") {
         if(smoothness_background == null) {
+            context.font = "16px sans-serif";
+            context.fillStyle="#eeeeee";        
             context.fillRect(0, 0, w, h);
             context.beginPath();
             context.strokeStyle = "#000";
@@ -609,13 +610,14 @@ function draw(thing) {
             }
             context.stroke();
             context.closePath();
-            smoothness_background = new Image();
-            smoothness_background.src = canvas.toDataURL('image/png');
+            smoothness_background = context.getImageData(0, 0, 640, 640);
         } else {
-            context.drawImage(smoothness_background, 0, 0);        
+            context.putImageData(smoothness_background, 0, 0);        
         }
     } else if (thing == "curves") {
         if(curves_background == null) {
+            context.font = "16px sans-serif";
+            context.fillStyle="#eeeeee";        
             context.fillRect(0, 0, w, h);
             context.beginPath();
             context.strokeStyle = "#777";
@@ -632,10 +634,9 @@ function draw(thing) {
             }
             context.stroke();
             context.closePath();
-            curves_background = new Image();
-            curves_background.src = canvas.toDataURL('image/png');
+            curves_background = context.getImageData(0, 0, 640, 640);
         } else {
-            context.drawImage(curves_background, 0, 0);  
+            context.putImageData(curves_background, 0, 0);  
         }
     }
     
