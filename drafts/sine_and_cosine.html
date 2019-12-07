@@ -532,147 +532,170 @@ function start_cos() {
     }
 }
 
-// rotation
+// user code animation
 var t_ms = 0.;
 setInterval(function(){t_ms+=20;draw_things();}, 20);
 
 function draw_things() {
-    draw("rotation");
-    draw("smoothness");
-    draw("curves");
+    draw_rotation();
+    draw_smoothness();
+    draw_curves();
 }
 
+// user code and visualisations
+function cos(x) {return Math.cos(x);};
+function sin(x) {return Math.sin(x);};
+const PI = Math.PI;
 </script>
 <script language="JavaScript" id="rotation_script">
 function draw_user_rotation(context) {
+}
+</script>
+<script language="JavaScript">
+var rotation_background = null;
+
+function draw_rotation() {
+    const canvas = document.getElementById("rotation");
+    const context = canvas.getContext("2d");
+
+    // background
+    if(rotation_background == null) {
+        context.font = "16px sans-serif";
+        context.fillStyle="#eeeeee";
+        context.fillRect(0, 0, w, h);
+        context.beginPath();
+        context.strokeStyle = "#000";
+        context.fillStyle="#000";
+        context.lineWidth = 1;
+        for(var i = 0; i < 12; ++i) {
+            context.moveTo(320 - 240 * Math.cos(i * Math.PI / 6), 320 + 240 * Math.sin(i * Math.PI / 6));
+            context.lineTo(320 - 453 * Math.cos(i * Math.PI / 6), 320 + 453 * Math.sin(i * Math.PI / 6));
+            const text_x = 320 - 220 * Math.cos(i * Math.PI / 6);
+            const text_y = 320 + 220 * Math.sin(i * Math.PI / 6);
+            context.textAlign = "center";
+            context.textBaseline = "middle";            
+            if(i == 0) context.fillText("0", text_x, text_y);
+            if(i == 1) context.fillText("π/6", text_x, text_y);
+            if(i == 2) context.fillText("π/3", text_x, text_y);
+            if(i == 3) context.fillText("π/2", text_x, text_y);
+            if(i == 4) context.fillText("2π/3", text_x, text_y);
+            if(i == 5) context.fillText("5π/6", text_x, text_y);
+            if(i == 6) context.fillText("π", text_x, text_y);
+            if(i == 7) context.fillText("-5π/6", text_x, text_y);
+            if(i == 8) context.fillText("-2π/3", text_x, text_y);
+            if(i == 9) context.fillText("-π/2", text_x, text_y);
+            if(i == 10) context.fillText("-π/3", text_x, text_y);
+            if(i == 11) context.fillText("-π/6", text_x, text_y);
+        }
+        context.stroke();
+        context.closePath();
+        rotation_background = context.getImageData(0, 0, 640, 640);
+    } else {
+        context.putImageData(rotation_background, 0, 0);
+    }
+
+    // user code    
+    context.beginPath();
+    context.strokeStyle = "#d67f45";
+    context.fillStyle="#d67f45";
+    context.lineWidth = 3;    
+    draw_user_rotation(context);
+    context.stroke();
+    context.closePath();
 }
 </script>
 <script language="JavaScript" id="smoothness_script">
 function draw_user_smoothness(context) {
 }
 </script>
+<script language="JavaScript">
+var smoothness_background = null;
+
+function draw_smoothness() {
+    const canvas = document.getElementById("smoothness");
+    const context = canvas.getContext("2d");
+
+    // background
+    if(smoothness_background == null) {
+        context.font = "16px sans-serif";
+        context.fillStyle="#eeeeee";        
+        context.fillRect(0, 0, w, h);
+        context.beginPath();
+        context.strokeStyle = "#000";
+        context.fillStyle="#000";
+        context.lineWidth = 1;
+        draw_arrow(context, 0, 640, 0, 0);
+        draw_arrow(context, 0, 640, 640, 640);
+        context.fillText("f(x)", 14, 20);
+        context.fillText("x", 620, 624);
+        context.fillText("0", 14, 624);
+        for(var i = 0.125; i < 1; i += 0.125) {
+            context.fillText(i, 640 * i - 2 , 624);
+            context.fillText(i, 14 , 640 + 12 - i * 640);
+            context.moveTo(0, 640 - i * 640);
+            context.lineTo(12 - 4 * 8 * (i % 0.25), 640 - i * 640);
+            context.moveTo(i * 640, 640);
+            context.lineTo(i * 640, 640 - (12 - 4 * 8 * (i % 0.25)));
+            
+        }
+        context.stroke();
+        context.closePath();
+        smoothness_background = context.getImageData(0, 0, 640, 640);
+    } else {
+        context.putImageData(smoothness_background, 0, 0);        
+    }
+    
+    // user code
+    context.beginPath();
+    context.strokeStyle = "#d67f45";
+    context.fillStyle="#d67f45";
+    context.lineWidth = 3;
+    draw_user_smoothness(context);
+    context.stroke();
+    context.closePath();
+}
+</script>
 <script language="JavaScript" id="curves_script">
 function draw_user_curves(context) {
 }
 </script>
-
 <script language="JavaScript">
-function cos(x) {return Math.cos(x);};
-function sin(x) {return Math.sin(x);};
-const PI = Math.PI;
-    
-var rotation_background = null;
-var smoothness_background = null;
 var curves_background = null;
-function draw(thing) {
-    const canvas = document.getElementById(thing);
+function draw_curves() {
+    const canvas = document.getElementById("curves");
     const context = canvas.getContext("2d");
 
     // background
-    if(thing == "rotation") {
-        if(rotation_background == null) {
-            context.font = "16px sans-serif";
-            context.fillStyle="#eeeeee";
-            context.fillRect(0, 0, w, h);
-            context.beginPath();
-            context.strokeStyle = "#000";
-            context.fillStyle="#000";
-            context.lineWidth = 1;
-            for(var i = 0; i < 12; ++i) {
-                context.moveTo(320 - 240 * Math.cos(i * Math.PI / 6), 320 + 240 * Math.sin(i * Math.PI / 6));
-                context.lineTo(320 - 453 * Math.cos(i * Math.PI / 6), 320 + 453 * Math.sin(i * Math.PI / 6));
-                const text_x = 320 - 220 * Math.cos(i * Math.PI / 6);
-                const text_y = 320 + 220 * Math.sin(i * Math.PI / 6);
-                context.textAlign = "center";
-                context.textBaseline = "middle";            
-                if(i == 0) context.fillText("0", text_x, text_y);
-                if(i == 1) context.fillText("π/6", text_x, text_y);
-                if(i == 2) context.fillText("π/3", text_x, text_y);
-                if(i == 3) context.fillText("π/2", text_x, text_y);
-                if(i == 4) context.fillText("2π/3", text_x, text_y);
-                if(i == 5) context.fillText("5π/6", text_x, text_y);
-                if(i == 6) context.fillText("π", text_x, text_y);
-                if(i == 7) context.fillText("-5π/6", text_x, text_y);
-                if(i == 8) context.fillText("-2π/3", text_x, text_y);
-                if(i == 9) context.fillText("-π/2", text_x, text_y);
-                if(i == 10) context.fillText("-π/3", text_x, text_y);
-                if(i == 11) context.fillText("-π/6", text_x, text_y);
-            }
-            context.stroke();
-            context.closePath();
-            rotation_background = context.getImageData(0, 0, 640, 640);
-        } else {
-            context.putImageData(rotation_background, 0, 0);
+    if(curves_background == null) {
+        context.font = "16px sans-serif";
+        context.fillStyle="#eeeeee";        
+        context.fillRect(0, 0, w, h);
+        context.beginPath();
+        context.strokeStyle = "#777";
+        context.fillStyle="#000";
+        context.lineWidth = 1;
+        for(var i = 80; i < 640; i += 80) {
+            context.fillText(i, i + 4, 18);
+            context.fillText(i, 4 , i - 8);
+            context.moveTo(0, i);
+            context.lineTo(640, i);
+            context.moveTo(i, 0);
+            context.lineTo(i, 640);
+            
         }
-    } else if (thing == "smoothness") {
-        if(smoothness_background == null) {
-            context.font = "16px sans-serif";
-            context.fillStyle="#eeeeee";        
-            context.fillRect(0, 0, w, h);
-            context.beginPath();
-            context.strokeStyle = "#000";
-            context.fillStyle="#000";
-            context.lineWidth = 1;
-            draw_arrow(context, 0, 640, 0, 0);
-            draw_arrow(context, 0, 640, 640, 640);
-            context.fillText("f(x)", 14, 20);
-            context.fillText("x", 620, 624);
-            context.fillText("0", 14, 624);
-            for(var i = 0.125; i < 1; i += 0.125) {
-                context.fillText(i, 640 * i - 2 , 624);
-                context.fillText(i, 14 , 640 + 12 - i * 640);
-                context.moveTo(0, 640 - i * 640);
-                context.lineTo(12 - 4 * 8 * (i % 0.25), 640 - i * 640);
-                context.moveTo(i * 640, 640);
-                context.lineTo(i * 640, 640 - (12 - 4 * 8 * (i % 0.25)));
-                
-            }
-            context.stroke();
-            context.closePath();
-            smoothness_background = context.getImageData(0, 0, 640, 640);
-        } else {
-            context.putImageData(smoothness_background, 0, 0);        
-        }
-    } else if (thing == "curves") {
-        if(curves_background == null) {
-            context.font = "16px sans-serif";
-            context.fillStyle="#eeeeee";        
-            context.fillRect(0, 0, w, h);
-            context.beginPath();
-            context.strokeStyle = "#777";
-            context.fillStyle="#000";
-            context.lineWidth = 1;
-            for(var i = 80; i < 640; i += 80) {
-                context.fillText(i, i + 4, 18);
-                context.fillText(i, 4 , i - 8);
-                context.moveTo(0, i);
-                context.lineTo(640, i);
-                context.moveTo(i, 0);
-                context.lineTo(i, 640);
-                
-            }
-            context.stroke();
-            context.closePath();
-            curves_background = context.getImageData(0, 0, 640, 640);
-        } else {
-            context.putImageData(curves_background, 0, 0);  
-        }
+        context.stroke();
+        context.closePath();
+        curves_background = context.getImageData(0, 0, 640, 640);
+    } else {
+        context.putImageData(curves_background, 0, 0);  
     }
     
+    // user code
     context.beginPath();
     context.strokeStyle = "#d67f45";
     context.fillStyle="#d67f45";
     context.lineWidth = 3;    
-    
-    if(thing == "rotation") {
-        draw_user_rotation(context);
-    } else if(thing == "smoothness") {
-        draw_user_smoothness(context);
-    } else if(thing == "curves") {
-        draw_user_curves(context);
-    }
-    
-        
+    draw_user_curves(context);   
     context.stroke();
     context.closePath();
 }
