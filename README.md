@@ -4,6 +4,7 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 
 ## Maths
 - [SymPy makes math fun again](https://wordsandbuttons.online/sympy_makes_math_fun_again.html) 
+- [Sine and cosine](https://wordsandbuttons.online/sine_and_cosine.html) Interactive mnemonics and changeable snippets.
 - [Circles and lines vs. polynomial splines](https://wordsandbuttons.online/circles_and_lines_vs_polynomial_splines.html) 
 - [Interactive mnemonics for dot and cross vector products](https://wordsandbuttons.online/interactive_mnemonics_for_dot_and_cross_vector_products.html) 
 - [Polynomial approximation and interpolation](https://wordsandbuttons.online/polynomial_approximation_and_interpolation.html) 
