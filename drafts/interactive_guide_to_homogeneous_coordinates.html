@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Interactive guide to homogeneous coordinates</title>
+    <meta name="keywords" content="homogeneous,coordinates,geometry,tutorial,guide">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 36pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 20pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    line-height: 1.42;
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.formula {
+    font-family: sans-serif;
+    font-size: 15pt;
+    font-style: italic;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+pre {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+}
+
+table {
+    border-width: 0pt;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    font-family: monospace;
+    text-align: center;
+}
+
+table td {
+    padding: 0pt 4pt 0pt 4pt;
+    margin: 0 0 0 0;
+    border-width: 0pt;
+}
+
+.brackets {
+    font-size:48pt;
+    padding-bottom:8pt;
+    font-family: sans-serif;
+    font-weight: 100;
+    font-style: normal;
+}
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: center;
+    font-family: sans-serif;
+    width: 505pt;
+    background-color: #eeee99;
+    color: #000;
+}
+
+input[type="text"] {
+    width: 100pt;
+    height: 22pt;
+    margin: 8pt 8pt 8pt 8pt;
+    padding-left: 3pt;
+    font-size: 16pt;
+}
+
+.incdec{
+    width: 32pt;
+    height: 26pt;
+    margin: 0 0 0 0;
+    font-size: 16pt;
+    text-align: center;
+}
+
+button {
+    width: 150pt;
+    height: 26pt;
+    margin-left:8pt;
+    margin-right:8pt;
+    font-size: 16pt;
+}
+
+input[type="radio"]{
+    margin: 4pt 4pt 4pt 4pt;
+}
+    </style>
+    <script language="JavaScript">
+var w = 640;
+var h = 640;
+var d = 128.0;
+
+function client_to_x(client_x){
+    return (client_x - w / 2.0) / d;
+}
+
+function client_to_y(client_y){
+    return (h / 2.0 - client_y) / d;
+}
+
+function x_to_client(x){
+    return x * d + w / 2.0;
+}
+
+function y_to_client(y){
+    return h / 2.0 - y * d;
+}
+
+var point_x = 1.5;
+var point_y = 2;
+
+var pick_a_point = null;
+var slide_a_w = null;
+var translation = null;
+
+function draw_grid_on(context){
+    // grid
+    context.beginPath();
+    context.moveTo(0,           h / 2.0);
+    context.lineTo(w,           h / 2.0);
+    context.lineTo(w-12,        h / 2.0 - 5);
+    context.moveTo(w,           h / 2.0);
+    context.lineTo(w-12,        h / 2.0 + 5);
+    context.moveTo(w / 2.0,     h);
+    context.lineTo(w / 2.0,     0);
+    context.lineTo(w / 2.0 - 5, 12);
+    context.moveTo(w / 2.0,     0);
+    context.lineTo(w / 2.0 + 5, 12);
+    context.fillStyle="#000000";
+    for(var i = -3; i <= 3; i++){
+        context.moveTo(     w / 2.0 + i*d,      h / 2.0);
+        context.lineTo(     w / 2.0 + i*d,      h / 2.0 - 5);
+        context.fillText(i, w / 2.0 + i*d + 4,  h / 2.0 + 16);
+        context.moveTo(     w / 2.0,            h / 2.0 - i*d);
+        context.lineTo(     w / 2.0 + 5,        h / 2.0 - i*d);
+        context.fillText(i, w / 2.0 + 5,        h / 2.0 - i*d + 16);
+    }
+    context.strokeStyle="#000000";
+    context.stroke();
+    context.closePath();
+}
+
+function write_the_point_value(){
+    document.getElementById("to_fill_with_numbers").innerHTML =
+    "The point (" + point_x + ", " + point_y + ") is the same as " +
+    "(" + point_x + ", " + point_y + ", 1). <br>" +
+    "Or (" + point_x*2 + ", " + point_y*2 + ", 2).<br>" +
+    "Or (" + point_x*0.5 + ", " + point_y*0.5 + ", 0.5). <br>" +
+    "Or even (" + point_x*1000 + ", " + point_y*1000 + ", 1000). <br>";
+}
+
+function init_w(){
+    document.getElementById("w").addEventListener('submit', function(e) {
+        transform();
+        e.preventDefault();
+    }, false);
+}
+
+function init_pick_a_point(){
+    pick_a_point = document.getElementById("pick_a_point");
+    var canvas_rect = pick_a_point.getBoundingClientRect();
+    client_x = canvas_rect.left + point_x * 64 + 256;
+    client_y = canvas_rect.top + 256 - point_y * 64;
+    pick_a_point_draw(0, 0, false);
+
+    pick_a_point.addEventListener('mousemove', function(e){
+        var canvas_rect = pick_a_point.getBoundingClientRect();
+        if(e.buttons == 1){ // drag
+            point_x = Math.round(client_to_x(e.clientX - canvas_rect.left)*10)/10;
+            point_y = Math.round(client_to_y(e.clientY - canvas_rect.top)*10)/10;
+            pick_a_point_draw(0, 0, false);
+        }else{  // move
+            pick_a_point_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        }
+    }, false);
+
+    pick_a_point.addEventListener('mousedown', function(e){
+        var canvas_rect = pick_a_point.getBoundingClientRect();
+        point_x = Math.round(client_to_x(e.clientX - canvas_rect.left)*10)/10;
+        point_y = Math.round(client_to_y(e.clientY - canvas_rect.top)*10)/10;
+        pick_a_point_draw(0, 0, false);
+        write_the_point_value();
+        transform();
+        slide_a_w_draw(e.clientX);
+    }, false);
+}
+
+function pick_a_point_draw(client_x, client_y, do_guides){
+    var pick_a_point_context = pick_a_point.getContext("2d");
+    pick_a_point_context.font = "16px sans-serif";
+    // background
+    pick_a_point_context.fillStyle="#eeeeee";
+    pick_a_point_context.fillRect(0, 0, w, h);
+
+    // selection
+    pick_a_point_context.beginPath();
+    pick_a_point_context.setLineDash([2, 2]);
+    pick_a_point_context.moveTo(x_to_client(point_x), h / 2.0);
+    pick_a_point_context.lineTo(x_to_client(point_x), y_to_client(point_y));
+    pick_a_point_context.moveTo(w / 2.0, y_to_client(point_y));
+    pick_a_point_context.lineTo(x_to_client(point_x), y_to_client(point_y));
+    pick_a_point_context.strokeStyle="#dd6644";
+    pick_a_point_context.stroke();
+    pick_a_point_context.fillStyle="#dd6644";
+    pick_a_point_context.fillText(point_x.toFixed(1) + ", " + point_y.toFixed(1), x_to_client(point_x) + 4, y_to_client(point_y) + 16);
+    pick_a_point_context.setLineDash([]);
+    pick_a_point_context.closePath();
+
+    if(do_guides){
+        pick_a_point_context.beginPath();
+        pick_a_point_context.setLineDash([4, 4]);
+        pick_a_point_context.moveTo(client_x, client_y);
+        pick_a_point_context.lineTo(x_to_client(point_x), y_to_client(point_y));
+        pick_a_point_context.strokeStyle="#992200";
+        pick_a_point_context.stroke();
+        pick_a_point_context.setLineDash([]);
+        pick_a_point_context.closePath();
+    }
+
+    // grid
+    draw_grid_on(pick_a_point_context);
+}
+
+function transform(){
+    var w = Number(document.getElementById("proposed_w").value);
+    if(w == NaN)
+        w = 1;
+    if(w == 0){
+        document.getElementById("after_the_w_proposed").style.display = "block";
+        document.getElementById("transformed").innerHTML = "<br>No transformation available!"
+        document.getElementById("to_hide_on_transform").style.display = "none";
+    }else{
+        document.getElementById("transformed").innerHTML =
+            "<br>(" + point_x + ", " + point_y + ") = " +
+            "(" + parseFloat((point_x * w).toFixed(3)) + ", " + parseFloat((point_y * w).toFixed(3)) + ", " + parseFloat((w).toFixed(3)) + ")";
+    }
+}
+
+var slide_w = 1.0;
+
+function init_slide_a_w(){
+    var slide_a_w = document.getElementById("slide_a_w");
+    var canvas_rect = slide_a_w.getBoundingClientRect();
+    slide_a_w_draw(0, 0, false);
+
+    slide_a_w.addEventListener('mousemove', function(e){
+        var canvas_rect = slide_a_w.getBoundingClientRect();
+        slide_a_w_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1){
+            var mouse_x = client_to_x(e.clientX - canvas_rect.left);
+            var mouse_y = client_to_y(e.clientY - canvas_rect.top);
+            var t = (point_x * mouse_x + point_y * mouse_y) / (point_x * point_x + point_y * point_y);
+            slide_w = 1.0 / t;
+            slide_a_w_draw(0, 0, false);
+        }
+    }, false);
+
+    slide_a_w.addEventListener('mousedown', function(e){
+        var canvas_rect = slide_a_w.getBoundingClientRect();
+        slide_w = point_x / client_to_x(e.clientX - canvas_rect.left);
+        slide_a_w_draw(0, 0, false);
+    }, false);
+
+    slide_a_w.addEventListener('mouseleave', function(e){
+        var canvas_rect = slide_a_w.getBoundingClientRect();
+        slide_a_w_draw(0, 0, false);
+    }, false);
+}
+
+function slide_a_w_draw(client_x, client_y, is_moving){
+    var slide_a_w = document.getElementById("slide_a_w");
+    var slide_a_w_context = slide_a_w.getContext("2d");
+    slide_a_w_context.font = "16px sans-serif";
+    // background
+    slide_a_w_context.fillStyle="#eeeeee";
+    slide_a_w_context.fillRect(0, 0, w, h);
+
+    // selection
+    var w_;
+    if(is_moving){
+        var mouse_x = client_to_x(client_x);
+        var mouse_y = client_to_y(client_y);
+        var t = (point_x * mouse_x + point_y * mouse_y) / (point_x * point_x + point_y * point_y);
+        w_ = 1.0 / t;
+    }else{
+        w_ = slide_w;
+    }
+
+    slide_a_w_context.beginPath();
+    slide_a_w_context.moveTo(x_to_client(point_x * 100), y_to_client(point_y * 100));
+    slide_a_w_context.lineTo(x_to_client(point_x * -100), y_to_client(point_y * -100));
+    slide_a_w_context.strokeStyle="#dd6644";
+    slide_a_w_context.stroke();
+    slide_a_w_context.closePath();
+
+    if(is_moving){
+        slide_a_w_context.beginPath();
+        slide_a_w_context.moveTo(x_to_client(point_x / w_), y_to_client(point_y / w_))
+        slide_a_w_context.lineTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w))
+        slide_a_w_context.strokeStyle="#992200";
+        slide_a_w_context.setLineDash([4, 4]);
+        slide_a_w_context.lineWidth = 2;
+        slide_a_w_context.stroke();
+        slide_a_w_context.lineWidth = 1;
+        slide_a_w_context.setLineDash([]);
+        slide_a_w_context.closePath();
+    }
+
+    slide_a_w_context.beginPath();
+    slide_a_w_context.moveTo(x_to_client(point_x / slide_w) - 10, y_to_client(point_y / slide_w));
+    slide_a_w_context.lineTo(x_to_client(point_x / slide_w) + 10, y_to_client(point_y / slide_w));
+    slide_a_w_context.moveTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w) - 10);
+    slide_a_w_context.lineTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w) + 10);
+    slide_a_w_context.strokeStyle="#dd6644";
+    slide_a_w_context.stroke();
+    slide_a_w_context.fillStyle="#dd6644";
+    slide_a_w_context.fillText(point_x.toFixed(1) + ", " + point_y.toFixed(1) + ", " + slide_w.toFixed(3), x_to_client(point_x / slide_w) + 4, y_to_client(point_y / slide_w) + 16);
+    slide_a_w_context.closePath();
+
+    // grid
+    draw_grid_on(slide_a_w_context);
+}
+
+
+function draw_original_cube_on(context){
+    // original cube
+    context.beginPath();
+    context.moveTo(x_to_client(1), y_to_client(1));
+    context.lineTo(x_to_client(1 + 1), y_to_client(1));
+    context.lineTo(x_to_client(1 + 1), y_to_client(1 + 1));
+    context.lineTo(x_to_client(1), y_to_client(1 + 1));
+    context.lineTo(x_to_client(1), y_to_client(1));
+    context.strokeStyle="#999999";
+    context.stroke();
+    context.closePath();
+}
+
+var dx = 0.5;
+var dy = 0.3;
+
+function init_translation(){
+    translation = document.getElementById("translation");
+    translation_draw(0, 0, false);
+
+    translation.addEventListener('mousedown', function(e){
+        var canvas_rect = translation.getBoundingClientRect();
+        dx = client_to_x(e.clientX - canvas_rect.left);
+        dy = client_to_y(e.clientY - canvas_rect.top);
+        translation_draw(0, 0, false);
+    }, false);
+
+    translation.addEventListener('mousemove', function(e){
+        var canvas_rect = translation.getBoundingClientRect();
+        if(e.buttons == 1){
+            dx = client_to_x(e.clientX - canvas_rect.left);
+            dy = client_to_y(e.clientY - canvas_rect.top);
+            translation_draw(0, 0, false);
+        }else{
+            translation_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        }
+    }, false);
+
+    translation.addEventListener('mouseleave', function(e){
+        var canvas_rect = translation.getBoundingClientRect();
+        translation_draw(0, 0, false);
+    }, false);
+}
+
+function translation_draw(client_x, client_y, do_new){
+    if(do_new){
+        var x = client_to_x(client_x);
+        var y = client_to_y(client_y);
+    }else{
+        var x = dx;
+        var y = dy;
+    }
+
+    var translation_context = translation.getContext("2d");
+    translation_context.font = "16px sans-serif";
+    // background
+    translation_context.fillStyle="#eeeeee";
+    translation_context.fillRect(0, 0, w, h);
+
+    // original cube
+    draw_original_cube_on(translation_context);
+
+    if(do_new){
+        // the connection
+        translation_context.beginPath();
+        translation_context.setLineDash([2, 2]);
+        translation_context.moveTo(x_to_client(1), y_to_client(1));
+        translation_context.lineTo(x_to_client(x), y_to_client(y));
+        translation_context.moveTo(x_to_client(1 + 1), y_to_client(1));
+        translation_context.lineTo(x_to_client(x + 1), y_to_client(y));
+        translation_context.moveTo(x_to_client(1 + 1), y_to_client(1 + 1));
+        translation_context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
+        translation_context.moveTo(x_to_client(1), y_to_client(1 + 1));
+        translation_context.lineTo(x_to_client(x), y_to_client(y + 1));
+        translation_context.strokeStyle="#eeaa88";
+        translation_context.stroke();
+        translation_context.setLineDash([]);
+        translation_context.closePath();
+
+        // dx-dy cube
+        translation_context.beginPath();
+        translation_context.moveTo(x_to_client(dx), y_to_client(dy));
+        translation_context.lineTo(x_to_client(dx + 1), y_to_client(dy));
+        translation_context.lineTo(x_to_client(dx + 1), y_to_client(dy + 1));
+        translation_context.lineTo(x_to_client(dx), y_to_client(dy + 1));
+        translation_context.lineTo(x_to_client(dx), y_to_client(dy));
+        translation_context.strokeStyle="#ff8866";
+        translation_context.stroke();
+        translation_context.closePath();
+    }
+    // translation
+    translation_context.beginPath();
+    translation_context.moveTo(x_to_client(x), y_to_client(y));
+    translation_context.lineTo(x_to_client(x + 1), y_to_client(y));
+    translation_context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
+    translation_context.lineTo(x_to_client(x), y_to_client(y + 1));
+    translation_context.lineTo(x_to_client(x), y_to_client(y));
+    translation_context.strokeStyle="#dd6644";
+    translation_context.stroke();
+    translation_context.closePath();
+    translation_context.fillStyle="#dd6644";
+    translation_context.fillText("x' = x + a, where a = " + (x-1).toFixed(1), 32, 560);
+    translation_context.fillText("y' = y + b, where b = " + (y-1).toFixed(1), 32, 580);
+
+    // grid
+    draw_grid_on(translation_context);
+}
+
+function rotated_x(a, x, y){
+    return Math.sin(a) * x - Math.cos(a) * y;
+}
+
+function rotated_y(a, x, y){
+    return Math.cos(a) * x + Math.sin(a) * y;
+}
+
+var rotation_a = Math.PI / 2 + 0.2;
+
+function in_2_pi(x) {
+    while(x < 0.0)
+        x += 2*Math.PI;
+    while(x >= 2*Math.PI)
+        x -= 2*Math.PI;
+    return x;
+}
+
+function rotation_for(x, y) {
+    if (x > 0)
+        return in_2_pi(Math.PI * 3 / 4 - Math.atan(y / x));
+    else
+        return in_2_pi(Math.PI * 7 / 4 - Math.atan(y / x));
+}
+
+function init_rotation(){
+    rotation_draw(rotation_a, false);
+
+    var rotation = document.getElementById("rotation");
+
+    rotation.addEventListener('mousemove', function(e){
+        var canvas_rect = rotation.getBoundingClientRect();
+        var client_x = e.clientX - canvas_rect.left;
+        var client_y = e.clientY - canvas_rect.top;
+        var a = rotation_for(client_to_x(client_x), client_to_y(client_y));
+        if(e.buttons == 1)
+            rotation_a = a;
+        rotation_draw(a, true);
+    }, false);
+
+    rotation.addEventListener('mousedown', function(e){
+        var canvas_rect = rotation.getBoundingClientRect();
+        var client_x = e.clientX - canvas_rect.left;
+        var client_y = e.clientY - canvas_rect.top;
+        rotation_a = rotation_for(client_to_x(client_x), client_to_y(client_y));
+        rotation_draw(rotation_a, false);
+    }, false);
+
+    rotation.addEventListener('mouseleave', function(e){
+        var canvas_rect = translation.getBoundingClientRect();
+        rotation_draw(rotation_a, false);
+    }, false);
+}
+
+function rotation_draw(a, do_new){
+    var rotation_context = rotation.getContext("2d");
+    rotation_context.font = "16px sans-serif";
+    // background
+    rotation_context.fillStyle="#eeeeee";
+    rotation_context.fillRect(0, 0, w, h);
+
+    var xs = [1., 2., 2., 1.];
+    var ys = [1., 1., 2., 2.];
+    var new_xs = [0, 0, 0, 0];
+    var new_ys = [0, 0, 0, 0];
+    for(var i = 0; i < 4; i++){
+      new_xs[i] = rotated_x(a, xs[i], ys[i]);
+      new_ys[i] = rotated_y(a, xs[i], ys[i]);
+    }
+
+    var new_saved_xs = [0, 0, 0, 0];
+    var new_saved_ys = [0, 0, 0, 0];
+    for(var i = 0; i < 4; i++){
+      new_saved_xs[i] = rotated_x(rotation_a, xs[i], ys[i]);
+      new_saved_ys[i] = rotated_y(rotation_a, xs[i], ys[i]);
+    }
+
+    if(do_new){
+        // the connection
+        for(var i = 0; i < 4; i++){
+            rotation_context.beginPath();
+            rotation_context.setLineDash([2, 2]);
+            var r = x_to_client(Math.sqrt(xs[i]*xs[i] + ys[i]*ys[i])) - x_to_client(0);
+            var a1 = in_2_pi(rotation_for(xs[i], ys[i]) - Math.PI * 3 / 4);
+            var a2 = in_2_pi(rotation_for(new_xs[i], new_ys[i]) - Math.PI * 3 / 4);
+            if(a1 < a2)
+                rotation_context.arc(x_to_client(0), y_to_client(0), r, a1, a2);
+            else
+                rotation_context.arc(x_to_client(0), y_to_client(0), r, a2, a1);
+            rotation_context.strokeStyle="#eeaa88";
+            rotation_context.stroke();
+            rotation_context.setLineDash([]);
+            rotation_context.closePath();
+        }
+    }
+
+    // original cube
+    draw_original_cube_on(rotation_context);
+
+    if(do_new){ // draw a saved cube
+        rotation_context.beginPath();
+        rotation_context.moveTo(x_to_client(new_saved_xs[3]), y_to_client(new_saved_ys[3]));
+        for(var i = 0; i < 4; i++){
+            rotation_context.lineTo(x_to_client(new_saved_xs[i]), y_to_client(new_saved_ys[i]));
+        }
+        rotation_context.strokeStyle="#ff8866";
+        rotation_context.stroke();
+        rotation_context.closePath();
+    }
+
+    // rotation
+    rotation_context.beginPath();
+    rotation_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
+    for(var i = 0; i < 4; i++){
+        rotation_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+    }
+    rotation_context.strokeStyle="#dd6644";
+    rotation_context.stroke();
+    rotation_context.closePath();
+    rotation_context.fillStyle="#dd6644";
+    rotation_context.fillText("x' = sin(a) * x + cos(a) * y", 32, 540);
+    rotation_context.fillText("y' = cos(a) * x - sin(a) * y", 32, 560);
+    rotation_context.fillText("where a = " + (a - Math.PI/2).toFixed(2), 32, 580);
+
+    // grid
+    draw_grid_on(rotation_context);
+}
+
+var scale_x = 0.8;
+var scale_y = 1.2;
+
+function init_scale(){
+    scale = document.getElementById("scale");
+    scale_draw(scale_x, scale_y, false);
+
+    scale.addEventListener('mousemove', function(e){
+        var canvas_rect = scale.getBoundingClientRect();
+        var new_scale_x = client_to_x(e.clientX - canvas_rect.left);
+        var new_scale_y = client_to_y(e.clientY - canvas_rect.top);
+        if(e.buttons == 1){
+            scale_x = new_scale_x;
+            scale_y = new_scale_y;
+            scale_draw(scale_x, scale_y, false);
+        }else{
+            scale_draw(new_scale_x, new_scale_y, true);
+        }
+    }, false);
+
+    scale.addEventListener('mousedown', function(e){
+        var canvas_rect = scale.getBoundingClientRect();
+        scale_x = client_to_x(e.clientX - canvas_rect.left);
+        scale_y = client_to_y(e.clientY - canvas_rect.top);
+        scale_draw(scale_x, scale_y, false);
+    }, false);
+
+    scale.addEventListener('mouseleave', function(e){
+        scale_draw(scale_x, scale_y, false);
+    }, false);
+}
+
+function scale_draw(a, b, do_new){
+    var scale_context = scale.getContext("2d");
+    scale_context.font = "16px sans-serif";
+    // background
+    scale_context.fillStyle="#eeeeee";
+    scale_context.fillRect(0, 0, w, h);
+
+    var xs = [1., 2., 2., 1.];
+    var ys = [1., 1., 2., 2.];
+    var new_xs = [0, 0, 0, 0];
+    var new_ys = [0, 0, 0, 0];
+    for(var i = 0; i < 4; i++){
+        new_xs[i] = a * xs[i];
+        new_ys[i] = b * ys[i];
+    }
+
+    var new_saved_xs = [0, 0, 0, 0];
+    var new_saved_ys = [0, 0, 0, 0];
+    for(var i = 0; i < 4; i++){
+        new_saved_xs[i] = scale_x * xs[i];
+        new_saved_ys[i] = scale_y * ys[i];
+    }
+
+    if(do_new){
+        // the connection
+        scale_context.beginPath();
+        scale_context.setLineDash([2, 2]);
+        for(var i = 0; i < 4; i++){
+            scale_context.moveTo(x_to_client(xs[i]), y_to_client(ys[i]));
+            scale_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+        }
+        scale_context.strokeStyle="#eeaa88";
+        scale_context.stroke();
+        scale_context.setLineDash([]);
+        scale_context.closePath();
+    }
+
+    // original cube
+    draw_original_cube_on(scale_context);
+
+    if(do_new){ // draw a saved cube
+        scale_context.beginPath();
+        scale_context.moveTo(x_to_client(new_saved_xs[3]), y_to_client(new_saved_ys[3]));
+        for(var i = 0; i < 4; i++){
+            scale_context.lineTo(x_to_client(new_saved_xs[i]), y_to_client(new_saved_ys[i]));
+        }
+        scale_context.strokeStyle="#ff8866";
+        scale_context.stroke();
+        scale_context.closePath();
+    }
+
+    // scale
+    scale_context.beginPath();
+    scale_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
+    for(var i = 0; i < 4; i++){
+        scale_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+    }
+    scale_context.strokeStyle="#dd6644";
+    scale_context.stroke();
+    scale_context.closePath();
+    scale_context.fillStyle="#dd6644";
+    scale_context.fillText("x' = a * x, where a = " + a.toFixed(2), 32, 560);
+    scale_context.fillText("y' = b * y, where b = " + b.toFixed(2), 32, 580);
+
+    // grid
+    draw_grid_on(scale_context);
+}
+
+function init_affine(){
+    affine = document.getElementById("affine");
+    affine_draw(0, 0, false);
+
+    affine.addEventListener('mousemove', function(e){
+        if(e.buttons == 1){
+            var canvas_rect = affine.getBoundingClientRect();
+            var client_x = e.clientX - canvas_rect.left;
+            var client_y = e.clientY - canvas_rect.top;
+            affine_xs[affine_i] = client_to_x(client_x);
+            affine_ys[affine_i] = client_to_y(client_y);
+            affine_draw(0, 0, false);
+        }else{
+            affine_draw(e.clientX, e.clientY, true);
+        }
+    }, false);
+
+    affine.addEventListener('mouseup', function(e){
+        var canvas_rect = affine.getBoundingClientRect();
+        var client_x = e.clientX - canvas_rect.left;
+        var client_y = e.clientY - canvas_rect.top;
+        var x = client_to_x(client_x);
+        var y = client_to_y(client_y);
+        affine_xs[affine_i] = x;
+        affine_ys[affine_i] = y;
+        affine_xs[3] = affine_xs[0] + affine_xs[2] - affine_xs[1];
+        affine_ys[3] = affine_ys[0] + affine_ys[2] - affine_ys[1];
+        affine_i = (affine_i + 1) % 3;
+        affine_draw(e.clientX, e.clientY, true);
+    }, false);
+
+    affine.addEventListener('mouseleave', function(e){
+        affine_draw(0, 0, false);
+    }, false);
+}
+
+var affine_xs = [0.75, 2.0, 2.25, 1.0];
+var affine_ys = [0.75, 1.0, 2.25, 2.0];
+var affine_i = 0;
+
+function affine_draw(client_x, client_y, do_new){
+    // coordiantes correction
+    var canvas_rect = affine.getBoundingClientRect();
+    client_x -= canvas_rect.left;
+    client_y -= canvas_rect.top;
+    var x = client_to_x(client_x);
+    var y = client_to_y(client_y);
+
+    var affine_context = affine.getContext("2d");
+    affine_context.font = "16px sans-serif";
+    // background
+    affine_context.fillStyle="#eeeeee";
+    affine_context.fillRect(0, 0, w, h);
+
+    // original cube
+    draw_original_cube_on(affine_context);
+
+    // affine
+    affine_context.beginPath();
+    affine_context.moveTo(x_to_client(affine_xs[3]), y_to_client(affine_ys[3]));
+    for(var i = 0; i < 4; i++){
+        affine_context.lineTo(x_to_client(affine_xs[i]), y_to_client(affine_ys[i]));
+    }
+    affine_context.strokeStyle="#dd6644";
+    affine_context.stroke();
+    affine_context.closePath();
+
+    if(do_new){
+        // link
+        affine_context.beginPath();
+        affine_context.setLineDash([2, 2]);
+        affine_context.moveTo(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]));
+        affine_context.lineTo(x_to_client(x), y_to_client(y));
+        affine_context.strokeStyle="#dd6644";
+        affine_context.stroke();
+        affine_context.setLineDash([]);
+        affine_context.closePath();
+    }
+
+    // grid
+    draw_grid_on(affine_context);
+
+    // x
+    affine_context.beginPath();
+    affine_context.moveTo(x_to_client(affine_xs[affine_i]) - 10, y_to_client(affine_ys[affine_i]));
+    affine_context.lineTo(x_to_client(affine_xs[affine_i]) + 10, y_to_client(affine_ys[affine_i]));
+    affine_context.moveTo(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]) - 10);
+    affine_context.lineTo(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]) + 10);
+    affine_context.strokeStyle="#dd6644";
+    affine_context.stroke();
+    affine_context.setLineDash([]);
+    affine_context.closePath();
+}
+
+function init_projective(){
+    projective = document.getElementById("projective");
+    projective_draw(0, 0, false);
+
+    projective.addEventListener('mousemove', function(e){
+        if(e.buttons == 1){
+            var canvas_rect = projective.getBoundingClientRect();
+            var client_x = e.clientX - canvas_rect.left;
+            var client_y = e.clientY - canvas_rect.top;
+            projective_xs[projective_i] = client_to_x(client_x);
+            projective_ys[projective_i] = client_to_y(client_y);
+            projective_draw(0, 0, false);
+        }else{
+            projective_draw(e.clientX, e.clientY, true);
+        }
+    }, false);
+
+    projective.addEventListener('mouseup', function(e){
+        var canvas_rect = projective.getBoundingClientRect();
+        client_x = e.clientX - canvas_rect.left;
+        client_y = e.clientY - canvas_rect.top;
+        var x = client_to_x(client_x);
+        var y = client_to_y(client_y);
+        projective_xs[projective_i] = x;
+        projective_ys[projective_i] = y;
+        projective_i = (projective_i + 1) % 4;
+        projective_draw(e.clientX, e.clientY, true);
+    }, false);
+
+    projective.addEventListener('mouseleave', function(e){
+        projective_draw(0, 0, false);
+    }, false);
+}
+
+var projective_xs = [0.5, 2.0, 1.5, 0.5];
+var projective_ys = [0.5, 0.5, 2.0, 1.0];
+var projective_i = 0;
+
+function projective_draw(client_x, client_y, do_new){
+    // coordiantes correction
+    var canvas_rect = projective.getBoundingClientRect();
+    client_x -= canvas_rect.left;
+    client_y -= canvas_rect.top;
+       var x = client_to_x(client_x);
+       var y = client_to_y(client_y);
+
+    var projective_context = projective.getContext("2d");
+    projective_context.font = "16px sans-serif";
+    // background
+    projective_context.fillStyle="#eeeeee";
+    projective_context.fillRect(0, 0, w, h);
+
+    // original cube
+    draw_original_cube_on(projective_context);
+
+    // projective
+    projective_context.beginPath();
+    projective_context.moveTo(x_to_client(projective_xs[3]), y_to_client(projective_ys[3]));
+    for(var i = 0; i < 4; i++){
+        projective_context.lineTo(x_to_client(projective_xs[i]), y_to_client(projective_ys[i]));
+    }
+    projective_context.strokeStyle="#dd6644";
+    projective_context.stroke();
+    projective_context.closePath();
+
+    if(do_new){
+        // link
+        projective_context.beginPath();
+        projective_context.setLineDash([2, 2]);
+        projective_context.moveTo(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]));
+        projective_context.lineTo(x_to_client(x), y_to_client(y));
+        projective_context.strokeStyle="#dd6644";
+        projective_context.stroke();
+        projective_context.setLineDash([]);
+        projective_context.closePath();
+    }
+
+    // grid
+    draw_grid_on(projective_context);
+
+    // x
+    projective_context.beginPath();
+    projective_context.moveTo(x_to_client(projective_xs[projective_i]) - 10, y_to_client(projective_ys[projective_i]));
+    projective_context.lineTo(x_to_client(projective_xs[projective_i]) + 10, y_to_client(projective_ys[projective_i]));
+    projective_context.moveTo(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]) - 10);
+    projective_context.lineTo(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]) + 10);
+    projective_context.strokeStyle="#dd6644";
+    projective_context.stroke();
+    projective_context.setLineDash([]);
+    projective_context.closePath();
+}
+
+var composable_reference_x = 0.0;
+var composable_reference_y = 0.0;
+
+function recalculate_composable(client_x, client_y){
+    const x = client_to_x(client_x);
+    const y = client_to_y(client_y);
+
+    // new cube
+    var new_xs = [1., 2., 2., 1.];
+    var new_ys = [1., 1., 2., 2.];
+    if(document.getElementById("radio_p").checked){
+        for(var i = 0; i < 4; i++){
+            new_xs[i] = composable_xs[i];
+            new_ys[i] = composable_ys[i];
+        }
+        new_xs[composable_i] = x;
+        new_ys[composable_i] = y;
+    }else if(document.getElementById("radio_t").checked){
+        for(var i = 0; i < 4; i++){
+            new_xs[i] = composable_xs[i] + x;
+            new_ys[i] = composable_ys[i] + y;
+        }
+    }else if(document.getElementById("radio_r").checked){
+        for(var i = 0; i < 4; i++){
+            new_xs[i] = rotated_x(rotation_for(x, y), composable_xs[i], composable_ys[i]);
+            new_ys[i] = rotated_y(rotation_for(x, y), composable_xs[i], composable_ys[i]);
+        }
+    }else if(document.getElementById("radio_s").checked){
+        for(var i = 0; i < 4; i++){
+            new_xs[i] = composable_xs[i] * x;
+            new_ys[i] = composable_ys[i] * y;
+        }
+    }
+    for(var i = 0; i < 4; i++){
+        composable_xs[i] = new_xs[i];
+        composable_ys[i] = new_ys[i];
+    }
+
+    // calculate a matrix
+    x0 = new_xs[0];     y0 = new_ys[0];
+    x1 = new_xs[1];     y1 = new_ys[1];
+    x2 = new_xs[2];     y2 = new_ys[2];
+    x3 = new_xs[3];     y3 = new_ys[3];
+    var A = (-x0*x2*y1 + x0*x2*y3 + x0*x3*y1 - x0*x3*y2 + x1*x2*y0 - x1*x2*y3 - x1*x3*y0 + x1*x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var D = (x0*x1*y2 - x0*x1*y3 - x0*x2*y1 + x0*x2*y3 + x1*x3*y0 - x1*x3*y2 - x2*x3*y0 + x2*x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var a = (-2*x0*x1*y2 + 2*x0*x1*y3 + 3*x0*x2*y1 - 3*x0*x2*y3 - 2*x0*x3*y1 + 2*x0*x3*y2 - x1*x2*y0 + x1*x2*y3 + x2*x3*y0 - x2*x3*y1)/
+        (x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var B = (-x0*y1*y2 + x0*y1*y3 + x1*y0*y2 - x1*y0*y3 + x2*y0*y3 - x2*y1*y3 - x3*y0*y2 + x3*y1*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var E = (-x0*y1*y3 + x0*y2*y3 + x1*y0*y2 - x1*y2*y3 - x2*y0*y1 + x2*y1*y3 + x3*y0*y1 - x3*y0*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var b = (x0*y1*y2 - x0*y2*y3 - 3*x1*y0*y2 + 2*x1*y0*y3 + x1*y2*y3 + 2*x2*y0*y1 - 2*x2*y0*y3 - 2*x3*y0*y1 + 3*x3*y0*y2 - x3*y1*y2)/
+        (x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var C = (-x0*y2 + x0*y3 + x1*y2 - x1*y3 + x2*y0 - x2*y1 - x3*y0 + x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var F = (-x0*y1 + x0*y2 + x1*y0 - x1*y3 - x2*y0 + x2*y3 + x3*y1 - x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+    var c = 1.;
+    document.getElementById("matrix_col1").innerHTML = parseFloat(A.toFixed(3)) + "<br>" + parseFloat(B.toFixed(3)) + "<br>" + parseFloat(C.toFixed(3));
+    document.getElementById("matrix_col2").innerHTML = parseFloat(D.toFixed(3)) + "<br>" + parseFloat(E.toFixed(3)) + "<br>" + parseFloat(F.toFixed(3));
+    document.getElementById("matrix_col3").innerHTML = parseFloat(a.toFixed(3)) + "<br>" + parseFloat(b.toFixed(3)) + "<br>" + parseFloat(c.toFixed(3));
+}
+
+function init_composable(){
+    composable = document.getElementById("composable");
+    composable_draw(0, 0, false);
+
+    composable.addEventListener('mousemove', function(e){
+        var canvas_rect = composable.getBoundingClientRect();
+        client_x = e.clientX - canvas_rect.left;
+        client_y = e.clientY - canvas_rect.top;
+        if(e.buttons == 1){
+            if(document.getElementById("radio_p").checked){
+                recalculate_composable(client_x, client_y);
+                composable_draw(client_x, client_y, false);
+            }else if(document.getElementById("radio_s").checked){
+                composable_draw(client_x, client_y, true);
+            }else if(document.getElementById("radio_r").checked){
+                composable_draw(client_x, client_y, true);
+            }else{  // rotation
+                var new_client_x = x_to_client(client_to_x(client_x) - composable_reference_x);
+                var new_client_y = y_to_client(client_to_y(client_y) - composable_reference_y);
+                recalculate_composable(new_client_x, new_client_y);
+                composable_draw(new_client_x, new_client_y, false);
+                composable_reference_x = client_to_x(client_x);
+                composable_reference_y = client_to_y(client_y);
+            }
+        }else{
+            if(document.getElementById("radio_p").checked){
+                composable_draw(client_x, client_y, true);
+            }else{
+                var new_client_x = x_to_client(client_to_x(client_x) - composable_reference_x);
+                var new_client_y = y_to_client(client_to_y(client_y) - composable_reference_y);
+                composable_draw(new_client_x, new_client_y, true);
+            }
+        }
+    }, false);
+
+    composable.addEventListener('mouseup', function(e){
+        var canvas_rect = composable.getBoundingClientRect();
+        client_x = e.clientX - canvas_rect.left;
+        client_y = e.clientY - canvas_rect.top;
+        if(document.getElementById("radio_p").checked){
+            recalculate_composable(client_x, client_y);
+            composable_i = (composable_i + 1) % 4;
+            composable_draw(client_x, client_y, false);
+        }else if(document.getElementById("radio_s").checked){
+            recalculate_composable(client_x, client_y);
+            composable_draw(client_x, client_y, false);
+        }else if(document.getElementById("radio_r").checked){
+            recalculate_composable(client_x, client_y);
+            composable_draw(client_x, client_y, false);
+        }else{ // translation
+            var new_client_x = x_to_client(client_to_x(client_x) - composable_reference_x);
+            var new_client_y = y_to_client(client_to_y(client_y) - composable_reference_y);
+            recalculate_composable(new_client_x, new_client_y);
+            composable_draw(new_client_x, new_client_y, false);
+            composable_reference_x = client_to_x(client_x);
+            composable_reference_y = client_to_y(client_y);
+        }
+    }, false);
+
+    composable.addEventListener('mouseleave', function(e){
+        composable_draw(0, 0, false);
+    }, false);
+}
+
+var composable_xs = [1., 2., 2., 1.];
+var composable_ys = [1., 1., 2., 2.];
+var composable_i = 0;
+
+function composable_draw(client_x, client_y, do_new){
+    var x = client_to_x(client_x);
+    var y = client_to_y(client_y);
+
+    var composable_context = composable.getContext("2d");
+    composable_context.font = "16px sans-serif";
+    // background
+    composable_context.fillStyle="#eeeeee";
+    composable_context.fillRect(0, 0, w, h);
+
+    // original cube
+    draw_original_cube_on(composable_context);
+
+    // composable
+    composable_context.beginPath();
+    composable_context.moveTo(x_to_client(composable_xs[3]), y_to_client(composable_ys[3]));
+    for(var i = 0; i < 4; i++){
+        composable_context.lineTo(x_to_client(composable_xs[i]), y_to_client(composable_ys[i]));
+    }
+    composable_context.strokeStyle="#dd6644";
+    composable_context.stroke();
+    composable_context.closePath();
+
+    if(do_new){
+        // new cube
+        var new_xs = [1., 2., 2., 1.];
+        var new_ys = [1., 1., 2., 2.];
+        if(document.getElementById("radio_p").checked){
+            for(var i = 0; i < 4; i++){
+                new_xs[i] = composable_xs[i];
+                new_ys[i] = composable_ys[i];
+            }
+            new_xs[composable_i] = x;
+            new_ys[composable_i] = y;
+        }else if(document.getElementById("radio_t").checked){
+            for(var i = 0; i < 4; i++){
+                new_xs[i] = composable_xs[i] + x;
+                new_ys[i] = composable_ys[i] + y;
+            }
+        }else if(document.getElementById("radio_r").checked){
+            for(var i = 0; i < 4; i++){
+                new_xs[i] = rotated_x(rotation_for(x, y), composable_xs[i], composable_ys[i]);
+                new_ys[i] = rotated_y(rotation_for(x, y), composable_xs[i], composable_ys[i]);
+            }
+        }else if(document.getElementById("radio_s").checked){
+            for(var i = 0; i < 4; i++){
+                new_xs[i] = composable_xs[i] * x;
+                new_ys[i] = composable_ys[i] * y;
+            }
+        }
+
+        composable_context.beginPath();
+        composable_context.setLineDash([4, 4]);
+        composable_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
+        for(var i = 0; i < 4; i++){
+            composable_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+        }
+        composable_context.strokeStyle="#992200";
+        if(document.getElementById("radio_p").checked)
+            composable_context.lineWidth = 2;
+        composable_context.stroke();
+        composable_context.lineWidth = 1;
+        composable_context.setLineDash([]);
+        composable_context.closePath();
+    }
+    // grid
+    draw_grid_on(composable_context);
+
+    // x
+    if(document.getElementById("radio_p").checked){
+        composable_context.beginPath();
+        composable_context.moveTo(x_to_client(composable_xs[composable_i]) - 10, y_to_client(composable_ys[composable_i]));
+        composable_context.lineTo(x_to_client(composable_xs[composable_i]) + 10, y_to_client(composable_ys[composable_i]));
+        composable_context.moveTo(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]) - 10);
+        composable_context.lineTo(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]) + 10);
+        composable_context.strokeStyle="#dd6644";
+        composable_context.stroke();
+        composable_context.setLineDash([]);
+        composable_context.closePath();
+        // guide
+        if(do_new){
+            composable_context.beginPath();
+            composable_context.setLineDash([2, 2]);
+            composable_context.moveTo(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]));
+            composable_context.lineTo(x_to_client(x), y_to_client(y));
+            composable_context.strokeStyle="#dd6644";
+            composable_context.stroke();
+            composable_context.setLineDash([]);
+            composable_context.closePath();
+        }
+    }
+}
+
+function setup_reference_for_translation(){
+    composable_reference_x = composable_xs[0];
+    composable_reference_y = composable_ys[0];
+}
+
+function setup_reference_for_rotation(){
+    composable_reference_x = 0.0;
+    composable_reference_y = 0.0;
+}
+
+function setup_reference_for_scale(){
+    composable_reference_x = 0.0;
+    composable_reference_y = 0.0;
+}
+
+function revert_composable(){
+    composable_xs = [1., 2., 2., 1.];
+    composable_ys = [1., 1., 2., 2.];
+    document.getElementById("matrix_col1").innerHTML = "1<br>0<br>0";
+    document.getElementById("matrix_col2").innerHTML = "0<br>1<br>0";
+    document.getElementById("matrix_col3").innerHTML = "0<br>0<br>1";
+    if(document.getElementById("radio_t").checked){
+        setup_reference_for_translation();
+    }else if(document.getElementById("radio_r").checked){
+        setup_reference_for_rotation();
+    }else if(document.getElementById("radio_s").checked){
+        setup_reference_for_scale();
+    }
+    composable_draw(0, 0, false);
+}
+
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) + 1;
+    draw_series();
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) - 1;
+    draw_series();
+}
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+Interactive guide to homogeneous coordinates
+    </h1>
+    <p>
+Why would you care about homogeneous coordinates, whatever they are? Well, if you work with geometry: <nobr>3D-graphics</nobr>, image processing, physical simulation, the answer is obvious. Knowing the mathematics behind your framework enables you to write more efficient code.
+    </p>
+    <p>
+But even if you don’t work with geometry at all, you still might enjoy learning a bit about projective space and its link to linear algebra. It is an excellent example of mathematical magic. Small complication benefits in enormous simplification.
+    </p>
+    <p>
+I think, learning this particular piece of geometry is a valuable experience in its own right. And you know how it works. More experience, higher level, better loot.
+    </p>
+    <h2>
+The complication
+    </h2>
+    <p>
+In our familiar Cartesian coordinate system, a point on a plane is set by a pair of numbers (x<sub>c</sub>, y<sub>c</sub>). Here is a plot you can choose a point on. Just click or tap anywhere you want.
+    </p>
+    <canvas id="pick_a_point" width=640 height=640></canvas>
+    <script language="JavaScript">
+    init_pick_a_point();
+    </script>
+    <p>
+Now in homogeneous coordinates, a point on a plane is set by a tuple of 3 numbers (x<sub>h</sub>, y<sub>h</sub>, w<sub>h</sub>).
+    </p>
+    <p>
+This is a bit unusual, and it seems excessive since every point from the Cartesian space transforms from this homogeneous tuple just like this:
+    </p>
+    <p class="formula">
+x<sub>c</sub> = x<sub>h</sub> / w<sub>h</sub>
+        <br>
+y<sub>c</sub> = y<sub>h</sub> / w<sub>h</sub>
+    </p>
+    <p>
+It's not that there is only one way to transform a point from Cartesian to homogeneous coordinates. You can pick any (almost) value for w<sub>h</sub> and it would still work.
+    </p>
+    <p>
+    <span id="to_fill_with_numbers">
+    </span>
+    <script language="JavaScript">
+    write_the_point_value();
+    </script>
+    </p>
+    <p>
+Here is a coordinate transformer. It will transform your point into homogeneous coordinates for the (almost) every w<sub>h</sub> you propose.
+    </p>
+    <form id="w">
+Please enter w<sub>h</sub>:
+    <button type="button" class="incdec" onclick="dec('proposed_w')">-</button>
+    <input type="text" class="incdec" id="proposed_w" value="1" style="width: 36pt;">
+    <button type="button" class="incdec" onclick="inc('proposed_w')">+</button>
+    <button type="button" onclick="transform()">Transform</button>
+    <span id="transformed">
+    </span>
+    <script language="JavaScript">
+    init_w();
+    </script>
+    </form>
+    <p id="to_hide_on_transform">
+But it wouldn't work for all the possible numbers. There is one and only one exception.
+    </p>
+    <div id="after_the_w_proposed" style="display:none;">
+        <p>
+Exactly! There is no transformation between affine and Cartesian coordinates when w<sub>h</sub> is 0. Kudos for finding this by yourself!
+        </p>
+     </div>
+    <p>
+Usually, Cartesian coordinates are just the first two of homogeneous coordinates divided by the third. So when the third one is 1, homogeneous coordinates are the same as Cartesian.
+    </p>
+    <p>
+The smaller w<sub>h</sub> gets, the further the point in Cartesian coordinates “travels” from the null. Here's the plot you can experiment with by sliding the point along its affine axis.
+    </p>
+    <canvas id="slide_a_w" width=640 height=640></canvas>
+    <script language="JavaScript">
+    init_slide_a_w();
+    </script>
+    <p>
+That’s all rather simple until one moment. What if the third coordinate is 0 after all?
+    </p>
+    <p>
+Intuition tells that the point with its <i>w<sub>h</sub> = 0</i> should be further from the beginning of the coordinates than every other point with <i>w<sub>h</sub> != 0</i>. But all the points in the Euclidean space can have their third coordinate infinitely small, so this point should be somewhere other than in Euclidean space.
+    </p>
+    <p>
+And that's when it gets fascinating. Homogeneous coordinates denote points not only in Euclidean (or, more generally, <i>affine</i> space) but in the <i>projective</i> space that includes and expands the affine one. There is more geometry that fits our Cartesian system. There is the Euclidean space, and there is also an infinite number of points that are infinitely far from it.
+    </p>
+    <p>
+It should be intuitive to imagine a point from the projective extension as a direction and not a specific point in space. A ray that starts at null and has no length, no end, only the direction.
+    </p>
+    <p>
+This infinite extension is often used in 3D graphics. With homogeneous coordinates, we can compose a 3D-scene so that every object that can be possibly reached, like a house, a tree or a cat, remains in the affine space with the coordinates like <i>(x, y, z, 1)</i>. All the objects that can never be reached, like the moon or the stars, go to the projective extension with the coordinates like <i>(x, y, z, 0)</i>.
+    </p>
+    <p>
+Living in a projective space gives you some interesting options. But that’s not all it is good for. In fact, we are only starting to get into the benefits.
+    </p>
+    <h2>
+1. In projective space, central and parallel projections are the same
+    </h2>
+    <p>
+There are two kinds of projection in Euclidean space: central and parallel. Central projection is what makes the perspective, so things closer to a viewer seem bigger. That’s what we use in video games to render a 3D scene into a flat picture on a screen. The parallel projection preserves proportions. That’s what we usually use in CAD systems to show bolts and nuts on technical drawings.
+    </p>
+    <p>
+In projective space, these two projections are the same.
+    </p>
+    <p>
+In affine space, you can set a center for a central projection very-very far away from the scene you want to render. This will make disproportion very small. But in projective space, you can hurl a center infinitely far — further away than any point in affine space at all, and the disproportion will disappear completely.
+    </p>
+    <p>
+So bear in mind, if you want to make a game about zombies who happen to be CAD engineers, you don’t have to implement both kinds of projections. Just set the projection's central point to (x, y, z, 0), and this will automatically turn it into the parallel projection. Less code to do the same amount of work.
+    </p>
+    <h2>
+2. All the surfaces described as an equation on degree n are the same
+    </h2>
+    <p>
+I remember my first year in college. We were studying quadric surfaces and one of the exercises was to make an album with their classification. 17 sheets of paper with different graphics and formulas all drawn in hand. The main purpose of this album was to be briefly examined by the professor and thrown away a day after. What a waste!
+    </p>
+    <p>
+Now in projective space, this exercise would have been much more environmentally friendly. In homogeneous coordinates, all the algebraic surfaces are homogeneous too. This means that every piece of a polynomial that defines the surface has the same degree. It may contain different variables with different degrees of their own, but they all magically add up to the very same degree for every element in the sum.
+    </p>
+    <p>
+And this means only one drawing with one formula to be drawn and thrown away instead of 17. That should sum up to a couple of dead trees over the years.
+    </p>
+    <h2>
+3. All projective transformations are a matrix (yes, singular)
+    </h2>
+    <p>
+Geometric transformations are something that happens to a point. They are basically functions (x', y') = f(x, y). If you want to apply a transformation to some object, most of the time you would have to represent it with points and then apply a transformation to each and every one of them.
+    </p>
+    <p>
+This may get computationally heavy. For instance, transforming a picture 3 000 x 4 000 pixels requires 12 000 000 transformations. And transforming a 512 x 512 x 1024 image requires 268 435 456 transformations. If we want to see holographic television anytime soon, we should learn to do these transformations really-really fast.
+    </p>
+    <p>
+Some of the most common transformations are called translation;
+    </p>
+    <canvas id="translation" width=640 height=640></canvas>
+    <script language="JavaScript">
+    init_translation();
+    </script>
+    <p>
+rotation;
+    </p>
+    <canvas id="rotation" width=640 height=640></canvas>
+    <script language="JavaScript">
+    init_rotation();
+    </script>
+    <p>
+and scale.
+    </p>
+    <canvas id="scale" width=640 height=640></canvas>
+    <script language="JavaScript">
+    init_scale();
+    </script>
+    <p>
+They are generalized by the affine transformation that can do translations, and rotations, and scales simultaneously:
+    </p>
+    <canvas id="affine" width=640 height=640></canvas>
+    <script language="JavaScript">
+    init_affine();
+    </script>
+    <p>
+The affine transformation is quite powerful but it has its noticeable constraint. It preserves parallelism, which limits it in a way. If you want to do perspective, you should do a projective transformation that looks like this:
+    </p>
+    <canvas id="projective" width=640 height=640></canvas>
+    <script language="JavaScript">
+    init_projective();
+    </script>
+    <h2>
+Formulas in Cartesian coordinates
+    </h2>
+    <p>
+The formula for projective transformations in Cartesian coordinates looks like this:
+    </p>
+    <p class="formula">
+x' = (Ax + By + C) / (ax + by +c)
+        <br>
+y' = (Dx + Ey + F) / (ax + by +c)
+    </p>
+    <p>
+It is a simple geometric transformation just like all the others we have seen before. It also works for one point at a time. It preserves the degree of curves and surfaces so every straight line gets transformed into a straight line, and each plane into a plane. Since all the second-degree surfaces are the same surface, and it also preserves the degree but not the classification from the affine space, an ellipsoid may become a paraboloid or a hyperboloid.
+    </p>
+    <p>
+It also generalizes the affine transformations that have a simpler formula:
+    </p>
+    <p class="formula">
+x' = (Ax + By + C)
+        <br>
+y' = (Dx + Ey + F)
+    </p>
+    <p>
+It's just a special case of projective transformation when a = 0, b = 0, and c = 1.
+    </p>
+    <p>
+And the affine transformations, in its turn, generalize translations, rotations, and scales. A translation is:
+    </p>
+    <p class="formula">
+x' = x + C &nbsp;&nbsp; (A = 1, B = 0)
+        <br>
+y' = y + F &nbsp;&nbsp; (D = 0, E = 1)
+    </p>
+    <p>
+A rotation is:
+    </p>
+    <p class="formula">
+x' = sin(r) x + cos(r) y   (A = sin(r), B = cos(r), C = 0)
+        <br>
+y' = cos(r) x - sin(r) y   (D = cos(r), E = -sin(r), F = 0)
+    </p>
+    <p>
+And a scale is:
+    </p>
+    <p class="formula">
+x' = Ax   (B = 0, C = 0)
+        <br>
+y' = Ey   (D = 0, F = 0)
+    </p>
+    <p>
+They are all special cases of projective transformations.
+    </p>
+    <h2>
+The matrix (singular) in homogeneous coordinates
+    </h2>
+    <p>
+What's happening when we multiply a square matrix to a point in homogeneous coordinates?
+    </p>
+    <table class="formula">
+    <tr>
+    <td class="brackets">[</td>
+    <td>A B C<br>D E F<br>a b c</td>
+    <td class="brackets">][</td>
+    <td>x<br>y<br>w</td>
+    <td class="brackets">]</td>
+    <td> = </td>
+    <td class="brackets">[</td>
+    <td>Ax + By + Cw<br>Dx + Ey + Fw<br>ax + by + cw</td>
+    <td class="brackets">]</td>
+    </tr>
+    </table>
+    <p>
+Let's pretend the point we took came from Cartesian coordinates so w<sub>h</sub> = 1. Now we see that:
+    </p>
+    <p class="formula">
+x' = Ax + By + C
+        <br>
+y' = Dx + Ey + F
+        <br>
+w' = ax + by + c
+    </p>
+    <p>
+And let's say we want to get back to the Cartesian coordinates with this as well. So let's make our w' = 1. We can do this by dividing everything to the current w'.
+    </p>
+    <p class="formula">
+x' = (Ax + By + C) / (ax + by + c)
+        <br>
+y' = (Dx + Ey + F) / (ax + by + c)
+        <br>
+w' = 1
+    </p>
+    <p>
+Doesn't it look familiar? Well, of course, it does! It's a projective transformation. Or it may be an affine one depending on the coefficients. Or it could be a translation, or a rotation, or a scale. Every one of these transformations can be written down as a single matrix multiplication.
+    </p>
+    <p>
+It gets better. Matrices are composable. You can compose your own transformation like: (translation + rotation + another translation + scale + projection), — and it will still be a single matrix multiplication!
+    </p>
+    <form style="margin-bottom: 6pt;">
+    <input type="radio" name="transformation_type" id="radio_t" onclick="setup_reference_for_translation()"><label for="radio_t">Translation</label>&nbsp;&nbsp;
+    <input type="radio" name="transformation_type" id="radio_r" onclick="setup_reference_for_rotation()"><label for="radio_r">Rotation</label>&nbsp;&nbsp;
+    <input type="radio" name="transformation_type" id="radio_s" onclick="setup_reference_for_scale()"><label for="radio_s">Scale</label>&nbsp;&nbsp;
+    <input type="radio" name="transformation_type" id="radio_p" checked="true"><label for="radio_p">Projection</label><br>
+    </form>
+    <canvas id="composable" width=640 height=640></canvas>
+    <table class="formula">
+    <tr><td>
+Matrix:
+    </td>
+    <td class="brackets">[</td>
+    <td id="matrix_col1">
+1<br>0<br>0
+    </td><td id="matrix_col2">
+0<br>1<br>0
+    </td><td id="matrix_col3">
+0<br>0<br>1
+    </td>
+    <td class="brackets">]</td>
+    </tr>
+    </table>
+
+    <button class="button" id="revert_composable" onclick="revert_composable()">Revert to E</button>
+    <script language="JavaScript">
+    init_composable();
+    </script>
+    <p>
+This is particularly important because whatever you do: animation, image processing, physics simulation, you always want to do as little computation as possible. Composability allows you to squeeze a series of transformations into a single matrix multiplication which is in turn very super-scalar friendly. With matrices, not only you do fewer calculations, you also benefit from vectorization both on CPU and GPU so you do them faster. Ultra-fast transformations everywhere!
+    </p>
+    <h2>
+Conclusion
+    </h2>
+    <p>
+Pragmatically, you can save a lot of time transforming points with one single matrix multiplication instead of applying all the transformations separately. And you can also write less code by unifying all the transformations. But this is not the whole point yet.
+    </p>
+    <p>
+Usually, we lose performance not because of some small computational inefficiencies but because of all the needless layering. And the needless layering occurs when programmers don’t understand and don’t trust the beauty of the plain mathematics.
+    </p>
+    <p>
+I hope this page reveals some of it. I hope it makes it a little more trustworthy.
+    </p>
+
+
+    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+    <tr>
+    <td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+        <a href="index.html"><img src="favicon.ico"></a>
+    </td>
+    <td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+        &nbsp;&larr; there's more.
+    </td>
+    <td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+        +
+        <a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+        <a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+        <a href="https://news.ycombinator.com/from?site=wordsandbuttons.online">Hacker News</a>
+    </td>
+    </tr>
+    </table>
+    </center>
+  </body>
+</html>
