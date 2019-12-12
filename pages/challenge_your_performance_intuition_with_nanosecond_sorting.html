@@ -99,11 +99,11 @@ const slider_true_xs = [
     0.1446586 / (0.1446586 + 0.02240006) * 512,
     0.02240006 / (0.02240006 + 0.020363) * 512,
     0.020363 / (0.020363 + 0.08614054) * 512,
-    
+
     0.08614054 / (0.08614054 + 0.0899975) * 512,
     0.0899975 / (0.0899975 + 0.04408498) * 512,
     0.04408498 / (0.04408498 + 0.02030048) * 512,
-    
+
     0.020363 / (0.020363 + 0.02052882) * 512,
     ];
 const slider_user_xs = [256, 256, 256, 256, 256, 256, 256];
@@ -373,9 +373,9 @@ The most effective algorithms become mediocre while the useless rise from the ob
 Index sort
     </h2>
     <p>
-The idea of index sort is this. For every item in the assorted array, you can find its index in the sorted array by comparing it to all the others. 
+The idea of index sort is this. For every item in the assorted array, you can find its index in the sorted array by comparing it to all the others.
     </p>
-    
+
     <table><tr>
     <td style="width:505pt;">
     <pre><span id="slides_is_1" style="display:block;"><div style="color:#994466"><b>Example</b></div>
@@ -559,7 +559,7 @@ static void ResetData() {
 }
 
 int CheckDataForMissorts() {
-    int missorts = 0; 
+    int missorts = 0;
     for (auto& numbers : g_data) {
         if(numbers[1] &lt; numbers[0] || numbers[2] &lt; numbers[1])
             missorts++;
@@ -625,10 +625,10 @@ They are almost the same.
     <button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
     <div id="the_truth_1" style="display:none;">
     <p>
-Index sort is five times faster in this context. 
+Index sort is five times faster in this context.
     </p>
     <p>
-But in a different context, it might not work all that well. For instance, on ARMv7 (v7l) it's only 2 times faster. And with clang (Debian clang 3.5.0) it's even less drastic. 
+But in a different context, it might not work all that well. For instance, on ARMv7 (v7l) it's only 2 times faster. And with clang (Debian clang 3.5.0) it's even less drastic.
     </p>
     <p>
 Clang's sort seems to be slightly better on small arrays generally. On my testing Intel i7 it's also 20% faster than the GCC version. Still, not enough to make it interesting so let's move along with the index sort.
@@ -637,7 +637,7 @@ Clang's sort seems to be slightly better on small arrays generally. On my testin
     <script language="JavaScript">
     init_slider(0);
     </script>
-    
+
     <h2>
 Round 2.
     </h2>
@@ -657,7 +657,7 @@ t[int(c &gt;= a) + int(c &gt;= b)] = c;
     </td>
     <td id="right_2">
     <pre>
-template &lt;size_t N&gt; 
+template &lt;size_t N&gt;
 void index_sort(std::array&lt;int, N&gt;& t) {
     std::array&lt;int, N&gt; a = t;
     for(auto i = 0u; i &lt; N; ++i) {
@@ -683,7 +683,7 @@ They are almost the same.
 Yes, we can. And even with... negative overhead?
     </p>
     <p>
-<a href="https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(j:1,lang:c%2B%2B,source:'%23include+%3Carray%3E%0A%0Atemplate+%3Clong+unsigned+int+N%3E+%0Avoid+index_sort(std::array%3Cint,+N%3E%26+t)+%7B%0A++++std::array%3Cint,+N%3E+a+%3D+t%3B%0A++++for(auto+i+%3D+0u%3B+i+%3C+N%3B+%2B%2Bi)%0A++++%7B%0A++++++++auto+k+%3D+0u%3B%0A++++++++for(auto+j+%3D+0u%3B+j+%3C+N%3B+%2B%2Bj)+%0A++++++++%7B%0A++++++++++++if(j+%3E+i)%0A++++++++++++++++k+%2B%3D+int(a%5Bi%5D+%3E+a%5Bj%5D)%3B%0A++++++++++++else+if(j+%3C+i)%0A++++++++++++++++k+%2B%3D+int(a%5Bi%5D+%3E%3D+a%5Bj%5D)%3B%0A++++++++%7D%0A++++++++t%5Bk%5D+%3D+a%5Bi%5D%3B%0A++++%7D%0A%7D%0A%0Avoid+sort(std::array%3Cint,+3%3E%26+t)+%7B%0A++++index_sort(t)%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:33.333333333333336,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:g540,filters:(b:'0',binary:'1',commentOnly:'0',demangle:'0',directives:'0',execute:'1',intel:'0',libraryCode:'1',trim:'1'),lang:c%2B%2B,libs:!(),options:'-O3+--std%3Dc%2B%2B14',source:1),l:'5',n:'0',o:'x86-64+gcc+5.4+(Editor+%231,+Compiler+%231)+C%2B%2B',t:'0')),k:48.02304268133018,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compiler:1,editor:1,wrap:'1'),l:'5',n:'0',o:'%231+with+x86-64+gcc+5.4',t:'0')),k:18.643623985336475,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4">godbolt</a> doesn't show any conceptual advantage. 
+<a href="https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(j:1,lang:c%2B%2B,source:'%23include+%3Carray%3E%0A%0Atemplate+%3Clong+unsigned+int+N%3E+%0Avoid+index_sort(std::array%3Cint,+N%3E%26+t)+%7B%0A++++std::array%3Cint,+N%3E+a+%3D+t%3B%0A++++for(auto+i+%3D+0u%3B+i+%3C+N%3B+%2B%2Bi)%0A++++%7B%0A++++++++auto+k+%3D+0u%3B%0A++++++++for(auto+j+%3D+0u%3B+j+%3C+N%3B+%2B%2Bj)+%0A++++++++%7B%0A++++++++++++if(j+%3E+i)%0A++++++++++++++++k+%2B%3D+int(a%5Bi%5D+%3E+a%5Bj%5D)%3B%0A++++++++++++else+if(j+%3C+i)%0A++++++++++++++++k+%2B%3D+int(a%5Bi%5D+%3E%3D+a%5Bj%5D)%3B%0A++++++++%7D%0A++++++++t%5Bk%5D+%3D+a%5Bi%5D%3B%0A++++%7D%0A%7D%0A%0Avoid+sort(std::array%3Cint,+3%3E%26+t)+%7B%0A++++index_sort(t)%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:33.333333333333336,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:g540,filters:(b:'0',binary:'1',commentOnly:'0',demangle:'0',directives:'0',execute:'1',intel:'0',libraryCode:'1',trim:'1'),lang:c%2B%2B,libs:!(),options:'-O3+--std%3Dc%2B%2B14',source:1),l:'5',n:'0',o:'x86-64+gcc+5.4+(Editor+%231,+Compiler+%231)+C%2B%2B',t:'0')),k:48.02304268133018,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:output,i:(compiler:1,editor:1,wrap:'1'),l:'5',n:'0',o:'%231+with+x86-64+gcc+5.4',t:'0')),k:18.643623985336475,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4">godbolt</a> doesn't show any conceptual advantage.
     </p>
     <table><tr>
     <td>
@@ -761,8 +761,8 @@ The code is not drastically different and it has no reason to be. My theory is t
     <script language="JavaScript">
     init_slider(1);
     </script>
-    
-    
+
+
     <h2>
 Round 3.
     </h2>
@@ -772,7 +772,7 @@ For a triplet, there is another std::sort substitude and it's just three conditi
     <table><tr>
     <td id="left_3">
     <pre>
-template &lt;size_t N&gt; 
+template &lt;size_t N&gt;
 void index_sort(std::array&lt;int, N&gt;& t) {
     std::array&lt;int, N&gt; a = t;
     for(auto i = 0u; i &lt; N; ++i) {
@@ -884,8 +884,8 @@ It's three pairs of jump and compare.
     <script language="JavaScript">
     init_slider(2);
     </script>
-    
-    
+
+
     <h2>
 Round 4.
     </h2>
@@ -1068,7 +1068,7 @@ However, with Clang the difference is obvious.
         mov     dword ptr [rdi], eax
         ret
     </pre>
-    </td></tr></table>    
+    </td></tr></table>
     <p>
 The min/max version is branchless! Clang uses the conditional moves instead of conditional jumps and this makes the code on the right five times faster on the very same CPU.
     </p>
@@ -1076,8 +1076,8 @@ The min/max version is branchless! Clang uses the conditional moves instead of c
     <script language="JavaScript">
     init_slider(3);
     </script>
-    
-    
+
+
     <h2>
 Round 5.
     </h2>
@@ -1244,13 +1244,13 @@ Since we're already knee-deep into limitations, why don't we try a truly integer
     <script language="JavaScript">
     init_slider(4);
     </script>
-    
-    
+
+
     <h2>
 Round 6.
     </h2>
     <p>
-I'll be honest, I stole this from somewhere on the Internet and I don't know how exactly this works. Apparently, it works just fine on an integer half-range so it's also limited. 
+I'll be honest, I stole this from somewhere on the Internet and I don't know how exactly this works. Apparently, it works just fine on an integer half-range so it's also limited.
     </p>
     <p>
 But would it be faster?
@@ -1277,9 +1277,9 @@ void swap_sort_arithmetic_hack
 void swap_sort_bit_hack
     (std::array&lt;int, 3&gt;& t) {
     auto sort_ = [](auto& x, auto& y) {
-        constexpr auto shift = 
+        constexpr auto shift =
             (sizeof(int) * CHAR_BIT - 1);
-        const auto temp = 
+        const auto temp =
             y + ((x - y) & ((x - y) &gt;&gt; shift));
         y = x - ((x - y) & ((x - y) &gt;&gt; shift));
         x = temp;
@@ -1394,14 +1394,14 @@ It is even faster than before and it generates even better code.
     </pre>
     </td></tr></table>
     <p>
-Yes. It is GCC-specific though. On Clang, the best code still comes from min/max swaps. 
+Yes. It is GCC-specific though. On Clang, the best code still comes from min/max swaps.
     </p>
     </div>
     <script language="JavaScript">
     init_slider(5);
     </script>
-    
-    
+
+
     <h2>
 Bonus round.
     </h2>
@@ -1411,7 +1411,7 @@ Since we know that the algorithm is supposed to work with small arrays, maybe we
     <table><tr>
     <td id="left_7">
     <pre>
-template &lt;size_t N&gt; 
+template &lt;size_t N&gt;
 void index_sort(std::array&lt;int, N&gt;& t) {
     std::array&lt;int, N&gt; a = t;
     for(auto i = 0u; i &lt; N; ++i) {
@@ -1429,7 +1429,7 @@ void index_sort(std::array&lt;int, N&gt;& t) {
     </td>
     <td id="right_7">
     <pre>
-template &lt;size_t N&gt; 
+template &lt;size_t N&gt;
 void index_sort_fast_t(std::array&lt;int, N&gt;& t) {
     std::array&lt;int, N&gt; a = t;
     for(uint_fast8_t i = 0u; i &lt; N; ++i) {
@@ -1548,15 +1548,15 @@ You can always win some performance by using clever tricks. Something type-speci
     document.getElementById("code_3_1").innerHTML = colorized(document.getElementById("code_3_1").innerHTML);
     document.getElementById("code_3_2").innerHTML = colorized(document.getElementById("code_3_2").innerHTML);
     document.getElementById("code_4_1").innerHTML = colorized(document.getElementById("code_4_1").innerHTML);
-    document.getElementById("code_4_2").innerHTML = colorized(document.getElementById("code_4_2").innerHTML);  
+    document.getElementById("code_4_2").innerHTML = colorized(document.getElementById("code_4_2").innerHTML);
     document.getElementById("code_4_1_").innerHTML = colorized(document.getElementById("code_4_1_").innerHTML);
     document.getElementById("code_4_2_").innerHTML = colorized(document.getElementById("code_4_2_").innerHTML);
     document.getElementById("code_5_1").innerHTML = colorized(document.getElementById("code_5_1").innerHTML);
-    document.getElementById("code_5_2").innerHTML = colorized(document.getElementById("code_5_2").innerHTML);  
+    document.getElementById("code_5_2").innerHTML = colorized(document.getElementById("code_5_2").innerHTML);
     document.getElementById("code_6_1").innerHTML = colorized(document.getElementById("code_6_1").innerHTML);
-    document.getElementById("code_6_2").innerHTML = colorized(document.getElementById("code_6_2").innerHTML);  
+    document.getElementById("code_6_2").innerHTML = colorized(document.getElementById("code_6_2").innerHTML);
     document.getElementById("code_7_1").innerHTML = colorized(document.getElementById("code_7_1").innerHTML);
-    document.getElementById("code_7_2").innerHTML = colorized(document.getElementById("code_7_2").innerHTML);              
+    document.getElementById("code_7_2").innerHTML = colorized(document.getElementById("code_7_2").innerHTML);
     </script>
 
 
