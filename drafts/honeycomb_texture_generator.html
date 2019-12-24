@@ -78,6 +78,34 @@ const rational_b = 56;
 var w = rational_b*6*2;
 var h = rational_a*3*2;
 
+// distance squared from (x1, y1) to (x2, y2)
+function d2(x1, y1, x2, y2) {
+    return (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1);
+}
+
+// distance from (x1, y1) to (x2, y2)
+function d(x1, y1, x2, y2) {
+    return Math.sqrt(d2(x1, y1, x2, y2));
+}
+
+// distance from (x, y) to edge [(x1, y1), (x2, y2)]
+function d_e(x, y, x1, y1, x2, y2) {
+    const dxe = x2-x1;
+    const dye = y2-y1;
+    const dx = x-x1;
+    const dy = y-y1;
+    const area = Math.abs(dxe*dy - dye*dx);
+    return area / d(x1, y1, x2, y2);
+}
+
+// min distance from point to all the lines
+function d_lines(x, y, lines) {
+	var d = Number.POSITIVE_INFINITY;
+	for(var i = 0; i < lines.length; ++i) {
+		d = Math.min(d, d_e(x, y, lines[i][0][0], lines[i][0][1], lines[i][1][0], lines[i][1][1]));
+	}
+}
+
 function draw_honeycomb(){
     var canvas = document.getElementById("honeycomb");
     var context = canvas.getContext("2d");
