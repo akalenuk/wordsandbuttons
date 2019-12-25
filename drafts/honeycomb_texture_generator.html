@@ -72,11 +72,47 @@ u {
 }
     </style>
     <script language="JavaScript">
-const rational_a = 97;
-const rational_b = 56;
+const rational_a = 56;
+const rational_b = 97;
 
-var w = rational_b*6*2;
-var h = rational_a*3*2;
+// honecomb lines in a pixel grid
+var lines_scale = 2;
+var lines_do_flip = false;
+function noheycomb_lines(scale, do_flip) {
+	const sceleton = [
+	[[0, 0], [1, 0]],
+	[[1, 0], [2, 1]],
+	[[2, 1], [4, 1]],
+	[[4, 1], [5, 0]],
+	[[5, 0], [6, 0]],
+
+	[[0, 2], [1, 2]],
+	[[1, 2], [2, 1]],
+	[[1, 2], [2, 3]],
+	[[4, 1], [5, 2]],
+	[[4, 3], [5, 2]],
+	[[5, 2], [6, 2]],
+
+	[[0, 4], [1, 4]],
+	[[1, 4], [2, 3]],
+	[[2, 3], [4, 3]],
+	[[4, 3], [5, 4]],
+	[[5, 4], [6, 4]]]
+
+	var lines = []
+	for(var i = 0; i < sceleton.length; ++i) {
+		const a1 = sceleton[i][0][0] * rational_a * scale;
+		const b1 = sceleton[i][0][1] * rational_b * scale;
+		const a2 = sceleton[i][1][0] * rational_a * scale;
+		const b2 = sceleton[i][1][1] * rational_b * scale;
+		if(do_flip) {
+			lines.push([[b1,a1], [b2,a2]]);
+		} else {
+			lines.push([[a1,b1], [a2,b2]]);
+		}
+	}
+	return lines;
+}
 
 // distance squared from (x1, y1) to (x2, y2)
 function d2(x1, y1, x2, y2) {
@@ -104,15 +140,35 @@ function d_lines(x, y, lines) {
 	for(var i = 0; i < lines.length; ++i) {
 		d = Math.min(d, d_e(x, y, lines[i][0][0], lines[i][0][1], lines[i][1][0], lines[i][1][1]));
 	}
+	return d;
 }
 
 function draw_honeycomb(){
     var canvas = document.getElementById("honeycomb");
     var context = canvas.getContext("2d");
 
+	// lines
+	var lines = noheycomb_lines(lines_scale, lines_do_flip);
+	var w = lines_do_flip ? (rational_b * 4 * lines_scale) : (rational_a * 6 * lines_scale);
+	var h = lines_do_flip ? (rational_a * 6 * lines_scale) : (rational_b * 4 * lines_scale);
+
     // background
-    context.fillStyle="#eeeeee";
+    context.fillStyle="#FFFFFF";
     context.fillRect(0, 0, w, h);
+
+	// lines
+    var pixel_field = context.createImageData(w, h);
+    for (var i = 0; i < pixel_field.data.length; i += 4) {
+        const x = (i / 4) % w;
+		const y = (i / 4) / w;
+		const d = d_lines(x, y, lines);
+		const color = Math.floor(d) & 0xFF;
+        pixel_field.data[i + 0] = color;
+        pixel_field.data[i + 1] = color;
+        pixel_field.data[i + 2] = color;
+        pixel_field.data[i + 3] = 0xFF;
+    }
+    context.putImageData(pixel_field, -0.5, -0.5);
 }
 
 function show(n){
@@ -129,7 +185,7 @@ Honeycomb texture generator
     <p>
 ...
     </p>
-	<canvas id="honeycomb" width="672" height="582"></canvas>
+	<canvas id="honeycomb" width="672" height="776"></canvas>
     <p>
 ...
     </p>
