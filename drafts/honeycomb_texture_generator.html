@@ -227,24 +227,6 @@ function draw_honeycomb(){
     context.fillStyle="#FFFFFF";
     context.fillRect(0, 0, w, h);
 
-/*    function color_from_d(d) {
-        const black = 0x00;
-        const white = 0xFF;
-        const width = 5;
-        const attenuation_width = 10;
-        function attenuation_f(d) {
-            const d_norm = d / attenuation_width;
-            const a_norm = (1 - Math.cos(d_norm * Math.PI)) / 2;
-            return black + a_norm * (white - black);
-        };
-        if(d < width)
-            return black;
-        d -= width;
-        if(d < attenuation_width)
-            return attenuation_f(d);
-        return white;
-    }*/
-
     // lines
     var pixel_field = context.createImageData(w, h);
     for (var i = 0; i < pixel_field.data.length; i += 4) {
@@ -297,11 +279,31 @@ Honeycomb texture generator
     </p>
     <canvas id="honeycomb" width="672" height="776"></canvas>
     <br>
-    <form id="scale" onsubmit="return false;">
-    Lines scale:
+    <form id="interface" onsubmit="return false;">
+    <span style="line-height: 2.0;">
+    Canvas scale:
     <button type="button" onclick="dec('lines_scale')">-</button>
     <input type="text" id="lines_scale" value="2" oninput="change_lines_scale();">
     <button type="button" onclick="inc('lines_scale')">+</button>
+    <br>
+    Black line width:
+    <button type="button" onclick="dec('line_width')">-</button>
+    <input type="text" id="line_width" value="12" oninput="change_line_width();">
+    <button type="button" onclick="inc('line_width')">+</button>
+    <br>
+    Black line attenuation:
+    <button type="button" onclick="dec('line_attenuation')">-</button>
+    <input type="text" id="line_attenuation" value="3" oninput="change_line_attenuation();">
+    <button type="button" onclick="inc('line_attenuation')">+</button>
+    <br>
+    </span>
+    <span style="line-height: 1.42;">
+    Please select the attenuation function:
+    <br>
+    <input type="radio" name="af" id="linear" value="linear" onclick="change_line_attenuation_function();"><label for="linear">linear</label>;
+    <br>
+    <input type="radio" name="af" id="cos" value="cos" onclick="change_line_attenuation_function();" checked><label for="cos">cosine</label>.
+    </span>
     <br>
     <textarea id="honeycomb_code" rows=22 onInput="reevaluate('honeycomb'); draw_honeycomb()">// input: d - distance to the nearest honeycomb segment
 // output: color - a number in range [0..255]
