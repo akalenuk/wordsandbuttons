@@ -70,6 +70,19 @@ u {
     text-decoration: none;
     cursor: pointer;
 }
+
+textarea {
+    width: 505pt;
+    font-size: 12pt;
+    font-family: monospace;
+}
+
+.comment {
+    font-size: 12pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
     </style>
     <script language="JavaScript">
 const rational_a = 56;
@@ -79,39 +92,39 @@ const rational_b = 97;
 var lines_scale = 2;
 var lines_do_flip = false;
 function noheycomb_lines(scale, do_flip) {
-	const sceleton = [
-	[[0, 0], [1, 0]],
-	[[1, 0], [2, 1]],
-	[[2, 1], [4, 1]],
-	[[4, 1], [5, 0]],
-	[[5, 0], [6, 0]],
+    const sceleton = [
+    [[0, 0], [1, 0]],
+    [[1, 0], [2, 1]],
+    [[2, 1], [4, 1]],
+    [[4, 1], [5, 0]],
+    [[5, 0], [6, 0]],
 
-	[[0, 2], [1, 2]],
-	[[1, 2], [2, 1]],
-	[[1, 2], [2, 3]],
-	[[4, 1], [5, 2]],
-	[[4, 3], [5, 2]],
-	[[5, 2], [6, 2]],
+    [[0, 2], [1, 2]],
+    [[1, 2], [2, 1]],
+    [[1, 2], [2, 3]],
+    [[4, 1], [5, 2]],
+    [[4, 3], [5, 2]],
+    [[5, 2], [6, 2]],
 
-	[[0, 4], [1, 4]],
-	[[1, 4], [2, 3]],
-	[[2, 3], [4, 3]],
-	[[4, 3], [5, 4]],
-	[[5, 4], [6, 4]]]
+    [[0, 4], [1, 4]],
+    [[1, 4], [2, 3]],
+    [[2, 3], [4, 3]],
+    [[4, 3], [5, 4]],
+    [[5, 4], [6, 4]]]
 
-	var lines = []
-	for(var i = 0; i < sceleton.length; ++i) {
-		const a1 = sceleton[i][0][0] * rational_a * scale;
-		const b1 = sceleton[i][0][1] * rational_b * scale;
-		const a2 = sceleton[i][1][0] * rational_a * scale;
-		const b2 = sceleton[i][1][1] * rational_b * scale;
-		if(do_flip) {
-			lines.push([[b1,a1], [b2,a2]]);
-		} else {
-			lines.push([[a1,b1], [a2,b2]]);
-		}
-	}
-	return lines;
+    var lines = []
+    for(var i = 0; i < sceleton.length; ++i) {
+        const a1 = sceleton[i][0][0] * rational_a * scale;
+        const b1 = sceleton[i][0][1] * rational_b * scale;
+        const a2 = sceleton[i][1][0] * rational_a * scale;
+        const b2 = sceleton[i][1][1] * rational_b * scale;
+        if(do_flip) {
+            lines.push([[b1,a1], [b2,a2]]);
+        } else {
+            lines.push([[a1,b1], [a2,b2]]);
+        }
+    }
+    return lines;
 }
 
 function dot(a1, a2, b1, b2) {
@@ -142,44 +155,71 @@ function d_lines(x, y, lines) {
     return d;
 }
 
+</script>
+<script language="JavaScript" id="honeycomb_script">
+function color_from_d(d) {
+    return 0;
+}
+</script>
+<script language="JavaScript">
+function reevaluate(thing) {
+    var script = document.getElementById(thing + "_script");
+    if (script) {
+        script.parentNode.removeChild(script);
+    }
+    var code = document.getElementById(thing + "_code");
+    script = document.createElement('script');
+    script.id = thing + "_script";
+
+    script.text = "function color_from_d(d){"
+    + "document.getElementById('" + thing + "_comment').innerHTML = 'This code is changeable.';"
+    + "try{"
+    + code.value
+    + "}catch(error){"
+    + "document.getElementById('" + thing + "_comment').innerHTML = '<b>Error:</b> ' + error.message;"
+    + "}}";
+
+    document.body.appendChild(script);
+}
+
 function draw_honeycomb(){
     var canvas = document.getElementById("honeycomb");
     var context = canvas.getContext("2d");
 
-	// lines
-	var lines = noheycomb_lines(lines_scale, lines_do_flip);
-	var w = lines_do_flip ? (rational_b * 4 * lines_scale) : (rational_a * 6 * lines_scale);
-	var h = lines_do_flip ? (rational_a * 6 * lines_scale) : (rational_b * 4 * lines_scale);
+    // lines
+    var lines = noheycomb_lines(lines_scale, lines_do_flip);
+    var w = lines_do_flip ? (rational_b * 4 * lines_scale) : (rational_a * 6 * lines_scale);
+    var h = lines_do_flip ? (rational_a * 6 * lines_scale) : (rational_b * 4 * lines_scale);
 
     // background
     context.fillStyle="#FFFFFF";
     context.fillRect(0, 0, w, h);
 
-	function color_from_d(d) {
-		const black = 0x00;
-		const white = 0xFF;
-		const width = 5;
-		const attenuation_width = 10;
-		function attenuation_f(d) {
-			const d_norm = d / attenuation_width;
-			const a_norm = (1 - Math.cos(d_norm * Math.PI)) / 2;
-			return black + a_norm * (white - black);
-		};
-		if(d < width)
-			return black;
-		d -= width;
-		if(d < attenuation_width)
-			return attenuation_f(d);
-		return white;
-	}
+/*    function color_from_d(d) {
+        const black = 0x00;
+        const white = 0xFF;
+        const width = 5;
+        const attenuation_width = 10;
+        function attenuation_f(d) {
+            const d_norm = d / attenuation_width;
+            const a_norm = (1 - Math.cos(d_norm * Math.PI)) / 2;
+            return black + a_norm * (white - black);
+        };
+        if(d < width)
+            return black;
+        d -= width;
+        if(d < attenuation_width)
+            return attenuation_f(d);
+        return white;
+    }*/
 
-	// lines
+    // lines
     var pixel_field = context.createImageData(w, h);
     for (var i = 0; i < pixel_field.data.length; i += 4) {
         const x = (i / 4) % w;
-		const y = (i / 4) / w;
-		const d = d_lines(x, y, lines);
-		const color = color_from_d(d);
+        const y = (i / 4) / w;
+        const d = d_lines(x, y, lines);
+        const color = color_from_d(d);
         pixel_field.data[i + 0] = color;
         pixel_field.data[i + 1] = color;
         pixel_field.data[i + 2] = color;
@@ -202,14 +242,38 @@ Honeycomb texture generator
     <p>
 ...
     </p>
-	<canvas id="honeycomb" width="672" height="776"></canvas>
+    <canvas id="honeycomb" width="672" height="776"></canvas>
+    <br>
+    <textarea id="honeycomb_code" rows=22 onInput="reevaluate('honeycomb'); draw_honeycomb()">
+// input: d - distance to the nearest honeycomb segment
+// output: color - a number in range [0..255]
+  const black = 0x00;
+  const white = 0xFF;
+  const width = 5;
+  const attenuation_width = 10;
+  function attenuation_f(d) {
+    const d_norm = d / attenuation_width;
+    const a_norm = (1 - Math.cos(d_norm * Math.PI)) / 2;
+    return black + a_norm * (white - black);
+  };
+  if(d &lt; width)
+    return black;
+  d -= width;
+  if(d &lt; attenuation_width)
+    return attenuation_f(d);
+  return white;
+</textarea>
+    <p id="honeycomb_comment" class="comment"></p>
+
+
     <p>
 ...
     </p>
 
     <script language="JavaScript">
+reevaluate('honeycomb');
 draw_honeycomb();
-	</script>
+    </script>
 
 
     <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
