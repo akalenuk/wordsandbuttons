@@ -251,6 +251,18 @@ function change_lines_scale() {
     draw_honeycomb();
 }
 
+function change_line_width() {
+    compose_the_code();
+}
+
+function change_line_attenuation() {
+    compose_the_code();
+}
+
+function change_line_attenuation_function() {
+    compose_the_code();
+}
+
 function inc(counter_name) {
     var counter = document.getElementById(counter_name);
     counter.value = Number(counter.value) + 1;
@@ -261,6 +273,39 @@ function dec(counter_name) {
     var counter = document.getElementById(counter_name);
     counter.value = Number(counter.value) - 1;
     eval('change_' + counter_name + '()');
+}
+
+function compose_the_code() {
+    var code = "// input: d - distance to the nearest honeycomb segment\n\
+// output: color - a number in range [0..255]\n\
+const black = 0x00;\n\
+const white = 0xFF;\n\
+const width = " + document.getElementById("line_width").value + ";\n\
+const attenuation_width = " + document.getElementById("line_attenuation").value + ";\n\
+function attenuation_f(d) {";
+    if(document.getElementById("linear").checked) {
+        code += "\n\
+    const d_norm = d / attenuation_width;\n\
+    const a_norm = d_norm;\n\
+    return black + a_norm * (white - black);";  
+    }
+    if(document.getElementById("cos").checked) {
+        code += "\n\
+    const d_norm = d / attenuation_width;\n\
+    const a_norm = (1 - Math.cos(d_norm * Math.PI)) / 2;\n\
+    return black + a_norm * (white - black);";
+    }
+    code += "\n\
+};\n\
+if(d < width)\n\
+    return black;\n\
+d -= width;\n\
+if(d < attenuation_width)\n\
+    return attenuation_f(d);\n\
+return white;\n";
+    document.getElementById("honeycomb_code").value = code;
+    reevaluate('honeycomb');
+    draw_honeycomb();
 }
 
 function show(n){
