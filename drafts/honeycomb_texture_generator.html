@@ -155,14 +155,31 @@ function draw_honeycomb(){
     context.fillStyle="#FFFFFF";
     context.fillRect(0, 0, w, h);
 
+	function color_from_d(d) {
+		const black = 0x00;
+		const white = 0xFF;
+		const width = 5;
+		const attenuation_width = 10;
+		function attenuation_f(d) {
+			const d_norm = d / attenuation_width;
+			const a_norm = (1 - Math.cos(d_norm * Math.PI)) / 2;
+			return black + a_norm * (white - black);
+		};
+		if(d < width)
+			return black;
+		d -= width;
+		if(d < attenuation_width)
+			return attenuation_f(d);
+		return white;
+	}
+
 	// lines
     var pixel_field = context.createImageData(w, h);
     for (var i = 0; i < pixel_field.data.length; i += 4) {
         const x = (i / 4) % w;
 		const y = (i / 4) / w;
 		const d = d_lines(x, y, lines);
-//		const color = Math.floor(d) & 0xFF;
-		const color = d < 5 ? 0x00 : 0xFF;
+		const color = color_from_d(d);
         pixel_field.data[i + 0] = color;
         pixel_field.data[i + 1] = color;
         pixel_field.data[i + 2] = color;
