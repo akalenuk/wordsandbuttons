@@ -83,6 +83,34 @@ textarea {
     font-family: sans-serif;
     padding-bottom: 24pt;
 }
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+    color: #000;
+}
+
+input[type="text"] {
+    width: 32pt;
+    height: 22pt;
+    font-size: 16pt;
+    text-align: center;
+}
+
+button {
+    width: 32pt;
+    height: 26pt;
+    font-size: 16pt;
+    text-align: center;
+}
+
     </style>
     <script language="JavaScript">
 const rational_a = 56;
@@ -190,6 +218,8 @@ function draw_honeycomb(){
     var lines = noheycomb_lines(lines_scale, lines_do_flip);
     var w = lines_do_flip ? (rational_b * 4 * lines_scale) : (rational_a * 6 * lines_scale);
     var h = lines_do_flip ? (rational_a * 6 * lines_scale) : (rational_b * 4 * lines_scale);
+    canvas.width = w;
+    canvas.height = h;
 
     // background
     context.fillStyle="#FFFFFF";
@@ -228,6 +258,27 @@ function draw_honeycomb(){
     context.putImageData(pixel_field, -0.5, -0.5);
 }
 
+function change_lines_scale() {
+    lines_scale = Number(document.getElementById("lines_scale").value);
+    if(isNaN(lines_scale) || lines_scale < 1.0) {
+        lines_scale = 1.0;
+    }
+    document.getElementById("lines_scale").value = lines_scale;
+    draw_honeycomb();
+}
+
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) + 1;
+    eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name);
+    counter.value = Number(counter.value) - 1;
+    eval('change_' + counter_name + '()');
+}
+
 function show(n){
     document.getElementById("shown_" + n).style.display = "none";
     document.getElementById("hidden_" + n).style.display = "inline";
@@ -243,6 +294,12 @@ Honeycomb texture generator
 ...
     </p>
     <canvas id="honeycomb" width="672" height="776"></canvas>
+    <br>
+    <form id="scale" onsubmit="return false;">
+    Lines scale:
+    <button type="button" onclick="dec('lines_scale')">-</button>
+    <input type="text" id="lines_scale" value="2" oninput="change_lines_scale();">
+    <button type="button" onclick="inc('lines_scale')">+</button>
     <br>
     <textarea id="honeycomb_code" rows=22 onInput="reevaluate('honeycomb'); draw_honeycomb()">// input: d - distance to the nearest honeycomb segment
 // output: color - a number in range [0..255]
@@ -262,6 +319,7 @@ if(d &lt; attenuation_width)
     return attenuation_f(d);
 return white;
 </textarea>
+    </form>
     <p id="honeycomb_comment" class="comment"></p>
 
 
