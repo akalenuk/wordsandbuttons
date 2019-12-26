@@ -190,25 +190,19 @@ function color_from_d(d) {
 }
 </script>
 <script language="JavaScript">
-function reevaluate(thing) {
-    var script = document.getElementById(thing + "_script");
+function reevaluate_code() {
+    var script = document.getElementById("honeycomb_script");
     if (script) {
         script.parentNode.removeChild(script);
     }
     // this may be overidden by the error
-    document.getElementById(thing + "_comment").innerHTML = "This code is changeable.";
+    document.getElementById("honeycomb_comment").innerHTML = "This code is changeable.";
 
-    var code = document.getElementById(thing + "_code");
+    var code = document.getElementById("honeycomb_code");
     script = document.createElement('script');
-    script.id = thing + "_script";
+    script.id = "honeycomb_script";
 
-    script.text = "function color_from_d(d){"
-    + "try{"
-    + code.value
-    + "}catch(error){"
-    + "document.getElementById('" + thing + "_comment').innerHTML = '<b>Error:</b> ' + error.message;"
-    + "}}";
-
+    script.text = "function color_from_d(d){" + code.value + "}";
     document.body.appendChild(script);
 }
 
@@ -228,16 +222,20 @@ function draw_honeycomb(){
     context.fillRect(0, 0, w, h);
 
     // lines
-    var pixel_field = context.createImageData(w, h);
-    for (var i = 0; i < pixel_field.data.length; i += 4) {
-        const x = Math.floor((i / 4) % w) + 0.5;
-        const y = Math.floor((i / 4) / w) + 0.5;
-        const d = d_lines(x, y, lines);
-        const color = color_from_d(d);
-        pixel_field.data[i + 0] = color;
-        pixel_field.data[i + 1] = color;
-        pixel_field.data[i + 2] = color;
-        pixel_field.data[i + 3] = 0xFF;
+    try{
+        var pixel_field = context.createImageData(w, h);
+        for (var i = 0; i < pixel_field.data.length; i += 4) {
+            const x = Math.floor((i / 4) % w) + 0.5;
+            const y = Math.floor((i / 4) / w) + 0.5;
+            const d = d_lines(x, y, lines);
+            const color = color_from_d(d);
+            pixel_field.data[i + 0] = color;
+            pixel_field.data[i + 1] = color;
+            pixel_field.data[i + 2] = color;
+            pixel_field.data[i + 3] = 0xFF;
+        }
+    } catch(error){
+        document.getElementById('honeycomb_comment').innerHTML = '<b>Error:</b> ' + error.message;
     }
     context.putImageData(pixel_field, -0.5, -0.5);
 }
@@ -303,7 +301,7 @@ if(d < black_d + attenuation_d)\n\
     return attenuation_f(d - black_d);\n\
 return white;\n";
     document.getElementById("honeycomb_code").value = code;
-    reevaluate('honeycomb');
+    reevaluate_code();
     draw_honeycomb();
 }
 
@@ -349,7 +347,7 @@ Honeycomb texture generator
     <input type="radio" name="af" id="cos" value="cos" onclick="change_line_attenuation_function();" checked><label for="cos">cosine</label>.
     </span>
     <br>
-    <textarea id="honeycomb_code" rows=22 onInput="reevaluate('honeycomb'); draw_honeycomb()">
+    <textarea id="honeycomb_code" rows=22 onInput="reevaluate_code(); draw_honeycomb()">
     </textarea>
     </form>
     <p id="honeycomb_comment" class="comment"></p>
@@ -361,7 +359,7 @@ Honeycomb texture generator
 
     <script language="JavaScript">
 compose_the_code();
-reevaluate('honeycomb');
+reevaluate_code();
 draw_honeycomb();
     </script>
 
