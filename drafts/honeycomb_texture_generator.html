@@ -225,8 +225,8 @@ function draw_honeycomb(){
     try{
         var pixel_field = context.createImageData(w, h);
         for (var i = 0; i < pixel_field.data.length; i += 4) {
-            const x = Math.floor((i / 4) % w) + 0.5;
-            const y = Math.floor((i / 4) / w) + 0.5;
+            const x = Math.floor((i / 4) % w) + 0.5 * 1/512;    // the last bit affects decision on odd width but not the attenuation grade
+            const y = Math.floor((i / 4) / w) + 0.5 * 1/512;
             const d = d_lines(x, y, lines);
             const color = color_from_d(d);
             pixel_field.data[i + 0] = color;
@@ -328,16 +328,16 @@ Apparently, it's not trivial. It's simple. Just not trivial.
     </div>
     <div id="hidden_explanation" style="display: none">
     <p>
-The honeycomp height relative to its side is irrational. It's a square root of three to be precise. Luckily, we don't have to be that precise all the time, the computers generally don't work in irrational numbers anyway. The reasonably well fitting approximation for that will be 97/56, and that's what we'll use in our basis.
+The honeycomb height relative to its side is irrational. It's a square root of three to be precise. Luckily, we don't have to be that precise all the time, the computers generally don't work in irrational numbers anyway. The reasonably well-fitting approximation for that will be 97/56, and that's what we'll use in our basis.
     </p>
     <p>
-So every of the hoveycomb's slopy sides should be in proportion of 97 to 56. To make the texture seamles, we have to make it at least 2 honeycombs wide and 2 honeycombs high. That's 3 flat sides wide and 4 sloppy sides high. Or 336 &times; 388 pixels. Of course, we can scale that but for the best precision possible, we should scale it by an integer number.
+So every of the honeycomb's slopy sides should be in proportion of 97 to 56. To make the texture seamless, we have to make it at least 2 honeycombs wide and 2 honeycombs high. That's 3 flat sides wide and 4 sloppy sides high. Or 336 &times; 388 pixels. Of course, we can scale that but for the best precision possible, we should scale it by an integer number.
     </p>
     <p>
 Now for the line width. We can choose any width we want but we still operate in a pixel grid. Most of the time we don't want to see actual pixels in our texture. That's what attenuation for. It's a way to smoothly translate black to white with a few greys in between so the lines will appear anti-aliased.
     </p>
     <p>
-The thing below is the generator. It provides a few option in the UI but if you need more, there is some changeable code too. If you need more freedom, just get this thing's source on Github.
+The thing below is the generator. It provides a few options in the UI but if you need more, there is some changeable code too. If you need more freedom, just get this thing's source on Github.
     </p>
     <span style="line-height: 2.0;">
     <span onclick="hide('explanation')"><p><u>Hide the explanation</u></p></span>
