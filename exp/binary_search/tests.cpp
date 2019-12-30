@@ -13,19 +13,13 @@
 using namespace std::chrono;
 using namespace std;
 
-vector<string> made_up_words(unsigned int how_much, unsigned int smallest, unsigned int largest) {
-    vector<string> words;
+vector<int> uniform_random(size_t how_much, int from, int to) {
+    vector<int> ints(how_much);
     std::mt19937 rng(0);
-    std::uniform_int_distribution<unsigned int> word_sizes(smallest, largest);
-    std::uniform_int_distribution<char> word_letter('a', 'z');
-    for(auto i = 0u; i < how_much; ++i) {
-        auto word_size = word_sizes(rng);
-        string word;
-        for(auto j = 0; j < word_size; ++j)
-            word.push_back(word_letter(rng));
-        words.push_back(word);
-    }
-    return words;
+    std::uniform_int_distribution<int> randoms(from, to);
+    for(auto& i : ints)
+        i = randoms(rng);
+    return ints;
 }
 
 #define MEASURE(CODE_TO_MEASURE, NAME_TO_PRINT) \
