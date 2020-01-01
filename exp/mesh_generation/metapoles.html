@@ -216,7 +216,10 @@ function d_f(x, y) {
         var di = distance_to_line_segment(lines[i], x, y);
         d += qi(di);
     }
-    return qii(qi(distance)) - qii(d);
+    const sdf = qii(qi(distance)) - qii(d);
+    const s = sdf <= -0. ? -1 : 1;
+    const df = Math.abs(sdf);
+    return s * Math.pow(df, 0.5);
 }
 `;
     document.getElementById("d_f_code").value = code;
@@ -390,9 +393,6 @@ function change_grid_size() {
     grid_size = Number(document.getElementById("grid_size_input").value);
     if(isNaN(grid_size) || grid_size < 4) {
         grid_size = 4;
-    }
-    if(grid_size > w/8) {
-        grid_size = w/8;
     }
     document.getElementById("grid_size_input").value = grid_size;
     draw_canvas();
