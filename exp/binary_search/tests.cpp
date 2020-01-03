@@ -32,28 +32,31 @@ vector<int> uniform_random(size_t how_much, int from, int to) {
     std::cout << difference.count() << " - " << NAME_TO_PRINT << "\n";    \
     }
 
-
+template <int percent>
 size_t find_if_any(const int what, const std::vector<int>& where, size_t from, size_t to) {
     if(where[from] == what)
         return from;
     if(to - from <= 1)      
       return NONE;
-    size_t mid = from + (to - from) / 2;
+    size_t mid = from + (to - from) * percent / 100;
+    mid = std::max(mid, from);
+    mid = std::min(mid, to-1);
     if(where[mid] < what)
-        return find_if_any(what, where, mid + 1, to);
-    return find_if_any(what, where, from, mid);
+        return find_if_any<percent>(what, where, mid + 1, to);
+    return find_if_any<percent>(what, where, from, mid);
 }
 
+template <int percent>
 size_t find_if_any(const int what, const std::vector<int>& where) {
-    return find_if_any(what, where, 0, where.size() - 1);
+    return find_if_any<percent>(what, where, 0, where.size() - 1);
 }
 
 int main() {
-    const auto test_data = uniform_random(100'000'000, 0, 100'000'000);
+    const auto test_data = uniform_random(10'000'000, 0, 10'000'000);
     MEASURE(
-    for(auto i = 0; i < 100'000'000; ++i)
+    for(auto i = 0; i < 10'000'000; ++i)
         {
-        auto index = find_if_any(i, test_data);
+        auto index = find_if_any<50>(i, test_data);
         if(index != NONE && test_data[index] != i)
             std::cout << "search is faulty\n";
         }
