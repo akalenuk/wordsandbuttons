@@ -52,7 +52,7 @@ size_t find_if_any(const int what, const std::vector<int>& where) {
 }
 
 int main() {
-    const auto test_data = uniform_random(10'000'000, 0, 10'000'000);
+    const auto test_data = uniform_random(10'000'000, 0, 10'000'000-1);
     MEASURE(    
     for(auto i = 0; i < 10'000'000; ++i) {
         auto index = find_if_any<10>(i, test_data);
