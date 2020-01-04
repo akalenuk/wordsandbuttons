@@ -20,6 +20,7 @@ vector<int> uniform_random(size_t how_much, int from, int to) {
     std::uniform_int_distribution<int> randoms(from, to);
     for(auto& i : ints)
         i = randoms(rng);
+    std::sort(ints.begin(), ints.end());
     return ints;
 }
 
@@ -27,11 +28,11 @@ template <int percent>
 size_t find_if_any(const int what, const std::vector<int>& where, size_t from, size_t to) {
     if(where[from] == what)
         return from;
-    if(to - from <= 1)      
+    if(to - from < 1)      
       return NONE;
     size_t mid = from + (to - from) * percent / 100;
     mid = std::max(mid, from);
-    mid = std::min(mid, to-1);
+    mid = std::min(mid, to);
     if(where[mid] < what)
         return find_if_any<percent>(what, where, mid + 1, to);
     return find_if_any<percent>(what, where, from, mid);
@@ -44,12 +45,15 @@ size_t find_if_any(const int what, const std::vector<int>& where) {
 
 int main() {
     const auto test_data = uniform_random(10, 0, 10-1);
-    for(auto i = 0; i < 10; ++i)
-        std::cout << test_data[i] << " ";
     std::cout << "\n";
     for(auto i = 0; i < 10; ++i) {
         auto index = find_if_any<50>(i, test_data);
-        std::cout << i << " is in " << index << "\n";
+        if(index != NONE && test_data[index] != i)
+            std::cout << "false positive!";
+        if(index == NONE)
+            for(auto j = 0u; j < 10; ++j)
+                if(test_data[j] == i)
+                   std::cout << "false negative!";
     }
     return 0;
 }

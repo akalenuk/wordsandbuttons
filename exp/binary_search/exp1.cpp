@@ -33,15 +33,16 @@ vector<int> uniform_random(size_t how_much, int from, int to) {
     std::cout << difference.count() << " - " << NAME_TO_PRINT << "\n";    \
     }
 
+
 template <int percent>
 size_t find_if_any(const int what, const std::vector<int>& where, size_t from, size_t to) {
     if(where[from] == what)
         return from;
-    if(to - from <= 1)      
+    if(to - from < 1)
       return NONE;
     size_t mid = from + (to - from) * percent / 100;
     mid = std::max(mid, from);
-    mid = std::min(mid, to-1);
+    mid = std::min(mid, to);
     if(where[mid] < what)
         return find_if_any<percent>(what, where, mid + 1, to);
     return find_if_any<percent>(what, where, from, mid);
