@@ -43,11 +43,40 @@ size_t find_if_any(const int what, const std::vector<int>& where) {
     return find_if_any<percent>(what, where, 0, where.size() - 1);
 }
 
+size_t find_if_any_ip(const int what, const std::vector<int>& where, size_t from, size_t to) {
+    if(where[from] == what)
+        return from;
+    if(where[to] == what)
+        return to;
+    if(to - from < 1)
+      return NONE;
+    size_t mid = from + (to - from) * (what - where[from]) / (where[to] - where[from]);
+    mid = std::max(mid, from);
+    mid = std::min(mid, to);
+    if(where[mid] < what)
+        return find_if_any_ip(what, where, mid + 1, to);
+    return find_if_any_ip(what, where, from, mid);
+}
+
+size_t find_if_any_ip(const int what, const std::vector<int>& where) {
+    return find_if_any_ip(what, where, 0, where.size() - 1);
+}
+
+
 int main() {
     const auto test_data = uniform_random(10, 0, 10-1);
     std::cout << "\n";
     for(auto i = 0; i < 10; ++i) {
         auto index = find_if_any<50>(i, test_data);
+        if(index != NONE && test_data[index] != i)
+            std::cout << "false positive!";
+        if(index == NONE)
+            for(auto j = 0u; j < 10; ++j)
+                if(test_data[j] == i)
+                   std::cout << "false negative!";
+    }
+    for(auto i = 0; i < 10; ++i) {
+        auto index = find_if_any_ip(i, test_data);
         if(index != NONE && test_data[index] != i)
             std::cout << "false positive!";
         if(index == NONE)
