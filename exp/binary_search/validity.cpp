@@ -44,15 +44,16 @@ size_t find_if_any(const int what, const std::vector<int>& where) {
 }
 
 size_t find_if_any_ip(const int what, const std::vector<int>& where, size_t from, size_t to) {
+    if(where[to] <= where[from])
+        return NONE;
     if(where[from] == what)
         return from;
     if(where[to] == what)
         return to;
-    if(to - from < 1)
-      return NONE;
-    size_t mid = from + (to - from) * (what - where[from]) / (where[to] - where[from]);
-    mid = std::max(mid, from);
-    mid = std::min(mid, to);
+    double t = static_cast<double>(what - where[from]) / static_cast<double>(where[to] - where[from]);
+    t = std::max(t, 0.);
+    t = std::min(t, 1.);
+    size_t mid = from + static_cast<size_t>((to - from) * t);
     if(where[mid] < what)
         return find_if_any_ip(what, where, mid + 1, to);
     return find_if_any_ip(what, where, from, mid);
