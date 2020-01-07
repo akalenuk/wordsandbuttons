@@ -41,7 +41,7 @@ vector<int> poisson_random(size_t how_much, int from, int to) {
     std::cout << difference.count() << " - " << NAME_TO_PRINT << "\n";    \
     }
 
-size_t find_if_any(const int what, const std::vector<int>& where, size_t from, size_t to) {
+size_t find_if_any(const int what, const std::vector<int>& where, size_t from, size_t to, size_t depth = 0) {
     if(where[to] <= where[from])
         return NONE;
     if(where[from] == what)
@@ -52,9 +52,13 @@ size_t find_if_any(const int what, const std::vector<int>& where, size_t from, s
     t = std::max(t, 0.);
     t = std::min(t, 1.);
     size_t mid = from + static_cast<size_t>((to - from) * t);
+    if(depth > where.size()) {
+        std::cout << "hanged!\n";
+        return NONE;
+        }
     if(where[mid] < what)
-        return find_if_any(what, where, mid + 1, to);
-    return find_if_any(what, where, from, mid);
+        return find_if_any(what, where, mid + 1, to, depth+1);
+    return find_if_any(what, where, from, mid, depth+1);
 }
 
 size_t find_if_any(const int what, const std::vector<int>& where) {
