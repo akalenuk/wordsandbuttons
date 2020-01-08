@@ -165,6 +165,20 @@ var pick_a_point = null;
 var slide_a_w = null;
 var translation = null;
 
+function draw_arrow(context, x1, y1, x2, y2, color) {
+    const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+    context.beginPath();
+    context.moveTo(x1, y1);
+    context.lineTo(x2, y2);
+    context.moveTo(x2 - (y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d, y2 - (y2 - y1) * 16.5 / d + (x2 - x1) * 4.5 / d);
+    context.lineTo(x2, y2);
+    context.moveTo(x2 + (y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d, y2 - (y2 - y1) * 16.5 / d - (x2 - x1) * 4.5 / d);
+    context.lineTo(x2, y2);
+    context.strokeStyle = color;
+    context.stroke();
+    context.closePath();
+}
+
 function draw_grid_on(context){
     // grid
     context.beginPath();
@@ -259,14 +273,9 @@ function pick_a_point_draw(client_x, client_y, do_guides){
     pick_a_point_context.closePath();
 
     if(do_guides){
-        pick_a_point_context.beginPath();
-        pick_a_point_context.setLineDash([4, 4]);
-        pick_a_point_context.moveTo(client_x, client_y);
-        pick_a_point_context.lineTo(x_to_client(point_x), y_to_client(point_y));
-        pick_a_point_context.strokeStyle="#992200";
-        pick_a_point_context.stroke();
-        pick_a_point_context.setLineDash([]);
-        pick_a_point_context.closePath();
+        pick_a_point_context.lineWidth = 2;
+        draw_arrow(pick_a_point_context, x_to_client(point_x), y_to_client(point_y), client_x, client_y, "#992200");
+        pick_a_point_context.lineWidth = 1;
     }
 
     // grid
@@ -346,16 +355,9 @@ function slide_a_w_draw(client_x, client_y, is_moving){
     slide_a_w_context.closePath();
 
     if(is_moving){
-        slide_a_w_context.beginPath();
-        slide_a_w_context.moveTo(x_to_client(point_x / w_), y_to_client(point_y / w_))
-        slide_a_w_context.lineTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w))
-        slide_a_w_context.strokeStyle="#992200";
-        slide_a_w_context.setLineDash([4, 4]);
         slide_a_w_context.lineWidth = 2;
-        slide_a_w_context.stroke();
+        draw_arrow(slide_a_w_context, x_to_client(point_x / slide_w), y_to_client(point_y / slide_w), x_to_client(point_x / w_), y_to_client(point_y / w_), "#992200");
         slide_a_w_context.lineWidth = 1;
-        slide_a_w_context.setLineDash([]);
-        slide_a_w_context.closePath();
     }
 
     slide_a_w_context.beginPath();
@@ -1104,14 +1106,9 @@ function composable_draw(client_x, client_y, do_new){
         composable_context.closePath();
         // guide
         if(do_new){
-            composable_context.beginPath();
-            composable_context.setLineDash([2, 2]);
-            composable_context.moveTo(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]));
-            composable_context.lineTo(x_to_client(x), y_to_client(y));
-            composable_context.strokeStyle="#dd6644";
-            composable_context.stroke();
-            composable_context.setLineDash([]);
-            composable_context.closePath();
+            composable_context.lineWidth = 2;
+            draw_arrow(composable_context, x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]), x_to_client(x), y_to_client(y), "#992200");
+            composable_context.lineWidth = 1;
         }
     }
 }
