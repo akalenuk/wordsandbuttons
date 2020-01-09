@@ -260,6 +260,7 @@ function pick_a_point_draw(client_x, client_y, do_guides){
 
     // selection
     context.beginPath();
+    context.lineWidth = 1;
     context.setLineDash([4, 4]);
     context.moveTo(x_to_client(point_x), h / 2.0);
     context.lineTo(x_to_client(point_x), y_to_client(point_y));
@@ -277,7 +278,11 @@ function pick_a_point_draw(client_x, client_y, do_guides){
         draw_arrow(context, x_to_client(point_x), y_to_client(point_y), client_x, client_y, "#d64562");
         context.lineWidth = 1;
     }
-
+    
+    // point
+    context.arc(x_to_client(point_x), y_to_client(point_y), 3, 0, 2*Math.PI);
+    context.fill();
+    
     // grid
     draw_grid_on(context);
 }
@@ -360,16 +365,13 @@ function slide_a_w_draw(client_x, client_y, is_moving){
         context.lineWidth = 1;
     }
 
-    context.beginPath();
-    context.moveTo(x_to_client(point_x / slide_w) - 10, y_to_client(point_y / slide_w));
-    context.lineTo(x_to_client(point_x / slide_w) + 10, y_to_client(point_y / slide_w));
-    context.moveTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w) - 10);
-    context.lineTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w) + 10);
-    context.strokeStyle="#8c2c3e";
-    context.stroke();
-    context.fillStyle="#8c2c3e";
+    // point
+    context.fillStyle="#8c2c3e";    
+    context.arc(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w), 3, 0, 2*Math.PI);
+    context.fill();
+
+    // coordinates
     context.fillText(point_x.toFixed(1) + ", " + point_y.toFixed(1) + ", " + slide_w.toFixed(3), x_to_client(point_x / slide_w) + 4, y_to_client(point_y / slide_w) + 16);
-    context.closePath();
 
     // grid
     draw_grid_on(context);
@@ -786,19 +788,15 @@ function affine_draw(client_x, client_y, do_new){
         context.lineWidth = 1;
     }
 
-    // grid
-    draw_grid_on(context);
-
     // x
     context.beginPath();
-    context.moveTo(x_to_client(affine_xs[affine_i]) - 10, y_to_client(affine_ys[affine_i]));
-    context.lineTo(x_to_client(affine_xs[affine_i]) + 10, y_to_client(affine_ys[affine_i]));
-    context.moveTo(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]) - 10);
-    context.lineTo(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]) + 10);
-    context.strokeStyle="#8c2c3e";
-    context.stroke();
-    context.setLineDash([]);
+    context.fillStyle="#8c2c3e";
+    context.arc(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]), 3, 0, 2*Math.PI);
+    context.fill();
     context.closePath();
+    
+    // grid
+    draw_grid_on(context);
 }
 
 function init_projective(){
@@ -873,19 +871,15 @@ function projective_draw(client_x, client_y, do_new){
         context.lineWidth = 1;
     }
 
-    // grid
-    draw_grid_on(context);
-
     // x
     context.beginPath();
-    context.moveTo(x_to_client(projective_xs[projective_i]) - 10, y_to_client(projective_ys[projective_i]));
-    context.lineTo(x_to_client(projective_xs[projective_i]) + 10, y_to_client(projective_ys[projective_i]));
-    context.moveTo(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]) - 10);
-    context.lineTo(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]) + 10);
-    context.strokeStyle="#8c2c3e";
-    context.stroke();
-    context.setLineDash([]);
+    context.fillStyle="#8c2c3e";
+    context.arc(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]), 3, 0, 2*Math.PI);
+    context.fill();
     context.closePath();
+
+    // grid
+    draw_grid_on(context);
 }
 
 var composable_reference_x = 0.0;
@@ -1086,14 +1080,11 @@ function composable_draw(client_x, client_y, do_new){
     // x
     if(document.getElementById("radio_p").checked){
         context.beginPath();
-        context.moveTo(x_to_client(composable_xs[composable_i]) - 10, y_to_client(composable_ys[composable_i]));
-        context.lineTo(x_to_client(composable_xs[composable_i]) + 10, y_to_client(composable_ys[composable_i]));
-        context.moveTo(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]) - 10);
-        context.lineTo(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]) + 10);
-        context.strokeStyle="#8c2c3e";
-        context.stroke();
-        context.setLineDash([]);
+        context.fillStyle="#8c2c3e";
+        context.arc(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]), 3, 0, 2*Math.PI);
+        context.fill();
         context.closePath();
+            
         // guide
         if(do_new){
             context.lineWidth = 2;
