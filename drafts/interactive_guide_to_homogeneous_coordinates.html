@@ -410,7 +410,7 @@ function init_translation(){
         if(e.buttons == 1){
             dx = client_to_x(e.clientX - canvas_rect.left);
             dy = client_to_y(e.clientY - canvas_rect.top);
-            translation_draw(0, 0, false);
+            translation_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
         }else{
             translation_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
         }
@@ -565,6 +565,9 @@ function rotation_draw(a, do_new){
         new_saved_ys[i] = rotated_y(rotation_a, xs[i], ys[i]);
     }
 
+    // original cube
+    draw_original_cube_on(context);
+    
     context.lineWidth = 2;
     if(do_new){
         // the connection
@@ -584,9 +587,6 @@ function rotation_draw(a, do_new){
             context.closePath();
         }
     }
-
-    // original cube
-    draw_original_cube_on(context);
 
     // draw a saved cube
     context.beginPath();
@@ -631,7 +631,7 @@ function init_scale(){
         if(e.buttons == 1){
             scale_x = new_scale_x;
             scale_y = new_scale_y;
-            scale_draw(scale_x, scale_y, false);
+            scale_draw(scale_x, scale_y, true);
         }else{
             scale_draw(new_scale_x, new_scale_y, true);
         }
@@ -672,6 +672,10 @@ function scale_draw(a, b, do_new){
         new_saved_ys[i] = scale_y * ys[i];
     }
 
+    // original cube
+    draw_original_cube_on(context);
+    
+    context.lineWidth = 2;
     if(do_new){
         // the connection
         context.beginPath();
@@ -686,19 +690,16 @@ function scale_draw(a, b, do_new){
         context.closePath();
     }
 
-    // original cube
-    draw_original_cube_on(context);
-
-    if(do_new){ // draw a saved cube
-        context.beginPath();
-        context.moveTo(x_to_client(new_saved_xs[3]), y_to_client(new_saved_ys[3]));
-        for(var i = 0; i < 4; i++){
-            context.lineTo(x_to_client(new_saved_xs[i]), y_to_client(new_saved_ys[i]));
-        }
-        context.strokeStyle="#ff8866";
-        context.stroke();
-        context.closePath();
+    // draw a saved cube
+    context.beginPath();
+    context.moveTo(x_to_client(new_saved_xs[3]), y_to_client(new_saved_ys[3]));
+    for(var i = 0; i < 4; i++){
+        context.lineTo(x_to_client(new_saved_xs[i]), y_to_client(new_saved_ys[i]));
     }
+    context.strokeStyle="#8c2c3e";
+    context.stroke();
+    context.closePath();
+    context.lineWidth = 1;
 
     // scale
     context.beginPath();
@@ -706,7 +707,7 @@ function scale_draw(a, b, do_new){
     for(var i = 0; i < 4; i++){
         context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
     }
-    context.strokeStyle="#8c2c3e";
+    context.strokeStyle="#d64562";
     context.stroke();
     context.closePath();
     context.fillStyle="#8c2c3e";
@@ -775,6 +776,7 @@ function affine_draw(client_x, client_y, do_new){
     draw_original_cube_on(context);
 
     // affine
+    context.lineWidth = 2;
     context.beginPath();
     context.moveTo(x_to_client(affine_xs[3]), y_to_client(affine_ys[3]));
     for(var i = 0; i < 4; i++){
@@ -783,6 +785,7 @@ function affine_draw(client_x, client_y, do_new){
     context.strokeStyle="#8c2c3e";
     context.stroke();
     context.closePath();
+    context.lineWidth = 1;
 
     if(do_new){
         // link
@@ -858,6 +861,7 @@ function projective_draw(client_x, client_y, do_new){
     draw_original_cube_on(context);
 
     // projective
+    context.lineWidth = 2;
     context.beginPath();
     context.moveTo(x_to_client(projective_xs[3]), y_to_client(projective_ys[3]));
     for(var i = 0; i < 4; i++){
@@ -866,6 +870,7 @@ function projective_draw(client_x, client_y, do_new){
     context.strokeStyle="#8c2c3e";
     context.stroke();
     context.closePath();
+    context.lineWidth = 1;
 
     if(do_new){
         // link
