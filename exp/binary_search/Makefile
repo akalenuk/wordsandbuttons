@@ -17,4 +17,4 @@ clean:
 	rm exp1
 	rm exp2
 	rm exp3
-
+	rm exp3_poisson
