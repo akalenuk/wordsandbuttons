@@ -165,6 +165,20 @@ var pick_a_point = null;
 var slide_a_w = null;
 var translation = null;
 
+function draw_arrow(context, x1, y1, x2, y2, color) {
+    const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+    context.beginPath();
+    context.moveTo(x1, y1);
+    context.lineTo(x2, y2);
+    context.moveTo(x2 - (y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d, y2 - (y2 - y1) * 16.5 / d + (x2 - x1) * 4.5 / d);
+    context.lineTo(x2, y2);
+    context.moveTo(x2 + (y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d, y2 - (y2 - y1) * 16.5 / d - (x2 - x1) * 4.5 / d);
+    context.lineTo(x2, y2);
+    context.strokeStyle = color;
+    context.stroke();
+    context.closePath();
+}
+
 function draw_grid_on(context){
     // grid
     context.beginPath();
@@ -238,39 +252,39 @@ function init_pick_a_point(){
 }
 
 function pick_a_point_draw(client_x, client_y, do_guides){
-    var pick_a_point_context = pick_a_point.getContext("2d");
-    pick_a_point_context.font = "16px sans-serif";
+    var context = pick_a_point.getContext("2d");
+    context.font = "16px sans-serif";
     // background
-    pick_a_point_context.fillStyle="#eeeeee";
-    pick_a_point_context.fillRect(0, 0, w, h);
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
 
     // selection
-    pick_a_point_context.beginPath();
-    pick_a_point_context.setLineDash([2, 2]);
-    pick_a_point_context.moveTo(x_to_client(point_x), h / 2.0);
-    pick_a_point_context.lineTo(x_to_client(point_x), y_to_client(point_y));
-    pick_a_point_context.moveTo(w / 2.0, y_to_client(point_y));
-    pick_a_point_context.lineTo(x_to_client(point_x), y_to_client(point_y));
-    pick_a_point_context.strokeStyle="#dd6644";
-    pick_a_point_context.stroke();
-    pick_a_point_context.fillStyle="#dd6644";
-    pick_a_point_context.fillText(point_x.toFixed(1) + ", " + point_y.toFixed(1), x_to_client(point_x) + 4, y_to_client(point_y) + 16);
-    pick_a_point_context.setLineDash([]);
-    pick_a_point_context.closePath();
+    context.beginPath();
+    context.lineWidth = 1;
+    context.setLineDash([4, 4]);
+    context.moveTo(x_to_client(point_x), h / 2.0);
+    context.lineTo(x_to_client(point_x), y_to_client(point_y));
+    context.moveTo(w / 2.0, y_to_client(point_y));
+    context.lineTo(x_to_client(point_x), y_to_client(point_y));
+    context.strokeStyle="#8c2c3e";
+    context.stroke();
+    context.fillStyle="#8c2c3e";
+    context.fillText(point_x.toFixed(1) + ", " + point_y.toFixed(1), x_to_client(point_x) + 4, y_to_client(point_y) + 16);
+    context.setLineDash([]);
+    context.closePath();
 
     if(do_guides){
-        pick_a_point_context.beginPath();
-        pick_a_point_context.setLineDash([4, 4]);
-        pick_a_point_context.moveTo(client_x, client_y);
-        pick_a_point_context.lineTo(x_to_client(point_x), y_to_client(point_y));
-        pick_a_point_context.strokeStyle="#992200";
-        pick_a_point_context.stroke();
-        pick_a_point_context.setLineDash([]);
-        pick_a_point_context.closePath();
+        context.lineWidth = 2;
+        draw_arrow(context, x_to_client(point_x), y_to_client(point_y), client_x, client_y, "#d64562");
+        context.lineWidth = 1;
     }
-
+    
+    // point
+    context.arc(x_to_client(point_x), y_to_client(point_y), 3, 0, 2*Math.PI);
+    context.fill();
+    
     // grid
-    draw_grid_on(pick_a_point_context);
+    draw_grid_on(context);
 }
 
 function transform(){
@@ -321,11 +335,11 @@ function init_slide_a_w(){
 
 function slide_a_w_draw(client_x, client_y, is_moving){
     var slide_a_w = document.getElementById("slide_a_w");
-    var slide_a_w_context = slide_a_w.getContext("2d");
-    slide_a_w_context.font = "16px sans-serif";
+    var context = slide_a_w.getContext("2d");
+    context.font = "16px sans-serif";
     // background
-    slide_a_w_context.fillStyle="#eeeeee";
-    slide_a_w_context.fillRect(0, 0, w, h);
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
 
     // selection
     var w_;
@@ -338,39 +352,29 @@ function slide_a_w_draw(client_x, client_y, is_moving){
         w_ = slide_w;
     }
 
-    slide_a_w_context.beginPath();
-    slide_a_w_context.moveTo(x_to_client(point_x * 100), y_to_client(point_y * 100));
-    slide_a_w_context.lineTo(x_to_client(point_x * -100), y_to_client(point_y * -100));
-    slide_a_w_context.strokeStyle="#dd6644";
-    slide_a_w_context.stroke();
-    slide_a_w_context.closePath();
+    context.beginPath();
+    context.moveTo(x_to_client(point_x * 100), y_to_client(point_y * 100));
+    context.lineTo(x_to_client(point_x * -100), y_to_client(point_y * -100));
+    context.strokeStyle="#8c2c3e";
+    context.stroke();
+    context.closePath();
 
     if(is_moving){
-        slide_a_w_context.beginPath();
-        slide_a_w_context.moveTo(x_to_client(point_x / w_), y_to_client(point_y / w_))
-        slide_a_w_context.lineTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w))
-        slide_a_w_context.strokeStyle="#992200";
-        slide_a_w_context.setLineDash([4, 4]);
-        slide_a_w_context.lineWidth = 2;
-        slide_a_w_context.stroke();
-        slide_a_w_context.lineWidth = 1;
-        slide_a_w_context.setLineDash([]);
-        slide_a_w_context.closePath();
+        context.lineWidth = 2;
+        draw_arrow(context, x_to_client(point_x / slide_w), y_to_client(point_y / slide_w), x_to_client(point_x / w_), y_to_client(point_y / w_), "#d64562");
+        context.lineWidth = 1;
     }
 
-    slide_a_w_context.beginPath();
-    slide_a_w_context.moveTo(x_to_client(point_x / slide_w) - 10, y_to_client(point_y / slide_w));
-    slide_a_w_context.lineTo(x_to_client(point_x / slide_w) + 10, y_to_client(point_y / slide_w));
-    slide_a_w_context.moveTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w) - 10);
-    slide_a_w_context.lineTo(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w) + 10);
-    slide_a_w_context.strokeStyle="#dd6644";
-    slide_a_w_context.stroke();
-    slide_a_w_context.fillStyle="#dd6644";
-    slide_a_w_context.fillText(point_x.toFixed(1) + ", " + point_y.toFixed(1) + ", " + slide_w.toFixed(3), x_to_client(point_x / slide_w) + 4, y_to_client(point_y / slide_w) + 16);
-    slide_a_w_context.closePath();
+    // point
+    context.fillStyle="#8c2c3e";
+    context.arc(x_to_client(point_x / slide_w), y_to_client(point_y / slide_w), 3, 0, 2*Math.PI);
+    context.fill();
+
+    // coordinates
+    context.fillText(point_x.toFixed(1) + ", " + point_y.toFixed(1) + ", " + slide_w.toFixed(3), x_to_client(point_x / slide_w) + 4, y_to_client(point_y / slide_w) + 16);
 
     // grid
-    draw_grid_on(slide_a_w_context);
+    draw_grid_on(context);
 }
 
 
@@ -406,7 +410,7 @@ function init_translation(){
         if(e.buttons == 1){
             dx = client_to_x(e.clientX - canvas_rect.left);
             dy = client_to_y(e.clientY - canvas_rect.top);
-            translation_draw(0, 0, false);
+            translation_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
         }else{
             translation_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
         }
@@ -427,59 +431,61 @@ function translation_draw(client_x, client_y, do_new){
         var y = dy;
     }
 
-    var translation_context = translation.getContext("2d");
-    translation_context.font = "16px sans-serif";
+    var context = translation.getContext("2d");
+    context.font = "16px sans-serif";
     // background
-    translation_context.fillStyle="#eeeeee";
-    translation_context.fillRect(0, 0, w, h);
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
 
     // original cube
-    draw_original_cube_on(translation_context);
+    draw_original_cube_on(context);
 
+    context.lineWidth = 2;
     if(do_new){
         // the connection
-        translation_context.beginPath();
-        translation_context.setLineDash([2, 2]);
-        translation_context.moveTo(x_to_client(1), y_to_client(1));
-        translation_context.lineTo(x_to_client(x), y_to_client(y));
-        translation_context.moveTo(x_to_client(1 + 1), y_to_client(1));
-        translation_context.lineTo(x_to_client(x + 1), y_to_client(y));
-        translation_context.moveTo(x_to_client(1 + 1), y_to_client(1 + 1));
-        translation_context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
-        translation_context.moveTo(x_to_client(1), y_to_client(1 + 1));
-        translation_context.lineTo(x_to_client(x), y_to_client(y + 1));
-        translation_context.strokeStyle="#eeaa88";
-        translation_context.stroke();
-        translation_context.setLineDash([]);
-        translation_context.closePath();
-
-        // dx-dy cube
-        translation_context.beginPath();
-        translation_context.moveTo(x_to_client(dx), y_to_client(dy));
-        translation_context.lineTo(x_to_client(dx + 1), y_to_client(dy));
-        translation_context.lineTo(x_to_client(dx + 1), y_to_client(dy + 1));
-        translation_context.lineTo(x_to_client(dx), y_to_client(dy + 1));
-        translation_context.lineTo(x_to_client(dx), y_to_client(dy));
-        translation_context.strokeStyle="#ff8866";
-        translation_context.stroke();
-        translation_context.closePath();
+        context.beginPath();
+        context.setLineDash([4, 4]);
+        context.moveTo(x_to_client(1), y_to_client(1));
+        context.lineTo(x_to_client(x), y_to_client(y));
+        context.moveTo(x_to_client(1 + 1), y_to_client(1));
+        context.lineTo(x_to_client(x + 1), y_to_client(y));
+        context.moveTo(x_to_client(1 + 1), y_to_client(1 + 1));
+        context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
+        context.moveTo(x_to_client(1), y_to_client(1 + 1));
+        context.lineTo(x_to_client(x), y_to_client(y + 1));
+        context.strokeStyle="#d64562";
+        context.stroke();
+        context.setLineDash([]);
+        context.closePath();
     }
+    // dx-dy cube
+    context.beginPath();
+    context.moveTo(x_to_client(dx), y_to_client(dy));
+    context.lineTo(x_to_client(dx + 1), y_to_client(dy));
+    context.lineTo(x_to_client(dx + 1), y_to_client(dy + 1));
+    context.lineTo(x_to_client(dx), y_to_client(dy + 1));
+    context.lineTo(x_to_client(dx), y_to_client(dy));
+    context.strokeStyle="#8c2c3e";
+    context.stroke();
+    context.closePath();
+    context.lineWidth = 1;
+
     // translation
-    translation_context.beginPath();
-    translation_context.moveTo(x_to_client(x), y_to_client(y));
-    translation_context.lineTo(x_to_client(x + 1), y_to_client(y));
-    translation_context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
-    translation_context.lineTo(x_to_client(x), y_to_client(y + 1));
-    translation_context.lineTo(x_to_client(x), y_to_client(y));
-    translation_context.strokeStyle="#dd6644";
-    translation_context.stroke();
-    translation_context.closePath();
-    translation_context.fillStyle="#dd6644";
-    translation_context.fillText("x' = x + a, where a = " + (x-1).toFixed(1), 32, 560);
-    translation_context.fillText("y' = y + b, where b = " + (y-1).toFixed(1), 32, 580);
+    context.beginPath();
+    context.moveTo(x_to_client(x), y_to_client(y));
+    context.lineTo(x_to_client(x + 1), y_to_client(y));
+    context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
+    context.lineTo(x_to_client(x), y_to_client(y + 1));
+    context.lineTo(x_to_client(x), y_to_client(y));
+    context.strokeStyle="#d64562";
+    context.stroke();
+    context.closePath();
+    context.fillStyle="#8c2c3e";
+    context.fillText("x' = x + a, where a = " + (x-1).toFixed(1), 32, 560);
+    context.fillText("y' = y + b, where b = " + (y-1).toFixed(1), 32, 580);
 
     // grid
-    draw_grid_on(translation_context);
+    draw_grid_on(context);
 }
 
 function rotated_x(a, x, y){
@@ -537,77 +543,78 @@ function init_rotation(){
 }
 
 function rotation_draw(a, do_new){
-    var rotation_context = rotation.getContext("2d");
-    rotation_context.font = "16px sans-serif";
+    var context = rotation.getContext("2d");
+    context.font = "16px sans-serif";
     // background
-    rotation_context.fillStyle="#eeeeee";
-    rotation_context.fillRect(0, 0, w, h);
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
 
     var xs = [1., 2., 2., 1.];
     var ys = [1., 1., 2., 2.];
     var new_xs = [0, 0, 0, 0];
     var new_ys = [0, 0, 0, 0];
     for(var i = 0; i < 4; i++){
-      new_xs[i] = rotated_x(a, xs[i], ys[i]);
-      new_ys[i] = rotated_y(a, xs[i], ys[i]);
+        new_xs[i] = rotated_x(a, xs[i], ys[i]);
+        new_ys[i] = rotated_y(a, xs[i], ys[i]);
     }
 
     var new_saved_xs = [0, 0, 0, 0];
     var new_saved_ys = [0, 0, 0, 0];
     for(var i = 0; i < 4; i++){
-      new_saved_xs[i] = rotated_x(rotation_a, xs[i], ys[i]);
-      new_saved_ys[i] = rotated_y(rotation_a, xs[i], ys[i]);
+        new_saved_xs[i] = rotated_x(rotation_a, xs[i], ys[i]);
+        new_saved_ys[i] = rotated_y(rotation_a, xs[i], ys[i]);
     }
 
+    // original cube
+    draw_original_cube_on(context);
+    
+    context.lineWidth = 2;
     if(do_new){
         // the connection
         for(var i = 0; i < 4; i++){
-            rotation_context.beginPath();
-            rotation_context.setLineDash([2, 2]);
+            context.beginPath();
+            context.setLineDash([4, 4]);
             var r = x_to_client(Math.sqrt(xs[i]*xs[i] + ys[i]*ys[i])) - x_to_client(0);
             var a1 = in_2_pi(rotation_for(xs[i], ys[i]) - Math.PI * 3 / 4);
             var a2 = in_2_pi(rotation_for(new_xs[i], new_ys[i]) - Math.PI * 3 / 4);
             if(a1 < a2)
-                rotation_context.arc(x_to_client(0), y_to_client(0), r, a1, a2);
+                context.arc(x_to_client(0), y_to_client(0), r, a1, a2);
             else
-                rotation_context.arc(x_to_client(0), y_to_client(0), r, a2, a1);
-            rotation_context.strokeStyle="#eeaa88";
-            rotation_context.stroke();
-            rotation_context.setLineDash([]);
-            rotation_context.closePath();
+                context.arc(x_to_client(0), y_to_client(0), r, a2, a1);
+            context.strokeStyle="#d64562";
+            context.stroke();
+            context.setLineDash([]);
+            context.closePath();
         }
     }
 
-    // original cube
-    draw_original_cube_on(rotation_context);
-
-    if(do_new){ // draw a saved cube
-        rotation_context.beginPath();
-        rotation_context.moveTo(x_to_client(new_saved_xs[3]), y_to_client(new_saved_ys[3]));
-        for(var i = 0; i < 4; i++){
-            rotation_context.lineTo(x_to_client(new_saved_xs[i]), y_to_client(new_saved_ys[i]));
-        }
-        rotation_context.strokeStyle="#ff8866";
-        rotation_context.stroke();
-        rotation_context.closePath();
-    }
-
-    // rotation
-    rotation_context.beginPath();
-    rotation_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
+    // draw a saved cube
+    context.beginPath();
+    context.moveTo(x_to_client(new_saved_xs[3]), y_to_client(new_saved_ys[3]));
     for(var i = 0; i < 4; i++){
-        rotation_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+        context.lineTo(x_to_client(new_saved_xs[i]), y_to_client(new_saved_ys[i]));
     }
-    rotation_context.strokeStyle="#dd6644";
-    rotation_context.stroke();
-    rotation_context.closePath();
-    rotation_context.fillStyle="#dd6644";
-    rotation_context.fillText("x' = sin(a) * x + cos(a) * y", 32, 540);
-    rotation_context.fillText("y' = cos(a) * x - sin(a) * y", 32, 560);
-    rotation_context.fillText("where a = " + (a - Math.PI/2).toFixed(2), 32, 580);
+    context.strokeStyle="#8c2c3e";
+    context.stroke();
+    context.closePath();
+    context.lineWidth = 1;
+    
+    // rotation
+    context.beginPath();
+    context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
+    for(var i = 0; i < 4; i++){
+        context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+    }
+    context.strokeStyle="#d64562";
+    context.stroke();
+    context.closePath();
+    context.fillStyle="#8c2c3e";
+    context.fillText("x' = sin(a) * x + cos(a) * y", 32, 540);
+    context.fillText("y' = cos(a) * x - sin(a) * y", 32, 560);
+    context.fillText("where a = " + (a - Math.PI/2).toFixed(2), 32, 580);
 
     // grid
-    draw_grid_on(rotation_context);
+    draw_grid_on(context);
 }
 
 var scale_x = 0.8;
@@ -624,7 +631,7 @@ function init_scale(){
         if(e.buttons == 1){
             scale_x = new_scale_x;
             scale_y = new_scale_y;
-            scale_draw(scale_x, scale_y, false);
+            scale_draw(scale_x, scale_y, true);
         }else{
             scale_draw(new_scale_x, new_scale_y, true);
         }
@@ -643,11 +650,11 @@ function init_scale(){
 }
 
 function scale_draw(a, b, do_new){
-    var scale_context = scale.getContext("2d");
-    scale_context.font = "16px sans-serif";
+    var context = scale.getContext("2d");
+    context.font = "16px sans-serif";
     // background
-    scale_context.fillStyle="#eeeeee";
-    scale_context.fillRect(0, 0, w, h);
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
 
     var xs = [1., 2., 2., 1.];
     var ys = [1., 1., 2., 2.];
@@ -665,49 +672,50 @@ function scale_draw(a, b, do_new){
         new_saved_ys[i] = scale_y * ys[i];
     }
 
+    // original cube
+    draw_original_cube_on(context);
+    
+    context.lineWidth = 2;
     if(do_new){
         // the connection
-        scale_context.beginPath();
-        scale_context.setLineDash([2, 2]);
+        context.beginPath();
+        context.setLineDash([4, 4]);
         for(var i = 0; i < 4; i++){
-            scale_context.moveTo(x_to_client(xs[i]), y_to_client(ys[i]));
-            scale_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+            context.moveTo(x_to_client(xs[i]), y_to_client(ys[i]));
+            context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
         }
-        scale_context.strokeStyle="#eeaa88";
-        scale_context.stroke();
-        scale_context.setLineDash([]);
-        scale_context.closePath();
+        context.strokeStyle="#8c2c3e";
+        context.stroke();
+        context.setLineDash([]);
+        context.closePath();
     }
 
-    // original cube
-    draw_original_cube_on(scale_context);
-
-    if(do_new){ // draw a saved cube
-        scale_context.beginPath();
-        scale_context.moveTo(x_to_client(new_saved_xs[3]), y_to_client(new_saved_ys[3]));
-        for(var i = 0; i < 4; i++){
-            scale_context.lineTo(x_to_client(new_saved_xs[i]), y_to_client(new_saved_ys[i]));
-        }
-        scale_context.strokeStyle="#ff8866";
-        scale_context.stroke();
-        scale_context.closePath();
+    // draw a saved cube
+    context.beginPath();
+    context.moveTo(x_to_client(new_saved_xs[3]), y_to_client(new_saved_ys[3]));
+    for(var i = 0; i < 4; i++){
+        context.lineTo(x_to_client(new_saved_xs[i]), y_to_client(new_saved_ys[i]));
     }
+    context.strokeStyle="#8c2c3e";
+    context.stroke();
+    context.closePath();
+    context.lineWidth = 1;
 
     // scale
-    scale_context.beginPath();
-    scale_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
+    context.beginPath();
+    context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
     for(var i = 0; i < 4; i++){
-        scale_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+        context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
     }
-    scale_context.strokeStyle="#dd6644";
-    scale_context.stroke();
-    scale_context.closePath();
-    scale_context.fillStyle="#dd6644";
-    scale_context.fillText("x' = a * x, where a = " + a.toFixed(2), 32, 560);
-    scale_context.fillText("y' = b * y, where b = " + b.toFixed(2), 32, 580);
+    context.strokeStyle="#d64562";
+    context.stroke();
+    context.closePath();
+    context.fillStyle="#8c2c3e";
+    context.fillText("x' = a * x, where a = " + a.toFixed(2), 32, 560);
+    context.fillText("y' = b * y, where b = " + b.toFixed(2), 32, 580);
 
     // grid
-    draw_grid_on(scale_context);
+    draw_grid_on(context);
 }
 
 function init_affine(){
@@ -758,50 +766,43 @@ function affine_draw(client_x, client_y, do_new){
     var x = client_to_x(client_x);
     var y = client_to_y(client_y);
 
-    var affine_context = affine.getContext("2d");
-    affine_context.font = "16px sans-serif";
+    var context = affine.getContext("2d");
+    context.font = "16px sans-serif";
     // background
-    affine_context.fillStyle="#eeeeee";
-    affine_context.fillRect(0, 0, w, h);
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
 
     // original cube
-    draw_original_cube_on(affine_context);
+    draw_original_cube_on(context);
 
     // affine
-    affine_context.beginPath();
-    affine_context.moveTo(x_to_client(affine_xs[3]), y_to_client(affine_ys[3]));
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(x_to_client(affine_xs[3]), y_to_client(affine_ys[3]));
     for(var i = 0; i < 4; i++){
-        affine_context.lineTo(x_to_client(affine_xs[i]), y_to_client(affine_ys[i]));
+        context.lineTo(x_to_client(affine_xs[i]), y_to_client(affine_ys[i]));
     }
-    affine_context.strokeStyle="#dd6644";
-    affine_context.stroke();
-    affine_context.closePath();
+    context.strokeStyle="#8c2c3e";
+    context.stroke();
+    context.closePath();
+    context.lineWidth = 1;
 
     if(do_new){
         // link
-        affine_context.beginPath();
-        affine_context.setLineDash([2, 2]);
-        affine_context.moveTo(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]));
-        affine_context.lineTo(x_to_client(x), y_to_client(y));
-        affine_context.strokeStyle="#dd6644";
-        affine_context.stroke();
-        affine_context.setLineDash([]);
-        affine_context.closePath();
+        context.lineWidth = 2;
+        draw_arrow(context, x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]), x_to_client(x), y_to_client(y), "#d64562");
+        context.lineWidth = 1;
     }
 
-    // grid
-    draw_grid_on(affine_context);
-
     // x
-    affine_context.beginPath();
-    affine_context.moveTo(x_to_client(affine_xs[affine_i]) - 10, y_to_client(affine_ys[affine_i]));
-    affine_context.lineTo(x_to_client(affine_xs[affine_i]) + 10, y_to_client(affine_ys[affine_i]));
-    affine_context.moveTo(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]) - 10);
-    affine_context.lineTo(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]) + 10);
-    affine_context.strokeStyle="#dd6644";
-    affine_context.stroke();
-    affine_context.setLineDash([]);
-    affine_context.closePath();
+    context.beginPath();
+    context.fillStyle="#8c2c3e";
+    context.arc(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]), 3, 0, 2*Math.PI);
+    context.fill();
+    context.closePath();
+    
+    // grid
+    draw_grid_on(context);
 }
 
 function init_projective(){
@@ -850,50 +851,43 @@ function projective_draw(client_x, client_y, do_new){
        var x = client_to_x(client_x);
        var y = client_to_y(client_y);
 
-    var projective_context = projective.getContext("2d");
-    projective_context.font = "16px sans-serif";
+    var context = projective.getContext("2d");
+    context.font = "16px sans-serif";
     // background
-    projective_context.fillStyle="#eeeeee";
-    projective_context.fillRect(0, 0, w, h);
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
 
     // original cube
-    draw_original_cube_on(projective_context);
+    draw_original_cube_on(context);
 
     // projective
-    projective_context.beginPath();
-    projective_context.moveTo(x_to_client(projective_xs[3]), y_to_client(projective_ys[3]));
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(x_to_client(projective_xs[3]), y_to_client(projective_ys[3]));
     for(var i = 0; i < 4; i++){
-        projective_context.lineTo(x_to_client(projective_xs[i]), y_to_client(projective_ys[i]));
+        context.lineTo(x_to_client(projective_xs[i]), y_to_client(projective_ys[i]));
     }
-    projective_context.strokeStyle="#dd6644";
-    projective_context.stroke();
-    projective_context.closePath();
+    context.strokeStyle="#8c2c3e";
+    context.stroke();
+    context.closePath();
+    context.lineWidth = 1;
 
     if(do_new){
         // link
-        projective_context.beginPath();
-        projective_context.setLineDash([2, 2]);
-        projective_context.moveTo(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]));
-        projective_context.lineTo(x_to_client(x), y_to_client(y));
-        projective_context.strokeStyle="#dd6644";
-        projective_context.stroke();
-        projective_context.setLineDash([]);
-        projective_context.closePath();
+        context.lineWidth = 2;
+        draw_arrow(context, x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]), x_to_client(x), y_to_client(y), "#d64562");
+        context.lineWidth = 1;
     }
 
-    // grid
-    draw_grid_on(projective_context);
-
     // x
-    projective_context.beginPath();
-    projective_context.moveTo(x_to_client(projective_xs[projective_i]) - 10, y_to_client(projective_ys[projective_i]));
-    projective_context.lineTo(x_to_client(projective_xs[projective_i]) + 10, y_to_client(projective_ys[projective_i]));
-    projective_context.moveTo(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]) - 10);
-    projective_context.lineTo(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]) + 10);
-    projective_context.strokeStyle="#dd6644";
-    projective_context.stroke();
-    projective_context.setLineDash([]);
-    projective_context.closePath();
+    context.beginPath();
+    context.fillStyle="#8c2c3e";
+    context.arc(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]), 3, 0, 2*Math.PI);
+    context.fill();
+    context.closePath();
+
+    // grid
+    draw_grid_on(context);
 }
 
 var composable_reference_x = 0.0;
@@ -1027,24 +1021,26 @@ function composable_draw(client_x, client_y, do_new){
     var x = client_to_x(client_x);
     var y = client_to_y(client_y);
 
-    var composable_context = composable.getContext("2d");
-    composable_context.font = "16px sans-serif";
+    var context = composable.getContext("2d");
+    context.font = "16px sans-serif";
     // background
-    composable_context.fillStyle="#eeeeee";
-    composable_context.fillRect(0, 0, w, h);
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
 
     // original cube
-    draw_original_cube_on(composable_context);
+    draw_original_cube_on(context);
 
     // composable
-    composable_context.beginPath();
-    composable_context.moveTo(x_to_client(composable_xs[3]), y_to_client(composable_ys[3]));
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(x_to_client(composable_xs[3]), y_to_client(composable_ys[3]));
     for(var i = 0; i < 4; i++){
-        composable_context.lineTo(x_to_client(composable_xs[i]), y_to_client(composable_ys[i]));
+        context.lineTo(x_to_client(composable_xs[i]), y_to_client(composable_ys[i]));
     }
-    composable_context.strokeStyle="#dd6644";
-    composable_context.stroke();
-    composable_context.closePath();
+    context.strokeStyle="#8c2c3e";
+    context.stroke();
+    context.closePath();
+    context.lineWidth = 1;
 
     if(do_new){
         // new cube
@@ -1074,44 +1070,35 @@ function composable_draw(client_x, client_y, do_new){
             }
         }
 
-        composable_context.beginPath();
-        composable_context.setLineDash([4, 4]);
-        composable_context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
+        context.lineWidth = 2;
+        context.beginPath();
+        context.setLineDash([4, 4]);
+        context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
         for(var i = 0; i < 4; i++){
-            composable_context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+            context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
         }
-        composable_context.strokeStyle="#992200";
-        if(document.getElementById("radio_p").checked)
-            composable_context.lineWidth = 2;
-        composable_context.stroke();
-        composable_context.lineWidth = 1;
-        composable_context.setLineDash([]);
-        composable_context.closePath();
+        context.strokeStyle="#d64562";
+        context.stroke();
+        context.setLineDash([]);
+        context.closePath();
+        context.lineWidth = 1;
     }
     // grid
-    draw_grid_on(composable_context);
+    draw_grid_on(context);
 
     // x
     if(document.getElementById("radio_p").checked){
-        composable_context.beginPath();
-        composable_context.moveTo(x_to_client(composable_xs[composable_i]) - 10, y_to_client(composable_ys[composable_i]));
-        composable_context.lineTo(x_to_client(composable_xs[composable_i]) + 10, y_to_client(composable_ys[composable_i]));
-        composable_context.moveTo(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]) - 10);
-        composable_context.lineTo(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]) + 10);
-        composable_context.strokeStyle="#dd6644";
-        composable_context.stroke();
-        composable_context.setLineDash([]);
-        composable_context.closePath();
+        context.beginPath();
+        context.fillStyle="#8c2c3e";
+        context.arc(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]), 3, 0, 2*Math.PI);
+        context.fill();
+        context.closePath();
+            
         // guide
         if(do_new){
-            composable_context.beginPath();
-            composable_context.setLineDash([2, 2]);
-            composable_context.moveTo(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]));
-            composable_context.lineTo(x_to_client(x), y_to_client(y));
-            composable_context.strokeStyle="#dd6644";
-            composable_context.stroke();
-            composable_context.setLineDash([]);
-            composable_context.closePath();
+            context.lineWidth = 2;
+            draw_arrow(context, x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]), x_to_client(x), y_to_client(y), "#d64562");
+            context.lineWidth = 1;
         }
     }
 }
@@ -1166,29 +1153,29 @@ function dec(counter_name) {
 Interactive guide to homogeneous coordinates
     </h1>
     <p>
-Why would you care about homogeneous coordinates, whatever they are? Well, if you work with geometry: <nobr>3D-graphics</nobr>, image processing, physical simulation, the answer is obvious. Knowing the mathematics behind your framework enables you to write more efficient code.
+Why would you care about homogeneous coordinates, whatever they are? Well, if you work with geometry: <nobr>3D-graphics</nobr>, image processing, physical simulation, — the answer is obvious. Knowing the mathematics behind your framework enables you to write more efficient code.
     </p>
     <p>
-But even if you don’t work with geometry at all, you still might enjoy learning a bit about projective space and its link to linear algebra. It is an excellent example of mathematical magic. Small complication benefits in enormous simplification.
+But even if you don’t work with geometry at all, you still might enjoy learning about projective space and its link to linear algebra. It is an outstanding example of mathematical magic: you pay with a small complication, you gain an enormous simplification in return.
     </p>
     <p>
-I think, learning this particular piece of geometry is a valuable experience in its own right. And you know how it works. More experience, higher level, better loot.
+I think, learning this particular piece of mathematics is a valuable experience in its own right. And you know how it works. More experience, higher level, better loot.
     </p>
     <h2>
 The complication
     </h2>
     <p>
-In our familiar Cartesian coordinate system, a point on a plane is set by a pair of numbers (x<sub>c</sub>, y<sub>c</sub>). Here is a plot you can choose a point on. Just click or tap anywhere you want.
+In a Cartesian coordinate system, a point on a plane is set by a pair of numbers <i>(x<sub>c</sub>, y<sub>c</sub>)</i>. Here is a plot you can choose a point on. Just click or tap anywhere you want.
     </p>
     <canvas id="pick_a_point" width=640 height=640></canvas>
     <script language="JavaScript">
     init_pick_a_point();
     </script>
     <p>
-Now in homogeneous coordinates, a point on a plane is set by a tuple of 3 numbers (x<sub>h</sub>, y<sub>h</sub>, w<sub>h</sub>).
+In homogeneous coordinates, a point on a plane is set by a tuple of 3 numbers <i>(x<sub>h</sub>, y<sub>h</sub>, w<sub>h</sub>)</i>.
     </p>
     <p>
-This is a bit unusual, and it seems excessive since every point from the Cartesian space transforms from this homogeneous tuple just like this:
+This is a bit unusual and it seems excessive since every Cartesian point can be obtained from the homogeneous tuple just like this:
     </p>
     <p class="formula">
 x<sub>c</sub> = x<sub>h</sub> / w<sub>h</sub>
@@ -1196,7 +1183,7 @@ x<sub>c</sub> = x<sub>h</sub> / w<sub>h</sub>
 y<sub>c</sub> = y<sub>h</sub> / w<sub>h</sub>
     </p>
     <p>
-It's not that there is only one way to transform a point from Cartesian to homogeneous coordinates. You can pick any (almost) value for w<sub>h</sub> and it would still work.
+There isn't a single correct way to translate a point back. You can pick (almost) any value for <i>w<sub>h</sub></i> and it will still work.
     </p>
     <p>
     <span id="to_fill_with_numbers">
@@ -1206,7 +1193,7 @@ It's not that there is only one way to transform a point from Cartesian to homog
     </script>
     </p>
     <p>
-Here is a coordinate transformer. It will transform your point into homogeneous coordinates for the (almost) every w<sub>h</sub> you propose.
+Here is a coordinate translater. It will translate your point into homogeneous coordinates for the (almost) every w<sub>h</sub> you propose.
     </p>
     <form id="w">
 Please enter w<sub>h</sub>:
@@ -1232,14 +1219,14 @@ Exactly! There is no transformation between affine and Cartesian coordinates whe
 Usually, Cartesian coordinates are just the first two of homogeneous coordinates divided by the third. So when the third one is 1, homogeneous coordinates are the same as Cartesian.
     </p>
     <p>
-The smaller w<sub>h</sub> gets, the further the point in Cartesian coordinates “travels” from the null. Here's the plot you can experiment with by sliding the point along its affine axis.
+The smaller <i>w<sub>h</sub></i> gets, the further the point in Cartesian coordinates “travels” from the null. You can slide the point along its axis on the plot. The first two coordinates will remain intact, the whole sliding is dine by only altering the <i>w<sub>h</sub></i>.
     </p>
     <canvas id="slide_a_w" width=640 height=640></canvas>
     <script language="JavaScript">
     init_slide_a_w();
     </script>
     <p>
-That’s all rather simple until one moment. What if the third coordinate is 0 after all?
+That’s all rather simple until one moment. What if the third coordinate is <i>0</i> after all?
     </p>
     <p>
 Intuition tells that the point with its <i>w<sub>h</sub> = 0</i> should be further from the beginning of the coordinates than every other point with <i>w<sub>h</sub> != 0</i>. But all the points in the Euclidean space can have their third coordinate infinitely small, so this point should be somewhere other than in Euclidean space.
@@ -1248,13 +1235,13 @@ Intuition tells that the point with its <i>w<sub>h</sub> = 0</i> should be furth
 And that's when it gets fascinating. Homogeneous coordinates denote points not only in Euclidean (or, more generally, <i>affine</i> space) but in the <i>projective</i> space that includes and expands the affine one. There is more geometry that fits our Cartesian system. There is the Euclidean space, and there is also an infinite number of points that are infinitely far from it.
     </p>
     <p>
-It should be intuitive to imagine a point from the projective extension as a direction and not a specific point in space. A ray that starts at null and has no length, no end, only the direction.
+You can imagine a point from this projective extension as a direction and not a specific point in space. A ray that starts at null and has no length, no end, only the direction.
     </p>
     <p>
-This infinite extension is often used in 3D graphics. With homogeneous coordinates, we can compose a 3D-scene so that every object that can be possibly reached, like a house, a tree or a cat, remains in the affine space with the coordinates like <i>(x, y, z, 1)</i>. All the objects that can never be reached, like the moon or the stars, go to the projective extension with the coordinates like <i>(x, y, z, 0)</i>.
+This representation is often used in 3D graphics. With homogeneous coordinates, we can compose a 3D-scene so that every object that can be possibly reached, like a house, a tree or a cat, remains in the affine space with the coordinates like <i>(x, y, z, 1)</i>. All the objects that can never be reached, like the moon or the stars, go to the projective extension with the coordinates like <i>(x, y, z, 0)</i>. Both types of objects share the same space.
     </p>
     <p>
-Living in a projective space gives you some interesting options. But that’s not all it is good for. In fact, we are only starting to get into the benefits.
+Living in a projective space gives you the benefit of being unreachable. But that’s not all it is good for. In fact, we are only starting to get into the benefits.
     </p>
     <h2>
 1. In projective space, central and parallel projections are the same
@@ -1269,10 +1256,10 @@ In projective space, these two projections are the same.
 In affine space, you can set a center for a central projection very-very far away from the scene you want to render. This will make disproportion very small. But in projective space, you can hurl a center infinitely far — further away than any point in affine space at all, and the disproportion will disappear completely.
     </p>
     <p>
-So bear in mind, if you want to make a game about zombies who happen to be CAD engineers, you don’t have to implement both kinds of projections. Just set the projection's central point to (x, y, z, 0), and this will automatically turn it into the parallel projection. Less code to do the same amount of work.
+So bear in mind, if you want to make a game about zombies who happen to be CAD engineers, you don’t have to implement both kinds of projections, only the central one. Just set the central point to <i>(x, y, z, 0)</i>, and this will automatically turn it into the parallel projection with no aditional programming.
     </p>
     <h2>
-2. All the surfaces described as an equation on degree n are the same
+2. All the surfaces described as equations of degree <i>n</i> are the same
     </h2>
     <p>
 I remember my first year in college. We were studying quadric surfaces and one of the exercises was to make an album with their classification. 17 sheets of paper with different graphics and formulas all drawn in hand. The main purpose of this album was to be briefly examined by the professor and thrown away a day after. What a waste!
@@ -1284,13 +1271,13 @@ Now in projective space, this exercise would have been much more environmentally
 And this means only one drawing with one formula to be drawn and thrown away instead of 17. That should sum up to a couple of dead trees over the years.
     </p>
     <h2>
-3. All projective transformations are a matrix (yes, singular)
+3. All projective transformations are matrices
     </h2>
     <p>
-Geometric transformations are something that happens to a point. They are basically functions (x', y') = f(x, y). If you want to apply a transformation to some object, most of the time you would have to represent it with points and then apply a transformation to each and every one of them.
+Geometric transformations are something that happens to a point. They are functions <i>(x', y') = f(x, y)</i>. If you want to apply a transformation to some object, most of the time you would have to represent it with points and then apply a transformation to each and every one of them.
     </p>
     <p>
-This may get computationally heavy. For instance, transforming a picture 3 000 x 4 000 pixels requires 12 000 000 transformations. And transforming a 512 x 512 x 1024 image requires 268 435 456 transformations. If we want to see holographic television anytime soon, we should learn to do these transformations really-really fast.
+This may get computationally heavy. For instance, transforming a picture 3 000 x 4 000 pixels requires 12 000 000 transformations. And transforming a 512 x 512 x 1024 3D-image requires 268 435 456 transformations. If we want to see holographic television anytime soon, we should learn to do these transformations really-really fast.
     </p>
     <p>
 Some of the most common transformations are called translation;
@@ -1350,7 +1337,7 @@ x' = (Ax + By + C)
 y' = (Dx + Ey + F)
     </p>
     <p>
-It's just a special case of projective transformation when a = 0, b = 0, and c = 1.
+It's just a special case of projective transformation when <i>a = 0</i>, <i>b = 0</i>, and <i>c = 1</i>.
     </p>
     <p>
 And the affine transformations, in its turn, generalize translations, rotations, and scales. A translation is:
@@ -1380,10 +1367,10 @@ y' = Ey   (D = 0, F = 0)
 They are all special cases of projective transformations.
     </p>
     <h2>
-The matrix (singular) in homogeneous coordinates
+The matrix in homogeneous coordinates
     </h2>
     <p>
-What's happening when we multiply a square matrix to a point in homogeneous coordinates?
+Let's multimpy a square matrix by a point in homogeneous coordinates?
     </p>
     <table class="formula">
     <tr>
@@ -1399,7 +1386,7 @@ What's happening when we multiply a square matrix to a point in homogeneous coor
     </tr>
     </table>
     <p>
-Let's pretend the point we took came from Cartesian coordinates so w<sub>h</sub> = 1. Now we see that:
+If the point we took came from Cartesian coordinates then <i>w<sub>h</sub> = 1</i>. Now we see that:
     </p>
     <p class="formula">
 x' = Ax + By + C
@@ -1409,7 +1396,7 @@ y' = Dx + Ey + F
 w' = ax + by + c
     </p>
     <p>
-And let's say we want to get back to the Cartesian coordinates with this as well. So let's make our w' = 1. We can do this by dividing everything to the current w'.
+To get back to the Cartesian coordinates, let's make our <i>w' = 1</i>. We can do this by dividing everything by <i>w'</i>.
     </p>
     <p class="formula">
 x' = (Ax + By + C) / (ax + by + c)
@@ -1419,7 +1406,7 @@ y' = (Dx + Ey + F) / (ax + by + c)
 w' = 1
     </p>
     <p>
-Doesn't it look familiar? Well, of course, it does! It's a projective transformation. Or it may be an affine one depending on the coefficients. Or it could be a translation, or a rotation, or a scale. Every one of these transformations can be written down as a single matrix multiplication.
+Doesn't it look familiar? Well, of course, it does! It's a projective transformation. Or it may be even an affine one with the right coefficients. Or it could be a translation, or a rotation, or a scale. Every one of these transformations can be written down as a matrix multiplication.
     </p>
     <p>
 It gets better. Matrices are composable. You can compose your own transformation like: (translation + rotation + another translation + scale + projection), — and it will still be a single matrix multiplication!
@@ -1458,10 +1445,10 @@ This is particularly important because whatever you do: animation, image process
 Conclusion
     </h2>
     <p>
-Pragmatically, you can save a lot of time transforming points with one single matrix multiplication instead of applying all the transformations separately. And you can also write less code by unifying all the transformations. But this is not the whole point yet.
+Pragmatically, you can save a lot of processor time transforming points with one single matrix multiplication instead of applying all the transformations separately. And you can also write less code by unifying all the transformations. But this is not the whole point yet.
     </p>
     <p>
-Usually, we lose performance not because of some small computational inefficiencies but because of all the needless layering. And the needless layering occurs when programmers don’t understand and don’t trust the beauty of the plain mathematics.
+Usually, we lose performance not because of some small computational inefficiencies but because of all the needless layering. And the needless layering occurs when programmers don’t understand and don’t trust the beauty of plain mathematics.
     </p>
     <p>
 I hope this page reveals some of it. I hope it makes it a little more trustworthy.
