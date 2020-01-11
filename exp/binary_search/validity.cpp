@@ -28,8 +28,8 @@ template <int percent>
 size_t find_if_any(const int what, const std::vector<int>& where, size_t from, size_t to) {
     if(where[from] == what)
         return from;
-    if(to - from < 1)      
-      return NONE;
+    if(to - from < 1)
+        return NONE;
     size_t mid = from + (to - from) * percent / 100;
     mid = std::max(mid, from);
     mid = std::min(mid, to);
@@ -43,20 +43,20 @@ size_t find_if_any(const int what, const std::vector<int>& where) {
     return find_if_any<percent>(what, where, 0, where.size() - 1);
 }
 
-size_t find_if_any_ip(const int what, const std::vector<int>& where, size_t from, size_t to) {
-    if(where[to] <= where[from])
-        return NONE;
-    if(where[from] == what)
+size_t find_if_any_ip(const int what, const std::vector<int>& where, size_t from, size_t to, size_t depth = 0) {
+    if (where[from] == what)
         return from;
-    if(where[to] == what)
+    if (where[to] == what)
         return to;
     double t = static_cast<double>(what - where[from]) / static_cast<double>(where[to] - where[from]);
     t = std::max(t, 0.);
     t = std::min(t, 1.);
     size_t mid = from + static_cast<size_t>((to - from) * t);
-    if(where[mid] < what)
-        return find_if_any_ip(what, where, mid + 1, to);
-    return find_if_any_ip(what, where, from, mid);
+    if (mid == to || mid == from)
+        return NONE;
+    if (where[mid] < what)
+        return find_if_any_ip(what, where, mid + 1, to, depth + 1);
+    return find_if_any_ip(what, where, from, mid, depth + 1);
 }
 
 size_t find_if_any_ip(const int what, const std::vector<int>& where) {
