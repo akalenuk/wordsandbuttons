@@ -1,0 +1,880 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cubes test</title>
+    <meta name="keywords" content="iterative,algorithms,guide,tutorial,learning">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.results {
+    font-family: sans-serif;
+    font-size: 14pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.formula {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: italic;
+    width: 505pt;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+}
+
+input[type="text"] {
+    width: 32pt;
+    height: 22pt;
+    font-size: 16pt;
+    text-align: center;
+}
+
+button {
+    width: 32pt;
+    height: 26pt;
+    font-size: 16pt;
+    text-align: center;
+}
+    </style>
+    <script language="JavaScript">
+
+// client
+var w = 640.0;
+var h = 640.0;
+
+// algorithm
+var grid_size = 48.0;
+var distance = 128.0;
+var gradient_step = 1.0;
+
+var lines = [[[320, 320], [320,320]]];
+
+// animation, not essencial for the algorithm
+var animation_d = distance;
+var FPS = 8;
+
+function grid_size_limited(x) {
+    if(!document.getElementById("do_optimized_limited").checked)
+        return x
+    if(x < -grid_size / 2.)
+        return -grid_size / 2.;
+    if(x > +grid_size / 2.)
+        return +grid_size / 2.;
+    return x;
+}
+
+function dot(a1, a2, b1, b2) {
+    return a1 * b1 + a2 * b2; 
+}
+
+function distance_to_segment(lp1x, lp1y, lp2x, lp2y, px, py) {
+    var t_proj = dot(px - lp1x, py - lp1y, lp2x - lp1x, lp2y - lp1y) / dot(lp2x - lp1x, lp2y - lp1y, lp2x - lp1x, lp2y - lp1y);
+    if (isNaN(t_proj))
+        t_proj = 0.0;
+    else if (t_proj < 0.0)
+        t_proj = 0.0;
+    else if (t_proj > 1.0)
+        t_proj = 1.0;
+    var p_proj_x = lp1x + (lp2x - lp1x) * t_proj;
+    var p_proj_y = lp1y + (lp2y - lp1y) * t_proj;
+    return Math.sqrt(dot(p_proj_x - px, p_proj_y - py, p_proj_x - px, p_proj_y - py));
+}
+
+function distance_to_line_segment(line, px, py) {
+    return distance_to_segment(line[0][0], line[0][1], line[1][0], line[1][1], px, py);
+}
+
+</script>
+<script language="JavaScript" id="d_f_function">
+// distance function
+function d_f(x, y) {
+    var d = Number.MAX_VALUE; // everything is out
+    for (var i = 0; i < lines.length; ++i) {
+        var di = distance_to_line_segment(lines[i], x, y);
+        if (di < d)
+            d = di;
+    }
+    return d;
+}
+</script>
+<script language="JavaScript">
+
+function eval_d_f() {
+    var df_old_script_code = document.getElementById("d_f_function");
+    if (df_old_script_code) {
+        df_old_script_code.parentNode.removeChild(df_old_script_code);
+    }
+    var df_code_textarea = document.getElementById("d_f_code");
+    var new_script_code = document.createElement('script');
+    new_script_code.id = "d_f_function";
+    new_script_code.text = df_code_textarea.value;
+    document.body.appendChild(new_script_code);
+    draw_canvas();
+}
+
+function put_d_f(d_f_code_string){
+    var df_code_textarea = document.getElementById("d_f_code");
+    df_code_textarea.value = d_f_code_string;
+}
+
+function put_simple_lines_d_f() {
+    var code = `function d_f(x, y) {
+    var d = Number.MAX_VALUE; // everything is out
+    for (var i = 0; i < lines.length; ++i) {
+        var di = distance_to_line_segment(lines[i], x, y);
+        if (di < d)
+            d = di;
+    }
+    return d;
+}`;
+    put_d_f(code);
+    eval_d_f();
+}
+
+function put_hollow_lines_d_f() {
+    var code = `function d_f(x, y) {
+    radius = 90;
+    var d = Number.MAX_VALUE; // everything is out
+    for (var i = 0; i < lines.length; ++i) {
+        var di = distance_to_line_segment(lines[i], x, y);
+        if (di < d)
+            d = di;
+    }
+    if(d < radius)
+        return radius - d;
+    return d - radius;
+}`;
+    put_d_f(code);
+    eval_d_f();
+}
+
+function put_metaball_d_f() {
+    var code = `function d_f(x, y) {
+    var d = 0;
+    for (var i = 0; i < lines.length; ++i) {
+        //ignove first points d += 1/Math.sqrt((lines[i][0][0]-x)*(lines[i][0][0]-x) + (lines[i][0][1]-y)*(lines[i][0][1]-y));
+        d += 1/Math.sqrt((lines[i][1][0]-x)*(lines[i][1][0]-x) + (lines[i][1][1]-y)*(lines[i][1][1]-y));
+    }
+    return 1/d;
+}`;
+    
+    put_d_f(code);
+    eval_d_f();
+}
+
+function dx(x, y) {
+    return ( d_f(x + gradient_step, y) - d_f(x, y) ) / gradient_step;
+}
+
+function gsx(x, y, distance) {
+    var dd = distance - d_f(x, y);
+    return grid_size_limited(dx(x, y) * dd);
+}
+
+function dy(x, y) {
+    return ( d_f(x, y + gradient_step) - d_f(x, y) ) / gradient_step;
+}
+
+function gsy(x, y, distance) {
+    var dd = distance - d_f(x, y);
+    return grid_size_limited(dy(x, y) * dd);
+}
+
+function sign_0_positive(x){ // Math.sign like with no 0 option
+    if(x >= 0)
+        return 1.0;
+    return -1.0;
+}
+
+function underflow_padded(x){
+    if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
+        return 1.e-5 * sign_0_positive(x);
+    return x;
+}
+
+function solved_linear(A, B, n){
+    var X = [];
+    for (var i = 0; i < n; ++i)
+        X[i] = 0.0;
+
+    // triangulize
+    for (var i = 0; i < n-1; ++i)
+        for (var j = 0; j < i+1; ++j) {
+            r = A[i+1][j] / underflow_padded(A[j][j]);
+            A[i+1][j] = 0.;
+            for (var b_j = j+1; b_j < n; ++b_j){
+                A[i+1][b_j] -= A[j][b_j]*r;
+            }
+            B[i+1] -= B[j]*r;
+        }
+
+    // calculate xs
+    X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
+    for (var i = n-2; i >= 0; --i){
+        var s = 0.0;
+        for (var j = i; j < n; ++j){
+            s = s + A[i][j]*X[j];
+        }
+        X[i] = (B[i] - s) / underflow_padded(A[i][i]);
+    }
+    return X;
+}
+
+function polynomial_in_x(A, x, n){
+    var y = 0.0;
+    for(var i = 0; i < n; ++i){
+        y += A[i] * Math.pow(x, i);
+    }
+    return y;
+}
+
+function optimum_in_cube_brute(x, y) {
+    var optimum = [0, 0];
+    var optimum_value = Number.MAX_VALUE;
+    for (var i = y; i < y + grid_size; i += gradient_step) {
+        for (var j = x; j < x + grid_size; j += gradient_step) {
+            var estimate = Math.pow(d_f(j, i) - distance, 2) // distance function border
+             + Math.pow(d_f(j - gradient_step, i) - d_f(j + gradient_step, i), 2) + Math.pow(d_f(j, i - gradient_step) - d_f(j, i + gradient_step), 2) // feature
+             + 0.01 * (Math.pow(j - (x + grid_size / 2), 2) + Math.pow(i - (y + grid_size / 2), 2) ); // stick to the cube's center as the last criterion
+            if (estimate < optimum_value) {
+                optimum_value = estimate;
+                optimum = [j, i];
+            }
+        }    
+    }
+    return optimum;
+}
+
+function init_canvas(){
+    var canvas = document.getElementById("canvas");
+    canvas.addEventListener('mousedown', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        lines.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
+    }, false);
+     
+    canvas.addEventListener('mousemove', function(e){
+        if(e.buttons == 1){
+            canvas_rect = canvas.getBoundingClientRect();
+            lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+            draw_canvas();
+        }
+    }, false);
+    
+    canvas.addEventListener('mouseup', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+        draw_canvas();
+    }, false);
+    
+    draw_canvas();
+}
+
+function draw_grid_border(context, d_f, w, h, grid_size, distance) {
+    context.beginPath();
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+            var do_horizontal = 
+        (d_f(j + 0.5 * grid_size, i - 0.5 * grid_size) - distance ) *
+        (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            var do_vertical = 
+        (d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) - distance ) *
+        (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            if(do_horizontal) {
+                context.moveTo(j, i);
+                context.lineTo(j + grid_size, i);
+            }
+            if(do_vertical) {
+                context.moveTo(j, i);
+                context.lineTo(j, i + grid_size);                
+            }            
+        }
+    }
+    context.strokeStyle="#994444";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath();
+}
+
+function draw_grid_border_optimized(context, d_f, w, h, grid_size, distance) {
+    context.beginPath();
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+/*            var do_horizontal = 
+        (d_f(j + 0.5 * grid_size, i - 0.5 * grid_size) - distance ) *
+        (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            var do_vertical = 
+        (d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) - distance ) *
+        (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            if(do_horizontal) {
+                context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
+                context.lineTo(j + grid_size + gsx(j + grid_size, i, distance), i + gsy(j + grid_size, i, distance));
+            }
+            if(do_vertical) {
+                context.moveTo(j + gsx(j, i, distance), i + gsy(j, i, distance));
+                context.lineTo(j + gsx(j, i + grid_size, distance), i + grid_size + gsy(j, i + grid_size, distance));
+            }
+*/
+            const d00 = d_f(j, i) - distance;
+            const d01 = d_f(j, i + grid_size) - distance;
+            const d11 = d_f(j + grid_size, i + grid_size) - distance;
+            const d10 = d_f(j + grid_size, i) - distance;
+            if(d00 > 0 && d01 > 0 && d11 > 0 && d10 > 0)
+                continue;
+            function sq(x) {
+                return -0.2*x;}
+
+            var x00, y00, x01, y01, x11, y11, x10, y10;
+            if(d00 > 0) {
+                x00 = j + gsx(j, i, distance);
+                y00 = i + gsy(j, i, distance);
+            } else {
+                x00 = j + dx(j, i) * sq(d00);
+                y00 = i + dy(j, i) * sq(d00);
+            }
+            if(d01 > 0) {
+                x01 = j + gsx(j, i + grid_size, distance);
+                y01 = i + grid_size + gsy(j, i + grid_size, distance);
+            } else {
+                x01 = j + dx(j, i + grid_size) * sq(d01);
+                y01 = i + grid_size + dy(j, i + grid_size) * sq(d01);
+            }
+            if(d11 > 0) {
+                x11 = j + grid_size + gsx(j + grid_size, i + grid_size, distance);
+                y11 = i + grid_size + gsy(j + grid_size, i + grid_size, distance);
+            } else {
+                x11 = j + grid_size + dx(j + grid_size, i + grid_size) * sq(d11);
+                y11 = i + grid_size + dy(j + grid_size, i + grid_size) * sq(d11);
+            }
+            if(d10 > 0) {
+                x10 = j + grid_size + gsx(j + grid_size, i, distance);
+                y10 = i + gsy(j + grid_size, i, distance);
+            } else {
+                x10 = j + grid_size + dx(j + grid_size, i) * sq(d10);
+                y10 = i + dy(j + grid_size, i) * sq(d10);
+            }
+            context.moveTo(x00, y00);
+            context.lineTo(x01, y01);
+            context.lineTo(x11, y11);
+            context.lineTo(x10, y10);
+            context.lineTo(x00, y00);
+        }
+    }
+    context.strokeStyle="#33AA33";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath();
+}
+
+function draw_grid_border_splixels(context, d_f, w, h, grid_size, distance) {
+    context.beginPath();
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+            var do_horizontal = 
+                (d_f(j + 0.5 * grid_size, i - 0.5 * grid_size) - distance ) *
+                (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            var do_vertical = 
+                (d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) - distance ) *
+                (d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) - distance ) < 0 ? true : false;
+            if(do_horizontal) {
+                var ds = d_f(j + 0.5 * grid_size, i - 0.5 * grid_size) < d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) ? 1.0 : -1.0;
+                var p1x = j + gsx(j, i, distance);
+                var p1y = i + gsy(j, i, distance);
+                var p2x = j + grid_size + gsx(j + grid_size, i, distance);
+                var p2y = i + gsy(j + grid_size, i, distance);
+                var d1x = dx(p1x, p1y) * grid_size;
+                var d1y = dy(p1x, p1y) * grid_size;
+                var d2x = dx(p2x, p2y) * grid_size;
+                var d2y = dy(p2x, p2y) * grid_size;
+                var Ax = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var Bx = [p1x, ds*d1y, p2x, ds*d2y]
+                var Px = solved_linear(Ax, Bx, 4);
+                var Ay = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
+                var Py = solved_linear(Ay, By, 4);
+                for(var k = 0; k < grid_size; k += 1) {
+                    var t1 = (k + 0.01) / grid_size;
+                    var t2 = (k + 0.99) / grid_size;
+                    var x1 = polynomial_in_x(Px, t1, 4);
+                    var y1 = polynomial_in_x(Py, t1, 4);
+                    var x2 = polynomial_in_x(Px, t2, 4);
+                    var y2 = polynomial_in_x(Py, t2, 4);
+                    context.moveTo(x1, y1);
+                    context.lineTo(x2, y2);
+                }
+            }
+            if(do_vertical) {
+                var ds = d_f(j - 0.5 * grid_size, i + 0.5 * grid_size) < d_f(j + 0.5 * grid_size, i + 0.5 * grid_size) ? -1.0 : 1.0;
+                var p1x = j + gsx(j, i, distance);
+                var p1y = i + gsy(j, i, distance);
+                var p2x = j + gsx(j, i + grid_size, distance);
+                var p2y = i + grid_size + gsy(j, i + grid_size, distance);
+                var d1x = dx(p1x, p1y) * grid_size;
+                var d1y = dy(p1x, p1y) * grid_size;
+                var d2x = dx(p2x, p2y) * grid_size;
+                var d2y = dy(p2x, p2y) * grid_size;
+                var Ax = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var Bx = [p1x, ds*d1y, p2x, ds*d2y]
+                var Px = solved_linear(Ax, Bx, 4);
+                var Ay = [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [1, 1, 1, 1],
+                    [0, 1, 2, 3]];
+                var By = [p1y, (-ds)*d1x, p2y, (-ds)*d2x]
+                var Py = solved_linear(Ay, By, 4);
+                for(var k = 0; k < grid_size; k += 1) {
+                    var t1 = (k + 0.01) / grid_size;
+                    var t2 = (k + 0.99) / grid_size;
+                    var x1 = polynomial_in_x(Px, t1, 4);
+                    var y1 = polynomial_in_x(Py, t1, 4);
+                    var x2 = polynomial_in_x(Px, t2, 4);
+                    var y2 = polynomial_in_x(Py, t2, 4);
+                    context.moveTo(x1, y1);
+                    context.lineTo(x2, y2);
+                }
+            }
+        }
+    }
+    context.strokeStyle="#AA3366";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath();
+}
+
+function draw_marching_cubes(context, d_f, w, h, grid_size, distance, do_interpolation) {
+    context.beginPath();
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+            var d00 = d_f(j, i);
+            var d01 = d_f(j, i + grid_size);
+            var d11 = d_f(j + grid_size, i + grid_size);
+            var d10 = d_f(j + grid_size, i);
+            var t00_01 = (distance - d00) / (d01 - d00);
+            var t01_11 = (distance - d01) / (d11 - d01);
+            var t11_10 = (distance - d11) / (d10 - d11);
+            var t10_00 = (distance - d10) / (d00 - d10);
+			if(!do_interpolation)
+			{
+				t00_01 = 0.5;
+				t01_11 = 0.5;
+				t11_10 = 0.5;
+				t10_00 = 0.5;
+			}
+            var in_00 = d00 < distance;
+            var out_00 = !in_00;
+            var in_01 = d01 < distance;
+            var out_01 = !in_01;
+            var in_11 = d11 < distance;
+            var out_11 = !in_11;
+            var in_10 = d10 < distance;
+            var out_10 = !in_10;
+            
+            if(out_00 && in_01 && in_11 && in_10) {
+                context.moveTo(j + grid_size * (1.0 - t10_00), i); // top
+                context.lineTo(j, i + grid_size * t00_01);
+            }            
+            if(in_00 && out_01 && in_11 && in_10) {
+                context.moveTo(j, i + grid_size * t00_01); // left
+                context.lineTo(j + grid_size * t01_11, i + grid_size);
+            }
+            if(out_00 && out_01 && in_11 && in_10) {
+                context.moveTo(j + grid_size * (1.0 - t10_00), i);
+                context.lineTo(j + grid_size * t01_11, i + grid_size); // bottom
+            }
+            if(in_00 && in_01 && out_11 && in_10) {            
+                context.moveTo(j + grid_size * t01_11, i + grid_size);
+                context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10)); // right
+            }
+            if(out_00 && in_01 && out_11 && in_10) {  
+                context.moveTo(j + grid_size * (1.0 - t10_00), i);
+                context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                context.moveTo(j, i + grid_size * t00_01);
+                context.lineTo(j + grid_size * t01_11, i + grid_size);
+            }
+            if(in_00 && out_01 && out_11 && in_10) {  
+                context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                context.lineTo(j, i + grid_size * t00_01);
+            }
+            if(out_00 && out_01 && out_11 && in_10) {
+                context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                context.lineTo(j + grid_size * (1.0 - t10_00), i);
+            }
+            if(in_00 && in_01 && in_11 && out_10) {
+                context.moveTo(j + grid_size * (1.0 - t10_00), i);
+                context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+            }
+            if(out_00 && in_01 && in_11 && out_10) {
+                context.moveTo(j, i + grid_size * t00_01);
+                context.lineTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+            }
+            if(in_00 && out_01 && in_11 && out_10) {
+                context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                context.lineTo(j + grid_size * t01_11, i + grid_size);
+                context.moveTo(j, i + grid_size * t00_01);
+                context.lineTo(j + grid_size * (1.0 - t10_00), i);
+            }
+            if(out_00 && out_01 && in_11 && out_10) {
+                context.moveTo(j + grid_size, i + grid_size * (1.0 - t11_10));
+                context.lineTo(j + grid_size * t01_11, i + grid_size);
+            }
+            if(in_00 && in_01 && out_11 && out_10) {
+                context.moveTo(j + grid_size * t01_11, i + grid_size);
+                context.lineTo(j + grid_size * (1.0 - t10_00), i);
+            }
+            if(out_00 && in_01 && out_11 && out_10) {
+                context.moveTo(j + grid_size * t01_11, i + grid_size);
+                context.lineTo(j, i + grid_size * t00_01);
+            }
+            if(in_00 && out_01 && out_11 && out_10) {
+                context.moveTo(j, i + grid_size * t00_01);
+                context.lineTo(j + grid_size * (1.0 - t10_00), i);
+            }
+        }
+    }
+    context.strokeStyle="#3333AA";
+	if(!do_interpolation)
+		context.strokeStyle="#008800";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath(); 
+}
+
+function draw_double_contouring(context, d_f, w, h, grid_size, distance) {
+    context.beginPath();
+    for(var i = 0; i <= h - grid_size; i += grid_size) {
+        for(var j = 0; j <= w - grid_size; j += grid_size) {
+            if(d_f(j, i) < distance != d_f(j, i + grid_size) < distance) {
+                var opt1 = optimum_in_cube_brute(j, i);
+                var opt2 = optimum_in_cube_brute(j - grid_size, i);
+                context.moveTo(opt1[0], opt1[1]);
+                context.lineTo(opt2[0], opt2[1]);
+            }
+            if(d_f(j, i) < distance != d_f(j + grid_size, i) < distance) {
+                var opt1 = optimum_in_cube_brute(j, i);
+                var opt2 = optimum_in_cube_brute(j, i - grid_size);
+                context.moveTo(opt1[0], opt1[1]);
+                context.lineTo(opt2[0], opt2[1]);
+            }
+        }
+    }
+    context.strokeStyle="#883388";
+    context.lineWidth=3;
+    context.stroke();
+    context.closePath();
+}
+
+function draw_canvas(){
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+
+    // distance function
+    var distance_field = context.createImageData(w, h);
+    for (var i = 0; i < distance_field.data.length; ++i)
+        distance_field.data[i] = 0;
+    
+    if(document.getElementById("draw_expected_shape").checked)
+        for (var i = 0; i <= h; i += 2.0)
+            for (var j = 0; j <= w; j += 2.0) {
+                d = d_f(j, i);
+                if (d <= distance) {
+                    distance_field.data[(i*w + j) * 4 + 0] = 0x55;
+                    distance_field.data[(i*w + j) * 4 + 1] = 0x55;
+                    distance_field.data[(i*w + j) * 4 + 2] = 0xAA;
+                    distance_field.data[(i*w + j) * 4 + 3] = 0xFF;
+                }
+            }
+        context.putImageData(distance_field, -0.5, -0.5);
+    
+    // grid
+    if(document.getElementById("draw_grid").checked) {
+        context.beginPath();
+        for(var i = 0; i <= h; i += grid_size) {
+            context.moveTo(0.0, i);
+            context.lineTo(w, i);
+        }
+        for(var j = 0; j <= w; j += grid_size) {
+            context.moveTo(j, 0.0);
+            context.lineTo(j, h);
+        }
+        context.strokeStyle="#999999";
+        context.lineWidth=1;
+        context.stroke();
+        context.closePath();
+    }
+ 
+    // grid border
+    if(document.getElementById("do_grid").checked) {
+        draw_grid_border(context, d_f, w, h, grid_size, distance);
+    }
+
+    // optimized border
+    if(document.getElementById("do_optimized").checked) {
+        if(document.getElementById("do_splixels").checked) {
+            draw_grid_border_splixels(context, d_f, w, h, grid_size, distance);
+        } else {
+            draw_grid_border_optimized(context, d_f, w, h, grid_size, distance);
+        }
+    }
+    
+    // distance values
+    if(document.getElementById("draw_distances").checked && lines.length > 0) {
+        context.font = "16px Arial";
+        context.fillStyle = "#000000";
+        for(var i = 0; i <= h - grid_size; i += grid_size) {
+            for(var j = 0; j <= w - grid_size; j += grid_size) {
+                context.fillText(Math.round(d_f(j, i),1).toString(), j+5, i-5);
+            }
+        }
+    }
+
+    // marching cubes
+    if(document.getElementById("do_marching").checked) {
+        draw_marching_cubes(context, d_f, w, h, grid_size, distance, true);
+    }
+
+    // marching cubes without interpolation
+    if(document.getElementById("do_marching_no_interpolation").checked) {
+        draw_marching_cubes(context, d_f, w, h, grid_size, distance, false);
+    }
+    
+    // dual contour
+    if(document.getElementById("do_dual").checked) {
+        draw_double_contouring(context, d_f, w, h, grid_size, distance);
+    }
+}
+
+function change_grid_size() {
+    grid_size = Number(document.getElementById("grid_size_input").value);
+    if(isNaN(grid_size) || grid_size < 4) {
+        grid_size = 4;
+    }
+    if(grid_size > w/8) {
+        grid_size = w/8;
+    }
+    document.getElementById("grid_size_input").value = grid_size;
+    draw_canvas();
+}
+
+function change_w() {
+    w = Number(document.getElementById("w_input").value);
+    if(isNaN(w)) {
+        w = 640;
+    }
+    document.getElementById("w_input").value = w;
+    document.getElementById("canvas").width = w;
+    draw_canvas();
+}
+
+function change_h() {
+    h = Number(document.getElementById("h_input").value);
+    if(isNaN(w)) {
+        h = 640;
+    }
+    document.getElementById("h_input").value = h;
+    document.getElementById("canvas").height = h;
+    draw_canvas();
+}
+
+function canvas_full_screen() {
+    var window_width = window.innerWidth;
+    var window_height = window.innerHeight;
+    document.getElementById("w_input").value = window_width;
+    document.getElementById("h_input").value = window_height;
+    change_w();
+    change_h();
+    window.scrollTo(0, document.getElementById("canvas").offsetTop);
+}
+
+function change_distance() {
+    distance = Number(document.getElementById("distance_input").value);
+    if(isNaN(distance)) {
+        distance = 1;
+    }
+    animation_d = distance;
+    document.getElementById("distance_input").value = distance;
+    draw_canvas();
+}
+
+function inc(counter_name) {
+    var counter = document.getElementById(counter_name+"_input");
+    counter.value = Number(counter.value) + 1;
+    eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+    var counter = document.getElementById(counter_name+"_input");
+    counter.value = Number(counter.value) - 1;
+    eval('change_' + counter_name + '()');
+}
+
+function reset_all() {
+    lines = [];
+    draw_canvas();
+}
+
+function undo_last() {
+    lines.splice(-1,1);
+    draw_canvas();
+}
+
+function alter_animation_d(dd) {
+    animation_d += dd;
+    if(animation_d < 1) {
+        animation_d = 1;
+    }
+    if(animation_d > w) {
+        animation_d = w;
+    }
+}
+
+function tick() {
+    if(distance != animation_d) {
+        if(distance < animation_d)
+            distance += 1;
+        if(distance > animation_d)
+            distance -= 1;
+        document.getElementById("distance_input").value = distance;
+        draw_canvas();
+    }
+    setTimeout( function(){tick();}, 1000.0 / FPS);
+}
+
+tick(); // let it tick always
+    </script>
+  </head>
+  <body>
+    <center>
+    <form onsubmit="return false;">
+    Canvas size:
+    <input type="text" id="w_input" value="640" onchange="change_w();"> X 
+    <input type="text" id="h_input" value="640" onchange="change_h();">
+    <button type="button" style="width: auto;" onclick="canvas_full_screen()">Full screen</button><br>
+    Grid size:
+    <button type="button" onclick="dec('grid_size')">-</button>
+    <input type="text" id="grid_size_input" value="48" onchange="change_grid_size();">
+    <button type="button" onclick="inc('grid_size')">+</button>
+    <br>
+    Distance:
+    <button type="button" onclick="alter_animation_d(-grid_size)">&lt;&lt;</button>
+    <button type="button" onclick="dec('distance')">-</button>
+    <input type="text" id="distance_input" value="128" onchange="change_distance();">
+    <button type="button" onclick="inc('distance')">+</button>
+    <button type="button" onclick="alter_animation_d(+grid_size)">&gt;&gt;</button>
+    <br>
+    <input type="checkbox" id="do_grid" onclick="draw_canvas();"/><label for="do_grid">Grid border</label>
+    <input type="checkbox" id="do_optimized" checked onclick="draw_canvas();"/><label for="do_optimized">Shrunk cells</label>
+    <br />
+<div style="display:none">
+    <input type="checkbox" id="do_optimized_limited" onclick="draw_canvas();"/><label for="do_optimized_limited"> & limited</label>
+    <input type="checkbox" id="do_splixels" onclick="draw_canvas();"/><label for="do_splixels"> & splixels</label>
+    <br>
+    <input type="checkbox" id="do_marching" onclick="draw_canvas();"/><label for="do_marching">Marching cubes</label>
+    <input type="checkbox" id="do_marching_no_interpolation" onclick="draw_canvas();"/><label for="do_marching_no_interpolation">MC without interpolation</label>
+    <br>
+    <input type="checkbox" id="do_dual" onclick="draw_canvas();"/><label for="do_dual">Dual contour</label>
+    <br>
+</div>
+    <input type="checkbox" id="draw_distances"onclick="draw_canvas();"/><label for="draw_distances">Show Distance</label>
+    <input type="checkbox" id="draw_expected_shape" checked onclick="draw_canvas();"/><label for="draw_expected_shape">Show Expected Shape</label>
+    <input type="checkbox" id="draw_grid" checked onclick="draw_canvas();"/><label for="draw_grid">Show Grid</label>
+    </form>
+    <canvas id="canvas" width=640 height=640></canvas>
+    <script language="JavaScript">
+    init_canvas();
+    </script>
+    <div style="text-align:right; width:640px; padding-bottom:12pt;">
+        <button type="button" style="width: 108pt;" onclick="undo_last()">Undo last</button>
+        <button type="button" style="width: 108pt;" onclick="reset_all()">Reset all</button>
+    </div>
+<div style="display:none">
+    <div style="text-align:right; width:640px">
+    <textarea id="d_f_code" rows="20" style="width:100%">
+    </textarea><br>
+    <button type="button" style="width: 108pt;" onclick="put_simple_lines_d_f()">Just Lines</button>
+    <button type="button" style="width: 108pt;" onclick="put_hollow_lines_d_f()">Hollow Lines</button>
+    <button type="button" style="width: 108pt;" onclick="put_metaball_d_f()">MetaBalls</button>
+    <button type="button" style="width: 108pt;" onclick="eval_d_f()">Compile</button>
+    </div>
+</div>
+    </center>
+    
+  </body>
+</html>
