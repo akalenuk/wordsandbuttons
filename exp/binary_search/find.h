@@ -43,7 +43,7 @@ size_t find_by_switching_percentage(const int what, const std::vector<int>& wher
 }
 
 
-size_t find_by_interpolation(const int what, const std::vector<int>& where, size_t from, size_t to, size_t depth = 0) {
+size_t find_by_interpolation(const int what, const std::vector<int>& where, size_t from, size_t to) {
     if (where[from] == what)
         return from;
     if (where[to] == what)
@@ -55,8 +55,8 @@ size_t find_by_interpolation(const int what, const std::vector<int>& where, size
     if (mid == to || mid == from)
         return NONE;
     if (where[mid] < what)
-        return find_by_interpolation(what, where, mid + 1, to, depth + 1);
-    return find_by_interpolation(what, where, from, mid, depth + 1);
+        return find_by_interpolation(what, where, mid + 1, to);
+    return find_by_interpolation(what, where, from, mid);
 }
 
 size_t find_by_interpolation(const int what, const std::vector<int>& where) {
