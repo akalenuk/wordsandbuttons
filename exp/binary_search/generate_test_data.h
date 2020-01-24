@@ -4,6 +4,13 @@
 
 const double PI = 3.141592653589793;
 
+std::vector<int> uniform(size_t how_much, int from, int to) {
+    std::vector<int> ints(how_much);
+    for(auto i = 0u; i < how_much; ++i)
+        ints[i] = from + (to - from) * i / how_much;
+    return ints;
+}
+
 std::vector<int> uniform_random(size_t how_much, int from, int to) {
     std::vector<int> ints(how_much);
     std::random_device rng;
@@ -19,7 +26,7 @@ std::vector<int> skewed_to_high_end_random(size_t how_much, int from, int to) {
     std::random_device rng;
     std::uniform_real_distribution<double> randoms(0., 1.);
     for(auto& i : ints) {
-        double d = sin(randoms(rng) * PI / 2.);
+        double d = std::pow(sin(randoms(rng) * PI / 2.), 4);
         i = static_cast<int>(from + (to - from) * d);
         }
     std::sort(ints.begin(), ints.end());
@@ -31,7 +38,7 @@ std::vector<int> less_in_the_middle_random(size_t how_much, int from, int to) {
     std::random_device rng;
     std::uniform_real_distribution<double> randoms(0., 1.);
     for(auto& i : ints) {
-        double d = (sin(randoms(rng) * PI - PI / 2.) + 1.) / 2.;
+        double d = std::pow((sin(randoms(rng) * PI - PI / 2.) + 1.) / 2., 4);
         i = static_cast<int>(from + (to - from) * d);
         }
     std::sort(ints.begin(), ints.end());
