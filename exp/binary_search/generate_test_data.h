@@ -7,7 +7,7 @@ const double PI = 3.141592653589793;
 std::vector<int> uniform(size_t how_much, int from, int to) {
     std::vector<int> ints(how_much);
     for(auto i = 0u; i < how_much; ++i)
-        ints[i] = from + (to - from) * i / how_much;
+        ints[i] = from + (to - from) * (i + 1) / how_much;
     return ints;
 }
 
