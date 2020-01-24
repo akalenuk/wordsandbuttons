@@ -2,9 +2,11 @@
 #include "measure.h"
 #include "find.h"
 
+const size_t sample_size = 10000019;
+
 int main() {
     std::cout << "Different percentage on uniform data\n";
-    auto test_data = uniform_random(10'000'000, 0, 10'000'000-1);
+    auto test_data = uniform_random(sample_size, 0, 10'000'000);
     MEASURE(    
     for(auto i = 0; i < 10'000'000; ++i) {
         auto index = find_by_percentage<10>(i, test_data);
@@ -71,7 +73,7 @@ int main() {
 
 
     std::cout << "Different percentage on skewed data\n";
-    test_data = skewed_to_high_end_random(10'000'000, 0, 10'000'000-1);
+    test_data = skewed_to_high_end_random(sample_size, 0, 10'000'000-1);
     MEASURE(    
     for(auto i = 0; i < 10'000'000; ++i) {
         auto index = find_by_percentage<10>(i, test_data);
@@ -138,7 +140,7 @@ int main() {
 
 
     std::cout << "Different percentage on low middle data\n";
-    test_data = less_in_the_middle_random(10'000'000, 0, 10'000'000-1);
+    test_data = less_in_the_middle_random(sample_size, 0, 10'000'000-1);
     MEASURE(    
     for(auto i = 0; i < 10'000'000; ++i) {
         auto index = find_by_percentage<10>(i, test_data);
