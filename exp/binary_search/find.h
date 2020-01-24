@@ -8,7 +8,7 @@ size_t find_by_percentage(const int what, const std::vector<int>& where, size_t 
     if(where[from] == what)
         return from;
     if(to - from < 1)
-      return NONE;
+        return NONE;
     size_t mid = from + (to - from) * percent / 100;
     mid = std::max(mid, from);
     mid = std::min(mid, to);
@@ -28,7 +28,7 @@ size_t find_by_switching_percentage(const int what, const std::vector<int>& wher
     if(where[from] == what)
         return from;
     if(to - from < 1)
-      return NONE;
+        return NONE;
     size_t mid = from + (to - from) * percent / 100;
     mid = std::max(mid, from);
     mid = std::min(mid, to);
