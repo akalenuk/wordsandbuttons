@@ -3,8 +3,7 @@
 
 static const size_t NONE = std::numeric_limits<size_t>::max();
 
-template <int percent>
-size_t find_by_percentage(const int what, const std::vector<int>& where, size_t from, size_t to) {
+size_t find_by_percentage(const int what, const std::vector<int>& where, size_t from, size_t to, int percent) {
     if(where[from] == what)
         return from;
     if(to - from < 1)
@@ -13,18 +12,16 @@ size_t find_by_percentage(const int what, const std::vector<int>& where, size_t 
     mid = std::max(mid, from);
     mid = std::min(mid, to);
     if(where[mid] < what)
-        return find_by_percentage<percent>(what, where, mid + 1, to);
-    return find_by_percentage<percent>(what, where, from, mid);
+        return find_by_percentage(what, where, mid + 1, to, percent);
+    return find_by_percentage(what, where, from, mid, percent);
 }
 
-template <int percent>
-size_t find_by_percentage(const int what, const std::vector<int>& where) {
-    return find_by_percentage<percent>(what, where, 0, where.size() - 1);
+size_t find_by_percentage(const int what, const std::vector<int>& where, int percent) {
+    return find_by_percentage(what, where, 0, where.size() - 1, percent);
 }
 
 
-template <int percent>
-size_t find_by_switching_percentage(const int what, const std::vector<int>& where, size_t from, size_t to) {
+size_t find_by_switching_percentage(const int what, const std::vector<int>& where, size_t from, size_t to, int percent) {
     if(where[from] == what)
         return from;
     if(to - from < 1)
@@ -33,13 +30,12 @@ size_t find_by_switching_percentage(const int what, const std::vector<int>& wher
     mid = std::max(mid, from);
     mid = std::min(mid, to);
     if(where[mid] < what)
-        return find_by_switching_percentage<100-percent>(what, where, mid + 1, to);
-    return find_by_switching_percentage<100-percent>(what, where, from, mid);
+        return find_by_switching_percentage(what, where, mid + 1, to, 100-percent);
+    return find_by_switching_percentage(what, where, from, mid, 100-percent);
 }
 
-template <int percent>
-size_t find_by_switching_percentage(const int what, const std::vector<int>& where) {
-    return find_by_switching_percentage<percent>(what, where, 0, where.size() - 1);
+size_t find_by_switching_percentage(const int what, const std::vector<int>& where, int percent) {
+    return find_by_switching_percentage(what, where, 0, where.size() - 1, percent);
 }
 
 
