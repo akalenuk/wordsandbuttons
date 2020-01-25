@@ -146,12 +146,33 @@ std::vector solve(std::vector<std::vector<double>>& A, std::vector<double>& B) {
     return X;
 }
 
-std::vector polynomial_for(std::vector<int>& where, unsigned int degree) {
-    std::vector<std::vector<double>> A(degree);
+std::vector<double> polynomial_for(std::vector<int>& where, unsigned int n) {
+    std::vector<std::vector<double>> A(n);
     for (auto& Ai : A)
-        Ai.resize(degree, 0.)
-    std::vector<double> B(degree, 0.);
-    std::vector<double> X(degree, 0.);
-    
+        Ai.resize(n, 0.)
+    std::vector<double> B(n, 0.);
+
+    for (auto i = 0u; i < n; ++i){
+        auto& Ai = A[i];
+        for (auto j = 0u; j < n; ++j){
+            for(auto k = 0u; k < N; ++k){
+                Ai[j] += std::pow(points[k][0], i + j);
+            }
+        }
+
+        for(auto k = 0u; k < N; ++k){
+            B[i] += points[k][1] * std::pow(points[k][0], i);
+        }
+    }
+    return solve(A, B, n);
 }
+
+double Px(std::vector<double> P, double x) {
+    auto y = 0;
+    for(auto i = 0u; i < n; ++i) {
+        y += P[i] * std::pow(x, i);
+    }
+    return y;
+}
+
 
