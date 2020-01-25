@@ -59,3 +59,71 @@ size_t find_by_interpolation(const int what, const std::vector<int>& where) {
     return find_by_interpolation(what, where, 0, where.size() - 1);
 }
 
+
+/*
+function solved_linear(A, B, n){
+    var X = [];
+    for (var i = 0; i < n; ++i)
+        X.push(0.0);
+
+    // triangulize
+    for (var i = 0; i < n-1; ++i)
+        for (var j = 0; j < i+1; ++j) {
+            r = A[i+1][j] / underflow_padded(A[j][j]);
+            A[i+1][j] = 0.;
+            for (var b_j = j+1; b_j < n; ++b_j){
+                A[i+1][b_j] -= A[j][b_j]*r;
+            }
+            B[i+1] -= B[j]*r;
+        }
+
+    // calculate xs
+    X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
+    for (var i = n-2; i >= 0; --i){
+        var s = 0.0;
+        for (var j = i; j < n; ++j){
+            s = s + A[i][j]*X[j];
+        }
+        X[i] = (B[i] - s) / underflow_padded(A[i][i]);
+    }
+    return X;
+}
+
+function approximation_of(points, n) {
+    const N = points.length;
+    var A = [];
+    var B = [];
+
+    for (var i = 0; i < n; ++i){
+        var Ai = []
+        for (var j = 0; j < n; ++j){
+            Ai.push(0);
+            for(var k = 0; k < N; ++k){
+                Ai[j] += Math.pow(points[k][0], i + j);
+            }
+        }
+        A.push(Ai);
+        B.push(0);
+        for(var k = 0; k < N; ++k){
+            B[i] += points[k][1] * Math.pow(points[k][0], i);
+        }
+    }
+    var P = solved_linear(A, B,n);
+    return function(x) {
+        var Px = 0;
+        for(var i = 0; i < n; ++i) {
+            Px += P[i] * Math.pow(x, i);
+        }
+        return Px;
+    };
+}
+*/
+std::vector polynomial(std::vector<int>& where, unsigned int degree) {
+    std::vector<std::vector<double>> A(degree);
+    for (auto& Ai : A)
+        Ai.resize(degree, 0.)
+    std::vector<double> B(degree, 0.);
+    std::vector<double> X(degree, 0.);
+    
+}
+
