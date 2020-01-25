@@ -118,7 +118,35 @@ function approximation_of(points, n) {
     };
 }
 */
-std::vector polynomial(std::vector<int>& where, unsigned int degree) {
+
+std::vector solve(std::vector<std::vector<double>>& A, std::vector<double>& B) {
+    const auto n = B.size();
+
+    // triangulize
+    for (auto i = 0u; i < n-1; ++i)
+        for (auto j = 0u; j < i+1; ++j) {
+            const auto r = A[i+1][j] / underflow_padded(A[j][j]);
+            A[i+1][j] = 0.;
+            for (auto b_j = j+1; b_j < n; ++b_j){
+                A[i+1][b_j] -= A[j][b_j]*r;
+            }
+            B[i+1] -= B[j]*r;
+        }
+
+    // calculate xs
+    std::vector<double> X(n, 0.);
+    X[n-1] = B[n-1] / A[n-1][n-1];
+    for (auto i = n-2; i >= 0; --i){
+        var s = 0.0;
+        for (auto j = i; j < n; ++j){
+            s = s + A[i][j]*X[j];
+        }
+        X[i] = (B[i] - s) / A[i][i];
+    }
+    return X;
+}
+
+std::vector polynomial_for(std::vector<int>& where, unsigned int degree) {
     std::vector<std::vector<double>> A(degree);
     for (auto& Ai : A)
         Ai.resize(degree, 0.)
