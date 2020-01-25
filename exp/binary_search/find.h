@@ -68,7 +68,7 @@ std::vector<double> solve(std::vector<std::vector<double>>& A, std::vector<doubl
         for (auto j = 0u; j < i+1; ++j) {
             const auto r = A[i+1][j] / A[j][j];
             A[i+1][j] = 0.;
-            for (auto b_j = j+1; b_j < n; ++b_j){
+            for (auto b_j = j+1; b_j < n; ++b_j) {
                 A[i+1][b_j] -= A[j][b_j]*r;
             }
             B[i+1] -= B[j]*r;
@@ -77,9 +77,9 @@ std::vector<double> solve(std::vector<std::vector<double>>& A, std::vector<doubl
     // calculate xs
     std::vector<double> X(n, 0.);
     X[n-1] = B[n-1] / A[n-1][n-1];
-    for (auto i = n-2; i >= 0; --i){
+    for (auto i = n-2; i >= 0; --i) {
         auto s = 0.0;
-        for (auto j = i; j < n; ++j){
+        for (auto j = i; j < n; ++j) {
             s = s + A[i][j]*X[j];
         }
         X[i] = (B[i] - s) / A[i][i];
@@ -93,22 +93,22 @@ std::vector<double> polynomial_for(std::vector<int>& where, unsigned int n) {
         Ai.resize(n, 0.);
     std::vector<double> B(n, 0.);
 
-    for (auto i = 0u; i < n; ++i){
+    for (auto i = 0u; i < n; ++i) {
         auto& Ai = A[i];
-        for (auto j = 0u; j < n; ++j){
-            for(auto k = 0u; k < where.size(); ++k){
+        for (auto j = 0u; j < n; ++j) {
+            for(auto k = 0u; k < where.size(); ++k) {
                 Ai[j] += std::pow(where[k], i + j);
             }
         }
 
-        for(auto k = 0u; k < where.size(); ++k){
+        for(auto k = 0u; k < where.size(); ++k) {
             B[i] += k * std::pow(where[k], i);
         }
     }
     return solve(A, B);
 }
 
-double Px(std::vector<double> P, double x) {
+double Px(const std::vector<double>& P, double x) {
     auto y = 0;
     for(auto i = 0u; i < P.size(); ++i) {
         y += P[i] * std::pow(x, i);
@@ -116,4 +116,26 @@ double Px(std::vector<double> P, double x) {
     return y;
 }
 
+size_t find_by_polynomial(const int what, const std::vector<int>& where, size_t from, size_t to, const std::vector<double>& polynomial) {
+    if (where[from] == what)
+        return from;
+    if (where[to] == what)
+        return to;
+        
+    // ? here should be the magic formula I don't see just yet
+    double t = static_cast<double>(what - where[from]) / static_cast<double>(where[to] - where[from]);
+    
+    t = std::max(t, 0.);
+    t = std::min(t, 1.);
+    size_t mid = from + static_cast<size_t>((to - from) * t);
+    if (mid == to || mid == from)
+        return NONE;
+    if (where[mid] < what)
+        return find_by_polynomial(what, where, mid + 1, to, polynomial);
+    return find_by_polynomial(what, where, from, mid, polynomial);
+}
+
+size_t find_by_polynomial(const int what, const std::vector<int>& where, const std::vector<double>& polynomial) {
+    return find_by_polynomial(what, where, 0, where.size() - 1, polynomial);
+}
 
