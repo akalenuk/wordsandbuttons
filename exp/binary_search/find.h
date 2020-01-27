@@ -122,8 +122,9 @@ size_t find_by_polynomial(const int what, const std::vector<int>& where, size_t 
     if (where[to] == what)
         return to;
         
-    // ? here should be the magic formula I don't see just yet
-    double t = static_cast<double>(what - where[from]) / static_cast<double>(where[to] - where[from]);
+    // polynomial "derivative"
+    double dPx = (Px(polynomial, to) - Px(polynomial, from)) / (to - from);
+    double t = 1 / dPx;
     
     t = std::max(t, 0.);
     t = std::min(t, 1.);

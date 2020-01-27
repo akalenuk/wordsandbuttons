@@ -89,7 +89,16 @@ int main() {
         if(index != NONE && test_data[index] != i)
             std::cout << "search is faulty\n";
     });
-    std::cout << " interpolation\n\n";
+    std::cout << " interpolation\n";
+    
+    const auto polynomial = polynomial_for(test_data, 3);
+    MEASURE(
+    for(auto i = 0; i < sample_size; ++i) {
+        auto index = find_by_polynomial(i, test_data, polynomial);
+        if(index != NONE && test_data[index] != i)
+            std::cout << "search is faulty\n";
+    });
+    std::cout << " polynomial\n\n";    
 
 
 
