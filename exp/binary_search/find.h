@@ -77,7 +77,7 @@ std::vector<double> solve(std::vector<std::vector<double>>& A, std::vector<doubl
     // calculate xs
     std::vector<double> X(n, 0.);
     X[n-1] = B[n-1] / A[n-1][n-1];
-    for (auto i = n-2; i >= 0; --i) {
+    for (signed int i = n-2; i >= 0; --i) {
         auto s = 0.0;
         for (auto j = i; j < n; ++j) {
             s = s + A[i][j]*X[j];
