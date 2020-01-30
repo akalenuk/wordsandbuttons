@@ -35,7 +35,7 @@ int main() {
         if(index != NONE && test_data[index] != i)
             std::cout << "search is faulty\n";
     });
-    std::cout << " interpolation\n\n";
+    std::cout << " interpolation\n";
 
     auto polynomial = polynomial_for(test_data, 3);
     MEASURE(
@@ -77,7 +77,7 @@ int main() {
         if(index != NONE && test_data[index] != i)
             std::cout << "search is faulty\n";
     });
-    std::cout << " interpolation\n\n";
+    std::cout << " interpolation\n";
 
     polynomial = polynomial_for(test_data, 3);
     MEASURE(
@@ -119,7 +119,7 @@ int main() {
         if(index != NONE && test_data[index] != i)
             std::cout << "search is faulty\n";
     });
-    std::cout << " interpolation\n\n";
+    std::cout << " interpolation\n";
 
     polynomial = polynomial_for(test_data, 3);
     MEASURE(
