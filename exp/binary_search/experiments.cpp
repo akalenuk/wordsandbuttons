@@ -3,6 +3,7 @@
 #include "find.h"
 
 const size_t sample_size = 10000019;
+int _;
 
 int main() {
     std::cout << "Different percentage on uniform non-random data\n";
@@ -10,7 +11,7 @@ int main() {
     for(auto percent = 10; percent <= 90; percent += 10) {
         MEASURE(
         for(auto i = 0; i < sample_size; ++i) {
-            auto index = find_by_percentage(i, test_data, percent);
+            auto index = find_by_percentage(i, test_data, percent, _);
             if(index == NONE || test_data[index] != i)
                 std::cout << "search is faulty\n";
         });
@@ -19,7 +20,7 @@ int main() {
 
     MEASURE(
     for(auto i = 0; i < sample_size; ++i) {
-        auto index = find_by_interpolation(i, test_data);
+        auto index = find_by_interpolation(i, test_data, _);
         if(index != NONE && test_data[index] != i)
             std::cout << "search is faulty\n";
     });
@@ -32,7 +33,7 @@ int main() {
     for(auto percent = 10; percent <= 90; percent += 10) {
         MEASURE(
         for(auto i = 0; i < sample_size; ++i) {
-            auto index = find_by_percentage(i, test_data, percent);
+            auto index = find_by_percentage(i, test_data, percent, _);
             if(index != NONE && test_data[index] != i)
                 std::cout << "search is faulty\n";
         });
@@ -41,7 +42,7 @@ int main() {
 
     MEASURE(
     for(auto i = 0; i < sample_size; ++i) {
-        auto index = find_by_interpolation(i, test_data);
+        auto index = find_by_interpolation(i, test_data, _);
         if(index != NONE && test_data[index] != i)
             std::cout << "search is faulty\n";
     });
@@ -54,7 +55,7 @@ int main() {
     for(auto percent = 10; percent <= 90; percent += 10) {
         MEASURE(
         for(auto i = 0; i < sample_size; ++i) {
-            auto index = find_by_percentage(i, test_data, percent);
+            auto index = find_by_percentage(i, test_data, percent, _);
             if(index != NONE && test_data[index] != i)
                 std::cout << "search is faulty\n";
         });
@@ -63,7 +64,7 @@ int main() {
 
     MEASURE(
     for(auto i = 0; i < sample_size; ++i) {
-        auto index = find_by_interpolation(i, test_data);
+        auto index = find_by_interpolation(i, test_data, _);
         if(index != NONE && test_data[index] != i)
             std::cout << "search is faulty\n";
     });
@@ -76,7 +77,7 @@ int main() {
     for(auto percent = 10; percent <= 90; percent += 10) {
         MEASURE(
         for(auto i = 0; i < sample_size; ++i) {
-            auto index = find_by_percentage(i, test_data, percent);
+            auto index = find_by_percentage(i, test_data, percent, _);
             if(index != NONE && test_data[index] != i)
                 std::cout << "search is faulty\n";
         });
@@ -85,7 +86,7 @@ int main() {
 
     MEASURE(
     for(auto i = 0; i < sample_size; ++i) {
-        auto index = find_by_interpolation(i, test_data);
+        auto index = find_by_interpolation(i, test_data, _);
         if(index != NONE && test_data[index] != i)
             std::cout << "search is faulty\n";
     });
@@ -94,7 +95,7 @@ int main() {
     const auto polynomial = polynomial_for(test_data, 3);
     MEASURE(
     for(auto i = 0; i < sample_size; ++i) {
-        auto index = find_by_polynomial(i, test_data, polynomial);
+        auto index = find_by_polynomial(i, test_data, polynomial, _);
         if(index != NONE && test_data[index] != i)
             std::cout << "search is faulty\n";
     });

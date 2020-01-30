@@ -3,7 +3,8 @@
 
 static const size_t NONE = std::numeric_limits<size_t>::max();
 
-size_t find_by_percentage(const int what, const std::vector<int>& where, size_t from, size_t to, int percent) {
+size_t find_by_percentage(const int what, const std::vector<int>& where, size_t from, size_t to, int percent, int& depth) {
+    ++depth;
     if(where[from] == what)
         return from;
     if(to - from < 1)
@@ -12,16 +13,17 @@ size_t find_by_percentage(const int what, const std::vector<int>& where, size_t 
     mid = std::max(mid, from);
     mid = std::min(mid, to);
     if(where[mid] < what)
-        return find_by_percentage(what, where, mid + 1, to, percent);
-    return find_by_percentage(what, where, from, mid, percent);
+        return find_by_percentage(what, where, mid + 1, to, percent, depth);
+    return find_by_percentage(what, where, from, mid, percent, depth);
 }
 
-size_t find_by_percentage(const int what, const std::vector<int>& where, int percent) {
-    return find_by_percentage(what, where, 0, where.size() - 1, percent);
+size_t find_by_percentage(const int what, const std::vector<int>& where, int percent, int& depth) {
+    return find_by_percentage(what, where, 0, where.size() - 1, percent, depth);
 }
 
 
-size_t find_by_switching_percentage(const int what, const std::vector<int>& where, size_t from, size_t to, int percent) {
+size_t find_by_switching_percentage(const int what, const std::vector<int>& where, size_t from, size_t to, int percent, int& depth) {
+    ++depth;
     if(where[from] == what)
         return from;
     if(to - from < 1)
@@ -30,16 +32,17 @@ size_t find_by_switching_percentage(const int what, const std::vector<int>& wher
     mid = std::max(mid, from);
     mid = std::min(mid, to);
     if(where[mid] < what)
-        return find_by_switching_percentage(what, where, mid + 1, to, 100-percent);
-    return find_by_switching_percentage(what, where, from, mid, 100-percent);
+        return find_by_switching_percentage(what, where, mid + 1, to, 100-percent, depth);
+    return find_by_switching_percentage(what, where, from, mid, 100-percent, depth);
 }
 
-size_t find_by_switching_percentage(const int what, const std::vector<int>& where, int percent) {
-    return find_by_switching_percentage(what, where, 0, where.size() - 1, percent);
+size_t find_by_switching_percentage(const int what, const std::vector<int>& where, int percent, int& depth) {
+    return find_by_switching_percentage(what, where, 0, where.size() - 1, percent, depth);
 }
 
 
-size_t find_by_interpolation(const int what, const std::vector<int>& where, size_t from, size_t to) {
+size_t find_by_interpolation(const int what, const std::vector<int>& where, size_t from, size_t to, int& depth) {
+    ++depth;
     if (where[from] == what)
         return from;
     if (where[to] == what)
@@ -51,12 +54,12 @@ size_t find_by_interpolation(const int what, const std::vector<int>& where, size
     if (mid == to || mid == from)
         return NONE;
     if (where[mid] < what)
-        return find_by_interpolation(what, where, mid + 1, to);
-    return find_by_interpolation(what, where, from, mid);
+        return find_by_interpolation(what, where, mid + 1, to, depth);
+    return find_by_interpolation(what, where, from, mid, depth);
 }
 
-size_t find_by_interpolation(const int what, const std::vector<int>& where) {
-    return find_by_interpolation(what, where, 0, where.size() - 1);
+size_t find_by_interpolation(const int what, const std::vector<int>& where, int& depth) {
+    return find_by_interpolation(what, where, 0, where.size() - 1, depth);
 }
 
 
@@ -116,7 +119,8 @@ double Px(const std::vector<double>& P, double x) {
     return y;
 }
 
-size_t find_by_polynomial(const int what, const std::vector<int>& where, size_t from, size_t to, const std::vector<double>& polynomial) {
+size_t find_by_polynomial(const int what, const std::vector<int>& where, size_t from, size_t to, const std::vector<double>& polynomial, int& depth) {
+    ++depth;
     if (where[from] == what)
         return from;
     if (where[to] == what)
@@ -133,11 +137,11 @@ size_t find_by_polynomial(const int what, const std::vector<int>& where, size_t 
     if (mid == to || mid == from)
         return NONE;
     if (where[mid] < what)
-        return find_by_polynomial(what, where, mid + 1, to, polynomial);
-    return find_by_polynomial(what, where, from, mid, polynomial);
+        return find_by_polynomial(what, where, mid + 1, to, polynomial, depth);
+    return find_by_polynomial(what, where, from, mid, polynomial, depth);
 }
 
-size_t find_by_polynomial(const int what, const std::vector<int>& where, const std::vector<double>& polynomial) {
-    return find_by_polynomial(what, where, 0, where.size() - 1, polynomial);
+size_t find_by_polynomial(const int what, const std::vector<int>& where, const std::vector<double>& polynomial, int& depth) {
+    return find_by_polynomial(what, where, 0, where.size() - 1, polynomial, depth);
 }
 
