@@ -18,6 +18,17 @@ int main() {
         std::cout << " " << percent << "/" << 100 - percent << "\n";
     }
 
+    std::cout << "Different switching percentage on uniform random data\n";
+    for(auto percent = 10; percent <= 90; percent += 10) {
+        MEASURE(
+        for(auto i = 0; i < sample_size; ++i) {
+            auto index = find_by_switching_percentage(i, test_data, percent, _);
+            if(index == NONE || test_data[index] != i)
+                std::cout << "search is faulty\n";
+        });
+        std::cout << " " << percent << "/" << 100 - percent << "\n";
+    }
+    
     MEASURE(
     for(auto i = 0; i < sample_size; ++i) {
         auto index = find_by_interpolation(i, test_data, _);
@@ -25,6 +36,15 @@ int main() {
             std::cout << "search is faulty\n";
     });
     std::cout << " interpolation\n\n";
+
+    auto polynomial = polynomial_for(test_data, 3);
+    MEASURE(
+    for(auto i = 0; i < sample_size; ++i) {
+        auto index = find_by_polynomial(i, test_data, polynomial, _);
+        if(index != NONE && test_data[index] != i)
+            std::cout << "search is faulty\n";
+    });
+    std::cout << " polynomial\n\n"; 
 
 
 
@@ -40,6 +60,17 @@ int main() {
         std::cout << " " << percent << "/" << 100 - percent << "\n";
     }
 
+    std::cout << "Different swithcing percentage on uniform random data\n";
+    for(auto percent = 10; percent <= 90; percent += 10) {
+        MEASURE(
+        for(auto i = 0; i < sample_size; ++i) {
+            auto index = find_by_switching_percentage(i, test_data, percent, _);
+            if(index != NONE && test_data[index] != i)
+                std::cout << "search is faulty\n";
+        });
+        std::cout << " " << percent << "/" << 100 - percent << "\n";
+    }
+
     MEASURE(
     for(auto i = 0; i < sample_size; ++i) {
         auto index = find_by_interpolation(i, test_data, _);
@@ -47,6 +78,15 @@ int main() {
             std::cout << "search is faulty\n";
     });
     std::cout << " interpolation\n\n";
+
+    polynomial = polynomial_for(test_data, 3);
+    MEASURE(
+    for(auto i = 0; i < sample_size; ++i) {
+        auto index = find_by_polynomial(i, test_data, polynomial, _);
+        if(index != NONE && test_data[index] != i)
+            std::cout << "search is faulty\n";
+    });
+    std::cout << " polynomial\n\n"; 
 
 
 
@@ -62,6 +102,17 @@ int main() {
         std::cout << " " << percent << "/" << 100 - percent << "\n";
     }
 
+    std::cout << "Different swithing percentage on skewed data\n";
+    for(auto percent = 10; percent <= 90; percent += 10) {
+        MEASURE(
+        for(auto i = 0; i < sample_size; ++i) {
+            auto index = find_by_percentage(i, test_data, percent, _);
+            if(index != NONE && test_data[index] != i)
+                std::cout << "search is faulty\n";
+        });
+        std::cout << " " << percent << "/" << 100 - percent << "\n";
+    }
+    
     MEASURE(
     for(auto i = 0; i < sample_size; ++i) {
         auto index = find_by_interpolation(i, test_data, _);
@@ -69,6 +120,16 @@ int main() {
             std::cout << "search is faulty\n";
     });
     std::cout << " interpolation\n\n";
+
+    polynomial = polynomial_for(test_data, 3);
+    MEASURE(
+    for(auto i = 0; i < sample_size; ++i) {
+        auto index = find_by_polynomial(i, test_data, polynomial, _);
+        if(index != NONE && test_data[index] != i)
+            std::cout << "search is faulty\n";
+    });
+    std::cout << " polynomial\n\n"; 
+
 
 
 
@@ -84,6 +145,17 @@ int main() {
         std::cout << " " << percent << "/" << 100 - percent << "\n";
     }
 
+    std::cout << "Different swithing percentage on low middle data\n";
+    for(auto percent = 10; percent <= 90; percent += 10) {
+        MEASURE(
+        for(auto i = 0; i < sample_size; ++i) {
+            auto index = find_by_percentage(i, test_data, percent, _);
+            if(index != NONE && test_data[index] != i)
+                std::cout << "search is faulty\n";
+        });
+        std::cout << " " << percent << "/" << 100 - percent << "\n";
+    }
+    
     MEASURE(
     for(auto i = 0; i < sample_size; ++i) {
         auto index = find_by_interpolation(i, test_data, _);
@@ -92,7 +164,7 @@ int main() {
     });
     std::cout << " interpolation\n";
     
-    const auto polynomial = polynomial_for(test_data, 3);
+    polynomial = polynomial_for(test_data, 3);
     MEASURE(
     for(auto i = 0; i < sample_size; ++i) {
         auto index = find_by_polynomial(i, test_data, polynomial, _);
@@ -100,7 +172,6 @@ int main() {
             std::cout << "search is faulty\n";
     });
     std::cout << " polynomial\n\n";    
-
 
 
     return 0;
