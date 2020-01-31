@@ -112,7 +112,7 @@ std::vector<double> polynomial_for(std::vector<int>& where, unsigned int n) {
 }
 
 double Px(const std::vector<double>& P, double x) {
-    auto y = 0;
+    double y = 0.;
     for(auto i = 0u; i < P.size(); ++i) {
         y += P[i] * std::pow(x, i);
     }
