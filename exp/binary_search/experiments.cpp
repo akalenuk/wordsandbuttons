@@ -163,7 +163,7 @@ int main() {
     }
     std::cout << (static_cast<double>(sum_of_depths) / sample_size) << " interpolation\n";
     
-    polynomial = polynomial_for(test_data, 3);
+    polynomial = polynomial_for(test_data, 4);
     sum_of_depths = 0;
     for(auto i = 0; i < sample_size; ++i) {
         auto index = find_by_polynomial(i, test_data, polynomial, sum_of_depths);
