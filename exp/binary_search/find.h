@@ -131,7 +131,7 @@ size_t find_by_polynomial(const int what, const std::vector<int>& where, size_t 
     // polynomial "derivative"
     static const double PI = 3.1415926;
     double dPx = (Px(polynomial, to) - Px(polynomial, from)) / (to - from);
-    double t = std::atan(1. / dPx) / (PI / 2.);
+    double t = std::atan(dPx) / (PI / 2.);
     
     t = std::max(t, 0.);
     t = std::min(t, 1.);
