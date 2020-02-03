@@ -7,7 +7,7 @@ size_t find_by_percentage(const int what, const std::vector<int>& where, size_t 
     ++depth;
     if(where[from] == what)
         return from;
-    if(to - from < 1)
+    if(to < from + 1)
         return NONE;
     size_t mid = from + (to - from) * percent / 100;
     mid = std::max(mid, from);
@@ -26,7 +26,7 @@ size_t find_by_switching_percentage(const int what, const std::vector<int>& wher
     ++depth;
     if(where[from] == what)
         return from;
-    if(to - from < 1)
+    if(to < from + 1)
         return NONE;
     size_t mid = from + (to - from) * percent / 100;
     mid = std::max(mid, from);
@@ -43,6 +43,8 @@ size_t find_by_switching_percentage(const int what, const std::vector<int>& wher
 
 size_t find_by_interpolation(const int what, const std::vector<int>& where, size_t from, size_t to, int& depth) {
     ++depth;
+    if(to < from + 1)
+        return NONE;
     if (where[from] == what)
         return from;
     if (where[to] == what)
@@ -51,8 +53,6 @@ size_t find_by_interpolation(const int what, const std::vector<int>& where, size
     t = std::max(t, 0.);
     t = std::min(t, 1.);
     size_t mid = from + static_cast<size_t>((to - from) * t);
-    if (mid == to || mid == from)
-        return NONE;
     if (where[mid] < what)
         return find_by_interpolation(what, where, mid + 1, to, depth);
     return find_by_interpolation(what, where, from, mid, depth);
@@ -121,6 +121,8 @@ double Px(const std::vector<double>& P, double x) {
 
 size_t find_by_polynomial(const int what, const std::vector<int>& where, size_t from, size_t to, const std::vector<double>& polynomial, int& depth) {
     ++depth;
+    if(to < from + 1)
+        return NONE;
     if (where[from] == what)
         return from;
     if (where[to] == what)
@@ -129,13 +131,11 @@ size_t find_by_polynomial(const int what, const std::vector<int>& where, size_t 
     // polynomial "derivative"
     static const double PI = 3.1415926;
     double dPx = (Px(polynomial, to) - Px(polynomial, from)) / (to - from);
-    double t = std::atan(1. / dPx) / (PI / 2.);
+    double t = std::atan(dPx) / (PI / 2.);
     
     t = std::max(t, 0.);
     t = std::min(t, 1.);
     size_t mid = from + static_cast<size_t>((to - from) * t);
-    if (mid == to || mid == from)
-        return NONE;
     if (where[mid] < what)
         return find_by_polynomial(what, where, mid + 1, to, polynomial, depth);
     return find_by_polynomial(what, where, from, mid, polynomial, depth);
