@@ -101,6 +101,39 @@ function less_in_the_middle_ascending() {
 
 var values = unifrom_ascending();
 
+function init_search() {
+    var canvas = document.getElementById("search");
+    canvas.addEventListener('mousedown', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        const x = e.clientX - canvas_rect.left;
+        const y = e.clientY - canvas_rect.top;
+        target = Math.floor(640 - y);
+        draw_search(0, 0, false);
+    }, false);
+
+    canvas.addEventListener('mousemove', function(e){
+        canvas_rect = canvas.getBoundingClientRect();
+        const x = e.clientX - canvas_rect.left;
+        const y = e.clientY - canvas_rect.top;
+        if(e.buttons == 1){
+            target = Math.floor(640 - y);
+            draw_search(0, 0, false);
+        } else {
+            draw_search(x, y, true); // todo: is it necesary here?
+        }
+    }, false);
+
+    canvas.addEventListener('mouseup', function(e){
+        draw_search(0, 0, false);
+    }, false);
+
+    canvas.addEventListener('mouseleave', function(e){
+        draw_search(0, 0, false);
+    }, false);
+
+    draw_search();
+}
+
 function draw_search(client_x, client_y, do_guides){
     var canvas = document.getElementById("search");
     var context = canvas.getContext("2d");
@@ -125,8 +158,8 @@ function draw_search(client_x, client_y, do_guides){
     context.strokeStyle="#000000";
     context.lineWidth = 1;
     context.beginPath()    
-    context.moveTo(0, 640 - target);
-    context.lineTo(640, 640 - target);
+    context.moveTo(0, 639.5 - target);
+    context.lineTo(640, 639.5 - target);
     context.stroke();
     context.closePath();
     
@@ -154,7 +187,7 @@ Binary search
 ...
     </p>
     <script language="JavaScript">
-    draw_search();
+    init_search();
     </script>
 
 
