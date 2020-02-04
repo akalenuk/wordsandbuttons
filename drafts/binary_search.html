@@ -158,7 +158,8 @@ function draw_search(client_x, client_y, do_guides){
     context.fillRect(0, 0, 640, 640);
 
     // data
-    context.strokeStyle="#888888";
+    const light_gray = 11 * 8;
+    context.strokeStyle='rgb('+light_gray+', '+light_gray+', '+light_gray+')';
     context.lineWidth = 1;
     context.beginPath()    
     for(var i = 0; i < 640; ++i) {
@@ -168,11 +169,25 @@ function draw_search(client_x, client_y, do_guides){
     context.stroke();
     context.closePath();
 
+    // path
+    context.lineWidth = 1;
+    for(var i = 0; i < path.length; ++i) {
+        const gray = (11 - i) * 8;
+        context.beginPath()
+        context.strokeStyle='rgb('+gray+', '+gray+', '+gray+')';
+        for(var j = path[i][0]; j <= path[i][1]; ++j) {
+            const value_part = values[j] / Math.pow(1.5, i);
+            context.moveTo(j, 640 - values[j]);
+            context.lineTo(j, 640);
+        }
+        context.stroke();
+        context.closePath();
+    }
 
     // target
     context.strokeStyle="#000000";
     context.lineWidth = 1;
-    context.beginPath()    
+    context.beginPath()
     context.moveTo(0, 639.5 - target);
     context.lineTo(640, 639.5 - target);
     context.stroke();
