@@ -119,7 +119,14 @@ double Px(const std::vector<double>& P, double x) {
     return y;
 }
 
-size_t find_by_polynomial(const int what, const std::vector<int>& where, size_t from, size_t to, const std::vector<double>& polynomial, int& depth) {
+std::vector<double> dP(const std::vector<double>& P) {
+    std::vector<double> d;
+    for(auto i = 1u; i < P.size(); ++i)
+        d.push_back(P[i] * i);
+    return d;
+}
+
+size_t find_by_polynomial(const int what, const std::vector<int>& where, size_t from, size_t to, const std::vector<double>& d_polynomial, int& depth) {
     ++depth;
     if(to < from + 1)
         return NONE;
@@ -130,18 +137,18 @@ size_t find_by_polynomial(const int what, const std::vector<int>& where, size_t 
         
     // polynomial "derivative"
     static const double PI = 3.1415926;
-    double dPx = (Px(polynomial, to) - Px(polynomial, from)) / (to - from);
+    double dPx = Px(d_polynomial, (to + from) / 2.);
     double t = std::atan(dPx) / (PI / 2.);
     
     t = std::max(t, 0.);
     t = std::min(t, 1.);
     size_t mid = from + static_cast<size_t>((to - from) * t);
     if (where[mid] < what)
-        return find_by_polynomial(what, where, mid + 1, to, polynomial, depth);
-    return find_by_polynomial(what, where, from, mid, polynomial, depth);
+        return find_by_polynomial(what, where, mid + 1, to, d_polynomial, depth);
+    return find_by_polynomial(what, where, from, mid, d_polynomial, depth);
 }
 
-size_t find_by_polynomial(const int what, const std::vector<int>& where, const std::vector<double>& polynomial, int& depth) {
-    return find_by_polynomial(what, where, 0, where.size() - 1, polynomial, depth);
+size_t find_by_polynomial(const int what, const std::vector<int>& where, const std::vector<double>& d_polynomial, int& depth) {
+    return find_by_polynomial(what, where, 0, where.size() - 1, d_polynomial, depth);
 }
 

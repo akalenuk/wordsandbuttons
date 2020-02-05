@@ -37,7 +37,7 @@ int main() {
     });
     std::cout << " interpolation\n";
 
-    auto polynomial = polynomial_for(test_data, 3);
+    auto polynomial = dP(polynomial_for(test_data, 3));
     MEASURE(
     for(auto i = 0; i < sample_size; ++i) {
         auto index = find_by_polynomial(i, test_data, polynomial, _);
@@ -79,7 +79,7 @@ int main() {
     });
     std::cout << " interpolation\n";
 
-    polynomial = polynomial_for(test_data, 3);
+    polynomial = dP(polynomial_for(test_data, 3));
     MEASURE(
     for(auto i = 0; i < sample_size; ++i) {
         auto index = find_by_polynomial(i, test_data, polynomial, _);
@@ -121,7 +121,7 @@ int main() {
     });
     std::cout << " interpolation\n";
 
-    polynomial = polynomial_for(test_data, 3);
+    polynomial = dP(polynomial_for(test_data, 3));
     MEASURE(
     for(auto i = 0; i < sample_size; ++i) {
         auto index = find_by_polynomial(i, test_data, polynomial, _);
@@ -164,7 +164,7 @@ int main() {
     });
     std::cout << " interpolation\n";
     
-    polynomial = polynomial_for(test_data, 3);
+    polynomial = dP(polynomial_for(test_data, 3));
     MEASURE(
     for(auto i = 0; i < sample_size; ++i) {
         auto index = find_by_polynomial(i, test_data, polynomial, _);
