@@ -26,7 +26,7 @@ std::vector<int> skewed_to_high_end_random(size_t how_much, int from, int to) {
     std::random_device rng;
     std::uniform_real_distribution<double> randoms(0., 1.);
     for(auto& i : ints) {
-        double d = std::pow(sin(randoms(rng) * PI / 2.), 4);
+        double d = sin(randoms(rng) * PI / 2.);
         i = static_cast<int>(from + (to - from) * d);
         }
     std::sort(ints.begin(), ints.end());
@@ -38,7 +38,7 @@ std::vector<int> less_in_the_middle_random(size_t how_much, int from, int to) {
     std::random_device rng;
     std::uniform_real_distribution<double> randoms(0., 1.);
     for(auto& i : ints) {
-        double d = std::pow((sin(randoms(rng) * PI - PI / 2.) + 1.) / 2., 4);
+        double d = (sin(randoms(rng) * PI - PI / 2.) + 1.) / 2.;
         i = static_cast<int>(from + (to - from) * d);
         }
     std::sort(ints.begin(), ints.end());
