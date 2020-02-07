@@ -46,6 +46,7 @@ button {
 var values = [];
 var target = 320;
 var path = [];
+var proportion = 0.5;
 
 function uniform_ascending() {
     var values = [];
@@ -73,17 +74,17 @@ function less_in_the_middle_ascending() {
 
 var values = uniform_ascending();
 
-function search_path(a, b) {
+function search_path(a, b, proportion) {
     if(a == b)
         return [[a, b]]
-    const mid = Math.floor((a+b) / 2.);
+    const mid = Math.floor((a+b) * proportion);
     if(values[mid] < target)
-        return [[a, b]].concat(search_path(mid + 1, b));
+        return [[a, b]].concat(search_path(mid + 1, b, proportion));
     else
-        return [[a, b]].concat(search_path(a, mid));
+        return [[a, b]].concat(search_path(a, mid, proportion));
 }
 
-path = search_path(0, 639);
+path = search_path(0, 639, proportion);
 
 function init_search() {
     var canvas = document.getElementById("search");
@@ -92,7 +93,7 @@ function init_search() {
         const x = e.clientX - canvas_rect.left;
         const y = e.clientY - canvas_rect.top;
         target = Math.floor(640 - y);
-        path = search_path(0, 639);
+        path = search_path(0, 639, proportion);
         draw_search();
     }, false);
 
@@ -102,7 +103,7 @@ function init_search() {
         const y = e.clientY - canvas_rect.top;
         if(e.buttons == 1){
             target = Math.floor(640 - y);
-            path = search_path(0, 639);
+            path = search_path(0, 639, proportion);
         }
         draw_search();
     }, false);
