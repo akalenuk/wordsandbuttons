@@ -98,15 +98,28 @@ function search_path(a, b, proportion) {
 
 path = search_path(0, 639, proportion);
 
-function init_search() {
-    var canvas = document.getElementById("search");
+function search_path_int(a, b) {
+    if(a == b)
+        return [[a, b]]
+    const mid = Math.floor(a + (b-a) * (target-values[a]) / (values[b]-values[a]))
+    if(values[mid] < target)
+        return [[a, b]].concat(search_path(mid + 1, b, proportion));
+    else
+        return [[a, b]].concat(search_path(a, mid, proportion));
+}
+
+path_int = search_path_int(0, 639);
+
+function init(canvas_name) {
+    var canvas = document.getElementById(canvas_name);
     canvas.addEventListener('mousedown', function(e){
         canvas_rect = canvas.getBoundingClientRect();
         const x = e.clientX - canvas_rect.left;
         const y = e.clientY - canvas_rect.top;
         target = Math.floor(640 - y);
         path = search_path(0, 639, proportion);
-        draw_search();
+        path_int = search_path_int(0, 639);
+        draw(canvas_name);
     }, false);
 
     canvas.addEventListener('mousemove', function(e){
@@ -116,23 +129,24 @@ function init_search() {
         if(e.buttons == 1){
             target = Math.floor(640 - y);
             path = search_path(0, 639, proportion);
+            path_int = search_path_int(0, 639);
         }
-        draw_search();
+        draw(canvas_name);
     }, false);
 
     canvas.addEventListener('mouseup', function(e){
-        draw_search();
+        draw(canvas_name);
     }, false);
 
     canvas.addEventListener('mouseleave', function(e){
-        draw_search();
+        draw(canvas_name);
     }, false);
 
-    draw_search();
+    draw(canvas_name);
 }
 
-function draw_search(){
-    var canvas = document.getElementById("search");
+function draw(canvas_name){
+    var canvas = document.getElementById(canvas_name);
     var context = canvas.getContext("2d");
 
     // background
@@ -209,7 +223,8 @@ function position_slider(no, client_x){
 
     comment_on_slider(no);
     path = search_path(0, 639, proportion);
-    draw_search();
+    draw("search");
+    draw("search_int");
 }
 
 function init_slider(no){
@@ -361,9 +376,9 @@ Here's an interactive plot for this very exercise. The numbers are random but th
     <form onsubmit="return false;">
     <p>
     Distribution: 
-    <input type="radio" name="distribution" id="radio_1" onclick="values = uniform_ascending(); draw_search();" checked=true /><label for="radio_1">uniform;</label>
-    <input type="radio" name="distribution" id="radio_2" onclick="values = scewed_to_high_ascending(); draw_search();" /><label for="radio_2">skewed;</label>
-    <input type="radio" name="distribution" id="radio_3" onclick="values = less_in_the_middle_ascending(); draw_search();" /><label for="radio_3">bi-skewed;</label>
+    <input type="radio" name="distribution" id="radio_1" onclick="values = uniform_ascending(); draw('search');" checked=true /><label for="radio_1">uniform;</label>
+    <input type="radio" name="distribution" id="radio_2" onclick="values = scewed_to_high_ascending(); draw('search');" /><label for="radio_2">skewed;</label>
+    <input type="radio" name="distribution" id="radio_3" onclick="values = less_in_the_middle_ascending(); draw('search');" /><label for="radio_3">bi-skewed;</label>
     </p>
     <p>
     Proportion: 
@@ -376,9 +391,12 @@ As you have noticed, there is one more thing here to play with. It's the proport
     <p>
 I remember of a very clever algorithm that could effectively predict the proportion for every sub-range based on the approximating polynoial but I don't remember the algorithm itself. If you know what I am talking about, please <a href="mailto:ok@wordsandbuttons.online">let me know</a>.
     </p>
+    <canvas id="search_int" width=640 height=640></canvas>
+
     <script language="JavaScript">
     init_slider(0);
-    init_search();
+    init("search");
+    init("search_int");
     </script>
 
 
