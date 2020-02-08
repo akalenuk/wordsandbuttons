@@ -182,11 +182,9 @@ function draw_search(){
     context.fillText("Search for " + target + " takes " + path.length + " iterations.", 16, target > 120 ? 640 - target + 17 : 640 - target - 14);
 }
 
-const max_slider_x = 512;
+const max_slider_x = 400 - 32;
 var slider_user_xs = [max_slider_x / 2];
 var slider_xs = [max_slider_x / 2];
-
-var slider_down = false;
 
 function comment_on_slider(no){
     var left = document.getElementById("left_" + (no + 1));
@@ -200,7 +198,7 @@ function comment_on_slider(no){
 function position_slider(no, client_x){
     var slider = document.getElementById("slider_" + (no + 1));
     var canvas_rect = slider.getBoundingClientRect();
-    var x = client_x - canvas_rect.left - 48;
+    var x = client_x - canvas_rect.left - 16;
     if(x < 1)
         x = 1;
     if(x > max_slider_x)
@@ -214,22 +212,13 @@ function init_slider(no){
     draw_slider(no);
     var slider = document.getElementById("slider_" + (no + 1));
 
-    slider.addEventListener('mouseleave', function(e){
-        slider_down = false;
-    }, false);
-
-    slider.addEventListener('mouseup', function(e){
-        slider_down = false;
-    }, false);
-
     slider.addEventListener('mousedown', function(e){
-        slider_down = true;
         position_slider(no, e.clientX);
         draw_slider(no);
     }, false);
 
     slider.addEventListener('mousemove', function(e){
-        if(slider_down){
+        if(e.buttons == 1){
             position_slider(no, e.clientX);
             draw_slider(no);
         }
@@ -239,32 +228,33 @@ function init_slider(no){
 }
 
 function draw_slider(no){
-    ctx = document.getElementById("slider_" + (no + 1)).getContext("2d");
-    x = slider_xs[no] + 48 + 0.5;
+    var context = document.getElementById("slider_" + (no + 1)).getContext("2d");
+    const x = slider_xs[no] - 0.5;
 
-    ctx.clearRect(0, 0, 608, 128);
-    ctx.beginPath();
-    ctx.moveTo(64.5-16, 32.5);
-    ctx.lineTo(0.5 + 16, 127.5 - 32);
-    ctx.lineTo(607.5 - 16, 127.5 - 32);
-    ctx.lineTo(607.5 - 64 + 16, 32.5);
-    ctx.lineTo(64.5-16, 32.5);
-    ctx.strokeStyle="#000000";
-    ctx.stroke();
-    ctx.closePath();
-    ctx.fillStyle="#999999";
-    ctx.fill();
+    context.clearRect(0, 0, 400, 32);
+    context.beginPath();
+    context.moveTo(0.5, 4.5);
+    context.lineTo(0.5, 27.5);
+    context.lineTo(399.5, 27.5);
+    context.lineTo(399.5, 4.5);
+    context.lineTo(0.5, 4.5);
+    context.strokeStyle="#000000";
+    context.stroke();
+    context.closePath();
+    context.fillStyle="#999999";
+    context.fill();
 
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x - 64, 127);
-    ctx.lineTo(x + 64, 127);
-    ctx.lineTo(x, 0);
-    ctx.strokeStyle="#000000";
-    ctx.stroke();
-    ctx.closePath();
-    ctx.fillStyle="#cccccc";
-    ctx.fill();
+    context.beginPath();
+    context.moveTo(x, 0.5);
+    context.lineTo(x + 32, 0.5);
+    context.lineTo(x + 32, 31.5);
+    context.lineTo(x, 31.5);
+    context.lineTo(x, 0.5);
+    context.strokeStyle="#000000";
+    context.stroke();
+    context.closePath();
+    context.fillStyle="#cccccc";
+    context.fill();
 }
     </script>
   </head>
@@ -285,8 +275,8 @@ Binary search
     <input type="radio" name="distribution" id="radio_3" onclick="values = less_in_the_middle_ascending(); draw_search();" /><label for="radio_3">bi-skewed;</label>
     </p>
     <p>
-    Proportion:<br>
-    <canvas id="slider_1" width=608 height=128></canvas>
+    Proportion: 
+    <canvas id="slider_1" width=400 height=32></canvas>
     <p class="comment" id="comment_1">
     </p>
     </form>
