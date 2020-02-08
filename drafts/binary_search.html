@@ -89,7 +89,7 @@ var values = uniform_ascending();
 function search_path(a, b, proportion) {
     if(a == b)
         return [[a, b]]
-    const mid = Math.floor((a+b) * proportion);
+    const mid = Math.floor(a + (b - a) * proportion);
     if(values[mid] < target)
         return [[a, b]].concat(search_path(mid + 1, b, proportion));
     else
@@ -192,7 +192,7 @@ function comment_on_slider(no){
     var x = slider_xs[no] / max_slider_x;
 
     var comment = document.getElementById("comment_" + (no + 1));
-    comment.innerHTML = "The proportion is " + Math.floor(x*100) + "/" + (100 - Math.floor(x*100)) + ".";
+    comment.innerHTML = Math.floor(x*100) + "/" + (100 - Math.floor(x*100));
 }
 
 function position_slider(no, client_x){
@@ -206,6 +206,9 @@ function position_slider(no, client_x){
     slider_xs[no] = x;
 
     comment_on_slider(no);
+    proportion = Math.floor(slider_xs[no] / max_slider_x*100) / 100.;  // trunc to exactly what is shown on UI
+    path = search_path(0, 639, proportion);
+    draw_search();
 }
 
 function init_slider(no){
@@ -277,8 +280,7 @@ Binary search
     <p>
     Proportion: 
     <canvas id="slider_1" width=400 height=32></canvas>
-    <p class="comment" id="comment_1">
-    </p>
+    <span id="comment_1"></span>
     </form>
     <p>
 ...
