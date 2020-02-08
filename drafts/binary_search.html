@@ -99,13 +99,17 @@ function search_path(a, b, proportion) {
 path = search_path(0, 639, proportion);
 
 function search_path_int(a, b) {
-    if(a == b)
+    if(a == b || values[b] == values[a])
         return [[a, b]]
-    const mid = Math.floor(a + (b-a) * (target-values[a]) / (values[b]-values[a]))
+    var mid = Math.floor(a + (b-a) * (target-values[a]) / (values[b]-values[a]))
+    if(mid >= b)
+        mid = b - 1;
+    if(mid < a)
+        mid = a;
     if(values[mid] < target)
-        return [[a, b]].concat(search_path(mid + 1, b, proportion));
+        return [[a, b]].concat(search_path_int(mid + 1, b));
     else
-        return [[a, b]].concat(search_path(a, mid, proportion));
+        return [[a, b]].concat(search_path_int(a, mid));
 }
 
 path_int = search_path_int(0, 639);
