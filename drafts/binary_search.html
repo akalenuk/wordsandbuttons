@@ -165,13 +165,16 @@ function draw(canvas_name){
     context.stroke();
     context.closePath();
 
+    // select path by canvas to draw
+    const the_path = canvas_name == "search" ? path : path_int;
+    
     // path
     context.lineWidth = 1;
-    for(var i = 0; i < path.length; ++i) {
+    for(var i = 0; i < the_path.length; ++i) {
         const gray = (11 - i) * 8;
         context.beginPath()
         context.strokeStyle='rgb('+gray+', '+gray+', '+gray+')';
-        for(var j = path[i][0]; j <= path[i][1]; ++j) {
+        for(var j = the_path[i][0]; j <= the_path[i][1]; ++j) {
             const value_part = values[j] / Math.pow(1.5, i);
             context.moveTo(j, 640 - values[j]);
             context.lineTo(j, 640);
@@ -193,7 +196,7 @@ function draw(canvas_name){
     context.font = "16px sans-serif";
     context.textAlign = "left";
     context.textBaseline = "middle";
-    context.fillText("Search for " + target + " takes " + path.length + " iterations.", 16, target > 120 ? 640 - target + 17 : 640 - target - 14);
+    context.fillText("Search for " + target + " takes " + the_path.length + " iterations.", 16, target > 120 ? 640 - target + 17 : 640 - target - 14);
 }
 
 const max_slider_x = 400 - 32;
