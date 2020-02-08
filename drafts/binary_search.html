@@ -187,12 +187,8 @@ var slider_user_xs = [max_slider_x / 2];
 var slider_xs = [max_slider_x / 2];
 
 function comment_on_slider(no){
-    var left = document.getElementById("left_" + (no + 1));
-    var right = document.getElementById("right_" + (no + 1));
-    var x = slider_xs[no] / max_slider_x;
-
     var comment = document.getElementById("comment_" + (no + 1));
-    comment.innerHTML = Math.floor(x*100) + "/" + (100 - Math.floor(x*100));
+    comment.innerHTML = Math.floor(100*proportion) + "/" + (100 - Math.floor(100*proportion));
 }
 
 function position_slider(no, client_x){
@@ -205,8 +201,13 @@ function position_slider(no, client_x){
         x = max_slider_x;
     slider_xs[no] = x;
 
+    proportion = slider_xs[no] / max_slider_x;
+    if(proportion < 0.01)
+        proportion = 0.01;
+    if(proportion > 0.99)
+        proportion = 0.99;
+
     comment_on_slider(no);
-    proportion = Math.floor(slider_xs[no] / max_slider_x*100) / 100.;  // trunc to exactly what is shown on UI
     path = search_path(0, 639, proportion);
     draw_search();
 }
@@ -351,7 +352,7 @@ Step 3. Select the right half-range. If the 320th number in the array is greater
 Step 4. Run step 1 for the new range.
     </p>
     <p>
-Eventually, and in less then a doxen iterations, you'll either find the element or establish that it's not there at all.
+Eventually, and in less then a dozen iterations, you'll either find the element or establish that it's not there at all.
     </p>
     <canvas id="search" width=640 height=640></canvas>
     <form onsubmit="return false;">
