@@ -46,6 +46,13 @@ form {
     background-color: #eeee99;
     color: #000;
 }
+
+.comment {
+    font-size: 14pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
     </style>
     <script language="JavaScript">
 var values = [];
@@ -175,6 +182,90 @@ function draw_search(){
     context.fillText("Search for " + target + " takes " + path.length + " iterations.", 16, target > 120 ? 640 - target + 24 : 640 - target - 24);
 }
 
+const max_slider_x = 512;
+var slider_user_xs = [max_slider_x / 2];
+var slider_xs = [max_slider_x / 2];
+
+var slider_down = false;
+
+function comment_on_slider(no){
+    var left = document.getElementById("left_" + (no + 1));
+    var right = document.getElementById("right_" + (no + 1));
+    var x = slider_xs[no] / max_slider_x;
+
+    var comment = document.getElementById("comment_" + (no + 1));
+    comment.innerHTML = "The proportion is " + Math.floor(x*100) + "/" + (100 - Math.floor(x*100)) + ".";
+}
+
+function position_slider(no, client_x){
+    var slider = document.getElementById("slider_" + (no + 1));
+    var canvas_rect = slider.getBoundingClientRect();
+    var x = client_x - canvas_rect.left - 48;
+    if(x < 1)
+        x = 1;
+    if(x > max_slider_x)
+        x = max_slider_x;
+    slider_xs[no] = x;
+
+    comment_on_slider(no);
+}
+
+function init_slider(no){
+    draw_slider(no);
+    var slider = document.getElementById("slider_" + (no + 1));
+
+    slider.addEventListener('mouseleave', function(e){
+        slider_down = false;
+    }, false);
+
+    slider.addEventListener('mouseup', function(e){
+        slider_down = false;
+    }, false);
+
+    slider.addEventListener('mousedown', function(e){
+        slider_down = true;
+        position_slider(no, e.clientX);
+        draw_slider(no);
+    }, false);
+
+    slider.addEventListener('mousemove', function(e){
+        if(slider_down){
+            position_slider(no, e.clientX);
+            draw_slider(no);
+        }
+    }, false);
+    
+    comment_on_slider(no);
+}
+
+function draw_slider(no){
+    ctx = document.getElementById("slider_" + (no + 1)).getContext("2d");
+    x = slider_xs[no] + 48 + 0.5;
+
+    ctx.clearRect(0, 0, 608, 128);
+    ctx.beginPath();
+    ctx.moveTo(64.5-16, 32.5);
+    ctx.lineTo(0.5 + 16, 127.5 - 32);
+    ctx.lineTo(607.5 - 16, 127.5 - 32);
+    ctx.lineTo(607.5 - 64 + 16, 32.5);
+    ctx.lineTo(64.5-16, 32.5);
+    ctx.strokeStyle="#000000";
+    ctx.stroke();
+    ctx.closePath();
+    ctx.fillStyle="#999999";
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x - 64, 127);
+    ctx.lineTo(x + 64, 127);
+    ctx.lineTo(x, 0);
+    ctx.strokeStyle="#000000";
+    ctx.stroke();
+    ctx.closePath();
+    ctx.fillStyle="#cccccc";
+    ctx.fill();
+}
     </script>
   </head>
   <body>
@@ -187,15 +278,23 @@ Binary search
     </p>
     <canvas id="search" width=640 height=640></canvas>
     <form onsubmit="return false;">
+    <p>
     Distribution: 
     <input type="radio" name="distribution" id="radio_1" onclick="values = uniform_ascending(); draw_search();" checked=true /><label for="radio_1">uniform;</label>
     <input type="radio" name="distribution" id="radio_2" onclick="values = scewed_to_high_ascending(); draw_search();" /><label for="radio_2">skewed;</label>
     <input type="radio" name="distribution" id="radio_3" onclick="values = less_in_the_middle_ascending(); draw_search();" /><label for="radio_3">bi-skewed;</label>
+    </p>
+    <p>
+    Proportion:<br>
+    <canvas id="slider_1" width=608 height=128></canvas>
+    <p class="comment" id="comment_1">
+    </p>
     </form>
     <p>
 ...
     </p>
     <script language="JavaScript">
+    init_slider(0);
     init_search();
     </script>
 
