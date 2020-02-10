@@ -414,14 +414,36 @@ Interpolation search
 While we can all agree that 64 is less than 18,446,744,073,709,551,615 it seems that the introduction story is still a little too long.
     </p>
     <p>
-We can choose a strategy for the range subdivision that will be more effecive for specific distributions. For example, using linear interpolation instead of fixed proportion for the dividing element, works wonders for the uniform distribution. It can be written down as:
+We can choose a strategy for the range subdivision that will be more effecive for specific distributions. For example, using linear interpolation instead of fixed proportion for the dividing element index, works wonders for the uniform distribution.
     </p>
-    <p class="formula">
-dividing_index = begin_index + (end_index-begin_index) * (value_to_find - array[begin_index]) / (array[end_index] - array[begin_index])
+    <p>
+It can be written down as:
+    </p>
+    <table class="formula">
+    <tr>
+    <td rowspan=3 style="vertical-align: middle; width: 64pt; "><nobr>i<sub>div</dub> = </nobr></td>
+    <td style="border-bottom:1px solid black">
+i<sub>1</sub>(A[i<sub>2</sub>] - x) + i<sub>2</sub>(x - A[i<sub>1</sub>])
+    </td>
+    </tr>
+    <tr>
+    <td>
+A[i<sub>2</sub>] - A[i<sub>1</sub>]
+    </td>
+    </tr>
+    </table>
+    <p>
+Here <i>i<sub>div</div></i> is the dividing index. It's the element that should start the second sub-range after the subdivision. The pair <i>(i<sub>1</sub>, i<sub>2</sub>)</i> is the pair of indices for the range being divided on a current iteration. The <i>x</i> stands for the element we're looking for, and <i>A</i> is the array to search in.
+    </p>
+    <p>
+Here's an interactive plot that shows how it works.
     </p>
     <canvas id="search_int" width=640 height=640></canvas>
     <p>
-I remember of a very clever algorithm that could effectively predict the proportion for every sub-range based on the approximating polynoial but I don't remember the algorithm itself. If you know what I am talking about, please <a href="mailto:ok@wordsandbuttons.online">let me know</a>.
+Note that while it works well on unimorf(-ish) distribution, the more uneven distribution becomes, the more iterations it takes to find the elelment. That's the downside of linear interpolation.
+    </p>
+    <p>
+Of course, the interpolation should not be linear. I remember of a very clever algorithm that could effectively predict the proportion for every sub-range based on the approximating polynoial but I don't remember the algorithm itself. If you know what I am talking about, please <a href="mailto:ok@wordsandbuttons.online">let me know</a>.
     </p>
     
     <script language="JavaScript">
