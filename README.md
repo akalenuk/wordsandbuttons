@@ -17,6 +17,7 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 - [Interactive guide to&nbsp;homogeneous coordinates](https://wordsandbuttons.online/interactive_guide_to_homogeneous_coordinates.html) Explains obscure concepts with clickable and draggable things.
 
 ## Algorithms
+- [Binary search](https://wordsandbuttons.online/binary_search.html)
 - [SWInE](https://wordsandbuttons.online/swine_simplicial_weight_interpolation_and_extrapolation.html): Simplicial Weight Interpolation and Extrapolation
 - [Simple image vectorization](https://wordsandbuttons.online/simple_image_vectorization.html) 
 - [The simplest possible smooth contouring algorithm](https://wordsandbuttons.online/the_simplest_possible_smooth_contouring_algorithm.html) 
