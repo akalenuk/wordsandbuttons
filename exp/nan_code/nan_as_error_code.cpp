@@ -33,4 +33,10 @@ int main(void) {
     assert(sqrt_or_not(1./0.) == ECode::INPUT_IS_INFINITE);
     assert(sqrt_or_not(0./0.) == ECode::INPUT_IS_NAN);
     assert(sqrt_or_not(4.) == 2.);
+
+    assert(std::isnan(sqrt_or_not(-1.)));
+    assert(std::isnan(sqrt_or_not(1./0.)));
+    assert(std::isnan(sqrt_or_not(0./0.)));
+    
+//    assert(0./0. != ECode::INPUT_IS_NEGATIVE);    // this wouldn't compile
 }
