@@ -37,6 +37,6 @@ int main(void) {
     assert(std::isnan(sqrt_or_not(-1.)));
     assert(std::isnan(sqrt_or_not(1./0.)));
     assert(std::isnan(sqrt_or_not(0./0.)));
-    
+    assert(std::isnan(sqrt_or_not(-1.) + 1.));
 //    assert(0./0. != ECode::INPUT_IS_NEGATIVE);    // this wouldn't compile
 }
