@@ -40,12 +40,12 @@ Result_or_code sqrt_or_not(double x) {
     return std::sqrt(x);
 }
 
-int main(void) {
+void measure_3_comparisons() {
     size_t errors = 0;
     size_t results = 0;
     std::cout << "3 comparisons: ";
     MEASURE(
-        for(double x = -256.; x < 256.; x += 1./65536.) {
+        for(double x = -1024.; x <= 1024.; x += 1./65536.) {
             auto root = sqrt_or_not(x);
             if(root == ECode::INPUT_IS_NAN || root == ECode::INPUT_IS_INFINITE || root == ECode::INPUT_IS_NEGATIVE)
                 ++errors;
@@ -53,5 +53,44 @@ int main(void) {
                 ++results;
         }
     );
-    std::cout << "\nsanity check: " << ((errors == results) == 1. ? "passed" : "not passed!") << "\n" << std::endl;
+    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "\n" << std::endl;
+}
+
+void measure_isnan() {
+    size_t errors = 0;
+    size_t results = 0;
+    std::cout << "is nan: ";
+    MEASURE(
+        for(double x = -1024.; x <= 1024.; x += 1./65536.) {
+            auto root = sqrt_or_not(x);
+            if(std::isnan(root))
+                ++errors;
+            else
+                ++results;
+        }
+    );
+    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "\n" << std::endl;
+}
+
+void measure_non_less_than_error() {
+    size_t errors = 0;
+    size_t results = 0;
+    std::cout << "no less than error: ";
+    MEASURE(
+        for(double x = -1024.; x <= 1024.; x += 1./65536.) {
+            auto root = sqrt_or_not(x);
+            if(root >= ECode::INPUT_IS_NAN)
+                ++errors;
+            else
+                ++results;
+        }
+    );
+    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "\n" << std::endl;
+}
+
+
+int main(void) {
+    measure_3_comparisons();
+    measure_isnan();
+    measure_non_less_than_error();
 }
