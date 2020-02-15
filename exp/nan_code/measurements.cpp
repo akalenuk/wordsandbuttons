@@ -5,6 +5,9 @@
 #include <iostream>
 #include <tuple>
 
+#include <boost/optional.hpp>
+
+
 #define MEASURE(CODE_TO_MEASURE) \
     { \
     auto start = std::chrono::system_clock::now(); \
@@ -40,6 +43,12 @@ Result_or_code sqrt_or_not(double x) {
     if(x < 0)
         return ECode::INPUT_IS_NEGATIVE;
     return std::sqrt(x);
+}
+
+boost::optional<double> optional_sqrt(double x) {
+    if (std::isnan(x) || std::isinf(x) || x < 0)
+        return boost::optional<double>();
+    return boost::optional<double>(std::sqrt(x));
 }
 
 double sqrt_or_throw(double x) {
@@ -138,6 +147,25 @@ void measure_tuple() {
     std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
 }
 
+void measure_optional() {
+    size_t errors = 0;
+    size_t results = 0;
+    double total = 0.;
+    std::cout << "optional: ";
+    MEASURE(
+        for(double x = -1024.; x <= 1024.; x += 1./65536.) {
+            auto optional_root = optional_sqrt(x);
+            if(!optional_root)
+                ++errors;
+            else {
+                ++results;
+                total += *optional_root;
+            }
+        }
+    );
+    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
+}
+
 void measure_throw() {
     size_t errors = 0;
     size_t results = 0;
@@ -163,5 +191,6 @@ int main(void) {
     measure_isnan();
     measure_non_less_than_error();
     measure_tuple();
+    measure_optional();
     measure_throw();
 }
