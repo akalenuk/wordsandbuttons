@@ -40,6 +40,16 @@ Result_or_code sqrt_or_not(double x) {
     return std::sqrt(x);
 }
 
+double sqrt_or_throw(double x) {
+    if (std::isnan(x))
+        throw std::invalid_argument("");
+    if (std::isinf(x))
+        throw std::invalid_argument("");
+    if(x < 0)
+        throw std::domain_error("");
+    return std::sqrt(x);
+}
+
 void measure_3_comparisons() {
     size_t errors = 0;
     size_t results = 0;
@@ -88,9 +98,27 @@ void measure_non_less_than_error() {
     std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "\n" << std::endl;
 }
 
+void measure_throw() {
+    size_t errors = 0;
+    size_t results = 0;
+    std::cout << "throw (512 less experiments!): ";
+    MEASURE(
+        for(double x = -2.; x <= 2.; x += 1./65536.) {
+            try {
+                auto root = sqrt_or_throw(x);
+                ++results;
+            } catch (const std::logic_error& e) {
+                ++errors;
+            }
+        }
+    );
+    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "\n" << std::endl;
+}
+
 
 int main(void) {
     measure_3_comparisons();
     measure_isnan();
     measure_non_less_than_error();
+    measure_throw();
 }
