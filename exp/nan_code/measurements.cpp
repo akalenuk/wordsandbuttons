@@ -87,6 +87,7 @@ void measure_3_comparisons() {
             }
         }
     );
+    std::cout << "\nsize of union: " << sizeof(Result_or_code);
     std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
 }
 
@@ -144,6 +145,7 @@ void measure_tuple() {
             }
         }
     );
+    std::cout << "\nsize of tuple: " << sizeof(std::tuple<ECode, double>);
     std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
 }
 
@@ -163,6 +165,7 @@ void measure_optional() {
             }
         }
     );
+    std::cout << "\nsize of optional: " << sizeof(boost::optional<double>);
     std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
 }
 
