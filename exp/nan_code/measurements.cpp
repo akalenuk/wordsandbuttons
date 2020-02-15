@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <chrono>
 #include <iostream>
+#include <tuple>
 
 #define MEASURE(CODE_TO_MEASURE) \
     { \
@@ -15,7 +16,8 @@
 
 
 enum class ECode : uint64_t {
-    INPUT_IS_NAN = 0xFFF0'0000'0000'0001,
+    OK = 0xFFF0'0000'0000'0001,
+    INPUT_IS_NAN,
     INPUT_IS_INFINITE,
     INPUT_IS_NEGATIVE
 };
@@ -48,6 +50,16 @@ double sqrt_or_throw(double x) {
     if(x < 0)
         throw std::domain_error("");
     return std::sqrt(x);
+}
+
+std::tuple<ECode, double> code_and_sqrt(double x) {
+    if (std::isnan(x))
+        return std::make_tuple(ECode::INPUT_IS_NAN, 0.);
+    if (std::isinf(x))
+        return std::make_tuple(ECode::INPUT_IS_INFINITE, 0.);
+    if(x < 0)
+        return std::make_tuple(ECode::INPUT_IS_NEGATIVE, 0.);
+    return std::make_tuple(ECode::OK, std::sqrt(x));
 }
 
 void measure_3_comparisons() {
@@ -98,6 +110,22 @@ void measure_non_less_than_error() {
     std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "\n" << std::endl;
 }
 
+void measure_tuple() {
+    size_t errors = 0;
+    size_t results = 0;
+    std::cout << "tuple: ";
+    MEASURE(
+        for(double x = -1024.; x <= 1024.; x += 1./65536.) {
+            auto code_and_root = code_and_sqrt(x);
+            if(std::get<0>(code_and_root) != ECode::OK)
+                ++errors;
+            else
+                ++results;
+        }
+    );
+    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "\n" << std::endl;
+}
+
 void measure_throw() {
     size_t errors = 0;
     size_t results = 0;
@@ -120,5 +148,6 @@ int main(void) {
     measure_3_comparisons();
     measure_isnan();
     measure_non_less_than_error();
+    measure_tuple();
     measure_throw();
 }
