@@ -65,82 +65,96 @@ std::tuple<ECode, double> code_and_sqrt(double x) {
 void measure_3_comparisons() {
     size_t errors = 0;
     size_t results = 0;
+    double total = 0.;
     std::cout << "3 comparisons: ";
     MEASURE(
         for(double x = -1024.; x <= 1024.; x += 1./65536.) {
             auto root = sqrt_or_not(x);
             if(root == ECode::INPUT_IS_NAN || root == ECode::INPUT_IS_INFINITE || root == ECode::INPUT_IS_NEGATIVE)
                 ++errors;
-            else
+            else {
                 ++results;
+                total += root;
+            }
         }
     );
-    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "\n" << std::endl;
+    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
 }
 
 void measure_isnan() {
     size_t errors = 0;
     size_t results = 0;
+    double total = 0.;
     std::cout << "is nan: ";
     MEASURE(
         for(double x = -1024.; x <= 1024.; x += 1./65536.) {
             auto root = sqrt_or_not(x);
             if(std::isnan(root))
                 ++errors;
-            else
+            else {
                 ++results;
+                total += root;
+            }
         }
     );
-    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "\n" << std::endl;
+    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
 }
 
 void measure_non_less_than_error() {
     size_t errors = 0;
     size_t results = 0;
+    double total = 0.;
     std::cout << "no less than error: ";
     MEASURE(
         for(double x = -1024.; x <= 1024.; x += 1./65536.) {
             auto root = sqrt_or_not(x);
             if(root >= ECode::INPUT_IS_NAN)
                 ++errors;
-            else
+            else {
                 ++results;
+                total += root;
+            }
         }
     );
-    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "\n" << std::endl;
+    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
 }
 
 void measure_tuple() {
     size_t errors = 0;
     size_t results = 0;
+    double total = 0.;
     std::cout << "tuple: ";
     MEASURE(
         for(double x = -1024.; x <= 1024.; x += 1./65536.) {
             auto code_and_root = code_and_sqrt(x);
             if(std::get<0>(code_and_root) != ECode::OK)
                 ++errors;
-            else
+            else {
                 ++results;
+                total += std::get<1>(code_and_root);
+            }
         }
     );
-    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "\n" << std::endl;
+    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
 }
 
 void measure_throw() {
     size_t errors = 0;
     size_t results = 0;
+    double total = 0.;
     std::cout << "throw (512 less experiments!): ";
     MEASURE(
         for(double x = -2.; x <= 2.; x += 1./65536.) {
             try {
                 auto root = sqrt_or_throw(x);
+                total += root;
                 ++results;
             } catch (const std::logic_error& e) {
                 ++errors;
             }
         }
     );
-    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "\n" << std::endl;
+    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
 }
 
 
