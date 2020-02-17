@@ -20,9 +20,10 @@
 
 enum class ECode : uint64_t {
     OK = 0xFFF0'0000'0000'0001,
+    ERROR,
     INPUT_IS_NAN,
     INPUT_IS_INFINITE,
-    INPUT_IS_NEGATIVE
+    INPUT_IS_NEGATIVE,
 };
 
 union Result_or_code
@@ -118,7 +119,7 @@ void measure_non_less_than_error() {
     MEASURE(
         for(double x = -1024.; x <= 1024.; x += 1./65536.) {
             auto root = sqrt_or_not(x);
-            if(root >= ECode::INPUT_IS_NAN)
+            if(root >= ECode::ERROR)
                 ++errors;
             else {
                 ++results;
