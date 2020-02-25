@@ -62,7 +62,8 @@ double sqrt_or_throw(double x) {
     return std::sqrt(x);
 }
 
-std::tuple<ECode, double> code_and_sqrt(double x) {
+using CodeAndResult = std::tuple<ECode, double>;
+CodeAndResult code_and_sqrt(double x) {
     if (std::isnan(x))
         return std::make_tuple(ECode::INPUT_IS_NAN, 0.);
     if (std::isinf(x))
@@ -130,6 +131,26 @@ void measure_non_less_than_error() {
     std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
 }
 
+void measure_non_less_than_error_storing() {
+    size_t errors = 0;
+    size_t results = 0;
+    double total = 0.;
+    std::cout << "no less than error: ";
+    MEASURE(
+        std::vector<Result_or_code> results_or_codes;
+        for(double x = -1024.; x <= 1024.; x += 1./65536.) {
+            results_or_codes.push_back(sqrt_or_not(x));
+            if(results_or_codes.back() >= ECode::ERROR)
+                ++errors;
+            else {
+                ++results;
+                total += results_or_codes.back();
+            }
+        }
+    );
+    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
+}
+
 void measure_tuple() {
     size_t errors = 0;
     size_t results = 0;
@@ -150,6 +171,27 @@ void measure_tuple() {
     std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
 }
 
+void measure_tuple_storing() {
+    size_t errors = 0;
+    size_t results = 0;
+    double total = 0.;
+    std::cout << "tuple: ";
+    MEASURE(
+        std::vector<CodeAndResult> results_and_codes;
+        for(double x = -1024.; x <= 1024.; x += 1./65536.) {
+            results_and_codes.push_back(code_and_sqrt(x));
+            if(std::get<0>(results_and_codes.back()) != ECode::OK)
+                ++errors;
+            else {
+                ++results;
+                total += std::get<1>(results_and_codes.back());
+            }
+        }
+    );
+    std::cout << "\nsize of tuple: " << sizeof(std::tuple<ECode, double>);
+    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
+}
+
 void measure_optional() {
     size_t errors = 0;
     size_t results = 0;
@@ -163,6 +205,27 @@ void measure_optional() {
             else {
                 ++results;
                 total += *optional_root;
+            }
+        }
+    );
+    std::cout << "\nsize of optional: " << sizeof(boost::optional<double>);
+    std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
+}
+
+void measure_optional_storing() {
+    size_t errors = 0;
+    size_t results = 0;
+    double total = 0.;
+    std::cout << "optional: ";
+    MEASURE(
+        std::vector<boost::optional<double>> optional_results;
+        for(double x = -1024.; x <= 1024.; x += 1./65536.) {
+            optional_results.push_back(optional_sqrt(x));
+            if(!optional_results.back())
+                ++errors;
+            else {
+                ++results;
+                total += *optional_results.back();
             }
         }
     );
@@ -194,7 +257,10 @@ int main(void) {
     measure_3_comparisons();
     measure_isnan();
     measure_non_less_than_error();
+    measure_non_less_than_error_storing();
     measure_tuple();
+    measure_tuple_storing();
     measure_optional();
+    measure_optional_storing();
     measure_throw();
 }
