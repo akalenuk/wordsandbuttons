@@ -26,6 +26,7 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 - [Interactive introduction to&nbsp;iterative algorithms](https://wordsandbuttons.online/interactive_introduction_to_iterative_algorithms.html) 
 
 ## Performance
+- [Error codes are not numbers. But they are. Can we exploit that?](https://wordsandbuttons.online/error_codes_are_not_numbers_but_they_are_can_we_exploit_that.html) 
 - [Challenge your performance intuition with nanosecond sorting](https://wordsandbuttons.online/challenge_your_performance_intuition_with_nanosecond_sorting.html) 
 - [Challenge your performance intuition with C++ operators](https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_operators.html) , and the follow-up: [Using logical operations for logical operators is good](https://wordsandbuttons.online/using_logical_operators_for_logical_operations_is_good.html)
 - [Cheap trick to speed up recursion in C++](https://wordsandbuttons.online/cheap_trick_to_speed_up_recursion_in_cpp.html) 
