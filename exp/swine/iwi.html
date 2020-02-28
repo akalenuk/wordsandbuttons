@@ -1,0 +1,233 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Inverse-weight interpolation</title>
+    <meta name="keywords" content="iterative,algorithms,guide,tutorial,learning">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 32pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 16pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.results {
+    font-family: sans-serif;
+    font-size: 14pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.formula {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: italic;
+    width: 505pt;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+table.footer {
+    padding: 64pt 0pt 32pt 0pt;
+    background-color: transparent;
+    width: 505pt;
+}
+
+td.footer {
+    font-family: sans-serif;
+    font-size: 16pt;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+}
+
+input[type="text"] {
+    width: 48pt;
+    height: 22pt;
+    font-size: 16pt;
+    text-align: center;
+}
+
+input[type="radio"] {
+    height: 16pt;
+    width: 16pt;
+    font-size: 16pt;
+}
+
+input[type="checkbox"] {
+    height: 16pt;
+    width: 16pt;
+    font-size: 16pt;
+    margin-bottom: 16pt;
+}
+
+button {
+    width: 128pt;
+    height: 26pt;
+    font-size: 16pt;
+    text-align: center;
+}
+
+textarea {
+    width: 600pt;
+    font-size: 12pt;
+    font-family: monospace;
+}
+
+.comment {
+    font-size: 12pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
+    </style>
+    <script language="JavaScript">
+
+// client
+var w = 1024.0;
+var h = 1024.0;
+
+// pixels
+var pixels = [];
+var pixel_size;
+
+function reset_pixels() {
+    pixels = [];
+    for(var i = 0; i < h; ++i) {
+        pixelsi = []
+        for(var j = 0; j < w; ++j)
+            pixelsi.push(0);
+        pixels.push(pixelsi);
+    }
+}
+
+reset_pixels();
+
+/*
+(define interval (lambda (a b) 
+  (if (= a b) 
+    (list a)
+    (append (list a) (interval (+ a 1) b)))))
+    
+(define (script-fu-darning image drawable)
+  (let* ((bounds (gimp-selection-bounds image))
+	 (has-selection (nth 0 bounds)) 
+	 (x1 (nth 1 bounds)) 
+	 (y1 (nth 2 bounds)) 
+	 (x2 (- (nth 3 bounds) 1)) 
+	 (y2 (- (nth 4 bounds) 1))
+         (w (- (car (gimp-image-width image)) 1))
+         (h (- (car (gimp-image-height image)) 1)))
+    
+    (if (= has-selection TRUE) (let* (
+        (p1 (gimp-drawable-get-pixel drawable 0 0))
+        (channels (car p1))
+        (col_0 (nth 1 p1))
+        (x1->x2 (interval x1 x2))
+        (y1->y2 (interval y1 y2))
+        (channels-enum (interval 0 (- channels 1))))
+
+      (gimp-message "Darning...")
+      (gimp-image-undo-disable image)
+  
+      (map (lambda (i) (let* (
+          (col_l (nth 1 (gimp-drawable-get-pixel drawable x1 i)))
+          (col_r (nth 1 (gimp-drawable-get-pixel drawable x2 i)))
+          (ti (if (= y1 0) 0 (/ 1 (+ (/ (- i y1) (- y2 y1)) 0.00001))))
+          (fi (if (= y2 h) 0 (/ 1 (+ (/ (- y2 i) (- y2 y1)) 0.00001)))))
+        (map (lambda (j) (let* (
+            (col_t (nth 1 (gimp-drawable-get-pixel drawable j y1)))
+            (col_b (nth 1 (gimp-drawable-get-pixel drawable j y2)))
+            (tj (if (= x1 0) 0 (/ 1 (- (/ (- j x1) (- x2 x1)) 0.00002))))
+            (fj (if (= x2 w) 0 (/ 1 (- (/ (- x2 j) (- x2 x1)) 0.00002)))))
+          (map (lambda (k) (let* (
+              (col_l_k (aref col_l k))
+              (col_r_k (aref col_r k))
+              (col_t_k (aref col_t k))
+              (col_b_k (aref col_b k))
+              (chan_k (/ (+ (* col_l_k tj) (* col_r_k fj) (* col_t_k ti) (* col_b_k fi)) (+ tj fj ti fi))))
+            (aset col_0 k chan_k)
+          )) channels-enum)
+          (gimp-drawable-set-pixel drawable j i channels col_0)
+        )) x1->x2)
+      )) y1->y2)
+      (gimp-drawable-update drawable x1 y1 (+ (- x2 x1 ) 1) (+ (- y2 y1 ) 1))
+      (gimp-image-undo-enable image)
+      (gimp-displays-flush)
+      (gimp-message "Darning done!")
+    )
+      (gimp-message "Selection is empty"))  
+  )
+)
+*/
+
+
+function draw_canvas(){
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+    // background
+    context.fillStyle="#eeeeee";
+    context.fillRect(0, 0, w, h);
+}
+
+
+  </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+Inverse weight inerpolation
+    </h1>
+
+    <canvas id="canvas" width=1024 height=1024></canvas>
+    <script language="JavaScript">
+    draw_canvas();
+    </script>
+
+
+    </center>
+  </body>
+</html>
