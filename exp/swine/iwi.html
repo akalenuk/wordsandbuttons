@@ -169,7 +169,12 @@ function darn(pixels, i0, j0, i1, j1) {
             const pi1 = (i1 == h) ? 0x000000 : pixels[i1 + 1][j];
             const pj0 = (j0 == 0) ? 0x000000 : pixels[i][j0 - 1];
             const pj1 = (j1 == w) ? 0x000000 : pixels[i][j1 + 1];
-            // here todo: blending
+            // blending
+            const d = ki0 + ki1 + kj0 + kj1;
+            const r = (pi0[0] * ki0 + pi1[0] * ki1 + pj0[0] * kj0 + pj1[0] * kj1) / d;
+            const g = (pi0[1] * ki0 + pi1[1] * ki1 + pj0[1] * kj0 + pj1[1] * kj1) / d;
+            const b = (pi0[2] * ki0 + pi1[2] * ki1 + pj0[2] * kj0 + pj1[2] * kj1) / d;
+            pixels[i][j] = [r, g, b];
         }
     }
 }
