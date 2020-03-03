@@ -9,10 +9,11 @@ new_footer = """<table class="footer" style="width: 555pt; padding: 64pt 0pt 32p
         &nbsp;&larr; there's more.
     </td>
     <td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
-        + 
-        <a href="https://github.com/akalenuk/wordsandbuttons">Github</a> & 
-        <a href="https://twitter.com/wordsandbuttons">Twitter</a> & 
-        <a href="https://news.ycombinator.com/from?site=wordsandbuttons.online">Hacker News</a>
+        +
+        <a href="faq.html"><span style="letter-spacing: 1pt;">FAQ</span></a> &
+        <a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+        <a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+        <a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
     </td>
     </tr>
     </table>"""
@@ -20,7 +21,7 @@ new_footer = """<table class="footer" style="width: 555pt; padding: 64pt 0pt 32p
 path = '../../pages/'
 for file_name in os.listdir(path):
     if os.path.isfile(path + file_name):
-        if file_name.endswith('.html'):
+        if file_name.endswith('.html') and file_name != 'index.html':
             print file_name
             html = open(path + file_name, 'r')
             text = html.read()
