@@ -147,6 +147,27 @@ function reset_pixels() {
 reset_pixels();
 
 
+function load_pixels_from(url) {
+    fetch(url).then(function(response) {
+        var blob = response.blob();
+        var img = createImageBitmap(blob);
+        var canvas = document.createElement('canvas');
+        var context = canvas.getContext('2d');
+        var img = document.getElementById('myimg');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        context.drawImage(img, 0, 0 );
+        var image_data = context.getImageData(0, 0, img.width, img.height);
+        for (var i = 0; i < img.height; ++i) {
+            for (var j = 0; j < img.width; ++j) {
+                pixels[i][j][0] = pixel_field.data[(i*w + j)*4 + 0];
+                pixels[i][j][1] = pixel_field.data[(i*w + j)*4 + 1];
+                pixels[i][j][2] = pixel_field.data[(i*w + j)*4 + 2];
+            }
+        }
+    });
+}
+
 function interval(a, b) {
     if (a == b) 
         return [a];
@@ -211,6 +232,7 @@ Inverse weight inerpolation
 
     <canvas id="canvas" width=1024 height=1024></canvas>
     <script language="JavaScript">
+    load_pixels_from('https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Ancient_Greece_Northern_Part_Map.jpg/800px-Ancient_Greece_Northern_Part_Map.jpg');
     draw_canvas();
     </script>
 
