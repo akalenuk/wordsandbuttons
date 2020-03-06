@@ -127,7 +127,42 @@ textarea {
     <script language="JavaScript">
 // pixels
 var pixels = [];
-var pixel_size;
+
+// frame points
+var points = [[100, 100], [200, 100], [200, 200], [100, 200]];
+function nearest_point(xy) {
+    function d(xy1, xy2) {
+        return (xy1[0] - xy2[0])*(xy1[0] - xy2[0]) + (xy1[1] - xy2[1])*(xy1[1] - xy2[1]);
+    }
+    var nearest_i = 0;
+    var nearest_d = d(xy, points[0]);
+    for(var i = 1; i < 4; ++i) {
+        const di = d(xy, points[i]);
+        if(di < nearest_d) {
+            nearest_d = di;
+            nearest_i = i;
+        }
+    }
+    return nearest_i;
+}
+function set_points(xy) {
+    const i = nearest_point(xy);
+    points[i][0] = xy[0]
+    points[i][1] = xy[1]
+    if(i == 0) {
+        points[1][1] = xy[1];
+        points[3][0] = xy[0];
+    } else if(i == 1) {
+        points[0][1] = xy[1];
+        points[2][0] = xy[0];
+    } else if(i == 2) {
+        points[3][1] = xy[1];
+        points[1][0] = xy[0];
+    } else if(i == 3) {
+        points[2][1] = xy[1];
+        points[0][0] = xy[0];
+    }
+}
 
 
 function load_pixels_from(url) {
@@ -154,7 +189,7 @@ function load_pixels_from(url) {
                     }
                     pixels.push(pixelsi);
                 }
-                draw_canvas();
+                draw_canvas()
             });
         });
     });
@@ -187,12 +222,45 @@ function darn(pixels, i0, j0, i1, j1) {
 }
 
 
+
+function init_canvas(){
+    const canvas = document.getElementById("canvas");
+    const canvas_rect = canvas.getBoundingClientRect();
+
+    canvas.addEventListener('mousemove', function(e){
+        var canvas_rect = canvas.getBoundingClientRect();
+        if(e.buttons == 1){
+            const x = e.clientX - canvas_rect.left;
+            const y = e.clientY - canvas_rect.top;
+            set_points([x, y]);
+            draw_canvas();
+        }
+    }, false);
+
+    canvas.addEventListener('mousedown', function(e){
+        var canvas_rect = canvas.getBoundingClientRect();
+        const x = e.clientX - canvas_rect.left;
+        const y = e.clientY - canvas_rect.top;
+        set_points([x, y]);
+        draw_canvas();
+    }, false);
+
+    canvas.addEventListener('mouseleave', function(e){
+        draw_canvas();
+    }, false);
+
+    draw_canvas();
+}
+
 function draw_canvas(){
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
-    // background
+    if(pixels.length == 0)
+        return
     const w = pixels[0].length;
     const h = pixels.length;
+
+    // background
     context.fillStyle="#eeeeee";
     context.fillRect(0, 0, w, h);
     
@@ -207,6 +275,20 @@ function draw_canvas(){
         }
     }
     context.putImageData(pixel_field, -0.5, -0.5);
+    
+    // frame
+    context.beginPath();
+    context.moveTo(points[0][0] + 0.5, points[0][1] + 0.5);
+    context.lineTo(points[1][0] + 0.5, points[1][1] + 0.5);
+    context.lineTo(points[2][0] + 0.5, points[2][1] + 0.5);
+    context.lineTo(points[3][0] + 0.5, points[3][1] + 0.5);
+    context.lineTo(points[0][0] + 0.5, points[0][1] + 0.5);
+    context.strokeStyle = "#d64562";
+    context.setLineDash([4, 4]);
+    context.lineWidth = 3;
+    context.stroke();
+    context.closePath();
+    context.setLineDash([]);
 }
 
 
@@ -221,6 +303,7 @@ Inverse weight inerpolation
     <canvas id="canvas" width=1024 height=1024></canvas>
     <script language="JavaScript">
     load_pixels_from('https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Ancient_Greece_Northern_Part_Map.jpg/800px-Ancient_Greece_Northern_Part_Map.jpg');
+    init_canvas();
     </script>
 
 
