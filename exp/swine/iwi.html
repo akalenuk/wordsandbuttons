@@ -125,46 +125,36 @@ textarea {
 }
     </style>
     <script language="JavaScript">
-
-// client
-var w = 1024.0;
-var h = 1024.0;
-
 // pixels
 var pixels = [];
 var pixel_size;
-
-function reset_pixels() {
-    pixels = [];
-    for(var i = 0; i < h; ++i) {
-        pixelsi = []
-        for(var j = 0; j < w; ++j)
-            pixelsi.push([0., 0., 0.]);
-        pixels.push(pixelsi);
-    }
-}
-
-reset_pixels();
 
 
 function load_pixels_from(url) {
     fetch(url).then(function(response) {
         response.blob().then(function(blob) {
             createImageBitmap(blob).then(function(img) {
-                var canvas = document.createElement('canvas');
+                const w = img.width;
+                const h = img.height;
+                var canvas = document.getElementById("canvas");
                 var context = canvas.getContext('2d');
-                var img = document.getElementById('myimg');
-                canvas.width = img.width;
-                canvas.height = img.height;
+                canvas.width = w;
+                canvas.height = h;
                 context.drawImage(img, 0, 0 );
-                var image_data = context.getImageData(0, 0, img.width, img.height);
-                for (var i = 0; i < img.height; ++i) {
-                    for (var j = 0; j < img.width; ++j) {
-                        pixels[i][j][0] = pixel_field.data[(i*w + j)*4 + 0];
-                        pixels[i][j][1] = pixel_field.data[(i*w + j)*4 + 1];
-                        pixels[i][j][2] = pixel_field.data[(i*w + j)*4 + 2];
+                var image_data = context.getImageData(0, 0, w, h);
+                pixels = [];
+                for (var i = 0; i < h; ++i) {
+                    pixelsi = []
+                    for (var j = 0; j < w; ++j) {
+                        pixel = [
+                            image_data.data[(i*w + j)*4 + 0],
+                            image_data.data[(i*w + j)*4 + 1],
+                            image_data.data[(i*w + j)*4 + 2]];
+                        pixelsi.push(pixel);
                     }
+                    pixels.push(pixelsi);
                 }
+                draw_canvas();
             });
         });
     });
@@ -201,6 +191,8 @@ function draw_canvas(){
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
     // background
+    const w = pixels[0].length;
+    const h = pixels.length;
     context.fillStyle="#eeeeee";
     context.fillRect(0, 0, w, h);
     
@@ -228,8 +220,7 @@ Inverse weight inerpolation
 
     <canvas id="canvas" width=1024 height=1024></canvas>
     <script language="JavaScript">
-    load_pixels_from('helix.jpg');
-    draw_canvas();
+    load_pixels_from('https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Ancient_Greece_Northern_Part_Map.jpg/800px-Ancient_Greece_Northern_Part_Map.jpg');
     </script>
 
 
