@@ -166,33 +166,31 @@ function set_points(xy) {
 
 
 function load_pixels_from(url) {
-    fetch(url).then(function(response) {
-        response.blob().then(function(blob) {
-            createImageBitmap(blob).then(function(img) {
-                const w = img.width;
-                const h = img.height;
-                var canvas = document.getElementById("canvas");
-                var context = canvas.getContext('2d');
-                canvas.width = w;
-                canvas.height = h;
-                context.drawImage(img, 0, 0 );
-                var image_data = context.getImageData(0, 0, w, h);
-                pixels = [];
-                for (var i = 0; i < h; ++i) {
-                    pixelsi = []
-                    for (var j = 0; j < w; ++j) {
-                        pixel = [
-                            image_data.data[(i*w + j)*4 + 0],
-                            image_data.data[(i*w + j)*4 + 1],
-                            image_data.data[(i*w + j)*4 + 2]];
-                        pixelsi.push(pixel);
-                    }
-                    pixels.push(pixelsi);
-                }
-                draw_canvas()
-            });
-        });
-    });
+    var img = new Image();
+    img.addEventListener('load', function() {
+        const w = img.width;
+        const h = img.height;
+        var canvas = document.getElementById("canvas");
+        var context = canvas.getContext('2d');
+        canvas.width = w;
+        canvas.height = h;
+        context.drawImage(img, 0, 0 );
+        var image_data = context.getImageData(0, 0, w, h);
+        pixels = [];
+        for (var i = 0; i < h; ++i) {
+            pixelsi = []
+            for (var j = 0; j < w; ++j) {
+                pixel = [
+                    image_data.data[(i*w + j)*4 + 0],
+                    image_data.data[(i*w + j)*4 + 1],
+                    image_data.data[(i*w + j)*4 + 2]];
+                pixelsi.push(pixel);
+            }
+            pixels.push(pixelsi);
+        }
+        draw_canvas()
+    }, false);
+    img.src = url;
 }
 
 function darn(pixels, i0, j0, i1, j1) {
@@ -299,10 +297,10 @@ function draw_canvas(){
     <h1>
 Inverse weight inerpolation
     </h1>
-
     <canvas id="canvas" width=1024 height=1024></canvas>
     <script language="JavaScript">
-    load_pixels_from('https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Ancient_Greece_Northern_Part_Map.jpg/800px-Ancient_Greece_Northern_Part_Map.jpg');
+//    load_pixels_from('https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Ancient_Greece_Northern_Part_Map.jpg/800px-Ancient_Greece_Northern_Part_Map.jpg');
+    load_pixels_from('helix.jpg');
     init_canvas();
     </script>
 
