@@ -10700,16 +10700,14 @@ function darn(pixels, i0, j0, i1, j1) {
             const kj0 = (j0 == 0) ? 0 : 1. / (j - (j0 - 1));
             const kj1 = (j1 == w) ? 0 : 1. / (j1 + 1 - j);
             // donor pixel values
-            const pi0 = (i0 == 0) ? 0x000000 : pixels[i0 - 1][j];
-            const pi1 = (i1 == h) ? 0x000000 : pixels[i1 + 1][j];
-            const pj0 = (j0 == 0) ? 0x000000 : pixels[i][j0 - 1];
-            const pj1 = (j1 == w) ? 0x000000 : pixels[i][j1 + 1];
+            const pi0 = (i0 == 0) ? 0x00 : pixels[i0 - 1][j];
+            const pi1 = (i1 == h) ? 0x00 : pixels[i1 + 1][j];
+            const pj0 = (j0 == 0) ? 0x00 : pixels[i][j0 - 1];
+            const pj1 = (j1 == w) ? 0x00 : pixels[i][j1 + 1];
             // blending
             const d = ki0 + ki1 + kj0 + kj1;
-            const r = (pi0[0] * ki0 + pi1[0] * ki1 + pj0[0] * kj0 + pj1[0] * kj1) / d;
-            const g = (pi0[1] * ki0 + pi1[1] * ki1 + pj0[1] * kj0 + pj1[1] * kj1) / d;
-            const b = (pi0[2] * ki0 + pi1[2] * ki1 + pj0[2] * kj0 + pj1[2] * kj1) / d;
-            pixels[i][j] = [r, g, b];
+            const gv = (pi0 * ki0 + pi1 * ki1 + pj0 * kj0 + pj1 * kj1) / d;
+            pixels[i][j] = gv;
         }
     }
 }
@@ -10793,6 +10791,8 @@ function draw_canvas(){
 Inverse weight inerpolation
     </h1>
     <canvas id="canvas" width=1024 height=1024></canvas>
+    <button type="button" onclick="darn(pixels, points[0][0], points[0][1], points[2][0], points[2][1]); draw_canvas();">Darn image</button>
+    
     <script language="JavaScript">
     init_canvas();
     </script>
