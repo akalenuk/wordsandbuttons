@@ -1,4 +1,4 @@
-<html lang="en">
+﻿<html lang="en">
   <head>
     <meta charset="utf-8">
     <title>Inverse-weight interpolation</title>
@@ -10668,22 +10668,26 @@ function nearest_point(xy) {
     }
     return nearest_i;
 }
+
 function set_points(xy) {
+    const x = Math.max(Math.min(xy[0], pixels[0].length - 1), 0);
+    const y = Math.max(Math.min(xy[1], pixels.length -1), 0);
+
     const i = nearest_point(xy);
-    points[i][0] = xy[0]
-    points[i][1] = xy[1]
+    points[i][0] = x;
+    points[i][1] = y;
     if(i == 0) {
-        points[1][1] = xy[1];
-        points[3][0] = xy[0];
+        points[1][1] = y;
+        points[3][0] = x;
     } else if(i == 1) {
-        points[0][1] = xy[1];
-        points[2][0] = xy[0];
+        points[0][1] = y;
+        points[2][0] = x;
     } else if(i == 2) {
-        points[3][1] = xy[1];
-        points[1][0] = xy[0];
+        points[3][1] = y;
+        points[1][0] = x;
     } else if(i == 3) {
-        points[2][1] = xy[1];
-        points[0][0] = xy[0];
+        points[2][1] = y;
+        points[0][0] = x;
     }
 }
 
@@ -10740,6 +10744,10 @@ function init_canvas(){
     }, false);
 
     canvas.addEventListener('mouseleave', function(e){
+        var canvas_rect = canvas.getBoundingClientRect();
+        const x = e.clientX - canvas_rect.left;
+        const y = e.clientY - canvas_rect.top;
+        set_points([x, y]);
         draw_canvas();
     }, false);
 
@@ -10794,6 +10802,7 @@ function draw_canvas(){
 Inverse weight inerpolation
     </h1>
     <canvas id="canvas" width=1024 height=1024></canvas>
+	<br>
     <button type="button" onclick="darn_by_points(); draw_canvas();">Darn image</button>
     
     <script language="JavaScript">
