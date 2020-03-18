@@ -127,7 +127,7 @@ textarea {
 
 	<script language="JavaScript">
 // pixels
-var pixels = [[196,197,197,199,198,196,192,194,194,195,195,196,202,203,202,195,199,199,197,199,199,
+const initial_pixels = [[196,197,197,199,198,196,192,194,194,195,195,196,202,203,202,195,199,199,197,199,199,
 202,201,201,202,202,200,200,203,211,209,204,203,205,205,206,204,204,208,206,205,201,201,
 202,199,194,196,200,199,194,193,194,193,193,190,182,174,178,173,184,195,198,205,203,204,
 197,194,197,199,203,198,197,200,201,201,201,203,203,201,200,202,205,206,205,203,206,204,
@@ -5233,9 +5233,9 @@ var pixels = [[196,197,197,199,198,196,192,194,194,195,195,196,202,203,202,195,1
 232,228,225,223,224,228,227,226,226,228,228,229,230,228,225,223,223,225,227,226,222,222,
 226,226,227,226,222,221,223,224,231,236,226,221,220,218,219,216,220,223,],];
 
-
 // frame points
-var points = [[311, 78], [364, 78], [364, 164], [311, 164]];
+const initial_points = [[311, 78], [364, 78], [364, 164], [311, 164]];
+
 function nearest_point(xy) {
 	function d(xy1, xy2) {
 		return (xy1[0] - xy2[0])*(xy1[0] - xy2[0]) + (xy1[1] - xy2[1])*(xy1[1] - xy2[1]);
@@ -5378,6 +5378,24 @@ function draw_canvas(){
 	context.setLineDash([]);
 }
 
+function copy_of_matrix(m) {
+	const h = m.length;
+	const w = m[0].length;
+	var copy_of_m = [];
+	for(var i = 0; i < h; i++){
+		row = [];
+		for(var j = 0; j < w; ++j)
+			row.push(m[i][j]);
+		copy_of_m.push(row);
+	}
+	return copy_of_m;
+}
+
+function restart() {
+	points = copy_of_matrix(initial_points);
+	pixels = copy_of_matrix(initial_pixels);
+}
+
 	</script>
 </head>
 <body>
@@ -5388,8 +5406,10 @@ Inverse weight inerpolation
 	<canvas id="canvas" width=1024 height=1024></canvas>
 	<br>
 	<button type="button" onclick="darn_by_points(); draw_canvas();">Darn image</button>
-	
+	<button type="button" onclick="restart(); draw_canvas();">Restart</button>
+
 	<script language="JavaScript">
+	restart()
 	init_canvas();
 	</script>
 
