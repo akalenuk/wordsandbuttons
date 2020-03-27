@@ -132,7 +132,7 @@ var initial_pixels = [];
 for(var i = 0; i < 294; ++i) {
 	row = [];
 	for(var j = 0; j < 382; ++j)
-		row.push(256);
+		row.push([256, 256, 256]);
 	initial_pixels.push(row);
 }
 
@@ -188,15 +188,19 @@ function darn(pixels, i0, j0, i1, j1) {
 			// weight coefficients for row
 			const kj0 = (j0 == 0) ? 0 : 1. / (j - (j0 - 1));
 			const kj1 = (j1 == w - 1) ? 0 : 1. / (j1 + 1 - j);
-			// donor pixel values
-			const pi0 = (i0 == 0) ? 0 : pixels[i0 - 1][j];
-			const pi1 = (i1 == h - 1) ? 0 : pixels[i1 + 1][j];
-			const pj0 = (j0 == 0) ? 0 : pixels[i][j0 - 1];
-			const pj1 = (j1 == w - 1) ? 0 : pixels[i][j1 + 1];
-			// blending
-			const d = ki0 + ki1 + kj0 + kj1;
-			const gv = (pi0*ki0 + pi1*ki1 + pj0*kj0 + pj1*kj1) / d;
-			pixels[i][j] = gv;
+			var color = [0, 0, 0];
+			// per channel
+			for(var k = 0; k < 3; ++k) {
+				// donor pixel values
+				const pi0 = (i0 == 0) ? 0 : pixels[i0 - 1][j][k];
+				const pi1 = (i1 == h - 1) ? 0 : pixels[i1 + 1][j][k];
+				const pj0 = (j0 == 0) ? 0 : pixels[i][j0 - 1][k];
+				const pj1 = (j1 == w - 1) ? 0 : pixels[i][j1 + 1][k];
+				// blending
+				const d = ki0 + ki1 + kj0 + kj1;
+				color[k] = (pi0*ki0 + pi1*ki1 + pj0*kj0 + pj1*kj1) / d;
+			}
+			pixels[i][j] = color;
 		}
 	}
 }
@@ -258,9 +262,9 @@ function draw_canvas(){
 	var pixel_field = context.createImageData(w, h);
 	for (var i = 0; i < h; ++i) {
 		for (var j = 0; j < w; ++j) {
-			pixel_field.data[(i*w + j)*4 + 0] = pixels[i][j];
-			pixel_field.data[(i*w + j)*4 + 1] = pixels[i][j];
-			pixel_field.data[(i*w + j)*4 + 2] = pixels[i][j];
+			pixel_field.data[(i*w + j)*4 + 0] = pixels[i][j][0];
+			pixel_field.data[(i*w + j)*4 + 1] = pixels[i][j][1];
+			pixel_field.data[(i*w + j)*4 + 2] = pixels[i][j][2];
 			pixel_field.data[(i*w + j)*4 + 3] = 0xFF;
 		}
 	}
@@ -315,10 +319,10 @@ function load_pixels_from(url) {
 				for (var i = 0; i < h; ++i) {
 					pixelsi = []
 					for (var j = 0; j < w; ++j) {
-						pixel = Math.floor((
-							image_data.data[(i*w + j)*4 + 0] +
-							image_data.data[(i*w + j)*4 + 1] +
-							image_data.data[(i*w + j)*4 + 2]) / 3.);
+						pixel = [
+							image_data.data[(i*w + j)*4 + 0],
+							image_data.data[(i*w + j)*4 + 1],
+							image_data.data[(i*w + j)*4 + 2]];
 						pixelsi.push(pixel);
 					}
 					initial_pixels.push(pixelsi);
