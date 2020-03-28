@@ -1,0 +1,452 @@
+﻿<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Image darning</title>
+	<meta name="keywords" content="iterative,algorithms,guide,tutorial,learning">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+	<style>
+body{
+	margin: 0 0 0 0;
+}
+
+a{
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 32pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 16pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+.results {
+	font-family: sans-serif;
+	font-size: 14pt;
+	width: 505pt;
+	text-align: left;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 14pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+table.footer {
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
+}
+
+td.footer {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+li {
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+	padding-bottom: 6pt;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding: 12pt 12pt 12pt 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+}
+
+input[type="text"] {
+	width: 505pt;
+	height: 22pt;
+	font-size: 12pt;
+	text-align: left;
+}
+
+input[type="radio"] {
+	height: 16pt;
+	width: 16pt;
+	font-size: 16pt;
+}
+
+input[type="checkbox"] {
+	height: 16pt;
+	width: 16pt;
+	font-size: 16pt;
+	margin-bottom: 16pt;
+}
+
+button {
+	width: 148pt;
+	height: 26pt;
+	font-size: 16pt;
+	text-align: center;
+	margin: 3pt 0pt 3pt 0pt;
+}
+
+textarea {
+	width: 600pt;
+	font-size: 12pt;
+	font-family: monospace;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
+}
+
+.comment {
+	font-size: 12pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
+}
+	</style>
+
+	<script language="JavaScript">
+// pixels
+// 382 x 294
+var initial_pixels = [];
+for(var i = 0; i < 294; ++i) {
+	row = [];
+	for(var j = 0; j < 382; ++j)
+		row.push([256, 256, 256]);
+	initial_pixels.push(row);
+}
+
+// frame points
+const initial_points = [[311, 78], [364, 78], [364, 164], [311, 164]];
+
+function nearest_point(xy) {
+	function d(xy1, xy2) {
+		return (xy1[0] - xy2[0])*(xy1[0] - xy2[0]) + (xy1[1] - xy2[1])*(xy1[1] - xy2[1]);
+	}
+	var nearest_i = 0;
+	var nearest_d = d(xy, points[0]);
+	for(var i = 1; i < 4; ++i) {
+		const di = d(xy, points[i]);
+		if(di < nearest_d) {
+			nearest_d = di;
+			nearest_i = i;
+		}
+	}
+	return nearest_i;
+}
+
+function set_points(xy) {
+	const x = Math.max(Math.min(xy[0], pixels[0].length - 1), 0);
+	const y = Math.max(Math.min(xy[1], pixels.length -1), 0);
+
+	const i = nearest_point(xy);
+	points[i][0] = x;
+	points[i][1] = y;
+	if(i == 0) {
+		points[1][1] = y;
+		points[3][0] = x;
+	} else if(i == 1) {
+		points[0][1] = y;
+		points[2][0] = x;
+	} else if(i == 2) {
+		points[3][1] = y;
+		points[1][0] = x;
+	} else if(i == 3) {
+		points[2][1] = y;
+		points[0][0] = x;
+	}
+}
+
+function darn(pixels, i0, j0, i1, j1) {
+	const w = pixels[0].length;
+	const h = pixels.length;
+	for(var i = i0; i <= i1; ++i) {
+		// weight coefficients for column
+		const ki0 = (i0 == 0) ? 0 : 1. / (i - (i0 - 1));
+		const ki1 = (i1 == h - 1) ? 0 : 1. / (i1 + 1 - i);
+		for(var j = j0; j <= j1; ++j) {
+			// weight coefficients for row
+			const kj0 = (j0 == 0) ? 0 : 1. / (j - (j0 - 1));
+			const kj1 = (j1 == w - 1) ? 0 : 1. / (j1 + 1 - j);
+			var color = [0, 0, 0];
+			// per channel
+			for(var k = 0; k < 3; ++k) {
+				// donor pixel values
+				const pi0 = (i0 == 0) ? 0 : pixels[i0 - 1][j][k];
+				const pi1 = (i1 == h - 1) ? 0 : pixels[i1 + 1][j][k];
+				const pj0 = (j0 == 0) ? 0 : pixels[i][j0 - 1][k];
+				const pj1 = (j1 == w - 1) ? 0 : pixels[i][j1 + 1][k];
+				// blending
+				const d = ki0 + ki1 + kj0 + kj1;
+				color[k] = (pi0*ki0 + pi1*ki1 + pj0*kj0 + pj1*kj1) / d;
+			}
+			pixels[i][j] = color;
+		}
+	}
+}
+
+function darn_by_points() {
+	darn(pixels, Math.round(points[0][1]), Math.round(points[0][0]), Math.round(points[2][1]), Math.round(points[2][0]));
+}
+
+function init_canvas(){
+	var canvas = document.getElementById("canvas");
+	canvas.width = pixels[0].length;
+	canvas.height = pixels.length;
+	const canvas_rect = canvas.getBoundingClientRect();
+
+	canvas.addEventListener('mousemove', function(e){
+		var canvas_rect = canvas.getBoundingClientRect();
+		if(e.buttons == 1){
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_points([x, y]);
+			draw_canvas();
+		}
+	}, false);
+
+	canvas.addEventListener('mousedown', function(e){
+		var canvas_rect = canvas.getBoundingClientRect();
+		const x = e.clientX - canvas_rect.left;
+		const y = e.clientY - canvas_rect.top;
+		set_points([x, y]);
+		draw_canvas();
+	}, false);
+
+	canvas.addEventListener('mouseleave', function(e){
+		if(e.buttons == 1){
+			var canvas_rect = canvas.getBoundingClientRect();
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_points([x, y]);
+		}
+		draw_canvas();
+	}, false);
+
+	draw_canvas();
+}
+
+function draw_canvas(){
+	var canvas = document.getElementById("canvas");
+	var context = canvas.getContext("2d");
+	if(pixels.length == 0)
+		return
+	const w = pixels[0].length;
+	const h = pixels.length;
+
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+	
+	// pixels
+	var pixel_field = context.createImageData(w, h);
+	for (var i = 0; i < h; ++i) {
+		for (var j = 0; j < w; ++j) {
+			pixel_field.data[(i*w + j)*4 + 0] = pixels[i][j][0];
+			pixel_field.data[(i*w + j)*4 + 1] = pixels[i][j][1];
+			pixel_field.data[(i*w + j)*4 + 2] = pixels[i][j][2];
+			pixel_field.data[(i*w + j)*4 + 3] = 0xFF;
+		}
+	}
+	context.putImageData(pixel_field, -0.5, -0.5);
+	
+	// frame
+	context.beginPath();
+	context.moveTo(points[0][0] + 0.5, points[0][1] + 0.5);
+	context.lineTo(points[1][0] + 0.5, points[1][1] + 0.5);
+	context.lineTo(points[2][0] + 0.5, points[2][1] + 0.5);
+	context.lineTo(points[3][0] + 0.5, points[3][1] + 0.5);
+	context.lineTo(points[0][0] + 0.5, points[0][1] + 0.5);
+	context.strokeStyle = "#d64562";
+	context.setLineDash([4, 4]);
+	context.lineWidth = 3;
+	context.stroke();
+	context.closePath();
+	context.setLineDash([]);
+}
+
+function copy_of_matrix(m) {
+	const h = m.length;
+	const w = m[0].length;
+	var copy_of_m = [];
+	for(var i = 0; i < h; i++){
+		row = [];
+		for(var j = 0; j < w; ++j)
+			row.push(m[i][j]);
+		copy_of_m.push(row);
+	}
+	return copy_of_m;
+}
+
+function restart() {
+	points = copy_of_matrix(initial_points);
+	pixels = copy_of_matrix(initial_pixels);
+}
+
+function load_pixels_from(url) {
+	fetch(url).then(function(response) {
+		response.blob().then(function(blob) {
+			createImageBitmap(blob).then(function(img) {
+				const w = img.width;
+				const h = img.height;
+				var canvas = document.getElementById("canvas");
+				var context = canvas.getContext('2d');
+				canvas.width = w;
+				canvas.height = h;
+				context.drawImage(img, 0, 0 );
+				var image_data = context.getImageData(0, 0, w, h);
+				initial_pixels = [];
+				for (var i = 0; i < h; ++i) {
+					pixelsi = []
+					for (var j = 0; j < w; ++j) {
+						pixel = [
+							image_data.data[(i*w + j)*4 + 0],
+							image_data.data[(i*w + j)*4 + 1],
+							image_data.data[(i*w + j)*4 + 2]];
+						pixelsi.push(pixel);
+					}
+					initial_pixels.push(pixelsi);
+				}
+				pixels = copy_of_matrix(initial_pixels);
+				draw_canvas();
+			});
+		});
+	});
+}
+
+function load() {
+	const url = document.getElementById("url").value;
+	load_pixels_from(url);
+}
+
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
+Image darning
+	</h1>
+	<p>
+My father is a historical metrologist. He has been a professional metrologist and a hobbyist historial before retirement. Now these two things merged. He publishes books and papers on the matter and uses really crappy pictures to illustrate them. The worst picture he had to deal with was, if I'm not mistaken, a photo of a scan of a book page with a picture of a roadsign in it.
+	</p>
+	<p>
+I'm trying to help him with this stuff without getting to much involved. So naturally, I write code. I've made an <a href="https://github.com/akalenuk/unpager">unpager</a> — a thing that bends pictures of book pages, straightens roadsigns, and cleans up dirst stains from aged newspapers.
+	</p>
+	<p>
+The latter appeared to be the most demanded feature. I called it darning because of how it works. It is surprisingly potent. With it, you can even erase Russia from the polytical map of the world. Literally.
+	</p>
+	<form>
+	The image is loaded from here:<br>
+	<div style="text-align: right">
+	<input type="text" id="url" value="https://raw.githubusercontent.com/akalenuk/darning/master/screenshots/E_before.png" /><br>
+	<button type="button" onclick="load(); draw_canvas();">Load yours</button>
+	</div>
+	<div style="text-align: center">
+	<br>
+	<canvas id="canvas" width=1024 height=1024></canvas>
+	<br>
+	<button type="button" onclick="darn_by_points(); draw_canvas();">Darn it!</button>
+	<button type="button" onclick="restart(); draw_canvas();">Restart</button>
+	</div>
+	</form>
+	<h2>
+How it works
+	</h2>
+	<p>
+The rectangular space in the selection is filled by interpolating the pixel values on the sides. The inverse-weights interpolation is used. In general case, a point <i>(x, y)</i> in the rectangular selection of bitmap <i>B</i> bound by <i>(x<sub>0</sub>, y<sub>0</sub>); (x<sub>1</sub>, y<sub>1</sub>)</i> will have each of its channels computed by this formula.
+	</p>
+	<table class="formula">
+	<tr>
+	<td rowspan=2>
+	B(x, y) = &nbsp;
+	</td>
+	<td style="border-bottom: 1px solid black">
+B(x<sub>0</sub>, y) k(x-x<sub>0</sub>) + B(x<sub>1</sub>, y) k(x<sub>1</sub>-x) + B(x, y<sub>0</sub>) k(y-y<sub>0</sub>) + B(x, y<sub>1</sub>) k(y<sub>1</sub>-y)
+	</td>
+	</tr>
+	<tr>
+	<td>
+k(x - x<sub>0</sub>) + k(x<sub>1</sub> - x) + k(y - y<sub>0</sub>) + k(y<sub>1</sub> - y)
+	</td>
+	</tr>
+	</table>
+	<table class="formula">
+	<tr>
+	<td rowspan=2>
+	k(z) = &nbsp;
+	</td>
+	<td style="border-bottom: 1px solid black">
+	1
+	</td>
+	</tr>
+	<tr>
+	<td>
+	z
+	</td>
+	</tr>
+	</table>
+
+	<p>
+But that's when all the border lines of the rectangle are still in the bitmap. But what if we have a stain in the corner? We don't want get the stain color into the mix.
+	</p>
+	<p>
+Luckily, with weight intepolation it's dead simple. If you don't want some particular <i>B(x<sub>j</sub>, y<sub>i</sub>)</i> influence your result, simply assign its coefficient <i>k(z)</i> to <i>0</i>. For instante, for the top left corner, the formula will reduce to:
+	</p>
+	<table class="formula">
+	<tr>
+	<td rowspan=2>
+	B(x, y) = &nbsp;
+	</td>
+	<td style="border-bottom: 1px solid black">
+B(x<sub>1</sub>, y) k(x<sub>1</sub>-x) + B(x, y<sub>1</sub>) k(y<sub>1</sub>-y)
+	</td>
+	</tr>
+	<tr>
+	<td>
+k(x<sub>1</sub> - x) + k(y<sub>1</sub> - y)
+	</td>
+	</tr>
+	</table>
+	<p>
+And that's it. In JavaScript, it's only 27 lines.
+	</p>
+
+	<script language="JavaScript">
+	load_pixels_from("https://raw.githubusercontent.com/akalenuk/darning/master/screenshots/E_before.png");
+	restart()
+	init_canvas();
+	</script>
+
+	</center>
+</body>
+</html>
