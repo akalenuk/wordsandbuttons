@@ -64,6 +64,13 @@ button {
 	margin: 3pt 0pt 3pt 0pt;
 }
 
+.comment {
+	font-size: 12pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 12pt;
+}
+
 	</style>
 	<script language="JavaScript">
 const w = 640;
@@ -105,6 +112,13 @@ function draw_canvas() {
 	// background
 	context.fillStyle="#eeeeee";
 	context.fillRect(0, 0, w, h);
+
+	try {
+		eval("const f = function(x) { return " + document.getElementById("f").value + ";}")
+		document.getElementById("error").innerHTML = "";
+	} catch (error) {
+		document.getElementById("error").innerHTML = "<b>Error:</b> " + error.message;
+	}
 }
 	</script>
 </head>
@@ -119,19 +133,20 @@ More than a logarithmic scale
 
 	<form>
 	<div style="margin-bottom: 12pt;">
-	The formula:<br>
-	<input type="text" id="url" value="https://raw.githubusercontent.com/akalenuk/darning/master/screenshots/E_before.png"/><br>
-	</div>
-	<div style="margin-bottom: 12pt;">
 	The scale:<br>
 	<input type="radio" name="scale" id="scale_1" value="A" checked="true"><label for="scale_1">Linear</label><br>
 	<input type="radio" name="scale" id="scale_2" value="B"><label for="scale_2">Logarithmic</label><br>
 	<input type="radio" name="scale" id="scale_3" value="C"><label for="scale_3">Arctagent</label><br>
 	<input type="radio" name="scale" id="scale_4" value="D"><label for="scale_4">Larin's</label><br>
 	</div>
+	<div style="margin-bottom: 12pt;">
+	The formula:<br>
+	<input type="text" id="f" value="Math.pow(x + 1, 2) - 2" onInput="draw_canvas()"/><br>
+	</div>
 	<div style="text-align: center; margin-bottom: 12pt;">
 	<canvas id="canvas" width=640 height=640></canvas>
 	</div>
+	<p id="error" class="comment"></p>
 	<button type="button" onclick="reset_scale(); draw_canvas();">Reset scale</button>
 	<button type="button" onclick="reset_focus(); draw_canvas();">Reset focus</button>
 	</form>
