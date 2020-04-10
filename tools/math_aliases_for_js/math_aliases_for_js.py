@@ -107,7 +107,6 @@ for line in source.split('\n'):
 		entity = line[5:].split('(')[0]
 		aliases += ["const " + entity + " = Math." + entity + ";"]
 
-aliases.sort(key = lambda x : len(x))
 
 # output
 out = ""
