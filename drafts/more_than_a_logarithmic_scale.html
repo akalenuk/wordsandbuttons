@@ -91,6 +91,31 @@ const sign = Math.sign;		const sin = Math.sin;		const sinh = Math.sinh;
 const tan = Math.tan;		const tanh = Math.tanh;		const toSource = Math.toSource;
 
 
+function linear_real_to_screen (x, dx, scale, w) {
+	return (w / 2) + ((x - dx) / scale) * (w / 2);
+}
+
+function linear_screen_to_real (x, dx, scale, w) {
+	return ((x - (w / 2)) / (w / 2) + dx) * scale;
+}
+
+function log_real_to_screen (x, dx, scale, w) {
+	return (w / 2) + log10((x - dx) / scale) * (w / 2);
+}
+
+function log_screen_to_real (x, dx, scale, w) {
+	return (pow(10, (x - (w / 2)) / (w / 2)) + dx) * scale;
+}
+
+function atan_real_to_screen (x, dx, scale, w) {
+	return atan((x - dx) / scale) / PI * w + (w / 2);
+}
+
+function atan_screen_to_real (x, dx, scale, w) {
+	return scale * tan((x - (w / 2)) * PI / w) + dx;
+}
+
+
 function init_canvas() {
 	canvas = document.getElementById("canvas");
 	const canvas_rect = canvas.getBoundingClientRect();
@@ -152,7 +177,6 @@ More than a logarithmic scale
 	<input type="radio" name="scale" id="scale_1" value="A" checked="true"><label for="scale_1">Linear</label><br>
 	<input type="radio" name="scale" id="scale_2" value="B"><label for="scale_2">Logarithmic</label><br>
 	<input type="radio" name="scale" id="scale_3" value="C"><label for="scale_3">Arctagent</label><br>
-	<input type="radio" name="scale" id="scale_4" value="D"><label for="scale_4">Larin's</label><br>
 	</div>
 	<div style="margin-bottom: 12pt;">
 	The formula:<br>
