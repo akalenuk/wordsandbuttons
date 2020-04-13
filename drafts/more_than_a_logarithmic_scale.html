@@ -153,12 +153,52 @@ function draw_canvas() {
 	context.fillStyle="#eeeeee";
 	context.fillRect(0, 0, w, h);
 
+	// scale
+	var s2x;
+	var s2y;
+	var x2s;
+	var y2s;
+	if(document.getElementById("scale_1").checked) {
+		s2x = linear_real_to_screen;
+		x2s = linear_screen_to_real;
+		s2y = function(i) {return linear_screan_to_real(h - i);}
+		y2s = function(y) {return h - linear_real_to_screen(y);}
+	} else if(document.getElementById("scale_2").checked) {
+		s2x = log_real_to_screen;
+		x2s = log_screen_to_real;
+		s2y = function(i) {return log_screan_to_real(h - i);}
+		y2s = function(y) {return h - log_real_to_screen(y);}
+	} else if(document.getElementById("scale_3").checked) {
+		s2x = atan_real_to_screen;
+		x2s = atan_screen_to_real;
+		s2y = function(i) {return atan_screan_to_real(h - i);}
+		y2s = function(y) {return h - atan_real_to_screen(y);}
+	}
+
+	// function
 	try {
-		eval("const f = function(x) { return " + document.getElementById("f").value + ";}")
+		eval("var f = function(x) { return " + document.getElementById("f").value + ";}")
 		document.getElementById("error").innerHTML = "";
+
 	} catch (error) {
+		var f = function(x) {return 0;}
 		document.getElementById("error").innerHTML = "<b>Error:</b> " + error.message;
 	}
+	// draw
+	context.beginPath();
+	for(var j = 1; j < w; ++j) {
+		const x1 = s2x(j - 1);
+		const x2 = s2x(j);
+		const i1 = y2s(f(x1));
+		const i2 = y2s(f(x2));
+		// todo: make divisible segments
+		context.moveTo(j-1, i1);
+		context.lineTo(j, i2);
+	}
+	context.strokeStyle = "#3561a3";
+	context.lineWidth = 1;
+	context.stroke();
+	context.closePath();
 }
 	</script>
 </head>
