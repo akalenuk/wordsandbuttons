@@ -200,9 +200,9 @@ function draw_arrow(context, x1, y1, x2, y2, color) {
 	context.beginPath();
 	context.moveTo(x1, y1);
 	context.lineTo(x2, y2);
-	context.moveTo(x2 - (y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d, y2 - (y2 - y1) * 16.5 / d + (x2 - x1) * 4.5 / d);
+	context.moveTo(x2 - (y2 - y1) * 4.3 / d - (x2 - x1) * 16.7 / d, y2 - (y2 - y1) * 16.7 / d + (x2 - x1) * 4.3 / d);
 	context.lineTo(x2, y2);
-	context.moveTo(x2 + (y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d, y2 - (y2 - y1) * 16.5 / d - (x2 - x1) * 4.5 / d);
+	context.moveTo(x2 + (y2 - y1) * 4.3 / d - (x2 - x1) * 16.7 / d, y2 - (y2 - y1) * 16.7 / d - (x2 - x1) * 4.3 / d);
 	context.lineTo(x2, y2);
 	context.strokeStyle = color;
 	context.stroke();
@@ -251,8 +251,9 @@ function draw_canvas() {
 	context.closePath();
 
 	// the grid
-	draw_arrow(context, 0, y2s(0), w, y2s(0), "#000000");
-	draw_arrow(context, x2s(0), h, x2s(0), 0, "#000000");
+	function sharp(x) {return Math.floor(x) + 0.5;}
+	draw_arrow(context, 0, sharp(y2s(0)), w, sharp(y2s(0)), "#000000");
+	draw_arrow(context, sharp(x2s(0)), h, sharp(x2s(0)), 0, "#000000");
 	const scale = Number(document.getElementById("scale").value);
 	context.font = "14px Arial";
 	context.fillStyle = "#444444";
@@ -260,19 +261,20 @@ function draw_canvas() {
 	context.textBaseline = "middle";
 	context.beginPath();
 	if(document.getElementById("scale_1").checked) {
-		for(var j = -Math.round(scale - 1); j <= Math.round(scale - 1); ++j) {
-			// horizontal
+		// horizontal
+		for(var j = Math.ceil(s2x(40)); j <= Math.floor(s2x(600)); ++j) {
 			if(j != 0) {
-				context.moveTo(x2s(j), y2s(0) + 2);
-				context.lineTo(x2s(j), y2s(0) - 2);
+				context.moveTo(sharp(x2s(j)), sharp(y2s(0)) + 2);
+				context.lineTo(sharp(x2s(j)), sharp(y2s(0)) - 2);
 			}
-			context.fillText(j, x2s(j) + 12, y2s(0) - 12);
-			// vertical
-			const i = j;
+			context.fillText(j, sharp(x2s(j)) + 12, sharp(y2s(0)) - 12);
+		}
+		// vertical
+		for(var i = Math.ceil(s2y(600)); i <= Math.floor(s2y(40)); ++i) {
 			if(i != 0) {
-				context.moveTo(x2s(0) - 2, y2s(i));
-				context.lineTo(x2s(0) + 2, y2s(i));
-				context.fillText(i, x2s(0) + 12, y2s(i) - 12);
+				context.moveTo(sharp(x2s(0)) - 2, sharp(y2s(i)));
+				context.lineTo(sharp(x2s(0)) + 2, sharp(y2s(i)));
+				context.fillText(i, sharp(x2s(0)) + 12, sharp(y2s(i)) - 12);
 			}
 		}
 	} else if(document.getElementById("scale_2").checked) {
