@@ -176,20 +176,20 @@ function draw_canvas() {
 	var x2s;
 	var y2s;
 	if(document.getElementById("scale_1").checked) {
-		s2x = function(i) {return linear_screen_to_real(i, center_x, scale, w);}
-		x2s = function(x) {return linear_real_to_screen(x, center_x, scale, w);}
-		s2y = function(i) {return linear_screan_to_real(h - i, center_y, scale, h);}
-		y2s = function(y) {return h - linear_real_to_screen(y, center_y, scale, h);}
+		s2x = function(i) {return linear_screen_to_real(i - 0.5, center_x, scale, w);}
+		x2s = function(x) {return linear_real_to_screen(x, center_x, scale, w) + 0.5;}
+		s2y = function(i) {return linear_screan_to_real(h - (i - 0.5), center_y, scale, h);}
+		y2s = function(y) {return h - linear_real_to_screen(y, center_y, scale, h) + 0.5;}
 	} else if(document.getElementById("scale_2").checked) {
-		s2x = function(i) {return log_screen_to_real(i, center_x, scale, w);}
-		x2s = function(x) {return log_real_to_screen(x, center_x, scale, w);}
-		s2y = function(i) {return log_screan_to_real(h - i, center_y, scale, h);}
-		y2s = function(y) {return h - log_real_to_screen(y, center_y, scale, h);}
+		s2x = function(i) {return log_screen_to_real(i - 0.5, center_x, scale, w);}
+		x2s = function(x) {return log_real_to_screen(x, center_x, scale, w) + 0.5;}
+		s2y = function(i) {return log_screan_to_real(h - (i - 0.5), center_y, scale, h);}
+		y2s = function(y) {return h - log_real_to_screen(y, center_y, scale, h) + 0.5;}
 	} else if(document.getElementById("scale_3").checked) {
-		s2x = function(i) {return atan_screen_to_real(i, center_x, scale, w);}
-		x2s = function(x) {return atan_real_to_screen(x, center_x, scale, w);}
-		s2y = function(i) {return atan_screan_to_real(h - i, center_y, scale, h);}
-		y2s = function(y) {return h - atan_real_to_screen(y, center_y, scale, h);}
+		s2x = function(i) {return atan_screen_to_real(i - 0.5, center_x, scale, w);}
+		x2s = function(x) {return atan_real_to_screen(x, center_x, scale, w) + 0.5;}
+		s2y = function(i) {return atan_screan_to_real(h - (i - 0.5), center_y, scale, h);}
+		y2s = function(y) {return h - atan_real_to_screen(y, center_y, scale, h) + 0.5;}
 	}
 
 	// function
@@ -214,6 +214,47 @@ function draw_canvas() {
 		context.lineTo(j, i2);
 	}
 	context.strokeStyle = "#3561a3";
+	context.lineWidth = 1;
+	context.stroke();
+	context.closePath();
+
+	// the grid
+	draw_arrow(context, 0, y2s(0), w, y2s(0), "#000000");
+	draw_arrow(context, x2s(0), h, x2s(0), 0, "#000000");
+
+	context.font = "14px Arial";
+	context.fillStyle = "#444444";
+	context.textAlign = "center";
+	context.textBaseline = "middle";
+	context.beginPath();
+	if(document.getElementById("scale_1").checked) {
+		for(var j = -Math.round(scale - 1); j <= Math.round(scale - 1); ++j) {
+			// horizontal
+			if(j != 0) {
+				context.moveTo(x2s(j), y2s(0) + 2);
+				context.lineTo(x2s(j), y2s(0) - 2);
+			}
+			context.fillText(j, x2s(j) + 12, y2s(0) - 12);
+			// vertical
+			const i = j;
+			if(i != 0) {
+				context.moveTo(x2s(0) - 2, y2s(i));
+				context.lineTo(x2s(0) + 2, y2s(i));
+				context.fillText(i, x2s(0) + 12, y2s(i) - 12);
+			}
+		}
+	} else if(document.getElementById("scale_2").checked) {
+		s2x = function(i) {return log_screen_to_real(i, center_x, scale, w);}
+		x2s = function(x) {return log_real_to_screen(x, center_x, scale, w);}
+		s2y = function(i) {return log_screan_to_real(h - i, center_y, scale, h);}
+		y2s = function(y) {return h - log_real_to_screen(y, center_y, scale, h);}
+	} else if(document.getElementById("scale_3").checked) {
+		s2x = function(i) {return atan_screen_to_real(i, center_x, scale, w);}
+		x2s = function(x) {return atan_real_to_screen(x, center_x, scale, w);}
+		s2y = function(i) {return atan_screan_to_real(h - i, center_y, scale, h);}
+		y2s = function(y) {return h - atan_real_to_screen(y, center_y, scale, h);}
+	}
+	context.strokeStyle = "#000000";
 	context.lineWidth = 1;
 	context.stroke();
 	context.closePath();
@@ -247,7 +288,7 @@ More than a logarithmic scale
 	<div style="text-align: center; margin-bottom: 12pt;">
 	Cener X: <input type="text" id="center_x" value="0" onInput="draw_canvas()"/>
 	Cener Y: <input type="text" id="center_y" value="0" onInput="draw_canvas()"/>
-	Scale: <input type="text" id="scale" value="2" onInput="draw_canvas()"/>
+	Scale: <input type="text" id="scale" value="5" onInput="draw_canvas()"/>
 	<br>
 	<button type="button" onclick="reset_scale(); draw_canvas();">Reset scale</button>
 	<button type="button" onclick="reset_focus(); draw_canvas();">Reset focus</button>
