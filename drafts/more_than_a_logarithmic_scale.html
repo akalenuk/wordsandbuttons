@@ -108,27 +108,10 @@ function atan_screen_to_real (x, dx, scale, w) {
 	return scale * tan((x - (w / 2)) * PI / w) + dx;
 }
 
-function larin(x) {
-	return sign(x)*x*x/(1-abs(x));
-}
-
-function inverse_larin(x) {
-	return sign(x)*(sqrt(x*x + 4*abs(x)) - abs(x))/2;
-}
-
-function larin_real_to_screen (x, dx, scale, w) {
-	return inverse_larin((x - dx)) * w + (w / 2);
-}
-
-function larin_screen_to_real (x, dx, scale, w) {
-	return larin((x - (w / 2)) / w) + dx;
-}
-
 // returns 4 translation functions from/to screen and real coordinates
-// types: LINEAR, ATAN, LARIN
+// types: LINEAR, ATAN
 const LINEAR = 0;
 const ATAN = 1;
-const LARIN = 2;
 function s2x_x2s_s2y_y2s(type, center_x, center_y, scale) {
 	if(type == LINEAR) {
 		return [
@@ -144,13 +127,6 @@ function s2x_x2s_s2y_y2s(type, center_x, center_y, scale) {
 			function(i) {return atan_screen_to_real(h - i, center_y, scale, h);},
 			function(y) {return h - atan_real_to_screen(y, center_y, scale, h);}
 		];
-	} else if(type == LARIN) {
-		return [
-			function(i) {return larin_screen_to_real(i, center_x, scale, w);},
-			function(x) {return larin_real_to_screen(x, center_x, scale, w);},
-			function(i) {return larin_screen_to_real(h - i, center_y, scale, h);},
-			function(y) {return h - larin_real_to_screen(y, center_y, scale, h);}
-		];
 	}
 }
 
@@ -160,9 +136,7 @@ function s2x_x2s_s2y_y2s_from_UI() {
 	const scale = Number(document.getElementById("scale").value);
 	const type = document.getElementById("scale_1").checked
 		? LINEAR
-		: document.getElementById("scale_2").checked
-			? ATAN
-			: LARIN;
+		: ATAN;
 	return s2x_x2s_s2y_y2s(type, center_x, center_y, scale);
 }
 
@@ -288,8 +262,6 @@ function draw_canvas() {
 		}
 	} else if(document.getElementById("scale_2").checked) {
 
-	} else if(document.getElementById("scale_3").checked) {
-
 	}
 	context.strokeStyle = "#000000";
 	context.lineWidth = 1;
@@ -324,7 +296,6 @@ More than a logarithmic scale
 	The scale:<br>
 	<input type="radio" name="scale" id="scale_1" value="A" onInput="draw_canvas()"checked="true"><label for="scale_1">Linear</label><br>
 	<input type="radio" name="scale" id="scale_2" value="B" onInput="draw_canvas()"><label for="scale_2">Arctagent</label><br>
-	<input type="radio" name="scale" id="scale_3" value="C" onInput="draw_canvas()"><label for="scale_3">Larin</label><br>
 	</div>
 	<div style="margin-bottom: 12pt;">
 	The formula:<br>
