@@ -235,8 +235,6 @@ function draw_canvas() {
 
 	// the grid
 	function sharp(x) {return Math.floor(x) + 0.5;}
-	draw_arrow(context, 0, sharp(y2s(0)), w, sharp(y2s(0)), "#000000");
-	draw_arrow(context, sharp(x2s(0)), h, sharp(x2s(0)), 0, "#000000");
 	const scale = Number(document.getElementById("scale").value);
 	context.font = "14px Arial";
 	context.fillStyle = "#444444";
@@ -244,6 +242,8 @@ function draw_canvas() {
 	context.textBaseline = "middle";
 	context.beginPath();
 	if(document.getElementById("scale_1").checked) {
+		draw_arrow(context, 0, sharp(y2s(0)), w, sharp(y2s(0)), "#000000");
+		draw_arrow(context, sharp(x2s(0)), h, sharp(x2s(0)), 0, "#000000");
 		// horizontal
 		for(var j = Math.ceil(s2x(40)); j <= Math.floor(s2x(600)); ++j) {
 			if(j != 0) {
@@ -261,7 +261,14 @@ function draw_canvas() {
 			}
 		}
 	} else if(document.getElementById("scale_2").checked) {
-
+		context.moveTo(0, sharp(y2s(0)));
+		context.lineTo(w, sharp(y2s(0)));
+		context.moveTo(w - 0.5, sharp(y2s(0) - 4.3));
+		context.lineTo(w - 0.5, sharp(y2s(0) + 4.3));
+		context.moveTo(sharp(x2s(0)), h);
+		context.lineTo(sharp(x2s(0)), 0);
+		context.moveTo(sharp(x2s(0)) - 4.3, 0.5);
+		context.lineTo(sharp(x2s(0)) + 4.3, 0.5);
 	}
 	context.strokeStyle = "#000000";
 	context.lineWidth = 1;
@@ -298,7 +305,7 @@ More than a logarithmic scale
 	<input type="radio" name="scale" id="scale_2" value="B" onInput="draw_canvas()"><label for="scale_2">Arctagent</label><br>
 	</div>
 	<div style="margin-bottom: 12pt;">
-	The formula:<br>
+	The function:<br>
 	<input type="text" id="f" value="Math.pow(x + 1, 2) - 2" style="width: 100%;" onInput="draw_canvas()"/><br>
 	<p id="error" class="comment"></p>
 	</div>
