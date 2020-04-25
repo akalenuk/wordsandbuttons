@@ -217,6 +217,53 @@ function draw_canvas() {
 		document.getElementById("error").innerHTML = "<b>Error:</b> " + error.message;
 	}
 
+	// the grid
+	context.beginPath();
+	context.setLineDash([2, 3]);
+	if(document.getElementById("scale_1").checked) {
+		// horizontal
+		for(var j = ceil(s2x(40)); j <= floor(s2x(600)); ++j) {
+			if(j != 0) {
+				context.moveTo(sharp(x2s(j)), 0);
+				context.lineTo(sharp(x2s(j)), h);
+			}
+			context.fillText(j, sharp(x2s(j)) + 12, sharp(y2s(0)) - 12);
+		}
+		// vertical
+		for(var i = ceil(s2y(600)); i <= floor(s2y(40)); ++i) {
+			if(i != 0) {
+				context.moveTo(0, sharp(y2s(i)));
+				context.lineTo(w, sharp(y2s(i)));
+			}
+		}
+	} else if(document.getElementById("scale_2").checked) {
+		// horizontal
+		const x_from = s2x(40);
+		const x_to = s2x(600);
+		for(var i = sign(x_from) * floor(log10(abs(x_from))) - 1; i <= sign(x_to) * ceil(log10(abs(x_to))); ++i) {
+			if(i == 0)
+				continue;
+			const x_i = sign(i) * pow(10, abs(i) - 1);
+			context.moveTo(sharp(x2s(x_i)), 0);
+			context.lineTo(sharp(x2s(x_i)), h);
+		}
+		// vertical
+		const y_from = s2y(600);
+		const y_to = s2y(40);
+		for(var i = sign(y_from) * floor(log10(abs(y_from))) - 1; i <= sign(y_to) * ceil(log10(abs(y_to))); ++i) {
+			if(i == 0)
+				continue;
+			const y_i = sign(i) * pow(10, abs(i) - 1);
+			context.moveTo(0, sharp(y2s(y_i)));
+			context.lineTo(w, sharp(y2s(y_i)));
+		}
+	}
+	context.strokeStyle = "#AAA";
+	context.lineWidth = 1;
+	context.stroke();
+	context.setLineDash([]);
+	context.closePath();
+
 	// draw
 	context.beginPath();
 	for(var j = 1; j < w; ++j) {
@@ -234,7 +281,7 @@ function draw_canvas() {
 	context.stroke();
 	context.closePath();
 
-	// the grid
+	// the axes
 	function sharp(x) {return floor(x) + 0.5;}
 	const scale = Number(document.getElementById("scale").value);
 	context.font = "14px Arial";
