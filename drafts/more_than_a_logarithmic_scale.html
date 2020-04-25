@@ -89,6 +89,7 @@ const log1p = Math.log1p;	const log10 = Math.log10;	const log2 = Math.log2;
 const min = Math.min;		const pow = Math.pow;		const random = Math.random;
 const sign = Math.sign;		const sin = Math.sin;		const sinh = Math.sinh;
 const tan = Math.tan;		const tanh = Math.tanh;		const toSource = Math.toSource;
+const floor = Math.floor;
 const sqrt = function(x) {return Math.pow(x, 0.5);}
 
 
@@ -234,7 +235,7 @@ function draw_canvas() {
 	context.closePath();
 
 	// the grid
-	function sharp(x) {return Math.floor(x) + 0.5;}
+	function sharp(x) {return floor(x) + 0.5;}
 	const scale = Number(document.getElementById("scale").value);
 	context.font = "14px Arial";
 	context.fillStyle = "#444444";
@@ -245,7 +246,7 @@ function draw_canvas() {
 		draw_arrow(context, 0, sharp(y2s(0)), w, sharp(y2s(0)), "#000000");
 		draw_arrow(context, sharp(x2s(0)), h, sharp(x2s(0)), 0, "#000000");
 		// horizontal
-		for(var j = Math.ceil(s2x(40)); j <= Math.floor(s2x(600)); ++j) {
+		for(var j = ceil(s2x(40)); j <= floor(s2x(600)); ++j) {
 			if(j != 0) {
 				context.moveTo(sharp(x2s(j)), sharp(y2s(0)) + 2);
 				context.lineTo(sharp(x2s(j)), sharp(y2s(0)) - 2);
@@ -253,7 +254,7 @@ function draw_canvas() {
 			context.fillText(j, sharp(x2s(j)) + 12, sharp(y2s(0)) - 12);
 		}
 		// vertical
-		for(var i = Math.ceil(s2y(600)); i <= Math.floor(s2y(40)); ++i) {
+		for(var i = ceil(s2y(600)); i <= floor(s2y(40)); ++i) {
 			if(i != 0) {
 				context.moveTo(sharp(x2s(0)) - 2, sharp(y2s(i)));
 				context.lineTo(sharp(x2s(0)) + 2, sharp(y2s(i)));
@@ -269,6 +270,36 @@ function draw_canvas() {
 		context.lineTo(sharp(x2s(0)), 0);
 		context.moveTo(sharp(x2s(0)) - 4.3, 0.5);
 		context.lineTo(sharp(x2s(0)) + 4.3, 0.5);
+		// horizontal
+		const x_from = s2x(40);
+		const x_to = s2x(600);
+		for(var i = sign(x_from) * floor(log10(abs(x_from))) - 1; i <= sign(x_to) * ceil(log10(abs(x_to))); ++i) {
+			if(i == 0)
+				continue;
+			const x_i = sign(i) * pow(10, abs(i) - 1);
+			context.moveTo(sharp(x2s(x_i)), sharp(y2s(0)) + 2);
+			context.lineTo(sharp(x2s(x_i)), sharp(y2s(0)) - 2);
+			const to_print = "e" + (i < 0) ? String(i+1) : String(i-1);
+			if(i % 2 == 0)
+				context.fillText("e" + String(i), sharp(x2s(x_i)), sharp(y2s(0)) - 12);
+			else
+				context.fillText("e" + String(i), sharp(x2s(x_i)), sharp(y2s(0)) + 12);
+		}
+		// vertical
+		const y_from = s2y(600);
+		const y_to = s2y(40);
+		for(var i = sign(y_from) * floor(log10(abs(y_from))) - 1; i <= sign(y_to) * ceil(log10(abs(y_to))); ++i) {
+			if(i == 0)
+				continue;
+			const y_i = sign(i) * pow(10, abs(i) - 1);
+			context.moveTo(sharp(x2s(0)) + 2, sharp(y2s(y_i)));
+			context.lineTo(sharp(x2s(0)) - 2, sharp(y2s(y_i)));
+			const to_print = "e" + (i < 0) ? String(i+1) : String(i-1);
+			if(i % 2 == 0)
+				context.fillText("e" + String(i), sharp(x2s(0)) - 12, sharp(y2s(y_i)) - 12);
+			else
+				context.fillText("e" + String(i), sharp(x2s(0)) + 12, sharp(y2s(y_i)) + 12);
+		}
 	}
 	context.strokeStyle = "#000000";
 	context.lineWidth = 1;
