@@ -147,14 +147,6 @@ function init_canvas() {
 	const canvas_rect = canvas.getBoundingClientRect();
 
 /*	canvas.addEventListener('mousemove', function(e){
-		var canvas_rect = plot.getBoundingClientRect();
-		draw_plot_named(name, e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-		if(e.buttons == 1){
-			invalidate_plot_named(name);
-		} else if(e.buttons == 0){
-			nearest_eq_id = find_nearest_eqution_id(name, e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
-			eval(name + "_eq_temp_id = nearest_eq_id;");
-		}
 	}, false);*/
 
 	canvas.addEventListener('mousedown', function(e){
@@ -169,12 +161,21 @@ function init_canvas() {
 		draw_canvas();
 	}, false);
 
+	canvas.addEventListener('wheel', function(e) {
+		if(e.shiftKey) {
+			const scale = Number(document.getElementById("scale").value);
+			if(e.deltaY > 0)
+				document.getElementById("scale").value = scale / 2;
+			else
+				document.getElementById("scale").value = scale * 2;
+			draw_canvas();
+		}
+	}, false);
+
 /*	canvas.addEventListener('mouseup', function(e){
-		invalidate_plot_named(name);
 	}, false);
 
 	canvas.addEventListener('mouseleave', function(e){
-		draw_plot_named(name, 0, 0, false);
 	}, false);*/
 	draw_canvas();
 }
@@ -386,7 +387,7 @@ function reset_focus() {
 }
 
 function reset_scale() {
-	document.getElementById("scale").value = 5;
+	document.getElementById("scale").value = 4;
 	draw_canvas();
 }
 
@@ -404,7 +405,7 @@ And now, when the whole world got familiar with the concept of logarithmic scale
 Normally, we can't show numbers like 1, 1000, and 1 000 000 on the same plot. Because if we want to see 1 clearly, we would have to put a million pixels on the same screen too. We can technically do that but it would be too tiresome to scroll.
 	</p>
 	<p>
-With exponential processes, numbers tend to go from 1 to a million considerably fast so we might want to see these numbers together after all. That's why we need logarithms. Logarithm is the antidote for exponential function. Where <i>y = a<sup>x</sup>, there <i>x = log<sub>a</sub>(y)</i>. Decimal logarithms of 1, 1000, and 1 000 000 are only 0, 3, and 6. We can have them all on the same plot easily.
+With exponential processes, numbers tend to go from 1 to a million considerably fast so we might want to see these numbers together after all. That's why we need logarithms. Logarithm is the antidote for exponential function. Where <i>y = a<sup>x</sup></i>, there <i>x = log<sub>a</sub>(y)</i>. Decimal logarithms of 1, 1000, and 1 000 000 are only 0, 3, and 6. We can have them all on the same plot easily.
 	</p>
 	<p>
 But what if the process is not exponential? What is it's something else, something completely unrecognizeable? What if the numbers we want to see change from 1 to 10<sup>1 000 000</sup>? This just pushes us back to the scrolling problem,
@@ -429,7 +430,7 @@ For something else, we need some other scale and that scale is based on arctange
 	<div style="text-align: center; margin-bottom: 12pt;">
 	Focus X at: <input type="text" id="center_x" value="0" onInput="draw_canvas()"/>
 	Focus Y at: <input type="text" id="center_y" value="0" onInput="draw_canvas()"/>
-	Scale: <input type="text" id="scale" value="5" onInput="draw_canvas()"/>
+	Scale: <input type="text" id="scale" value="4" onInput="draw_canvas()"/>
 	<br>
 	<button type="button" onclick="reset_focus();">Reset focus</button>
 	<button type="button" onclick="reset_scale();">Reset scale</button>
@@ -441,6 +442,8 @@ For something else, we need some other scale and that scale is based on arctange
 	</p>
 
 	<script language="JavaScript">
+		reset_focus();
+		reset_scale();
 		init_canvas();
 	</script>
 
