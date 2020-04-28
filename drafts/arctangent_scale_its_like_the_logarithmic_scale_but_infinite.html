@@ -141,30 +141,48 @@ function s2x_x2s_s2y_y2s_from_UI() {
 	return s2x_x2s_s2y_y2s(type, center_x, center_y, scale);
 }
 
-
+var mousedown_sx;
+var mousedown_sy;
 function init_canvas() {
 	canvas = document.getElementById("canvas");
 	const canvas_rect = canvas.getBoundingClientRect();
 
-/*	canvas.addEventListener('mousemove', function(e){
-	}, false);*/
+	canvas.addEventListener('mousemove', function(e){
+		if(e.buttons == 1) {
+			const canvas_rect = canvas.getBoundingClientRect();
+			const sx = e.clientX - canvas_rect.left;
+			const sy = e.clientY - canvas_rect.top;
+			const cx = 320 - (sx - mousedown_sx);
+			const cy = 320 - (sy - mousedown_sy);
+			const functions = s2x_x2s_s2y_y2s_from_UI();
+			const s2x = functions[0];
+			const s2y = functions[2];
+			document.getElementById("center_x").value = s2x(cx).toFixed(3);
+			document.getElementById("center_y").value = s2y(cy).toFixed(3);
+			mousedown_sx = sx;
+			mousedown_sy = sy;
+			draw_canvas();
+		}
+	}, false);
 
 	canvas.addEventListener('mousedown', function(e){
 		const canvas_rect = canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		const sy = e.clientY - canvas_rect.top;
-		const functions = s2x_x2s_s2y_y2s_from_UI();
+		mousedown_sx = sx;
+		mousedown_sy = sy;
+/*		const functions = s2x_x2s_s2y_y2s_from_UI();
 		const s2x = functions[0];
 		const s2y = functions[2];
 		document.getElementById("center_x").value = s2x(sx).toFixed(3);
 		document.getElementById("center_y").value = s2y(sy).toFixed(3);
-		draw_canvas();
+		draw_canvas();*/
 	}, false);
 
 	canvas.addEventListener('wheel', function(e) {
 		if(e.shiftKey) {
 			const scale = Number(document.getElementById("scale").value);
-			if(e.deltaY > 0)
+			if(e.deltaY < 0)
 				document.getElementById("scale").value = scale / 2;
 			else
 				document.getElementById("scale").value = scale * 2;
