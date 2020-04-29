@@ -171,12 +171,6 @@ function init_canvas() {
 		const sy = e.clientY - canvas_rect.top;
 		mousedown_sx = sx;
 		mousedown_sy = sy;
-/*		const functions = s2x_x2s_s2y_y2s_from_UI();
-		const s2x = functions[0];
-		const s2y = functions[2];
-		document.getElementById("center_x").value = s2x(sx).toFixed(3);
-		document.getElementById("center_y").value = s2y(sy).toFixed(3);
-		draw_canvas();*/
 	}, false);
 
 	canvas.addEventListener('wheel', function(e) {
@@ -237,11 +231,15 @@ function draw_canvas() {
 	}
 
 	// the grid
+	const scale = Number(document.getElementById("scale").value);
+	const step = scale < 16 ? 1 : floor(scale / 8);
+	const stepped = function(x) {return floor(x / step) * step;}
+
 	context.beginPath();
 	context.setLineDash([2, 3]);
 	if(document.getElementById("scale_1").checked) {
 		// horizontal
-		for(var j = ceil(s2x(40)); j <= floor(s2x(600)); ++j) {
+		for(var j = stepped(s2x(0)); j <= stepped(s2x(640)); j += step) {
 			if(j != 0) {
 				context.moveTo(sharp(x2s(j)), 0);
 				context.lineTo(sharp(x2s(j)), h);
@@ -249,7 +247,7 @@ function draw_canvas() {
 			context.fillText(j, sharp(x2s(j)) + 12, sharp(y2s(0)) - 12);
 		}
 		// vertical
-		for(var i = ceil(s2y(600)); i <= floor(s2y(40)); ++i) {
+		for(var i = stepped(s2y(640)); i <= stepped(s2y(0)); i += step) {
 			if(i != 0) {
 				context.moveTo(0, sharp(y2s(i)));
 				context.lineTo(w, sharp(y2s(i)));
@@ -303,7 +301,6 @@ function draw_canvas() {
 
 	// the axes
 	function sharp(x) {return floor(x) + 0.5;}
-	const scale = Number(document.getElementById("scale").value);
 	context.font = "14px Arial";
 	context.fillStyle = "#444444";
 	context.textAlign = "center";
@@ -313,7 +310,7 @@ function draw_canvas() {
 		draw_arrow(context, 0, sharp(y2s(0)), w, sharp(y2s(0)), "#000000");
 		draw_arrow(context, sharp(x2s(0)), h, sharp(x2s(0)), 0, "#000000");
 		// horizontal
-		for(var j = ceil(s2x(40)); j <= floor(s2x(600)); ++j) {
+		for(var j = stepped(s2x(0)); j <= stepped(s2x(640)); j += step) {
 			if(j != 0) {
 				context.moveTo(sharp(x2s(j)), sharp(y2s(0)) + 2);
 				context.lineTo(sharp(x2s(j)), sharp(y2s(0)) - 2);
@@ -321,7 +318,7 @@ function draw_canvas() {
 			context.fillText(j, sharp(x2s(j)) + 12, sharp(y2s(0)) - 12);
 		}
 		// vertical
-		for(var i = ceil(s2y(600)); i <= floor(s2y(40)); ++i) {
+		for(var i = stepped(s2y(640)); i <= stepped(s2y(0)); i += step) {
 			if(i != 0) {
 				context.moveTo(sharp(x2s(0)) - 2, sharp(y2s(i)));
 				context.lineTo(sharp(x2s(0)) + 2, sharp(y2s(i)));
