@@ -184,11 +184,6 @@ function init_canvas() {
 		}
 	}, false);
 
-/*	canvas.addEventListener('mouseup', function(e){
-	}, false);
-
-	canvas.addEventListener('mouseleave', function(e){
-	}, false);*/
 	draw_canvas();
 }
 
@@ -305,6 +300,8 @@ function draw_canvas() {
 	context.fillStyle = "#444444";
 	context.textAlign = "center";
 	context.textBaseline = "middle";
+	context.strokeStyle = "#000000";
+	context.lineWidth = 1;
 	context.beginPath();
 	if(document.getElementById("scale_1").checked) {
 		draw_arrow(context, 0, sharp(y2s(0)), w, sharp(y2s(0)), "#000000");
@@ -326,14 +323,28 @@ function draw_canvas() {
 			}
 		}
 	} else if(document.getElementById("scale_2").checked) {
-		context.moveTo(0, sharp(y2s(0)));
-		context.lineTo(w, sharp(y2s(0)));
-		context.moveTo(w - 0.5, sharp(y2s(0) - 4.3));
-		context.lineTo(w - 0.5, sharp(y2s(0) + 4.3));
-		context.moveTo(sharp(x2s(0)), h);
-		context.lineTo(sharp(x2s(0)), 0);
-		context.moveTo(sharp(x2s(0)) - 4.3, 0.5);
-		context.lineTo(sharp(x2s(0)) + 4.3, 0.5);
+		context.moveTo(20.5, sharp(y2s(0)));
+		context.lineTo(w - 20.5, sharp(y2s(0)));
+		context.moveTo(sharp(x2s(0)), h - 20.5);
+		context.lineTo(sharp(x2s(0)), 20.5);
+		context.stroke();
+		context.closePath();
+
+		context.beginPath();
+		context.setLineDash([3, 2]);
+		context.moveTo(20.5, sharp(y2s(0)));
+		context.lineTo(-0.5, sharp(y2s(0)));
+		context.moveTo(w - 20.5, sharp(y2s(0)));
+		context.lineTo(w + 0.5, sharp(y2s(0)));
+		context.moveTo(sharp(x2s(0)), h - 20.5);
+		context.lineTo(sharp(x2s(0)), h + 0.5);
+		context.moveTo(sharp(x2s(0)), 20.5);
+		context.lineTo(sharp(x2s(0)), -0.5);
+		context.stroke();
+		context.closePath();
+		context.setLineDash([]);
+
+		context.beginPath();
 		// horizontal
 		const x_from = s2x(20);
 		const x_to = s2x(620);
@@ -365,8 +376,7 @@ function draw_canvas() {
 				context.fillText(to_print, sharp(x2s(0)) + 12, sharp(y2s(y_i)) + 12);
 		}
 	}
-	context.strokeStyle = "#000000";
-	context.lineWidth = 1;
+
 	context.stroke();
 	context.closePath();
 
