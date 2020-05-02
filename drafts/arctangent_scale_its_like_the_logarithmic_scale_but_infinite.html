@@ -43,17 +43,26 @@ form {
 	background-color: #eeee99;
 }
 
-input[type="text"] {
-	width: 42pt;
-	height: 20pt;
+textarea {
+	width: 100%;
 	font-size: 12pt;
-	text-align: left;
+	font-family: monospace;
+	padding: 0pt 0pt 0pt 0pt;
+	margin: 0pt 0pt 0pt 0pt;
 }
 
 input[type="radio"] {
 	height: 16pt;
 	width: 16pt;
 	font-size: 16pt;
+}
+
+input[type="text"] {
+	font-size: 12pt;
+	font-family: monospace;
+	width: 64pt;
+	height: 20pt;
+	text-align: center;
 }
 
 button {
@@ -270,43 +279,45 @@ function draw_canvas() {
 
 	// function
 	const f_text = document.getElementById("f").value;
-	try {
-		eval("var f = function(x) { return " + f_text + ";}")
-		document.getElementById("error").innerHTML = "";
-	} catch (error) {
-		var f = function(x) {return 0;}
-		document.getElementById("error").innerHTML = "<b>Error:</b> " + error.message;
-	}
-	// helper for coloring
-	function color_by_hash_of(string) {
-		var code_sum = 0;
-		for(var i = 0; i < string.length; ++i)
-			code_sum += ([1, 7, 11, 13][i % 4] * string.charCodeAt(i));
-		const zero_channel = code_sum % 3;
-		const color = '#' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
-			+ (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
-			+ (zero_channel == 2 ? '0' : '');
-		console.log(color);
-		return color;
-	}
-	// draw
-	context.beginPath();
-	for(var j = 1; j < w; ++j) {
-		const x1 = s2x(j - 1);
-		const x2 = s2x(j);
-		const i1 = y2s(f(x1));
-		const i2 = y2s(f(x2));
+	const f_lines = f_text.split('\n');
+	for(var line_i = 0; line_i < f_lines.length; ++line_i) {
+		const f_line = f_lines[line_i];
+		try {
+			eval("var f = function(x) { return " + f_line + ";}")
+			document.getElementById("error").innerHTML = "";
+		} catch (error) {
+			var f = function(x) {return 0;}
+			document.getElementById("error").innerHTML = "<b>Error:</b> " + error.message;
+		}
+		// helper for coloring
+		function color_by_hash_of(string) {
+			var code_sum = 0;
+			for(var i = 0; i < string.length; ++i)
+				code_sum += ([1, 7, 11, 13][i % 4] * string.charCodeAt(i));
+			const zero_channel = code_sum % 3;
+			const color = '#' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
+				+ (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
+				+ (zero_channel == 2 ? '0' : '');
+			return color;
+		}
+		// draw
+		context.beginPath();
+		for(var j = 1; j < w; ++j) {
+			const x1 = s2x(j - 1);
+			const x2 = s2x(j);
+			const i1 = y2s(f(x1));
+			const i2 = y2s(f(x2));
 
-		// todo: make divisible segments
-		if(j == 1)
-			context.moveTo(j-1, i1);
-		context.lineTo(j, i2);
+			// todo: make divisible segments
+			if(j == 1)
+				context.moveTo(j-1, i1);
+			context.lineTo(j, i2);
+		}
+		context.strokeStyle = color_by_hash_of(f_line);
+		context.lineWidth = 1;
+		context.stroke();
+		context.closePath();
 	}
-	context.strokeStyle = color_by_hash_of(f_text);
-	context.lineWidth = 1;
-	context.stroke();
-	context.closePath();
-
 
 	// the axes
 	function sharp(x) {return floor(x) + 0.5;}
@@ -460,8 +471,10 @@ For something else, we need some other scale and that scale is based on arctange
 	<input type="radio" name="scale" id="scale_2" value="B" onInput="draw_canvas()"><label for="scale_2">Arctagent</label><br>
 	</div>
 	<div style="margin-bottom: 12pt;">
-	The function:<br>
-	<input type="text" id="f" value="Math.pow(x + 1, 2) - 2" style="width: 100%;" onInput="draw_canvas()"/><br>
+	Functions to plot:<br>
+	<textarea id="f" onInput="draw_canvas()" rows=3>Math.pow(x + 1, 2) - 2
+-x*x + 2*x + 1</textarea>
+	<br>
 	<p id="error" class="comment"></p>
 	</div>
 	<div style="text-align: center; margin-bottom: 12pt;">
