@@ -216,15 +216,6 @@ function draw_canvas() {
 	const s2y = functions[2];
 	const y2s = functions[3];
 
-	// function
-	try {
-		eval("var f = function(x) { return " + document.getElementById("f").value + ";}")
-		document.getElementById("error").innerHTML = "";
-	} catch (error) {
-		var f = function(x) {return 0;}
-		document.getElementById("error").innerHTML = "<b>Error:</b> " + error.message;
-	}
-
 	// the grid
 	const scale = Number(document.getElementById("scale").value);
 	const step = scale < 16 ? 1 : floor(scale / 8);
@@ -276,6 +267,28 @@ function draw_canvas() {
 	context.setLineDash([]);
 	context.closePath();
 
+
+	// helper for coloring
+	function color_by_hash_of(string) {
+		var hash = 0;
+		for (var i = 0; i < string.length; ++i) {
+			hash  = ((hash << 5) - hash) + string.charCodeAt(i);
+			hash |= 0;
+		}
+		const r = hash & 0x7F;
+		const g = (hash >> 7) & 0x7F;
+		const b = (hash >> 14) & 0x7F;
+		return "rgb(" + r.toString() + ", " + g.toString() + ", " + b.toString() + ")";
+	}
+	// function
+	const f_text = document.getElementById("f").value;
+	try {
+		eval("var f = function(x) { return " + f_text + ";}")
+		document.getElementById("error").innerHTML = "";
+	} catch (error) {
+		var f = function(x) {return 0;}
+		document.getElementById("error").innerHTML = "<b>Error:</b> " + error.message;
+	}
 	// draw
 	context.beginPath();
 	for(var j = 1; j < w; ++j) {
@@ -289,10 +302,11 @@ function draw_canvas() {
 			context.moveTo(j-1, i1);
 		context.lineTo(j, i2);
 	}
-	context.strokeStyle = "#3561a3";
+	context.strokeStyle = color_by_hash_of(f_text);
 	context.lineWidth = 1;
 	context.stroke();
 	context.closePath();
+
 
 	// the axes
 	function sharp(x) {return floor(x) + 0.5;}
