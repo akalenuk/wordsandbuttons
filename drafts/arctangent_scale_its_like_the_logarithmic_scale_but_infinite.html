@@ -268,18 +268,6 @@ function draw_canvas() {
 	context.closePath();
 
 
-	// helper for coloring
-	function color_by_hash_of(string) {
-		var hash = 0;
-		for (var i = 0; i < string.length; ++i) {
-			hash  = ((hash << 5) - hash) + string.charCodeAt(i);
-			hash |= 0;
-		}
-		const r = hash & 0x7F;
-		const g = (hash >> 7) & 0x7F;
-		const b = (hash >> 14) & 0x7F;
-		return "rgb(" + r.toString() + ", " + g.toString() + ", " + b.toString() + ")";
-	}
 	// function
 	const f_text = document.getElementById("f").value;
 	try {
@@ -288,6 +276,18 @@ function draw_canvas() {
 	} catch (error) {
 		var f = function(x) {return 0;}
 		document.getElementById("error").innerHTML = "<b>Error:</b> " + error.message;
+	}
+	// helper for coloring
+	function color_by_hash_of(string) {
+		var code_sum = 0;
+		for(var i = 0; i < string.length; ++i)
+			code_sum += ([1, 7, 11, 13][i % 4] * string.charCodeAt(i));
+		const zero_channel = code_sum % 3;
+		const color = '#' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
+			+ (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
+			+ (zero_channel == 2 ? '0' : '');
+		console.log(color);
+		return color;
 	}
 	// draw
 	context.beginPath();
