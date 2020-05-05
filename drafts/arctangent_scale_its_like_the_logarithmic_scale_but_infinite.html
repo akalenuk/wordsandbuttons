@@ -75,7 +75,7 @@ button {
 
 .comment {
 	font-size: 12pt;
-	text-align:center;
+	text-align: center;
 	font-family: sans-serif;
 	padding-bottom: 12pt;
 }
@@ -99,6 +99,7 @@ const min = Math.min;		const pow = Math.pow;		const random = Math.random;
 const sign = Math.sign;		const sin = Math.sin;		const sinh = Math.sinh;
 const tan = Math.tan;		const tanh = Math.tanh;		const toSource = Math.toSource;
 const floor = Math.floor;
+const cos = Math.cos;
 const sqrt = function(x) {return Math.pow(x, 0.5);}
 
 
@@ -208,6 +209,231 @@ function draw_arrow(context, x1, y1, x2, y2, color) {
 	context.strokeStyle = color;
 	context.stroke();
 	context.closePath();
+}
+
+// for illustrations
+function draw_tan() {
+	// client
+	const w = 640.0;
+	const h = 480.0;
+
+	// visible region
+	const x_min = -4.5;
+	const y_min = -3.0;
+	const x_max = 4.5;
+	const y_max = 3.0;
+	const client_x_center = w*(0-x_min)/(x_max-x_min);
+	const client_x_step = (w/(x_max-x_min));
+	const client_y_center = h - h*(0-y_min)/(y_max-y_min);
+	const client_y_step = (h/(y_max-y_min));
+
+	function client_to_x(client_x){
+		return (client_x - client_x_center) / client_x_step;
+	}
+
+	function client_to_y(client_y){
+		return (client_y_center - client_y) / client_y_step;
+	}
+
+	function x_to_client(x){
+		return x * client_x_step + client_x_center;
+	}
+
+	function y_to_client(y){
+		return client_y_center - y * client_y_step;
+	}
+
+	plot = document.getElementById("tan");
+	const context = plot.getContext("2d");
+
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// grid
+	context.font = "16px sans-serif";
+	// axes
+	draw_arrow(context, 0, h/2, w, h/2, "#000");
+	draw_arrow(context, w/2, h, w/2, 0, "#000");
+	context.fillStyle="#000000";
+	// numbers
+	for(var i = x_min + 1; i <= x_max - 1; i++){
+		context.moveTo(client_x_center + i*client_x_step, client_y_center);
+		context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+		if(i < 0)
+			context.fillText(i, client_x_center + i*client_x_step - 28, client_y_center - 12);
+		else
+			context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+	}
+	for(var i = y_min + 1; i <= y_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x_center, client_y_center - i*client_y_step);
+			context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+			context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+		}
+	}
+	context.strokeStyle="#000000";
+	context.stroke();
+	context.closePath();
+
+	// letters
+	context.fillText("x", client_x_center + x_max*client_x_step - 24, client_y_center - 8);
+	context.fillText("y", client_x_center - 18, client_y_center - y_max*client_y_step + 16);
+
+	// tan
+	context.lineWidth = 1.5;
+	context.beginPath();
+	context.strokeStyle = "#d64562";
+	var the_gap = true;
+	var old_i;
+	for(var j = 0; j < w; j += 1) {
+		const x = client_to_x(j);
+		const y = tan(x);
+		const i = y_to_client(y);
+		if(abs(i - old_i) >= h)
+			the_gap = true;
+		if(the_gap) {
+			context.moveTo(j, i)
+		} else {
+			context.lineTo(j, i);
+		}
+		old_i = i;
+		the_gap = false;
+	}
+	context.stroke();
+	context.closePath();
+
+	context.lineWidth = 1;
+	context.strokeStyle = "#444444";
+	context.setLineDash([4, 4]);
+	context.beginPath();
+
+	context.moveTo(x_to_client(PI/2), y_to_client(-3));
+	context.lineTo(x_to_client(PI/2), y_to_client(3));
+	context.moveTo(x_to_client(-3), y_to_client(-3));
+	context.lineTo(x_to_client(3), y_to_client(3));
+	// antisymmetry
+	context.moveTo(x_to_client(-PI/2), y_to_client(3));
+	context.lineTo(x_to_client(-PI/2), y_to_client(-3));
+
+	context.stroke();
+	context.closePath();
+	context.setLineDash([]);
+
+	context.fillStyle="#222222";
+	context.fillText("π/2", x_to_client(PI/2) + 6, y_to_client(0) - 6);
+}
+
+function draw_atan() {
+	// client
+	const w = 640.0;
+	const h = 480.0;
+
+	// visible region
+	const x_min = -4.5;
+	const y_min = -3.0;
+	const x_max = 4.5;
+	const y_max = 3.0;
+	const client_x_center = w*(0-x_min)/(x_max-x_min);
+	const client_x_step = (w/(x_max-x_min));
+	const client_y_center = h - h*(0-y_min)/(y_max-y_min);
+	const client_y_step = (h/(y_max-y_min));
+
+	function client_to_x(client_x){
+		return (client_x - client_x_center) / client_x_step;
+	}
+
+	function client_to_y(client_y){
+		return (client_y_center - client_y) / client_y_step;
+	}
+
+	function x_to_client(x){
+		return x * client_x_step + client_x_center;
+	}
+
+	function y_to_client(y){
+		return client_y_center - y * client_y_step;
+	}
+
+	plot = document.getElementById("atan");
+	const context = plot.getContext("2d");
+
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// grid
+	context.font = "16px sans-serif";
+	// axes
+	draw_arrow(context, 0, h/2, w, h/2, "#000");
+	draw_arrow(context, w/2, h, w/2, 0, "#000");
+	context.beginPath();
+	context.fillStyle="#000000";
+	// numbers
+	for(var i = x_min + 1; i <= x_max - 1; i++){
+		context.moveTo(client_x_center + i*client_x_step, client_y_center);
+		context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+		if(i < 0)
+			context.fillText(i, client_x_center + i*client_x_step - 28, client_y_center - 12);
+		else
+			context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center - 12);
+	}
+	for(var i = y_min + 1; i <= y_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x_center, client_y_center - i*client_y_step);
+			context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+			context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+		}
+	}
+	context.strokeStyle="#000000";
+	context.stroke();
+	context.closePath();
+	// letters
+	context.fillText("x", client_x_center + x_max*client_x_step - 24, client_y_center - 8);
+	context.fillText("y", client_x_center - 18, client_y_center - y_max*client_y_step + 16);
+
+	// cosine
+	context.lineWidth = 1.5;
+	context.beginPath();
+	context.strokeStyle = "#457fd6";
+	var the_gap = true;
+	var old_i;
+	for(var j = 0; j < w; j += 1) {
+		const x = client_to_x(j);
+		const y = atan(x);
+		const i = y_to_client(y);
+		if(abs(i - old_i) >= h)
+			the_gap = true;
+		if(the_gap) {
+			context.moveTo(j, i)
+		} else {
+			context.lineTo(j, i);
+		}
+		old_i = i;
+		the_gap = false;
+	}
+	context.stroke();
+	context.closePath();
+
+	context.lineWidth = 1;
+	context.strokeStyle = "#444444";
+	context.setLineDash([4, 4]);
+	context.beginPath();
+
+	context.moveTo(x_to_client(-4.5), y_to_client(PI/2));
+	context.lineTo(x_to_client(4.5), y_to_client(PI/2));
+	context.moveTo(x_to_client(-4.5), y_to_client(-PI/2));
+	context.lineTo(x_to_client(4.5), y_to_client(-PI/2));
+	context.moveTo(x_to_client(3), y_to_client(3));
+	context.lineTo(x_to_client(-3), y_to_client(-3));
+
+	context.stroke();
+	context.closePath();
+	context.setLineDash([]);
+
+	context.fillStyle="#222222";
+	context.fillText("-π/2", x_to_client(0) - 34, y_to_client(-PI/2) - 4);
+	context.fillText("π/2", x_to_client(0) - 29, y_to_client(PI/2) - 4);
 }
 
 function draw_canvas() {
@@ -412,7 +638,7 @@ function draw_canvas() {
 		context.lineTo(sharp(w/2) + 14.5, sharp(h/2));
 		context.moveTo(sharp(w/2), sharp(h/2) - 14.5);
 		context.lineTo(sharp(w/2), sharp(h/2) + 14.5);
-		context.strokeStyle = "#880000";
+		context.strokeStyle = "#222222";
 		context.lineWidth = 1;
 		context.stroke();
 		context.closePath();
@@ -485,22 +711,33 @@ For something else, we need some other scale and that scale is based on arctange
 Tangent and arctangent
 	</h2>
 	<p>
-The tangent function is continuous from -&frac12;&Pi; to +&frac12;&Pi;.
+The tangent function is continuous from <i>-&frac12;&Pi;</i> to <i>+&frac12;&Pi;</i>.
 	</p>
 	<p>
-It converges to -&infin; in -&frac12;&Pi; and then smoothly growth to +&infin; in +&frac12;&Pi;. Of course, it is also periodic but this is not currently important.
+It converges aymptotically to <i>y = x</i> in <i>0</i>.
 	</p>
 	<p>
-For our purposes, it acts like a bridge connecting a specific range of a plot canvas and the infinite space of real numbers.
+It converges to <i>-&infin;</i> in <i>-&frac12;&Pi;</i> and then smoothly growth to <i>+&infin;</i> in <i>+&frac12;&Pi;</i>. 
 	</p>
 	<p>
-...
+It converges aymptotically to <i>y = x</i> in <i>0</i>.
 	</p>
 	<p>
-The arctangent function is the inverse of the tangent. It translates any real number back into the range (-&frac12;&Pi;, +&frac12;&Pi;).
+Of course, it is also periodic but this is not currently important.
 	</p>
 	<p>
-...
+For our purposes, it acts like a translator from the range <i>(-&frac12;&Pi;, +&frac12;&Pi;)</i> into the infinite space of real numbers.
+	</p>
+	<canvas id="tan" width=640 height=480></canvas>
+	<p class="comment">
+Tangent function
+	</p>
+	<p>
+The arctangent function is the inverse of the tangent. It translates any real number back into the range <i>(-&frac12;&Pi;, +&frac12;&Pi;)</i>.
+	</p>
+	<canvas id="atan" width=640 height=480></canvas>
+	<p class="comment">
+Arctangent function
 	</p>
 	<p>
 With these two functions we can show any function on a screen and not just a part of it but the whole function at once.
@@ -519,8 +756,10 @@ This is a function plotter that can do both linear and arctangent scales. Everyt
 	</div>
 	<div style="margin-bottom: 12pt;">
 	Functions to plot:<br>
-	<textarea id="f" onInput="draw_canvas()" rows=3>Math.pow(x + 1, 2) - 2
--x*x + 2*x + 1</textarea>
+	<textarea id="f" onInput="draw_canvas()" rows=3>exp(x - 1) - 3
+x*x*x - 2*x
+-exp(-x - 1) + 3
+</textarea>
 	<br>
 	<p id="error" class="comment"></p>
 	</div>
@@ -546,6 +785,8 @@ This makes it a useful tool for exploring functions, equations, systems etc.
 	</p>
 
 	<script language="JavaScript">
+		draw_tan();
+		draw_atan();
 		reset_focus();
 		reset_scale();
 		init_canvas();
