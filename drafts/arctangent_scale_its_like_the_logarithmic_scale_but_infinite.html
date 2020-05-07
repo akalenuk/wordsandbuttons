@@ -546,16 +546,22 @@ function draw_canvas() {
 		}
 		// draw
 		context.beginPath();
-		for(var j = 1.5; j < w; ++j) {
-			const x1 = s2x(j - 1);
-			const x2 = s2x(j);
-			const i1 = y2s(f(x1));
-			const i2 = y2s(f(x2));
-
-			// todo: make divisible segments
-			if(j == 1.5)
-				context.moveTo(j-1, i1);
-			context.lineTo(j, i2);
+		var the_gap = true;
+		var old_i;
+		for(var j = 0.5; j < w - 0.5; j += 0.5) {
+			const x = s2x(j);
+			const y = f(x);
+			const i = y2s(y);
+			if(the_gap) {
+				context.moveTo(j, i)
+				the_gap = false;
+			} else {
+				if(abs(i - old_i) >= h)
+					the_gap = true;
+				else
+					context.lineTo(j, i);
+			}
+			old_i = i;
 		}
 		context.strokeStyle = color_by_hash_of(f_line);
 		context.lineWidth = 1.5;
