@@ -153,34 +153,52 @@ function s2x_x2s_s2y_y2s_from_UI() {
 
 var mousedown_sx;
 var mousedown_sy;
+var mousemove_sx;
+var mousemove_sy;
 function init_canvas() {
 	canvas = document.getElementById("canvas");
 	const canvas_rect = canvas.getBoundingClientRect();
 
-	canvas.addEventListener('mousemove', function(e){
+	canvas.addEventListener('click', function(e) {
+		const canvas_rect = canvas.getBoundingClientRect();
+		const sx = e.clientX - canvas_rect.left;
+		const sy = e.clientY - canvas_rect.top;
+		if(mousedown_sx == mousemove_sx && mousedown_sy == mousemove_sy) {
+			const functions = s2x_x2s_s2y_y2s_from_UI();
+			const s2x = functions[0];
+			const s2y = functions[2];
+			document.getElementById("center_x").value = s2x(sx).toFixed(5);
+			document.getElementById("center_y").value = s2y(sy).toFixed(5);
+			draw_canvas();
+		}
+	}, false);
+
+	canvas.addEventListener('mousemove', function(e) {
 		if(e.buttons == 1) {
 			const canvas_rect = canvas.getBoundingClientRect();
 			const sx = e.clientX - canvas_rect.left;
 			const sy = e.clientY - canvas_rect.top;
-			const cx = 320 - (sx - mousedown_sx);
-			const cy = 320 - (sy - mousedown_sy);
+			const cx = 320 - (sx - mousemove_sx);
+			const cy = 320 - (sy - mousemove_sy);
 			const functions = s2x_x2s_s2y_y2s_from_UI();
 			const s2x = functions[0];
 			const s2y = functions[2];
 			document.getElementById("center_x").value = s2x(cx).toFixed(5);
 			document.getElementById("center_y").value = s2y(cy).toFixed(5);
-			mousedown_sx = sx;
-			mousedown_sy = sy;
+			mousemove_sx = sx;
+			mousemove_sy = sy;
 			draw_canvas();
 		}
 	}, false);
 
-	canvas.addEventListener('mousedown', function(e){
+	canvas.addEventListener('mousedown', function(e) {
 		const canvas_rect = canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		const sy = e.clientY - canvas_rect.top;
 		mousedown_sx = sx;
 		mousedown_sy = sy;
+		mousemove_sx = mousedown_sx;
+		mousemove_sy = mousedown_sy;
 	}, false);
 
 	canvas.addEventListener('wheel', function(e) {
@@ -756,8 +774,11 @@ With these two functions we can show any function on a screen and not just a par
 The plot example
 	</h2>
 	<p>
-This is a function plotter that can do both linear and arctangent scales. Everything is clickable-dragable. Feel free to try your own functions. The plotter accepts lines of JavaScript code each evaluated to <i>f(x)</i>.
-	<p>
+This is a function plotter that can do both linear and arctangent scales. Everything is clickable-dragable, there is even a shortcut for the scale on <nobr>Shift + mouse wheel</nobr>.
+	</p>
+	<p> 
+Feel free to try your own functions. The plotter accepts lines of JavaScript code each evaluated to <i>f(x)</i>.
+	</p>
 	<form>
 	<div style="margin-bottom: 12pt;">
 	The scale:<br>
