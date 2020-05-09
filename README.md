@@ -3,6 +3,7 @@
 This is the source code for [Words and Buttons Online](https://wordsandbuttons.online/) — a growing collection of interactive tutorials, guides, and quizzes about things generally considered boring. Maths, algorithms, programming languages.
 
 ## Maths
+- [Arctangent scale. It's like the logarithmic scale but infinite](https://wordsandbuttons.online/arctangent_scale_its_like_the_logarithmic_scale_but_infinite.html)
 - [SymPy makes math fun again](https://wordsandbuttons.online/sympy_makes_math_fun_again.html) 
 - [Sine and cosine](https://wordsandbuttons.online/sine_and_cosine.html) Interactive mnemonics and changeable snippets.
 - [Circles and lines vs. polynomial splines](https://wordsandbuttons.online/circles_and_lines_vs_polynomial_splines.html) 
