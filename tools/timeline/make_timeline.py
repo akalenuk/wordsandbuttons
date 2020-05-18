@@ -3,8 +3,12 @@ import subprocess
 
 PAGES_DIR = "../../pages"
 
+date_link_titles = []
+
 for filename in os.listdir(PAGES_DIR):
 	if filename == 'index.html':
+		continue
+	if filename == 'faq.html':
 		continue
 	if filename.endswith(".html"):
 		date_from_git = subprocess.run(["git", "log", "--reverse", "--date=iso", "--format=%cd", "--", filename], \
@@ -16,4 +20,7 @@ for filename in os.listdir(PAGES_DIR):
 		content = f.read()
 		f.close
 		title = content.split("<title>")[1].split("</title>")[0]
-		print (filename, title, date)
+		date_link_titles += [(date, filename, title)]
+
+for dlt in sorted(date_link_titles)[::-1]:
+	print (dlt)
