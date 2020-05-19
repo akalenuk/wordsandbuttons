@@ -1,210 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Binary search</title>
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
-    <style>
+<head>
+	<meta charset="utf-8">
+	<title>Binary search</title>
+	<meta name="description" content="Interactive demo of the binary search along with its one promising variant.">
+	<meta name="keywords" content="algorithms">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+	<style>
 body {
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a {
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 20pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 form {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 16pt;
-    text-align: left;
-    width: 505pt;
-    background-color: #eeee99;
-    color: #000;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
 }
 
 .formula {
-    font-family: sans-serif;
-    font-size: 15pt;
-    font-style: italic;
-    text-align: center;
-    padding-top: 6pt;
-    padding-bottom: 6pt;
+	font-family: sans-serif;
+	font-size: 15pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
 }
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 var values = [];
 var target = 480;
 var path = [];
 var proportion = 0.5;
 
 function uniform_ascending() {
-    var values = [];
-    for(var i = 0; i < 640; ++i)
-        values.push(Math.floor(Math.random()*640));
-    values.sort(function(a, b){return a - b});
-    return values;
+	var values = [];
+	for(var i = 0; i < 640; ++i)
+		values.push(Math.floor(Math.random()*640));
+	values.sort(function(a, b){return a - b});
+	return values;
 }
 
 function scewed_to_high_ascending() {
-    var values = [];
-    for(var i = 0; i < 640; ++i)
-        values.push(Math.floor(Math.sin(Math.random() * Math.PI / 2.) * 640));
-    values.sort(function(a, b){return a - b});
-    return values;
+	var values = [];
+	for(var i = 0; i < 640; ++i)
+		values.push(Math.floor(Math.sin(Math.random() * Math.PI / 2.) * 640));
+	values.sort(function(a, b){return a - b});
+	return values;
 }
 
 function less_in_the_middle_ascending() {
-    var values = [];
-    for(var i = 0; i < 640; ++i)
-        values.push(Math.floor((Math.sin(Math.random() * Math.PI - Math.PI / 2.) + 1.) / 2. *640));
-    values.sort(function(a, b){return a - b});
-    return values;
+	var values = [];
+	for(var i = 0; i < 640; ++i)
+		values.push(Math.floor((Math.sin(Math.random() * Math.PI - Math.PI / 2.) + 1.) / 2. *640));
+	values.sort(function(a, b){return a - b});
+	return values;
 }
 
 var values = uniform_ascending();
 
 function search_path(a, b, proportion) {
-    if(a == b)
-        return [[a, b]]
-    const mid = Math.floor(a + (b - a) * proportion);
-    if(values[mid] < target)
-        return [[a, b]].concat(search_path(mid + 1, b, proportion));
-    else
-        return [[a, b]].concat(search_path(a, mid, proportion));
+	if(a == b)
+		return [[a, b]]
+	const mid = Math.floor(a + (b - a) * proportion);
+	if(values[mid] < target)
+		return [[a, b]].concat(search_path(mid + 1, b, proportion));
+	else
+		return [[a, b]].concat(search_path(a, mid, proportion));
 }
 
 path = search_path(0, 639, proportion);
 
 function search_path_int(a, b) {
-    if(a == b || values[b] == values[a])
-        return [[a, b]]
-    var mid = Math.floor(a + (b-a) * (target-values[a]) / (values[b]-values[a]))
-    if(mid >= b)
-        mid = b - 1;
-    if(mid < a)
-        mid = a;
-    if(values[mid] < target)
-        return [[a, b]].concat(search_path_int(mid + 1, b));
-    else
-        return [[a, b]].concat(search_path_int(a, mid));
+	if(a == b || values[b] == values[a])
+		return [[a, b]]
+	var mid = Math.floor(a + (b-a) * (target-values[a]) / (values[b]-values[a]))
+	if(mid >= b)
+		mid = b - 1;
+	if(mid < a)
+		mid = a;
+	if(values[mid] < target)
+		return [[a, b]].concat(search_path_int(mid + 1, b));
+	else
+		return [[a, b]].concat(search_path_int(a, mid));
 }
 
 path_int = search_path_int(0, 639);
 
 function init(canvas_name) {
-    var canvas = document.getElementById(canvas_name);
-    canvas.addEventListener('mousedown', function(e){
-        canvas_rect = canvas.getBoundingClientRect();
-        const x = e.clientX - canvas_rect.left;
-        const y = e.clientY - canvas_rect.top;
-        target = Math.floor(640 - y);
-        path = search_path(0, 639, proportion);
-        path_int = search_path_int(0, 639);
-        draw(canvas_name);
-    }, false);
+	var canvas = document.getElementById(canvas_name);
+	canvas.addEventListener('mousedown', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		const x = e.clientX - canvas_rect.left;
+		const y = e.clientY - canvas_rect.top;
+		target = Math.floor(640 - y);
+		path = search_path(0, 639, proportion);
+		path_int = search_path_int(0, 639);
+		draw(canvas_name);
+	}, false);
 
-    canvas.addEventListener('mousemove', function(e){
-        canvas_rect = canvas.getBoundingClientRect();
-        const x = e.clientX - canvas_rect.left;
-        const y = e.clientY - canvas_rect.top;
-        if(e.buttons == 1){
-            target = Math.floor(640 - y);
-            path = search_path(0, 639, proportion);
-            path_int = search_path_int(0, 639);
-        }
-        draw(canvas_name);
-    }, false);
+	canvas.addEventListener('mousemove', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		const x = e.clientX - canvas_rect.left;
+		const y = e.clientY - canvas_rect.top;
+		if(e.buttons == 1){
+			target = Math.floor(640 - y);
+			path = search_path(0, 639, proportion);
+			path_int = search_path_int(0, 639);
+		}
+		draw(canvas_name);
+	}, false);
 
-    canvas.addEventListener('mouseup', function(e){
-        draw("search");
-        draw("search_int");
-    }, false);
+	canvas.addEventListener('mouseup', function(e){
+		draw("search");
+		draw("search_int");
+	}, false);
 
-    canvas.addEventListener('mouseleave', function(e){
-        draw("search");
-        draw("search_int");
-    }, false);
+	canvas.addEventListener('mouseleave', function(e){
+		draw("search");
+		draw("search_int");
+	}, false);
 
-    draw(canvas_name);
+	draw(canvas_name);
 }
 
 function draw(canvas_name){
-    var canvas = document.getElementById(canvas_name);
-    var context = canvas.getContext("2d");
+	var canvas = document.getElementById(canvas_name);
+	var context = canvas.getContext("2d");
 
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, 640, 640);
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, 640, 640);
 
-    // data
-    const light_gray = 11 * 8;
-    context.strokeStyle='rgb('+light_gray+', '+light_gray+', '+light_gray+')';
-    context.lineWidth = 1;
-    context.beginPath()    
-    for(var i = 0; i < 640; ++i) {
-        context.moveTo(i, 640);
-        context.lineTo(i, 640 - values[i]);
-    }
-    context.stroke();
-    context.closePath();
+	// data
+	const light_gray = 11 * 8;
+	context.strokeStyle='rgb('+light_gray+', '+light_gray+', '+light_gray+')';
+	context.lineWidth = 1;
+	context.beginPath()
+	for(var i = 0; i < 640; ++i) {
+		context.moveTo(i, 640);
+		context.lineTo(i, 640 - values[i]);
+	}
+	context.stroke();
+	context.closePath();
 
-    // select path by canvas to draw
-    const the_path = canvas_name == "search" ? path : path_int;
-    
-    // path
-    context.lineWidth = 1;
-    for(var i = 0; i < the_path.length; ++i) {
-        const gray = Math.max(0, (16 - i) * 10);
-        context.beginPath()
-        context.strokeStyle='rgb('+gray+', '+gray+', '+gray+')';
-        for(var j = the_path[i][0]; j <= the_path[i][1]; ++j) {
-            const value_part = values[j] / Math.pow(1.5, i);
-            context.moveTo(j, 640 - values[j]);
-            context.lineTo(j, 640);
-        }
-        context.stroke();
-        context.closePath();
-    }
+	// select path by canvas to draw
+	const the_path = canvas_name == "search" ? path : path_int;
+	
+	// path
+	context.lineWidth = 1;
+	for(var i = 0; i < the_path.length; ++i) {
+		const gray = Math.max(0, (16 - i) * 10);
+		context.beginPath()
+		context.strokeStyle='rgb('+gray+', '+gray+', '+gray+')';
+		for(var j = the_path[i][0]; j <= the_path[i][1]; ++j) {
+			const value_part = values[j] / Math.pow(1.5, i);
+			context.moveTo(j, 640 - values[j]);
+			context.lineTo(j, 640);
+		}
+		context.stroke();
+		context.closePath();
+	}
 
-    // target
-    context.strokeStyle="#000000";
-    context.lineWidth = 1;
-    context.beginPath()
-    context.moveTo(0, 639.5 - target);
-    context.lineTo(640, 639.5 - target);
-    context.stroke();
-    context.closePath();
-    
-    context.fillStyle="#000000";
-    context.font = "16px sans-serif";
-    context.textAlign = "left";
-    context.textBaseline = "middle";
-    context.fillText("Search for " + target + " takes " + the_path.length + " iterations.", 16, target > 120 ? 640 - target + 17 : 640 - target - 14);
+	// target
+	context.strokeStyle="#000000";
+	context.lineWidth = 1;
+	context.beginPath()
+	context.moveTo(0, 639.5 - target);
+	context.lineTo(640, 639.5 - target);
+	context.stroke();
+	context.closePath();
+	
+	context.fillStyle="#000000";
+	context.font = "16px sans-serif";
+	context.textAlign = "left";
+	context.textBaseline = "middle";
+	context.fillText("Search for " + target + " takes " + the_path.length + " iterations.", 16, target > 120 ? 640 - target + 17 : 640 - target - 14);
 }
 
 const max_slider_x = 400 - 32;
@@ -212,266 +214,266 @@ var slider_user_xs = [max_slider_x / 2];
 var slider_xs = [max_slider_x / 2];
 
 function comment_on_slider(no){
-    var comment = document.getElementById("comment_" + (no + 1));
-    comment.innerHTML = Math.floor(100*proportion) + "/" + (100 - Math.floor(100*proportion));
+	var comment = document.getElementById("comment_" + (no + 1));
+	comment.innerHTML = Math.floor(100*proportion) + "/" + (100 - Math.floor(100*proportion));
 }
 
 function position_slider(no, client_x){
-    var slider = document.getElementById("slider_" + (no + 1));
-    var canvas_rect = slider.getBoundingClientRect();
-    var x = client_x - canvas_rect.left - 16;
-    if(x < 1)
-        x = 1;
-    if(x > max_slider_x)
-        x = max_slider_x;
-    slider_xs[no] = x;
+	var slider = document.getElementById("slider_" + (no + 1));
+	var canvas_rect = slider.getBoundingClientRect();
+	var x = client_x - canvas_rect.left - 16;
+	if(x < 1)
+		x = 1;
+	if(x > max_slider_x)
+		x = max_slider_x;
+	slider_xs[no] = x;
 
-    proportion = slider_xs[no] / max_slider_x;
-    if(proportion < 0.01)
-        proportion = 0.01;
-    if(proportion > 0.99)
-        proportion = 0.99;
+	proportion = slider_xs[no] / max_slider_x;
+	if(proportion < 0.01)
+		proportion = 0.01;
+	if(proportion > 0.99)
+		proportion = 0.99;
 
-    comment_on_slider(no);
-    path = search_path(0, 639, proportion);
-    draw("search");
-    draw("search_int");
+	comment_on_slider(no);
+	path = search_path(0, 639, proportion);
+	draw("search");
+	draw("search_int");
 }
 
 function init_slider(no){
-    draw_slider(no);
-    var slider = document.getElementById("slider_" + (no + 1));
+	draw_slider(no);
+	var slider = document.getElementById("slider_" + (no + 1));
 
-    slider.addEventListener('mousedown', function(e){
-        position_slider(no, e.clientX);
-        draw_slider(no);
-    }, false);
+	slider.addEventListener('mousedown', function(e){
+		position_slider(no, e.clientX);
+		draw_slider(no);
+	}, false);
 
-    slider.addEventListener('mousemove', function(e){
-        if(e.buttons == 1){
-            position_slider(no, e.clientX);
-            draw_slider(no);
-        }
-    }, false);
-    
-    comment_on_slider(no);
+	slider.addEventListener('mousemove', function(e){
+		if(e.buttons == 1){
+			position_slider(no, e.clientX);
+			draw_slider(no);
+		}
+	}, false);
+	
+	comment_on_slider(no);
 }
 
 function draw_slider(no){
-    var context = document.getElementById("slider_" + (no + 1)).getContext("2d");
-    const x = slider_xs[no] - 0.5;
+	var context = document.getElementById("slider_" + (no + 1)).getContext("2d");
+	const x = slider_xs[no] - 0.5;
 
-    context.clearRect(0, 0, 400, 32);
-    context.beginPath();
-    context.moveTo(0.5, 4.5);
-    context.lineTo(0.5, 27.5);
-    context.lineTo(399.5, 27.5);
-    context.lineTo(399.5, 4.5);
-    context.lineTo(0.5, 4.5);
-    context.strokeStyle="#000000";
-    context.stroke();
-    context.closePath();
-    context.fillStyle="#999999";
-    context.fill();
+	context.clearRect(0, 0, 400, 32);
+	context.beginPath();
+	context.moveTo(0.5, 4.5);
+	context.lineTo(0.5, 27.5);
+	context.lineTo(399.5, 27.5);
+	context.lineTo(399.5, 4.5);
+	context.lineTo(0.5, 4.5);
+	context.strokeStyle="#000000";
+	context.stroke();
+	context.closePath();
+	context.fillStyle="#999999";
+	context.fill();
 
-    context.beginPath();
-    context.moveTo(x, 0.5);
-    context.lineTo(x + 32, 0.5);
-    context.lineTo(x + 32, 31.5);
-    context.lineTo(x, 31.5);
-    context.lineTo(x, 0.5);
-    context.strokeStyle="#000000";
-    context.stroke();
-    context.closePath();
-    context.fillStyle="#cccccc";
-    context.fill();
+	context.beginPath();
+	context.moveTo(x, 0.5);
+	context.lineTo(x + 32, 0.5);
+	context.lineTo(x + 32, 31.5);
+	context.lineTo(x, 31.5);
+	context.lineTo(x, 0.5);
+	context.strokeStyle="#000000";
+	context.stroke();
+	context.closePath();
+	context.fillStyle="#cccccc";
+	context.fill();
 }
-    </script>
-  </head>
-  <body>
-    <center>
-    <h1>
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
 Binary search
-    </h1>
-    <p>
+	</h1>
+	<p>
 You probably know this story. An Indian king summons the inventor of chess. "I really like your game and I want to reward you. What do you want as a reward?"
-    </p>
-    <p>
+	</p>
+	<p>
 "Not much", replies the inventor. "Just put a single grain of rice on the first cell of the chessboard. Put two grains on the second one. Then put four on the third. Then eight on the fourth."
-    </p>
-    <p>
+	</p>
+	<p>
 "Go on", says the king.
-    </p>
-    <p>
+	</p>
+	<p>
 "Then 16 on the 5th. Then 32 on the 6th. Then 64 on the 7th. Then 128 on the 8th. Then 256 on the 9th. Then 512 on the 10th. Then 1024 on the 11th. Then 2048 on the 12th. Then 4096 on the 13th. Then 8192 on the 14th."
-    </p>
-    <p>
+	</p>
+	<p>
 "Please, continue", says the king.
-    </p>
-    <p>
+	</p>
+	<p>
 "Then 16,384 on the 15th. Then 32,768 on the 16th. Then 65,536 on the 17th. Then 131,072 on the 18th. Then 262,144 on the 19th. Then 524,288 on the 20th. Then 1,048,576 on the 21st. Then 2,097,152 on the 22nd. Then 4,194,304 on the 23rd."
-    </p>
-    <p>
+	</p>
+	<p>
 "Aha."
-    </p>
-    <p>
+	</p>
+	<p>
 "Then 8,388,608 on the 24th. Then 16,777,216 on the 25th. Then 33,554,432 on the 26th. Then 67,108,864 on the 27th. Then 134,217,728 on the 28th. Then 268,435,456 on the 29th. Then 536,870,912 on the 30th. Then 1,073,741,824 on the 31th."
-    </p>
-    <p>
+	</p>
+	<p>
 "Ok, and then?"
-    </p>
-    <p>
+	</p>
+	<p>
 "Then 2,147,483,648 on the 32th. Then 4,294,967,296 on the 33th. Then 8,589,934,592 on the 34th. Then 17,179,869,184 on the 35th. Then 34,359,738,368 on the 36th. Then 68,719,476,736 on the 37th. Then 137,438,953,472 on the 38th. Then 274,877,906,944 on the 39th. Then 549,755,813,888 on the 40th. Then 1,099,511,627,776 on the 41th. Then 2,199,023,255,552 on the 42th."
-    </p>
-    <p>
-"And then what?"    
-    </p>
-    <p>
+	</p>
+	<p>
+"And then what?"
+	</p>
+	<p>
 "Then 4,398,046,511,104 on the 43th. Then 8,796,093,022,208 on the 44th. Then 17,592,186,044,416 on the 45th. Then 35,184,372,088,832 on the 46th. Then 70,368,744,177,664 on the 47th. Then 140,737,488,355,328 on the 48th. Then 281,474,976,710,656 on the 49th."
-    </p>
-    <p>
+	</p>
+	<p>
 "I think, I know where it's heading to but please, go on."
-    </p>
-    <p>
+	</p>
+	<p>
 "Then 562,949,953,421,312 on the 50th. Then 1,125,899,906,842,624 on the 51th. Then 2,251,799,813,685,248 on the 52th. Then 4,503,599,627,370,496 on the 53th. Then 9,007,199,254,740,992 on the 54th. Then 18,014,398,509,481,984 on the 55th. Then 36,028,797,018,963,968 on the 56th."
-    </p>
-    <p>
+	</p>
+	<p>
 "And?"
-    </p>
-    <p>
+	</p>
+	<p>
 "And then 72,057,594,037,927,936 on the 57th. Then 144,115,188,075,855,872 on the 58th. Then 288,230,376,151,711,744 on the 59th. Then 576,460,752,303,423,488 on the 60th. Then 1,152,921,504,606,846,976 on the 61th. Then 2,305,843,009,213,693,952 on the 62th. Then 4,611,686,018,427,387,904 on the 63th. And 9,223,372,036,854,775,808 on the 64th."
-    </p>
-    <p>
+	</p>
+	<p>
 "Ok. Listen, I really like your game but this is just unreasonable. That's 18,446,744,073,709,551,615 grains of rice total. That's about 500,000,000,000 metric tons of rice. That's more rice that will be produced worldwide from now until the moment this story is published on that neat little website with movable thingies."
-    </p>
-    <p>
+	</p>
+	<p>
 "Oh," said the inventor. "I didn't realize how much rice that is."
-    </p>
-    <p>
+	</p>
+	<p>
 The moral of the story is, well, there are actually two equally important lessons. First, always read your requirements to the last page. Second, by multiplying things over and over again, you get from fairly small to unreasonably large numbers very fast. The good news is, this works the other way around too.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Binary search
-    </h2>
-    <p>
+	</h2>
+	<p>
 Now imagine you have a database with 18,446,744,073,709,551,615 entries in it. You want to find a particular entry by the key. Looking up through all the entries will take you exactly 18,446,744,073,709,551,615 steps. Even if a single step is 1 nanosecond long, the whole operation takes 584 years.
-    </p>
-    <p>
+	</p>
+	<p>
 But let's say you can split the whole array in two and for each half, say does the queried entry belong to that half or not. How many steps will it require to find an entry then?
-    </p>
-    <p>
+	</p>
+	<p>
 Yes, only this many.
-    </p>
-    <p>
+	</p>
+	<p>
 Ok, let's be more specific. Let's say you have an array of 640 numbers sorted from little to great. You want to see if number 480 is among them.
-    </p>
-    <p>
+	</p>
+	<p>
 Step 1. If the range is only 1 element wide (obviously, that's not true for the first iteration but we'll get there), then if the element is 480 then the range start is its index in the array. If it's not, then there is no 480 in the array at all. Either way, we're done.
-    </p>
-    <p>
+	</p>
+	<p>
 Step 2. Split the range in half. Now you have two sorted arrays. On the first iteration, the first contains 320 numbers from first to 319th, and the second — from 320th to 639th. 320 is the dividing index.
-    </p>
-    <p>
+	</p>
+	<p>
 Step 3. Select the right half-range. If the element pointed by the dividing index is greater than 480, then 480 may only be in the first half-range. It may not be there either but that's yet inconclusive. If the dividing number is less or equal than 480, then it may only be in the second half-range.
-    </p>
-    <p>
+	</p>
+	<p>
 Step 4. Run step 1 for the new range.
-    </p>
-    <p>
+	</p>
+	<p>
 Eventually, and in fewer then a dozen iterations, you'll either find the element or establish that it's not there at all.
-    </p>
-    <p>
+	</p>
+	<p>
 Here's an interactive plot for this very exercise. The numbers are random but they are generated according to one of the three distributions. The shade of gray corresponds to the iteration number. You can pick a number to search by clicking or tapping anywhere on the plot.
-    </p>
-    <canvas id="search" width=640 height=640></canvas>
-    <form onsubmit="return false;">
-    <p>
-    Distribution: 
-    <input type="radio" name="distribution1" id="radio_11" onclick="values = uniform_ascending(); draw('search'); draw('search_int'); document.getElementById('radio_21').checked=true;" checked=true /><label for="radio_11">uniform;</label>
-    <input type="radio" name="distribution1" id="radio_12" onclick="values = scewed_to_high_ascending(); draw('search'); draw('search_int'); document.getElementById('radio_22').checked=true;" /><label for="radio_12">skewed;</label>
-    <input type="radio" name="distribution1" id="radio_13" onclick="values = less_in_the_middle_ascending(); draw('search'); draw('search_int'); document.getElementById('radio_23').checked=true;" /><label for="radio_13">bi-skewed;</label>
-    </p>
-    <p>
-    Proportion: 
-    <canvas id="slider_1" width=400 height=32></canvas>
-    <span id="comment_1"></span>
-    </p>
-    </form>
-    <p>
+	</p>
+	<canvas id="search" width=640 height=640></canvas>
+	<form onsubmit="return false;">
+	<p>
+	Distribution: 
+	<input type="radio" name="distribution1" id="radio_11" onclick="values = uniform_ascending(); draw('search'); draw('search_int'); document.getElementById('radio_21').checked=true;" checked=true /><label for="radio_11">uniform;</label>
+	<input type="radio" name="distribution1" id="radio_12" onclick="values = scewed_to_high_ascending(); draw('search'); draw('search_int'); document.getElementById('radio_22').checked=true;" /><label for="radio_12">skewed;</label>
+	<input type="radio" name="distribution1" id="radio_13" onclick="values = less_in_the_middle_ascending(); draw('search'); draw('search_int'); document.getElementById('radio_23').checked=true;" /><label for="radio_13">bi-skewed;</label>
+	</p>
+	<p>
+	Proportion: 
+	<canvas id="slider_1" width=400 height=32></canvas>
+	<span id="comment_1"></span>
+	</p>
+	</form>
+	<p>
 As you have noticed, there is one more thing here to play with. It's the proportion in which the ranges are split. The thing is, you don't necessarily split the ranges into two equal halves. Yes, on uniform distribution this is the best strategy but it isn't necessarily so for all the possible ranges and all the possible distributions.
-    </p>
+	</p>
 
-    <h2>
+	<h2>
 Interpolation search
-    </h2>
-    <p>
+	</h2>
+	<p>
 While we can all agree that 64 is less than 18,446,744,073,709,551,615 it still seems that the introduction story is a little too long.
-    </p>
-    <p>
+	</p>
+	<p>
 We can choose a strategy for the range subdivision that will be more effective for specific distributions. For example, using linear interpolation instead of a fixed proportion for the dividing element index works wonders for the uniform distribution.
-    </p>
-    <p>
+	</p>
+	<p>
 It can be written down as:
-    </p>
-    <table class="formula">
-    <tr>
-    <td rowspan=3 style="vertical-align: middle; width: 64pt; "><nobr>i<sub>div</dub> = </nobr></td>
-    <td style="border-bottom:1px solid black">
+	</p>
+	<table class="formula">
+	<tr>
+	<td rowspan=3 style="vertical-align: middle; width: 64pt; "><nobr>i<sub>div</dub> = </nobr></td>
+	<td style="border-bottom:1px solid black">
 i<sub>1</sub>(A[i<sub>2</sub>] - x) + i<sub>2</sub>(x - A[i<sub>1</sub>])
-    </td>
-    </tr>
-    <tr>
-    <td>
+	</td>
+	</tr>
+	<tr>
+	<td>
 A[i<sub>2</sub>] - A[i<sub>1</sub>]
-    </td>
-    </tr>
-    </table>
-    <p>
+	</td>
+	</tr>
+	</table>
+	<p>
 Here <i>i<sub>div</div></i> is the dividing index. It's the element that should start the second sub-range after the subdivision. The pair <i>(i<sub>1</sub>, i<sub>2</sub>)</i> is the pair of indices for the range being divided on a current iteration. The <i>x</i> stands for the element we're looking for, and <i>A</i> is the array to search in.
-    </p>
-    <p>
+	</p>
+	<p>
 Here's an interactive plot that shows how it works.
-    </p>
-    <canvas id="search_int" width=640 height=640></canvas>
-    <form onsubmit="return false;">
-    <p>
-    Distribution: 
-    <input type="radio" name="distribution2" id="radio_21" onclick="values = uniform_ascending(); draw('search'); draw('search_int'); document.getElementById('radio_11').checked=true;" checked=true/><label for="radio_21">uniform;</label>
-    <input type="radio" name="distribution2" id="radio_22" onclick="values = scewed_to_high_ascending(); draw('search'); draw('search_int'); document.getElementById('radio_12').checked=true;" /><label for="radio_22">skewed;</label>
-    <input type="radio" name="distribution2" id="radio_23" onclick="values = less_in_the_middle_ascending(); draw('search'); draw('search_int'); document.getElementById('radio_13').checked=true;" /><label for="radio_23">bi-skewed;</label>
-    </p>
-    </form>
-    <p>
+	</p>
+	<canvas id="search_int" width=640 height=640></canvas>
+	<form onsubmit="return false;">
+	<p>
+	Distribution: 
+	<input type="radio" name="distribution2" id="radio_21" onclick="values = uniform_ascending(); draw('search'); draw('search_int'); document.getElementById('radio_11').checked=true;" checked=true/><label for="radio_21">uniform;</label>
+	<input type="radio" name="distribution2" id="radio_22" onclick="values = scewed_to_high_ascending(); draw('search'); draw('search_int'); document.getElementById('radio_12').checked=true;" /><label for="radio_22">skewed;</label>
+	<input type="radio" name="distribution2" id="radio_23" onclick="values = less_in_the_middle_ascending(); draw('search'); draw('search_int'); document.getElementById('radio_13').checked=true;" /><label for="radio_23">bi-skewed;</label>
+	</p>
+	</form>
+	<p>
 Note that while it works well on uniform(-ish) distribution, the more uneven the distribution becomes, the more iterations it takes to find the element. That's the downside of linear interpolation.
-    </p>
-    <p>
+	</p>
+	<p>
 Of course, the interpolation may be non-linear too. I remember of a very clever algorithm that effectively predicts the proportion for every sub-range based on the approximating polynomial of any degree. Unfortunately, I don't remember the algorithm itself. If you know what I am talking about, please <a href="mailto:ok@wordsandbuttons.online">let me know</a>.
-    </p>
-    
-    <script language="JavaScript">
-    init_slider(0);
-    init("search");
-    init("search_int");
-    </script>
+	</p>
+
+	<script language="JavaScript">
+	init_slider(0);
+	init("search");
+	init("search_int");
+	</script>
 
 
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
-    <tr>
-    <td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
-        <a href="index.html"><img src="favicon.ico"></a> 
-    </td>
-    <td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
-        &nbsp;&larr; there's more.
-    </td>
-    <td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
-        +
-        <a href="faq.html"><span style="letter-spacing: 1pt;">FAQ</span></a> &
-        <a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
-        <a href="https://twitter.com/wordsandbuttons">Twitter</a> &
-        <a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
-    </td>
-    </tr>
-    </table>
-    </center>
-  </body>
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html"><img src="favicon.ico"></a> 
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+		+
+		<a href="faq.html"><span style="letter-spacing: 1pt;">FAQ</span></a> &
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+		<a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+</body>
 </html>
