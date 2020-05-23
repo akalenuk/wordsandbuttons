@@ -20,14 +20,17 @@ for filename in os.listdir(PAGES_DIR):
 		f = open(PAGES_DIR + "/" + filename, 'rt')
 		content = f.read()
 		f.close
-		print(filename)
 		title = content.split("<title>")[1].split("</title>")[0]
 		description = content.split('<meta name="description" content="')[1].split('">')[0]
 		keywords = content.split('<meta name="keywords" content="')[1].split('">')[0].split(', ')
 		date_link_title_description_keywords  += [(date, filename, title, description, keywords)]
 		all_keywords.update(keywords)
 
-for dlt in sorted(date_link_title_description_keywords)[::-1]:
-	print (dlt)
+date_link_title_description_keywords.sort()
 
-print(all_keywords)
+# index
+f = open('index.html')
+index = f.read()
+f.close()
+
+
