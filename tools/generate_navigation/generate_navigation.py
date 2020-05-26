@@ -3,6 +3,14 @@ import subprocess
 
 PAGES_DIR = "../../pages"
 
+keyword_description = {'mathematics': 'Interactive explanations of mathematical concepts mostly witten with the practicing programmers in mind.',
+'programming': 'Interactive explanations of non-trivial programming ideas.',
+'performance': 'Quizes and demos touching the topic of software performance.',
+'languages': 'Interactive essays about programming languages.',
+'tutorials': 'Interactive tutorials with discoverables.',
+'algorithms': 'Playable demos of different algorithms.',
+'show-and-tell': 'Interactive essays on different math and programming curiosities.'}
+
 date_link_title_description_keywords = []
 all_keywords = set()
 
@@ -27,6 +35,7 @@ for filename in os.listdir(PAGES_DIR):
 		all_keywords.update(keywords)
 
 date_link_title_description_keywords.sort()
+
 
 # index
 f = open('index.html')
