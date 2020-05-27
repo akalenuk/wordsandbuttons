@@ -42,4 +42,16 @@ f = open('index.html')
 index = f.read()
 f.close()
 
+timeline = ""
+for (d, l, t, desc, kwds) in date_link_title_description_keywords[::-1]:
+	timeline += '<h3>' + '<a href="' + l + '">' + t + '</a><sup><span class="timestamp">' + d + '</span></h3>\n'
+	timeline += '<p class="description">' + desc + '</p>\n'
+	timeline += '<p class="links">'
+	for kw in kwds:
+		timeline += '<a href="' + kw + '.html">#' + kw + '</a> '
+	timeline += '</p>\n'
 
+index = index.replace('<div id="timeline"></div>', '\n' + timeline + '\n')
+f = open('_index.html', 'w')
+f.write(index)
+f.close
