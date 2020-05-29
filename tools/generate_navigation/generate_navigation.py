@@ -7,9 +7,12 @@ keyword_description = {'mathematics': 'Interactive explanations of mathematical 
 'programming': 'Interactive explanations of non-trivial programming ideas.',
 'performance': 'Quizes and demos touching the topic of software performance.',
 'languages': 'Interactive essays about programming languages.',
-'tutorials': 'Interactive tutorials with discoverables.',
+'tutorials': 'Tutorials with clickable, draggable, and discoverable things.',
 'algorithms': 'Playable demos of different algorithms.',
 'show-and-tell': 'Interactive essays on different math and programming curiosities.'}
+
+index_title = 'Hello, world!'
+index_description = 'This is <i>Words and Buttons Online</i> — a growing collection of&nbsp;interactive tutorials, guides and quizzes about maths, algorithms, and programming.'
 
 date_link_title_description_keywords = []
 all_keywords = set()
@@ -41,19 +44,51 @@ date_link_title_description_keywords.sort()
 
 # index
 f = open('index.template')
-index = f.read()
+template = f.read()
 f.close()
 
-timeline = ""
+index = '%s' % template
+
+menu = '<p class="links">'
+for kw in sorted(list(all_keywords)):
+	menu += '<nobr><a style="padding-right: 12pt;" href="' + kw + '.html">#' + kw + '</a></nobr> '
+menu += '</p>'
+
+timeline = ''
 for (d, l, t, desc, kwds) in date_link_title_description_keywords[::-1]:
 	timeline += '<p class="title">' + '<a href="' + l + '">' + t + '</a><sup><span class="timestamp">' + d.replace('-', '/') + '</span></p>\n'
 	timeline += '<p class="description">' + desc + '</p>\n'
 	timeline += '<p class="links">'
 	for kw in kwds:
-		timeline += '<a style="padding-right: 12pt;" href="' + kw + '.html">#' + kw + '</a>'
+		timeline += '<a style="padding-right: 12pt;" href="' + kw + '.html">#' + kw + '</a> '
 	timeline += '</p>\n'
 
+index = index.replace('<h1>Title</h1>', '<h1>' + index_title + '</h1>')
+index = index.replace('<p>Description</p>', '<p>' + index_description + '</p>')
+index = index.replace('<div id="menu"></div>', '\n' + menu + '\n')
 index = index.replace('<div id="timeline"></div>', '\n' + timeline + '\n')
+
 f = open('index.html', 'w')
 f.write(index)
 f.close
+
+for title in list(all_keywords):
+	page = '%s' % template
+	timeline = ''
+	for (d, l, t, desc, kwds) in date_link_title_description_keywords[::-1]:
+		if not title in kwds:
+			continue
+		timeline += '<p class="title">' + '<a href="' + l + '">' + t + '</a><sup><span class="timestamp">' + d.replace('-', '/') + '</span></p>\n'
+		timeline += '<p class="description">' + desc + '</p>\n'
+		timeline += '<p class="links">'
+		for kw in kwds:
+			timeline += '<a style="padding-right: 12pt;" href="' + kw + '.html">#' + kw + '</a> '
+		timeline += '</p>\n'
+	page = page.replace('<h1>Title</h1>', '<h1><a href="index.html">W&B</a>: ' + title + '</h1>')
+	page = page.replace('<p>Description</p>', '<p>' + keyword_description[title] + '</p>')
+	page = page.replace('<div id="menu"></div>', '\n' + menu + '\n')
+	page = page.replace('<div id="timeline"></div>', '\n' + timeline + '\n')
+
+	f = open(title + '.html', 'w')
+	f.write(page)
+	f.close
