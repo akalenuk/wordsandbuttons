@@ -6,7 +6,7 @@ PAGES_DIR = "../../pages"
 keyword_description = {'mathematics': 'Interactive explanations of mathematical concepts mostly witten with the practicing programmers in mind.',
 'programming': 'Interactive explanations of non-trivial programming ideas.',
 'performance': 'Quizes and demos touching the topic of software performance.',
-'languages': 'Interactive essays about programming languages.',
+'languages': 'Interactive essays about programming languages. By the way, if you prefer books to blogs, <a href="https://wordsandbuttons.online/SYTYKC.pdf">there is a free book</a> that was originally made from this section.',
 'tutorials': 'Tutorials with clickable, draggable, and discoverable things.',
 'algorithms': 'Playable demos of different algorithms.',
 'show-and-tell': 'Interactive essays on different math and programming curiosities.'}
@@ -84,7 +84,7 @@ for title in list(all_keywords):
 		for kw in kwds:
 			timeline += '<a style="padding-right: 12pt;" href="' + kw + '.html">#' + kw + '</a> '
 		timeline += '</p>\n'
-	page = page.replace('<h1>Title</h1>', '<h1><a href="index.html">W&B</a>: ' + title + '</h1>')
+	page = page.replace('<h1>Title</h1>', '<h1><a href="index.html">Words and Buttons</a>: ' + title + '</h1>')
 	page = page.replace('<p>Description</p>', '<p>' + keyword_description[title] + '</p>')
 	page = page.replace('<div id="menu"></div>', '\n' + menu + '\n')
 	page = page.replace('<div id="timeline"></div>', '\n' + timeline + '\n')
