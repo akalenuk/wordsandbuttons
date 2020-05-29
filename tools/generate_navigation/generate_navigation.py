@@ -7,9 +7,9 @@ keyword_description = {'mathematics': 'Interactive explanations of mathematical 
 'programming': 'Interactive explanations of non-trivial programming ideas.',
 'performance': 'Quizes and demos touching the topic of software performance.',
 'languages': 'Interactive essays about programming languages. By the way, if you prefer books to blogs, <a href="https://wordsandbuttons.online/SYTYKC.pdf">there is a free book</a> that was originally made from this section.',
-'tutorials': 'Tutorials with clickable, draggable, and discoverable things.',
+'tutorials': 'Tutorials with clickable, draggable, and discoverable things. These usually cover broad topics but they still tend to keep as brief as possible while as comprehensive as necessery.',
 'algorithms': 'Playable demos of different algorithms.',
-'show-and-tell': 'Interactive essays on different math and programming curiosities.'}
+'show-and-tell': 'Interactive essays on different math and programming curiosities. Unlike tutorials, these are more focused. Also the topics they cover are generally more obscure. Tutorials are meant to explain well known things to people who do not know them just yet. Show and tell is for showing interesting and unusual things and telling about them.'}
 
 index_title = 'Hello, world!'
 index_description = 'This is <i>Words and Buttons Online</i> — a growing collection of&nbsp;interactive tutorials, guides and quizzes about maths, algorithms, and programming.'
@@ -59,7 +59,7 @@ for (d, l, t, desc, kwds) in date_link_title_description_keywords[::-1]:
 	timeline += '<p class="title">' + '<a href="' + l + '">' + t + '</a><sup><span class="timestamp">' + d.replace('-', '/') + '</span></p>\n'
 	timeline += '<p class="description">' + desc + '</p>\n'
 	timeline += '<p class="links">'
-	for kw in kwds:
+	for kw in sorted(list(kwds)):
 		timeline += '<a style="padding-right: 12pt;" href="' + kw + '.html">#' + kw + '</a> '
 	timeline += '</p>\n'
 
@@ -81,8 +81,11 @@ for title in list(all_keywords):
 		timeline += '<p class="title">' + '<a href="' + l + '">' + t + '</a><sup><span class="timestamp">' + d.replace('-', '/') + '</span></p>\n'
 		timeline += '<p class="description">' + desc + '</p>\n'
 		timeline += '<p class="links">'
-		for kw in kwds:
-			timeline += '<a style="padding-right: 12pt;" href="' + kw + '.html">#' + kw + '</a> '
+		for kw in sorted(list(kwds)):
+			if kw == title:
+				timeline += '<span style="padding-right: 12pt; color: #999;">#' + kw + '</span> '
+			else:
+				timeline += '<a style="padding-right: 12pt;" href="' + kw + '.html">#' + kw + '</a> '
 		timeline += '</p>\n'
 	page = page.replace('<h1>Title</h1>', '<h1><a href="index.html">Words and Buttons</a>: ' + title + '</h1>')
 	page = page.replace('<p>Description</p>', '<p>' + keyword_description[title] + '</p>')
