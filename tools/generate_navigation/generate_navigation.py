@@ -68,7 +68,7 @@ index = index.replace('<p>Description</p>', '<p>' + index_description + '</p>')
 index = index.replace('<div id="menu"></div>', '\n' + menu + '\n')
 index = index.replace('<div id="timeline"></div>', '\n' + timeline + '\n')
 
-f = open('index.html', 'w')
+f = open('../../pages/' + 'index.html', 'w')
 f.write(index)
 f.close
 
@@ -89,6 +89,6 @@ for title in list(all_keywords):
 	page = page.replace('<div id="menu"></div>', '\n' + menu + '\n')
 	page = page.replace('<div id="timeline"></div>', '\n' + timeline + '\n')
 
-	f = open(title + '.html', 'w')
+	f = open('../../pages/' + title + '.html', 'w')
 	f.write(page)
 	f.close
