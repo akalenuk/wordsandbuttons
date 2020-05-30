@@ -44,7 +44,7 @@ for kw in sorted(list(all_keywords)):
 markdown += '\n\n## Pages\n\n'
 
 for (_, l, t, desc, kwds) in date_link_title_description_keywords[::-1]:
-	markdown += '- [' + t + '](https://wordsandbuttons.online/' + l + '.html) ' + desc + '\n'
+	markdown += '- [' + t + '](https://wordsandbuttons.online/' + l + ') ' + desc + '\n'
 	for kw in sorted(list(kwds)):
 		markdown += '<sup>[#' + kw + '](https://wordsandbuttons.online/' + kw + '.html)</sup> '
 	markdown += '\n\n'
