@@ -18,11 +18,11 @@ for file in sorted(files):
         styles = [style.split('{')[0].strip()[1:] for style in styles]
         for style in styles:
             if text.find('"'+style+'"') == -1 and text.find("'"+style+"'") == -1:
-                print '  ' + file + ' has style "' + style + '" unused'
+                print( '  ' + file + ' has style "' + style + '" unused')
     if text.find('</script>') != -1:
         functions = text.split('<script language="JavaScript">')[1].split('</script>')[0]
         functions = [fun.split('(')[0].strip() for fun in functions.split('function ')[1:]]
         for fun in functions:
             if text.count(fun) == 1:
-                print '  ' + file + ' has function "' + fun + '" unused'
+                print( '  ' + file + ' has function "' + fun + '" unused')
 
