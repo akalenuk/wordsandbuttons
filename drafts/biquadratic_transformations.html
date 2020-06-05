@@ -111,6 +111,20 @@ function y_to_client(y){
 	return client_y_center - y * client_y_step;
 }
 
+// linear interpolation by two values in 0 and 1
+function lerp(y1, y2, x) {
+	return y1 * (1. - x) + y2 * x;
+}
+
+// quadratic interpolation by three values in 0, 0.5, and 1 respectively.
+function qerp(y1, y2, y3, x) {
+	// from SymPy: {a: 2.0*y1 - 4.0*y2 + 2.0*y3, b: -3.0*y1 + 4.0*y2 - y3, c: y1}
+	const a = 2.0*y1 - 4.0*y2 + 2.0*y3;
+	const b = -3.0*y1 + 4.0*y2 - y3;
+	const c = y1;
+	return a*x*x + b*x + c;
+}
+
 function draw_grid_on(context){
 	context.font = "16px sans-serif";
 	// axes
