@@ -86,6 +86,8 @@ var y_max = 2.0;
 var line_colors = ["#d64562", "#457fd6", "#62d645"];
 var fill_colors = ["#e3bfc3", "#bfc7e3", "#c4e3bf"];
 
+// points
+const q_points = [[0., 0.0], [0., 0.5], [0., 1.0], [0.5, 0.0], [0.5, 0.5], [0.5, 1.0], [1., 0.0], [1., 0.5], [1., 1.0]];
 
 var client_x_center = w*(0-x_min)/(x_max-x_min);
 var client_x_step = (w/(x_max-x_min));
@@ -144,6 +146,65 @@ function draw_grid_on(context){
 	context.closePath();
 }
 
+function nearest_point(xy, points) {
+	function d(xy1, xy2) {
+		return (xy1[0] - xy2[0])*(xy1[0] - xy2[0]) + (xy1[1] - xy2[1])*(xy1[1] - xy2[1]);
+	}
+	var nearest_i = 0;
+	var nearest_d = d(xy, points[0]);
+	for(var i = 1; i < points.length; ++i) {
+		const di = d(xy, points[i]);
+		if(di < nearest_d) {
+			nearest_d = di;
+			nearest_i = i;
+		}
+	}
+	return nearest_i;
+}
+
+function set_q_points(xy) {
+	const x = client_to_x(Math.max(Math.min(xy[0], w - 1), 0));
+	const y = client_to_y(Math.max(Math.min(xy[1], h -1), 0));
+
+	const i = nearest_point([x, y], q_points);
+	q_points[i][0] = x;
+	q_points[i][1] = y;
+}
+
+function init_plot_q(){
+	var canvas = document.getElementById("plot_q");
+
+	canvas.addEventListener('mousemove', function(e){
+		const canvas_rect = canvas.getBoundingClientRect();
+		if(e.buttons == 1){
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_q_points([x, y]);
+			draw_plot_q();
+		}
+	}, false);
+
+	canvas.addEventListener('mousedown', function(e){
+		const canvas_rect = canvas.getBoundingClientRect();
+		const x = e.clientX - canvas_rect.left;
+		const y = e.clientY - canvas_rect.top;
+		set_q_points([x, y]);
+		draw_plot_q();
+	}, false);
+
+	canvas.addEventListener('mouseleave', function(e){
+		if(e.buttons == 1){
+			const canvas_rect = canvas.getBoundingClientRect();
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_q_points([x, y]);
+		}
+		draw_plot_q();
+	}, false);
+
+	draw_plot_q();
+}
+
 function draw_plot_q() {
 	plot = document.getElementById("plot_q");
 	var context = plot.getContext("2d");
@@ -154,7 +215,18 @@ function draw_plot_q() {
 
 	// grid
 	draw_grid_on(context);
+
+	// points
+	context.strokeStyle = line_colors[0];
+	for(var i = 0; i < 9; ++i) {
+		x = x_to_client(q_points[i][0]);
+		y = y_to_client(q_points[i][1]);
+		context.beginPath();
+		context.arc(x, y, 4, 0, 2*Math.PI);
+		context.stroke();
+		context.closePath();
 	}
+}
 	</script>
 </head>
 <body>
@@ -172,7 +244,7 @@ Biquadratic transformations
 ...
 	</p>
 	<script language="JavaScript">
-draw_plot_q()
+init_plot_q()
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
