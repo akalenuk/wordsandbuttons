@@ -72,6 +72,89 @@ u {
 }
 	</style>
 	<script language="JavaScript">
+// client
+var w = 640.0;
+var h = 512.0;
+
+// visible region
+var x_min = -0.5;
+var y_min = -0.5;
+var x_max = 2.5;
+var y_max = 2.0;
+
+// colors
+var line_colors = ["#d64562", "#457fd6", "#62d645"];
+var fill_colors = ["#e3bfc3", "#bfc7e3", "#c4e3bf"];
+
+
+var client_x_center = w*(0-x_min)/(x_max-x_min);
+var client_x_step = (w/(x_max-x_min));
+
+var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+var client_y_step = (h/(y_max-y_min));
+
+function client_to_x(client_x){
+	return (client_x - client_x_center) / client_x_step;
+}
+
+function client_to_y(client_y){
+	return (client_y_center - client_y) / client_y_step;
+}
+
+function x_to_client(x){
+	return x * client_x_step + client_x_center;
+}
+
+function y_to_client(y){
+	return client_y_center - y * client_y_step;
+}
+
+function draw_grid_on(context){
+	context.font = "16px sans-serif";
+	// axes
+	context.beginPath();
+	context.moveTo(0, client_y_center);
+	context.lineTo(w, client_y_center);
+	context.lineTo(w - 12, client_y_center - 5);
+	context.moveTo(w, client_y_center);
+	context.lineTo(w - 12, client_y_center + 5);
+	context.moveTo(client_x_center, h);
+	context.lineTo(client_x_center, 0);
+	context.lineTo(client_x_center - 5, 12);
+	context.moveTo(client_x_center, 0);
+	context.lineTo(client_x_center + 5, 12);
+	context.fillStyle="#000000";
+	// numbers
+	for(var i = Math.floor(x_min) + 1; i <= x_max - 1; i++){
+		context.moveTo(client_x_center + i*client_x_step, client_y_center);
+		context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+		context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+	}
+	for(var i = Math.floor(y_min) + 1; i <= y_max - 1; i++){
+		context.moveTo(client_x_center, client_y_center - i*client_y_step);
+		context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+		context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+	}
+	// letters
+	context.fillText("X1", client_x_center + x_max*client_x_step - 24, client_y_center - 16);
+	context.fillText("X2", client_x_center - 30, client_y_center - y_max*client_y_step + 16);
+
+	context.strokeStyle="#000000";
+	context.stroke();
+	context.closePath();
+}
+
+function draw_plot_q() {
+	plot = document.getElementById("plot_q");
+	var context = plot.getContext("2d");
+
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// grid
+	draw_grid_on(context);
+	}
 	</script>
 </head>
 <body>
@@ -83,27 +166,14 @@ Biquadratic transformations
 ...
 	</p>
 
-	<table><tr>
-	<td>
-	<pre>
-...
-	</pre>
-	</td></tr></table>
-	<p>
-	<div id="shown_1">
-		<button type="button" onclick="show(1)">Yes</button>
-		<button type="button" onclick="show(1)">No</button>
-	</div>
-	<div id="hidden_1" style="display:none;">
-		<p>
-...
-		</p>
-	</div>
+	<canvas id="plot_q" width=640 height=512></canvas>
 
 	<p>
 ...
 	</p>
-
+	<script language="JavaScript">
+draw_plot_q()
+	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
