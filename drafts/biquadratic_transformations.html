@@ -126,15 +126,15 @@ function qerp(y1, y2, y3, x) {
 }
 
 function transform(points, x, y) {
-    const x1 = qert(points[0][0], points[1][0], points[2][0], x);
-    const x2 = qert(points[4][0], points[5][0], points[6][0], x);
-    const x3 = qert(points[7][0], points[8][0], points[9][0], x);
-    const x_transformed = qert(x1, x2, x3, y);
-    const y1 = qert(points[0][1], points[1][1], points[2][1], x);
-    const y2 = qert(points[4][1], points[5][1], points[6][1], x);
-    const y3 = qert(points[7][1], points[8][1], points[9][1], x);
-    const y_transformed = qert(y1, y2, y3, y);
-    return (x_transformed, y_transformed);
+    const x1 = qerp(points[0][0], points[1][0], points[2][0], x);
+    const x2 = qerp(points[3][0], points[4][0], points[5][0], x);
+    const x3 = qerp(points[6][0], points[7][0], points[8][0], x);
+    const x_transformed = qerp(x1, x2, x3, y);
+    const y1 = qerp(points[0][1], points[1][1], points[2][1], x);
+    const y2 = qerp(points[3][1], points[4][1], points[5][1], x);
+    const y3 = qerp(points[6][1], points[7][1], points[8][1], x);
+    const y_transformed = qerp(y1, y2, y3, y);
+    return [x_transformed, y_transformed];
 }
 
 function draw_grid_on(context){
@@ -245,10 +245,40 @@ function draw_plot_q() {
 	// points
 	context.strokeStyle = line_colors[0];
 	for(var i = 0; i < 9; ++i) {
-		x = x_to_client(q_points[i][0]);
-		y = y_to_client(q_points[i][1]);
+		const x = x_to_client(q_points[i][0]);
+		const y = y_to_client(q_points[i][1]);
 		context.beginPath();
 		context.arc(x, y, 4, 0, 2*Math.PI);
+		context.stroke();
+		context.closePath();
+	}
+
+	// singular cube
+	for(var i = 0; i <= 1.; i += 0.25) {
+		// horizontal
+		context.beginPath();
+		for(var j = 0; j <= 1.; j+=1./128.) {
+			const xy = transform(q_points, i, j);
+			const x_client = x_to_client(xy[0]);
+			const y_client = y_to_client(xy[1]);
+			if(j == 0)
+				context.moveTo(x_client, y_client);
+			else
+				context.lineTo(x_client, y_client);
+		}
+		context.stroke();
+		context.closePath();
+		// vertical
+		context.beginPath();
+		for(var j = 0; j <= 1.; j+=1./128.) {
+			const xy = transform(q_points, j, i);
+			const x_client = x_to_client(xy[0]);
+			const y_client = y_to_client(xy[1]);
+			if(j == 0)
+				context.moveTo(x_client, y_client);
+			else
+				context.lineTo(x_client, y_client);
+		}
 		context.stroke();
 		context.closePath();
 	}
