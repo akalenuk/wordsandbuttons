@@ -89,7 +89,7 @@ var fill_colors = ["#d97386", "#71d6b1", "#b6d671"];
 // points
 const l_points = [[0., 0.0], [0., 1.0], [1., 0.0], [1., 1.0]];
 const q_points = [[0., 0.0], [0., 0.5], [0., 1.0], [0.5, 0.0], [0.5, 0.5], [0.5, 1.0], [1., 0.0], [1., 0.5], [1., 1.0]];
-const ql_points = [[0., 0.0], [0., 0.5], [0., 1.0], [1., 0.0], [1., 0.5], [1., 1.0]];
+const ql_points = [[0., 0.0], [0., 1.0], [0.5, 0.0], [0.5, 1.0], [1., 0.0], [1., 1.0]];
 
 
 var client_x_center = w*(0-x_min)/(x_max-x_min);
@@ -151,12 +151,14 @@ function q_transform(points, x, y) {
 }
 
 function ql_transform(points, x, y) {
-	const x1 = qerp(points[0][0], points[1][0], points[2][0], x);
-	const x2 = qerp(points[3][0], points[4][0], points[5][0], x);
-	const x_transformed = lerp(x1, x2, y);
-	const y1 = qerp(points[0][1], points[1][1], points[2][1], x);
-	const y2 = qerp(points[3][1], points[4][1], points[5][1], x);
-	const y_transformed = lerp(y1, y2, y);
+	const x1 = lerp(points[0][0], points[1][0], x);
+	const x2 = lerp(points[2][0], points[3][0], x);
+	const x3 = lerp(points[4][0], points[5][0], x);
+	const x_transformed = qerp(x1, x2, x3, y);
+	const y1 = lerp(points[0][1], points[1][1], x);
+	const y2 = lerp(points[2][1], points[3][1], x);
+	const y3 = lerp(points[4][1], points[5][1], x);
+	const y_transformed = qerp(y1, y2, y3, y);
 	return [x_transformed, y_transformed];
 }
 
