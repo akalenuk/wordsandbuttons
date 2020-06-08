@@ -268,20 +268,11 @@ function draw_plot(name, points, transform, color_scheme_no) {
 	context.fillRect(0, 0, w, h);
 
 	// grid
+	context.lineWidth = 1;
 	draw_grid_on(context);
 
-	// points
-	context.strokeStyle = line_colors[color_scheme_no];
-	for(var i = 0; i < points.length; ++i) {
-		const x = x_to_client(points[i][0]);
-		const y = y_to_client(points[i][1]);
-		context.beginPath();
-		context.arc(x, y, 4, 0, 2*Math.PI);
-		context.stroke();
-		context.closePath();
-	}
-
 	// singular cube
+	context.lineWidth = 2;	
 	context.strokeStyle = fill_colors[color_scheme_no];
 	for(var i = 0; i <= 1.; i += 0.125) {
 		// horizontal
@@ -309,6 +300,19 @@ function draw_plot(name, points, transform, color_scheme_no) {
 				context.lineTo(x_client, y_client);
 		}
 		context.stroke();
+		context.closePath();
+	}
+	
+	// points
+	context.strokeStyle = line_colors[color_scheme_no];
+	context.fillStyle = fill_colors[color_scheme_no];
+	for(var i = 0; i < points.length; ++i) {
+		const x = x_to_client(points[i][0]);
+		const y = y_to_client(points[i][1]);
+		context.beginPath();
+		context.arc(x, y, 4, 0, 2*Math.PI);
+		context.stroke();
+		context.fill();
 		context.closePath();
 	}
 }
