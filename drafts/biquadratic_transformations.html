@@ -89,6 +89,8 @@ var fill_colors = ["#d97386", "#71d6b1", "#b6d671"];
 // points
 const l_points = [[0., 0.0], [0., 1.0], [1., 0.0], [1., 1.0]];
 const q_points = [[0., 0.0], [0., 0.5], [0., 1.0], [0.5, 0.0], [0.5, 0.5], [0.5, 1.0], [1., 0.0], [1., 0.5], [1., 1.0]];
+const ql_points = [[0., 0.0], [0., 0.5], [0., 1.0], [1., 0.0], [1., 0.5], [1., 1.0]];
+
 
 var client_x_center = w*(0-x_min)/(x_max-x_min);
 var client_x_step = (w/(x_max-x_min));
@@ -147,6 +149,17 @@ function q_transform(points, x, y) {
 	const y_transformed = qerp(y1, y2, y3, y);
 	return [x_transformed, y_transformed];
 }
+
+function ql_transform(points, x, y) {
+	const x1 = qerp(points[0][0], points[1][0], points[2][0], x);
+	const x2 = qerp(points[3][0], points[4][0], points[5][0], x);
+	const x_transformed = lerp(x1, x2, y);
+	const y1 = qerp(points[0][1], points[1][1], points[2][1], x);
+	const y2 = qerp(points[3][1], points[4][1], points[5][1], x);
+	const y_transformed = lerp(y1, y2, y);
+	return [x_transformed, y_transformed];
+}
+
 
 function draw_grid_on(context){
 	context.font = "16px sans-serif";
@@ -383,6 +396,94 @@ function draw_plot_q() {
 		context.closePath();
 	}
 }
+
+function init_plot_ql(){
+	var canvas = document.getElementById("plot_ql");
+
+	canvas.addEventListener('mousemove', function(e){
+		const canvas_rect = canvas.getBoundingClientRect();
+		if(e.buttons == 1){
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_points(ql_points, x, y);
+			draw_plot_ql();
+		}
+	}, false);
+
+	canvas.addEventListener('mousedown', function(e){
+		const canvas_rect = canvas.getBoundingClientRect();
+		const x = e.clientX - canvas_rect.left;
+		const y = e.clientY - canvas_rect.top;
+		set_points(ql_points, x, y);
+		draw_plot_ql();
+	}, false);
+
+	canvas.addEventListener('mouseleave', function(e){
+		if(e.buttons == 1){
+			const canvas_rect = canvas.getBoundingClientRect();
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_points(ql_points, x, y);
+		}
+		draw_plot_ql();
+	}, false);
+
+	draw_plot_ql();
+}
+
+function draw_plot_ql() {
+	plot = document.getElementById("plot_ql");
+	var context = plot.getContext("2d");
+
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// grid
+	draw_grid_on(context);
+
+	// points
+	context.strokeStyle = line_colors[2];
+	for(var i = 0; i < ql_points.length; ++i) {
+		const x = x_to_client(ql_points[i][0]);
+		const y = y_to_client(ql_points[i][1]);
+		context.beginPath();
+		context.arc(x, y, 4, 0, 2*Math.PI);
+		context.stroke();
+		context.closePath();
+	}
+
+	// singular cube
+	context.strokeStyle = fill_colors[2];
+	for(var i = 0; i <= 1.; i += 0.125) {
+		// horizontal
+		context.beginPath();
+		for(var j = 0; j <= 1.; j+=1./128.) {
+			const xy = ql_transform(ql_points, i, j);
+			const x_client = x_to_client(xy[0]);
+			const y_client = y_to_client(xy[1]);
+			if(j == 0)
+				context.moveTo(x_client, y_client);
+			else
+				context.lineTo(x_client, y_client);
+		}
+		context.stroke();
+		context.closePath();
+		// vertical
+		context.beginPath();
+		for(var j = 0; j <= 1.; j+=1./128.) {
+			const xy = ql_transform(ql_points, j, i);
+			const x_client = x_to_client(xy[0]);
+			const y_client = y_to_client(xy[1]);
+			if(j == 0)
+				context.moveTo(x_client, y_client);
+			else
+				context.lineTo(x_client, y_client);
+		}
+		context.stroke();
+		context.closePath();
+	}
+}
 	</script>
 </head>
 <body>
@@ -405,9 +506,17 @@ Biquadratic transformations
 	<p>
 ...
 	</p>
+	
+	<canvas id="plot_ql" width=640 height=512></canvas>
+
+	<p>
+...
+	</p>
+	
 	<script language="JavaScript">
 init_plot_l();
 init_plot_q();
+init_plot_ql();
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
