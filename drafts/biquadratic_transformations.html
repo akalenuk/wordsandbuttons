@@ -221,16 +221,17 @@ function set_points(points, client_x, client_y) {
 	points[i][1] = y;
 }
 
-function init_plot_l(){
-	var canvas = document.getElementById("plot_l");
+// e.g. init_plot("plot_ql", ql_point, ql_transform);
+function init_plot(name, points, transform, color_scheme_no){
+	var canvas = document.getElementById(name);
 
 	canvas.addEventListener('mousemove', function(e){
 		const canvas_rect = canvas.getBoundingClientRect();
 		if(e.buttons == 1){
 			const x = e.clientX - canvas_rect.left;
 			const y = e.clientY - canvas_rect.top;
-			set_points(l_points, x, y);
-			draw_plot_l();
+			set_points(points, x, y);
+			draw_plot(name, points, transform, color_scheme_no);
 		}
 	}, false);
 
@@ -238,8 +239,8 @@ function init_plot_l(){
 		const canvas_rect = canvas.getBoundingClientRect();
 		const x = e.clientX - canvas_rect.left;
 		const y = e.clientY - canvas_rect.top;
-		set_points(l_points, x, y);
-		draw_plot_l();
+		set_points(points, x, y);
+		draw_plot(name, points, transform, color_scheme_no);
 	}, false);
 
 	canvas.addEventListener('mouseleave', function(e){
@@ -247,16 +248,17 @@ function init_plot_l(){
 			const canvas_rect = canvas.getBoundingClientRect();
 			const x = e.clientX - canvas_rect.left;
 			const y = e.clientY - canvas_rect.top;
-			set_points(l_points, x, y);
+			set_points(points, x, y);
 		}
-		draw_plot_l();
+		draw_plot(name, points, transform, color_scheme_no);
 	}, false);
 
-	draw_plot_l();
+	draw_plot(name, points, transform, color_scheme_no);
 }
 
-function draw_plot_l() {
-	plot = document.getElementById("plot_l");
+// e.g. draw_plot("plot_ql", ql_points, ql_transform, 2);
+function draw_plot(name, points, transform, color_scheme_no) {
+	plot = document.getElementById(name);
 	var context = plot.getContext("2d");
 
 	// background
@@ -267,10 +269,10 @@ function draw_plot_l() {
 	draw_grid_on(context);
 
 	// points
-	context.strokeStyle = line_colors[0];
-	for(var i = 0; i < 4; ++i) {
-		const x = x_to_client(l_points[i][0]);
-		const y = y_to_client(l_points[i][1]);
+	context.strokeStyle = line_colors[color_scheme_no];
+	for(var i = 0; i < points.length; ++i) {
+		const x = x_to_client(points[i][0]);
+		const y = y_to_client(points[i][1]);
 		context.beginPath();
 		context.arc(x, y, 4, 0, 2*Math.PI);
 		context.stroke();
@@ -278,12 +280,12 @@ function draw_plot_l() {
 	}
 
 	// singular cube
-	context.strokeStyle = fill_colors[0];
+	context.strokeStyle = fill_colors[color_scheme_no];
 	for(var i = 0; i <= 1.; i += 0.125) {
 		// horizontal
 		context.beginPath();
 		for(var j = 0; j <= 1.; j+=1./128.) {
-			const xy = l_transform(l_points, i, j);
+			const xy = transform(points, i, j);
 			const x_client = x_to_client(xy[0]);
 			const y_client = y_to_client(xy[1]);
 			if(j == 0)
@@ -296,183 +298,7 @@ function draw_plot_l() {
 		// vertical
 		context.beginPath();
 		for(var j = 0; j <= 1.; j+=1./128.) {
-			const xy = l_transform(l_points, j, i);
-			const x_client = x_to_client(xy[0]);
-			const y_client = y_to_client(xy[1]);
-			if(j == 0)
-				context.moveTo(x_client, y_client);
-			else
-				context.lineTo(x_client, y_client);
-		}
-		context.stroke();
-		context.closePath();
-	}
-}
-
-function init_plot_q(){
-	var canvas = document.getElementById("plot_q");
-
-	canvas.addEventListener('mousemove', function(e){
-		const canvas_rect = canvas.getBoundingClientRect();
-		if(e.buttons == 1){
-			const x = e.clientX - canvas_rect.left;
-			const y = e.clientY - canvas_rect.top;
-			set_points(q_points, x, y);
-			draw_plot_q();
-		}
-	}, false);
-
-	canvas.addEventListener('mousedown', function(e){
-		const canvas_rect = canvas.getBoundingClientRect();
-		const x = e.clientX - canvas_rect.left;
-		const y = e.clientY - canvas_rect.top;
-		set_points(q_points, x, y);
-		draw_plot_q();
-	}, false);
-
-	canvas.addEventListener('mouseleave', function(e){
-		if(e.buttons == 1){
-			const canvas_rect = canvas.getBoundingClientRect();
-			const x = e.clientX - canvas_rect.left;
-			const y = e.clientY - canvas_rect.top;
-			set_points(q_points, x, y);
-		}
-		draw_plot_q();
-	}, false);
-
-	draw_plot_q();
-}
-
-function draw_plot_q() {
-	plot = document.getElementById("plot_q");
-	var context = plot.getContext("2d");
-
-	// background
-	context.fillStyle="#eeeeee";
-	context.fillRect(0, 0, w, h);
-
-	// grid
-	draw_grid_on(context);
-
-	// points
-	context.strokeStyle = line_colors[1];
-	for(var i = 0; i < 9; ++i) {
-		const x = x_to_client(q_points[i][0]);
-		const y = y_to_client(q_points[i][1]);
-		context.beginPath();
-		context.arc(x, y, 4, 0, 2*Math.PI);
-		context.stroke();
-		context.closePath();
-	}
-
-	// singular cube
-	context.strokeStyle = fill_colors[1];
-	for(var i = 0; i <= 1.; i += 0.125) {
-		// horizontal
-		context.beginPath();
-		for(var j = 0; j <= 1.; j+=1./128.) {
-			const xy = q_transform(q_points, i, j);
-			const x_client = x_to_client(xy[0]);
-			const y_client = y_to_client(xy[1]);
-			if(j == 0)
-				context.moveTo(x_client, y_client);
-			else
-				context.lineTo(x_client, y_client);
-		}
-		context.stroke();
-		context.closePath();
-		// vertical
-		context.beginPath();
-		for(var j = 0; j <= 1.; j+=1./128.) {
-			const xy = q_transform(q_points, j, i);
-			const x_client = x_to_client(xy[0]);
-			const y_client = y_to_client(xy[1]);
-			if(j == 0)
-				context.moveTo(x_client, y_client);
-			else
-				context.lineTo(x_client, y_client);
-		}
-		context.stroke();
-		context.closePath();
-	}
-}
-
-function init_plot_ql(){
-	var canvas = document.getElementById("plot_ql");
-
-	canvas.addEventListener('mousemove', function(e){
-		const canvas_rect = canvas.getBoundingClientRect();
-		if(e.buttons == 1){
-			const x = e.clientX - canvas_rect.left;
-			const y = e.clientY - canvas_rect.top;
-			set_points(ql_points, x, y);
-			draw_plot_ql();
-		}
-	}, false);
-
-	canvas.addEventListener('mousedown', function(e){
-		const canvas_rect = canvas.getBoundingClientRect();
-		const x = e.clientX - canvas_rect.left;
-		const y = e.clientY - canvas_rect.top;
-		set_points(ql_points, x, y);
-		draw_plot_ql();
-	}, false);
-
-	canvas.addEventListener('mouseleave', function(e){
-		if(e.buttons == 1){
-			const canvas_rect = canvas.getBoundingClientRect();
-			const x = e.clientX - canvas_rect.left;
-			const y = e.clientY - canvas_rect.top;
-			set_points(ql_points, x, y);
-		}
-		draw_plot_ql();
-	}, false);
-
-	draw_plot_ql();
-}
-
-function draw_plot_ql() {
-	plot = document.getElementById("plot_ql");
-	var context = plot.getContext("2d");
-
-	// background
-	context.fillStyle="#eeeeee";
-	context.fillRect(0, 0, w, h);
-
-	// grid
-	draw_grid_on(context);
-
-	// points
-	context.strokeStyle = line_colors[2];
-	for(var i = 0; i < ql_points.length; ++i) {
-		const x = x_to_client(ql_points[i][0]);
-		const y = y_to_client(ql_points[i][1]);
-		context.beginPath();
-		context.arc(x, y, 4, 0, 2*Math.PI);
-		context.stroke();
-		context.closePath();
-	}
-
-	// singular cube
-	context.strokeStyle = fill_colors[2];
-	for(var i = 0; i <= 1.; i += 0.125) {
-		// horizontal
-		context.beginPath();
-		for(var j = 0; j <= 1.; j+=1./128.) {
-			const xy = ql_transform(ql_points, i, j);
-			const x_client = x_to_client(xy[0]);
-			const y_client = y_to_client(xy[1]);
-			if(j == 0)
-				context.moveTo(x_client, y_client);
-			else
-				context.lineTo(x_client, y_client);
-		}
-		context.stroke();
-		context.closePath();
-		// vertical
-		context.beginPath();
-		for(var j = 0; j <= 1.; j+=1./128.) {
-			const xy = ql_transform(ql_points, j, i);
+			const xy = transform(points, j, i);
 			const x_client = x_to_client(xy[0]);
 			const y_client = y_to_client(xy[1]);
 			if(j == 0)
@@ -514,9 +340,9 @@ Biquadratic transformations
 	</p>
 	
 	<script language="JavaScript">
-init_plot_l();
-init_plot_q();
-init_plot_ql();
+init_plot("plot_l", l_points, l_transform, 0);
+init_plot("plot_q", q_points, q_transform, 1);
+init_plot("plot_ql", ql_points, ql_transform, 2);
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
