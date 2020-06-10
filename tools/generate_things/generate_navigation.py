@@ -75,6 +75,15 @@ f.close
 for title in list(all_keywords):
 	page = '%s' % template
 	timeline = ''
+
+	menu = '<p class="links">'
+	for kw in sorted(list(all_keywords)):
+		if kw == title:
+			menu += '<nobr><span style="padding-right: 12pt; color: #999;">#' + kw + '</span></nobr> '
+		else:
+			menu += '<nobr><a style="padding-right: 12pt;" href="' + kw + '.html">#' + kw + '</a></nobr> '
+	menu += '</p>'
+
 	for (d, l, t, desc, kwds) in date_link_title_description_keywords[::-1]:
 		if not title in kwds:
 			continue
