@@ -65,6 +65,13 @@ button {
 	font-size: 16pt;
 }
 
+input[type="checkbox"] {
+	height: 16pt;
+	width: 16pt;
+	font-size: 16pt;
+	margin-bottom: 16pt;
+}
+
 u {
 	border-bottom: 1px dotted #000;
 	text-decoration: none;
@@ -86,9 +93,12 @@ var y_max = 2.0;
 var colors = ["#d64562", "#457fd6", "#62d645"];
 
 // points
-const l_points = [[0., 0.0], [0., 1.0], [1., 0.0], [1., 1.0]];
-const q_points = [[0., 0.0], [0., 0.5], [0., 1.0], [0.5, 0.0], [0.5, 0.5], [0.5, 1.0], [1., 0.0], [1., 0.5], [1., 1.0]];
-const ql_points = [[0., 0.0], [0., 1.0], [0.5, 0.0], [0.5, 1.0], [1., 0.0], [1., 1.0]];
+const l_points_original = [[0., 0.0], [0., 1.0], [1., 0.0], [1., 1.0]];
+const q_points_original = [[0., 0.0], [0., 0.5], [0., 1.0], [0.5, 0.0], [0.5, 0.5], [0.5, 1.0], [1., 0.0], [1., 0.5], [1., 1.0]];
+const ql_points_original = [[0., 0.0], [0., 1.0], [0.5, 0.0], [0.5, 1.0], [1., 0.0], [1., 1.0]];
+var l_points = [[0., 0.0], [0., 1.0], [1., 0.0], [1., 1.0]];
+var q_points = [[0., 0.0], [0., 0.5], [0., 1.0], [0.5, 0.0], [0.5, 0.5], [0.5, 1.0], [1., 0.0], [1., 0.5], [1., 1.0]];
+var ql_points = [[0., 0.0], [0., 1.0], [0.5, 0.0], [0.5, 1.0], [1., 0.0], [1., 1.0]];
 
 
 var client_x_center = w*(0-x_min)/(x_max-x_min);
@@ -222,8 +232,22 @@ function set_points(points, client_x, client_y) {
 	points[i][1] = y;
 }
 
-// e.g. init_plot("plot_ql", ql_point, ql_transform);
-function init_plot(name, points, transform, color_scheme_no){
+function draw_arrow(context, x1, y1, x2, y2, color) {
+	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - (y2 - y1) * 4.3 / d - (x2 - x1) * 16.7 / d, y2 - (y2 - y1) * 16.7 / d + (x2 - x1) * 4.3 / d);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + (y2 - y1) * 4.3 / d - (x2 - x1) * 16.7 / d, y2 - (y2 - y1) * 16.7 / d - (x2 - x1) * 4.3 / d);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
+}
+
+// e.g. init_plot("plot_ql", ql_point, ql_points_original, ql_transform);
+function init_plot(name, points, points_original, transform, color_scheme_no){
 	var canvas = document.getElementById(name);
 
 	canvas.addEventListener('mousemove', function(e){
@@ -232,7 +256,7 @@ function init_plot(name, points, transform, color_scheme_no){
 			const x = e.clientX - canvas_rect.left;
 			const y = e.clientY - canvas_rect.top;
 			set_points(points, x, y);
-			draw_plot(name, points, transform, color_scheme_no);
+			draw_plot(name, points, points_original, transform, color_scheme_no);
 		}
 	}, false);
 
@@ -241,7 +265,7 @@ function init_plot(name, points, transform, color_scheme_no){
 		const x = e.clientX - canvas_rect.left;
 		const y = e.clientY - canvas_rect.top;
 		set_points(points, x, y);
-		draw_plot(name, points, transform, color_scheme_no);
+		draw_plot(name, points, points_original, transform, color_scheme_no);
 	}, false);
 
 	canvas.addEventListener('mouseleave', function(e){
@@ -251,14 +275,14 @@ function init_plot(name, points, transform, color_scheme_no){
 			const y = e.clientY - canvas_rect.top;
 			set_points(points, x, y);
 		}
-		draw_plot(name, points, transform, color_scheme_no);
+		draw_plot(name, points, points_original, transform, color_scheme_no);
 	}, false);
 
-	draw_plot(name, points, transform, color_scheme_no);
+	draw_plot(name, points, points_original, transform, color_scheme_no);
 }
 
-// e.g. draw_plot("plot_ql", ql_points, ql_transform, 2);
-function draw_plot(name, points, transform, color_scheme_no) {
+// e.g. draw_plot("plot_ql", ql_points, ql_points_original, ql_transform, 2);
+function draw_plot(name, points, points_original, transform, color_scheme_no) {
 	plot = document.getElementById(name);
 	var context = plot.getContext("2d");
 
@@ -271,7 +295,36 @@ function draw_plot(name, points, transform, color_scheme_no) {
 	draw_grid_on(context);
 
 	// singular cube
-	context.lineWidth = 2;	
+	if(document.getElementById("draw_singular_cube").checked) {
+		context.lineWidth = 2;
+		context.strokeStyle = colors[color_scheme_no];
+		context.setLineDash([4, 4]);
+		context.beginPath();
+		context.moveTo(x_to_client(0.), y_to_client(0.));
+		context.lineTo(x_to_client(1.), y_to_client(0.));
+		context.lineTo(x_to_client(1.), y_to_client(1.));
+		context.lineTo(x_to_client(0.), y_to_client(1.));
+		context.lineTo(x_to_client(0.), y_to_client(0.));
+		context.stroke();
+		context.closePath();
+		context.setLineDash([]);
+	}
+
+	if(document.getElementById("draw_arrows").checked) {
+		context.lineWidth = 1;
+		context.setLineDash([4, 4]);
+		for(var i = 0; i < points.length; ++i) {
+			const x0 = x_to_client(points_original[i][0]);
+			const y0 = y_to_client(points_original[i][1]);
+			const x = x_to_client(points[i][0]);
+			const y = y_to_client(points[i][1]);
+			draw_arrow(context, x0, y0, x, y, colors[color_scheme_no]);
+		}
+		context.setLineDash([]);
+	}
+
+	// transformed cube
+	context.lineWidth = 2;
 	context.strokeStyle = colors[color_scheme_no];
 	for(var i = 0; i <= 1.; i += 0.125) {
 		// horizontal
@@ -301,7 +354,7 @@ function draw_plot(name, points, transform, color_scheme_no) {
 		context.stroke();
 		context.closePath();
 	}
-	
+
 	// points
 	context.strokeStyle = colors[color_scheme_no];
 	context.fillStyle = colors[color_scheme_no];
@@ -315,6 +368,12 @@ function draw_plot(name, points, transform, color_scheme_no) {
 		context.closePath();
 	}
 }
+
+function draw_all_plots() {
+	draw_plot("plot_l", l_points, l_points_original, l_transform, 0);
+	draw_plot("plot_q", q_points, q_points_original, q_transform, 1);
+	draw_plot("plot_ql", ql_points, ql_points_original, ql_transform, 2);
+}
 	</script>
 </head>
 <body>
@@ -327,6 +386,9 @@ This is a crossover episode between <a href="https://wordsandbuttons.online/poly
 	</p>
 
 	<canvas id="plot_l" width=640 height=512></canvas>
+	<br>
+	<input type="checkbox" id="draw_singular_cube" onclick="draw_all_plots();" checked="true"/><label for="draw_singular_cube">draw singular cube; </label>
+	<input type="checkbox" id="draw_arrows" onclick="draw_all_plots();" checked="true"/><label for="draw_arrows">draw arrows. </label>
 
 	<p>
 ...
@@ -345,9 +407,9 @@ This is a crossover episode between <a href="https://wordsandbuttons.online/poly
 	</p>
 	
 	<script language="JavaScript">
-init_plot("plot_l", l_points, l_transform, 0);
-init_plot("plot_q", q_points, q_transform, 1);
-init_plot("plot_ql", ql_points, ql_transform, 2);
+init_plot("plot_l", l_points, l_points_original, l_transform, 0);
+init_plot("plot_q", q_points, q_points_original, q_transform, 1);
+init_plot("plot_ql", ql_points, ql_points_original, ql_transform, 2);
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
