@@ -54,7 +54,7 @@ td {
 	padding: 6pt 12pt 6pt 12pt;
 	font-size: 16pt;
 	border: 1px solid black;
-	width: 600pt;
+	width: 505pt;
 }
 
 button {
@@ -418,8 +418,47 @@ It doesn't bring much mathematical meaning into the whole business of transofrma
 In this page, all the transformations are shown from a singular cube on a plane to a particular figure on plane given by some set of points.
 	</p>
 	<h2>
-Bi-linear transformation
+Bilinear transformation
 	</h2>
+	<p>
+Ok, so you want to translate a piece of space guided by 4 points. Wherever these points go, the neighbors will follow. This iplies that for every coordinate's equation you'd have to have at least 4 coefficients too. For the polynomial transformation, this means 4x4 system of linear equations. Which is fine but it gets messier as you add more points or dimensions.
+	</p>
+	<p>
+The idea of bilinear transofrmation, or bi-anything, or even whatever-anything for that matter, is: you can decompose an n-dimensional translation into n 1-dimensional ones.
+	</p>
+	<p>
+For the bilinear transofrmation it works in the most obvious way and that's why we're starting with it. Let's say we have a function that linearly intrpolates from one value to another as the parameter travels from 0 to 1. Here it is:
+	</p>
+	<table>
+	<tr><td><pre>
+// linear interpolation by two values in 0 and 1
+function lerp(y1, y2, x) {
+	return y1 * (1. - x) + y2 * x;
+}
+	</pre></td></tr>
+	</table>
+	<p>
+Just to reiterate, this is a linear interpolating function. You give it two values and the parameter. When the parameter is 0, it returns the first value, when the paramter is 1, — the second one. When it's something in between, it returns something in between but in such way that all these inbetweeners form a straight line.
+	</p>
+	<p>
+Now you can use two of these to compose a bilinear interpolation. It will also give you back the values you supply it with in points (0, 0), (1, 0), (1, 1) and (1, 1), and it will also find the values between these poitns so they will form straight lines along the parametric axes.
+	</p>
+	<table>
+	<tr><td><pre>
+function l_transform(points, x, y) {
+	const x1 = lerp(points[0][0], points[1][0], x);
+	const x2 = lerp(points[2][0], points[3][0], x);
+	const x_transformed = lerp(x1, x2, y);
+	const y1 = lerp(points[0][1], points[1][1], x);
+	const y2 = lerp(points[2][1], points[3][1], x);
+	const y_transformed = lerp(y1, y2, y);
+	return [x_transformed, y_transformed];
+}
+	</pre></td></tr>
+	</table>
+	<p>
+All and all, it looks like on the plot below. This is a live plot, the guiding are draggable.
+	</p>
 	<canvas id="plot_l" width=640 height=512></canvas>
 	<br>
 	<form onsubmit="return false;">
