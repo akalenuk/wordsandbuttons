@@ -467,12 +467,52 @@ Guiding figures:
 	<input type="checkbox" id="draw_arrows" onclick="draw_all_plots();" checked="true"/><label for="draw_arrows">draw arrows. </label>
 	</form>
 
+	<h2>
+Biquadratic transforamtion
+	</h2>
 	<p>
-...
+If mapping a straight line makde quadrilateral to another quadrilateral isn't enough for you, if you need curvy shapes to be transofrmed into another curvy shapes, you can double the bets. Go biquadratic.
 	</p>
-
+	<p>
+The main idea remains, we just need another interpolator.
+	</p>
+	<table>
+	<tr><td><pre>
+// quadratic interpolation by three values in 0, 0.5, and 1 respectively.
+function qerp(y1, y2, y3, x) {
+	// from SymPy: {a: 2.0*y1 - 4.0*y2 + 2.0*y3, b: -3.0*y1 + 4.0*y2 - y3, c: y1}
+	const a = 2.0*y1 - 4.0*y2 + 2.0*y3;
+	const b = -3.0*y1 + 4.0*y2 - y3;
+	const c = y1;
+	return a*x*x + b*x + c;
+}
+	</pre></td></tr>
+	</table>
+	<p>
+And the biquadratic transofrmation will look almost the same as the bilinear one except for the few extra lines and a few extra arguments.
+	</p>
+	<table>
+	<tr><td><pre>
+function q_transform(points, x, y) {
+	const x1 = qerp(points[0][0], points[1][0], points[2][0], x);
+	const x2 = qerp(points[3][0], points[4][0], points[5][0], x);
+	const x3 = qerp(points[6][0], points[7][0], points[8][0], x);
+	const x_transformed = qerp(x1, x2, x3, y);
+	const y1 = qerp(points[0][1], points[1][1], points[2][1], x);
+	const y2 = qerp(points[3][1], points[4][1], points[5][1], x);
+	const y3 = qerp(points[6][1], points[7][1], points[8][1], x);
+	const y_transformed = qerp(y1, y2, y3, y);
+	return [x_transformed, y_transformed];
+}
+	</pre></td></tr>
+	</table>
+	<p>
+And it behaves like this:
+	</p>
 	<canvas id="plot_q" width=640 height=512></canvas>
 
+	<h2>
+	</h2>
 	<p>
 ...
 	</p>
