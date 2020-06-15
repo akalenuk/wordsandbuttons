@@ -397,31 +397,31 @@ function draw_all_plots() {
 Polynomial transformations
 	</h1>
 	<p>
-This is a crossover episode between <a href="https://wordsandbuttons.online/polynomial_approximation_and_interpolation.html">polynomial interpolation</a> and <a href="https://wordsandbuttons.online/interactive_guide_to_homogeneous_coordinates.html">projective transformations</a>. With a projective transformation, you can turn any quadrilateral on a plane into any other quadrilateral with only one matrix multiplication! Yey! However, even in 3D you can't do the same to hexahedron. Well, not every hexahedron to be precise.
+This is a crossover episode between <a href="https://wordsandbuttons.online/polynomial_approximation_and_interpolation.html">polynomial interpolation</a> and <a href="https://wordsandbuttons.online/interactive_guide_to_homogeneous_coordinates.html">projective transformations</a>. With a projective transformation, you can turn any quadrilateral on a plane into any other quadrilateral with a single matrix multiplication! Yey! However, even in 3D you can't do the same to hexahedron. Well, not every hexahedron to be precise.
 	</p>
 	<p>
-You see, projective transformations not only translate a straight line into a straight line in 2D, they translate a plane into a plane in 3D as well. And since not every hexahedron has its sides made of perfectly straight planes, there is only a subset of them that are perfectly translateable by projective transformations.
+You see, projective transformations not only translate a straight line into a straight line in 2D, they translate a plane into a plane in 3D as well. And since not every hexahedron has its sides made of perfectly straight planes, there is only a subset of them that are perfectly projectable.
 	</p>
 	<p>
-With polynomial transformations, you get to pick features that you want to preserve while transforming. You can preserve straightness of lines, or you can guarantee that a parabola will translate into another parabola, or a curvy surface into another surface not much curvier than the origianal. You have options. And this page is meant to show you how to use them.
+With polynomial transformations however, you get to pick features that you want to preserve while transforming. You can preserve straightness of lines, or you can guarantee that a parabola will translate into another parabola, or a curvy surface into another surface equally or less curvier than the original. You have options. And this page is meant to show you how to use them.
 	</p>
 	<h2>
 But first!.. Meet the singular cube
 	</h2>
 	<p>
-The <b>singular cube</b> is an n-dimentional generalisation of the <i>[0..1]</i> range. On a plane, it's an axis-aligned square that has four squares in (0, 0), (1, 0), (1, 1), and (0, 0).
+A <b>singular cube</b> is an n-dimentional generalisation of the <i>[0..1]</i> range. On a plane, it's an axis-aligned square that has four corners in (0, 0), (1, 0), (1, 1), and (0, 0).
 	</p>
 	<p>
-It doesn't bring much mathematical meaning into the whole business of transofrmations, you can still transform from arbitrary entity to another arbitrary entity, but since the singular cube all consists of ones and zeroes, transforming in and out of this cube requires much simpler equations.
+It doesn't bring much mathematical sense into the whole business of transformations, you can still transform from arbitrary entity to another arbitrary entity, but since the singular cube all consists of ones and zeroes, transforming in and out of this cube requires much simpler equations.
 	</p>
 	<p>
-In this page, all the transformations are shown from a singular cube on a plane to a particular figure on plane given by some set of points.
+On this page, all the transformations are translating line segments from a singular square to a particular figure on plane, and they are all ruled by sets of points. This simplifies the visualisations but, of course, you can translate any geometric data in any-dimensional space and not necessary from singular cubes.
 	</p>
 	<h2>
 Bilinear transformation
 	</h2>
 	<p>
-Ok, so you want to translate a piece of space guided by 4 points. Wherever these points go, the neighbors will follow. This iplies that for every coordinate's equation you'd have to have at least 4 coefficients too. For the polynomial transformation, this means 4x4 system of linear equations. Which is fine but it gets messier as you add more points or dimensions.
+Ok, so you want to translate a piece of space guided by 4 points. Wherever these points go, the neighbors will follow. This implies that for every transformative equation you'd have to have at least 4 coefficients, too. For the polynomial transformation, this means 4x4 system of linear equations. 4 points, 4 equations, 4 coefficients, it all comes together nicely. So far. It gets messier as you add more points.
 	</p>
 	<p>
 The idea of bilinear transofrmation, or bi-anything, or even whatever-anything for that matter, is: you can decompose an n-dimensional translation into n 1-dimensional ones.
@@ -438,10 +438,10 @@ function lerp(y1, y2, x) {
 	</pre></td></tr>
 	</table>
 	<p>
-Just to reiterate, this is a linear interpolating function. You give it two values and the parameter. When the parameter is 0, it returns the first value, when the paramter is 1, — the second one. When it's something in between, it returns something in between but in such way that all these inbetweeners form a straight line.
+Just to reiterate, this is a linear interpolating function. You give it two values and the parameter. When the parameter is 0, it returns the first value, when the paramter is 1, — the second one. When it's something in between, it returns something in between but in such a way that all these inbetweeners form a straight line.
 	</p>
 	<p>
-Now you can use two of these to compose a bilinear interpolation. It will also give you back the values you supply it with in points (0, 0), (1, 0), (1, 1) and (1, 1), and it will also find the values between these poitns so they will form straight lines along the parametric axes.
+Now you can use two of these to compose a bilinear interpolation. It will also give you back the values you supply it with in the points (0, 0), (1, 0), (1, 1), and (1, 1); and it will also give you the values between these poitns so they will form straight lines along the parametric axes.
 	</p>
 	<table>
 	<tr><td><pre>
@@ -457,12 +457,12 @@ function l_transform(points, x, y) {
 	</pre></td></tr>
 	</table>
 	<p>
-All and all, it looks like on the plot below. This is a live plot, the guiding are draggable.
+All and all, what it does looks exactly like on the plot below. This is a live plot, the guiding points are draggable.
 	</p>
 	<canvas id="plot_l" width=640 height=512></canvas>
 	<br>
 	<form onsubmit="return false;">
-Guiding figures: 
+Auxiliary figures: 
 	<input type="checkbox" id="draw_singular_cube" onclick="draw_all_plots();" checked="true"/><label for="draw_singular_cube">draw singular cube; </label>
 	<input type="checkbox" id="draw_arrows" onclick="draw_all_plots();" checked="true"/><label for="draw_arrows">draw arrows. </label>
 	</form>
@@ -471,7 +471,7 @@ Guiding figures:
 Biquadratic transforamtion
 	</h2>
 	<p>
-If mapping a straight line makde quadrilateral to another quadrilateral isn't enough for you, if you need curvy shapes to be transofrmed into another curvy shapes, you can double the bets. Go biquadratic.
+If mapping a straight quadrilateral to another quadrilateral isn't enough for you, if you need curvy shapes to be transofrmed into another curvy shapes, you can double the bets. Go biquadratic.
 	</p>
 	<p>
 The main idea remains, we just need another interpolator.
@@ -488,7 +488,10 @@ function qerp(y1, y2, y3, x) {
 	</pre></td></tr>
 	</table>
 	<p>
-And the biquadratic transofrmation will look almost the same as the bilinear one except for the few extra lines and a few extra arguments.
+This is a quadratic interpolation. You give it points in 0, 0.5, and 1, and it computes all the other points so they a parabola passing throught these three points.
+	</p>
+	<p>
+And the biquadratic transofrmation looks almost the same as the bilinear one except for the few extra lines and a few extra arguments.
 	</p>
 	<table>
 	<tr><td><pre>
@@ -514,13 +517,13 @@ And it behaves like this:
 linear-cubic transformation
 	</h2>
 	<p>
-Other thing, the transormation doesn't have to be just bi-something. It can be linear along one axis and cubic along the other. That's how I modelled pages in the <a href="https://github.com/akalenuk/unpager">Unpager</a>.
+And one more thing, the transormation doesn't have to be just bi-something. For instance, it can be linear along one axis and cubic along the other. That's how I modelled pages in the <a href="https://github.com/akalenuk/unpager">Unpager</a>.
 	</p>
 	<p>
-The Unpager is a tool for unbending the pages from the pictures taken by the phone or a pocket camera. The idea was, if you lack a proper scanner, or if you can't take a book to the scanner, you take pictures of the pages you want, and they appear all skewed and curvy. That's where the Unpages comes in. You unbend the pages with projective and linear-cubic transformation and they look just like if they were scanned.
+The Unpager is a tool for unbending the pages from the pictures taken by a phone or a pocket camera. The idea was, if you lack a proper scanner, or if you can't take a book close enough to the scanner without dragging too much attention, you cat simply take a few pictures of the pages you want. They will, of course, appear all skewed and curvy but that's ok. That's where the Unpages comes in. You unbend the pages with both projective and linear-cubic transformation, and they look then just like if they were scanned.
 	</p>
 	<p>
-The tool could do a few thing more than just polynomial transformations but these were the main ingredient.
+Well, the tool can do a few things more than just transformations but these are the main ingredient.
 	</p>
 	<p>
 The cubic-linear transformation code looks like this:
@@ -559,7 +562,7 @@ And the transformation itself — like this:
 And one more thing
 	</h2>
 	<p>
-The formulas for the interpolants are well known. You can google them up or you can just deduce them with pen and paper. Or you could use SymPy.
+The formulas for the interpolants are well known. You can google them up or you can just deduce them with pen and paper. Or, if you're too lazy to google things, you can simply use SymPy.
 	</p>
 	<p>
 SymPy is a Python library for symbolic computations. It does your math for you. E. g. the cubic interpolant formula can be deduced automatically by stating that you want your interpolation function through the points you want. Once you get the problem stated, you just run the solver and it does the rest.
@@ -582,13 +585,16 @@ print(solve([
 	</pre></td></tr>
 	</table>
 	<p>
-With a little imagination and a valid business need, you can make yourself the exact polynomial that fits your task perfectly.
+With a little imagination and a valid business need, you can easily make yourself the exact polynomial that fits your task perfectly.
 	</p>
 	<p>
 And you can combine several polynomials in one transformation.
 	</p>
 	<p>
-And you can make it work in any number of dimensions.
+And you can make it work in any n-dimensional space.
+	</p>
+	<p>
+This is what makes polynomial transformations pragmatic and beautiful.
 	</p>
 	<p>
 That's all I have to say. Thank you for reading.
