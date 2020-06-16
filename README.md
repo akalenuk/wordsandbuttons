@@ -7,6 +7,9 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 
 ## Pages
 
+- [Bi-whatever transformations](https://wordsandbuttons.online/biwhatever_transformations.html) An interactive explanation of how polynomial transformations such as trilinear or biquadratic or even linear-cubic work, and how to craft your own that fits your particular task the best.
+<sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/programming.html)</sup> <sup>[#show-and-tell](https://wordsandbuttons.online/show-and-tell.html)</sup> 
+
 - [Arctangent scale. It's like the logarithmic scale but infinite](https://wordsandbuttons.online/arctangent_scale_its_like_the_logarithmic_scale_but_infinite.html) An interactive demo of how, with arctangent used as a scale, we can show any function on a screen. And not just a fragment of it but the whole function.
 <sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> <sup>[#show-and-tell](https://wordsandbuttons.online/show-and-tell.html)</sup> 
 
