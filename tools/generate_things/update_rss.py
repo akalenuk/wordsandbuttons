@@ -33,7 +33,7 @@ item = ' <item>\n'
 item += '  <title>' + title + '</title>\n'
 item += '  <description>' + description + '</description>\n'
 item += '  <link>https://wordsandbuttons.online/' + path.split('/')[-1] + '</link>\n'
-item += '  <guid isPermaLink="true">' + str(uuid.uuid4()) + '</guid>\n'
+item += '  <guid isPermaLink="false">' + str(uuid.uuid4()) + '</guid>\n'
 item += '  <pubDate>' + timestamp + '</pubDate>\n'
 item += ' </item>\n\n'
 
