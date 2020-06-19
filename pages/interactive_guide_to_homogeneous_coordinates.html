@@ -722,34 +722,58 @@ function scale_draw(a, b, do_new){
 	draw_grid_on(context);
 }
 
+function nearest_i(x, y, xs, ys) {
+	var best_i = 0;
+	var best_d = (x-xs[0])*(x-xs[0]) + (y-ys[0])*(y-ys[0]);
+	for(var i = 1; i < xs.length; ++i) {
+		const d = (x-xs[i])*(x-xs[i]) + (y-ys[i])*(y-ys[i]);
+		if(d < best_d) {
+			best_d = d;
+			best_i = i;
+		}
+	}
+	return best_i;
+}
+
+var affine_xs = [0.75, 2.0, 2.25, 1.0];
+var affine_ys = [0.75, 1.0, 2.25, 2.0];
+var affine_i = 0;
+
 function init_affine(){
 	affine = document.getElementById("affine");
 	affine_draw(0, 0, false);
 
+	affine.addEventListener('mousedown', function(e){
+		const canvas_rect = affine.getBoundingClientRect();
+		const x = client_to_x( e.clientX - canvas_rect.left );
+		const y = client_to_y( e.clientY - canvas_rect.top );
+		affine_i = nearest_i(x, y, affine_xs, affine_ys);
+	}, false);
+
 	affine.addEventListener('mousemove', function(e){
+		const canvas_rect = affine.getBoundingClientRect();
+		const x = client_to_x( e.clientX - canvas_rect.left );
+		const y = client_to_y( e.clientY - canvas_rect.top );
 		if(e.buttons == 1){
-			var canvas_rect = affine.getBoundingClientRect();
-			var client_x = e.clientX - canvas_rect.left;
-			var client_y = e.clientY - canvas_rect.top;
-			affine_xs[affine_i] = client_to_x(client_x);
-			affine_ys[affine_i] = client_to_y(client_y);
+			affine_xs[affine_i] = x;
+			affine_ys[affine_i] = y;
+			affine_xs[(affine_i + 3) % 4] = affine_xs[(affine_i + 2) % 4] + affine_xs[(affine_i + 0) % 4] - affine_xs[(affine_i + 1) % 4];
+			affine_ys[(affine_i + 3) % 4] = affine_ys[(affine_i + 2) % 4] + affine_ys[(affine_i + 0) % 4] - affine_ys[(affine_i + 1) % 4];
 			affine_draw(0, 0, false);
 		}else{
+			affine_i = nearest_i(x, y, affine_xs, affine_ys);
 			affine_draw(e.clientX, e.clientY, true);
 		}
 	}, false);
 
 	affine.addEventListener('mouseup', function(e){
 		var canvas_rect = affine.getBoundingClientRect();
-		var client_x = e.clientX - canvas_rect.left;
-		var client_y = e.clientY - canvas_rect.top;
-		var x = client_to_x(client_x);
-		var y = client_to_y(client_y);
+		const x = client_to_x( e.clientX - canvas_rect.left );
+		const y = client_to_y( e.clientY - canvas_rect.top );
 		affine_xs[affine_i] = x;
 		affine_ys[affine_i] = y;
-		affine_xs[3] = affine_xs[0] + affine_xs[2] - affine_xs[1];
-		affine_ys[3] = affine_ys[0] + affine_ys[2] - affine_ys[1];
-		affine_i = (affine_i + 1) % 3;
+		affine_xs[(affine_i + 3) % 4] = affine_xs[(affine_i + 2) % 4] + affine_xs[(affine_i + 0) % 4] - affine_xs[(affine_i + 1) % 4];
+		affine_ys[(affine_i + 3) % 4] = affine_ys[(affine_i + 2) % 4] + affine_ys[(affine_i + 0) % 4] - affine_ys[(affine_i + 1) % 4];
 		affine_draw(e.clientX, e.clientY, true);
 	}, false);
 
@@ -757,10 +781,6 @@ function init_affine(){
 		affine_draw(0, 0, false);
 	}, false);
 }
-
-var affine_xs = [0.75, 2.0, 2.25, 1.0];
-var affine_ys = [0.75, 1.0, 2.25, 2.0];
-var affine_i = 0;
 
 function affine_draw(client_x, client_y, do_new){
 	// coordiantes correction
