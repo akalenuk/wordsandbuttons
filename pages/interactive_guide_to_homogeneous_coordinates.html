@@ -736,6 +736,19 @@ function nearest_i(x, y, xs, ys) {
 	return best_i;
 }
 
+function is_convex(xs, ys) {
+	// split the quadrilateral into 2 triangles in 2 ways. 
+	// If the sum of triangle's areas are equal both ways, it looks convex
+	function area_but_not_really(x1, y1, x2, y2, x3, y3) { // cross of triangle's sides
+		return Math.abs((x2-x1) * (y3-y1) - (x3-x1) * (y2-y1));
+	}
+	return Math.abs(
+		area_but_not_really(xs[0], ys[0], xs[1], ys[1], xs[2], ys[2]) 
+		+ area_but_not_really(xs[0], ys[0], xs[2], ys[2], xs[3], ys[3])
+		- area_but_not_really(xs[1], ys[1], xs[2], ys[2], xs[3], ys[3])
+		- area_but_not_really(xs[1], ys[1], xs[3], ys[3], xs[0], ys[0])) < 1e-5;
+}
+
 var affine_xs = [0.75, 2.0, 2.25, 1.0];
 var affine_ys = [0.75, 1.0, 2.25, 2.0];
 var affine_i = 0;
@@ -846,8 +859,18 @@ function init_projective(){
 		const x = client_to_x( e.clientX - canvas_rect.left );
 		const y = client_to_y( e.clientY - canvas_rect.top );
 		if(e.buttons == 1){
+			const dx = x - projective_xs[projective_i];
+			const dy = y - projective_ys[projective_i];
 			projective_xs[projective_i] = x;
 			projective_ys[projective_i] = y;
+			if(!is_convex(projective_xs, projective_ys)) {
+				for(var i = 0; i < 4; ++i) {
+					if(i != projective_i) {
+						projective_xs[i] += dx;
+						projective_ys[i] += dy;
+					}
+				}
+			}
 			projective_draw(0, 0, false);
 		}else{
 			projective_i = nearest_i(x, y, projective_xs, projective_ys);
@@ -857,10 +880,20 @@ function init_projective(){
 
 	projective.addEventListener('mouseup', function(e){
 		var canvas_rect = projective.getBoundingClientRect();
-		client_x = e.clientX - canvas_rect.left;
-		client_y = e.clientY - canvas_rect.top;
-		projective_xs[projective_i] = client_to_x(client_x);
-		projective_ys[projective_i] = client_to_y(client_y);
+		const x = client_to_x( e.clientX - canvas_rect.left );
+		const y = client_to_y( e.clientY - canvas_rect.top );
+		const dx = x - projective_xs[projective_i];
+		const dy = y - projective_ys[projective_i];
+		projective_xs[projective_i] = x;
+		projective_ys[projective_i] = y;
+		if(!is_convex(projective_xs, projective_ys)) {
+			for(var i = 0; i < 4; ++i) {
+				if(i != projective_i) {
+					projective_xs[i] += dx;
+					projective_ys[i] += dy;
+				}
+			}
+		}
 		projective_draw(e.clientX, e.clientY, true);
 	}, false);
 
@@ -941,6 +974,14 @@ function recalculate_composable(client_x, client_y){
 		}
 		new_xs[composable_i] = x;
 		new_ys[composable_i] = y;
+		if(!is_convex(new_xs, new_ys)) {
+			for(var i = 0; i < 4; i++) {
+				if(i != composable_i) {
+					new_xs[i] += x - composable_xs[composable_i];
+					new_ys[i] += y - composable_ys[composable_i];
+				}
+			}
+		}
 	}else if(document.getElementById("radio_t").checked){
 		for(var i = 0; i < 4; i++){
 			new_xs[i] = composable_xs[i] + x;
