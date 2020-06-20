@@ -921,6 +921,10 @@ function projective_draw(client_x, client_y, do_new){
 
 var composable_reference_x = 0.0;
 var composable_reference_y = 0.0;
+ 
+var composable_transformation = function(x, y) {	// just a placeholder to be filled below
+	return [x, y];
+}
 
 function recalculate_composable(client_x, client_y){
 	const x = client_to_x(client_x);
@@ -973,6 +977,14 @@ function recalculate_composable(client_x, client_y){
 	var C = (-x0*y2 + x0*y3 + x1*y2 - x1*y3 + x2*y0 - x2*y1 - x3*y0 + x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
 	var F = (-x0*y1 + x0*y2 + x1*y0 - x1*y3 - x2*y0 + x2*y3 + x3*y1 - x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
 	var c = 1.;
+	
+	composable_transformation = function(x, y) {
+		const x_ = A*x + D*y + a;
+		const y_ = B*x + E*y + b;
+		const w_ = C*x + F*y + c;
+		return [x_/w_, y_/w_];
+	};
+
 	document.getElementById("matrix_col1").innerHTML = parseFloat(A.toFixed(3)) + "<br>" + parseFloat(B.toFixed(3)) + "<br>" + parseFloat(C.toFixed(3));
 	document.getElementById("matrix_col2").innerHTML = parseFloat(D.toFixed(3)) + "<br>" + parseFloat(E.toFixed(3)) + "<br>" + parseFloat(F.toFixed(3));
 	document.getElementById("matrix_col3").innerHTML = parseFloat(a.toFixed(3)) + "<br>" + parseFloat(b.toFixed(3)) + "<br>" + parseFloat(c.toFixed(3));
@@ -1080,6 +1092,20 @@ function composable_draw(client_x, client_y, do_new){
 	context.stroke();
 	context.closePath();
 	context.lineWidth = 1;
+
+	context.beginPath();
+	for(var t = 1.; t <= 2.; t += 0.125) {
+		const xy1 = composable_transformation(t, 1.);
+		const xy2 = composable_transformation(t, 2.);
+		context.moveTo(x_to_client(xy1[0]), y_to_client(xy1[1]));
+		context.lineTo(x_to_client(xy2[0]), y_to_client(xy2[1]));
+		const xy3 = composable_transformation(1., t);
+		const xy4 = composable_transformation(2., t);
+		context.moveTo(x_to_client(xy3[0]), y_to_client(xy3[1]));
+		context.lineTo(x_to_client(xy4[0]), y_to_client(xy4[1]));
+	}
+	context.stroke();
+	context.closePath();
 
 	if(do_new){
 		// new cube
