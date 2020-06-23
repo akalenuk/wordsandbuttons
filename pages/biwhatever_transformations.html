@@ -224,7 +224,8 @@ function draw_grid_on(context){
 	context.closePath();
 }
 
-function nearest_point(xy, points) {
+var nearest_for_plot_no = [0, 0, 0];
+function find_and_remember_nearest_point(xy, points, plot_no) {
 	function d(xy1, xy2) {
 		return (xy1[0] - xy2[0])*(xy1[0] - xy2[0]) + (xy1[1] - xy2[1])*(xy1[1] - xy2[1]);
 	}
@@ -237,16 +238,15 @@ function nearest_point(xy, points) {
 			nearest_i = i;
 		}
 	}
-	return nearest_i;
+	nearest_for_plot_no[plot_no] = nearest_i;
 }
 
-function set_points(points, client_x, client_y) {
+function set_points(points, client_x, client_y, plot_no) {
 	const x = client_to_x(Math.max(Math.min(client_x, w - 1), 0));
 	const y = client_to_y(Math.max(Math.min(client_y, h - 1), 0));
 
-	const i = nearest_point([x, y], points);
-	points[i][0] = x;
-	points[i][1] = y;
+	points[nearest_for_plot_no[plot_no]][0] = x;
+	points[nearest_for_plot_no[plot_no]][1] = y;
 }
 
 function draw_arrow(context, x1, y1, x2, y2, color) {
@@ -263,8 +263,8 @@ function draw_arrow(context, x1, y1, x2, y2, color) {
 	context.closePath();
 }
 
-// e.g. init_plot("plot_cl", cl_point, cl_points_original, cl_transform);
-function init_plot(name, points, points_original, transform, color_scheme_no){
+// e.g. init_plot("plot_cl", cl_point, cl_points_original, cl_transform, 2);
+function init_plot(name, points, points_original, transform, plot_no){
 	var canvas = document.getElementById(name);
 
 	canvas.addEventListener('mousemove', function(e){
@@ -272,17 +272,20 @@ function init_plot(name, points, points_original, transform, color_scheme_no){
 		if(e.buttons == 1){
 			const x = e.clientX - canvas_rect.left;
 			const y = e.clientY - canvas_rect.top;
-			set_points(points, x, y);
-			draw_plot(name, points, points_original, transform, color_scheme_no);
+			set_points(points, x, y, plot_no);
+			draw_plot(name, points, points_original, transform, plot_no);
 		}
 	}, false);
 
 	canvas.addEventListener('mousedown', function(e){
 		const canvas_rect = canvas.getBoundingClientRect();
-		const x = e.clientX - canvas_rect.left;
-		const y = e.clientY - canvas_rect.top;
-		set_points(points, x, y);
-		draw_plot(name, points, points_original, transform, color_scheme_no);
+		const client_x = e.clientX - canvas_rect.left;
+		const client_y = e.clientY - canvas_rect.top;
+		const x = client_to_x(Math.max(Math.min(client_x, w - 1), 0));
+		const y = client_to_y(Math.max(Math.min(client_y, h - 1), 0));
+		find_and_remember_nearest_point([x, y], points, plot_no);
+		set_points(points, client_x, client_y, plot_no);
+		draw_plot(name, points, points_original, transform, plot_no);
 	}, false);
 
 	canvas.addEventListener('mouseleave', function(e){
@@ -290,12 +293,12 @@ function init_plot(name, points, points_original, transform, color_scheme_no){
 			const canvas_rect = canvas.getBoundingClientRect();
 			const x = e.clientX - canvas_rect.left;
 			const y = e.clientY - canvas_rect.top;
-			set_points(points, x, y);
+			set_points(points, x, y, plot_no);
 		}
-		draw_plot(name, points, points_original, transform, color_scheme_no);
+		draw_plot(name, points, points_original, transform, plot_no);
 	}, false);
 
-	draw_plot(name, points, points_original, transform, color_scheme_no);
+	draw_plot(name, points, points_original, transform, plot_no);
 }
 
 // e.g. draw_plot("plot_cl", cl_points, cl_points_original, cl_transform, 2);
