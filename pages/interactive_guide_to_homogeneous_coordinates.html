@@ -421,7 +421,7 @@ function init_translation(){
 		var canvas_rect = translation.getBoundingClientRect();
 		drag_x = client_to_x(e.clientX - canvas_rect.left);
 		drag_y = client_to_y(e.clientY - canvas_rect.top);
-		translation_draw(0, 0, false);
+		translation_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 	}, false);
 
 	translation.addEventListener('mousemove', function(e){
@@ -509,9 +509,9 @@ function rotated_y(a, x, y){
 var rotation_a = Math.PI / 2 + 0.2;
 
 function in_2_pi(x) {
-	while(x < 0.0)
+	while(x < -Math.PI)
 		x += 2*Math.PI;
-	while(x >= 2*Math.PI)
+	while(x >= Math.PI)
 		x -= 2*Math.PI;
 	return x;
 }
@@ -544,7 +544,7 @@ function init_rotation(){
 		var client_x = e.clientX - canvas_rect.left;
 		var client_y = e.clientY - canvas_rect.top;
 		rotation_a = rotation_for(client_to_x(client_x), client_to_y(client_y));
-		rotation_draw(rotation_a, false);
+		rotation_draw(rotation_a, true);
 	}, false);
 
 	rotation.addEventListener('mouseup', function(e){
@@ -656,7 +656,7 @@ function init_scale(){
 		var canvas_rect = scale.getBoundingClientRect();
 		scale_x = client_to_x(e.clientX - canvas_rect.left);
 		scale_y = client_to_y(e.clientY - canvas_rect.top);
-		scale_draw(scale_x, scale_y, false);
+		scale_draw(scale_x, scale_y, true);
 	}, false);
 
 	scale.addEventListener('mouseup', function(e){
