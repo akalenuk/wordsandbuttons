@@ -499,14 +499,14 @@ function translation_draw(client_x, client_y, do_new){
 }
 
 function rotated_x(a, x, y){
-	return Math.sin(a) * x - Math.cos(a) * y;
+	return - Math.sin(a) * x + Math.cos(a) * y;
 }
 
 function rotated_y(a, x, y){
 	return Math.cos(a) * x + Math.sin(a) * y;
 }
 
-var rotation_a = Math.PI / 2 + 0.2;
+var rotation_a = -0.2;
 
 function in_2_pi(x) {
 	while(x < -Math.PI)
@@ -517,10 +517,9 @@ function in_2_pi(x) {
 }
 
 function rotation_for(x, y) {
-	if (x > 0)
-		return in_2_pi(Math.PI * 3 / 4 - Math.atan(y / x));
-	else
-		return in_2_pi(Math.PI * 7 / 4 - Math.atan(y / x));
+	return in_2_pi(Math.atan(y / x) 
+		+ ((x < 0) ? Math.PI : 0.)
+		- Math.PI / 4.);
 }
 
 function init_rotation(){
@@ -533,9 +532,8 @@ function init_rotation(){
 			var canvas_rect = rotation.getBoundingClientRect();
 			var client_x = e.clientX - canvas_rect.left;
 			var client_y = e.clientY - canvas_rect.top;
-			var a = rotation_for(client_to_x(client_x), client_to_y(client_y));
-			rotation_a = a;
-			rotation_draw(a, true);
+			rotation_a = rotation_for(client_to_x(client_x), client_to_y(client_y))
+			rotation_draw(rotation_a, true);
 		}
 	}, false);
 
@@ -572,49 +570,29 @@ function rotation_draw(a, do_new){
 		new_ys[i] = rotated_y(a, xs[i], ys[i]);
 	}
 
-	var new_saved_xs = [0, 0, 0, 0];
-	var new_saved_ys = [0, 0, 0, 0];
-	for(var i = 0; i < 4; i++){
-		new_saved_xs[i] = rotated_x(rotation_a, xs[i], ys[i]);
-		new_saved_ys[i] = rotated_y(rotation_a, xs[i], ys[i]);
-	}
-
 	// original cube
 	draw_original_cube_on(context);
 
 	context.lineWidth = 2;
 	if(do_new){
 		// the connection
-		for(var i = 0; i < 1; i++) {
-			context.beginPath();
-			context.setLineDash([4, 4]);
-			var r = x_to_client(Math.sqrt(xs[i]*xs[i] + ys[i]*ys[i])) - x_to_client(0);
-			var a1 = in_2_pi(rotation_for(xs[i], ys[i]) - Math.PI * 3 / 4);
-			var a2 = in_2_pi(rotation_for(new_xs[i], new_ys[i]) - Math.PI * 3 / 4);
-			if(a1 < a2) {
-				context.arc(x_to_client(0), y_to_client(0), r, a1, a2);
-				context.lineTo(320, 320);
-			} else {
-				context.moveTo(320, 320);
-				context.arc(x_to_client(0), y_to_client(0), r, a2, a1);
-			}
-			context.strokeStyle="#d64562";
-			context.stroke();
-			context.setLineDash([]);
-			context.closePath();
+		context.beginPath();
+		context.setLineDash([4, 4]);
+		var r = x_to_client(Math.sqrt(2.)) - x_to_client(0.);
+		const a1 = - Math.PI / 4.;
+		const a2 = - Math.PI / 4. - a;
+		if(a < 0.) {
+			context.arc(x_to_client(0), y_to_client(0), r, a1, a2);
+			context.lineTo(320, 320);
+		} else {
+			context.moveTo(320, 320);
+			context.arc(x_to_client(0), y_to_client(0), r, a2, a1);
 		}
+		context.strokeStyle="#d64562";
+		context.stroke();
+		context.setLineDash([]);
+		context.closePath();
 	}
-
-	// draw a saved cube
-	context.beginPath();
-	context.moveTo(x_to_client(new_saved_xs[3]), y_to_client(new_saved_ys[3]));
-	for(var i = 0; i < 4; i++){
-		context.lineTo(x_to_client(new_saved_xs[i]), y_to_client(new_saved_ys[i]));
-	}
-	context.strokeStyle="#8c2c3e";
-	context.stroke();
-	context.closePath();
-	context.lineWidth = 1;
 
 	// rotation
 	context.beginPath();
@@ -622,13 +600,15 @@ function rotation_draw(a, do_new){
 	for(var i = 0; i < 4; i++){
 		context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
 	}
-	context.strokeStyle="#d64562";
+	context.strokeStyle="#8c2c3e";
 	context.stroke();
 	context.closePath();
+	context.lineWidth = 1;
+
 	context.fillStyle="#8c2c3e";
 	context.fillText("x' = sin(a) * x + cos(a) * y", 32, 540);
 	context.fillText("y' = cos(a) * x - sin(a) * y", 32, 560);
-	context.fillText("where a = " + (a - Math.PI/2).toFixed(2), 32, 580);
+	context.fillText("where a = " + a.toFixed(2), 32, 580);
 
 	// grid
 	draw_grid_on(context);
