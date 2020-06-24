@@ -741,7 +741,7 @@ var affine_ys = [1.0, 1.5, -1.0, -1.5];
 var affine_i = 0;
 
 function init_affine(){
-	affine = document.getElementById("affine");
+	const affine = document.getElementById("affine");
 	affine_draw(0, 0, false);
 
 	affine.addEventListener('mousedown', function(e){
@@ -749,6 +749,11 @@ function init_affine(){
 		const x = client_to_x( e.clientX - canvas_rect.left );
 		const y = client_to_y( e.clientY - canvas_rect.top );
 		affine_i = nearest_i(x, y, affine_xs, affine_ys);
+		affine_xs[affine_i] = x;
+		affine_ys[affine_i] = y;
+		affine_xs[(affine_i + 3) % 4] = affine_xs[(affine_i + 2) % 4] + affine_xs[(affine_i + 0) % 4] - affine_xs[(affine_i + 1) % 4];
+		affine_ys[(affine_i + 3) % 4] = affine_ys[(affine_i + 2) % 4] + affine_ys[(affine_i + 0) % 4] - affine_ys[(affine_i + 1) % 4];
+		affine_draw(e.clientX, e.clientY, true);
 	}, false);
 
 	affine.addEventListener('mousemove', function(e){
@@ -828,14 +833,27 @@ function affine_draw(client_x, client_y, do_new){
 }
 
 function init_projective(){
-	projective = document.getElementById("projective");
+	const projective = document.getElementById("projective");
 	projective_draw(0, 0, false);
 
-	affine.addEventListener('mousedown', function(e){
+	projective.addEventListener('mousedown', function(e){
 		const canvas_rect = projective.getBoundingClientRect();
 		const x = client_to_x( e.clientX - canvas_rect.left );
 		const y = client_to_y( e.clientY - canvas_rect.top );
 		projective_i = nearest_i(x, y, projective_xs, projective_ys);
+		const dx = x - projective_xs[projective_i];
+		const dy = y - projective_ys[projective_i];
+		projective_xs[projective_i] = x;
+		projective_ys[projective_i] = y;
+		if(!is_convex(projective_xs, projective_ys)) {
+			for(var i = 0; i < 4; ++i) {
+				if(i != projective_i) {
+					projective_xs[i] += dx;
+					projective_ys[i] += dy;
+				}
+			}
+		}
+		projective_draw(e.clientX, e.clientY, true);
 	}, false);
 	
 	projective.addEventListener('mousemove', function(e){
