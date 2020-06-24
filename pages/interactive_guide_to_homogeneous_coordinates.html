@@ -230,6 +230,10 @@ function init_w(){
 	}, false);
 }
 
+function round00(x) {
+	return Math.round(100.*x) / 100.;
+}
+
 function init_pick_a_point(){
 	pick_a_point = document.getElementById("pick_a_point");
 	var canvas_rect = pick_a_point.getBoundingClientRect();
@@ -240,9 +244,11 @@ function init_pick_a_point(){
 	pick_a_point.addEventListener('mousemove', function(e){
 		var canvas_rect = pick_a_point.getBoundingClientRect();
 		if(e.buttons == 1){ // drag
-			point_x = Math.round(client_to_x(e.clientX - canvas_rect.left)*10)/10;
-			point_y = Math.round(client_to_y(e.clientY - canvas_rect.top)*10)/10;
+			point_x = round00(client_to_x(e.clientX - canvas_rect.left));
+			point_y = round00(client_to_y(e.clientY - canvas_rect.top));
 			pick_a_point_draw(0, 0, false);
+			write_the_point_value();
+			transform();
 			slide_a_w_draw(e.clientX);
 		}else{  // move
 			pick_a_point_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
@@ -251,12 +257,16 @@ function init_pick_a_point(){
 
 	pick_a_point.addEventListener('mousedown', function(e){
 		var canvas_rect = pick_a_point.getBoundingClientRect();
-		point_x = Math.round(client_to_x(e.clientX - canvas_rect.left)*10)/10;
-		point_y = Math.round(client_to_y(e.clientY - canvas_rect.top)*10)/10;
+		point_x = round00(client_to_x(e.clientX - canvas_rect.left));
+		point_y = round00(client_to_y(e.clientY - canvas_rect.top));
 		pick_a_point_draw(0, 0, false);
 		write_the_point_value();
 		transform();
 		slide_a_w_draw(e.clientX);
+	}, false);
+
+	pick_a_point.addEventListener('mouseleave', function(e){
+		pick_a_point_draw(0, 0, false);
 	}, false);
 }
 
@@ -278,7 +288,7 @@ function pick_a_point_draw(client_x, client_y, do_guides){
 	context.strokeStyle="#8c2c3e";
 	context.stroke();
 	context.fillStyle="#8c2c3e";
-	context.fillText(point_x.toFixed(1) + ", " + point_y.toFixed(1), x_to_client(point_x) + 4, y_to_client(point_y) + 16);
+	context.fillText(point_x + ", " + point_y, x_to_client(point_x) + 4, y_to_client(point_y) + 16);
 	context.setLineDash([]);
 	context.closePath();
 
@@ -1328,7 +1338,7 @@ The smaller <i>w<sub>h</sub></i> gets, the further the point in Cartesian coordi
 That’s all rather simple until one moment. What if the third coordinate is <i>0</i> after all?
 	</p>
 	<p>
-Intuition tells that the point with its <i>w<sub>h</sub> = 0</i> should be further from the beginning of the coordinates than every other point with <i>w<sub>h</sub> != 0</i>. All the points in the Euclidean space have <i>w<sub>h</sub> != 0</i>, so this point should be somewhere other than in Euclidean space.
+Intuition tells that the point with its <i>w<sub>h</sub> = 0</i> should be further from the beginning of the coordinates than every other point with <i>w<sub>h</sub> &ne; 0</i>. All the points in the Euclidean space have <i>w<sub>h</sub> &ne; 0</i>, so this point should be somewhere other than in Euclidean space.
 	</p>
 	<p>
 And that's when it gets fascinating. Homogeneous coordinates denote points not only in Euclidean (or, more generally, <i>affine</i> space) but in the <i>projective</i> space that includes and expands the affine one. There is more geometry that fits in our cozy Cartesian system. There is the Euclidean space, and there is also an infinite number of points that are infinitely far from it.
@@ -1376,7 +1386,7 @@ And this means only one drawing with one formula to be drawn and thrown away ins
 Geometric transformations are something that happens to points. They are functions <i>(x', y') = f(x, y)</i>. If you want to apply a transformation to some object, most of the time you would have to represent it with points and then apply a transformation to each and every one of them.
 	</p>
 	<p>
-This may get computationally heavy. For instance, transforming a picture <nobr>3 000 &times; 4 000</nobr> pixels requires 12 000 000 transformations. And transforming a <nobr>512 &times; 512 &times; 1024</nobr> 3D-image requires <nobr>268 435 456</nobr> transformations. If we want to see holographic television anytime soon, we should learn to do these transformations really-really fast.
+This may get computationally heavy. For instance, transforming a picture <nobr>3&thinsp;000&thinsp;&times;&thinsp;4&thinsp;000</nobr> pixels requires <nobr>12&thinsp;000&thinsp;000</nobr> transformations. And transforming a <nobr>512&thinsp;&times;&thinsp;512&thinsp;&times;&thinsp;1024</nobr> 3D-image requires <nobr>268&thinsp;435&thinsp;456</nobr> transformations. If we want to see holographic television anytime soon, we should learn to do these transformations really-really fast.
 	</p>
 	<p>
 Some of the most common transformations are called translation;
