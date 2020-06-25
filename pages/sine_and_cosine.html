@@ -1,539 +1,539 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <title>Sine and cosine</title>
-    <meta name="description" content="A pair of interactive mnemonics for sine and cosine. There are also examples of practical usage. Basically, the second half of a tutorial is about how the first half was made.">
-    <meta name="keywords" content="mathematics, tutorials">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
-    <style>
+	<meta charset="utf-8">
+	<title>Sine and cosine</title>
+	<meta name="description" content="A pair of interactive mnemonics for sine and cosine. There are also examples of practical usage. Basically, the second half of a tutorial is about how the first half was made.">
+	<meta name="keywords" content="mathematics, tutorials">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+	<style>
 body {
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a {
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 20pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 pre {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 12pt;
-    text-align: left;
-    width: 300pt;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 300pt;
 }
 
 table {
-    border-width: 0pt;
+	border-width: 0pt;
 }
 
 td {
-    vertical-align: top;
-    padding: 6pt 12pt 6pt 12pt;
-    font-size: 16pt;
+	vertical-align: top;
+	padding: 6pt 12pt 6pt 12pt;
+	font-size: 16pt;
 }
 
 button {
-    width: 248pt;
-    height: 42pt;
-    margin-left:4pt;
-    margin-right:4pt;
-    font-size: 16pt;
+	width: 248pt;
+	height: 42pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 16pt;
 }
 
 textarea {
-    width: 505pt;
-    font-size: 12pt;
-    font-family: monospace;
+	width: 505pt;
+	font-size: 12pt;
+	font-family: monospace;
 }
 
 .formula {
-    font-family: sans-serif;
-    font-size: 15pt;
-    font-style: italic;
-    text-align: center;
-    padding-top: 6pt;
-    padding-bottom: 6pt;
+	font-family: sans-serif;
+	font-size: 15pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
 }
 
 .letters {
-    font-family: sans-serif;
+	font-family: sans-serif;
 }
 
 .comment {
-    font-size: 12pt;
-    text-align:center;
-    font-family: sans-serif;
-    padding-bottom: 24pt;
+	font-size: 12pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
 }
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 const w = 640;
 const h = 640;
 const scale = 4;
 
 function xy_to_screen(x, y, a) {
-    return [w / 2 + (x * Math.cos(a) / scale) * w / 2 - (y * Math.sin(a) / scale) * h / 2
-           ,h / 2 - (x * Math.sin(a) / scale) * w / 2 - (y * Math.cos(a) / scale) * h / 2];
+	return	[w / 2 + (x * Math.cos(a) / scale) * w / 2 - (y * Math.sin(a) / scale) * h / 2
+			,h / 2 - (x * Math.sin(a) / scale) * w / 2 - (y * Math.cos(a) / scale) * h / 2];
 }
 
 function smooth_01_to_0PI_2(x) {
-    return Math.PI * (Math.sin((x - 0.5) * Math.PI) + 1.) / 4;
+	return Math.PI * (Math.sin((x - 0.5) * Math.PI) + 1.) / 4;
 }
 
 function draw_arrow(context, x1, y1, x2, y2, color) {
-    const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
-    context.beginPath();
-    context.moveTo(x1, y1);
-    context.lineTo(x2, y2);
-    context.moveTo(x2 - (y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d, y2 - (y2 - y1) * 16.5 / d + (x2 - x1) * 4.5 / d);
-    context.lineTo(x2, y2);
-    context.moveTo(x2 + (y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d, y2 - (y2 - y1) * 16.5 / d - (x2 - x1) * 4.5 / d);
-    context.lineTo(x2, y2);
-    context.strokeStyle = color;
-    context.stroke();
-    context.closePath();
+	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - (y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d, y2 - (y2 - y1) * 16.5 / d + (x2 - x1) * 4.5 / d);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + (y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d, y2 - (y2 - y1) * 16.5 / d - (x2 - x1) * 4.5 / d);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
 }
 
 // for illustrations
 function draw_sine() {
-    // client
-    const w = 640.0;
-    const h = 480.0;
+	// client
+	const w = 640.0;
+	const h = 480.0;
 
-    // visible region
-    const x_min = -4.5;
-    const y_min = -3.0;
-    const x_max = 4.5;
-    const y_max = 3.0;
-    const client_x_center = w*(0-x_min)/(x_max-x_min);
-    const client_x_step = (w/(x_max-x_min));
-    const client_y_center = h - h*(0-y_min)/(y_max-y_min);
-    const client_y_step = (h/(y_max-y_min));
+	// visible region
+	const x_min = -4.5;
+	const y_min = -3.0;
+	const x_max = 4.5;
+	const y_max = 3.0;
+	const client_x_center = w*(0-x_min)/(x_max-x_min);
+	const client_x_step = (w/(x_max-x_min));
+	const client_y_center = h - h*(0-y_min)/(y_max-y_min);
+	const client_y_step = (h/(y_max-y_min));
 
-    function client_to_x(client_x){
-        return (client_x - client_x_center) / client_x_step;
-    }
+	function client_to_x(client_x){
+		return (client_x - client_x_center) / client_x_step;
+	}
 
-    function client_to_y(client_y){
-        return (client_y_center - client_y) / client_y_step;
-    }
+	function client_to_y(client_y){
+		return (client_y_center - client_y) / client_y_step;
+	}
 
-    function x_to_client(x){
-        return x * client_x_step + client_x_center;
-    }
+	function x_to_client(x){
+		return x * client_x_step + client_x_center;
+	}
 
-    function y_to_client(y){
-        return client_y_center - y * client_y_step;
-    }
+	function y_to_client(y){
+		return client_y_center - y * client_y_step;
+	}
 
-    plot = document.getElementById("sine");
-    const context = plot.getContext("2d");
+	plot = document.getElementById("sine");
+	const context = plot.getContext("2d");
 
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // grid
-    context.font = "16px sans-serif";
-    // axes
-    draw_arrow(context, 0, h/2, w, h/2, "#000");
-    draw_arrow(context, w/2, h, w/2, 0, "#000");
-    context.fillStyle="#000000";
-    // numbers
-    for(var i = x_min + 1; i <= x_max - 1; i++){
-        context.moveTo(client_x_center + i*client_x_step, client_y_center);
-        context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
-        if(i < 0)
-            context.fillText(i, client_x_center + i*client_x_step - 28, client_y_center - 12);
-        else
-            context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
-    }
-    for(var i = y_min + 1; i <= y_max - 1; i++){
-        if(i != 0) {
-            context.moveTo(client_x_center, client_y_center - i*client_y_step);
-            context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
-            context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
-        }
-    }
-    context.strokeStyle="#000000";
-    context.stroke();
-    context.closePath();
+	// grid
+	context.font = "16px sans-serif";
+	// axes
+	draw_arrow(context, 0, h/2, w, h/2, "#000");
+	draw_arrow(context, w/2, h, w/2, 0, "#000");
+	context.fillStyle="#000000";
+	// numbers
+	for(var i = x_min + 0.5; i <= x_max - 0.5; i++){
+		context.moveTo(client_x_center + i*client_x_step, client_y_center);
+		context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+		if(i < 0)
+			context.fillText(i, client_x_center + i*client_x_step - 16, client_y_center - 6);
+		else
+			context.fillText(i, client_x_center + i*client_x_step + 2, client_y_center + 16);
+	}
+	for(var i = y_min + 1; i <= y_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x_center, client_y_center - i*client_y_step);
+			context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+			context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+		}
+	}
+	context.strokeStyle="#000000";
+	context.stroke();
+	context.closePath();
 
-    // letters
-    context.fillText("x", client_x_center + x_max*client_x_step - 24, client_y_center - 8);
-    context.fillText("y", client_x_center - 18, client_y_center - y_max*client_y_step + 16);
+	// letters
+	context.fillText("x", client_x_center + x_max*client_x_step - 24, client_y_center - 8);
+	context.fillText("y", client_x_center - 18, client_y_center - y_max*client_y_step + 16);
 
-    // sine
-    context.lineWidth = 1;
-    context.beginPath();
-    context.strokeStyle = "#d64562";
-    for(var j = 1; j < w; j += 1) {
-	    const x = client_to_x(j);
-	    const x_ = client_to_x(j-1);
-	    const y = Math.sin(x);
-	    const y_ = Math.sin(x_);
-        context.moveTo(j-1, y_to_client(y_));
-        context.lineTo(j, y_to_client(y));
-        context.stroke();
-    }
-    context.closePath();
+	// sine
+	context.lineWidth = 2;
+	context.beginPath();
+	context.strokeStyle = "#d64562";
+	for(var j = 0; j <= w; j += 2) {
+		const x = client_to_x(j);
+		const y = Math.sin(x);
+		if(j == 0)
+			context.moveTo(j, y_to_client(y));
+		else
+			context.lineTo(j, y_to_client(y));
+		context.stroke();
+	}
+	context.closePath();
 
-    context.lineWidth = 1;
-    context.strokeStyle = "#444444";
-    context.setLineDash([4, 4]);
-    context.beginPath();
+	context.lineWidth = 1;
+	context.strokeStyle = "#444444";
+	context.setLineDash([4, 4]);
+	context.beginPath();
 
-    context.moveTo(x_to_client(Math.PI/2), y_to_client(-3));
-    context.lineTo(x_to_client(Math.PI/2), y_to_client(3));
-    context.moveTo(x_to_client(-4.5), y_to_client(1));
-    context.lineTo(x_to_client(4.5), y_to_client(1));
-    context.moveTo(x_to_client(-3), y_to_client(-3));
-    context.lineTo(x_to_client(3), y_to_client(3));
-    context.moveTo(x_to_client(Math.PI+3), y_to_client(-3));
-    context.lineTo(x_to_client(Math.PI-3), y_to_client(3));
-    // antisymmetry
-    context.moveTo(x_to_client(-Math.PI/2), y_to_client(3));
-    context.lineTo(x_to_client(-Math.PI/2), y_to_client(-3));
-    context.moveTo(x_to_client(4.5), y_to_client(-1));
-    context.lineTo(x_to_client(-4.5), y_to_client(-1));
-    context.moveTo(x_to_client(3), y_to_client(3));
-    context.lineTo(x_to_client(-3), y_to_client(-3));
-    context.moveTo(x_to_client(-Math.PI-3), y_to_client(3));
-    context.lineTo(x_to_client(-Math.PI+3), y_to_client(-3));
+	context.moveTo(x_to_client(Math.PI/2), y_to_client(-3));
+	context.lineTo(x_to_client(Math.PI/2), y_to_client(3));
+	context.moveTo(x_to_client(-4.5), y_to_client(1));
+	context.lineTo(x_to_client(4.5), y_to_client(1));
+	context.moveTo(x_to_client(-3), y_to_client(-3));
+	context.lineTo(x_to_client(3), y_to_client(3));
+	context.moveTo(x_to_client(Math.PI+3), y_to_client(-3));
+	context.lineTo(x_to_client(Math.PI-3), y_to_client(3));
+	// antisymmetry
+	context.moveTo(x_to_client(-Math.PI/2), y_to_client(3));
+	context.lineTo(x_to_client(-Math.PI/2), y_to_client(-3));
+	context.moveTo(x_to_client(4.5), y_to_client(-1));
+	context.lineTo(x_to_client(-4.5), y_to_client(-1));
+	context.moveTo(x_to_client(3), y_to_client(3));
+	context.lineTo(x_to_client(-3), y_to_client(-3));
+	context.moveTo(x_to_client(-Math.PI-3), y_to_client(3));
+	context.lineTo(x_to_client(-Math.PI+3), y_to_client(-3));
 
-    context.stroke();
-    context.closePath();
-    context.setLineDash([]);
+	context.stroke();
+	context.closePath();
+	context.setLineDash([]);
 
-    context.fillStyle="#222222";
-    context.fillText("π", x_to_client(Math.PI) + 4, y_to_client(0) - 4);
-    context.fillText("π/2", x_to_client(Math.PI/2) + 4, y_to_client(0) - 4);
+	context.fillStyle="#222222";
+	context.fillText("π", x_to_client(Math.PI) + 4, y_to_client(0) - 4);
+	context.fillText("π/2", x_to_client(Math.PI/2) + 4, y_to_client(0) - 4);
 }
 
 function draw_cosine() {
-    // client
-    const w = 640.0;
-    const h = 480.0;
+	// client
+	const w = 640.0;
+	const h = 480.0;
 
-    // visible region
-    const x_min = -4.5;
-    const y_min = -3.0;
-    const x_max = 4.5;
-    const y_max = 3.0;
-    const client_x_center = w*(0-x_min)/(x_max-x_min);
-    const client_x_step = (w/(x_max-x_min));
-    const client_y_center = h - h*(0-y_min)/(y_max-y_min);
-    const client_y_step = (h/(y_max-y_min));
+	// visible region
+	const x_min = -4.5;
+	const y_min = -3.0;
+	const x_max = 4.5;
+	const y_max = 3.0;
+	const client_x_center = w*(0-x_min)/(x_max-x_min);
+	const client_x_step = (w/(x_max-x_min));
+	const client_y_center = h - h*(0-y_min)/(y_max-y_min);
+	const client_y_step = (h/(y_max-y_min));
 
-    function client_to_x(client_x){
-        return (client_x - client_x_center) / client_x_step;
-    }
+	function client_to_x(client_x){
+		return (client_x - client_x_center) / client_x_step;
+	}
 
-    function client_to_y(client_y){
-        return (client_y_center - client_y) / client_y_step;
-    }
+	function client_to_y(client_y){
+		return (client_y_center - client_y) / client_y_step;
+	}
 
-    function x_to_client(x){
-        return x * client_x_step + client_x_center;
-    }
+	function x_to_client(x){
+		return x * client_x_step + client_x_center;
+	}
 
-    function y_to_client(y){
-        return client_y_center - y * client_y_step;
-    }
+	function y_to_client(y){
+		return client_y_center - y * client_y_step;
+	}
 
-    plot = document.getElementById("cosine");
-    const context = plot.getContext("2d");
+	plot = document.getElementById("cosine");
+	const context = plot.getContext("2d");
 
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // grid
-    context.font = "16px sans-serif";
-    // axes
-    draw_arrow(context, 0, h/2, w, h/2, "#000");
-    draw_arrow(context, w/2, h, w/2, 0, "#000");
-    context.beginPath();
-    context.fillStyle="#000000";
-    // numbers
-    for(var i = x_min + 1; i <= x_max - 1; i++){
-        context.moveTo(client_x_center + i*client_x_step, client_y_center);
-        context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
-        if(i < 0)
-            context.fillText(i, client_x_center + i*client_x_step - 28, client_y_center - 12);
-        else
-            context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center - 12);
-    }
-    for(var i = y_min + 1; i <= y_max - 1; i++){
-        if(i != 0) {
-            context.moveTo(client_x_center, client_y_center - i*client_y_step);
-            context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
-            context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
-        }
-    }
-    context.strokeStyle="#000000";
-    context.stroke();
-    context.closePath();
-    // letters
-    context.fillText("x", client_x_center + x_max*client_x_step - 24, client_y_center - 8);
-    context.fillText("y", client_x_center - 18, client_y_center - y_max*client_y_step + 16);
+	// grid
+	context.font = "16px sans-serif";
+	// axes
+	draw_arrow(context, 0, h/2, w, h/2, "#000");
+	draw_arrow(context, w/2, h, w/2, 0, "#000");
+	context.beginPath();
+	context.fillStyle="#000000";
+	// numbers
+	for(var i = x_min + 0.5; i <= x_max - 0.5; i++){
+		context.moveTo(client_x_center + i*client_x_step, client_y_center);
+		context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+		if(i < 0)
+			context.fillText(i, client_x_center + i*client_x_step - 16, client_y_center - 6);
+		else
+			context.fillText(i, client_x_center + i*client_x_step + 2, client_y_center + 16);
+	}
+	for(var i = y_min + 1; i <= y_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x_center, client_y_center - i*client_y_step);
+			context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+			context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+		}
+	}
+	context.strokeStyle="#000000";
+	context.stroke();
+	context.closePath();
+	// letters
+	context.fillText("x", client_x_center + x_max*client_x_step - 24, client_y_center - 8);
+	context.fillText("y", client_x_center - 18, client_y_center - y_max*client_y_step + 16);
 
-    // cosine
-    context.lineWidth = 1;
-    context.beginPath();
-    context.strokeStyle = "#457fd6";
-    for(var j = 1; j < w; j += 1) {
-	    const x = client_to_x(j);
-	    const x_ = client_to_x(j-1);
-	    const y = Math.cos(x);
-	    const y_ = Math.cos(x_);
-        context.moveTo(j-1, y_to_client(y_));
-        context.lineTo(j, y_to_client(y));
-        context.stroke();
-    }
-    context.closePath();
+	// cosine
+	context.lineWidth = 2;
+	context.beginPath();
+	context.strokeStyle = "#457fd6";
+	for(var j = 0; j <= w; j += 2) {
+		const x = client_to_x(j);
+		const y = Math.cos(x);
+		if(j == 0)
+			context.moveTo(j, y_to_client(y));
+		else
+			context.lineTo(j, y_to_client(y));
+		context.stroke();
+	}
+	context.closePath();
 
-    context.lineWidth = 1;
-    context.strokeStyle = "#444444";
-    context.setLineDash([4, 4]);
-    context.beginPath();
+	context.lineWidth = 1;
+	context.strokeStyle = "#444444";
+	context.setLineDash([4, 4]);
+	context.beginPath();
 
-    context.moveTo(x_to_client(-4.5), y_to_client(1));
-    context.lineTo(x_to_client(4.5), y_to_client(1));
-    context.moveTo(x_to_client(Math.PI/2+3), y_to_client(-3));
-    context.lineTo(x_to_client(Math.PI/2-3), y_to_client(3));
+	context.moveTo(x_to_client(-4.5), y_to_client(1));
+	context.lineTo(x_to_client(4.5), y_to_client(1));
+	context.moveTo(x_to_client(Math.PI/2+3), y_to_client(-3));
+	context.lineTo(x_to_client(Math.PI/2-3), y_to_client(3));
 
-    // symmetry
-    context.moveTo(x_to_client(-4.5), y_to_client(-1));
-    context.lineTo(x_to_client(4.5), y_to_client(-1));
-    context.moveTo(x_to_client(-Math.PI/2+3), y_to_client(3));
-    context.lineTo(x_to_client(-Math.PI/2-3), y_to_client(-3));
+	// symmetry
+	context.moveTo(x_to_client(-4.5), y_to_client(-1));
+	context.lineTo(x_to_client(4.5), y_to_client(-1));
+	context.moveTo(x_to_client(-Math.PI/2+3), y_to_client(3));
+	context.lineTo(x_to_client(-Math.PI/2-3), y_to_client(-3));
 
-    context.stroke();
-    context.closePath();
-    context.setLineDash([]);
+	context.stroke();
+	context.closePath();
+	context.setLineDash([]);
 
-    context.fillStyle="#222222";
-    context.fillText("-π/2", x_to_client(-Math.PI/2), y_to_client(0) + 20);
-    context.fillText("π/2", x_to_client(Math.PI/2) - 24, y_to_client(0) + 20);
+	context.fillStyle="#222222";
+	context.fillText("-π/2", x_to_client(-Math.PI/2), y_to_client(0) + 20);
+	context.fillText("π/2", x_to_client(Math.PI/2) - 24, y_to_client(0) + 20);
 }
 
 // sine mnemonic
 var sin_a = 0.;
 function draw_sine_mnemonic() {
-    const canvas = document.getElementById("sine_mnemonic");
-    const context = canvas.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	const canvas = document.getElementById("sine_mnemonic");
+	const context = canvas.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // axes
-    const axis_plus = 10*sin_a;
-    const left =    xy_to_screen(-scale-axis_plus, 0, sin_a);
-    const right =   xy_to_screen(+scale+axis_plus, 0, sin_a);
-    const up =      xy_to_screen(0, +scale+axis_plus, sin_a);
-    const down =    xy_to_screen(0, -scale-axis_plus, sin_a);
-    draw_arrow(context, left[0], left[1], right[0], right[1], "#000");
-    draw_arrow(context, down[0], down[1], up[0], up[1], "#000");
+	// axes
+	const axis_plus = 10*sin_a;
+	const left =	xy_to_screen(-scale-axis_plus, 0, sin_a);
+	const right =   xy_to_screen(+scale+axis_plus, 0, sin_a);
+	const up =	  xy_to_screen(0, +scale+axis_plus, sin_a);
+	const down =	xy_to_screen(0, -scale-axis_plus, sin_a);
+	draw_arrow(context, left[0], left[1], right[0], right[1], "#000");
+	draw_arrow(context, down[0], down[1], up[0], up[1], "#000");
 
-    // sine
-    const plus = (scale - Math.PI) * sin_a / (Math.PI/2);
-    context.lineWidth = 2;
-    context.beginPath();
-    context.strokeStyle = "#d64562";
-    for(var i = -scale + plus; i < scale - plus; i += 0.02) {
-        const p = xy_to_screen(i, Math.sin(i), sin_a);
-        if(i == -scale + plus)
-            context.moveTo(p[0], p[1]);
-        else
-            context.lineTo(p[0], p[1]);
-    }
-    context.stroke();
-    context.closePath();
+	// sine
+	const plus = (scale - Math.PI) * sin_a / (Math.PI/2);
+	context.lineWidth = 2;
+	context.beginPath();
+	context.strokeStyle = "#d64562";
+	for(var i = -scale + plus; i < scale - plus; i += 0.02) {
+		const p = xy_to_screen(i, Math.sin(i), sin_a);
+		if(i == -scale + plus)
+			context.moveTo(p[0], p[1]);
+		else
+			context.lineTo(p[0], p[1]);
+	}
+	context.stroke();
+	context.closePath();
 
-    // letters
-    if(sin_a > 0) {
-        const height = 2*(Math.PI/2-1)*sin_a;
-        const d = -(Math.PI/2 - 1);
-        context.beginPath();
-        context.strokeStyle = "#d64562";
-        // I
-        const i1 = xy_to_screen(-height, -Math.PI/2, sin_a);
-        const i2 = xy_to_screen(+height, -Math.PI/2, sin_a);
-        context.moveTo(i1[0], i1[1]);
-        context.lineTo(i2[0], i2[1]);
-        // N
-        const n1 = xy_to_screen(-height, -Math.PI/2 + d, sin_a);
-        const n2 = xy_to_screen(+height, -Math.PI/2 + d, sin_a);
-        const n3 = xy_to_screen(-height, -Math.PI/2 + 2*d, sin_a);
-        const n4 = xy_to_screen(+height, -Math.PI/2 + 2*d, sin_a);
-        context.moveTo(n1[0], n1[1]);
-        context.lineTo(n2[0], n2[1]);
-        context.lineTo(n3[0], n3[1]);
-        context.lineTo(n4[0], n4[1]);
-        // E
-        const e1 = xy_to_screen(-height,        -Math.PI/2 + 3*d, sin_a);
-        const e2 = xy_to_screen(+0.33*height,   -Math.PI/2 + 3*d, sin_a);
-        const e3 = xy_to_screen(+height,        -Math.PI/2 + 3*d, sin_a);
-        const e4 = xy_to_screen(-height,        -Math.PI/2 + 4*d, sin_a);
-        const e5 = xy_to_screen(+0.33*height,   -Math.PI/2 + 3.66*d, sin_a);
-        const e6 = xy_to_screen(+height,        -Math.PI/2 + 4*d, sin_a);
-        context.moveTo(e1[0], e1[1]);
-        context.lineTo(e3[0], e3[1]);
-        context.moveTo(e1[0], e1[1]);
-        context.lineTo(e4[0], e4[1]);
-        context.moveTo(e2[0], e2[1]);
-        context.lineTo(e5[0], e5[1]);
-        context.moveTo(e3[0], e3[1]);
-        context.lineTo(e6[0], e6[1]);
-        context.stroke();
-        context.closePath();
-    }
-    context.lineWidth = 1;
+	// letters
+	if(sin_a > 0) {
+		const height = 2*(Math.PI/2-1)*sin_a;
+		const d = -(Math.PI/2 - 1);
+		context.beginPath();
+		context.strokeStyle = "#d64562";
+		// I
+		const i1 = xy_to_screen(-height, -Math.PI/2, sin_a);
+		const i2 = xy_to_screen(+height, -Math.PI/2, sin_a);
+		context.moveTo(i1[0], i1[1]);
+		context.lineTo(i2[0], i2[1]);
+		// N
+		const n1 = xy_to_screen(-height, -Math.PI/2 + d, sin_a);
+		const n2 = xy_to_screen(+height, -Math.PI/2 + d, sin_a);
+		const n3 = xy_to_screen(-height, -Math.PI/2 + 2*d, sin_a);
+		const n4 = xy_to_screen(+height, -Math.PI/2 + 2*d, sin_a);
+		context.moveTo(n1[0], n1[1]);
+		context.lineTo(n2[0], n2[1]);
+		context.lineTo(n3[0], n3[1]);
+		context.lineTo(n4[0], n4[1]);
+		// E
+		const e1 = xy_to_screen(-height,		-Math.PI/2 + 3*d, sin_a);
+		const e2 = xy_to_screen(+0.33*height,   -Math.PI/2 + 3*d, sin_a);
+		const e3 = xy_to_screen(+height,		-Math.PI/2 + 3*d, sin_a);
+		const e4 = xy_to_screen(-height,		-Math.PI/2 + 4*d, sin_a);
+		const e5 = xy_to_screen(+0.33*height,   -Math.PI/2 + 3.66*d, sin_a);
+		const e6 = xy_to_screen(+height,		-Math.PI/2 + 4*d, sin_a);
+		context.moveTo(e1[0], e1[1]);
+		context.lineTo(e3[0], e3[1]);
+		context.moveTo(e1[0], e1[1]);
+		context.lineTo(e4[0], e4[1]);
+		context.moveTo(e2[0], e2[1]);
+		context.lineTo(e5[0], e5[1]);
+		context.moveTo(e3[0], e3[1]);
+		context.lineTo(e6[0], e6[1]);
+		context.stroke();
+		context.closePath();
+	}
+	context.lineWidth = 1;
 }
 
 var sin_t = 0.;
 var sin_dt = 0.;
 function sin_animation() {
-    if(sin_dt != 0) {
-        sin_t += sin_dt;
-        sin_a = smooth_01_to_0PI_2(sin_t);
-        draw_sine_mnemonic();
-        if(sin_t <= 0.) {
-            sin_t = 0.;
-            sin_dt = 0.;
-        } else if(sin_t >= 1.) {
-            sin_t = 1.;
-            sin_dt = 0.;
-        } else
-            setTimeout(sin_animation, 20);
-    }
+	if(sin_dt != 0) {
+		sin_t += sin_dt;
+		sin_a = smooth_01_to_0PI_2(sin_t);
+		draw_sine_mnemonic();
+		if(sin_t <= 0.) {
+			sin_t = 0.;
+			sin_dt = 0.;
+		} else if(sin_t >= 1.) {
+			sin_t = 1.;
+			sin_dt = 0.;
+		} else
+			setTimeout(sin_animation, 20);
+	}
 }
 
 function start_sin() {
-    if(sin_a == 0) {
-        sin_dt = 0.01;
-        sin_animation();
-    } else {
-        sin_dt = -0.01;
-        sin_animation();
-    }
+	if(sin_a == 0) {
+		sin_dt = 0.01;
+		sin_animation();
+	} else {
+		sin_dt = -0.01;
+		sin_animation();
+	}
 }
 
 // cos mnemonic
 var cos_a = 0.;
 function draw_cos_mnemonic() {
-    const canvas = document.getElementById("cos_mnemonic");
-    const context = canvas.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	const canvas = document.getElementById("cos_mnemonic");
+	const context = canvas.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // axes
-    const axis_plus = 10*cos_a;
-    const left =    xy_to_screen(-scale-axis_plus, 0, cos_a);
-    const right =   xy_to_screen(+scale+axis_plus, 0, cos_a);
-    const up =      xy_to_screen(0, +scale+axis_plus, cos_a);
-    const down =    xy_to_screen(0, -scale-axis_plus, cos_a);
-    draw_arrow(context, left[0], left[1], right[0], right[1], "#000");
-    draw_arrow(context, down[0], down[1], up[0], up[1], "#000");
+	// axes
+	const axis_plus = 10*cos_a;
+	const left =	xy_to_screen(-scale-axis_plus, 0, cos_a);
+	const right =   xy_to_screen(+scale+axis_plus, 0, cos_a);
+	const up =	  xy_to_screen(0, +scale+axis_plus, cos_a);
+	const down =	xy_to_screen(0, -scale-axis_plus, cos_a);
+	draw_arrow(context, left[0], left[1], right[0], right[1], "#000");
+	draw_arrow(context, down[0], down[1], up[0], up[1], "#000");
 
-    // cos
-    const plus = (scale - Math.PI / 2) * cos_a / (Math.PI/2);
-    context.lineWidth = 2;
-    context.beginPath();
-    context.strokeStyle = "#457fd6";
-    for(var i = -scale + plus; i < scale - plus; i += 0.02) {
-        const p = xy_to_screen(i, Math.cos(i), cos_a);
-        if(i == -scale + plus)
-            context.moveTo(p[0], p[1]);
-        else
-            context.lineTo(p[0], p[1]);
-    }
-    context.stroke();
-    context.closePath();
+	// cos
+	const plus = (scale - Math.PI / 2) * cos_a / (Math.PI/2);
+	context.lineWidth = 2;
+	context.beginPath();
+	context.strokeStyle = "#457fd6";
+	for(var i = -scale + plus; i < scale - plus; i += 0.02) {
+		const p = xy_to_screen(i, Math.cos(i), cos_a);
+		if(i == -scale + plus)
+			context.moveTo(p[0], p[1]);
+		else
+			context.lineTo(p[0], p[1]);
+	}
+	context.stroke();
+	context.closePath();
 
-    // letters
-    if(cos_a > 0) {
-        context.beginPath();
-        context.strokeStyle = "#457fd6";
-        const d = -1;
-        // o
-        for(var a = 0; a <= 2*Math.PI; a+=0.01) {
-            const pa = xy_to_screen(Math.sin(a) * cos_a * d, -0.8*cos_a + Math.cos(a) * d, cos_a);
-            if(a == 0)
-                context.moveTo(pa[0], pa[1]);
-            else
-                context.lineTo(pa[0], pa[1]);
-        }
+	// letters
+	if(cos_a > 0) {
+		context.beginPath();
+		context.strokeStyle = "#457fd6";
+		const d = -1;
+		// o
+		for(var a = 0; a <= 2*Math.PI; a+=0.01) {
+			const pa = xy_to_screen(Math.sin(a) * cos_a * d, -0.8*cos_a + Math.cos(a) * d, cos_a);
+			if(a == 0)
+				context.moveTo(pa[0], pa[1]);
+			else
+				context.lineTo(pa[0], pa[1]);
+		}
 
-        // s
-        for(var a = -0.75*Math.PI; a <= 0.75*Math.PI; a+=0.01) {
-            const pa = xy_to_screen(Math.sin(a) * cos_a * d, -2*cos_a + Math.PI/2*Math.sin(a)*Math.cos(a) * d, cos_a);
-            if(a == -0.75*Math.PI)
-                context.moveTo(pa[0], pa[1]);
-            else
-                context.lineTo(pa[0], pa[1]);
-        }
-        context.stroke();
-        context.closePath();
-    }
-    context.lineWidth = 1;
+		// s
+		for(var a = -0.75*Math.PI; a <= 0.75*Math.PI; a+=0.01) {
+			const pa = xy_to_screen(Math.sin(a) * cos_a * d, -2*cos_a + Math.PI/2*Math.sin(a)*Math.cos(a) * d, cos_a);
+			if(a == -0.75*Math.PI)
+				context.moveTo(pa[0], pa[1]);
+			else
+				context.lineTo(pa[0], pa[1]);
+		}
+		context.stroke();
+		context.closePath();
+	}
+	context.lineWidth = 1;
 }
 
 var cos_t = 0.;
 var cos_dt = 0.;
 function cos_animation() {
-    if(cos_dt != 0) {
-        cos_t += cos_dt;
-        cos_a = smooth_01_to_0PI_2(cos_t);
-        draw_cos_mnemonic();
-        if(cos_t <= 0.) {
-            cos_t = 0.;
-            cos_dt = 0.;
-        } else if(cos_t >= 1.) {
-            cos_t = 1.;
-            cos_dt = 0.;
-        } else
-            setTimeout(cos_animation, 20);
-    }
+	if(cos_dt != 0) {
+		cos_t += cos_dt;
+		cos_a = smooth_01_to_0PI_2(cos_t);
+		draw_cos_mnemonic();
+		if(cos_t <= 0.) {
+			cos_t = 0.;
+			cos_dt = 0.;
+		} else if(cos_t >= 1.) {
+			cos_t = 1.;
+			cos_dt = 0.;
+		} else
+			setTimeout(cos_animation, 20);
+	}
 }
 
 function start_cos() {
-    if(cos_a == 0) {
-        cos_dt = 0.01;
-        cos_animation();
-    } else {
-        cos_dt = -0.01;
-        cos_animation();
-    }
+	if(cos_a == 0) {
+		cos_dt = 0.01;
+		cos_animation();
+	} else {
+		cos_dt = -0.01;
+		cos_animation();
+	}
 }
 
 // user code animation
@@ -541,9 +541,9 @@ var t_ms = 0.;
 setInterval(function(){t_ms+=20;draw_things();}, 20);
 
 function draw_things() {
-    draw_rotation();
-    draw_smoothness();
-    draw_curves();
+	draw_rotation();
+	draw_smoothness();
+	draw_curves();
 }
 
 // user code and visualisations
@@ -559,53 +559,53 @@ function draw_user_rotation(context) {
 var rotation_background = null;
 
 function draw_rotation() {
-    const canvas = document.getElementById("rotation");
-    const context = canvas.getContext("2d");
+	const canvas = document.getElementById("rotation");
+	const context = canvas.getContext("2d");
 
-    // background
-    if(rotation_background == null) {
-        context.font = "16px sans-serif";
-        context.fillStyle="#eeeeee";
-        context.fillRect(0, 0, w, h);
-        context.beginPath();
-        context.strokeStyle = "#000";
-        context.fillStyle="#000";
-        context.lineWidth = 1;
-        for(var i = 0; i < 12; ++i) {
-            context.moveTo(320 - 240 * Math.cos(i * Math.PI / 6), 320 + 240 * Math.sin(i * Math.PI / 6));
-            context.lineTo(320 - 453 * Math.cos(i * Math.PI / 6), 320 + 453 * Math.sin(i * Math.PI / 6));
-            const text_x = 320 - 220 * Math.cos(i * Math.PI / 6);
-            const text_y = 320 + 220 * Math.sin(i * Math.PI / 6);
-            context.textAlign = "center";
-            context.textBaseline = "middle";
-            if(i == 0) context.fillText("0", text_x, text_y);
-            if(i == 1) context.fillText("π/6", text_x, text_y);
-            if(i == 2) context.fillText("π/3", text_x, text_y);
-            if(i == 3) context.fillText("π/2", text_x, text_y);
-            if(i == 4) context.fillText("2π/3", text_x, text_y);
-            if(i == 5) context.fillText("5π/6", text_x, text_y);
-            if(i == 6) context.fillText("π", text_x, text_y);
-            if(i == 7) context.fillText("-5π/6", text_x, text_y);
-            if(i == 8) context.fillText("-2π/3", text_x, text_y);
-            if(i == 9) context.fillText("-π/2", text_x, text_y);
-            if(i == 10) context.fillText("-π/3", text_x, text_y);
-            if(i == 11) context.fillText("-π/6", text_x, text_y);
-        }
-        context.stroke();
-        context.closePath();
-        rotation_background = context.getImageData(0, 0, 640, 640);
-    } else {
-        context.putImageData(rotation_background, 0, 0);
-    }
+	// background
+	if(rotation_background == null) {
+		context.font = "16px sans-serif";
+		context.fillStyle="#eeeeee";
+		context.fillRect(0, 0, w, h);
+		context.beginPath();
+		context.strokeStyle = "#000";
+		context.fillStyle="#000";
+		context.lineWidth = 1;
+		for(var i = 0; i < 12; ++i) {
+			context.moveTo(320 - 240 * Math.cos(i * Math.PI / 6), 320 + 240 * Math.sin(i * Math.PI / 6));
+			context.lineTo(320 - 453 * Math.cos(i * Math.PI / 6), 320 + 453 * Math.sin(i * Math.PI / 6));
+			const text_x = 320 - 220 * Math.cos(i * Math.PI / 6);
+			const text_y = 320 + 220 * Math.sin(i * Math.PI / 6);
+			context.textAlign = "center";
+			context.textBaseline = "middle";
+			if(i == 0) context.fillText("0", text_x, text_y);
+			if(i == 1) context.fillText("π/6", text_x, text_y);
+			if(i == 2) context.fillText("π/3", text_x, text_y);
+			if(i == 3) context.fillText("π/2", text_x, text_y);
+			if(i == 4) context.fillText("2π/3", text_x, text_y);
+			if(i == 5) context.fillText("5π/6", text_x, text_y);
+			if(i == 6) context.fillText("π", text_x, text_y);
+			if(i == 7) context.fillText("-5π/6", text_x, text_y);
+			if(i == 8) context.fillText("-2π/3", text_x, text_y);
+			if(i == 9) context.fillText("-π/2", text_x, text_y);
+			if(i == 10) context.fillText("-π/3", text_x, text_y);
+			if(i == 11) context.fillText("-π/6", text_x, text_y);
+		}
+		context.stroke();
+		context.closePath();
+		rotation_background = context.getImageData(0, 0, 640, 640);
+	} else {
+		context.putImageData(rotation_background, 0, 0);
+	}
 
-    // user code
-    context.beginPath();
-    context.strokeStyle = "#d67f45";
-    context.fillStyle="#d67f45";
-    context.lineWidth = 3;
-    draw_user_rotation(context);
-    context.stroke();
-    context.closePath();
+	// user code
+	context.beginPath();
+	context.strokeStyle = "#d67f45";
+	context.fillStyle="#d67f45";
+	context.lineWidth = 3;
+	draw_user_rotation(context);
+	context.stroke();
+	context.closePath();
 }
 </script>
 <script language="JavaScript" id="smoothness_script">
@@ -616,47 +616,47 @@ function draw_user_smoothness(context) {
 var smoothness_background = null;
 
 function draw_smoothness() {
-    const canvas = document.getElementById("smoothness");
-    const context = canvas.getContext("2d");
+	const canvas = document.getElementById("smoothness");
+	const context = canvas.getContext("2d");
 
-    // background
-    if(smoothness_background == null) {
-        context.font = "16px sans-serif";
-        context.fillStyle="#eeeeee";
-        context.fillRect(0, 0, w, h);
-        context.beginPath();
-        context.strokeStyle = "#000";
-        context.fillStyle="#000";
-        context.lineWidth = 1;
-        draw_arrow(context, 0, 640, 0, 0);
-        draw_arrow(context, 0, 640, 640, 640);
-        context.fillText("f(x)", 14, 20);
-        context.fillText("x", 620, 624);
-        context.fillText("0", 14, 624);
-        for(var i = 0.125; i < 1; i += 0.125) {
-            context.fillText(i, 640 * i - 2 , 624);
-            context.fillText(i, 14 , 640 + 12 - i * 640);
-            context.moveTo(0, 640 - i * 640);
-            context.lineTo(12 - 4 * 8 * (i % 0.25), 640 - i * 640);
-            context.moveTo(i * 640, 640);
-            context.lineTo(i * 640, 640 - (12 - 4 * 8 * (i % 0.25)));
+	// background
+	if(smoothness_background == null) {
+		context.font = "16px sans-serif";
+		context.fillStyle="#eeeeee";
+		context.fillRect(0, 0, w, h);
+		context.beginPath();
+		context.strokeStyle = "#000";
+		context.fillStyle="#000";
+		context.lineWidth = 1;
+		draw_arrow(context, 0, 640, 0, 0);
+		draw_arrow(context, 0, 640, 640, 640);
+		context.fillText("f(x)", 14, 20);
+		context.fillText("x", 620, 624);
+		context.fillText("0", 14, 624);
+		for(var i = 0.125; i < 1; i += 0.125) {
+			context.fillText(i, 640 * i - 2 , 624);
+			context.fillText(i, 14 , 640 + 12 - i * 640);
+			context.moveTo(0, 640 - i * 640);
+			context.lineTo(12 - 4 * 8 * (i % 0.25), 640 - i * 640);
+			context.moveTo(i * 640, 640);
+			context.lineTo(i * 640, 640 - (12 - 4 * 8 * (i % 0.25)));
 
-        }
-        context.stroke();
-        context.closePath();
-        smoothness_background = context.getImageData(0, 0, 640, 640);
-    } else {
-        context.putImageData(smoothness_background, 0, 0);
-    }
+		}
+		context.stroke();
+		context.closePath();
+		smoothness_background = context.getImageData(0, 0, 640, 640);
+	} else {
+		context.putImageData(smoothness_background, 0, 0);
+	}
 
-    // user code
-    context.beginPath();
-    context.strokeStyle = "#d67f45";
-    context.fillStyle="#d67f45";
-    context.lineWidth = 3;
-    draw_user_smoothness(context);
-    context.stroke();
-    context.closePath();
+	// user code
+	context.beginPath();
+	context.strokeStyle = "#d67f45";
+	context.fillStyle="#d67f45";
+	context.lineWidth = 3;
+	draw_user_smoothness(context);
+	context.stroke();
+	context.closePath();
 }
 </script>
 <script language="JavaScript" id="curves_script">
@@ -666,86 +666,86 @@ function draw_user_curves(context) {
 <script language="JavaScript">
 var curves_background = null;
 function draw_curves() {
-    const canvas = document.getElementById("curves");
-    const context = canvas.getContext("2d");
+	const canvas = document.getElementById("curves");
+	const context = canvas.getContext("2d");
 
-    // background
-    if(curves_background == null) {
-        context.font = "16px sans-serif";
-        context.fillStyle="#eeeeee";
-        context.fillRect(0, 0, w, h);
-        context.beginPath();
-        context.strokeStyle = "#777";
-        context.fillStyle="#000";
-        context.lineWidth = 1;
-        for(var i = 80; i < 640; i += 80) {
-            context.fillText(i, i + 4, 18);
-            context.fillText(i, 4 , i - 8);
-            context.moveTo(0, i);
-            context.lineTo(640, i);
-            context.moveTo(i, 0);
-            context.lineTo(i, 640);
+	// background
+	if(curves_background == null) {
+		context.font = "16px sans-serif";
+		context.fillStyle="#eeeeee";
+		context.fillRect(0, 0, w, h);
+		context.beginPath();
+		context.strokeStyle = "#777";
+		context.fillStyle="#000";
+		context.lineWidth = 1;
+		for(var i = 80; i < 640; i += 80) {
+			context.fillText(i, i + 4, 18);
+			context.fillText(i, 4 , i - 8);
+			context.moveTo(0, i);
+			context.lineTo(640, i);
+			context.moveTo(i, 0);
+			context.lineTo(i, 640);
 
-        }
-        context.stroke();
-        context.closePath();
-        curves_background = context.getImageData(0, 0, 640, 640);
-    } else {
-        context.putImageData(curves_background, 0, 0);
-    }
+		}
+		context.stroke();
+		context.closePath();
+		curves_background = context.getImageData(0, 0, 640, 640);
+	} else {
+		context.putImageData(curves_background, 0, 0);
+	}
 
-    // user code
-    context.beginPath();
-    context.strokeStyle = "#d67f45";
-    context.fillStyle="#d67f45";
-    context.lineWidth = 3;
-    draw_user_curves(context);
-    context.stroke();
-    context.closePath();
+	// user code
+	context.beginPath();
+	context.strokeStyle = "#d67f45";
+	context.fillStyle="#d67f45";
+	context.lineWidth = 3;
+	draw_user_curves(context);
+	context.stroke();
+	context.closePath();
 }
 
 function reevaluate(thing) {
-    var script = document.getElementById(thing + "_script");
-    if (script) {
-        script.parentNode.removeChild(script);
-    }
-    var code = document.getElementById(thing + "_code");
-    script = document.createElement('script');
-    script.id = thing + "_script";
+	var script = document.getElementById(thing + "_script");
+	if (script) {
+		script.parentNode.removeChild(script);
+	}
+	var code = document.getElementById(thing + "_code");
+	script = document.createElement('script');
+	script.id = thing + "_script";
 
-    script.text = "function draw_user_" + thing + "(context){"
-    + "document.getElementById('" + thing + "_comment').innerHTML = 'This code is changeable.';"
-    + "try{"
-    + code.value
-    + "}catch(error){"
-    + "document.getElementById('" + thing + "_comment').innerHTML = '<b>Error:</b> ' + error.message;"
-    + "}}";
+	script.text = "function draw_user_" + thing + "(context){"
+	+ "document.getElementById('" + thing + "_comment').innerHTML = 'This code is changeable.';"
+	+ "try{"
+	+ code.value
+	+ "}catch(error){"
+	+ "document.getElementById('" + thing + "_comment').innerHTML = '<b>Error:</b> ' + error.message;"
+	+ "}}";
 
-    document.body.appendChild(script);
+	document.body.appendChild(script);
 }
-    </script>
+	</script>
   </head>
   <body>
-    <center>
-    <h1>
+	<center>
+	<h1>
 Sine and cosine
-    </h1>
-    <p>
+	</h1>
+	<p>
 Anode and cathode, procaryote and eucaryote, epimorphism and monomorphism. For every pair, I think I know what the words mean from school but I can't always tell one from another. I can always tell sine from cosine but I didn't learn them at school. My father taught me.
-    </p>
-    <p>
-He was not an educator but an engineer. He didn't tell me where these words come from, he didn't tell me about Greeks or Sumerians. He didn't even tell me about that circle thingy with a triangle. Nothing that math teachers somehow deem important. He only told me what do these functions look like and how can I use them to create other functions. I played with them on my computer for a while and that's it. Every piece of trigonometry I learned from then started to make sense.
-    </p>
-    <h2>
+	</p>
+	<p>
+He was not an educator but an engineer. He didn't tell me where these words come from, he didn't tell me about Greeks or Sumerians. He didn't even tell me about that circle thingy with a triangle. Nothing that math teachers somehow deem important. He only told me what do these functions look like and how to make them into other functions. I played with them on a computer for a while and that was it. Every piece of trigonometry I learned from then started to make sense.
+	</p>
+	<h2>
 Sine
-    </h2>
-    <p>
+	</h2>
+	<p>
 This is sine.
-    </p>
-    <canvas id="sine" width=640 height=480></canvas>
-    <p>
+	</p>
+	<canvas id="sine" width=640 height=480></canvas>
+	<p>
 It's a <b>continuous</b> function that runs through all the <i>x</i>-axis. On the <i>y</i>-axis, it is constrained between -1 and 1.
-    </p>
+	</p>
 	<p>
 Its most interesting values are:
 	</p>
@@ -759,34 +759,34 @@ Its most interesting values are:
 	<td><b>sin(&alpha;)</td><td>&radic;0 / 2</td><td>&radic;1 / 2</td><td>&radic;2 / 2</td><td>&radic;3 / 2</td><td>&radic;4 / 2</td>
 	</tr>
 	</table>
-    <p>
+	<p>
 It is <b>smooth</b>. It grows and declines but the magnitude of these changes is continuos.
-    </p>
-    <p>
+	</p>
+	<p>
 It is <b>periodic</b> meaning that it consists of an infinite number of equal pieces 2Π-long.
-    </p>
-    <p>
+	</p>
+	<p>
 It is <b>antisymmetric</b> meaning that it's x-negative half is exactly the opposite of the x-positive one: <i>f(-x) = -f(x)</i>.
-    </p>
-    <p>
+	</p>
+	<p>
 In 0 it grows exactly like <i>y = x</i>. For small <i>x</i>, we can even use <i>f(x) = x</i> as an approximation of <i>sin(x)</i>.
-    </p>
-    <p>
+	</p>
+	<p>
 It's all pretty easy to remember since it also looks like <span class="letters">S</span>.
-    </p>
-    <canvas id="sine_mnemonic" width=640 height=640></canvas>
-    <br>
-    <button type="button" onclick="start_sin()" id="sin_button">Toggle the mnemonic</button>
-    <h2>
+	</p>
+	<canvas id="sine_mnemonic" width=640 height=640></canvas>
+	<br>
+	<button type="button" onclick="start_sin()" id="sin_button">Toggle the mnemonic</button>
+	<h2>
 Cosine
-    </h2>
-    <p>
+	</h2>
+	<p>
 This is cosine.
-    </p>
-    <canvas id="cosine" width=640 height=480></canvas>
-    <p>
+	</p>
+	<canvas id="cosine" width=640 height=480></canvas>
+	<p>
 It is the sine's older cousin. It looks exactly like the sine but it runs Π/2 ahead of it.
-    </p>
+	</p>
 	<p>
 It has the same interesting values but in reverse order:
 	</p>
@@ -800,50 +800,50 @@ It has the same interesting values but in reverse order:
 	<td><b>sin(&alpha;)</td><td>&radic;4 / 2</td><td>&radic;3 / 2</td><td>&radic;2 / 2</td><td>&radic;1 / 2</td><td>&radic;0 / 2</td>
 	</tr>
 	</table>
-    <p>
+	<p>
 Unlike the sine, it's <b>symmetric</b>. Its x-negative half is the mirrored copy of x-positive half: <i>f(-x) = +f(x)</i>.
-    </p>
-    <p>
+	</p>
+	<p>
 Around 0, it behaves like <i>y = 1</i>.
-    </p>
-    <p>
+	</p>
+	<p>
 It's also easy to remember since it looks like <span class="letters">C</span>.
-    </p>
-    <canvas id="cos_mnemonic" width=640 height=640></canvas>
-    <br>
-    <button type="button" onclick="start_cos()" id="cos_button">Toggle the mnemonic</button>
-    <p>
+	</p>
+	<canvas id="cos_mnemonic" width=640 height=640></canvas>
+	<br>
+	<button type="button" onclick="start_cos()" id="cos_button">Toggle the mnemonic</button>
+	<p>
 The moving illustrations you see are all made with sines and cosines. And now I'll show you how.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Rotation
-    </h2>
-    <p>
+	</h2>
+	<p>
 Rotation is a spatial transformation. On a plane, this is a function that turns a pair of coordinates into another pair of coordinates. <i>(x, y) &rarr; (x<sub>r</sub>, y<sub>r</sub>)</i>. Of course, it can be written down as a pair of functions used simultaneously.
-    </p>
-    <p>
+	</p>
+	<p>
 The formula for rotation on <i>a</i> in radians is this:
-    </p>
-    <p class="formula">
+	</p>
+	<p class="formula">
 x<sub>r</sub> = -x cos(a) + y sin(a)
 <br>
 y<sub>r</sub> = x sin(a) + y cos(a)
-    </p>
-    <p>
+	</p>
+	<p>
 On this plot, I wanted the arrow to run clockwise so I negated the <i>a</i>. But you can do the same by altering your formula. And yes, it's your formula now, the code below is changeable, you can change things there and the plot will react.
-    </p>
-    <canvas id="rotation" width=640 height=640></canvas>
-    <br>
-    <textarea id="rotation_code" rows=22 onInput="reevaluate('rotation')">
+	</p>
+	<canvas id="rotation" width=640 height=640></canvas>
+	<br>
+	<textarea id="rotation_code" rows=22 onInput="reevaluate('rotation')">
 const screen_center = [320, 320];
 const a = - t_ms / 1000; // time to angle proportion
 
 // this is how you rotate: x, y, a -> x_rotated, y_rotated
 function x_rotated(x, y) {
-    return - x * cos(a) + y * sin(a);
+	return - x * cos(a) + y * sin(a);
 }
 function y_rotated(x, y) {
-    return + x * sin(a) + y * cos(a);
+	return + x * sin(a) + y * cos(a);
 }
 
 // the illustration
@@ -851,103 +851,103 @@ const arrow = [[0, 0], [200, 0], [180, -7], [200, 0], [180, 7]];
 
 context.moveTo(screen_center[0], screen_center[1]);
 for(var i = 1; i &lt; arrow.length; ++i)
-    context.lineTo(
-        screen_center[0] + x_rotated(arrow[i][0], arrow[i][1]),
-        screen_center[1] + y_rotated(arrow[i][0], arrow[i][1]));
-    </textarea>
-    <p id="rotation_comment" class="comment"></p>
-    <h2>
+	context.lineTo(
+		screen_center[0] + x_rotated(arrow[i][0], arrow[i][1]),
+		screen_center[1] + y_rotated(arrow[i][0], arrow[i][1]));
+	</textarea>
+	<p id="rotation_comment" class="comment"></p>
+	<h2>
 “Natural” movement
-    </h2>
-    <p>
+	</h2>
+	<p>
 If something starts moving gradually growing speed from the full stop and then stops completely by gradually losing speed, we consider its movement natural.
-    </p>
-    <p>
+	</p>
+	<p>
 On the plot, the vertical line speeds up from 0 and stops smoothly at the end. That's because its movement is dictated by <i>f(x)</i> — the function that starts flat and ends flat, and we use the sine for that, and the sine itself is smooth.
-    </p>
-    <canvas id="smoothness" width=640 height=640></canvas>
-    <br>
-    <textarea id="smoothness_code" rows=22 onInput="reevaluate('smoothness')">
-    const w = 640;
-    const h = 640;
+	</p>
+	<canvas id="smoothness" width=640 height=640></canvas>
+	<br>
+	<textarea id="smoothness_code" rows=22 onInput="reevaluate('smoothness')">
+	const w = 640;
+	const h = 640;
 
-    // the function f: x -> y; x ∈ [0, 1], y ∈ [0, 1]
-    function f(x) {
-        return (sin((x - 0.5)*PI) + 1) / 2;
-    }
+	// the function f: x -> y; x ∈ [0, 1], y ∈ [0, 1]
+	function f(x) {
+		return (sin((x - 0.5)*PI) + 1) / 2;
+	}
 
-    // the plot
-    for(var j = 0; j &lt; w ; ++j) {
-        const i = h - h * f(j / w);
-        if(j == 0)
-            context.moveTo(j, i);
-        else
-            context.lineTo(j, i);
-    }
+	// the plot
+	for(var j = 0; j &lt; w ; ++j) {
+		const i = h - h * f(j / w);
+		if(j == 0)
+			context.moveTo(j, i);
+		else
+			context.lineTo(j, i);
+	}
 
-    // the moving line
-    const t = (t_ms / 5000) % 1;
-    context.moveTo(f(t) * w, 0);
-    context.lineTo(f(t) * w, h);
-    </textarea>
-    <p id="smoothness_comment" class="comment"></p>
-    <h2>
+	// the moving line
+	const t = (t_ms / 5000) % 1;
+	context.moveTo(f(t) * w, 0);
+	context.lineTo(f(t) * w, h);
+	</textarea>
+	<p id="smoothness_comment" class="comment"></p>
+	<h2>
 Curves
-    </h2>
-    <p>
+	</h2>
+	<p>
 A parametric curve is a function of a parameter resulting in a pair of coordinates: <i>a &rarr; (x, y)</i>.
-    </p>
-    <p>
+	</p>
+	<p>
 Of course, it's the same as a pair of separate functions for each coordinate.
-    </p>
-    <canvas id="curves" width=640 height=640></canvas>
-    <br>
-    <textarea id="curves_code" rows=22 onInput="reevaluate('curves')">
-    const w = 640;
-    const h = 640;
-    const size = 280;
+	</p>
+	<canvas id="curves" width=640 height=640></canvas>
+	<br>
+	<textarea id="curves_code" rows=22 onInput="reevaluate('curves')">
+	const w = 640;
+	const h = 640;
+	const size = 280;
 
-    // parametric curve is: a -> (x, y)
-    function x(a) {
-        return w / 2 + sin(a) * size;
-    }
-    function y(a) {
-        return h / 2 - PI / 2 * sin(a)*cos(a) * size;
-    }
+	// parametric curve is: a -> (x, y)
+	function x(a) {
+		return w / 2 + sin(a) * size;
+	}
+	function y(a) {
+		return h / 2 - PI / 2 * sin(a)*cos(a) * size;
+	}
 
-    // this draws the function in a range
-    const range = [-0.75 * PI, 0.75 * PI];
-    for(var a = range[0]; a <= range[1]; a += 0.01) {
-        if(a == range[0])
-            context.moveTo(x(a), y(a));
-        else
-            context.lineTo(x(a), y(a));
-    }
-    </textarea>
-    <p id="curves_comment" class="comment"></p>
+	// this draws the function in a range
+	const range = [-0.75 * PI, 0.75 * PI];
+	for(var a = range[0]; a <= range[1]; a += 0.01) {
+		if(a == range[0])
+			context.moveTo(x(a), y(a));
+		else
+			context.lineTo(x(a), y(a));
+	}
+	</textarea>
+	<p id="curves_comment" class="comment"></p>
 
-    <h2>
+	<h2>
 TL&DR
-    </h2>
-    <p>
+	</h2>
+	<p>
 Sine is like <span class="letters">S</span> and cosine is like <span class="letters">C</span>.
-    </p>
-    <p>
+	</p>
+	<p>
 You can make things like <span class="letters">O</span> or <span class="letters">8</span> by using them both.
-    </p>
+	</p>
 
-    <script language="JavaScript">
-    draw_sine();
-    draw_cosine();
-    draw_sine_mnemonic();
-    draw_cos_mnemonic();
-    reevaluate("rotation");
-    reevaluate("smoothness");
-    reevaluate("curves");
-    </script>
+	<script language="JavaScript">
+	draw_sine();
+	draw_cosine();
+	draw_sine_mnemonic();
+	draw_cos_mnemonic();
+	reevaluate("rotation");
+	reevaluate("smoothness");
+	reevaluate("curves");
+	</script>
 
 
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
 		<a href="index.html"><img src="favicon.ico"></a>
@@ -963,6 +963,6 @@ You can make things like <span class="letters">O</span> or <span class="letters"
 	</td>
 	</tr>
 	</table>
-    </center>
+	</center>
   </body>
 </html>
