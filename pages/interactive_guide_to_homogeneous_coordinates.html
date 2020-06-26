@@ -996,16 +996,21 @@ function recalculate_composable(client_x, client_y){
 			new_ys[i] = composable_ys[i] * y;
 		}
 	}
+
 	for(var i = 0; i < 4; i++){
 		composable_xs[i] = new_xs[i];
 		composable_ys[i] = new_ys[i];
 	}
 
+	recalculate_composable_matrix();
+	}
+
+function recalculate_composable_matrix() {
 	// calculate a matrix
-	x0 = new_xs[0];	 y0 = new_ys[0];
-	x1 = new_xs[1];	 y1 = new_ys[1];
-	x2 = new_xs[2];	 y2 = new_ys[2];
-	x3 = new_xs[3];	 y3 = new_ys[3];
+	x0 = composable_xs[0];	 y0 = composable_ys[0];
+	x1 = composable_xs[1];	 y1 = composable_ys[1];
+	x2 = composable_xs[2];	 y2 = composable_ys[2];
+	x3 = composable_xs[3];	 y3 = composable_ys[3];
 	var A = (-x0*x2*y1 + x0*x2*y3 + x0*x3*y1 - x0*x3*y2 + x1*x2*y0 - x1*x2*y3 - x1*x3*y0 + x1*x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
 	var D = (x0*x1*y2 - x0*x1*y3 - x0*x2*y1 + x0*x2*y3 + x1*x3*y0 - x1*x3*y2 - x2*x3*y0 + x2*x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
 	var a = (-2*x0*x1*y2 + 2*x0*x1*y3 + 3*x0*x2*y1 - 3*x0*x2*y3 - 2*x0*x3*y1 + 2*x0*x3*y2 - x1*x2*y0 + x1*x2*y3 + x2*x3*y0 - x2*x3*y1)/
@@ -1139,7 +1144,7 @@ function composable_draw(client_x, client_y, do_new){
 	context.stroke();
 	context.closePath();
 
-	if(do_new){
+	/*if(do_new){
 		// new cube
 		var new_xs = [1., 2., 2., 1.];
 		var new_ys = [1., 1., 2., 2.];
@@ -1179,7 +1184,7 @@ function composable_draw(client_x, client_y, do_new){
 		context.setLineDash([]);
 		context.closePath();
 		context.lineWidth = 1;
-	}
+	}*/
 	// grid
 	draw_grid_on(context);
 
@@ -1203,9 +1208,7 @@ function composable_draw(client_x, client_y, do_new){
 function revert_composable(){
 	composable_xs = [1., 2., 2., 1.];
 	composable_ys = [1., 1., 2., 2.];
-	document.getElementById("matrix_col1").innerHTML = "1<br>0<br>0";
-	document.getElementById("matrix_col2").innerHTML = "0<br>1<br>0";
-	document.getElementById("matrix_col3").innerHTML = "0<br>0<br>1";
+	recalculate_composable_matrix();
 	composable_draw(0, 0, false);
 }
 
