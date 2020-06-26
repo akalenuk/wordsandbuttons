@@ -505,12 +505,12 @@ function translation_draw(client_x, client_y, do_new){
 	draw_grid_on(context);
 }
 
-function rotated_x(a, x, y){
-	return - Math.sin(a) * x + Math.cos(a) * y;
+function rotated_y(a, x, y){
+	return Math.sin(a) * x + Math.cos(a) * y;
 }
 
-function rotated_y(a, x, y){
-	return Math.cos(a) * x + Math.sin(a) * y;
+function rotated_x(a, x, y){
+	return Math.cos(a) * x - Math.sin(a) * y;
 }
 
 var rotation_a = -0.2;
@@ -986,9 +986,11 @@ function recalculate_composable(client_x, client_y){
 			new_ys[i] = composable_ys[i] + y - client_to_y(composable_mousedown_y);
 		}
 	}else if(document.getElementById("radio_r").checked){
+		const a_new = rotation_for(x, y);
+		const a_increment = a_new - rotation_for(client_to_x(composable_mousedown_x), client_to_y(composable_mousedown_y));
 		for(var i = 0; i < 4; i++){
-			new_xs[i] = rotated_x(rotation_for(x, y), composable_xs[i], composable_ys[i]);
-			new_ys[i] = rotated_y(rotation_for(x, y), composable_xs[i], composable_ys[i]);
+			new_xs[i] = rotated_x(a_increment, composable_xs[i], composable_ys[i]);
+			new_ys[i] = rotated_y(a_increment, composable_xs[i], composable_ys[i]);
 		}
 	}else if(document.getElementById("radio_s").checked){
 		for(var i = 0; i < 4; i++){
@@ -1007,10 +1009,10 @@ function recalculate_composable(client_x, client_y){
 
 function recalculate_composable_matrix() {
 	// calculate a matrix
-	x0 = composable_xs[0];	 y0 = composable_ys[0];
-	x1 = composable_xs[1];	 y1 = composable_ys[1];
-	x2 = composable_xs[2];	 y2 = composable_ys[2];
-	x3 = composable_xs[3];	 y3 = composable_ys[3];
+	x0 = composable_xs[0];	y0 = composable_ys[0];
+	x1 = composable_xs[1];	y1 = composable_ys[1];
+	x2 = composable_xs[2];	y2 = composable_ys[2];
+	x3 = composable_xs[3];	y3 = composable_ys[3];
 	var A = (-x0*x2*y1 + x0*x2*y3 + x0*x3*y1 - x0*x3*y2 + x1*x2*y0 - x1*x2*y3 - x1*x3*y0 + x1*x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
 	var D = (x0*x1*y2 - x0*x1*y3 - x0*x2*y1 + x0*x2*y3 + x1*x3*y0 - x1*x3*y2 - x2*x3*y0 + x2*x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
 	var a = (-2*x0*x1*y2 + 2*x0*x1*y3 + 3*x0*x2*y1 - 3*x0*x2*y3 - 2*x0*x3*y1 + 2*x0*x3*y2 - x1*x2*y0 + x1*x2*y3 + x2*x3*y0 - x2*x3*y1)/
@@ -1022,7 +1024,7 @@ function recalculate_composable_matrix() {
 	var C = (-x0*y2 + x0*y3 + x1*y2 - x1*y3 + x2*y0 - x2*y1 - x3*y0 + x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
 	var F = (-x0*y1 + x0*y2 + x1*y0 - x1*y3 - x2*y0 + x2*y3 + x3*y1 - x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
 	var c = 1.;
-	
+
 	composable_transformation = function(x, y) {
 		const x_ = A*x + D*y + a;
 		const y_ = B*x + E*y + b;
@@ -1061,7 +1063,10 @@ function init_composable(){
 			}else if(document.getElementById("radio_s").checked){
 				composable_draw(client_x, client_y, true);
 			}else if(document.getElementById("radio_r").checked){
-				composable_draw(client_x, client_y, true);
+				recalculate_composable(client_x, client_y);
+				composable_mousedown_x = client_x;
+				composable_mousedown_y = client_y;
+				composable_draw(client_x, client_y, false);
 			}else if(document.getElementById("radio_t").checked){
 				recalculate_composable(client_x, client_y);
 				composable_mousedown_x = client_x;
@@ -1224,8 +1229,8 @@ function dec(counter_name) {
 	draw_series();
 }
 	</script>
-  </head>
-  <body>
+</head>
+<body>
 	<center>
 	<h1>
 Interactive guide to homogeneous coordinates
