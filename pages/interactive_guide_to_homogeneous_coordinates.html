@@ -993,9 +993,13 @@ function recalculate_composable(client_x, client_y){
 			new_ys[i] = rotated_y(a_increment, composable_xs[i], composable_ys[i]);
 		}
 	}else if(document.getElementById("radio_s").checked){
+		new_xs[0] = composable_xs[0] + x - client_to_x(composable_mousedown_x);
+		new_ys[0] = composable_ys[0] + y - client_to_y(composable_mousedown_y);
+		sx = new_xs[0] / composable_xs[0];
+		sy = new_ys[0] / composable_ys[0];
 		for(var i = 0; i < 4; i++){
-			new_xs[i] = composable_xs[i] * x;
-			new_ys[i] = composable_ys[i] * y;
+			new_xs[i] = composable_xs[i] * sx;
+			new_ys[i] = composable_ys[i] * sy;
 		}
 	}
 
@@ -1061,6 +1065,9 @@ function init_composable(){
 				recalculate_composable(client_x, client_y);
 				composable_draw(client_x, client_y, false);
 			}else if(document.getElementById("radio_s").checked){
+				recalculate_composable(client_x, client_y);
+				composable_mousedown_x = client_x;
+				composable_mousedown_y = client_y;
 				composable_draw(client_x, client_y, true);
 			}else if(document.getElementById("radio_r").checked){
 				recalculate_composable(client_x, client_y);
@@ -1149,47 +1156,6 @@ function composable_draw(client_x, client_y, do_new){
 	context.stroke();
 	context.closePath();
 
-	/*if(do_new){
-		// new cube
-		var new_xs = [1., 2., 2., 1.];
-		var new_ys = [1., 1., 2., 2.];
-		if(document.getElementById("radio_p").checked){
-			for(var i = 0; i < 4; i++){
-				new_xs[i] = composable_xs[i];
-				new_ys[i] = composable_ys[i];
-			}
-			new_xs[composable_i] = x;
-			new_ys[composable_i] = y;
-		}else if(document.getElementById("radio_t").checked){
-			for(var i = 0; i < 4; i++){
-				new_xs[i] = composable_xs[i] + x;
-				new_ys[i] = composable_ys[i] + y;
-			}
-		}else if(document.getElementById("radio_r").checked){
-			for(var i = 0; i < 4; i++){
-				new_xs[i] = rotated_x(rotation_for(x, y), composable_xs[i], composable_ys[i]);
-				new_ys[i] = rotated_y(rotation_for(x, y), composable_xs[i], composable_ys[i]);
-			}
-		}else if(document.getElementById("radio_s").checked){
-			for(var i = 0; i < 4; i++){
-				new_xs[i] = composable_xs[i] * x;
-				new_ys[i] = composable_ys[i] * y;
-			}
-		}
-
-		context.lineWidth = 2;
-		context.beginPath();
-		context.setLineDash([4, 4]);
-		context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
-		for(var i = 0; i < 4; i++){
-			context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
-		}
-		context.strokeStyle="#d64562";
-		context.stroke();
-		context.setLineDash([]);
-		context.closePath();
-		context.lineWidth = 1;
-	}*/
 	// grid
 	draw_grid_on(context);
 
