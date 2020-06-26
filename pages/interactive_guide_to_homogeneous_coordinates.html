@@ -951,9 +951,9 @@ function projective_draw(client_x, client_y, do_new){
 	draw_grid_on(context);
 }
 
-var composable_reference_x = 0.0;
-var composable_reference_y = 0.0;
- 
+var composable_mousedown_x = 0;
+var composable_mousedown_y = 0;
+
 var composable_transformation = function(x, y) {	// just a placeholder to be filled below
 	return [x, y];
 }
@@ -982,8 +982,8 @@ function recalculate_composable(client_x, client_y){
 		}
 	}else if(document.getElementById("radio_t").checked){
 		for(var i = 0; i < 4; i++){
-			new_xs[i] = composable_xs[i] + x;
-			new_ys[i] = composable_ys[i] + y;
+			new_xs[i] = composable_xs[i] + x - client_to_x(composable_mousedown_x);
+			new_ys[i] = composable_ys[i] + y - client_to_y(composable_mousedown_y);
 		}
 	}else if(document.getElementById("radio_r").checked){
 		for(var i = 0; i < 4; i++){
@@ -1034,10 +1034,12 @@ function init_composable(){
 	composable = document.getElementById("composable");
 	composable_draw(0, 0, false);
 
-	affine.addEventListener('mousedown', function(e){
-		const canvas_rect = projective.getBoundingClientRect();
-		const x = client_to_x( e.clientX - canvas_rect.left );
-		const y = client_to_y( e.clientY - canvas_rect.top );
+	composable.addEventListener('mousedown', function(e){
+		const canvas_rect = composable.getBoundingClientRect();
+		composable_mousedown_x = e.clientX - canvas_rect.left;
+		composable_mousedown_y = e.clientY - canvas_rect.top;
+		const x = client_to_x( composable_mousedown_x );
+		const y = client_to_y( composable_mousedown_y );
 		composable_i = nearest_i(x, y, composable_xs, composable_ys);
 	}, false);
 
@@ -1055,22 +1057,16 @@ function init_composable(){
 				composable_draw(client_x, client_y, true);
 			}else if(document.getElementById("radio_r").checked){
 				composable_draw(client_x, client_y, true);
-			}else{  // rotation
-				var new_client_x = x_to_client(client_to_x(client_x) - composable_reference_x);
-				var new_client_y = y_to_client(client_to_y(client_y) - composable_reference_y);
-				recalculate_composable(new_client_x, new_client_y);
-				composable_draw(new_client_x, new_client_y, false);
-				composable_reference_x = client_to_x(client_x);
-				composable_reference_y = client_to_y(client_y);
+			}else if(document.getElementById("radio_t").checked){
+				recalculate_composable(client_x, client_y);
+				composable_mousedown_x = client_x;
+				composable_mousedown_y = client_y;
+				composable_draw(client_x, client_y, false);
 			}
 		}else{
 			if(document.getElementById("radio_p").checked){
 				composable_i = nearest_i(x, y, composable_xs, composable_ys);
 				composable_draw(client_x, client_y, true);
-			}else{
-				var new_client_x = x_to_client(client_to_x(client_x) - composable_reference_x);
-				var new_client_y = y_to_client(client_to_y(client_y) - composable_reference_y);
-				composable_draw(new_client_x, new_client_y, true);
 			}
 		}
 	}, false);
@@ -1089,13 +1085,9 @@ function init_composable(){
 		}else if(document.getElementById("radio_r").checked){
 			recalculate_composable(client_x, client_y);
 			composable_draw(client_x, client_y, false);
-		}else{ // translation
-			var new_client_x = x_to_client(client_to_x(client_x) - composable_reference_x);
-			var new_client_y = y_to_client(client_to_y(client_y) - composable_reference_y);
-			recalculate_composable(new_client_x, new_client_y);
-			composable_draw(new_client_x, new_client_y, false);
-			composable_reference_x = client_to_x(client_x);
-			composable_reference_y = client_to_y(client_y);
+		}else if(document.getElementById("radio_t").checked){
+			recalculate_composable(client_x, client_y);
+			composable_draw(client_x, client_y, false);
 		}
 	}, false);
 
@@ -1208,34 +1200,12 @@ function composable_draw(client_x, client_y, do_new){
 	}
 }
 
-function setup_reference_for_translation(){
-	composable_reference_x = composable_xs[0];
-	composable_reference_y = composable_ys[0];
-}
-
-function setup_reference_for_rotation(){
-	composable_reference_x = 0.0;
-	composable_reference_y = 0.0;
-}
-
-function setup_reference_for_scale(){
-	composable_reference_x = 0.0;
-	composable_reference_y = 0.0;
-}
-
 function revert_composable(){
 	composable_xs = [1., 2., 2., 1.];
 	composable_ys = [1., 1., 2., 2.];
 	document.getElementById("matrix_col1").innerHTML = "1<br>0<br>0";
 	document.getElementById("matrix_col2").innerHTML = "0<br>1<br>0";
 	document.getElementById("matrix_col3").innerHTML = "0<br>0<br>1";
-	if(document.getElementById("radio_t").checked){
-		setup_reference_for_translation();
-	}else if(document.getElementById("radio_r").checked){
-		setup_reference_for_rotation();
-	}else if(document.getElementById("radio_s").checked){
-		setup_reference_for_scale();
-	}
 	composable_draw(0, 0, false);
 }
 
@@ -1545,9 +1515,9 @@ Doesn't it look familiar? Well, of course, it does! It's a projective transforma
 It gets better. Matrices are composable. You can compose your own transformation like: (translation + rotation + another translation + scale + projection), — and it will still be a single matrix multiplication!
 	</p>
 	<form style="margin-bottom: 6pt;">
-	<input type="radio" name="transformation_type" id="radio_t" onclick="setup_reference_for_translation()"><label for="radio_t">Translation</label>&nbsp;&nbsp;
-	<input type="radio" name="transformation_type" id="radio_r" onclick="setup_reference_for_rotation()"><label for="radio_r">Rotation</label>&nbsp;&nbsp;
-	<input type="radio" name="transformation_type" id="radio_s" onclick="setup_reference_for_scale()"><label for="radio_s">Scale</label>&nbsp;&nbsp;
+	<input type="radio" name="transformation_type" id="radio_t"><label for="radio_t">Translation</label>&nbsp;&nbsp;
+	<input type="radio" name="transformation_type" id="radio_r"><label for="radio_r">Rotation</label>&nbsp;&nbsp;
+	<input type="radio" name="transformation_type" id="radio_s"><label for="radio_s">Scale</label>&nbsp;&nbsp;
 	<input type="radio" name="transformation_type" id="radio_p" checked="true"><label for="radio_p">Projection</label><br>
 	</form>
 	<canvas id="composable" width=640 height=640></canvas>
