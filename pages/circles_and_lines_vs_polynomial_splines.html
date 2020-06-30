@@ -482,19 +482,18 @@ function init(canvas_name){
 }
 
 function draw_arrow(context, x1, y1, x2, y2, color) {
-    var d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
-    context.beginPath();
-    context.moveTo(x1, y1);
-    context.lineTo(x2, y2);
-    context.moveTo(x2 - (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d + (x2 - x1) * 6 / d);
-    context.lineTo(x2, y2);
-    context.moveTo(x2 + (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d - (x2 - x1) * 6 / d);
-    context.lineTo(x2, y2);
-
-
-    context.strokeStyle = color;
-    context.stroke();
-    context.closePath();
+	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	const t = d < 16 ? (d / 16.) : 1.;
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - ((y2 - y1) * 4.5 / d + (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d - (x2 - x1) * 4.5 / d) * t);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + ((y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d + (x2 - x1) * 4.5 / d) * t);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
 }
 
 function draw_common(context, client_x, client_y, do_guides) {

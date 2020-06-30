@@ -725,17 +725,19 @@ function init_canvas3d(){
     draw_canvas3d();
 }
 
-function draw_arrow(context, x1, y1, x2, y2) {
-    var d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
-    context.beginPath();
-    context.moveTo(x1, y1);
-    context.lineTo(x2, y2);
-    context.moveTo(x2 - (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d + (x2 - x1) * 6 / d);
-    context.lineTo(x2, y2);
-    context.moveTo(x2 + (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d - (x2 - x1) * 6 / d);
-    context.lineTo(x2, y2);
-    context.stroke();
-    context.closePath();
+function draw_arrow(context, x1, y1, x2, y2, color) {
+	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	const t = d < 16 ? (d / 16.) : 1.;
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - ((y2 - y1) * 4.5 / d + (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d - (x2 - x1) * 4.5 / d) * t);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + ((y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d + (x2 - x1) * 4.5 / d) * t);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
 }
 
 // these hacks are here to store edges in sets
