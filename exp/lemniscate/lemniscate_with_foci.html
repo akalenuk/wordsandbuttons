@@ -98,10 +98,11 @@ button {
 const w = 640.0;
 const h = 640.0;
 
+function d2(x1, y1, x2, y2) {
+	return (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1);
+}
+
 function closest_point_starting_from(x, y, xs, ys, i) {
-	function d2(x1, y1, x2, y2) {
-		return (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1);
-	}
 	for(var j = i + 1; j < xs.length; ++j)
 		if(d2(x, y, xs[j], ys[j]) < d2(x, y, xs[i], ys[i]))
 			return closest_point_starting_from(x, y, xs, ys, j);
@@ -116,6 +117,8 @@ function closest_point(x, y){
 // points
 var xs = [320   , 320 - 128, 320 + 128, 320 + 256, 320 + 128, 320 - 128, 320 - 256];
 var ys = [320   , 320 - 256, 320 - 256, 320      , 320 + 256, 320 + 256, 320      ];
+
+var r = 1000.;
 
 function draw_arrow(context, x1, y1, x2, y2, color) {
 	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
@@ -169,6 +172,14 @@ function init_canvas(){
 	draw_canvas();
 }
 
+function lemniscate(x, y) {
+	var l = 1.;
+	for(var i = 0; i < xs.length; ++i) {
+		l *= Math.sqrt(d2(x, y, xs[i], ys[i]));
+	}
+	return Math.pow(l, 1./xs.length);
+}
+
 function draw_canvas(client_x, client_y, do_guides){
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
@@ -176,11 +187,18 @@ function draw_canvas(client_x, client_y, do_guides){
 	// draw z-field
 	var pixel_field = context.createImageData(w, h);
 	for (var i = 0; i < pixel_field.data.length; i += 4) {
-		if(true) {
-			pixel_field.data[i + 0] = 0x00;
-			pixel_field.data[i + 1] = 0x00;
-			pixel_field.data[i + 2] = 0x00;
-			pixel_field.data[i + 3] = 0x00;
+		const x = (i / 4) % w;
+		const y = (i / 4) / w;
+		if(lemniscate(x, y) < r) {
+			pixel_field.data[i + 0] = lemniscate(x, y) % 256;
+			pixel_field.data[i + 1] = lemniscate(x, y) % 256;
+			pixel_field.data[i + 2] = lemniscate(x, y) % 256;
+			pixel_field.data[i + 3] = 0xFF;
+		} else {
+			pixel_field.data[i + 0] = 0xFF;
+			pixel_field.data[i + 1] = 0xFF;
+			pixel_field.data[i + 2] = 0xFF;
+			pixel_field.data[i + 3] = 0xFF;
 		}
 	}
 	context.putImageData(pixel_field, -0.5, -0.5);
