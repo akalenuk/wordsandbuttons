@@ -118,7 +118,7 @@ function closest_point(x, y){
 var xs = [320   , 320 - 128, 320 + 128, 320 + 256, 320 + 128, 320 - 128, 320 - 256];
 var ys = [320   , 320 - 256, 320 - 256, 320      , 320 + 256, 320 + 256, 320      ];
 
-var r = 1000.;
+var r = 256.;
 
 function draw_arrow(context, x1, y1, x2, y2, color) {
 	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
@@ -175,9 +175,9 @@ function init_canvas(){
 function lemniscate(x, y) {
 	var l = 1.;
 	for(var i = 0; i < xs.length; ++i) {
-		l *= Math.sqrt(d2(x, y, xs[i], ys[i]));
+		l *= d2(x, y, xs[i], ys[i]);
 	}
-	return Math.pow(l, 1./xs.length);
+	return Math.pow(l, 0.5/xs.length);
 }
 
 function draw_canvas(client_x, client_y, do_guides){
@@ -190,14 +190,14 @@ function draw_canvas(client_x, client_y, do_guides){
 		const x = (i / 4) % w;
 		const y = (i / 4) / w;
 		if(lemniscate(x, y) < r) {
-			pixel_field.data[i + 0] = lemniscate(x, y) % 256;
-			pixel_field.data[i + 1] = lemniscate(x, y) % 256;
-			pixel_field.data[i + 2] = lemniscate(x, y) % 256;
+			pixel_field.data[i + 0] = 0;
+			pixel_field.data[i + 1] = 0;
+			pixel_field.data[i + 2] = 0;
 			pixel_field.data[i + 3] = 0xFF;
 		} else {
-			pixel_field.data[i + 0] = 0xFF;
-			pixel_field.data[i + 1] = 0xFF;
-			pixel_field.data[i + 2] = 0xFF;
+			pixel_field.data[i + 0] = 0xEE;
+			pixel_field.data[i + 1] = 0xEE;
+			pixel_field.data[i + 2] = 0xEE;
 			pixel_field.data[i + 3] = 0xFF;
 		}
 	}
