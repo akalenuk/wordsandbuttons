@@ -232,6 +232,56 @@ function remove_point() {
 	ys.pop();
 	draw_canvas(0, 0, false);
 }
+
+var pixels = [
+[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]
+];
+
+function init_pixels(){
+	var canvas = document.getElementById("pixels");
+	canvas.addEventListener('click', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		const x = e.clientX - canvas_rect.left;
+		const y = e.clientY - canvas_rect.top;
+		const js = pixels[0].length;
+		const is = pixels.length;
+		const j = Math.floor((x * js) / w);
+		const i = Math.floor((y * is) / h);
+		pixels[i][j] = 1. - pixels[i][j];
+		draw_pixels();
+	}, false);
+
+	draw_pixels();
+}
+
+function draw_pixels(client_x, client_y, do_guides){
+	var canvas = document.getElementById("pixels");
+	var context = canvas.getContext("2d");
+
+	// draw z-field
+	var pixel_field = context.createImageData(w, h);
+	for (var i = 0; i < pixel_field.data.length; i += 4) {
+		const x = (i / 4) % w;
+		const y = (i / 4) / w;
+		const js = pixels[0].length;
+		const is = pixels.length;
+		const pj = Math.floor((x * js) / w);
+		const pi = Math.floor((y * is) / h);
+		if(pixels[pi][pj] == 1) {
+			pixel_field.data[i + 0] = 0x77;
+			pixel_field.data[i + 1] = 0x77;
+			pixel_field.data[i + 2] = 0x77;
+			pixel_field.data[i + 3] = 0xFF;
+		} else {
+			pixel_field.data[i + 0] = 0xEE;
+			pixel_field.data[i + 1] = 0xEE;
+			pixel_field.data[i + 2] = 0xEE;
+			pixel_field.data[i + 3] = 0xFF;
+		}
+	}
+	context.putImageData(pixel_field, -0.5, -0.5);
+}
 	</script>
 </head>
 <body>
@@ -247,8 +297,13 @@ Lemniscate with foci
 	<p>
 ...
 	</p>
+	<canvas id="pixels" width=640 height=640></canvas><br>
+	<p>
+...
+	</p>
 	<script language="JavaScript">
 	init_canvas();
+	init_pixels();
 	</script>
 
 
