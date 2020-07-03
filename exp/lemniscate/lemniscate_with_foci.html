@@ -282,6 +282,25 @@ function draw_pixels(client_x, client_y, do_guides){
 	}
 	context.putImageData(pixel_field, -0.5, -0.5);
 }
+
+function weights_for_current_px_py_and_pixels() {
+	const js = pixels[0].length;
+	const is = pixels.length;
+	const dw = w / js;
+	const dh = h / js;
+	var weigth_sum = 0.;
+	for(var i = 0; i < is; ++i)
+		for(var j = 0; j < js; ++j) {
+			const x = (j + 0.5) * dw;
+			const y = (i + 0.5) * dh;
+			const l = lemniscate(x, y);
+			if(pixels[i][j] == 1 && l > r)
+				weigth_sum += l - r;
+			if(pixels[i][j] == 0 && l < r)
+				weigth_sum += r - l;
+		}
+	return weight_sum;
+}
 	</script>
 </head>
 <body>
