@@ -268,17 +268,12 @@ function draw_pixels(client_x, client_y, do_guides){
 		const is = pixels.length;
 		const pj = Math.floor((x * js) / w);
 		const pi = Math.floor((y * is) / h);
-		if(pixels[pi][pj] == 1) {
-			pixel_field.data[i + 0] = 0x77;
-			pixel_field.data[i + 1] = 0x77;
-			pixel_field.data[i + 2] = 0x77;
-			pixel_field.data[i + 3] = 0xFF;
-		} else {
-			pixel_field.data[i + 0] = 0xEE;
-			pixel_field.data[i + 1] = 0xEE;
-			pixel_field.data[i + 2] = 0xEE;
-			pixel_field.data[i + 3] = 0xFF;
-		}
+
+		const gv = 0xEE - 0x55 * (pixels[pi][pj] == 1) - 0x22 * (lemniscate(x, y) < r);
+		pixel_field.data[i + 0] = gv;
+		pixel_field.data[i + 1] = gv;
+		pixel_field.data[i + 2] = gv;
+		pixel_field.data[i + 3] = 0xFF;
 	}
 	context.putImageData(pixel_field, -0.5, -0.5);
 }
