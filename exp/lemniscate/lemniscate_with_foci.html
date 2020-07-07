@@ -234,8 +234,8 @@ function remove_point() {
 }
 
 var pixels = [
-[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]
+[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 1, 0, 0], [0, 0, 0, 1, 1, 0, 0, 0],
+[0, 0, 0, 1, 1, 0, 0, 0], [0, 0, 1, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]
 ];
 
 function init_pixels(){
@@ -278,6 +278,11 @@ function draw_pixels(){
 	context.putImageData(pixel_field, -0.5, -0.5);
 }
 
+function draw_all() {
+	draw_canvas(0, 0, false);
+	draw_pixels();
+}
+
 function weights_for_current_px_py_and_pixels() {
 	const js = pixels[0].length;
 	const is = pixels.length;
@@ -297,14 +302,14 @@ function weights_for_current_px_py_and_pixels() {
 	return weight_sum;
 }
 
-function fit(count) {
+function fit(count, step) {
 	if(count == 0)
 		return;
 
 	var l = weights_for_current_px_py_and_pixels();
 	for(var i = 0; i < xs.length; ++i) {
-		const dx = 100 * Math.random() - 50;
-		const dy = 100 * Math.random() - 50;
+		const dx = step * Math.random() - step / 2.;
+		const dy = step * Math.random() - step / 2.;
 		xs[i] += dx;
 		ys[i] += dy;
 		li = weights_for_current_px_py_and_pixels();
@@ -314,7 +319,7 @@ function fit(count) {
 		}
 	}
 
-	fit(count - 1);
+	fit(count - 1, step);
 }
 	</script>
 </head>
@@ -332,7 +337,8 @@ Lemniscate with foci
 ...
 	</p>
 	<canvas id="pixels" width=640 height=640></canvas><br>
-	<button type="button" id="fit" onclick="fit(10);draw_pixels();">Fit (10 iterations)</button><br>
+	<button type="button" id="fit" onclick="fit(100, 100);draw_all();">Fit</button><br>
+	<button type="button" id="fit" onclick="fit(100, 1);draw_all();">Finer fit</button><br>
 	<p>
 ...
 	</p>
