@@ -190,17 +190,16 @@ function draw_canvas(client_x, client_y, do_guides){
 	for (var i = 0; i < pixel_field.data.length; i += 4) {
 		const x = (i / 4) % w;
 		const y = (i / 4) / w;
-		if(lemniscate(x, y) < r) {
-			pixel_field.data[i + 0] = 0;
-			pixel_field.data[i + 1] = 0;
-			pixel_field.data[i + 2] = 0;
-			pixel_field.data[i + 3] = 0xFF;
-		} else {
-			pixel_field.data[i + 0] = 0xEE;
-			pixel_field.data[i + 1] = 0xEE;
-			pixel_field.data[i + 2] = 0xEE;
-			pixel_field.data[i + 3] = 0xFF;
-		}
+		const js = pixels[0].length;
+		const is = pixels.length;
+		const pj = Math.floor((x * js) / w);
+		const pi = Math.floor((y * is) / h);
+
+		const gv = 0xCC *(lemniscate(x, y) > r) + 0x22 * (pixels[pi][pj] == 0);
+		pixel_field.data[i + 0] = gv;
+		pixel_field.data[i + 1] = gv;
+		pixel_field.data[i + 2] = gv;
+		pixel_field.data[i + 3] = 0xFF;
 	}
 	context.putImageData(pixel_field, -0.5, -0.5);
 
@@ -363,6 +362,11 @@ function deterministic_fit_from_ui() {
 	draw_all();
 }
 
+function change_r() {
+	r = document.getElementById("r").value;
+	draw_all();
+}
+
 	</script>
 </head>
 <body>
@@ -374,7 +378,8 @@ Lemniscate with foci
 	</p>
 	<canvas id="canvas" width=640 height=640></canvas><br>
 	<button type="button" id="inc_points" onclick="add_point()">Add a point</button><br>
-	<button type="button" id="dec_points" onclick="remove_point()">Remove a point</button>
+	<button type="button" id="dec_points" onclick="remove_point()">Remove a point</button><br>
+	<input type="text" id="r" value="256" oninput="change_r();">
 	<p>
 ...
 	</p>
