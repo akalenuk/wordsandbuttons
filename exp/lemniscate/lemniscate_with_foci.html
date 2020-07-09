@@ -163,11 +163,11 @@ function init_canvas(){
 	}, false);
 
 	canvas.addEventListener('mouseup', function(e){
-		draw_canvas(0, 0, false);
+		draw_all();
 	}, false);
 
 	canvas.addEventListener('mouseleave', function(e){
-		draw_canvas(0, 0, false);
+		draw_all();
 	}, false);
 
 	draw_canvas();
@@ -249,7 +249,7 @@ function init_pixels(){
 		const j = Math.floor((x * js) / w);
 		const i = Math.floor((y * is) / h);
 		pixels[i][j] = 1. - pixels[i][j];
-		draw_pixels();
+		draw_all();
 	}, false);
 
 	draw_pixels();
@@ -277,35 +277,6 @@ function draw_pixels(){
 	}
 	context.putImageData(pixel_field, -0.5, -0.5);
 
-	// draw weights
-	context.fillStyle="#000000";
-	const js = pixels[0].length;
-	const is = pixels.length;
-	const dw = w / js;
-	const dh = h / js;
-	context.beginPath();
-	for(var i = 0.125-0.5; i < is-0.5; i += 0.25)
-		for(var j = 0.125-0.5; j < js-0.5; j += 0.25) {
-			const x = (j + 0.5) * dw;
-			const y = (i + 0.5) * dh;
-			const l = lemniscate(x, y);
-			const pixel_i = Math.max(Math.min(is-1, Math.trunc(i + 0.5)), 0);
-			const pixel_j = Math.max(Math.min(is-1, Math.trunc(j + 0.5)), 0);
-			if(pixels[pixel_i][pixel_j] == 1 && l > r){
-				context.fillText((l-r).toFixed(2), x, y);
-				context.moveTo(x-2.5,y+0.5);
-				context.lineTo(x+2.5,y+0.5);
-				context.moveTo(x+0.5,y-2.5);
-				context.lineTo(x+0.5,y+2.5);
-			}
-			if(pixels[pixel_i][pixel_j] == 0 && l < r){
-				context.fillText((r-l).toFixed(2), x, y);
-				context.moveTo(x-2.5,y+0.5);
-				context.lineTo(x+2.5,y+0.5);
-				context.moveTo(x+0.5,y-2.5);
-				context.lineTo(x+0.5,y+2.5);
-			}
-	}
 	context.stroke();
 	context.closePath();
 }
@@ -321,16 +292,6 @@ function weights_for_current_px_py_and_pixels() {
 	const dw = w / js;
 	const dh = h / js;
 	var weight_sum = 0.;
-/*	for(var i = 0; i < is; ++i)
-		for(var j = 0; j < js; ++j) {
-			const x = (j + 0.5) * dw;
-			const y = (i + 0.5) * dh;
-			const l = lemniscate(x, y);
-			if(pixels[i][j] == 1 && l > r)
-				weight_sum += l - r;
-			if(pixels[i][j] == 0 && l < r)
-				weight_sum += r - l;
-		}*/
 	for(var i = 0.125-0.5; i < is-0.5; i += 0.25)
 		for(var j = 0.125-0.5; j < js-0.5; j += 0.25) {
 			const x = (j + 0.5) * dw;
