@@ -300,7 +300,7 @@ function weights_for_current_px_py_and_pixels() {
 			const pixel_i = Math.max(Math.min(is-1, Math.trunc(i + 0.5)), 0);
 			const pixel_j = Math.max(Math.min(is-1, Math.trunc(j + 0.5)), 0);
 			if(pixels[pixel_i][pixel_j] == 1 && l > r){
-				weight_sum += l - r;
+				weight_sum += (l - r) * 4;
 			}
 			if(pixels[pixel_i][pixel_j] == 0 && l < r){
 				weight_sum += r - l;
@@ -309,14 +309,44 @@ function weights_for_current_px_py_and_pixels() {
 	return weight_sum;
 }
 
-function fit(count, step) {
+function fit(count) {
+	if(count == 0)
+		return;
+
+	const js = pixels[0].length;
+	const is = pixels.length;
+	const dw = w / js;
+	const dh = h / js;
+
+	var l = weights_for_current_px_py_and_pixels();
+	for(var k = 0; k < xs.length; ++k) {
+		for(var x = 0; x < w; x += 32)
+			for(var y = 0; y < h; y += 32) {
+				const old_x = xs[k];
+				const old_y = ys[k];
+				xs[k] = x;
+				ys[k] = y;
+				const lk = weights_for_current_px_py_and_pixels();
+				if(lk > l) {
+					xs[k] = old_x;
+					ys[k] = old_y;
+				} else {
+					l = lk;
+				}
+			}
+	}
+
+	fit(count - 1);
+}
+
+function finer_fit(count) {
 	if(count == 0)
 		return;
 
 	var l = weights_for_current_px_py_and_pixels();
 	for(var i = 0; i < xs.length; ++i) {
-		const dx = step * Math.random() - step / 2.;
-		const dy = step * Math.random() - step / 2.;
+		const dx = Math.random() - 1 / 2.;
+		const dy = Math.random() - 1 / 2.;
 		xs[i] += dx;
 		ys[i] += dy;
 		li = weights_for_current_px_py_and_pixels();
@@ -326,7 +356,7 @@ function fit(count, step) {
 		}
 	}
 
-	fit(count - 1, step);
+	finer_fit(count - 1);
 }
 	</script>
 </head>
@@ -344,8 +374,8 @@ Lemniscate with foci
 ...
 	</p>
 	<canvas id="pixels" width=640 height=640></canvas><br>
-	<button type="button" id="fit" onclick="fit(100, 100);draw_all();">Fit</button><br>
-	<button type="button" id="fit" onclick="fit(100, 1);draw_all();">Finer fit</button><br>
+	<button type="button" id="fit" onclick="fit(1);draw_all();">Fit</button><br>
+	<button type="button" id="fit" onclick="finer_fit(1000);draw_all();">Finer fit</button><br>
 	<p>
 ...
 	</p>
