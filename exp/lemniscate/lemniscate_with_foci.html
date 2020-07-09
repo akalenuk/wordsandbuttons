@@ -222,8 +222,8 @@ function draw_canvas(client_x, client_y, do_guides){
 }
 
 function add_point() {
-	xs.push(0.);
-	ys.push(0.);
+	xs.push(Math.random() * w);
+	ys.push(Math.random() * h);
 	draw_canvas(0, 0, false);
 }
 
@@ -309,55 +309,60 @@ function weights_for_current_px_py_and_pixels() {
 	return weight_sum;
 }
 
-function fit(count) {
-	if(count == 0)
-		return;
-
-	const js = pixels[0].length;
-	const is = pixels.length;
-	const dw = w / js;
-	const dh = h / js;
-
+function random_fit(iterations, step) {
 	var l = weights_for_current_px_py_and_pixels();
-	for(var k = 0; k < xs.length; ++k) {
-		for(var x = 0; x < w; x += 32)
-			for(var y = 0; y < h; y += 32) {
-				const old_x = xs[k];
-				const old_y = ys[k];
-				xs[k] = x;
-				ys[k] = y;
-				const lk = weights_for_current_px_py_and_pixels();
-				if(lk > l) {
-					xs[k] = old_x;
-					ys[k] = old_y;
-				} else {
-					l = lk;
-				}
+	for(var iteration = 0; iteration < iterations; ++iteration) {
+		for(var i = 0; i < xs.length; ++i) {
+			const index = (i + iteration) % xs.length;
+			const dx = step * (Math.random() - 0.5);
+			const dy = step * (Math.random() - 0.5);
+			xs[index] += dx;
+			ys[index] += dy;
+			li = weights_for_current_px_py_and_pixels();
+			if(li > l) {
+				xs[index] -= dx;
+				ys[index] -= dy;
 			}
-	}
-
-	fit(count - 1);
-}
-
-function finer_fit(count) {
-	if(count == 0)
-		return;
-
-	var l = weights_for_current_px_py_and_pixels();
-	for(var i = 0; i < xs.length; ++i) {
-		const dx = Math.random() - 1 / 2.;
-		const dy = Math.random() - 1 / 2.;
-		xs[i] += dx;
-		ys[i] += dy;
-		li = weights_for_current_px_py_and_pixels();
-		if(li > l) {
-			xs[i] -= dx;
-			ys[i] -= dy;
 		}
 	}
-
-	finer_fit(count - 1);
 }
+
+function deterministic_fit(iterations, step) {
+	var l = weights_for_current_px_py_and_pixels();
+	for(var iteration = 0; iteration < iterations; ++iteration) {
+		for(var i = 0; i < xs.length; ++i) {
+			const index = (i + iteration) % xs.length;
+			for(var dx_sign = -1; dx_sign <= 1; ++dx_sign)
+				for(var dy_sign = -1; dy_sign <= 1; ++dy_sign) {
+					const dx = step * dx_sign;
+					const dy = step * dy_sign;
+					xs[index] += dx;
+					ys[index] += dy;
+					li = weights_for_current_px_py_and_pixels();
+					if(li > l) {
+						xs[index] -= dx;
+						ys[index] -= dy;
+					}
+				}
+		}
+	}
+}
+
+
+function random_fit_from_ui() {
+	const step = document.getElementById("step").value;
+	const iterations = document.getElementById("iterations").value;
+	random_fit(iterations, step);
+	draw_all();
+}
+
+function deterministic_fit_from_ui() {
+	const step = document.getElementById("step").value;
+	const iterations = document.getElementById("iterations").value;
+	deterministic_fit(iterations, step);
+	draw_all();
+}
+
 	</script>
 </head>
 <body>
@@ -374,8 +379,10 @@ Lemniscate with foci
 ...
 	</p>
 	<canvas id="pixels" width=640 height=640></canvas><br>
-	<button type="button" id="fit" onclick="fit(1);draw_all();">Fit</button><br>
-	<button type="button" id="fit" onclick="finer_fit(1000);draw_all();">Finer fit</button><br>
+	<label for="step">Step: </label><input type="text" id="step" value="1.0">, 
+	<label for="iterations">Iterations: </label><input type="text" id="iterations" value="100">
+	<button type="button" id="fit1" onclick="random_fit_from_ui();">Random Fit</button><br>
+	<button type="button" id="fit2" onclick="deterministic_fit_from_ui();">Deterministic Fit</button><br>
 	<p>
 ...
 	</p>
