@@ -374,14 +374,30 @@ function change_r() {
 }
 
 function write_radius_and_points() {
-	document.getElementById("radius_and_points").innerHTML = r + '\n';
+	document.getElementById("radius_and_points").value = r + '\n';
 	for(var i = 0; i < xs.length; ++i) {
-		document.getElementById("radius_and_points").innerHTML += ((i == 0) ? '' : ',\t') + Math.round(xs[i]);
+		document.getElementById("radius_and_points").value += ((i == 0) ? '' : ',\t') + Math.round(xs[i]);
 	}
-	document.getElementById("radius_and_points").innerHTML += '\n';
+	document.getElementById("radius_and_points").value += '\n';
 	for(var i = 0; i < xs.length; ++i) {
-		document.getElementById("radius_and_points").innerHTML += ((i == 0) ? '' : ',\t') + Math.round(ys[i]);
+		document.getElementById("radius_and_points").value += ((i == 0) ? '' : ',\t') + Math.round(ys[i]);
 	}
+}
+
+function read_radius_and_points() {
+	const r_n_p = document.getElementById("radius_and_points").value;
+	r = Number(r_n_p.split('\n')[0]);
+	text_xs = r_n_p.split('\n')[1].replace('   ', '').replace('  ', '').replace(' ', '').replace('\t', '').split(',');
+	xs = []
+	for(var i = 0; i < text_xs.length; ++i) {
+		xs.push(Number(text_xs[i]));
+	}
+	text_ys = r_n_p.split('\n')[2].replace('   ', '').replace('  ', '').replace(' ', '').replace('\t', '').split(',');
+	ys = []
+	for(var i = 0; i < text_ys.length; ++i) {
+		ys.push(Number(text_ys[i]));
+	}
+	draw_all();
 }
 	</script>
 </head>
@@ -410,6 +426,7 @@ Lemniscate with foci
 
 	<form>
 	<button type="button" style="width: 200pt;" onclick="write_radius_and_points()">Write radius and points</button>
+	<button type="button" style="width: 200pt;" onclick="read_radius_and_points()">Read radius and points</button>
 	</form>
 	<textarea id="radius_and_points" rows=4>
 
