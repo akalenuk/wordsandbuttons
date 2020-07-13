@@ -218,11 +218,13 @@ function draw_canvas(client_x, client_y, do_guides){
 
 	// dots
 	context.strokeStyle="#f71134";
+	context.fillStyle="#f71134";
 	for(var i = 0; i <= xs.length; ++i){
 		context.beginPath();
 		context.arc(xs[i], ys[i], 4, 0, 2*Math.PI);
 		context.stroke();
 		context.closePath();
+		context.fillText(i, xs[i] + 4, ys[i] - 4);
 	}
 
 	// guides
@@ -296,6 +298,7 @@ function draw_pixels(){
 function draw_all() {
 	draw_canvas(0, 0, false);
 	draw_pixels();
+	
 }
 
 function weights_for_current_px_py_and_pixels() {
@@ -404,15 +407,21 @@ function read_radius_and_points() {
 	for(var i = 0; i < text_ys.length; ++i) {
 		ys.push(Number(text_ys[i]) + 320);
 	}
+	document.getElementById("r").value = r;
 	draw_all();
 }
 
 function select_image() {
-	console.log(document.getElementById("image_no").value);
-	if(document.getElementById("image_no").value == 0) {
+	const image_no = document.getElementById("image_no").value;
+	if(image_no == 0) {
 		r = 256;
 		xs = [185, -128, -2, 110, 178, -178, -110, 128, -185];
 		ys = [240, -200, 247, -96, 266, 266, -96, -200, 240];
+	}
+	if(image_no == 1) {
+		r = 200;
+		xs = [-36, -192, -192, -36, 36, 192, 192, 36];
+		ys = [-192, -36, 36, 192, 192, 36, -36, -192];
 	}
 	for(var i = 0; i < xs.length; ++i) {
 		xs[i] += 320;
