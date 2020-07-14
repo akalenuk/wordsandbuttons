@@ -342,39 +342,10 @@ function random_fit(iterations, step) {
 	}
 }
 
-function deterministic_fit(iterations, step) {
-	var l = weights_for_current_px_py_and_pixels();
-	for(var iteration = 0; iteration < iterations; ++iteration) {
-		for(var i = 0; i < xs.length; ++i) {
-			const index = (i + iteration) % xs.length;
-			for(var dx_sign = -1; dx_sign <= 1; ++dx_sign)
-				for(var dy_sign = -1; dy_sign <= 1; ++dy_sign) {
-					const dx = step * dx_sign;
-					const dy = step * dy_sign;
-					xs[index] += dx;
-					ys[index] += dy;
-					li = weights_for_current_px_py_and_pixels();
-					if(li > l) {
-						xs[index] -= dx;
-						ys[index] -= dy;
-					}
-				}
-		}
-	}
-}
-
-
 function random_fit_from_ui() {
 	const step = document.getElementById("step").value;
 	const iterations = document.getElementById("iterations").value;
 	random_fit(iterations, step);
-	draw_all();
-}
-
-function deterministic_fit_from_ui() {
-	const step = document.getElementById("step").value;
-	const iterations = document.getElementById("iterations").value;
-	deterministic_fit(iterations, step);
 	draw_all();
 }
 
@@ -453,7 +424,6 @@ Lemniscate with foci
 	<label for="step">Step: </label><input type="text" id="step" value="1.0">, 
 	<label for="iterations">Iterations: </label><input type="text" id="iterations" value="100">
 	<button type="button" id="fit1" onclick="random_fit_from_ui();">Random Fit</button><br>
-	<button type="button" id="fit2" onclick="deterministic_fit_from_ui();">Deterministic Fit</button><br>
 	<p>
 ...
 	</p>
