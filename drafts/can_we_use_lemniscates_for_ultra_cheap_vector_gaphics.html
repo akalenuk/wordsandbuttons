@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Can we use lemniscates for ultra-cheap vector graphics?</title>
+	<meta name="description" content="This depicts an old idea of using multifoci lemniscates to draw arbitrary curves. In its limited scope, this may be indeed an economical alternative to splines.">
+	<meta name="keywords" content="mathematics, show-and-tell">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+	<style>
+body {
+	margin: 0 0 0 0;
+}
+
+a {
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 15pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+table.footer {
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
+}
+
+td.footer {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+li {
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+	padding-bottom: 6pt;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+}
+
+input[type="text"] {
+	width: 32pt;
+	height: 22pt;
+	font-size: 16pt;
+	text-align: center;
+}
+
+select {
+	width: 128pt;
+	height: 22pt;
+	font-size: 16pt;
+	text-align: center;
+}
+
+button{
+	width: 248pt;
+	height: 42pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 16pt;
+}
+
+textarea {
+	width: 505pt;
+	font-size: 12pt;
+	font-family: monospace;
+}
+	</style>
+	<script language="JavaScript">
+// client
+const w = 640.0;
+const h = 640.0;
+
+function d2(x1, y1, x2, y2) {
+	return (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1);
+}
+
+function closest_point_starting_from(x, y, xs, ys, i) {
+	for(var j = i + 1; j < xs.length; ++j)
+		if(d2(x, y, xs[j], ys[j]) < d2(x, y, xs[i], ys[i]))
+			return closest_point_starting_from(x, y, xs, ys, j);
+	return i;
+}
+
+// finds a closest point from xs, ys to x, y
+function closest_point(x, y){
+	return closest_point_starting_from(x, y, xs, ys, 0);
+}
+
+// points
+var xs = [320   , 320 - 128, 320 + 128, 320 + 256, 320 + 128, 320 - 128, 320 - 256];
+var ys = [320   , 320 - 256, 320 - 256, 320      , 320 + 256, 320 + 256, 320      ];
+
+var r = 256.;
+
+function draw_arrow(context, x1, y1, x2, y2, color) {
+	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	const t = d < 16 ? (d / 16.) : 1.;
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - ((y2 - y1) * 4.5 / d + (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d - (x2 - x1) * 4.5 / d) * t);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + ((y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d + (x2 - x1) * 4.5 / d) * t);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
+}
+
+var point_i = 0;
+function init_canvas(){
+	var canvas = document.getElementById("canvas");
+	canvas.addEventListener('mousedown', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		const x = e.clientX - canvas_rect.left;
+		const y = e.clientY - canvas_rect.top;
+		point_i = closest_point(x, y);
+		xs[point_i] = x;
+		ys[point_i] = y;
+		draw_canvas(0, 0, false);
+	}, false);
+
+	canvas.addEventListener('mousemove', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		const x = e.clientX - canvas_rect.left;
+		const y = e.clientY - canvas_rect.top;
+		if(e.buttons == 1){
+			xs[point_i] = x;
+			ys[point_i] = y;
+			draw_canvas(0, 0, false);
+		} else {
+			draw_canvas(x, y, true);
+		}
+	}, false);
+
+	canvas.addEventListener('mouseup', function(e){
+		draw_all();
+	}, false);
+
+	canvas.addEventListener('mouseleave', function(e){
+		draw_all();
+	}, false);
+
+	draw_canvas();
+}
+
+function lemniscate(x, y) {
+	var l = 1.;
+	for(var i = 0; i < xs.length; ++i) {
+		l *= d2(x, y, xs[i], ys[i]);
+	}
+	return Math.pow(l, 0.5/xs.length);
+}
+
+function draw_canvas(client_x, client_y, do_guides){
+	var canvas = document.getElementById("canvas");
+	var context = canvas.getContext("2d");
+
+	// draw z-field
+	var pixel_field = context.createImageData(w, h);
+	for (var i = 0; i < pixel_field.data.length; i += 4) {
+		const x = (i / 4) % w;
+		const y = (i / 4) / w;
+		const js = pixels[0].length;
+		const is = pixels.length;
+		const pj = Math.floor((x * js) / w);
+		const pi = Math.floor((y * is) / h);
+
+		const gv = 0xCC *(lemniscate(x, y) > r) + 0x22 * (pixels[pi][pj] == 0);
+		pixel_field.data[i + 0] = gv;
+		pixel_field.data[i + 1] = gv;
+		pixel_field.data[i + 2] = gv;
+		pixel_field.data[i + 3] = 0xFF;
+	}
+	context.putImageData(pixel_field, -0.5, -0.5);
+
+	// dots
+	context.strokeStyle="#f71134";
+	context.fillStyle="#f71134";
+	for(var i = 0; i <= xs.length; ++i){
+		context.beginPath();
+		context.arc(xs[i], ys[i], 4, 0, 2*Math.PI);
+		context.stroke();
+		context.closePath();
+		context.fillText(i, xs[i] + 4, ys[i] - 4);
+	}
+
+	// guides
+	if(do_guides){
+		const point_i = closest_point(client_x, client_y);
+		draw_arrow(context, xs[point_i], ys[point_i], client_x, client_y);
+	}
+	context.setLineDash([]);
+}
+
+function add_point() {
+	xs.push(Math.random() * w);
+	ys.push(Math.random() * h);
+	draw_canvas(0, 0, false);
+}
+
+function remove_point() {
+	xs.pop();
+	ys.pop();
+	draw_canvas(0, 0, false);
+}
+
+var pixels = [
+[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 1, 0, 0], [0, 0, 0, 1, 1, 0, 0, 0],
+[0, 0, 0, 1, 1, 0, 0, 0], [0, 0, 1, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]
+];
+
+function init_pixels(){
+	var canvas = document.getElementById("pixels");
+	canvas.addEventListener('click', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		const x = e.clientX - canvas_rect.left;
+		const y = e.clientY - canvas_rect.top;
+		const js = pixels[0].length;
+		const is = pixels.length;
+		const j = Math.floor((x * js) / w);
+		const i = Math.floor((y * is) / h);
+		pixels[i][j] = 1. - pixels[i][j];
+		draw_all();
+	}, false);
+
+	draw_pixels();
+}
+
+function draw_pixels(){
+	var canvas = document.getElementById("pixels");
+	var context = canvas.getContext("2d");
+
+	// draw z-field
+	var pixel_field = context.createImageData(w, h);
+	for (var i = 0; i < pixel_field.data.length; i += 4) {
+		const x = (i / 4) % w;
+		const y = (i / 4) / w;
+		const js = pixels[0].length;
+		const is = pixels.length;
+		const pj = Math.floor((x * js) / w);
+		const pi = Math.floor((y * is) / h);
+
+		const gv = 0xEE - 0x55 * (pixels[pi][pj] == 1) - 0x22 * (lemniscate(x, y) < r);
+		pixel_field.data[i + 0] = gv;
+		pixel_field.data[i + 1] = gv;
+		pixel_field.data[i + 2] = gv;
+		pixel_field.data[i + 3] = 0xFF;
+	}
+	context.putImageData(pixel_field, -0.5, -0.5);
+
+	context.stroke();
+	context.closePath();
+}
+
+function draw_all() {
+	draw_canvas(0, 0, false);
+	draw_pixels();
+	document.getElementById("target").innerHTML = "Error function: " + weights_for_current_px_py_and_pixels().toFixed(2);
+}
+
+function weights_for_current_px_py_and_pixels() {
+	const js = pixels[0].length;
+	const is = pixels.length;
+	const dw = w / js;
+	const dh = h / js;
+	var weight_sum = 0.;
+	for(var i = 0.125-0.5; i < is-0.5; i += 0.25)
+		for(var j = 0.125-0.5; j < js-0.5; j += 0.25) {
+			const x = (j + 0.5) * dw;
+			const y = (i + 0.5) * dh;
+			const l = lemniscate(x, y);
+			const pixel_i = Math.max(Math.min(is-1, Math.trunc(i + 0.5)), 0);
+			const pixel_j = Math.max(Math.min(is-1, Math.trunc(j + 0.5)), 0);
+			if(pixels[pixel_i][pixel_j] == 1 && l > r){
+				weight_sum += (l - r) * 4;
+			}
+			if(pixels[pixel_i][pixel_j] == 0 && l < r){
+				weight_sum += r - l;
+			}
+	}
+	return weight_sum;
+}
+
+function random_fit(iterations, step) {
+	var l = weights_for_current_px_py_and_pixels();
+	for(var iteration = 0; iteration < iterations; ++iteration) {
+		for(var i = 0; i < xs.length; ++i) {
+			const index = (i + iteration) % xs.length;
+			const dx = step * (Math.random() - 0.5);
+			const dy = step * (Math.random() - 0.5);
+			xs[index] += dx;
+			ys[index] += dy;
+			li = weights_for_current_px_py_and_pixels();
+			if(li > l) {
+				xs[index] -= dx;
+				ys[index] -= dy;
+			}
+		}
+	}
+}
+
+function random_fit_from_ui() {
+	const step = document.getElementById("step").value;
+	const iterations = document.getElementById("iterations").value;
+	random_fit(iterations, step);
+	console.log(weights_for_current_px_py_and_pixels());
+	draw_all();
+}
+
+function change_r() {
+	r = document.getElementById("r").value;
+	draw_all();
+}
+
+function write_radius_and_points() {
+	document.getElementById("radius_and_points").value = r + '\n';
+	for(var i = 0; i < xs.length; ++i) {
+		document.getElementById("radius_and_points").value += ((i == 0) ? '' : ',\t') + Math.round(xs[i] - 320);
+	}
+	document.getElementById("radius_and_points").value += '\n';
+	for(var i = 0; i < xs.length; ++i) {
+		document.getElementById("radius_and_points").value += ((i == 0) ? '' : ',\t') + Math.round(ys[i] - 320);
+	}
+}
+
+function read_radius_and_points() {
+	const r_n_p = document.getElementById("radius_and_points").value;
+	r = Number(r_n_p.split('\n')[0]);
+	text_xs = r_n_p.split('\n')[1].replace('   ', '').replace('  ', '').replace(' ', '').replace('\t', '').split(',');
+	xs = []
+	for(var i = 0; i < text_xs.length; ++i) {
+		xs.push(Number(text_xs[i]) + 320);
+	}
+	text_ys = r_n_p.split('\n')[2].replace('   ', '').replace('  ', '').replace(' ', '').replace('\t', '').split(',');
+	ys = []
+	for(var i = 0; i < text_ys.length; ++i) {
+		ys.push(Number(text_ys[i]) + 320);
+	}
+	document.getElementById("r").value = r;
+	draw_all();
+}
+
+function select_image() {
+	const image_no = document.getElementById("image_no").value;
+	if(image_no == 0) {
+		r = 256;
+		xs = [185, -128, -2, 110, 178, -178, -110, 128, -185];
+		ys = [240, -200, 247, -96, 266, 266, -96, -200, 240];
+	}
+	if(image_no == 1) {
+		r = 200;
+		xs = [-36, -192, -192, -36, 36, 192, 192, 36];
+		ys = [-192, -36, 36, 192, 192, 36, -36, -192];
+	}
+	if(image_no == 2) {
+		r = 200;
+		xs = [15, -120, 105, 205, 120, -80, -140];
+		ys = [-110, -110, -160, 70, -80, -160, -10];
+	}
+	if(image_no == 3) {
+		r = 210;
+		xs = [192.0, -192.0, 0.0, -108.0, 108.0, 0.0, 0.0];
+		ys = [-180.0, -180.0, -255.0, 67.5, 67.5, 277.5, 262.5];
+	}
+	if(image_no == 4) {
+		r = 200;
+		xs = [-60, -60, -112, -112, 40, 120];
+		ys = [-112, 112, -206, 206, 0, 0];
+	}
+	if(image_no == 5) {
+		r = 256;
+		xs = [0, -135, 135, -274, 274, -212, 212, -286, 286];
+		ys = [35, -129, -129, 14, 14, 216, 216, 111, 111];
+	}
+
+	for(var i = 0; i < xs.length; ++i) {
+		xs[i] += 320;
+		ys[i] += 320;
+	}
+	draw_all();
+}
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
+Can we use lemniscates for ultra-cheap vector graphics?
+	</h1>
+	<p>
+TL&DR: Yes, but you get what you pay for.
+	</p>
+	<canvas id="canvas" width=640 height=640></canvas><br>
+	<button type="button" id="inc_points" onclick="add_point()">Add a point</button><br>
+	<button type="button" id="dec_points" onclick="remove_point()">Remove a point</button><br>
+	<input type="text" id="r" value="256" oninput="change_r();"><br>
+	<select id="image_no" oninput="select_image()">
+	<option value="0">Cat</option>
+	<option value="1">Cross</option>
+	<option value="2">Speech baloon</option>
+	<option value="3">Mushroom (with extra points)</option>
+	<option value="4">Play button</option>
+	<option value="5">Space invader</option>
+	</select>
+	<p>
+...
+	</p>
+	<canvas id="pixels" width=640 height=640></canvas><br>
+	<p id="target"></p>
+	<label for="step">Step: </label><input type="text" id="step" value="1.0">, 
+	<label for="iterations">Iterations: </label><input type="text" id="iterations" value="100">
+	<button type="button" id="fit1" onclick="random_fit_from_ui();">Random Fit</button><br>
+	<p>
+...
+	</p>
+
+	<form>
+	<button type="button" style="width: 200pt;" onclick="write_radius_and_points()">Write radius and points</button>
+	<button type="button" style="width: 200pt;" onclick="read_radius_and_points()">Read radius and points</button>
+	</form>
+	<textarea id="radius_and_points" rows=4>
+
+	</textarea>
+
+	<script language="JavaScript">
+	init_canvas();
+	init_pixels();
+	</script>
+
+
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html"><img src="favicon.ico"></a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+		+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+		<a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+  </body>
+</html>
