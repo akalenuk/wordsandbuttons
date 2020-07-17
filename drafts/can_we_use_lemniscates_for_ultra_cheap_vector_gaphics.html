@@ -487,7 +487,7 @@ TL&DR: Yes, but you get what you pay for.
 I stole this idea from and old Russian book named Notable Curves by Alekséi Markushévich. The book was published in 1952 and, as you can imagine, it was not dedicated to computer graphics.
 	</p>
 	<p>
-In that book there was a casual mention that multifoci lemniscate can approximate any possible curve with some given error and that this fact was mathematically proven. There were also some promising but frankly unrealistic pictures of a man's face and a bird set by a handfull of points.
+In that book there was a casual mention that multifoci lemniscate can approximate any possible curve with some given error and that this fact was mathematically proven. There were also some promising but frankly unrealistic pictures of a man's face and a bird both set by a handfull of points.
 	</p>
 	<p>
 Which got me thinking. SVG is relatively cheap but this looks even cheaper. I mean, to approximate a piece of curve with a Bézier spline, you need to set 4 points. With lemniscate, you can approximate the whole face with only 6 or 7 points. Isn't it wonderful! Almost too good to be true, right?
@@ -532,7 +532,25 @@ I've made a mini-editor for lemniscate graphics with a few examples of images. F
 	<button type="button" id="inc_points" onclick="add_point()">Add a point</button>
 	<button type="button" id="dec_points" onclick="remove_point()">Remove a point</button><br>
 	<p>
-...
+You can export your image into a set of points, and reimport it back if you like.
+	</p>
+	<form>
+	<button type="button" style="width: 200pt;" onclick="write_radius_and_points()">Write radius and points</button>
+	<button type="button" style="width: 200pt;" onclick="read_radius_and_points()">Read radius and points</button>
+	</form>
+	<textarea id="radius_and_points" rows=3>
+	</textarea>
+	<p>
+Ok, so it's not easy to make it draw exactly what you want it to. It is mathematically possible to draw everything, sure, but pragmatically it only makes sense to draw some simple curvy shapes with this tool. With a limited set of points, it's not very powerful, and with adding more points, it gets less and less user-friendly.
+	</p>
+	<p>
+But what about automatic image tracing? Should it work autmagically by turning poorly pixelated pictures into nice and smooth vector images?
+	</p>
+	<p>
+Well, yes and no. With lemniscate approximating a pixel image, the error function is not very friendly to the gradient descent either. There are some seemingly random platoes and points mascarading as local minimums that make a minimizer stall every now and then. I tried a few approaches and apparently, a simple random crawler works the best.
+	</p>
+	<p>
+Here's my tracer. It minimizes the error function small step at a time, making a vector image closer to the pixelated origianl. If you're not afraid of putting your browser into koma, you can ask for drastically more iterations or uppen the step size.
 	</p>
 	<canvas id="pixels" width=640 height=640></canvas><br>
 	<p id="target"></p>
@@ -540,16 +558,17 @@ I've made a mini-editor for lemniscate graphics with a few examples of images. F
 	<label for="iterations">Iterations: </label><input type="text" id="iterations" value="100">
 	<button type="button" id="fit1" onclick="random_fit_from_ui();">Random Fit</button><br>
 	<p>
-...
+And, of course, you're more than welcome to do it better! if you want to explore it some more, you can start from the code for this page available from GitHub. Besides, multifoci lemniscate is a very simple concept, it all revolves around one simple formula. You can easily reimplement it in your exploration environment of choice.
 	</p>
-
-	<form>
-	<button type="button" style="width: 200pt;" onclick="write_radius_and_points()">Write radius and points</button>
-	<button type="button" style="width: 200pt;" onclick="read_radius_and_points()">Read radius and points</button>
-	</form>
-	<textarea id="radius_and_points" rows=4>
-
-	</textarea>
+	<h2>
+Conclusion
+	</h2>
+	<p>
+The practicality of this approach is limited. For a real world vector graphics, its application is doubtful. It's way easier to approximate curves with splines of all kinds both automatically and manually.
+	</p>
+	<p>
+But when you're really constrained by memory and a badly drawn cat of 19 bytes is a wanted alternative for a nice cat of a few kilobytes, then yes — multifoci lemniscate is your friend. For instance, it might give you an advantage in a <a href="https://js13kgames.com/">js13kGames</a> competition.
+	</p>
 
 	<script language="JavaScript">
 	select_image();
