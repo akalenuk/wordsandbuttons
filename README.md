@@ -7,6 +7,9 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 
 ## Pages
 
+- [Can we use lemniscates for ultra-cheap vector graphics?](https://wordsandbuttons.online/can_we_use_lemniscates_for_ultra_cheap_vector_gaphics.html) This depicts an old idea of using multifocal lemniscates to draw arbitrary curves. In somewhat limited scope, this may be indeed an economical alternative to splines.
+<sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> <sup>[#show-and-tell](https://wordsandbuttons.online/show-and-tell.html)</sup> 
+
 - [Bi-whatever transformations](https://wordsandbuttons.online/biwhatever_transformations.html) An interactive explanation of how polynomial transformations such as trilinear or biquadratic or even linear-cubic work, and how to craft your own that fits your particular task the best.
 <sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/programming.html)</sup> <sup>[#show-and-tell](https://wordsandbuttons.online/show-and-tell.html)</sup> 
 
@@ -134,7 +137,7 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 <sup>[#performance](https://wordsandbuttons.online/performance.html)</sup> <sup>[#programming](https://wordsandbuttons.online/programming.html)</sup> 
 
 - [Interactive guide to homogeneous coordinates](https://wordsandbuttons.online/interactive_guide_to_homogeneous_coordinates.html) This interactive guide shows how homogeneous coordinates actually make geometry simpler and not more complicated. It explains the extra coordinate, the matrices, the generalized transformations. Most of what you need to know about projective geometry as a practicing programmer is here.
-<sup>[#algorithms](https://wordsandbuttons.online/algorithms.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/tutorials.html)</sup> 
+<sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/tutorials.html)</sup> 
 
 - [So you think you know C?](https://wordsandbuttons.online/so_you_think_you_know_c.html) It's a C test. If you think you know C, take this test. It only has 5 questions.
 <sup>[#languages](https://wordsandbuttons.online/languages.html)</sup> <sup>[#programming](https://wordsandbuttons.online/programming.html)</sup> 
