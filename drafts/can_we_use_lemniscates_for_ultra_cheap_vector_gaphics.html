@@ -142,9 +142,10 @@ function closest_point(x, y){
 }
 
 // points
-var xs = [320   , 320 - 128, 320 + 128, 320 + 256, 320 + 128, 320 - 128, 320 - 256];
-var ys = [320   , 320 - 256, 320 - 256, 320      , 320 + 256, 320 + 256, 320      ];
+var xs = [];
+var ys = [];
 
+// r - the "distance" of shading
 var r = 256.;
 
 function draw_arrow(context, x1, y1, x2, y2, color) {
@@ -225,7 +226,11 @@ function draw_canvas(client_x, client_y, do_guides){
 		const pj = Math.floor((x * js) / w);
 		const pi = Math.floor((y * is) / h);
 
-		const gv = 0xCC *(lemniscate(x, y) > r) + 0x22 * (pixels[pi][pj] == 0);
+		var gv;
+		if(draw_pixels)
+			gv = 0xCC *(lemniscate(x, y) > r) + 0x22 * (pixels[pi][pj] == 0);
+		else
+			gv = 0xEE *(lemniscate(x, y) > r);
 		pixel_field.data[i + 0] = gv;
 		pixel_field.data[i + 1] = gv;
 		pixel_field.data[i + 2] = gv;
@@ -233,15 +238,45 @@ function draw_canvas(client_x, client_y, do_guides){
 	}
 	context.putImageData(pixel_field, -0.5, -0.5);
 
-	// dots
-	context.strokeStyle="#f71134";
-	context.fillStyle="#f71134";
-	for(var i = 0; i <= xs.length; ++i){
+	// grid
+	if(draw_coordinates) {
+		context.strokeStyle="#7d1721";
+		context.fillStyle="#7d1721";
+		draw_arrow(context, 320.5, 0, 320.5, 640.5, "#7d1721");
+		draw_arrow(context, 0, 320.5, 640.5, 320.5, "#7d1721");
 		context.beginPath();
-		context.arc(xs[i], ys[i], 4, 0, 2*Math.PI);
+		context.setLineDash([4, 4]);
+		for(var x = 320.5 - 80*3; x <= 320.5 + 80*3; x += 80) {
+			if(x != 320.5) {
+				context.moveTo(x, 0);
+				context.lineTo(x, 641);
+				context.fillText(x - 320.5, x + 6, 320 - 8);
+			}
+		}
+		for(var y = 320.5 - 80*3; y <= 320.5 + 80*3; y += 80) {
+			if(y != 320.5) {
+				context.moveTo(0, y);
+				context.lineTo(641, y);
+				context.fillText(y - 320.5, 320 + 6, y - 8);
+			}
+		}
+
 		context.stroke();
 		context.closePath();
-		context.fillText(i, xs[i] + 4, ys[i] - 4);
+		context.setLineDash([]);
+	}
+
+	// dots
+	if(draw_points) {
+		context.strokeStyle="#f71134";
+		context.fillStyle="#f71134";
+		for(var i = 0; i <= xs.length; ++i){
+			context.beginPath();
+			context.arc(xs[i], ys[i], 4, 0, 2*Math.PI);
+			context.stroke();
+			context.closePath();
+			context.fillText(i, xs[i] + 4, ys[i] - 4);
+		}
 	}
 
 	// guides
@@ -265,8 +300,8 @@ function remove_point() {
 }
 
 var pixels = [
-[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 1, 0, 0], [0, 0, 0, 1, 1, 0, 0, 0],
-[0, 0, 0, 1, 1, 0, 0, 0], [0, 0, 1, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]
+[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 0, 0, 0], [0, 1, 1, 1, 1, 1, 1, 0],
+[0, 1, 1, 1, 1, 1, 1, 0], [0, 0, 0, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]
 ];
 
 function init_pixels(){
@@ -363,7 +398,6 @@ function random_fit_from_ui() {
 	const step = document.getElementById("step").value;
 	const iterations = document.getElementById("iterations").value;
 	random_fit(iterations, step);
-	console.log(weights_for_current_px_py_and_pixels());
 	draw_all();
 }
 
@@ -403,34 +437,34 @@ function read_radius_and_points() {
 function select_image() {
 	const image_no = document.getElementById("image_no").value;
 	if(image_no == 0) {
-		r = 256;
-		xs = [185, -128, -2, 110, 178, -178, -110, 128, -185];
-		ys = [240, -200, 247, -96, 266, 266, -96, -200, 240];
-	}
-	if(image_no == 1) {
 		r = 200;
 		xs = [-36, -192, -192, -36, 36, 192, 192, 36];
 		ys = [-192, -36, 36, 192, 192, 36, -36, -192];
 	}
+	if(image_no == 1) {
+		r = 256;
+		xs = [0, -135, 135, -274, 274, -212, 212, -286, 286];
+		ys = [35, -129, -129, 14, 14, 216, 216, 111, 111];
+	}
 	if(image_no == 2) {
-		r = 200;
-		xs = [15, -120, 105, 205, 120, -80, -140];
-		ys = [-110, -110, -160, 70, -80, -160, -10];
+		r = 256;
+		xs = [185, -128, -2, 110, 178, -178, -110, 128, -185];
+		ys = [240, -200, 247, -96, 266, 266, -96, -200, 240];
 	}
 	if(image_no == 3) {
-		r = 210;
-		xs = [192.0, -192.0, 0.0, -108.0, 108.0, 0.0, 0.0];
-		ys = [-180.0, -180.0, -255.0, 67.5, 67.5, 277.5, 262.5];
-	}
-	if(image_no == 4) {
 		r = 200;
 		xs = [-60, -60, -112, -112, 40, 120];
 		ys = [-112, 112, -206, 206, 0, 0];
 	}
+	if(image_no == 4) {
+		r = 200;
+		xs = [15, -120, 105, 205, 120, -80, -140];
+		ys = [-110, -110, -160, 70, -80, -160, -10];
+	}
 	if(image_no == 5) {
-		r = 256;
-		xs = [0, -135, 135, -274, 274, -212, 212, -286, 286];
-		ys = [35, -129, -129, 14, 14, 216, 216, 111, 111];
+		r = 210;
+		xs = [192.0, -192.0, 0.0, -108.0, 108.0, 0.0, 0.0];
+		ys = [-180.0, -180.0, -255.0, 67.5, 67.5, 277.5, 262.5];
 	}
 
 	for(var i = 0; i < xs.length; ++i) {
@@ -458,12 +492,12 @@ TL&DR: Yes, but you get what you pay for.
 	<button type="button" id="dec_points" onclick="remove_point()">Remove a point</button><br>
 	<input type="text" id="r" value="256" oninput="change_r();"><br>
 	<select id="image_no" oninput="select_image()">
-	<option value="0">Cat</option>
-	<option value="1">Cross</option>
-	<option value="2">Speech baloon</option>
-	<option value="3">Mushroom (with extra points)</option>
-	<option value="4">Play button</option>
-	<option value="5">Space invader</option>
+	<option value="0" selected="true">Cross</option>
+	<option value="1">Space invader</option>
+	<option value="2">Cat</option>
+	<option value="3">Play button</option>
+	<option value="4">Speech baloon</option>
+	<option value="5">Mushroom (with extra points)</option>
 	</select>
 	<p>
 ...
@@ -486,6 +520,7 @@ TL&DR: Yes, but you get what you pay for.
 	</textarea>
 
 	<script language="JavaScript">
+	select_image();
 	init_canvas();
 	init_pixels();
 	</script>
