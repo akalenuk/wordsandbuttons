@@ -80,29 +80,25 @@ form {
 }
 
 input[type="text"] {
-	width: 32pt;
-	height: 22pt;
-	font-size: 16pt;
+	width: 48pt;
+	height: 24pt;
+	font-size: 15pt;
 	text-align: center;
 }
 
 input[type="checkbox"] {
-	height: 16pt;
-	width: 16pt;
-	font-size: 16pt;
-	margin-bottom: 16pt;
 }
 
 select {
-	width: 128pt;
-	height: 22pt;
-	font-size: 16pt;
-	text-align: center;
+	width: 256pt;
+	height: 24pt;
+	font-size: 15pt;
+	text-align: left;
 }
 
 button{
-	width: 248pt;
-	height: 42pt;
+	width: 148pt;
+	height: 26pt;
 	margin-left: 4pt;
 	margin-right: 4pt;
 	font-size: 16pt;
@@ -352,7 +348,7 @@ function draw_all() {
 	draw_canvas(0, 0, false);
 	draw_pixels();
 	document.getElementById("r").value = r;
-	document.getElementById("target").innerHTML = "Error function: " + weights_for_current_px_py_and_pixels().toFixed(2);
+	document.getElementById("target").innerHTML = "Approximation error: " + weights_for_current_px_py_and_pixels().toFixed(2);
 }
 
 function weights_for_current_px_py_and_pixels() {
@@ -514,9 +510,9 @@ it turns out, it's not too handy to play with since you have to adjust the <span
 Now you can add and remove points and the picture will still fit the screen without readjucing the <span class="formula">r</span>.
 	</p>
 	<p>
-I've made a mini-editor for lemniscate graphics with a few examples of images. Feel free to explore!
+I've made a mini-editor for lemniscate graphics with a few examples. Feel free to explore!
 	</p>
-	<canvas id="canvas" width=640 height=640></canvas><br>
+	<form>
 	<label for="image_no">Image examples: </label><select id="image_no" oninput="select_image()">
 	<option value="0" selected="true">Cross</option>
 	<option value="1">Space invader</option>
@@ -526,19 +522,23 @@ I've made a mini-editor for lemniscate graphics with a few examples of images. F
 	<option value="5">Mushroom (with extra points)</option>
 	</select>
 	<br>
+	<br>
 	<input type="checkbox" id="draw_coordinates" onclick="draw_all();"/><label for="draw_coordinates">Draw the coordinate grid; </label>
 	<input type="checkbox" id="draw_points" checked onclick="draw_all();"/><label for="draw_points">draw the points; </label>
 	<input type="checkbox" id="draw_pixels" onclick="draw_all();"/><label for="draw_pixels">draw the pixels. </label>
-	<br>
-	<label for="r"><span class="formula">r</span> coefficient: </label><input type="text" id="r" value="256" oninput="change_r();"><br>
+	</form>
+	<canvas id="canvas" width=640 height=640></canvas><br>
+	<form>
+	<label for="r"><span class="formula">r</span> coefficient:</label><input type="text" id="r" value="256" oninput="change_r();"> &nbsp;  &nbsp; 
 	<button type="button" id="inc_points" onclick="add_point()">Add a point</button>
-	<button type="button" id="dec_points" onclick="remove_point()">Remove a point</button><br>
+	<button type="button" id="dec_points" onclick="remove_point()">Remove a point</button>
+	</form>
 	<p>
-You can export your image into a set of points, and reimport it back if you like.
+You can export your image into a set of points, and reimport it back.
 	</p>
 	<form>
-	<button type="button" style="width: 200pt;" onclick="write_radius_and_points()">Write radius and points</button>
-	<button type="button" style="width: 200pt;" onclick="read_radius_and_points()">Read radius and points</button>
+	<button type="button" style="width: 200pt;" onclick="write_radius_and_points()">Write image</button>
+	<button type="button" style="width: 200pt;" onclick="read_radius_and_points()">Read image</button>
 	</form>
 	<textarea id="radius_and_points" rows=3>
 	</textarea>
@@ -552,15 +552,19 @@ But what about automatic image tracing? Should it work autmagically by turning p
 Well, yes and no. With lemniscate approximating a pixel image, the error function is not very friendly to the gradient descent either. There are some seemingly random platoes and points mascarading as local minimums that make a minimizer stall every now and then. I tried a few approaches and apparently, a simple random crawler works the best.
 	</p>
 	<p>
-Here's my tracer. It minimizes the error function small step at a time, making a vector image closer to the pixelated origianl. If you're not afraid of putting your browser into koma, you can ask for drastically more iterations or uppen the step size.
+Here's my tracer. It minimizes the error function small step at a time, making a vector image closer to the pixelated origianl. If you're not afraid of putting your browser into koma, you can ask for drastically more iterations or raise the step size.
 	</p>
+	<form>
+	<span id="target"></span>
+	</form>
 	<canvas id="pixels" width=640 height=640></canvas><br>
-	<p id="target"></p>
+	<form>
 	<label for="step">Step: </label><input type="text" id="step" value="1.0">, 
 	<label for="iterations">Iterations: </label><input type="text" id="iterations" value="100">
 	<button type="button" id="fit1" onclick="random_fit_from_ui();">Random Fit</button><br>
+	</form>
 	<p>
-And, of course, you're more than welcome to do it better! if you want to explore it some more, you can start from the code for this page available from GitHub. Besides, multifoci lemniscate is a very simple concept, it all revolves around one simple formula. You can easily reimplement it in your exploration environment of choice.
+Of course, you're more than welcome to explore it further! You can start from the code for this page available on GitHub. Besides, multifoci lemniscate is a very simple concept, it all revolves around one simple formula. You can easily reimplement it in your exploration environment of choice.
 	</p>
 	<h2>
 Conclusion
