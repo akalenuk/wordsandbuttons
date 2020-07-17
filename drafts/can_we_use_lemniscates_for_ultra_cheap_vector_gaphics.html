@@ -483,15 +483,39 @@ Can we use lemniscates for ultra-cheap vector graphics?
 	<p>
 TL&DR: Yes, but you get what you pay for.
 	</p>
+	<p>
+I stole this idea from and old Russian book named Notable Curves by Alekséi Markushévich. The book was published in 1952 and, as you can imagine, it was not dedicated to computer graphics.
+	</p>
+	<p>
+In that book there was a casual mention that multifoci lemniscate can approximate any possible curve with some given error and that this fact was mathematically proven. There were also some promising but frankly unrealistic pictures of a man's face and a bird set by a handfull of points.
+	</p>
+	<p>
+Which got me thinking. SVG is relatively cheap but this looks even cheaper. I mean, to approximate a piece of curve with a Bézier spline, you need to set 4 points. With lemniscate, you can approximate the whole face with only 6 or 7 points. Isn't it wonderful! Almost too good to be true, right?
+	</p>
+
+	<h2>
+Multifoci lemniscate
+	</h2>
+	<p>
+Lemniscate is an isoline of a product of distances to the foci (or focuses). You have a number of point you call focuses, then you build a function that computes all the distances to them, multiply them together. Where your function meets some number — there is your curve.
+	</p>
+	<p class="formula">
+|<b>x</b> - <b>x</b><sub>1</sub>| &times; |<b>x</b> - <b>x</b><sub>2</sub>| &times; ... &times; |<b>x</b> - <b>x</b><sub>n</sub>| = &rho;
+	</p>
+	<p>
+it turns out, it's not too handy to play with since you have to adjust the <span class="formula">&rho;</span> every time you add or remove a point. It's a bit irritating so I changed a formula just a bit to make it more practical.
+	</p>
+	<p class="formula">
+|<b>x</b> - <b>x</b><sub>1</sub>| &times; |<b>x</b> - <b>x</b><sub>2</sub>| &times; ... &times; |<b>x</b> - <b>x</b><sub>n</sub>| = r<sup>n</sup>
+	</p>
+	<p>
+Now you can add and remove points and the picture will still fit the screen without readjucing the <span class="formula">r</span>.
+	</p>
+	<p>
+I've made a mini-editor for lemniscate graphics with a few examples of images. Feel free to explore!
+	</p>
 	<canvas id="canvas" width=640 height=640></canvas><br>
-	<input type="checkbox" id="draw_coordinates" onclick="draw_all();"/><label for="draw_coordinates">Draw the coordinate grid; </label>
-	<input type="checkbox" id="draw_points" checked onclick="draw_all();"/><label for="draw_points">draw the points; </label>
-	<input type="checkbox" id="draw_pixels" onclick="draw_all();"/><label for="draw_pixels">draw the pixels. </label>
-	<br>
-	<button type="button" id="inc_points" onclick="add_point()">Add a point</button><br>
-	<button type="button" id="dec_points" onclick="remove_point()">Remove a point</button><br>
-	<input type="text" id="r" value="256" oninput="change_r();"><br>
-	<select id="image_no" oninput="select_image()">
+	<label for="image_no">Image examples: </label><select id="image_no" oninput="select_image()">
 	<option value="0" selected="true">Cross</option>
 	<option value="1">Space invader</option>
 	<option value="2">Cat</option>
@@ -499,6 +523,14 @@ TL&DR: Yes, but you get what you pay for.
 	<option value="4">Speech baloon</option>
 	<option value="5">Mushroom (with extra points)</option>
 	</select>
+	<br>
+	<input type="checkbox" id="draw_coordinates" onclick="draw_all();"/><label for="draw_coordinates">Draw the coordinate grid; </label>
+	<input type="checkbox" id="draw_points" checked onclick="draw_all();"/><label for="draw_points">draw the points; </label>
+	<input type="checkbox" id="draw_pixels" onclick="draw_all();"/><label for="draw_pixels">draw the pixels. </label>
+	<br>
+	<label for="r"><span class="formula">r</span> coefficient: </label><input type="text" id="r" value="256" oninput="change_r();"><br>
+	<button type="button" id="inc_points" onclick="add_point()">Add a point</button>
+	<button type="button" id="dec_points" onclick="remove_point()">Remove a point</button><br>
 	<p>
 ...
 	</p>
