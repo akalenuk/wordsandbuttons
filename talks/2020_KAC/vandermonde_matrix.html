@@ -114,20 +114,6 @@ function change_the_formula() {
 	const zs = Number(document.getElementById("z_degree").value);
 	const all_points = (xs + 1) * (ys + 1) * (zs + 1);
 
-	var coefficients = "";
-	for(var i = 0; i < all_points; ++i) {
-		if(i != 0) 
-			coefficients += "<br>";
-		coefficients += "a<sub>" + String(i+1) + "</sub>";
-	}
-
-	var results = "";
-	for(var i = 0; i < all_points; ++i) {
-		if(i != 0) 
-			results += "<br>";
-		results += "x'<sub>" + String(i+1) + "</sub>";
-	}
-
 	var nomes = [];
 	for(var x = xs; x >= 0; --x) {
 		for(var y = ys; y >= 0; --y) {
@@ -154,36 +140,35 @@ function change_the_formula() {
 		}
 	}
 
-	var a_content = "";
-	for(var i = 0; i < nomes.length; ++ i) {
-		a_content += "<td>";
-		for(var j = 0; j < all_points; ++j) {
-			if(j != 0) 
-				a_content += "<br>";
-			a_content += "<nobr>";
-			a_content += nomes[i]
-						.replace('%', "<sub>" + String(j + 1) + "</sub>")
-						.replace('%', "<sub>" + String(j + 1) + "</sub>")
-						.replace('%', "<sub>" + String(j + 1) + "</sub>");
-			a_content += "</nobr>";
+	var matrix_content = "";
+	for(var i = 0; i < all_points; ++i) {
+		matrix_content += "<tr>";
+		if(i == 0)
+			matrix_content += "<td rowspan='" + String(all_points) + "' class='open_matrix'></td>";
+		for(var j = 0; j < nomes.length; ++j) {
+			matrix_content += "<td><nobr>";
+			matrix_content += nomes[j]
+						.replace('%', "<sub>" + String(i + 1) + "</sub>")
+						.replace('%', "<sub>" + String(i + 1) + "</sub>")
+						.replace('%', "<sub>" + String(i + 1) + "</sub>");
+			matrix_content += "</nobr></td>";
 		}
-		a_content += "</td>";
+		if(i == 0)
+			matrix_content += "<td rowspan='" + String(all_points) + "' class='close_matrix'></td>";
+		if(i == 0)
+			matrix_content += "<td rowspan='" + String(all_points) + "' class='open_matrix'></td>";
+		matrix_content += "<td>a<sub>" + String(i+1) + "</sub></td>";
+		if(i == 0)
+			matrix_content += "<td rowspan='" + String(all_points) + "' class='close_matrix'></td>";
+		if(i == 0)
+			matrix_content += "<td rowspan='" + String(all_points) + "'> = </td>";
+		if(i == 0)
+			matrix_content += "<td rowspan='" + String(all_points) + "' class='open_matrix'></td>";
+		matrix_content += "<td>x'<sub>" + String(i+1) + "</sub></td>";
+		if(i == 0)
+			matrix_content += "<td rowspan='" + String(all_points) + "' class='close_matrix'></td>";
+		matrix_content += "</tr>";
 	}
-
-	var matrix_content = "</td>\
-	<tr>\
-	<td class='open_matrix'>\
-	</td> " + a_content + " \
-	<td class='close_matrix'></td>\
-	<td></td>\
-	<td class='open_matrix'></td>\
-	<td>" + coefficients + "</td>\
-	<td class='close_matrix'></td>\
-	<td> = </td>\
-	<td class='open_matrix'></td>\
-	<td>" + results + "</td>\
-	<td class='close_matrix'></td>\
-	</tr>";
 
 	document.getElementById("matrix").innerHTML = matrix_content;
 }
