@@ -195,25 +195,46 @@ function polynomial_in_x(A, x, n){
 function draw_grid_on(context){
     // grid
     context.beginPath();
-    context.moveTo(0, client_y_center);
-    context.lineTo(w, client_y_center);
-    context.lineTo(w - 12, client_y_center - 5);
-    context.moveTo(w, client_y_center);
-    context.lineTo(w - 12, client_y_center + 5);
-    context.moveTo(client_x_center, h);
-    context.lineTo(client_x_center, 0);
-    context.lineTo(client_x_center - 5, 12);
-    context.moveTo(client_x_center, 0);
-    context.lineTo(client_x_center + 5, 12);
-    context.fillStyle="#000000";
     for(var i = x_min + 1; i <= x_max - 1; i++){
-        context.moveTo(client_x_center + i*client_x_step, client_y_center);
-        context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
-        context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+        if(i != 0) {
+            context.moveTo(client_x_center + i*client_x_step + 0.5, 0);
+            context.lineTo(client_x_center + i*client_x_step + 0.5, h+1);
+        }
     }
     for(var i = y_min + 1; i <= y_max - 1; i++){
-        context.moveTo(client_x_center, client_y_center - i*client_y_step);
-        context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+        if(i != 0) {
+            context.moveTo(0, client_y_center - i*client_y_step + 0.5);
+            context.lineTo(w+1, client_y_center - i*client_y_step + 0.5);
+        }
+    }
+    context.strokeStyle="#999999";
+    context.stroke();
+    context.closePath();
+
+    context.beginPath();
+    context.moveTo(0, client_y_center + 0.5);
+    context.lineTo(w, client_y_center + 0.5);
+    context.lineTo(w - 12, client_y_center - 5 + 0.5);
+    context.moveTo(w, client_y_center + 0.5);
+    context.lineTo(w - 12, client_y_center + 5 + 0.5);
+    context.moveTo(client_x_center + 0.5, h);
+    context.lineTo(client_x_center + 0.5, 0);
+    context.lineTo(client_x_center - 5 + 0.5, 12);
+    context.moveTo(client_x_center + 0.5, 0);
+    context.lineTo(client_x_center + 5 + 0.5, 12);
+    context.fillStyle="#000000";
+    for(var i = x_min + 1; i <= x_max - 1; i++){
+        if(i != 0) {
+            context.moveTo(client_x_center + i*client_x_step + 0.5, client_y_center);
+            context.lineTo(client_x_center + i*client_x_step + 0.5, client_y_center - 5);
+            context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+        }
+    }
+    for(var i = y_min + 1; i <= y_max - 1; i++){
+        if(i != 0) {
+            context.moveTo(client_x_center, client_y_center - i*client_y_step + 0.5);
+            context.lineTo(client_x_center + 5, client_y_center - i*client_y_step + 0.5);
+        }
         context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
     }
     context.strokeStyle="#000000";
@@ -298,21 +319,21 @@ function polynomial_draw(client_x, client_y, do_guides){
         polynomial_context.moveTo(x_to_client(x1), y_to_client(y1));
         polynomial_context.lineTo(x_to_client(x2), y_to_client(y2));
     }
-    polynomial_context.strokeStyle="#661100";
+    polynomial_context.strokeStyle="#d64562";
     polynomial_context.stroke();
     polynomial_context.closePath();
 
     // dots
-    polynomial_context.beginPath();
+    polynomial_context.fillStyle="#d64562";
     for(var i = 0; i < polynomial_n; ++i){
-        polynomial_context.moveTo(x_to_client(polynomial_xs[i])-5.5, y_to_client(polynomial_ys[i])+5.5);
-        polynomial_context.lineTo(x_to_client(polynomial_xs[i])+5.5, y_to_client(polynomial_ys[i])-5.5);
-        polynomial_context.moveTo(x_to_client(polynomial_xs[i])+5.5, y_to_client(polynomial_ys[i])+5.5);
-        polynomial_context.lineTo(x_to_client(polynomial_xs[i])-5.5, y_to_client(polynomial_ys[i])-5.5);
+        const xi = x_to_client(polynomial_xs[i]) + 0.5;
+        const yi = y_to_client(polynomial_ys[i]) + 0.5;
+        polynomial_context.beginPath();
+        polynomial_context.arc(xi, yi, 4, 0, 2*Math.PI);
+        polynomial_context.stroke();
+        polynomial_context.fill();
+        polynomial_context.closePath();
     }
-    polynomial_context.strokeStyle="#AA3311";
-    polynomial_context.stroke();
-    polynomial_context.closePath();
 
     // guides
     if(do_guides){
@@ -330,7 +351,7 @@ function polynomial_draw(client_x, client_y, do_guides){
         polynomial_context.beginPath();
         polynomial_context.moveTo(x_to_client(polynomial_xs[min_i]), y_to_client(polynomial_ys[min_i]));
         polynomial_context.lineTo(client_x, client_y);
-        polynomial_context.strokeStyle="#AA3311";
+        polynomial_context.strokeStyle="#d64562";
         polynomial_context.stroke();
         polynomial_context.closePath();
         polynomial_context.setLineDash([]);
@@ -444,7 +465,7 @@ function synthesis_draw(client_x, client_y, do_guides){
             synthesis_context.lineTo(x_to_client(x2), y_to_client(y2));
         }
     }
-    synthesis_context.strokeStyle="#661100";
+    synthesis_context.strokeStyle="#d64562";
     synthesis_context.stroke();
     synthesis_context.closePath();
 
@@ -452,16 +473,17 @@ function synthesis_draw(client_x, client_y, do_guides){
     draw_grid_on(synthesis_context);
 
     // dots
-    synthesis_context.beginPath();
-    for(var i = 0; i < synthesis_n; ++i){
-        synthesis_context.moveTo(x_to_client(synthesis_xs[i])-5.5, y_to_client(synthesis_ys[i])+5.5);
-        synthesis_context.lineTo(x_to_client(synthesis_xs[i])+5.5, y_to_client(synthesis_ys[i])-5.5);
-        synthesis_context.moveTo(x_to_client(synthesis_xs[i])+5.5, y_to_client(synthesis_ys[i])+5.5);
-        synthesis_context.lineTo(x_to_client(synthesis_xs[i])-5.5, y_to_client(synthesis_ys[i])-5.5);
+    synthesis_context.fillStyle="#d64562";
+    synthesis_context.strokeStyle="#d64562";
+    for(var i = 0; i < synthesis_xs.length; ++i){
+        const xi = x_to_client(synthesis_xs[i]) + 0.5;
+        const yi = y_to_client(synthesis_ys[i]) + 0.5;
+        synthesis_context.beginPath();
+        synthesis_context.arc(xi, yi, 4, 0, 2*Math.PI);
+        synthesis_context.stroke();
+        synthesis_context.fill();
+        synthesis_context.closePath();
     }
-    synthesis_context.strokeStyle="#AA3311";
-    synthesis_context.stroke();
-    synthesis_context.closePath();
 
     // tangents
     synthesis_context.beginPath();
@@ -470,7 +492,7 @@ function synthesis_draw(client_x, client_y, do_guides){
     synthesis_context.lineTo(x_to_client(synthesis_xs[1]), y_to_client(synthesis_ys[1]));
     synthesis_context.moveTo(x_to_client(synthesis_xs[synthesis_n-2]), y_to_client(synthesis_ys[synthesis_n-2]));
     synthesis_context.lineTo(x_to_client(synthesis_xs[synthesis_n-1]), y_to_client(synthesis_ys[synthesis_n-1]));
-    synthesis_context.strokeStyle="#AA3311";
+    synthesis_context.strokeStyle="#d64562";
     synthesis_context.stroke();
     synthesis_context.setLineDash([]);
     synthesis_context.closePath();
@@ -491,7 +513,7 @@ function synthesis_draw(client_x, client_y, do_guides){
         synthesis_context.beginPath();
         synthesis_context.moveTo(x_to_client(synthesis_xs[min_i]), y_to_client(synthesis_ys[min_i]));
         synthesis_context.lineTo(client_x, client_y);
-        synthesis_context.strokeStyle="#AA3311";
+        synthesis_context.strokeStyle="#d64562";
         synthesis_context.stroke();
         synthesis_context.closePath();
         synthesis_context.setLineDash([]);
@@ -565,21 +587,22 @@ function runge_draw(client_x, client_y, do_guides){
         runge_context.moveTo(x_to_client(x1), y_to_client(y1));
         runge_context.lineTo(x_to_client(x2), y_to_client(y2));
     }
-    runge_context.strokeStyle="#661100";
+    runge_context.strokeStyle="#d64562";
     runge_context.stroke();
     runge_context.closePath();
 
     // dots
-    runge_context.beginPath();
-    for(var i = 0; i < runge_n; ++i){
-        runge_context.moveTo(x_to_client(runge_xs[i])-5.5, y_to_client(runge_ys[i])+5.5);
-        runge_context.lineTo(x_to_client(runge_xs[i])+5.5, y_to_client(runge_ys[i])-5.5);
-        runge_context.moveTo(x_to_client(runge_xs[i])+5.5, y_to_client(runge_ys[i])+5.5);
-        runge_context.lineTo(x_to_client(runge_xs[i])-5.5, y_to_client(runge_ys[i])-5.5);
+    runge_context.fillStyle="#d64562";
+    runge_context.strokeStyle="#d64562";
+    for(var i = 0; i < runge_xs.length; ++i){
+        const xi = x_to_client(runge_xs[i]) + 0.5;
+        const yi = y_to_client(runge_ys[i]) + 0.5;
+        runge_context.beginPath();
+        runge_context.arc(xi, yi, 4, 0, 2*Math.PI);
+        runge_context.stroke();
+        runge_context.fill();
+        runge_context.closePath();
     }
-    runge_context.strokeStyle="#AA3311";
-    runge_context.stroke();
-    runge_context.closePath();
 
     // guides
     if(do_guides){
@@ -597,7 +620,7 @@ function runge_draw(client_x, client_y, do_guides){
         runge_context.beginPath();
         runge_context.moveTo(x_to_client(runge_xs[min_i]), y_to_client(runge_ys[min_i]));
         runge_context.lineTo(client_x, client_y);
-        runge_context.strokeStyle="#AA3311";
+        runge_context.strokeStyle="#d64562";
         runge_context.stroke();
         runge_context.closePath();
         runge_context.setLineDash([]);
@@ -682,26 +705,30 @@ function chebyshev_draw(client_x, client_y, do_guides){
     chebyshev_context.fillRect(0, 0, w, h);
 
     // grid
-     chebyshev_context.beginPath();
-    chebyshev_context.moveTo(0, chebyshev_client_y_center);
-    chebyshev_context.lineTo(w, chebyshev_client_y_center);
-    chebyshev_context.lineTo(w - 12, chebyshev_client_y_center - 5);
-    chebyshev_context.moveTo(w, chebyshev_client_y_center);
-    chebyshev_context.lineTo(w - 12, chebyshev_client_y_center + 5);
-    chebyshev_context.moveTo(chebyshev_client_x_center, h);
-    chebyshev_context.lineTo(chebyshev_client_x_center, 0);
-    chebyshev_context.lineTo(chebyshev_client_x_center - 5, 12);
-    chebyshev_context.moveTo(chebyshev_client_x_center, 0);
-    chebyshev_context.lineTo(chebyshev_client_x_center + 5, 12);
+    chebyshev_context.beginPath();
+    chebyshev_context.moveTo(0, chebyshev_client_y_center + 0.5);
+    chebyshev_context.lineTo(w+1, chebyshev_client_y_center + 0.5);
+    chebyshev_context.lineTo(w - 12, chebyshev_client_y_center - 5 + 0.5);
+    chebyshev_context.moveTo(w, chebyshev_client_y_center + 0.5);
+    chebyshev_context.lineTo(w - 12, chebyshev_client_y_center + 5 + 0.5);
+    chebyshev_context.moveTo(chebyshev_client_x_center + 0.5, h+1);
+    chebyshev_context.lineTo(chebyshev_client_x_center + 0.5, 0);
+    chebyshev_context.lineTo(chebyshev_client_x_center - 5 + 0.5, 12);
+    chebyshev_context.moveTo(chebyshev_client_x_center + 0.5, 0);
+    chebyshev_context.lineTo(chebyshev_client_x_center + 5 + 0.5, 12);
     chebyshev_context.fillStyle="#000000";
     for(var i = x_min + 1; i <= x_max - 1; i++){
-        chebyshev_context.moveTo(chebyshev_client_x_center + i*chebyshev_client_x_step, chebyshev_client_y_center);
-        chebyshev_context.lineTo(chebyshev_client_x_center + i*chebyshev_client_x_step, chebyshev_client_y_center - 5);
-        chebyshev_context.fillText(i, chebyshev_client_x_center + i*chebyshev_client_x_step + 4, chebyshev_client_y_center + 16);
+        if(i != 0) {
+            chebyshev_context.moveTo(chebyshev_client_x_center + i*chebyshev_client_x_step, chebyshev_client_y_center);
+            chebyshev_context.lineTo(chebyshev_client_x_center + i*chebyshev_client_x_step, chebyshev_client_y_center - 5);
+            chebyshev_context.fillText(i, chebyshev_client_x_center + i*chebyshev_client_x_step + 4, chebyshev_client_y_center + 16);
+        }
     }
     for(var i = y_min + 1; i <= y_max - 1; i++){
-        chebyshev_context.moveTo(chebyshev_client_x_center, chebyshev_client_y_center - i*chebyshev_client_y_step);
-        chebyshev_context.lineTo(chebyshev_client_x_center + 5, chebyshev_client_y_center - i*chebyshev_client_y_step);
+        if(i != 0) {
+            chebyshev_context.moveTo(chebyshev_client_x_center, chebyshev_client_y_center - i*chebyshev_client_y_step);
+            chebyshev_context.lineTo(chebyshev_client_x_center + 5, chebyshev_client_y_center - i*chebyshev_client_y_step);
+        }
         chebyshev_context.fillText(i, chebyshev_client_x_center + 5, chebyshev_client_y_center - i*chebyshev_client_y_step + 16);
     }
     chebyshev_context.strokeStyle="#000000";
@@ -730,21 +757,22 @@ function chebyshev_draw(client_x, client_y, do_guides){
         chebyshev_context.moveTo(chebyshev_x_to_client(x1), chebyshev_y_to_client(y1));
         chebyshev_context.lineTo(chebyshev_x_to_client(x2), chebyshev_y_to_client(y2));
     }
-    chebyshev_context.strokeStyle="#661100";
+    chebyshev_context.strokeStyle="#d64562";
     chebyshev_context.stroke();
     chebyshev_context.closePath();
 
     // dots
-    chebyshev_context.beginPath();
-    for(var i = 0; i < chebyshev_n; ++i){
-        chebyshev_context.moveTo(chebyshev_x_to_client(chebyshev_xs[i])-5.5, chebyshev_y_to_client(chebyshev_ys[i])+5.5);
-        chebyshev_context.lineTo(chebyshev_x_to_client(chebyshev_xs[i])+5.5, chebyshev_y_to_client(chebyshev_ys[i])-5.5);
-        chebyshev_context.moveTo(chebyshev_x_to_client(chebyshev_xs[i])+5.5, chebyshev_y_to_client(chebyshev_ys[i])+5.5);
-        chebyshev_context.lineTo(chebyshev_x_to_client(chebyshev_xs[i])-5.5, chebyshev_y_to_client(chebyshev_ys[i])-5.5);
+    chebyshev_context.fillStyle="#d64562";
+    chebyshev_context.strokeStyle="#d64562";
+    for(var i = 0; i < chebyshev_xs.length; ++i){
+        const xi = chebyshev_x_to_client(chebyshev_xs[i]) + 0.5;
+        const yi = chebyshev_y_to_client(chebyshev_ys[i]) + 0.5;
+        chebyshev_context.beginPath();
+        chebyshev_context.arc(xi, yi, 4, 0, 2*Math.PI);
+        chebyshev_context.stroke();
+        chebyshev_context.fill();
+        chebyshev_context.closePath();
     }
-    chebyshev_context.strokeStyle="#AA3311";
-    chebyshev_context.stroke();
-    chebyshev_context.closePath();
 
     // guides
     if(do_guides){
@@ -762,7 +790,7 @@ function chebyshev_draw(client_x, client_y, do_guides){
         chebyshev_context.beginPath();
         chebyshev_context.moveTo(chebyshev_x_to_client(chebyshev_xs[min_i]), chebyshev_y_to_client(chebyshev_ys[min_i]));
         chebyshev_context.lineTo(chebyshev_x_to_client(chebyshev_xs[min_i]), client_y);
-        chebyshev_context.strokeStyle="#AA3311";
+        chebyshev_context.strokeStyle="#d64562";
         chebyshev_context.stroke();
         chebyshev_context.closePath();
         chebyshev_context.setLineDash([]);
@@ -869,28 +897,31 @@ function spline_draw(client_x, client_y, do_guides){
             spline_context.lineTo(x_to_client(x2), y_to_client(y2));
         }
     }
-    spline_context.strokeStyle="#661100";
+    spline_context.strokeStyle="#d64562";
     spline_context.stroke();
     spline_context.closePath();
 
     // dots
-    spline_context.beginPath();
-    for(var i = 0; i < spline_n; ++i){
-        spline_context.moveTo(x_to_client(spline_xs[i])-5.5, y_to_client(spline_ys[i])+5.5);
-        spline_context.lineTo(x_to_client(spline_xs[i])+5.5, y_to_client(spline_ys[i])-5.5);
-        spline_context.moveTo(x_to_client(spline_xs[i])+5.5, y_to_client(spline_ys[i])+5.5);
-        spline_context.lineTo(x_to_client(spline_xs[i])-5.5, y_to_client(spline_ys[i])-5.5);
+    spline_context.fillStyle="#d64562";
+    spline_context.strokeStyle="#d64562";
+    for(var i = 0; i < spline_xs.length; ++i){
+        const xi = x_to_client(spline_xs[i]) + 0.5;
+        const yi = y_to_client(spline_ys[i]) + 0.5;
+        spline_context.beginPath();
+        spline_context.arc(xi, yi, 4, 0, 2*Math.PI);
+        spline_context.stroke();
+        spline_context.fill();
+        spline_context.closePath();
     }
-    spline_context.strokeStyle="#AA3311";
-    spline_context.stroke();
-    spline_context.closePath();
+
+
     spline_context.beginPath();
     spline_context.setLineDash([4, 4]);
     for(var i = 0; i < spline_n/2; ++i){
         spline_context.moveTo(x_to_client(spline_xs[2*i]), y_to_client(spline_ys[2*i]));
         spline_context.lineTo(x_to_client(spline_xs[2*i+1]), y_to_client(spline_ys[2*i+1]));
     }
-    spline_context.strokeStyle="#AA3311";
+    spline_context.strokeStyle="#d64562";
     spline_context.stroke();
     spline_context.setLineDash([]);
     spline_context.closePath();
@@ -911,7 +942,7 @@ function spline_draw(client_x, client_y, do_guides){
         spline_context.beginPath();
         spline_context.moveTo(x_to_client(spline_xs[min_i]), y_to_client(spline_ys[min_i]));
         spline_context.lineTo(client_x, client_y);
-        spline_context.strokeStyle="#AA3311";
+        spline_context.strokeStyle="#d64562";
         spline_context.stroke();
         spline_context.closePath();
         spline_context.setLineDash([]);
