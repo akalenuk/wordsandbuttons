@@ -45,6 +45,7 @@ pre {
 	font-size: 12pt;
 	text-align: left;
 	width: 300pt;
+	font-weight: bold;
 }
 
 table {
@@ -498,6 +499,56 @@ function change_the_formula() {
 
 	document.getElementById("system").innerHTML = system_content;
 }
+
+function colorized(text) {
+    const separators = ['function ', ' for ', ' else', ' if ', ' break', 'return', 'class ', ' in ', 'const ',
+        '\n', ' ', '\t', ',', ':', '=', '[', ']', '(', ')', '+', '-', '*', '/'];
+    const quotes = ['\'', '"'];
+    const comments = [['//', '\n']];
+
+    function painted_in(line, color) {
+        return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+    }
+
+    function colorized(token) {
+        var code_sum = 0;
+        for(var i = 0; i < token.length; ++i)
+            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+        var zero_channel = code_sum % 3;
+        var color = '' + (zero_channel == 0 ? '3' : '') + (1 + (code_sum % 5) * 2)
+            + (zero_channel == 1 ? '3' : '') + (4 + (code_sum % 2) * 5)
+            + (zero_channel == 2 ? '3' : '');
+        return painted_in(token, color);
+    }
+
+    function separated(line, i) {
+        if(i == separators.length)
+            return colorized(line);
+        return line.split(separators[i]).map(function(subline) {
+            return separated(subline, i + 1);}).join(separators[i]);
+    }
+
+    function unquoted(line, i) {
+        if(i == quotes.length)
+            return separated(line, 0);
+        var chunk_no = 0;
+        return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {
+            return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {
+                return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "555");}).join('');
+    }
+
+    function uncommented(line, i) {
+        if(i == comments.length)
+            return unquoted(line, 0);
+        var chunks = line.split(comments[i][0]);
+        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+            var in_out_comment = chunk.split(comments[i][1]);
+            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555")
+                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+    }
+
+    return uncommented(text, 0);
+}
 	</script>
 </head>
 <body>
@@ -524,8 +575,8 @@ points: (0, 0) (0, 1) (1, 1) (1, 0)
 
 	<h2>Interpolating interpolants</h2>
 	<table>
-	<tr><td><pre>
-<span style="color:#777">// linear interpolation by the two values in 0 and 1</span>
+	<tr><td><pre id="code_1">
+// linear interpolation by the two values in 0 and 1</span>
 function lerp(y1, y2, x) {
     return y1 * (1. - x) + y2 * x;
 }
@@ -533,7 +584,7 @@ function lerp(y1, y2, x) {
 	</table>
 
 	<table>
-	<tr><td><pre>
+	<tr><td><pre id="code_2">
 function l_transform(points, x, y) {
     const x1 = lerp(points[0][0], points[1][0], x);
     const x2 = lerp(points[2][0], points[3][0], x);
@@ -550,11 +601,11 @@ function l_transform(points, x, y) {
 	<canvas id="plot_q" width=640 height=512></canvas>
 	<br>
 	<table>
-	<tr><td><pre>
-<span style="color:#777">// quadratic interpolation by the three values in 0, 0.5, and 1</span>
+	<tr><td><pre id="code_3">
+// quadratic interpolation by the three values in 0, 0.5, and 1
 function qerp(y1, y2, y3, x) {
-    const a = 2.0*y1 - 4.0*y2 + 2.0*y3;
-    const b = -3.0*y1 + 4.0*y2 - y3;
+    const a = 2*y1 - 4*y2 + 2*y3;
+    const b = -3*y1 + 4*y2 - y3;
     const c = y1;
     return a*x*x + b*x + c;
 }
@@ -562,7 +613,7 @@ function qerp(y1, y2, y3, x) {
 	</table>
 
 	<table>
-	<tr><td><pre>
+	<tr><td><pre id="code_4">
 function q_transform(points, x, y) {
     const x1 = qerp(points[0][0], points[1][0], points[2][0], x);
     const x2 = qerp(points[3][0], points[4][0], points[5][0], x);
@@ -582,8 +633,8 @@ function q_transform(points, x, y) {
 	<br>
 
 	<table>
-	<tr><td><pre>
-<span style="color:#777">// cubic interpolation by the four values in 0, 1/3, 2/3 and 1</span>
+	<tr><td><pre id="code_5">
+// cubic interpolation by the four values in 0, 1/3, 2/3 and 1</span>
 function cerp(y1, y2, y3, y4, x) {
     const a = -9*y1/2 + 27*y2/2 - 27*y3/2 + 9*y4/2;
     const b = 9*y1 - 45*y2/2 + 18*y3 - 9*y4/2;
@@ -612,6 +663,11 @@ function cl_transform(points, x, y) {
 init_plot("plot_l", l_points, l_points_original, l_transform, 0);
 init_plot("plot_q", q_points, q_points_original, q_transform, 1);
 init_plot("plot_cl", cl_points, cl_points_original, cl_transform, 2);
+document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
+document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
+document.getElementById("code_3").innerHTML = colorized(document.getElementById("code_3").innerHTML);
+document.getElementById("code_4").innerHTML = colorized(document.getElementById("code_4").innerHTML);
+document.getElementById("code_5").innerHTML = colorized(document.getElementById("code_5").innerHTML);
 change_the_formula();
 	</script>
 
