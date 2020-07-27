@@ -702,8 +702,24 @@ function init_chebyshev(){
 
 	chebyshev.addEventListener('mousedown', function(e){
 		var canvas_rect = chebyshev.getBoundingClientRect();
-		chebyshev_ys[chebyshev_i] = chebyshev_client_to_y(e.clientY - canvas_rect.top);
-		chebyshev_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+
+		const client_x = e.clientX - canvas_rect.left;
+		const client_y = e.clientY - canvas_rect.top;
+		min_d = Math.abs(chebyshev_xs[0] - chebyshev_client_to_x(client_x));
+		min_i = 0;
+		for(var i = 1; i < chebyshev_n; ++i){
+			var di = Math.abs(chebyshev_xs[i] - chebyshev_client_to_x(client_x));
+			if(di < min_d){
+				min_d = di;
+				min_i = i;
+			}
+		}
+		chebyshev_i = min_i;
+
+		chebyshev_ys[chebyshev_i] = chebyshev_client_to_y(client_y);
+		chebyshev_draw(client_x, client_y, false);
+
+
 	}, false);
 
 	chebyshev.addEventListener('mouseleave', function(e){
@@ -793,26 +809,16 @@ function chebyshev_draw(client_x, client_y, do_guides){
 	}
 
 	// guides
-	if(do_guides){
-		min_d = Math.abs(chebyshev_xs[0] - chebyshev_client_to_x(client_x));
-		min_i = 0;
-		for(var i = 1; i < chebyshev_n; ++i){
-			var di = Math.abs(chebyshev_xs[i] - chebyshev_client_to_x(client_x));
-			if(di < min_d){
-				min_d = di;
-				min_i = i;
-			}
-		}
-		chebyshev_i = min_i;
-		chebyshev_context.setLineDash([4, 4]);
-		chebyshev_context.beginPath();
-		chebyshev_context.moveTo(chebyshev_x_to_client(chebyshev_xs[min_i]), chebyshev_y_to_client(chebyshev_ys[min_i]));
-		chebyshev_context.lineTo(chebyshev_x_to_client(chebyshev_xs[min_i]), client_y);
-		chebyshev_context.strokeStyle="#d64562";
-		chebyshev_context.stroke();
-		chebyshev_context.closePath();
-		chebyshev_context.setLineDash([]);
+	chebyshev_context.setLineDash([4, 4]);
+	chebyshev_context.beginPath();
+	for(var i = 0; i < chebyshev_n; ++i){
+		chebyshev_context.moveTo(chebyshev_x_to_client(chebyshev_xs[i]), h);
+		chebyshev_context.lineTo(chebyshev_x_to_client(chebyshev_xs[i]), 0);
 	}
+	chebyshev_context.strokeStyle="#d64562";
+	chebyshev_context.stroke();
+	chebyshev_context.closePath();
+	chebyshev_context.setLineDash([]);
 }
 
 
@@ -829,12 +835,12 @@ function init_spline(){
 
 	spline.addEventListener('mousemove', function(e){
 		var canvas_rect = spline.getBoundingClientRect();
-		   spline_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-		   if(e.buttons == 1){
+		spline_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
 			spline_xs[spline_i] = client_to_x(e.clientX - canvas_rect.left);
 			spline_ys[spline_i] = client_to_y(e.clientY - canvas_rect.top);
 			spline_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
-		   }
+		}
 	}, false);
 
 	spline.addEventListener('mousedown', function(e){
