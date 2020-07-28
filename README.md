@@ -112,7 +112,7 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 - [Outperforming everything with anything](https://wordsandbuttons.online/outperforming_everything_with_anything.html) A 100 lines of Python code that substitute the compiler front-end for a specific computation. This shows that you don't need a “fast” compiling language to write efficient code. In fact, a compilation is only one of the multiple ways to achieve speed.
 <sup>[#performance](https://wordsandbuttons.online/performance.html)</sup> <sup>[#programming](https://wordsandbuttons.online/programming.html)</sup> <sup>[#show-and-tell](https://wordsandbuttons.online/show-and-tell.html)</sup> 
 
-- [Programmer's guide to polynomials and splines](https://wordsandbuttons.online/programmers_guide_to_polynomials_and_splines.html) This is a brief introduction into polynomials. From how to make a polynomial run through your set of points to how to make it into a parametric curve.
+- [Programmer's guide to polynomials and splines](https://wordsandbuttons.online/programmers_guide_to_polynomials_and_splines.html) This is a brief introduction into polynomials. From how to make a polynomial run through your set of points to how to make it into a spline.
 <sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/tutorials.html)</sup> 
 
 - [Vastly outperforming LAPACK with C++ metaprogramming](https://wordsandbuttons.online/vastly_outperforming_lapack_with_cpp_metaprogramming.html) Still not really about LAPACK. It's a second part of “outperforming” series explaining how the C++ metaprogramming can appear useful for efficient code generation.
