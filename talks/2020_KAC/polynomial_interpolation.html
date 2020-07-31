@@ -45,7 +45,9 @@ p {
     padding-bottom: 6pt;
 }
 
+
 table.footer {
+    border-width: 0pt;
     padding: 64pt 0pt 32pt 0pt;
     background-color: transparent;
     width: 505pt;
@@ -249,6 +251,14 @@ var polynomial_ys = [4.0, 2.0, 4.0];
 var polynomial_n = 3;
 var polynomial_i = 0;
 
+function points_ok() {
+    if(polynomial_xs[0].toFixed(1) == polynomial_xs[1].toFixed(1)
+      || polynomial_xs[1].toFixed(1) == polynomial_xs[2].toFixed(1)
+      || polynomial_xs[2].toFixed(1) == polynomial_xs[0].toFixed(1))
+       return false;
+    return true;
+}
+
 function init_polynomial(){
     polynomial = document.getElementById("polynomial");
     var canvas_rect = polynomial.getBoundingClientRect();
@@ -256,12 +266,12 @@ function init_polynomial(){
 
     polynomial.addEventListener('mousemove', function(e){
         var canvas_rect = polynomial.getBoundingClientRect();
-           polynomial_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-           if(e.buttons == 1){
+        polynomial_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+        if(e.buttons == 1) {
             polynomial_xs[polynomial_i] = client_to_x(e.clientX - canvas_rect.left);
             polynomial_ys[polynomial_i] = client_to_y(e.clientY - canvas_rect.top);
             polynomial_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
-           }
+        }
     }, false);
 
     polynomial.addEventListener('mousedown', function(e){
@@ -300,12 +310,16 @@ function polynomial_draw(client_x, client_y, do_guides){
 
     X = solved_linear(A, B, polynomial_n);
 
+    if(!points_ok()) {
+        X = [Number.NaN, Number.NaN, Number.NaN];
+    }
+
     polynomial_system = document.getElementById("polynomial_system");
-    polynomial_system.innerHTML = "P(x<sub>1</sub>) = "+polynomial_xs[0].toFixed(2)+"<sup>2</sup>a + "+polynomial_xs[0].toFixed(2)+" b + c = "+polynomial_ys[0].toFixed(2);
+    polynomial_system.innerHTML = "P(x<sub>1</sub>) = "+polynomial_xs[0].toFixed(1)+"<sup>2</sup>a + "+polynomial_xs[0].toFixed(1)+" b + c = "+polynomial_ys[0].toFixed(1);
     polynomial_system.innerHTML += "<br>";
-    polynomial_system.innerHTML += "P(x<sub>2</sub>) = "+polynomial_xs[1].toFixed(2)+"<sup>2</sup>a + "+polynomial_xs[1].toFixed(2)+" b + c = "+polynomial_ys[1].toFixed(2);
+    polynomial_system.innerHTML += "P(x<sub>2</sub>) = "+polynomial_xs[1].toFixed(1)+"<sup>2</sup>a + "+polynomial_xs[1].toFixed(1)+" b + c = "+polynomial_ys[1].toFixed(1);
     polynomial_system.innerHTML += "<br>";
-    polynomial_system.innerHTML += "P(x<sub>3</sub>) = "+polynomial_xs[2].toFixed(2)+"<sup>2</sup>a + "+polynomial_xs[2].toFixed(2)+" b + c = "+polynomial_ys[2].toFixed(2);
+    polynomial_system.innerHTML += "P(x<sub>3</sub>) = "+polynomial_xs[2].toFixed(1)+"<sup>2</sup>a + "+polynomial_xs[2].toFixed(1)+" b + c = "+polynomial_ys[2].toFixed(1);
     polynomial_formula = document.getElementById("polynomial_formula");
     polynomial_formula.innerHTML = "a = " + X[2].toFixed(2) + ", b = " + X[1].toFixed(2) + ", c = " + X[0].toFixed(2);
     polynomial_formula.innerHTML += "<br>";
@@ -314,15 +328,16 @@ function polynomial_draw(client_x, client_y, do_guides){
     polynomial_context.beginPath();
     polynomial_context.lineWidth = 2;
     polynomial_context.strokeStyle="#d64562";
-    for(var j = 0; j < w; ++j){
-        const x = client_to_x(j);
-        const y = polynomial_in_x(X, x, polynomial_n);
-        if(j == 0) {
-            polynomial_context.moveTo(x_to_client(x), y_to_client(y));
-        } else {
-            polynomial_context.lineTo(x_to_client(x), y_to_client(y));
+    if(points_ok())
+        for(var j = 0; j < w; ++j){
+            const x = client_to_x(j);
+            const y = polynomial_in_x(X, x, polynomial_n);
+            if(j == 0) {
+                polynomial_context.moveTo(x_to_client(x), y_to_client(y));
+            } else {
+                polynomial_context.lineTo(x_to_client(x), y_to_client(y));
+            }
         }
-    }
     polynomial_context.stroke();
     polynomial_context.closePath();
     polynomial_context.lineWidth = 1;
@@ -953,16 +968,16 @@ function spline_draw(client_x, client_y, do_guides){
 Polynomial interpolation
     </h1>
     <p>
-Cubic polynomial
+Quadratic polynomial
     </p>
     <p class="formula">
-P(x) = ax<sup>3</sup> + bx<sup>2</sup> + cx + d
+P(x) = ax<sup>2</sup> + bx + c
     </p>
     <p>
 Using Horner's method
     </p>
     <p class="formula">
-P(x) = ((ax+ b)x + c)x + d
+P(x) = (ax+ b)x + c
     </p>
 
     <p>
@@ -985,6 +1000,15 @@ Quadratic polynomial from 3 points
     <p>
 This is the <a href="https://en.wikipedia.org/wiki/Vandermonde_matrix">Vandermonde matrix</a>.
     </p>
+
+    <table style="width: 505pt;" class="footer">
+    <tr>
+    <td class="footer" style="text-align: left;"><a href="polynomial_transformations.html">&larr; </a></td>
+    <td class="footer" style="text-align: center"><a href="index.html">- Contents -</a></td>
+    <td class="footer" style="text-align: right"><a href="linear_equations.html">&rarr;</a></td>
+    </tr>
+    </table>
+
     </center>
   </body>
 </html>
