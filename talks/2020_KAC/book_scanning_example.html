@@ -60,11 +60,11 @@ td {
 }
 
 button {
-	width: 248pt;
-	height: 42pt;
-	margin-left:4pt;
-	margin-right:4pt;
+	width: 148pt;
+	height: 26pt;
 	font-size: 16pt;
+	text-align: center;
+	margin: 3pt 0pt 3pt 0pt;
 }
 
 form {
@@ -152,6 +152,7 @@ var cl_points = [
 
 // image
 pixels = [];
+flat_pixels = [];
 
 var client_x_center = w*(0-x_min)/(x_max-x_min);
 var client_x_step = (w/(x_max-x_min));
@@ -260,21 +261,6 @@ function set_points(points, client_x, client_y, plot_no) {
 	points[nearest_for_plot_no[plot_no]][1] = y;
 }
 
-function draw_arrow(context, x1, y1, x2, y2, color) {
-	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
-	const t = d < 16 ? (d / 16.) : 1.;
-	context.beginPath();
-	context.moveTo(x1, y1);
-	context.lineTo(x2, y2);
-	context.moveTo(x2 - ((y2 - y1) * 4.5 / d + (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d - (x2 - x1) * 4.5 / d) * t);
-	context.lineTo(x2, y2);
-	context.moveTo(x2 + ((y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d + (x2 - x1) * 4.5 / d) * t);
-	context.lineTo(x2, y2);
-	context.strokeStyle = color;
-	context.stroke();
-	context.closePath();
-}
-
 // e.g. init_plot("plot_cl", cl_point, cl_points_original, cl_transform, 2);
 function init_plot(name, points, points_original, transform, plot_no){
 	var canvas = document.getElementById(name);
@@ -380,11 +366,10 @@ function draw_plot(name, points, points_original, transform, color_scheme_no) {
 		context.fill();
 		context.closePath();
 	}
-	console.log(points);
 }
 
 function draw_all_plots() {
-	draw_plot("plot_cl", cl_points, cl_points_original, cl_transform, 2);
+	draw_plot("plot_cl", cl_points, cl_points_original, cl_transform, 0);
 }
 
 function load_pixels_from(url) {
@@ -416,6 +401,44 @@ function load_pixels_from(url) {
 		});
 	});
 }
+
+function flatten() {
+	for (var i = 0; i < h; ++i) {
+		pixelsi = []
+		for (var j = 0; j < w/2; ++j) {
+			const x = (j + 0.5) / (w/2);
+			const y = (i + 0.5) / h;
+			const xy_ = cl_transform(cl_points, x, y);
+			const j_ = Math.round(Math.max(Math.min(xy_[0] * w, w-1), 0));
+			const i_ = Math.round(Math.max(Math.min(xy_[1] * h, h-1), 0));
+			pixelsi.push(pixels[i_][j_]);
+		}
+		flat_pixels.push(pixelsi);
+	}
+}
+
+function draw_flat() {
+	plot = document.getElementById("flat");
+	var context = plot.getContext("2d");
+
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// flat pixels
+	if(flat_pixels.length > 0) {
+		var pixel_field = context.createImageData(w, h);
+		for (var i = 0; i < h; ++i) {
+			for (var j = 0; j < w/2; ++j) {
+				pixel_field.data[(i*w + j)*4 + 0] = flat_pixels[i][j][0];
+				pixel_field.data[(i*w + j)*4 + 1] = flat_pixels[i][j][1];
+				pixel_field.data[(i*w + j)*4 + 2] = flat_pixels[i][j][2];
+				pixel_field.data[(i*w + j)*4 + 3] = 0xFF;
+			}
+		}
+		context.putImageData(pixel_field, -0.5, -0.5);
+	}
+}
 	</script>
 </head>
 <body>
@@ -430,10 +453,15 @@ Auxiliary figures:
 	</form>
 
 	<canvas id="plot_cl" width=640 height=480></canvas>
+	<form>
+	<button type="button" onclick="flatten();draw_flat();">Flatten</button>
+	</form>
+	<canvas id="flat" width=320 height=480></canvas>
 
 	<script language="JavaScript">
-init_plot("plot_cl", cl_points, cl_points_original, cl_transform, 2);
+init_plot("plot_cl", cl_points, cl_points_original, cl_transform, 0);
 load_pixels_from("https://raw.githubusercontent.com/akalenuk/wordsandbuttons/master/talks/2020_KAC/book_640.png");
+draw_flat();
 	</script>
 	</center>
 </body>
