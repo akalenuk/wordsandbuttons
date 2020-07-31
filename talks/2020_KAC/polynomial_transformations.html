@@ -76,10 +76,10 @@ td.footer {
 }
 
 button {
-	width: 248pt;
-	height: 42pt;
-	margin-left:4pt;
-	margin-right:4pt;
+	width: 150pt;
+	height: 26pt;
+	margin-left:8pt;
+	margin-right:8pt;
 	font-size: 16pt;
 }
 
@@ -129,6 +129,11 @@ var colors = ["#d64562", "#457fd6", "#62d645"];
 const l_points_original = [[0., 0.0], [0., 1.0], [1., 0.0], [1., 1.0]];
 const q_points_original = [[0., 0.0], [0., 0.5], [0., 1.0], [0.5, 0.0], [0.5, 0.5], [0.5, 1.0], [1., 0.0], [1., 0.5], [1., 1.0]];
 const cl_points_original = [[0., 0.0], [0., 1.0], [1./3., 0.0], [1./3., 1.0], [2./3., 0.0], [2./3., 1.0], [1., 0.0], [1., 1.0]];
+
+const l_points_initial = [[0.5, 0.5], [0.3, 1.6], [1.6, 0.3], [1.2, 1.2]];
+const q_points_initial = [[0.23, 0.35], [0.26, 0.89], [0.29, 1.49], [0.7, 0.2], [0.94, 0.73], [1.12, 1.5], [1.33, 0.13], [1.83, 0.86], [1.84, 1.79]];
+const cl_points_initial = [[0.31, 0.31], [0.13, 1.66], [0.94, 0.33], [0.73, 1.54], [1.55, 0.51], [1.24, 1.70], [2.24, 0.40], [2.02, 1.77]];
+
 var l_points = [[0.5, 0.5], [0.3, 1.6], [1.6, 0.3], [1.2, 1.2]];
 var q_points = [[0.23, 0.35], [0.26, 0.89], [0.29, 1.49], [0.7, 0.2], [0.94, 0.73], [1.12, 1.5], [1.33, 0.13], [1.83, 0.86], [1.84, 1.79]];
 var cl_points = [[0.31, 0.31], [0.13, 1.66], [0.94, 0.33], [0.73, 1.54], [1.55, 0.51], [1.24, 1.70], [2.24, 0.40], [2.02, 1.77]];
@@ -421,6 +426,19 @@ function draw_all_plots() {
 	draw_plot("plot_q", q_points, q_points_original, q_transform, 1);
 	draw_plot("plot_cl", cl_points, cl_points_original, cl_transform, 2);
 }
+
+function reinit_all_plots() {
+	init_plot("plot_l", l_points, l_points_original, l_transform, 0);
+	init_plot("plot_q", q_points, q_points_original, q_transform, 1);
+	init_plot("plot_cl", cl_points, cl_points_original, cl_transform, 2);
+}
+
+function deep_copy(from) {
+	to = [];
+	for(var i = 0; i < from.length; ++i)
+		to.push([from[i][0], from[i][1]]);
+	return to;
+}
 	</script>
 </head>
 <body>
@@ -428,10 +446,11 @@ function draw_all_plots() {
 	<h1>
 Polynomial transformations
 	</h1>
-    <h2>
+	<h2>
 Bilinear transformation
-    </h2>
+	</h2>
 	<canvas id="plot_l" width=640 height=512></canvas>
+	<br><button type="button" onclick="l_points = deep_copy(l_points_initial); reinit_all_plots();">Reset</button>
 	<br>
 	<form onsubmit="return false;" style="display:none;">
 Auxiliary figures: 
@@ -443,10 +462,11 @@ x' = a<sub>x</sub>&hairsp;x&hairsp;y + b<sub>x</sub>&hairsp;x + c<sub>x</sub>&ha
 <br>
 y' = a<sub>y</sub>&hairsp;x&hairsp;y + b<sub>y</sub>&hairsp;x + c<sub>y</sub>&hairsp;y + d<sub>y</sub>
 	</p>
-    <h2>
+	<h2>
 Biquadratic transformation
-    </h2>
+	</h2>
 	<canvas id="plot_q" width=640 height=512></canvas>
+	<br><button type="button" onclick="q_points = deep_copy(q_points_initial); reinit_all_plots();">Reset</button>
  	<p class="formula">
 x' = a<sub>x</sub>&hairsp;x<sup>2</sup>&hairsp;y<sup>2</sup>
 	+ b<sub>x</sub>&hairsp;x<sup>2</sup>&hairsp;y
@@ -468,11 +488,12 @@ y' = a<sub>y</sub>&hairsp;x<sup>2</sup>&hairsp;y<sup>2</sup>
 	+ h<sub>y</sub>&hairsp;y
 	+ i<sub>y</sub>
 	</p>
-    <h2>
+	<h2>
 Linear-cubic transformation
-    </h2>
+	</h2>
 	<canvas id="plot_cl" width=640 height=512></canvas>
-  	<p class="formula">
+	<br><button type="button" onclick="cl_points = deep_copy(cl_points_initial); reinit_all_plots();">Reset</button>
+	<p class="formula">
 x' = a<sub>x</sub>&hairsp;x<sup>3</sup>&hairsp;y
  + b<sub>x</sub>&hairsp;x<sup>2</sup>&hairsp;y
  + c<sub>x</sub>&hairsp;x&hairsp;y
@@ -493,10 +514,8 @@ y' = a<sub>y</sub>&hairsp;x<sup>3</sup>&hairsp;y
 	</p>
 
 	<script language="JavaScript">
-init_plot("plot_l", l_points, l_points_original, l_transform, 0);
-init_plot("plot_q", q_points, q_points_original, q_transform, 1);
-init_plot("plot_cl", cl_points, cl_points_original, cl_transform, 2);
- 	</script>
+reinit_all_plots();
+	</script>
 
     <table style="width: 505pt;" class="footer">
     <tr>
