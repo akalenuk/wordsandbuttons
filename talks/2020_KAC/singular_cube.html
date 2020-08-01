@@ -89,10 +89,9 @@ input[type="checkbox"] {
 	font-family: sans-serif;
 	font-size: 15pt;
 	font-style: italic;
-	text-align: center;
 	line-height: 1.8;
-	padding-top: 6pt;
-	padding-bottom: 6pt;
+	padding-top: 0pt;
+	padding-bottom: 12pt;
 }
 
 table.footer {
@@ -489,7 +488,7 @@ function draw_all_plots() {
 	draw_plot("plot_l", l_points, l_points_original, l_transform, 0);
 }
 
-function change_the_formula() {
+function set_the_system_x() {
 	var system_content = "";
 	const xs = [0, 0, 1, 1];
 	const ys = [0, 1, 1, 0];
@@ -499,19 +498,44 @@ function change_the_formula() {
 			system_content += "<br>";
 		const c1 = xs[i] * ys[i];
 		if(c1 != 0)
-			nomes.push((c1 == 1 ? "" : String(c1)) + "&hairsp;a<sub>1</sub>");
+			nomes.push((c1 == 1 ? "" : String(c1)) + "&hairsp;a<sub>x&hairsp;1</sub>");
 		const c2 = xs[i];
 		if(c2 != 0)
-			nomes.push((c2 == 1 ? "" : String(c2)) + "&hairsp;a<sub>2</sub>");
+			nomes.push((c2 == 1 ? "" : String(c2)) + "&hairsp;a<sub>x&hairsp;2</sub>");
 		const c3 = ys[i];
 		if(c3 != 0)
-			nomes.push((c3 == 1 ? "" : String(c3)) + "&hairsp;a<sub>3</sub>");
-		nomes.push("a<sub>4</sub>");
+			nomes.push((c3 == 1 ? "" : String(c3)) + "&hairsp;a<sub>x&hairsp;3</sub>");
+		nomes.push("a<sub>x&hairsp;4</sub>");
 		system_content += nomes.join('&hairsp;+&hairsp;');
 		system_content += " = x'<sub>" + String(i) + "</sub>";
 	}
 
-	document.getElementById("system").innerHTML = system_content;
+	document.getElementById("system_x").innerHTML = system_content;
+}
+
+function set_the_system_y() {
+	var system_content = "";
+	const xs = [0, 0, 1, 1];
+	const ys = [0, 1, 1, 0];
+	for(var i = 0; i < 4; i++) {
+		var nomes = [];
+		if(i != 0)
+			system_content += "<br>";
+		const c1 = xs[i] * ys[i];
+		if(c1 != 0)
+			nomes.push((c1 == 1 ? "" : String(c1)) + "&hairsp;a<sub>y&hairsp;1</sub>");
+		const c2 = xs[i];
+		if(c2 != 0)
+			nomes.push((c2 == 1 ? "" : String(c2)) + "&hairsp;a<sub>y&hairsp;2</sub>");
+		const c3 = ys[i];
+		if(c3 != 0)
+			nomes.push((c3 == 1 ? "" : String(c3)) + "&hairsp;a<sub>y&hairsp;3</sub>");
+		nomes.push("a<sub>y&hairsp;4</sub>");
+		system_content += nomes.join('&hairsp;+&hairsp;');
+		system_content += " = y'<sub>" + String(i) + "</sub>";
+	}
+
+	document.getElementById("system_y").innerHTML = system_content;
 }
 
 function colorized(text) {
@@ -574,6 +598,9 @@ Singular cube
 	<p>
 A <b>singular cube</b> is an n-dimensional generalization of the <i>[0..1]</i> range. On a plane, it's an axis-aligned square that has four corners in (0, 0), (1, 0), (1, 1), and (0, 0).
 	</p>
+	<h2>
+Bilinear transformation from the singular cube
+	</h2>
 	<canvas id="plot_l" width=640 height=512></canvas>
 	<br>
 	<form onsubmit="return false;">
@@ -581,10 +608,26 @@ Auxiliary figures:
 	<input type="checkbox" id="draw_singular_cube" onclick="draw_all_plots();" checked="true"/><label for="draw_singular_cube">draw singular cube; </label>
 	<input type="checkbox" id="draw_arrows" onclick="draw_all_plots();" checked="true"/><label for="draw_arrows">draw arrows. </label>
 	</form>
-	<p class="formula">
-points: (0, 0) (0, 1) (1, 1) (1, 0)
+	<p>
+Points:
 	</p>
-	<p class="formula" id="system">
+	<p class="formula">
+(0, 0) (0, 1) (1, 1) (1, 0)
+	</p>
+	<p>
+Polynomials:
+	</p>
+	<p class="formula">
+P<sub>x</sub>(x, y) = a<sub>x&hairsp;1</sub>&hairsp;x&hairsp;y + a<sub>x&hairsp;2</sub>&hairsp;x + a<sub>x&hairsp;3</sub>&hairsp;y + a<sub>x&hairsp;4</sub>
+<br>
+P<sub>y</sub>(x, y) = a<sub>y&hairsp;1</sub>&hairsp;x&hairsp;y + a<sub>y&hairsp;2</sub>&hairsp;x + a<sub>y&hairsp;3</sub>&hairsp;y + a<sub>y&hairsp;4</sub>
+	</p>
+	<p>
+Equations
+	</p>
+	<p class="formula" id="system_x">
+	</p>
+	<p class="formula" id="system_y">
 	</p>
 
 	<h2>Interpolating interpolants</h2>
@@ -682,7 +725,8 @@ document.getElementById("code_2").innerHTML = colorized(document.getElementById(
 document.getElementById("code_3").innerHTML = colorized(document.getElementById("code_3").innerHTML);
 document.getElementById("code_4").innerHTML = colorized(document.getElementById("code_4").innerHTML);
 document.getElementById("code_5").innerHTML = colorized(document.getElementById("code_5").innerHTML);
-change_the_formula();
+set_the_system_x();
+set_the_system_y();
 	</script>
 
     <table style="width: 505pt;" class="footer">
