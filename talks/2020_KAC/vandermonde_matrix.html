@@ -123,10 +123,7 @@ table td {
 }
 	</style>
 	<script language="JavaScript">
-function change_the_formula() {
-	const xs = Number(document.getElementById("x_degree").value);
-	const ys = Number(document.getElementById("y_degree").value);
-	const zs = Number(document.getElementById("z_degree").value);
+function matrix_for(xs, ys, zs, axis) {
 	const all_points = (xs + 1) * (ys + 1) * (zs + 1);
 
 	var nomes = [];
@@ -172,20 +169,38 @@ function change_the_formula() {
 			matrix_content += "<td rowspan='" + String(all_points) + "' class='close_matrix'></td>";
 		if(i == 0)
 			matrix_content += "<td rowspan='" + String(all_points) + "' class='open_matrix'></td>";
-		matrix_content += "<td>a<sub>" + String(i+1) + "</sub></td>";
+		matrix_content += "<td>a<sub>" + axis + "&hairsp;" + String(i+1) + "</sub></td>";
 		if(i == 0)
 			matrix_content += "<td rowspan='" + String(all_points) + "' class='close_matrix'></td>";
 		if(i == 0)
 			matrix_content += "<td rowspan='" + String(all_points) + "'> = </td>";
 		if(i == 0)
 			matrix_content += "<td rowspan='" + String(all_points) + "' class='open_matrix'></td>";
-		matrix_content += "<td>x'<sub>" + String(i+1) + "</sub></td>";
+		matrix_content += "<td>" + axis + "'<sub>" + String(i+1) + "</sub></td>";
 		if(i == 0)
 			matrix_content += "<td rowspan='" + String(all_points) + "' class='close_matrix'></td>";
 		matrix_content += "</tr>";
 	}
+	return matrix_content;
+}
 
-	document.getElementById("matrix").innerHTML = matrix_content;
+function change_the_formula() {
+	const xs = Number(document.getElementById("x_degree").value);
+	const ys = Number(document.getElementById("y_degree").value);
+	const zs = Number(document.getElementById("z_degree").value);
+
+	if(xs > 0)
+		document.getElementById("matrix_x").innerHTML = matrix_for(xs, ys, zs, "x");
+	else
+		document.getElementById("matrix_x").innerHTML = "";
+	if(ys > 0)
+		document.getElementById("matrix_y").innerHTML = matrix_for(xs, ys, zs, "y");
+	else
+		document.getElementById("matrix_y").innerHTML = "";
+	if(zs > 0)
+		document.getElementById("matrix_z").innerHTML = matrix_for(xs, ys, zs, "z");
+	else
+		document.getElementById("matrix_z").innerHTML = "";
 }
 	</script>
 </head>
@@ -223,10 +238,48 @@ Vandermonde matrix
 	</select>
 	<br>
 	<center>
-	<button type="button" onclick="change_the_formula()">Compose the matrix</button>
+	<button type="button" onclick="change_the_formula()">Compose the matrices</button>
 	</center>
 	</form>
-	<table class="formula" id="matrix">
+	<table class="formula" id="matrix_x">
+	<tr>
+	<td class="open_matrix">
+	</td>
+	<td style="width:24pt;">A<br>D<br>a</td>
+	<td style="width:24pt;">B<br>E<br>b</td>
+	<td style="width:24pt;">C<br>F<br>c</td>
+	<td class="close_matrix"></td>
+	<td></td>
+	<td class="open_matrix"></td>
+	<td>x<br>y<br>w</td>
+	<td class="close_matrix"></td>
+	<td> = </td>
+	<td class="open_matrix"></td>
+	<td>Ax + By + Cw<br>Dx + Ey + Fw<br>ax + by + cw</td>
+	<td class="close_matrix"></td>
+	</tr>
+	</table>
+
+	<table class="formula" id="matrix_y">
+	<tr>
+	<td class="open_matrix">
+	</td>
+	<td style="width:24pt;">A<br>D<br>a</td>
+	<td style="width:24pt;">B<br>E<br>b</td>
+	<td style="width:24pt;">C<br>F<br>c</td>
+	<td class="close_matrix"></td>
+	<td></td>
+	<td class="open_matrix"></td>
+	<td>x<br>y<br>w</td>
+	<td class="close_matrix"></td>
+	<td> = </td>
+	<td class="open_matrix"></td>
+	<td>Ax + By + Cw<br>Dx + Ey + Fw<br>ax + by + cw</td>
+	<td class="close_matrix"></td>
+	</tr>
+	</table>
+
+	<table class="formula" id="matrix_z">
 	<tr>
 	<td class="open_matrix">
 	</td>
