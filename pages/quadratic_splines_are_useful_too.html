@@ -1,113 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Quadratic splines are useful too</title>
-    <meta name="description" content="This explains simple quadratic splines, how to craft one yourself, and why.">
-    <meta name="keywords" content="mathematics, show-and-tell">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
-    <style>
+<head>
+	<meta charset="utf-8">
+	<title>Quadratic splines are useful too</title>
+	<meta name="description" content="This explains simple quadratic splines, how to craft one yourself, and why.">
+	<meta name="keywords" content="mathematics, show-and-tell">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+	<style>
 body{
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a{
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 20pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 .formula {
-    font-family: sans-serif;
-    font-size: 15pt;
-    font-style: italic;
-    text-align: center;
-    padding-top: 6pt;
-    padding-bottom: 6pt;
+	font-family: sans-serif;
+	font-size: 15pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
 }
 
 table.footer {
-    padding: 64pt 0pt 32pt 0pt;
-    background-color: transparent;
-    width: 505pt;
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
 }
 
 td.footer {
-    font-family: sans-serif;
-    font-size: 16pt;
-    font-style: normal;
-    padding: 0;
-    margin: 0;
-    border: 0;
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
 }
 
 table {
-    font-family: sans-serif;
-    font-size: 13pt;
-    font-style: italic;
-    text-align: center;
+	font-family: sans-serif;
+	font-size: 13pt;
+	font-style: italic;
+	text-align: center;
 }
 
 td {
-    vertical-align: text-top;
-    padding-top: 6pt;
-    padding-bottom: 6pt;
+	vertical-align: text-top;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
 }
 
 li {
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
-    padding-bottom: 6pt;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+	padding-bottom: 6pt;
 }
 
 form {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 16pt;
-    text-align: left;
-    width: 505pt;
-    background-color: #eeee99;
-    color: #000;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
 }
 
 input[type="text"] {
-    width: 32pt;
-    height: 22pt;
-    font-size: 16pt;
-    text-align: center;
+	width: 32pt;
+	height: 22pt;
+	font-size: 16pt;
+	text-align: center;
 }
 
 button {
-    width: 32pt;
-    height: 26pt;
-    font-size: 16pt;
-    text-align: center;
+	width: 32pt;
+	height: 26pt;
+	font-size: 16pt;
+	text-align: center;
 }
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 
 // client
 var w = 640.0;
@@ -126,200 +126,204 @@ var client_y_center = h - h*(0-y_min)/(y_max-y_min);
 var client_y_step = (h/(y_max-y_min));
 
 function client_to_x(client_x){
-    return (client_x - client_x_center) / client_x_step;
+	return (client_x - client_x_center) / client_x_step;
 }
 
 function client_to_y(client_y){
-    return (client_y_center - client_y) / client_y_step;
+	return (client_y_center - client_y) / client_y_step;
 }
 
 function x_to_client(x){
-    return x * client_x_step + client_x_center;
+	return x * client_x_step + client_x_center;
 }
 
 function y_to_client(y){
-    return client_y_center - y * client_y_step;
+	return client_y_center - y * client_y_step;
 }
 
 function sign_0_positive(x){ // Math.sign like with no 0 option
-    if(x >= 0)
-        return 1.0;
-    return -1.0;
+	if(x >= 0)
+		return 1.0;
+	return -1.0;
 }
 
 function underflow_padded(x){
-    if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
-        return 1.e-5 * sign_0_positive(x);
-    return x;
+	if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
+		return 1.e-5 * sign_0_positive(x);
+	return x;
 }
 
 function solved_linear(A, B, n){
-    var X = [];
-    for (var i = 0; i < n; ++i)
-        X[i] = 0.0;
+	var X = [];
+	for (var i = 0; i < n; ++i)
+		X[i] = 0.0;
 
-    // triangulize
-    for (var i = 0; i < n-1; ++i)
-        for (var j = 0; j < i+1; ++j) {
-            r = A[i+1][j] / underflow_padded(A[j][j]);
-            A[i+1][j] = 0.;
-            for (var b_j = j+1; b_j < n; ++b_j){
-                A[i+1][b_j] -= A[j][b_j]*r;
-            }
-            B[i+1] -= B[j]*r;
-        }
+	// triangulize
+	for (var i = 0; i < n-1; ++i)
+		for (var j = 0; j < i+1; ++j) {
+			r = A[i+1][j] / underflow_padded(A[j][j]);
+			A[i+1][j] = 0.;
+			for (var b_j = j+1; b_j < n; ++b_j){
+				A[i+1][b_j] -= A[j][b_j]*r;
+			}
+			B[i+1] -= B[j]*r;
+		}
 
-    // calculate xs
-    X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
-    for (var i = n-2; i >= 0; --i){
-        var s = 0.0;
-        for (var j = i; j < n; ++j){
-            s = s + A[i][j]*X[j];
-        }
-        X[i] = (B[i] - s) / underflow_padded(A[i][i]);
-    }
-    return X;
+	// calculate xs
+	X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
+	for (var i = n-2; i >= 0; --i){
+		var s = 0.0;
+		for (var j = i; j < n; ++j){
+			s = s + A[i][j]*X[j];
+		}
+		X[i] = (B[i] - s) / underflow_padded(A[i][i]);
+	}
+	return X;
 }
 
 function polynomial_in_x(A, x, n){
-    var y = 0.0;
-    for(var i = 0; i < n; ++i){
-        y += A[i] * Math.pow(x, i);
-    }
-    return y;
+	var y = 0.0;
+	for(var i = 0; i < n; ++i){
+		y += A[i] * Math.pow(x, i);
+	}
+	return y;
 }
 
 function do_spline2(grid_xs, grid_ys, grid_n, derivative_divisor, callback_on_segment){
-    var nT = 0;
-    var ax,bx,cx, ay,by,cy;
-    var d_x = 0;
-    var d_y = 0;
-    var ox = grid_xs[0];
-    var oy = grid_ys[0];
-    for(var T = 0.0; T <= grid_n - 1 + 0.001; T += 0.01) {
-        if(T >= nT){   // spline on the new grid piece
-            cx = grid_xs[nT];
+	var nT = 0;
+	var ax,bx,cx, ay,by,cy;
+	var d_x = 0;
+	var d_y = 0;
+	var ox = grid_xs[0];
+	var oy = grid_ys[0];
+	for(var T = 0.0; T <= grid_n - 1 + 0.001; T += 0.01) {
+		if(T >= nT){   // spline on the new grid piece
+			cx = grid_xs[nT];
 			bx = d_x;
 			ax = grid_xs[nT+1]-cx-bx;
 			cy = grid_ys[nT];
 			by = d_y;
 			ay = grid_ys[nT+1]-cy-by;
-            nT++;
-        }
-        // spline in point
-        var t01=T-(nT-1);
-        var x=ax*t01*t01 + bx*t01 + cx;
-        var y=ay*t01*t01 + by*t01 + cy;
+			nT++;
+		}
+		// spline in point
+		var t01=T-(nT-1);
+		var x=ax*t01*t01 + bx*t01 + cx;
+		var y=ay*t01*t01 + by*t01 + cy;
 
-        callback_on_segment(ox, oy, x, y); // drawing part
-        ox = x;
-        oy = y;
+		callback_on_segment(T, ox, oy, x, y); // drawing part
+		ox = x;
+		oy = y;
 
-        // derivatives
-        d_x = (2 * ax * t01 + bx) / derivative_divisor;
-        d_y = (2 * ay * t01 + by) / derivative_divisor;
-    }
+		// derivatives
+		d_x = (2 * ax * t01 + bx) / derivative_divisor;
+		d_y = (2 * ay * t01 + by) / derivative_divisor;
+	}
 }
 
 function do_spline3(grid_xs, grid_ys, grid_n, derivative_divisor, callback_on_segment){
-    var nT = 0;
-    var ax,bx,cx,dx, ay,by,cy,dy;
-    var d_x = 0;
-    var d_y = 0;
-    var dd_x = 0;
-    var dd_y = 0;
-    var ox = grid_xs[0];
-    var oy = grid_ys[0];
-    for(var T = 0.0; T <= grid_n - 1 + 0.001; T += 0.01) {
-        if(T >= nT){   // spline on the new grid piece
-            dx = grid_xs[nT];
-            cx = d_x;
-            bx = dd_x/2;
-            ax = grid_xs[nT+1]-dx-cx-bx;
-            dy = grid_ys[nT];
-            cy = d_y
-            by = dd_y/2;
-            ay = grid_ys[nT+1]-dy-cy-by;
-            nT++;
-        }
-        // spline in point
-        var t01=T-(nT-1);
-        var x=ax*t01*t01*t01 + bx*t01*t01 + cx*t01 + dx;
-        var y=ay*t01*t01*t01 + by*t01*t01 + cy*t01 + dy;
+	var nT = 0;
+	var ax,bx,cx,dx, ay,by,cy,dy;
+	var d_x = 0;
+	var d_y = 0;
+	var dd_x = 0;
+	var dd_y = 0;
+	var ox = grid_xs[0];
+	var oy = grid_ys[0];
+	for(var T = 0.0; T <= grid_n - 1 + 0.001; T += 0.01) {
+		if(T >= nT){   // spline on the new grid piece
+			dx = grid_xs[nT];
+			cx = d_x;
+			bx = dd_x/2;
+			ax = grid_xs[nT+1]-dx-cx-bx;
+			dy = grid_ys[nT];
+			cy = d_y
+			by = dd_y/2;
+			ay = grid_ys[nT+1]-dy-cy-by;
+			nT++;
+		}
+		// spline in point
+		var t01=T-(nT-1);
+		var x=ax*t01*t01*t01 + bx*t01*t01 + cx*t01 + dx;
+		var y=ay*t01*t01*t01 + by*t01*t01 + cy*t01 + dy;
 
-        callback_on_segment(ox, oy, x, y); // drawing part
-        ox = x;
-        oy = y;
+		callback_on_segment(T, ox, oy, x, y); // drawing part
+		ox = x;
+		oy = y;
 
-        // derivatives
-        d_x = (3*ax*t01*t01+2*bx*t01+cx) / derivative_divisor;
-        d_y = (3*ay*t01*t01+2*by*t01+cy) / derivative_divisor;
-        dd_x = (6*ax*t01+2*bx) / derivative_divisor;
-        dd_y = (6*ay*t01+2*by) / derivative_divisor;
-    }
+		// derivatives
+		d_x = (3*ax*t01*t01+2*bx*t01+cx) / derivative_divisor;
+		d_y = (3*ay*t01*t01+2*by*t01+cy) / derivative_divisor;
+		dd_x = (6*ax*t01+2*bx) / derivative_divisor;
+		dd_y = (6*ay*t01+2*by) / derivative_divisor;
+	}
 }
 
 function draw_grid_on(context){
-    // grid
-    context.beginPath();
-    context.moveTo(0, client_y_center);
-    context.lineTo(w, client_y_center);
-    context.lineTo(w - 12, client_y_center - 5);
-    context.moveTo(w, client_y_center);
-    context.lineTo(w - 12, client_y_center + 5);
-    context.moveTo(client_x_center, h);
-    context.lineTo(client_x_center, 0);
-    context.lineTo(client_x_center - 5, 12);
-    context.moveTo(client_x_center, 0);
-    context.lineTo(client_x_center + 5, 12);
-    context.fillStyle="#000000";
-    for(var i = x_min + 1; i <= x_max - 1; i++){
-        context.moveTo(client_x_center + i*client_x_step, client_y_center);
-        context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
-        context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
-    }
-    for(var i = y_min + 1; i <= y_max - 1; i++){
-        context.moveTo(client_x_center, client_y_center - i*client_y_step);
-        context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
-        context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
-    }
-    context.strokeStyle="#000000";
-    context.stroke();
-    context.closePath();
+	// grid
+	context.beginPath();
+	context.moveTo(0, client_y_center + 0.5);
+	context.lineTo(w, client_y_center + 0.5);
+	context.lineTo(w - 12, client_y_center - 5 + 0.5);
+	context.moveTo(w, client_y_center + 0.5);
+	context.lineTo(w - 12, client_y_center + 5 + 0.5);
+	context.moveTo(client_x_center + 0.5, h);
+	context.lineTo(client_x_center + 0.5, 0);
+	context.lineTo(client_x_center - 5 + 0.5, 12);
+	context.moveTo(client_x_center + 0.5, 0);
+	context.lineTo(client_x_center + 5 + 0.5, 12);
+	context.fillStyle="#000000";
+	for(var i = x_min + 1; i <= x_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x_center + 0.5 + i*client_x_step, client_y_center + 0.5);
+			context.lineTo(client_x_center + 0.5 + i*client_x_step, client_y_center + 0.5 - 5);
+			context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+		}
+	}
+	for(var i = y_min + 1; i <= y_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x_center + 0.5, client_y_center + 0.5 - i*client_y_step);
+			context.lineTo(client_x_center + 0.5 + 5, client_y_center + 0.5 - i*client_y_step);
+		}
+		context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+	}
+	context.strokeStyle="#000000";
+	context.stroke();
+	context.closePath();
 }
 
 function draw_dots_and_guides(context, grid_xs, grid_ys, grid_n, do_guides, client_x, client_y){
-    // dots
-    for(var i = 0; i < grid_n; ++i) {
-        context.beginPath();
-        context.arc(x_to_client(grid_xs[i]), y_to_client(grid_ys[i]), 5, 0, 2*Math.PI);
-        context.fill();
-        context.closePath();
-    }
+	// dots
+	for(var i = 0; i < grid_n; ++i) {
+		context.beginPath();
+		context.arc(x_to_client(grid_xs[i]), y_to_client(grid_ys[i]), 5, 0, 2*Math.PI);
+		context.fill();
+		context.closePath();
+	}
 
-    // closest point
-    var closest_i = 0;
-    min_d = Math.pow(grid_xs[0] - client_to_x(client_x), 2) + Math.pow(grid_ys[0] - client_to_y(client_y), 2);
-    for(var i = 1; i < grid_n; ++i){
-        var di = Math.pow(grid_xs[i] - client_to_x(client_x), 2) + Math.pow(grid_ys[i] - client_to_y(client_y), 2);
-        if(di < min_d){
-            min_d = di;
-            closest_i = i;
-        }
-    }
+	// closest point
+	var closest_i = 0;
+	min_d = Math.pow(grid_xs[0] - client_to_x(client_x), 2) + Math.pow(grid_ys[0] - client_to_y(client_y), 2);
+	for(var i = 1; i < grid_n; ++i){
+		var di = Math.pow(grid_xs[i] - client_to_x(client_x), 2) + Math.pow(grid_ys[i] - client_to_y(client_y), 2);
+		if(di < min_d){
+			min_d = di;
+			closest_i = i;
+		}
+	}
 
-    // guides
-    if(do_guides){
-        context.setLineDash([4, 4]);
-        context.beginPath();
-        context.moveTo(x_to_client(grid_xs[closest_i]), y_to_client(grid_ys[closest_i]));
-        context.lineTo(client_x, client_y);
-        context.stroke();
-        context.closePath();
-        context.setLineDash([]);
-    }
+	// guides
+	if(do_guides){
+		context.setLineDash([4, 4]);
+		context.beginPath();
+		context.moveTo(x_to_client(grid_xs[closest_i]), y_to_client(grid_ys[closest_i]));
+		context.lineTo(client_x, client_y);
+		context.stroke();
+		context.closePath();
+		context.setLineDash([]);
+	}
 
-    return closest_i;
+	return closest_i;
 }
 
 // parametric
@@ -329,99 +333,99 @@ var parametric_n = 4;
 var parametric_i = 0;
 
 function init_parametric(){
-    parametric = document.getElementById("parametric");
-    parametric_draw(0, 0, false);
+	parametric = document.getElementById("parametric");
+	parametric_draw(0, 0, false);
 
-    parametric.addEventListener('mousemove', function(e){
-        var canvas_rect = parametric.getBoundingClientRect();
-        parametric_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-        if(e.buttons == 1){
-            parametric_xs[parametric_i] = client_to_x(e.clientX - canvas_rect.left);
-            parametric_ys[parametric_i] = client_to_y(e.clientY - canvas_rect.top);
-            parametric_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
-        }
-    }, false);
+	parametric.addEventListener('mousemove', function(e){
+		var canvas_rect = parametric.getBoundingClientRect();
+		parametric_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			parametric_xs[parametric_i] = client_to_x(e.clientX - canvas_rect.left);
+			parametric_ys[parametric_i] = client_to_y(e.clientY - canvas_rect.top);
+			parametric_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+		}
+	}, false);
 
-    parametric.addEventListener('mousedown', function(e){
-        var canvas_rect = parametric.getBoundingClientRect();
-        parametric_xs[parametric_i] = client_to_x(e.clientX - canvas_rect.left);
-        parametric_ys[parametric_i] = client_to_y(e.clientY - canvas_rect.top);
-        parametric_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-    }, false);
+	parametric.addEventListener('mousedown', function(e){
+		var canvas_rect = parametric.getBoundingClientRect();
+		parametric_xs[parametric_i] = client_to_x(e.clientX - canvas_rect.left);
+		parametric_ys[parametric_i] = client_to_y(e.clientY - canvas_rect.top);
+		parametric_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+	}, false);
 
-    parametric.addEventListener('mouseleave', function(e){
-        parametric_draw(0, 0, false);
-    }, false);
+	parametric.addEventListener('mouseleave', function(e){
+		parametric_draw(0, 0, false);
+	}, false);
 }
 
 function parametric_draw(client_x, client_y, do_guides){
-    parametric = document.getElementById("parametric");
-    var context = parametric.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	parametric = document.getElementById("parametric");
+	var context = parametric.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // grid
-    draw_grid_on(context);
+	// grid
+	draw_grid_on(context);
 
-    // parametric
-    var Ax = [];
-    var Bx = [];
-    for(var i = 0; i < parametric_n; ++i){
-        var parameter = i;
-        Ax[i] = [];
-        for(var j = 0; j < parametric_n; ++j){
-            Ax[i][j] = Math.pow(parameter, j);
-        }
-        Bx[i] = parametric_xs[i];
-    }
+	// parametric
+	var Ax = [];
+	var Bx = [];
+	for(var i = 0; i < parametric_n; ++i){
+		var parameter = i;
+		Ax[i] = [];
+		for(var j = 0; j < parametric_n; ++j){
+			Ax[i][j] = Math.pow(parameter, j);
+		}
+		Bx[i] = parametric_xs[i];
+	}
 
-    Xx = solved_linear(Ax, Bx, parametric_n);
+	Xx = solved_linear(Ax, Bx, parametric_n);
 
-    var Ay = [];
-    var By = [];
-    for(var i = 0; i < parametric_n; ++i){
-        var parameter = i;
-        Ay[i] = [];
-        for(var j = 0; j < parametric_n; ++j){
-            Ay[i][j] = Math.pow(parameter, j);
-        }
-        By[i] = parametric_ys[i];
-    }
-    Xy = solved_linear(Ay, By, parametric_n);
+	var Ay = [];
+	var By = [];
+	for(var i = 0; i < parametric_n; ++i){
+		var parameter = i;
+		Ay[i] = [];
+		for(var j = 0; j < parametric_n; ++j){
+			Ay[i][j] = Math.pow(parameter, j);
+		}
+		By[i] = parametric_ys[i];
+	}
+	Xy = solved_linear(Ay, By, parametric_n);
 
-    context.fillStyle="#d64562";
-    context.strokeStyle="#d64562";
+	context.fillStyle="#d64562";
+	context.strokeStyle="#d64562";
 
-    context.beginPath();
-    context.lineWidth = 3;
-    for(var j = -0.25; j <= parametric_n - 1 + 0.25; j += 0.01){
-        x1 = polynomial_in_x(Xx, j - 0.01, parametric_n);
-        x2 = polynomial_in_x(Xx, j, parametric_n);
-        y1 = polynomial_in_x(Xy, j - 0.01, parametric_n);
-        y2 = polynomial_in_x(Xy, j, parametric_n);
-        context.moveTo(x_to_client(x1), y_to_client(y1));
-        context.lineTo(x_to_client(x2), y_to_client(y2));
-    }
-    context.stroke();
-    context.lineWidth = 1;
-    context.closePath();
+	context.beginPath();
+	context.lineWidth = 3;
+	for(var j = -0.25; j <= parametric_n - 1 + 0.25; j += 0.01){
+		x = polynomial_in_x(Xx, j - 0.01, parametric_n);
+		y = polynomial_in_x(Xy, j - 0.01, parametric_n);
+		if(j == -0.25)
+			context.moveTo(x_to_client(x), y_to_client(y));
+		else
+			context.lineTo(x_to_client(x), y_to_client(y));
+	}
+	context.stroke();
+	context.lineWidth = 1;
+	context.closePath();
 
-    // dots and guides (guide sets the current point to drag)
-    parametric_i = draw_dots_and_guides(
-        context,
-        parametric_xs, parametric_ys, parametric_n,
-        do_guides, client_x, client_y);
+	// dots and guides (guide sets the current point to drag)
+	parametric_i = draw_dots_and_guides(
+		context,
+		parametric_xs, parametric_ys, parametric_n,
+		do_guides, client_x, client_y);
 }
 
 // all splines draw
 function splines_draw(client_x, client_y, do_guides){
-    spline2_draw(client_x, client_y, do_guides);
-    spline2_derivatives_draw(client_x, client_y, do_guides);
-    spline3_draw(client_x, client_y, do_guides);
-    spline3_derivatives_draw(client_x, client_y, do_guides);
-    compensated_spline3_derivatives_draw(client_x, client_y, do_guides);
+	spline2_draw(client_x, client_y, do_guides);
+	spline2_derivatives_draw(client_x, client_y, do_guides);
+	spline3_draw(client_x, client_y, do_guides);
+	spline3_derivatives_draw(client_x, client_y, do_guides);
+	compensated_spline3_derivatives_draw(client_x, client_y, do_guides);
 }
 
 // splines parameters
@@ -432,333 +436,343 @@ var spline2_i = 0;
 
 // spline 3
 function init_spline3(){
-    spline3 = document.getElementById("spline3");
-    spline3_draw(0, 0, false);
+	spline3 = document.getElementById("spline3");
+	spline3_draw(0, 0, false);
 
-    spline3.addEventListener('mousemove', function(e){
-        var canvas_rect = spline3.getBoundingClientRect();
-        spline3_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-        if(e.buttons == 1){
-            spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
-            spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
-            splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-        }
-    }, false);
+	spline3.addEventListener('mousemove', function(e){
+		var canvas_rect = spline3.getBoundingClientRect();
+		spline3_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
+			spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
+			splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		}
+	}, false);
 
-    spline3.addEventListener('mousedown', function(e){
-        var canvas_rect = spline3.getBoundingClientRect();
-        spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
-        spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
-        splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-    }, false);
+	spline3.addEventListener('mousedown', function(e){
+		var canvas_rect = spline3.getBoundingClientRect();
+		spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
+		spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
+		splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+	}, false);
 
-    spline3.addEventListener('mouseleave', function(e){
-        splines_draw(0, 0, false);
-    }, false);
+	spline3.addEventListener('mouseleave', function(e){
+		splines_draw(0, 0, false);
+	}, false);
 }
 
 function spline3_draw(client_x, client_y, do_guides){
-    spline3 = document.getElementById("spline3");
-    var context = spline3.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	spline3 = document.getElementById("spline3");
+	var context = spline3.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // grid
-    draw_grid_on(context);
+	// grid
+	draw_grid_on(context);
 
-    // spline3
-    context.fillStyle="#457fd6";
-    context.strokeStyle="#457fd6";
-    context.lineWidth = 3;
-    context.beginPath();
-    do_spline3(spline2_xs, spline2_ys, spline2_n, 1.0, function(ox, oy, x, y){
-        context.moveTo(x_to_client(ox), y_to_client(oy));
-        context.lineTo(x_to_client(x), y_to_client(y));
-    })
-    context.stroke();
-    context.closePath();
-    context.lineWidth = 1;
+	// spline3
+	context.fillStyle="#457fd6";
+	context.strokeStyle="#457fd6";
+	context.lineWidth = 3;
+	context.beginPath();
+	do_spline3(spline2_xs, spline2_ys, spline2_n, 1.0, function(t, ox, oy, x, y){
+		if(t == 0.)
+			context.moveTo(x_to_client(x), y_to_client(y));
+		else
+			context.lineTo(x_to_client(x), y_to_client(y));
+	})
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
 
-    // dots and guides
-    spline2_i = draw_dots_and_guides(
-        context,
-        spline2_xs, spline2_ys, spline2_n,
-        do_guides, client_x, client_y);
+	// dots and guides
+	spline2_i = draw_dots_and_guides(
+		context,
+		spline2_xs, spline2_ys, spline2_n,
+		do_guides, client_x, client_y);
 }
 
 // spline 2
 function init_spline2(){
-    spline2 = document.getElementById("spline2");
-    splines_draw(0, 0, false);
+	spline2 = document.getElementById("spline2");
+	splines_draw(0, 0, false);
 
-    spline2.addEventListener('mousemove', function(e){
-        var canvas_rect = spline2.getBoundingClientRect();
-           splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-           if(e.buttons == 1){
-            spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
-            spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
-            splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-           }
-    }, false);
+	spline2.addEventListener('mousemove', function(e){
+		var canvas_rect = spline2.getBoundingClientRect();
+		splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
+			spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
+			splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		}
+	}, false);
 
-    spline2.addEventListener('mousedown', function(e){
-        var canvas_rect = spline2.getBoundingClientRect();
-        spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
-        spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
-        splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-    }, false);
+	spline2.addEventListener('mousedown', function(e){
+		var canvas_rect = spline2.getBoundingClientRect();
+		spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
+		spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
+		splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+	}, false);
 
-    spline2.addEventListener('mouseleave', function(e){
-        splines_draw(0, 0, false);
-    }, false);
+	spline2.addEventListener('mouseleave', function(e){
+		splines_draw(0, 0, false);
+	}, false);
 }
 
 function spline2_draw(client_x, client_y, do_guides){
-    spline2 = document.getElementById("spline2");
-    var context = spline2.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	spline2 = document.getElementById("spline2");
+	var context = spline2.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // grid
-    draw_grid_on(context);
+	// grid
+	draw_grid_on(context);
 
-    context.fillStyle="#62d645";
-    context.strokeStyle="#62d645";
-    // spline2
-    context.lineWidth = 3;
-    context.beginPath();
-    do_spline2(spline2_xs, spline2_ys, spline2_n, 1.0, function(ox, oy, x, y){
-        context.moveTo(x_to_client(ox), y_to_client(oy));
-        context.lineTo(x_to_client(x), y_to_client(y));
-    });
-    context.stroke();
-    context.closePath();
-    context.lineWidth = 1;
+	context.fillStyle="#62d645";
+	context.strokeStyle="#62d645";
+	// spline2
+	context.lineWidth = 3;
+	context.beginPath();
+	do_spline2(spline2_xs, spline2_ys, spline2_n, 1.0, function(t, ox, oy, x, y){
+		if(t == 0.)
+			context.moveTo(x_to_client(x), y_to_client(y));
+		else
+			context.lineTo(x_to_client(x), y_to_client(y));
+	});
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
 
-    // dots and guides
-    spline2_i = draw_dots_and_guides(
-        context,
-        spline2_xs, spline2_ys, spline2_n,
-        do_guides, client_x, client_y);
+	// dots and guides
+	spline2_i = draw_dots_and_guides(
+		context,
+		spline2_xs, spline2_ys, spline2_n,
+		do_guides, client_x, client_y);
 }
 
 // naive splines2 derivatives
 function init_spline2_derivatives(){
-    spline2_derivatives = document.getElementById("spline2_derivatives");
-    splines_draw(0, 0, false);
+	spline2_derivatives = document.getElementById("spline2_derivatives");
+	splines_draw(0, 0, false);
 
-    spline2_derivatives.addEventListener('mousemove', function(e){
-        var canvas_rect = spline2_derivatives.getBoundingClientRect();
-           splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-           if(e.buttons == 1){
-            spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
-            spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
-            splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-           }
-    }, false);
+	spline2_derivatives.addEventListener('mousemove', function(e){
+		var canvas_rect = spline2_derivatives.getBoundingClientRect();
+		splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
+			spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
+			splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		}
+	}, false);
 
-    spline2_derivatives.addEventListener('mousedown', function(e){
-        var canvas_rect = spline2_derivatives.getBoundingClientRect();
-        spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
-        spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
+	spline2_derivatives.addEventListener('mousedown', function(e){
+		var canvas_rect = spline2_derivatives.getBoundingClientRect();
+		spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
+		spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
 
-        splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-    }, false);
+		splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+	}, false);
 
-    spline2_derivatives.addEventListener('mouseleave', function(e){
-        splines_draw(0, 0, false);
-    }, false);
+	spline2_derivatives.addEventListener('mouseleave', function(e){
+		splines_draw(0, 0, false);
+	}, false);
 }
 
 function spline2_derivatives_draw(client_x, client_y, do_guides){
-    spline2_derivatives = document.getElementById("spline2_derivatives");
-    var context = spline2_derivatives.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	spline2_derivatives = document.getElementById("spline2_derivatives");
+	var context = spline2_derivatives.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // grid
-    draw_grid_on(context);
+	// grid
+	draw_grid_on(context);
 
-    context.fillStyle="#62d645";
-    context.strokeStyle="#62d645";
-    // spline2 derivatives
-    context.beginPath();
-    do_spline2(spline2_xs, spline2_ys, spline2_n, 1.0, function(ox, oy, x, y){
-        context.moveTo(x_to_client(x), y_to_client(y));
-        context.lineTo(x_to_client(x - 10.0*(y-oy)), y_to_client(y + 10.0*(x-ox)));
-    });
-    context.stroke();
-    context.closePath();
+	context.fillStyle="#62d645";
+	context.strokeStyle="#62d645";
+	// spline2 derivatives
+	context.beginPath();
+	do_spline2(spline2_xs, spline2_ys, spline2_n, 1.0, function(t, ox, oy, x, y){
+		context.moveTo(x_to_client(x), y_to_client(y));
+		context.lineTo(x_to_client(x - 10.0*(y-oy)), y_to_client(y + 10.0*(x-ox)));
+	});
+	context.stroke();
+	context.closePath();
 
-    // spline2
-    context.lineWidth = 3;
-    context.beginPath();
-    do_spline2(spline2_xs, spline2_ys, spline2_n, 1.0, function(ox, oy, x, y){
-        context.moveTo(x_to_client(ox), y_to_client(oy));
-        context.lineTo(x_to_client(x), y_to_client(y));
-    });
-    context.stroke();
-    context.closePath();
-    context.lineWidth = 1;
+	// spline2
+	context.lineWidth = 3;
+	context.beginPath();
+	do_spline2(spline2_xs, spline2_ys, spline2_n, 1.0, function(t, ox, oy, x, y){
+		if(t == 0.)
+			context.moveTo(x_to_client(x), y_to_client(y));
+		else
+			context.lineTo(x_to_client(x), y_to_client(y));
+	});
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
 
-    // dots and guides
-    spline2_i = draw_dots_and_guides(
-        context,
-        spline2_xs, spline2_ys, spline2_n,
-        do_guides, client_x, client_y);
+	// dots and guides
+	spline2_i = draw_dots_and_guides(
+		context,
+		spline2_xs, spline2_ys, spline2_n,
+		do_guides, client_x, client_y);
 }
 
 // naive splines3 derivatives
 function init_spline3_derivatives(){
-    spline3_derivatives = document.getElementById("spline3_derivatives");
-    splines_draw(0, 0, false);
+	spline3_derivatives = document.getElementById("spline3_derivatives");
+	splines_draw(0, 0, false);
 
-    spline3_derivatives.addEventListener('mousemove', function(e){
-        var canvas_rect = spline3_derivatives.getBoundingClientRect();
-           splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-           if(e.buttons == 1){
-            spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
-            spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
-            splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-           }
-    }, false);
+	spline3_derivatives.addEventListener('mousemove', function(e){
+		var canvas_rect = spline3_derivatives.getBoundingClientRect();
+		splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
+			spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
+			splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		}
+	}, false);
 
-    spline3_derivatives.addEventListener('mousedown', function(e){
-        var canvas_rect = spline3_derivatives.getBoundingClientRect();
-        spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
-        spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
+	spline3_derivatives.addEventListener('mousedown', function(e){
+		var canvas_rect = spline3_derivatives.getBoundingClientRect();
+		spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
+		spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
 
-        splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-    }, false);
+		splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+	}, false);
 
-    spline3_derivatives.addEventListener('mouseleave', function(e){
-        splines_draw(0, 0, false);
-    }, false);
+	spline3_derivatives.addEventListener('mouseleave', function(e){
+		splines_draw(0, 0, false);
+	}, false);
 }
 
 function spline3_derivatives_draw(client_x, client_y, do_guides){
-    spline3_derivatives = document.getElementById("spline3_derivatives");
-    var context = spline3_derivatives.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	spline3_derivatives = document.getElementById("spline3_derivatives");
+	var context = spline3_derivatives.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // grid
-    draw_grid_on(context);
+	// grid
+	draw_grid_on(context);
 
-    context.fillStyle="#457fd6";
-    context.strokeStyle="#457fd6";
+	context.fillStyle="#457fd6";
+	context.strokeStyle="#457fd6";
 
-    // spline3 derivatives
-    context.beginPath();
-    do_spline3(spline2_xs, spline2_ys, spline2_n, 1.0, function(ox, oy, x, y){
-        context.moveTo(x_to_client(x), y_to_client(y));
-        context.lineTo(x_to_client(x - 10.0*(y-oy)), y_to_client(y + 10.0*(x-ox)));
-    })
-    context.stroke();
-    context.closePath();
+	// spline3 derivatives
+	context.beginPath();
+	do_spline3(spline2_xs, spline2_ys, spline2_n, 1.0, function(t, ox, oy, x, y){
+		context.moveTo(x_to_client(x), y_to_client(y));
+		context.lineTo(x_to_client(x - 10.0*(y-oy)), y_to_client(y + 10.0*(x-ox)));
+	})
+	context.stroke();
+	context.closePath();
 
-    // spline3
-    context.lineWidth = 3;
-    context.beginPath();
-    do_spline3(spline2_xs, spline2_ys, spline2_n, 1.0, function(ox, oy, x, y){
-        context.moveTo(x_to_client(ox), y_to_client(oy));
-        context.lineTo(x_to_client(x), y_to_client(y));
-    })
-    context.stroke();
-    context.closePath();
-    context.lineWidth = 1;
+	// spline3
+	context.lineWidth = 3;
+	context.beginPath();
+	do_spline3(spline2_xs, spline2_ys, spline2_n, 1.0, function(t, ox, oy, x, y){
+		if(t == 0.)
+			context.moveTo(x_to_client(x), y_to_client(y));
+		else
+			context.lineTo(x_to_client(x), y_to_client(y));
+	})
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
 
-    // dots and guides
-    spline2_i = draw_dots_and_guides(
-        context,
-        spline2_xs, spline2_ys, spline2_n,
-        do_guides, client_x, client_y);
+	// dots and guides
+	spline2_i = draw_dots_and_guides(
+		context,
+		spline2_xs, spline2_ys, spline2_n,
+		do_guides, client_x, client_y);
 }
 
 // compensated splines3 derivatives
 function init_compensated_spline3_derivatives(){
-    compensated_spline3_derivatives = document.getElementById("compensated_spline3_derivatives");
-    splines_draw(0, 0, false);
+	compensated_spline3_derivatives = document.getElementById("compensated_spline3_derivatives");
+	splines_draw(0, 0, false);
 
-    compensated_spline3_derivatives.addEventListener('mousemove', function(e){
-        var canvas_rect = compensated_spline3_derivatives.getBoundingClientRect();
-        splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-        if(e.buttons == 1){
-            spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
-            spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
-            splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-        }
-    }, false);
+	compensated_spline3_derivatives.addEventListener('mousemove', function(e){
+		var canvas_rect = compensated_spline3_derivatives.getBoundingClientRect();
+		splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
+			spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
+			splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		}
+	}, false);
 
-    compensated_spline3_derivatives.addEventListener('mousedown', function(e){
-        var canvas_rect = compensated_spline3_derivatives.getBoundingClientRect();
-        spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
-        spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
-        splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-    }, false);
+	compensated_spline3_derivatives.addEventListener('mousedown', function(e){
+		var canvas_rect = compensated_spline3_derivatives.getBoundingClientRect();
+		spline2_xs[spline2_i] = client_to_x(e.clientX - canvas_rect.left);
+		spline2_ys[spline2_i] = client_to_y(e.clientY - canvas_rect.top);
+		splines_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+	}, false);
 
-    compensated_spline3_derivatives.addEventListener('mouseleave', function(e){
-        splines_draw(0, 0, false);
-    }, false);
+	compensated_spline3_derivatives.addEventListener('mouseleave', function(e){
+		splines_draw(0, 0, false);
+	}, false);
 }
 
 var compensated_spline3_derivative_divisor = 3.0;
 
 function compensated_spline3_derivatives_draw(client_x, client_y, do_guides){
-    compensated_spline3_derivatives = document.getElementById("compensated_spline3_derivatives");
-    var context = compensated_spline3_derivatives.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	compensated_spline3_derivatives = document.getElementById("compensated_spline3_derivatives");
+	var context = compensated_spline3_derivatives.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // grid
-    draw_grid_on(context);
+	// grid
+	draw_grid_on(context);
 
-    context.fillStyle="#457fd6";
-    context.strokeStyle="#457fd6";
-    // spline3 derivatives
-    context.beginPath();
-    do_spline3(spline2_xs, spline2_ys, spline2_n, compensated_spline3_derivative_divisor, function(ox, oy, x, y){
-        context.moveTo(x_to_client(x), y_to_client(y));
-        context.lineTo(x_to_client(x - 10.0*(y-oy)), y_to_client(y + 10.0*(x-ox)));
-    })
-    context.stroke();
-    context.closePath();
+	context.fillStyle="#457fd6";
+	context.strokeStyle="#457fd6";
+	// spline3 derivatives
+	context.beginPath();
+	do_spline3(spline2_xs, spline2_ys, spline2_n, compensated_spline3_derivative_divisor, function(t, ox, oy, x, y){
+		context.moveTo(x_to_client(x), y_to_client(y));
+		context.lineTo(x_to_client(x - 10.0*(y-oy)), y_to_client(y + 10.0*(x-ox)));
+	})
+	context.stroke();
+	context.closePath();
 
-    // spline3
-    context.lineWidth = 3;
-    context.beginPath();
-    do_spline3(spline2_xs, spline2_ys, spline2_n, compensated_spline3_derivative_divisor, function(ox, oy, x, y){
-        context.moveTo(x_to_client(ox), y_to_client(oy));
-        context.lineTo(x_to_client(x), y_to_client(y));
-    })
-    context.stroke();
-    context.closePath();
-    context.lineWidth = 1;
+	// spline3
+	context.lineWidth = 3;
+	context.beginPath();
+	do_spline3(spline2_xs, spline2_ys, spline2_n, compensated_spline3_derivative_divisor, function(t, ox, oy, x, y){
+		if(t == 0.)
+			context.moveTo(x_to_client(x), y_to_client(y));
+		else
+			context.lineTo(x_to_client(x), y_to_client(y));
+	})
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
 
-    // dots and guides
-    spline2_i = draw_dots_and_guides(
-        context,
-        spline2_xs, spline2_ys, spline2_n,
-        do_guides, client_x, client_y);
+	// dots and guides
+	spline2_i = draw_dots_and_guides(
+		context,
+		spline2_xs, spline2_ys, spline2_n,
+		do_guides, client_x, client_y);
 }
 
 function change_derivative_divisor() {
-    compensated_spline3_derivative_divisor = Number(document.getElementById("derivative_divisor").value);
-    if(isNaN(compensated_spline3_derivative_divisor) || compensated_spline3_derivative_divisor < 1.0) {
-        compensated_spline3_derivative_divisor = 1.0;
-        document.getElementById("derivative_divisor").value = 1;
-        }
-    splines_draw(0, 0, false);
+	compensated_spline3_derivative_divisor = Number(document.getElementById("derivative_divisor").value);
+	if(isNaN(compensated_spline3_derivative_divisor) || compensated_spline3_derivative_divisor < 1.0) {
+		compensated_spline3_derivative_divisor = 1.0;
+		document.getElementById("derivative_divisor").value = 1;
+		}
+	splines_draw(0, 0, false);
 }
 
 var animation_xs = [320]
@@ -775,160 +789,160 @@ var animation_x = animation_xs[0];
 var animation_y = animation_ys[0];
 
 function init_animation() {
-    animation = document.getElementById("animation");
-    draw_animation();
-    animation.addEventListener('mousedown', function(e){
-        var canvas_rect = animation.getBoundingClientRect();
-        animation_xs.push(e.clientX - canvas_rect.left);
-        animation_ys.push(e.clientY - canvas_rect.top);
-        draw_animation();
-    }, false);
-    setTimeout(animation_tick, 40);
+	animation = document.getElementById("animation");
+	draw_animation();
+	animation.addEventListener('mousedown', function(e){
+		var canvas_rect = animation.getBoundingClientRect();
+		animation_xs.push(e.clientX - canvas_rect.left);
+		animation_ys.push(e.clientY - canvas_rect.top);
+		draw_animation();
+	}, false);
+	setTimeout(animation_tick, 40);
 }
 
 function animation_tick() {
-    if(animation_t >= 1.0){
-        animation_xs.shift();
-        animation_ys.shift();
-        animation_t = 0.0;
-    }
-    // movement
-    if(animation_t == 0.0 && animation_xs.length > 1) {
-        animation_cx = animation_xs[0];
-        animation_bx = animation_d_x;
-        animation_ax = animation_xs[1] - animation_cx - animation_bx;
-        animation_cy = animation_ys[0]
-        animation_by = animation_d_y;
-        animation_ay = animation_ys[1] - animation_cy - animation_by;
-    }
-    if(animation_xs.length == 1){
-        animation_x = animation_xs[0];
-        animation_y = animation_ys[0];
-    }else{
-        animation_t += 1.0 / 32.0;
-        // spline in point
-        var t01 = animation_t;
-        animation_x = animation_ax*t01*t01 + animation_bx*t01 + animation_cx;
-        animation_y = animation_ay*t01*t01 + animation_by*t01 + animation_cy;
+	if(animation_t >= 1.0){
+		animation_xs.shift();
+		animation_ys.shift();
+		animation_t = 0.0;
+	}
+	// movement
+	if(animation_t == 0.0 && animation_xs.length > 1) {
+		animation_cx = animation_xs[0];
+		animation_bx = animation_d_x;
+		animation_ax = animation_xs[1] - animation_cx - animation_bx;
+		animation_cy = animation_ys[0]
+		animation_by = animation_d_y;
+		animation_ay = animation_ys[1] - animation_cy - animation_by;
+	}
+	if(animation_xs.length == 1){
+		animation_x = animation_xs[0];
+		animation_y = animation_ys[0];
+	}else{
+		animation_t += 1.0 / 32.0;
+		// spline in point
+		var t01 = animation_t;
+		animation_x = animation_ax*t01*t01 + animation_bx*t01 + animation_cx;
+		animation_y = animation_ay*t01*t01 + animation_by*t01 + animation_cy;
 
-        // derivatives
-        animation_d_x = (2*animation_ax*t01 + animation_bx);
-        animation_d_y = (2*animation_ay*t01 + animation_by);
-    }
+		// derivatives
+		animation_d_x = (2*animation_ax*t01 + animation_bx);
+		animation_d_y = (2*animation_ay*t01 + animation_by);
+	}
 
-    draw_animation();
+	draw_animation();
 
-    animation_ox = animation_x;
-    animation_oy = animation_y;
+	animation_ox = animation_x;
+	animation_oy = animation_y;
 
-    // derivative attenuation
-    var d_length = Math.sqrt(animation_d_x*animation_d_x + animation_d_y*animation_d_y);
-    if(d_length > 1.0){
-        animation_d_x *= 0.95;
-        animation_d_y *= 0.95;
-    }
+	// derivative attenuation
+	var d_length = Math.sqrt(animation_d_x*animation_d_x + animation_d_y*animation_d_y);
+	if(d_length > 1.0){
+		animation_d_x *= 0.95;
+		animation_d_y *= 0.95;
+	}
 
-    setTimeout(animation_tick, 40);
+	setTimeout(animation_tick, 40);
 }
 
 function draw_animation() {
-    animation = document.getElementById("animation");
-    var animation_context = animation.getContext("2d");
-    // background
-    animation_context.fillStyle = "#aabbee";
-    animation_context.fillRect(0, 0, 640, 640);
+	animation = document.getElementById("animation");
+	var animation_context = animation.getContext("2d");
+	// background
+	animation_context.fillStyle = "#aabbee";
+	animation_context.fillRect(0, 0, 640, 640);
 
-    // dots
-    animation_context.beginPath();
-    for(var i = 1; i < animation_xs.length; ++i){
-        animation_context.moveTo(animation_xs[i]-5.5, animation_ys[i]+5.5);
-        animation_context.lineTo(animation_xs[i]+5.5, animation_ys[i]-5.5);
-        animation_context.moveTo(animation_xs[i]+5.5, animation_ys[i]+5.5);
-        animation_context.lineTo(animation_xs[i]-5.5, animation_ys[i]-5.5);
-    }
-    animation_context.lineWidth = 2;
-    animation_context.strokeStyle = "#BB6644";
-    animation_context.stroke();
-    animation_context.closePath();
+	// dots
+	animation_context.beginPath();
+	for(var i = 1; i < animation_xs.length; ++i){
+		animation_context.moveTo(animation_xs[i]-5.5, animation_ys[i]+5.5);
+		animation_context.lineTo(animation_xs[i]+5.5, animation_ys[i]-5.5);
+		animation_context.moveTo(animation_xs[i]+5.5, animation_ys[i]+5.5);
+		animation_context.lineTo(animation_xs[i]-5.5, animation_ys[i]-5.5);
+	}
+	animation_context.lineWidth = 2;
+	animation_context.strokeStyle = "#BB6644";
+	animation_context.stroke();
+	animation_context.closePath();
 
-    // thing that moves around
+	// thing that moves around
 
-    // normalized tail (we don't want in to be 0)
-    var d_length = Math.sqrt(animation_d_x*animation_d_x + animation_d_y*animation_d_y);
-    var tail_x = -animation_d_x / d_length;
-    var tail_y = -animation_d_y / d_length;
-    // width
-    var width = 1.0 + 15.0 / Math.max(1.0, d_length / 100);
+	// normalized tail (we don't want in to be 0)
+	var d_length = Math.sqrt(animation_d_x*animation_d_x + animation_d_y*animation_d_y);
+	var tail_x = -animation_d_x / d_length;
+	var tail_y = -animation_d_y / d_length;
+	// width
+	var width = 1.0 + 15.0 / Math.max(1.0, d_length / 100);
 
-    // tail
-    animation_context.beginPath();
-    animation_context.moveTo(animation_ox + tail_x * width + 0.5, animation_oy + tail_y * width + 0.5);
-    animation_context.lineTo(animation_x + 0.5, animation_y + 0.5);
-    animation_context.lineWidth = width;
-    animation_context.strokeStyle = "#331100";
-    animation_context.stroke();
-    animation_context.closePath();
-    // head
-    for(var i = 0; i < width; ++i){
-        animation_context.beginPath();
-        animation_context.moveTo(animation_x - tail_x * (i - 0.5) + 0.5, animation_y - tail_y * (i - 0.5) + 0.5);
-        animation_context.lineTo(animation_x - tail_x * (i + 1.5) + 0.5, animation_y - tail_y * (i + 1.5) + 0.5);
-        animation_context.lineWidth = 1.5 * (width-i);
-        animation_context.strokeStyle = "#331100";
-        animation_context.stroke();
-        animation_context.closePath();
-    }
+	// tail
+	animation_context.beginPath();
+	animation_context.moveTo(animation_ox + tail_x * width + 0.5, animation_oy + tail_y * width + 0.5);
+	animation_context.lineTo(animation_x + 0.5, animation_y + 0.5);
+	animation_context.lineWidth = width;
+	animation_context.strokeStyle = "#331100";
+	animation_context.stroke();
+	animation_context.closePath();
+	// head
+	for(var i = 0; i < width; ++i){
+		animation_context.beginPath();
+		animation_context.moveTo(animation_x - tail_x * (i - 0.5) + 0.5, animation_y - tail_y * (i - 0.5) + 0.5);
+		animation_context.lineTo(animation_x - tail_x * (i + 1.5) + 0.5, animation_y - tail_y * (i + 1.5) + 0.5);
+		animation_context.lineWidth = 1.5 * (width-i);
+		animation_context.strokeStyle = "#331100";
+		animation_context.stroke();
+		animation_context.closePath();
+	}
 }
 
 function inc(counter_name) {
-    var counter = document.getElementById(counter_name);
-    counter.value = Number(counter.value) + 1;
-    eval('change_' + counter_name + '()');
+	var counter = document.getElementById(counter_name);
+	counter.value = Number(counter.value) + 1;
+	eval('change_' + counter_name + '()');
 }
 
 function dec(counter_name) {
-    var counter = document.getElementById(counter_name);
-    counter.value = Number(counter.value) - 1;
-    eval('change_' + counter_name + '()');
+	var counter = document.getElementById(counter_name);
+	counter.value = Number(counter.value) - 1;
+	eval('change_' + counter_name + '()');
 }
-    </script>
-  </head>
-  <body>
-    <center>
-    <h1>
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
 Quadratic splines are useful too
-    </h1>
-    <p>
+	</h1>
+	<p>
 Usually, when people talk about splines, like at a party or in a pub, they talk about polynomial cubic splines. This makes sense as cubics are the simplest functions you can link together and expect continuity and smoothness at the joints. But can you get it even simpler than that?
-    </p>
-    <p>
+	</p>
+	<p>
 Consider this. A parametric curve is a curve that has its every point defined as a function of some parameter. Let's build a polynomial curve that runs through 4 points.
-    </p>
-    <p class="formula">
+	</p>
+	<p class="formula">
 x(t) = a<sub>x</sub>t<sup>3</sup> + b<sub>x</sub>t<sup>2</sup> + c<sub>x</sub>t + d<sub>x</sub>
 <br>
 y(t) = a<sub>y</sub>t<sup>3</sup> + b<sub>y</sub>t<sup>2</sup> + c<sub>y</sub>t + d<sub>y</sub>
-    </p>
-    <p>
+	</p>
+	<p>
 There is an explanation of how to build an interpolating function in the <a href="https://wordsandbuttons.online/programmers_guide_to_polynomials_and_splines.html">Programmer's guide to polynomials and splines</a>. Long story short, if you run a polynomial through some 4 points, it could minimally be of 3rd degree. Which is a cubic.
-    </p>
-    <p>
+	</p>
+	<p>
 Here is an interactive example. You can drag the points across the canvas. The curve is rather predictable, especially in between the second and the third points. That's the piece we prefer to build aggregate spline functions.
-    </p>
-    <canvas id="parametric" width=640 height=512></canvas>
-    <script language="JavaScript">
-    init_parametric();
-    </script>
-    <p>
+	</p>
+	<canvas id="parametric" width=640 height=512></canvas>
+	<script language="JavaScript">
+	init_parametric();
+	</script>
+	<p>
 Just like with the simple non-parametric interpolation, you can't just add more points to the interpolating polynomial and expect it to behave nicely. It will eventually oscillate due to the Runge effect. That's why you need splines in the first place.
-    </p>
-    <p>
+	</p>
+	<p>
 Now let's say we don't know how many points we want. Let's say points keep coming even while we're building our spline. We want to add points and retain the pieces of the curve that we've built.
-    </p>
-    <p>
+	</p>
+	<p>
 We can still use cubic splines. It's just now we don't have to conjoint each of them from both sides, we only have to attach it from one. This can be done, for instance, by solving these systems:
-    </p>
-    <p class="formula" style="text-align: left; margin-left: 10em;">
+	</p>
+	<p class="formula" style="text-align: left; margin-left: 10em;">
 a<sub>xi</sub>t<sup>3</sup> + b<sub>xi</sub>t<sup>2</sup> + c<sub>xi</sub>t + d<sub>xi</sub> = x<sub>i</sub>
 <br>
 a<sub>xi</sub>(t+1)<sup>3</sup> + b<sub>xi</sub>(t+1)<sup>2</sup> + c<sub>xi</sub>(t+1) + d<sub>xi</sub> = x<sub>i+1</sub>
@@ -945,122 +959,122 @@ a<sub>yi</sub>(t+1)<sup>3</sup> + b<sub>yi</sub>(t+1)<sup>2</sup> + c<sub>yi</su
 3a<sub>yi</sub>t<sup>2</sup> + 2b<sub>yi</sub>t + c<sub>yi</sub> = 3a<sub>yi-1</sub>t<sup>2</sup> + 2b<sub>yi-1</sub>t + c<sub>yi-1</sub>
 <br>
 6a<sub>yi</sub>t + 2b<sub>yi</sub> = 6a<sub>yi-1</sub>t + 2b<sub>yi-1</sub>
-    </p>
-    <p>
+	</p>
+	<p>
 The first and the second equations here are just the interpolation conditions. The third and the fourth are the ones that connect the derivatives of the i-th piece to the derivatives of its successor.
-    </p>
-    <p>
+	</p>
+	<p>
 Here is an example of a 3-piece curve made of such one-sided cubic splines. Feel free to drag the points.
-    </p>
+	</p>
 
-    <canvas id="spline3" width=640 height=512></canvas>
-    <p>
+	<canvas id="spline3" width=640 height=512></canvas>
+	<p>
 As you can see, it is smooth and continuous, so it's kind of a win. But it is nearly impossible to make it go where you want it to. It's even worse than with the Runge effect as the oscillations start almost immediately.
-    </p>
-    <p>
+	</p>
+	<p>
 You probably noticed that the first segment is straight. That's because both the initial derivatives, the first one and the second one, are zeros. The second segment is then quadratic, since its own second derivative on the left is still zero, and only the third one is fully cubic. And this is the least controllable one.
-    </p>
-    <p>
+	</p>
+	<p>
 Still, since we keep the second derivative continuous, we know that our first derivative is smooth. You can see it in the next plot. The “hair” is the depiction of the derivative vector's length in multiple points. And yes, since the curve is parametric, and it's formed by two functions, it has two derivatives in every point: <i>dx/dt</i> and <i>dy/dt</i>, and you can make a vector out of them.
-    </p>
-    <canvas id="spline3_derivatives" width=640 height=512></canvas>
+	</p>
+	<canvas id="spline3_derivatives" width=640 height=512></canvas>
 
-    <p>
+	<p>
 Now here is a trick that may help us tame the curve we got. With <i>y(x)</i>, we can expect it to be smooth only if the first derivative of the function is continuous. That's true for <i>y(x)</i>. But for <i>x(t), y(t)</i>, the tangent is not the same as the derivative. It's the proportion of its derivatives. It doesn't have to be like that:
-    </p>
-    <p class="formula">
+	</p>
+	<p class="formula">
 dp<sub>xi</sub>(t) / dt = dp<sub>xi+1</sub>(t) / dt
 <br>
 dp<sub>yi</sub>(t) / dt = dp<sub>yi+1</sub>(t) / dt
-    </p>
-    <p>
+	</p>
+	<p>
 We only need this:
-    </p>
-    <table class="formula">
-    <tr>
-    <td style="border-bottom:1px solid black">
+	</p>
+	<table class="formula">
+	<tr>
+	<td style="border-bottom:1px solid black">
 dp<sub>xi</sub>(t) / dt
-    </td>
-    <td rowspan=3 style="vertical-align: middle; width: 64pt; ">=</td>
-    <td style="border-bottom:1px solid black">
+	</td>
+	<td rowspan=3 style="vertical-align: middle; width: 64pt; ">=</td>
+	<td style="border-bottom:1px solid black">
 dp<sub>xi+1</sub>(t) / dt
-    </td>
-    </tr>
-    <tr>
-    <td>
+	</td>
+	</tr>
+	<tr>
+	<td>
 dp<sub>yi</sub>(t) / dt
-    </td>
-    <td>
+	</td>
+	<td>
 dp<sub>yi+1</sub>(t) / dt
-    </td>
-    </tr>
-    </table>
-    <p>
+	</td>
+	</tr>
+	</table>
+	<p>
 When your curve becomes uncontrollable, you can safely calm it down. Cut down its derivatives in every point to make it more like a piece-wise linear interpolation.
-    </p>
-    <p>
+	</p>
+	<p>
 Here is the example, increment the derivative divisor to cut down the derivatives:
-    </p>
-    <form onsubmit="return false;">
-    Derivative divisor:
-    <button type="button" onclick="dec('derivative_divisor');">-</button>
-    <input type="text" id="derivative_divisor" value="3" oninput="change_derivative_divisor();">
-    <button type="button" onclick="inc('derivative_divisor');">+</button>
-    </form>
-    <canvas id="compensated_spline3_derivatives" width=640 height=512></canvas>
-    <p>
+	</p>
+	<form onsubmit="return false;">
+	Derivative divisor:
+	<button type="button" onclick="dec('derivative_divisor');">-</button>
+	<input type="text" id="derivative_divisor" value="3" oninput="change_derivative_divisor();">
+	<button type="button" onclick="inc('derivative_divisor');">+</button>
+	</form>
+	<canvas id="compensated_spline3_derivatives" width=640 height=512></canvas>
+	<p>
 Look at its hair! It's no longer continuous, it gets cut off after every grid point.
-    </p>
-    <p>
+	</p>
+	<p>
 We also have another way to calm down our curve, and it is to drop its second derivative in every grid point effectively turning it... into a quadratic spline!
-    </p>
-    <canvas id="spline2" width=640 height=512></canvas>
+	</p>
+	<canvas id="spline2" width=640 height=512></canvas>
 
-    <p>
+	<p>
 Quadratic splines are even simpler than the cubic ones. We keep the idea of stealing the first derivative from the successor, but we don't touch the second one.
-    </p>
-    <p class="formula" style="text-align: left; margin-left: 10em;">
+	</p>
+	<p class="formula" style="text-align: left; margin-left: 10em;">
 a<sub>i</sub>t<sup>2</sup> + b<sub>i</sub>t + c<sub>i</sub> = x<sub>i</sub>
 <br>
 a<sub>i</sub>(t+1)<sup>2</sup> + b<sub>i</sub>(t+1) + c<sub>i</sub> = x<sub>i+1</sub>
 <br>
 2a<sub>i</sub>t + b<sub>i</sub> = 2a<sub>i-1</sub>t + b<sub>i-1</sub>
-    </p>
-    <p>
+	</p>
+	<p>
 The first derivative is then continuous but it isn't smooth anymore. You can see it on the plot's hair. It gets a little bent at the grid points.
-    </p>
-    <canvas id="spline2_derivatives" width=640 height=512></canvas>
+	</p>
+	<canvas id="spline2_derivatives" width=640 height=512></canvas>
 
-    <script language="JavaScript">
-    init_spline2();
-    init_spline2_derivatives();
-    init_spline3();
-    init_spline3_derivatives();
-    init_compensated_spline3_derivatives();
-    </script>
+	<script language="JavaScript">
+	init_spline2();
+	init_spline2_derivatives();
+	init_spline3();
+	init_spline3_derivatives();
+	init_compensated_spline3_derivatives();
+	</script>
 
-    <p>
+	<p>
 Now, this has all been fun, but is it really a problem to solve? I mean, why would we want to have a curve that grows as we plot it? There is a niche for building splines on the go, and it is the animation.
-    </p>
-    <p>
+	</p>
+	<p>
 Here is an arrow. Just click somewhere on the canvas, and it will go there. Setup several way-points, it will run through them all. Note that it also accumulates derivatives, which is its speed, and becomes thin and uncontrollable. Let it rest and get fat again. That calms it down.
-    </p>
-    <canvas id="animation" width=640 height=640></canvas>
-    <script language="JavaScript">
-    init_animation();
-    </script>
+	</p>
+	<canvas id="animation" width=640 height=640></canvas>
+	<script language="JavaScript">
+	init_animation();
+	</script>
 
-    <h2>
+	<h2>
 Conclusion
-    </h2>
-    <p>
+	</h2>
+	<p>
 Spline function is a broad concept, and you get to choose what you want. Sometimes you want simple quadratic splines, sometimes you want 5-th degree ones with all the extra knots and weights. There are even non-polynomial splines, they have their applications too.
-    </p>
-    <p>
+	</p>
+	<p>
 There is, however, some common body of knowledge that works for all splines, plots, and curves in general. I think, even if you wouldn't have to ever implement any kind of splines, you can benefit from learning about derivatives, parameterization, continuity, and smoothness. Quadratic splines demonstrate all that rather well.
-    </p>
+	</p>
 
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
 		<a href="index.html"><img src="favicon.ico"></a>
@@ -1076,6 +1090,6 @@ There is, however, some common body of knowledge that works for all splines, plo
 	</td>
 	</tr>
 	</table>
-    </center>
-  </body>
+	</center>
+</body>
 </html>
