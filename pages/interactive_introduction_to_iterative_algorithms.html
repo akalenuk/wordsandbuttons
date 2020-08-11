@@ -1,110 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Interactive introduction to iterative algorithms</title>
-    <meta name="description" content="An interactive explanation of how iterative algorithms work. This explains convergence and the exit condition problem on an oversimplified linear system solver.">
-    <meta name="keywords" content="mathematics, algorithms, show-and-tell">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
-    <style>
+<head>
+	<meta charset="utf-8">
+	<title>Interactive introduction to iterative algorithms</title>
+	<meta name="description" content="An interactive explanation of how iterative algorithms work. This explains convergence and the exit condition problem on an oversimplified linear system solver.">
+	<meta name="keywords" content="mathematics, algorithms, show-and-tell">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+	<style>
 body{
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a{
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 20pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 .results {
-    font-family: sans-serif;
-    font-size: 14pt;
-    width: 505pt;
-    text-align: left;
+	font-family: sans-serif;
+	font-size: 14pt;
+	width: 505pt;
+	text-align: left;
 }
 
 .formula {
-    font-family: sans-serif;
-    font-size: 16pt;
-    font-style: italic;
-    width: 505pt;
-    text-align: center;
-    padding-top: 6pt;
-    padding-bottom: 6pt;
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: italic;
+	width: 505pt;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
 }
 
 table.footer {
-    padding: 64pt 0pt 32pt 0pt;
-    background-color: transparent;
-    width: 505pt;
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
 }
 
 td.footer {
-    font-family: sans-serif;
-    font-size: 16pt;
-    font-style: normal;
-    padding: 0;
-    margin: 0;
-    border: 0;
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
 }
 
 li {
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
-    padding-bottom: 6pt;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+	padding-bottom: 6pt;
 }
 
 form {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 16pt;
-    text-align: left;
-    width: 505pt;
-    background-color: #eeee99;
-    color: #000;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
 }
 
 input[type="text"] {
-    width: 100pt;
-    height: 22pt;
-    margin: 8pt 8pt 8pt 8pt;
-    padding-left: 3pt;
-    font-size: 16pt;
+	width: 100pt;
+	height: 22pt;
+	margin: 8pt 8pt 8pt 8pt;
+	padding-left: 3pt;
+	font-size: 16pt;
 }
 
 button {
-    width: 108pt;
-    height: 28pt;
-    margin-left:4pt;
-    margin-right:4pt;
-    font-size: 16pt;
+	width: 108pt;
+	height: 28pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 16pt;
 }
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 
 // client
 var w = 640.0;
@@ -121,29 +121,44 @@ var line_colors = ["#d64562", "#457fd6", "#62d645"];
 var fill_colors = ["#e3bfc3", "#bfc7e3", "#c4e3bf"];
 
 var client_x_center = w*(0-x_min)/(x_max-x_min);
-var client_x_step = (w/(x_max-x_min));
+var client_x_step = Math.round(w/(x_max-x_min));
 
 var client_y_center = h - h*(0-y_min)/(y_max-y_min);
-var client_y_step = (h/(y_max-y_min));
+var client_y_step = Math.round(h/(y_max-y_min));
 
 function client_to_x(client_x){
-    return (client_x - client_x_center) / client_x_step;
+	return (client_x - client_x_center) / client_x_step;
 }
 
 function client_to_y(client_y){
-    return (client_y_center - client_y) / client_y_step;
+	return (client_y_center - client_y) / client_y_step;
 }
 
 function x_to_client(x){
-    return x * client_x_step + client_x_center;
+	return x * client_x_step + client_x_center;
 }
 
 function y_to_client(y){
-    return client_y_center - y * client_y_step;
+	return client_y_center - y * client_y_step;
+}
+
+function draw_arrow(context, x1, y1, x2, y2, color) {
+	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	const t = d < 64 ? (d / 64.) : 1.;
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - ((y2 - y1) * 4.5 / d + (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d - (x2 - x1) * 4.5 / d) * t);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + ((y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d + (x2 - x1) * 4.5 / d) * t);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
 }
 
 function draw_grid_on(context){
-    context.font = "16px sans-serif";
+	context.font = "16px sans-serif";
 	// grid
  	context.beginPath();
 	context.moveTo(0, client_y_center);
@@ -156,98 +171,102 @@ function draw_grid_on(context){
 	context.lineTo(client_x_center - 5, 12);
 	context.moveTo(client_x_center, 0);
 	context.lineTo(client_x_center + 5, 12);
-    context.fillStyle="#000000";
+	context.fillStyle="#000000";
 	for(var i = x_min + 1; i <= x_max - 1; i++){
-	    context.moveTo(client_x_center + i*client_x_step, client_y_center);
-		context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
-		context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+		if(i != 0) {
+			context.moveTo(client_x_center + i*client_x_step, client_y_center);
+			context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+			context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+		}
 	}
 	for(var i = y_min + 1; i <= y_max - 1; i++){
-	    context.moveTo(client_x_center, client_y_center - i*client_y_step);
-		context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+		if(i != 0) {
+			context.moveTo(client_x_center, client_y_center - i*client_y_step);
+			context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+		}
 		context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
 	}
 	context.strokeStyle="#000000";
-    context.stroke();
-    context.closePath();
+	context.stroke();
+	context.closePath();
 }
 
 function dot_of(a11, a12, a21, a22){
-    return a11*a21 + a12*a22;
+	return a11*a21 + a12*a22;
 }
 
 function length_of(a1, a2){
-    return Math.sqrt(dot_of(a1, a2, a1, a2));
+	return Math.sqrt(dot_of(a1, a2, a1, a2));
 }
 
 function projected_x(x, y, a1, a2, b){
-    return x + a1 * (b - dot_of(x, y, a1, a2)) / dot_of(a1, a2, a1, a2);
+	return x + a1 * (b - dot_of(x, y, a1, a2)) / dot_of(a1, a2, a1, a2);
 }
 
 function projected_y(x, y, a1, a2, b){
-    return y + a2 * (b - dot_of(x, y, a1, a2)) / dot_of(a1, a2, a1, a2);
+	return y + a2 * (b - dot_of(x, y, a1, a2)) / dot_of(a1, a2, a1, a2);
 }
 
 function get_points_on_the_ends(a1, a2, b) {
-    var xys = []
+	var xys = []
 
-    var x_in_y_min = (b - a2 * y_min)/ a1;
-    if(x_in_y_min >= x_min && x_in_y_min < x_max)
-        xys.push([x_in_y_min, y_min]);
+	var x_in_y_min = (b - a2 * y_min)/ a1;
+	if(x_in_y_min >= x_min && x_in_y_min < x_max)
+		xys.push([x_in_y_min, y_min]);
 
-    var x_in_y_max = (b - a2 * y_max)/ a1;
-    if(x_in_y_max >= x_min && x_in_y_max < x_max)
-        xys.push([x_in_y_max, y_max]);
+	var x_in_y_max = (b - a2 * y_max)/ a1;
+	if(x_in_y_max >= x_min && x_in_y_max < x_max)
+		xys.push([x_in_y_max, y_max]);
 
-    var y_in_x_min = (b - a1 * x_min) / a2;
-    if(y_in_x_min >= y_min && y_in_x_min < y_max)
-        xys.push([x_min, y_in_x_min]);
+	var y_in_x_min = (b - a1 * x_min) / a2;
+	if(y_in_x_min >= y_min && y_in_x_min < y_max)
+		xys.push([x_min, y_in_x_min]);
 
-    var y_in_x_max = (b - a1 * x_max) / a2;
-    if(y_in_x_max >= y_min && y_in_x_max < y_max)
-        xys.push([x_max, y_in_x_max]);
+	var y_in_x_max = (b - a1 * x_max) / a2;
+	if(y_in_x_max >= y_min && y_in_x_max < y_max)
+		xys.push([x_max, y_in_x_max]);
 
-    return xys;
+	return xys;
 }
 
 function equation_for_two_points(x1, y1, x2, y2) {
-    return [(y2 - y1)/(-x2 + x1), 1.0, (x2*y1 - x1*y2)/(x2 - x1)];
+	return [(y2 - y1)/(-x2 + x1), 1.0, (x2*y1 - x1*y2)/(x2 - x1)];
 }
 
 function new_equation_for_one_point(a1, a2, b, x, y) {
-    var xys = get_points_on_the_ends(a1, a2, b);
-    if(length_of(x - xys[0][0], y - xys[0][1]) > length_of(x - xys[1][0], y - xys[1][1])) {
-        return equation_for_two_points(x, y, xys[0][0], xys[0][1]);
-    } else {
-        return equation_for_two_points(x, y, xys[1][0], xys[1][1]);
-    }
+	var xys = get_points_on_the_ends(a1, a2, b);
+	if(length_of(x - xys[0][0], y - xys[0][1]) > length_of(x - xys[1][0], y - xys[1][1])) {
+		return equation_for_two_points(x, y, xys[0][0], xys[0][1]);
+	} else {
+		return equation_for_two_points(x, y, xys[1][0], xys[1][1]);
+	}
 }
 
 function solve_2(a11, a12, b1, a21, a22, b2) {
-    sx = (-a12*b2 + a22*b1)/(a11*a22 - a12*a21);
-    sy = (a11*b2 - a21*b1)/(a11*a22 - a12*a21);
-    return [sx, sy];
+	sx = (-a12*b2 + a22*b1)/(a11*a22 - a12*a21);
+	sy = (a11*b2 - a21*b1)/(a11*a22 - a12*a21);
+	return [sx, sy];
 }
 
 function find_nearest_eqution_id(name, client_x, client_y) {
-    var x = client_to_x(client_x);
-    var y = client_to_y(client_y);
-    var closest_eq_i = 0;
-    var eq0 = eval(name + "_eq_1");
-    var x0 = projected_x(x, y, eq0[0], eq0[1], eq0[2]);
-    var y0 = projected_y(x, y, eq0[0], eq0[1], eq0[2]);
-    var closest_distance = length_of(x - x0, y - y0);
-    for(var i = 1; i < eval(name + "_eqs"); ++i) {
-        var eq = eval(name + "_eq_" + (i+1));
-        var xi = projected_x(x, y, eq[0], eq[1], eq[2]);
-        var yi = projected_y(x, y, eq[0], eq[1], eq[2]);
-        var distancei = length_of(x - xi, y - yi);
-        if (distancei < closest_distance) {
-            closest_distance = distancei;
-            closest_eq_i = i;
-        }
-    }
-    return closest_eq_i + 1;
+	var x = client_to_x(client_x);
+	var y = client_to_y(client_y);
+	var closest_eq_i = 0;
+	var eq0 = eval(name + "_eq_1");
+	var x0 = projected_x(x, y, eq0[0], eq0[1], eq0[2]);
+	var y0 = projected_y(x, y, eq0[0], eq0[1], eq0[2]);
+	var closest_distance = length_of(x - x0, y - y0);
+	for(var i = 1; i < eval(name + "_eqs"); ++i) {
+		var eq = eval(name + "_eq_" + (i+1));
+		var xi = projected_x(x, y, eq[0], eq[1], eq[2]);
+		var yi = projected_y(x, y, eq[0], eq[1], eq[2]);
+		var distancei = length_of(x - xi, y - yi);
+		if (distancei < closest_distance) {
+			closest_distance = distancei;
+			closest_eq_i = i;
+		}
+	}
+	return closest_eq_i + 1;
 }
 
 //////
@@ -274,362 +293,358 @@ var solver_1_eq_2_temp;
 var end_step_length_temp;
 
 function set_solver_1() {
-    solver_1_eq_1 = [-0.9, 1.0, -1.0]
-    solver_1_eq_2 = [-0.15, 1.0, 2.5]
-    start_x = 1.0;
-    start_y = 1.0;
-    end_step_length = 0.3
+	solver_1_eq_1 = [-0.9, 1.0, -1.0]
+	solver_1_eq_2 = [-0.15, 1.0, 2.5]
+	start_x = 1.0;
+	start_y = 1.0;
+	end_step_length = 0.3
 
-    solver_1_eq_2_temp = solver_1_eq_2;
-    solver_1_eq_1_temp = solver_1_eq_1;
-    end_step_length_temp = end_step_length;
+	solver_1_eq_2_temp = solver_1_eq_2;
+	solver_1_eq_1_temp = solver_1_eq_1;
+	end_step_length_temp = end_step_length;
 }
 set_solver_1();
 
 function invalidate_solver_1(client_x, client_y){
-    var solver = document.getElementById("solver_1");
-    var canvas_rect = solver.getBoundingClientRect();
-    if(document.getElementById("button_1").disabled) {
-           eval("solver_1_eq_" + solver_1_eq_temp_id + " = " + name + "solver_1_eq_" + solver_1_eq_temp_id + "_temp;");
-    } else if(document.getElementById("button_2").disabled) {
-        start_x = client_to_x(client_x - canvas_rect.left);
-        start_y = client_to_y(client_y - canvas_rect.top);
-    } else if(document.getElementById("button_3").disabled) {
-        end_step_length = temp_end_step_length;
-    }
-    draw_solver_1(0, 0, false);
+	var solver = document.getElementById("solver_1");
+	var canvas_rect = solver.getBoundingClientRect();
+	if(document.getElementById("button_1").disabled) {
+		   eval("solver_1_eq_" + solver_1_eq_temp_id + " = " + name + "solver_1_eq_" + solver_1_eq_temp_id + "_temp;");
+	} else if(document.getElementById("button_2").disabled) {
+		start_x = client_to_x(client_x - canvas_rect.left);
+		start_y = client_to_y(client_y - canvas_rect.top);
+	} else if(document.getElementById("button_3").disabled) {
+		end_step_length = temp_end_step_length;
+	}
+	draw_solver_1(0, 0, false);
 }
 
 function init_solver_1(){
-    var solver = document.getElementById("solver_1");
-    var canvas_rect = solver.getBoundingClientRect();
-    draw_solver_1(0, 0, false);
+	var solver = document.getElementById("solver_1");
+	var canvas_rect = solver.getBoundingClientRect();
+	draw_solver_1(0, 0, false);
 
-    solver.addEventListener('mousemove', function(e){
-        var canvas_rect = solver.getBoundingClientRect();
-        draw_solver_1(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-        if(e.buttons == 1) {
-            invalidate_solver_1(e.clientX, e.clientY);
-        } else if(e.buttons == 0) {
-            solver_1_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
-        }
-    }, false);
+	solver.addEventListener('mousemove', function(e){
+		var canvas_rect = solver.getBoundingClientRect();
+		draw_solver_1(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1) {
+			invalidate_solver_1(e.clientX, e.clientY);
+		} else if(e.buttons == 0) {
+			solver_1_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+		}
+	}, false);
 
-    solver.addEventListener('mousedown', function(e){
-        invalidate_solver_1(e.clientX, e.clientY);
-        var canvas_rect = solver.getBoundingClientRect();
-        solver_1_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
-    }, false);
+	solver.addEventListener('mousedown', function(e){
+		invalidate_solver_1(e.clientX, e.clientY);
+		var canvas_rect = solver.getBoundingClientRect();
+		solver_1_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+	}, false);
 
-    solver.addEventListener('mouseup', function(e){
-        invalidate_solver_1(e.clientX, e.clientY);
-    }, false);
+	solver.addEventListener('mouseup', function(e){
+		invalidate_solver_1(e.clientX, e.clientY);
+	}, false);
 
-    solver.addEventListener('mouseleave', function(e){
-        draw_solver_1(0, 0, false);
-    }, false);
+	solver.addEventListener('mouseleave', function(e){
+		draw_solver_1(0, 0, false);
+	}, false);
 }
 
 var last_iterations = 100;
 var last_error = 100.;
 function draw_solver_1(client_x, client_y, do_guides){
-    var solver = document.getElementById("solver_1");
-    var context = solver.getContext("2d");
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	var solver = document.getElementById("solver_1");
+	var context = solver.getContext("2d");
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
 
-    // lines and stop criterias
-    context.globalAlpha = 0.6;
-    for(var i = 0; i < solver_1_eqs; ++i){
-        var eq = eval("solver_1_eq_" + (i + 1));
-        // stop
-        context.beginPath();
-        var db2 = end_step_length * length_of(eq[0], eq[1]);
-        context.moveTo(x_to_client(x_min), y_to_client((eq[2] - db2 - eq[0]*(x_min))/eq[1]));
-        context.lineTo(x_to_client(x_max), y_to_client((eq[2] - db2 - eq[0]*(x_max))/eq[1]));
-        context.lineTo(x_to_client(x_max), y_to_client((eq[2] + db2 - eq[0]*(x_max))/eq[1]));
-        context.lineTo(x_to_client(x_min), y_to_client((eq[2] + db2 - eq[0]*(x_min))/eq[1]));
-        context.lineTo(x_to_client(x_min), y_to_client((eq[2] - db2 - eq[0]*(x_min))/eq[1]));
-        context.strokeStyle = line_colors[i];
-        context.stroke();
-        context.closePath();
-        context.fillStyle = fill_colors[i];
-        context.fill();
-    }
-    context.globalAlpha = 1.0;
-    for(var i = 0; i < solver_1_eqs; ++i){
-        var eq = eval("solver_1_eq_" + (i + 1));
-        // line
-        context.beginPath();
-        context.lineWidth = 2;
-        var xys = get_points_on_the_ends(eq[0], eq[1], eq[2]);
-        context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
-        context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
-        context.strokeStyle = line_colors[i];
-        context.stroke();
-        context.lineWidth = 1;
-        context.closePath();
-    }
+	// lines and stop criterias
+	context.globalAlpha = 0.6;
+	for(var i = 0; i < solver_1_eqs; ++i){
+		var eq = eval("solver_1_eq_" + (i + 1));
+		// stop
+		context.beginPath();
+		var db2 = end_step_length * length_of(eq[0], eq[1]);
+		context.moveTo(x_to_client(x_min), y_to_client((eq[2] - db2 - eq[0]*(x_min))/eq[1]));
+		context.lineTo(x_to_client(x_max), y_to_client((eq[2] - db2 - eq[0]*(x_max))/eq[1]));
+		context.lineTo(x_to_client(x_max), y_to_client((eq[2] + db2 - eq[0]*(x_max))/eq[1]));
+		context.lineTo(x_to_client(x_min), y_to_client((eq[2] + db2 - eq[0]*(x_min))/eq[1]));
+		context.lineTo(x_to_client(x_min), y_to_client((eq[2] - db2 - eq[0]*(x_min))/eq[1]));
+		context.strokeStyle = line_colors[i];
+		context.stroke();
+		context.closePath();
+		context.fillStyle = fill_colors[i];
+		context.fill();
+	}
+	context.globalAlpha = 1.0;
+	for(var i = 0; i < solver_1_eqs; ++i){
+		var eq = eval("solver_1_eq_" + (i + 1));
+		// line
+		context.beginPath();
+		context.lineWidth = 2;
+		var xys = get_points_on_the_ends(eq[0], eq[1], eq[2]);
+		context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
+		context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
+		context.strokeStyle = line_colors[i];
+		context.stroke();
+		context.lineWidth = 1;
+		context.closePath();
+	}
 
-    // solver
-    context.beginPath();
-    context.moveTo(x_to_client(start_x), y_to_client(start_y));
-    var prev_x = start_x + end_step_length + 1.;    // not to fall as done
-    var prev_y = start_y;
-    var cur_x = start_x;
-    var cur_y = start_y;
-    var i;
-    for(i = 0; i <= 100; i++) // max iterations = 100
-    {
-        if(length_of(prev_x - cur_x, prev_y - cur_y) < end_step_length)
-            break;  // done
-        prev_x = cur_x;
-        prev_y = cur_y;
-        if(i % 2 == 0){
-            cur_x = projected_x(prev_x, prev_y, solver_1_eq_1[0], solver_1_eq_1[1], solver_1_eq_1[2]);
-            cur_y = projected_y(prev_x, prev_y, solver_1_eq_1[0], solver_1_eq_1[1], solver_1_eq_1[2]);
-        }else{
-            cur_x = projected_x(prev_x, prev_y, solver_1_eq_2[0], solver_1_eq_2[1], solver_1_eq_2[2]);
-            cur_y = projected_y(prev_x, prev_y, solver_1_eq_2[0], solver_1_eq_2[1], solver_1_eq_2[2]);
-        }
-        context.lineTo(x_to_client(cur_x), y_to_client(cur_y));
-    }
-    last_iterations = i;
-    context.strokeStyle="#002200";
-    context.setLineDash([2, 2]);
-    context.stroke();
-    context.setLineDash([]);
-    context.closePath();
+	// solver
+	context.lineWidth = 0.5;
+	context.moveTo(x_to_client(start_x), y_to_client(start_y));
+	var prev_x = start_x + end_step_length + 1.; // not to fall as done
+	var prev_y = start_y;
+	var cur_x = start_x;
+	var cur_y = start_y;
+	var i;
+	for(i = 0; i <= 100; i++) // max iterations = 100
+	{
+		if(length_of(prev_x - cur_x, prev_y - cur_y) < end_step_length)
+			break;  // done
+		prev_x = cur_x;
+		prev_y = cur_y;
+		if(i % 2 == 0){
+			cur_x = projected_x(prev_x, prev_y, solver_1_eq_1[0], solver_1_eq_1[1], solver_1_eq_1[2]);
+			cur_y = projected_y(prev_x, prev_y, solver_1_eq_1[0], solver_1_eq_1[1], solver_1_eq_1[2]);
+		}else{
+			cur_x = projected_x(prev_x, prev_y, solver_1_eq_2[0], solver_1_eq_2[1], solver_1_eq_2[2]);
+			cur_y = projected_y(prev_x, prev_y, solver_1_eq_2[0], solver_1_eq_2[1], solver_1_eq_2[2]);
+		}
+		draw_arrow(context, x_to_client(prev_x), y_to_client(prev_y), x_to_client(cur_x), y_to_client(cur_y), "#002200");
+	}
+	last_iterations = i;
+	context.lineWidth = 1;
 
-    // grid
-    draw_grid_on(context);
+	// grid
+	draw_grid_on(context);
 
-    // mouse move
-    if(do_guides){
-        if(document.getElementById("button_1").disabled){
-            var eq = eval("solver_1_eq_" + solver_1_eq_temp_id);
-            var x = client_to_x(client_x);
-            var y = client_to_y(client_y);
-            var temp_eq = new_equation_for_one_point(eq[0], eq[1], eq[2], x, y);
-            eval("solver_1_eq_" + solver_1_eq_temp_id + "_temp = temp_eq;");
+	// mouse move
+	if(do_guides){
+		if(document.getElementById("button_1").disabled){
+			var eq = eval("solver_1_eq_" + solver_1_eq_temp_id);
+			var x = client_to_x(client_x);
+			var y = client_to_y(client_y);
+			var temp_eq = new_equation_for_one_point(eq[0], eq[1], eq[2], x, y);
+			eval("solver_1_eq_" + solver_1_eq_temp_id + "_temp = temp_eq;");
 
-            context.beginPath();
-            var xys = get_points_on_the_ends(temp_eq[0], temp_eq[1], temp_eq[2]);
-            context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
-            context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
-            context.strokeStyle = line_colors[solver_1_eq_temp_id - 1];
-            context.setLineDash([4, 4]);
-            context.stroke();
-            context.setLineDash([]);
-            context.closePath();
+			context.beginPath();
+			var xys = get_points_on_the_ends(temp_eq[0], temp_eq[1], temp_eq[2]);
+			context.moveTo(x_to_client(xys[0][0]), y_to_client(xys[0][1]));
+			context.lineTo(x_to_client(xys[1][0]), y_to_client(xys[1][1]));
+			context.strokeStyle = line_colors[solver_1_eq_temp_id - 1];
+			context.setLineDash([4, 4]);
+			context.stroke();
+			context.setLineDash([]);
+			context.closePath();
 
-        }else if(document.getElementById("button_2").disabled){
-            context.beginPath();
-            context.setLineDash([4, 4]);
-            context.moveTo(x_to_client(start_x), y_to_client(start_y));
-            context.lineTo(client_x, client_y);
-            context.strokeStyle="#557755";
-            context.stroke();
-            context.setLineDash([]);
-            context.closePath();
-        }else if(document.getElementById("button_3").disabled){
-            var a11 = solver_1_eq_1[0];
-            var a12 = solver_1_eq_1[1];
-            var b1 = solver_1_eq_1[2];
-            var a21 = solver_1_eq_2[0];
-            var a22 = solver_1_eq_2[1];
-            var b2 = solver_1_eq_2[2];
-            var x = client_to_x(client_x);
-            var y = client_to_y(client_y);
-            var x1 = projected_x(x, y, a11, a12, b1);
-            var y1 = projected_y(x, y, a11, a12, b1);
-            var x2 = projected_x(x, y, a21, a22, b2);
-            var y2 = projected_y(x, y, a21, a22, b2);
-            var d1 = length_of(x-x1, y-y1);
-            var d2 = length_of(x-x2, y-y2);
-            if(d1<d2){
-                temp_end_step_length = d1;
-            }else{
-                temp_end_step_length = d2;
-            }
-            // red
-            context.beginPath();
-            context.setLineDash([4, 4]);
-            var db1 = temp_end_step_length * length_of(a11, a12);
-            context.moveTo(x_to_client(x_min), y_to_client((b1 - db1 - a11*(x_min))/a12));
-            context.lineTo(x_to_client(x_max), y_to_client((b1 - db1 - a11*(x_max))/a12));
-            context.moveTo(x_to_client(x_min), y_to_client((b1 + db1 - a11*(x_min))/a12));
-            context.lineTo(x_to_client(x_max), y_to_client((b1 + db1 - a11*(x_max))/a12));
-            context.strokeStyle="#ff8866";
-            context.stroke();
-            context.setLineDash([]);
-            context.closePath();
-            // blue
-            context.beginPath();
-            context.setLineDash([4, 4]);
-            var db2 = temp_end_step_length * length_of(a21, a22);
-            context.moveTo(x_to_client(x_min), y_to_client((b2 - db2 - a21*(x_min))/a22));
-            context.lineTo(x_to_client(x_max), y_to_client((b2 - db2 - a21*(x_max))/a22));
-            context.moveTo(x_to_client(x_min), y_to_client((b2 + db2 - a21*(x_min))/a22));
-            context.lineTo(x_to_client(x_max), y_to_client((b2 + db2 - a21*(x_max))/a22));
-            context.strokeStyle="#6699ff";
-            context.stroke();
-            context.setLineDash([]);
-            context.closePath();
-        }
-    }
+		}else if(document.getElementById("button_2").disabled){
+			context.beginPath();
+			context.setLineDash([4, 4]);
+			context.moveTo(x_to_client(start_x), y_to_client(start_y));
+			context.lineTo(client_x, client_y);
+			context.strokeStyle="#557755";
+			context.stroke();
+			context.setLineDash([]);
+			context.closePath();
+		}else if(document.getElementById("button_3").disabled){
+			var a11 = solver_1_eq_1[0];
+			var a12 = solver_1_eq_1[1];
+			var b1 = solver_1_eq_1[2];
+			var a21 = solver_1_eq_2[0];
+			var a22 = solver_1_eq_2[1];
+			var b2 = solver_1_eq_2[2];
+			var x = client_to_x(client_x);
+			var y = client_to_y(client_y);
+			var x1 = projected_x(x, y, a11, a12, b1);
+			var y1 = projected_y(x, y, a11, a12, b1);
+			var x2 = projected_x(x, y, a21, a22, b2);
+			var y2 = projected_y(x, y, a21, a22, b2);
+			var d1 = length_of(x-x1, y-y1);
+			var d2 = length_of(x-x2, y-y2);
+			if(d1<d2){
+				temp_end_step_length = d1;
+			}else{
+				temp_end_step_length = d2;
+			}
+			// red
+			context.beginPath();
+			context.setLineDash([4, 4]);
+			var db1 = temp_end_step_length * length_of(a11, a12);
+			context.moveTo(x_to_client(x_min), y_to_client((b1 - db1 - a11*(x_min))/a12));
+			context.lineTo(x_to_client(x_max), y_to_client((b1 - db1 - a11*(x_max))/a12));
+			context.moveTo(x_to_client(x_min), y_to_client((b1 + db1 - a11*(x_min))/a12));
+			context.lineTo(x_to_client(x_max), y_to_client((b1 + db1 - a11*(x_max))/a12));
+			context.strokeStyle="#ff8866";
+			context.stroke();
+			context.setLineDash([]);
+			context.closePath();
+			// blue
+			context.beginPath();
+			context.setLineDash([4, 4]);
+			var db2 = temp_end_step_length * length_of(a21, a22);
+			context.moveTo(x_to_client(x_min), y_to_client((b2 - db2 - a21*(x_min))/a22));
+			context.lineTo(x_to_client(x_max), y_to_client((b2 - db2 - a21*(x_max))/a22));
+			context.moveTo(x_to_client(x_min), y_to_client((b2 + db2 - a21*(x_min))/a22));
+			context.lineTo(x_to_client(x_max), y_to_client((b2 + db2 - a21*(x_max))/a22));
+			context.strokeStyle="#6699ff";
+			context.stroke();
+			context.setLineDash([]);
+			context.closePath();
+		}
+	}
 
-    // iteration count
-    results = document.getElementById("results");
-    if(last_iterations > 100){
-        results.innerHTML = "Iterations > 100";
-    }else{
-        results.innerHTML = "Iterations = " + last_iterations;
-    }
-    // solution
-    var sxy = solve_2(solver_1_eq_1[0], solver_1_eq_1[1], solver_1_eq_1[2],  solver_1_eq_2[0], solver_1_eq_2[1], solver_1_eq_2[2]);
-    results.innerHTML += "<br>";
-    results.innerHTML += "Solution found: (" + cur_x.toFixed(3) + "; " + cur_y.toFixed(3) + "), ";
-    results.innerHTML += "<i>actual solution: (" + sxy[0].toFixed(3) + "; " + sxy[1].toFixed(3) + ")</i>";
-    error = length_of(sxy[0] - cur_x, sxy[1] - cur_y);
-    results.innerHTML += "<br>";
-    results.innerHTML += "Tolerance: " + end_step_length.toFixed(3) + ", real error: " + error.toFixed(3);
-    last_error = error;
+	// iteration count
+	results = document.getElementById("results");
+	if(last_iterations > 100){
+		results.innerHTML = "Iterations > 100";
+	}else{
+		results.innerHTML = "Iterations = " + last_iterations;
+	}
+	// solution
+	var sxy = solve_2(solver_1_eq_1[0], solver_1_eq_1[1], solver_1_eq_1[2],  solver_1_eq_2[0], solver_1_eq_2[1], solver_1_eq_2[2]);
+	results.innerHTML += "<br>";
+	results.innerHTML += "Solution found: (" + cur_x.toFixed(3) + "; " + cur_y.toFixed(3) + "), ";
+	results.innerHTML += "<i>actual solution: (" + sxy[0].toFixed(3) + "; " + sxy[1].toFixed(3) + ")</i>";
+	error = length_of(sxy[0] - cur_x, sxy[1] - cur_y);
+	results.innerHTML += "<br>";
+	results.innerHTML += "Tolerance: " + end_step_length.toFixed(3) + ", real error: " + error.toFixed(3);
+	last_error = error;
 }
 
 function reset_solver() {
-    set_solver_1();
-    draw_solver_1(0, 0, false);
+	set_solver_1();
+	draw_solver_1(0, 0, false);
 }
 
 function radio(n) {
-    for(var i = 1; i <= 3; i++){
-        radio_i = document.getElementById("button_" + i);
-        radio_i.disabled = false;
-    }
-    radio_n = document.getElementById("button_" + n);
-    radio_n.disabled = true;
+	for(var i = 1; i <= 3; i++){
+		radio_i = document.getElementById("button_" + i);
+		radio_i.disabled = false;
+	}
+	radio_n = document.getElementById("button_" + n);
+	radio_n.disabled = true;
 }
 
-    </script>
-  </head>
-  <body>
-    <center>
-    <h1>
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
 Interactive introduction to iterative algorithms
-    </h1>
-    <p>
+	</h1>
+	<p>
 This is not only a tongue-twister but an actual interactive introduction. Here will be the living plot illustrating a simple iterative algorithm that solves systems of 2 linear equations.
-    </p>
-    <p>
+	</p>
+	<p>
 Inherently, all iterative algorithms consist of three steps:
-    </p>
-    <ol>
-    <li>Start somewhere.</li>
-    <li>See if you got what you were looking for. If so — great, you are done!</li>
-    <li>If not, do something that brings you closer to the goal. Go to the step 2.</li>
-    </ol>
-    <p>
+	</p>
+	<ol>
+	<li>Start somewhere.</li>
+	<li>See if you got what you were looking for. If so — great, you are done!</li>
+	<li>If not, do something that brings you closer to the goal. Go to the step 2.</li>
+	</ol>
+	<p>
 Our example is a linear solver. It solves a system that looks like this:
-    </p>
-    <p class="formula">
+	</p>
+	<p class="formula">
 a<sub>11</sub> x + a<sub>12</sub> y = b<sub>1</sub>
 <br>
 a<sub>21</sub> x + a<sub>22</sub> y = b<sub>2</sub>
-    </p>
-    <p>
+	</p>
+	<p>
 We want to find <i>(x, y)</i> for every possible set of <i>a</i>s and <i>b</i>s.
-    </p>
-    <p>
+	</p>
+	<p>
 Geometrically speaking, a linear equation of two variables is just a straight line in 2D space. A system of two equations is a pair of lines. And the solution is the point where they intersect. It's as simple as that!
-    </p>
-    <p>
+	</p>
+	<p>
 Our algorithm rationale is as follows. The solution is a point in 2D that lies on both lines simultaneously. A point in space lies further from any point on the line than its own projection on that line. When we project any point in space on the first line, and then on the second, and then again on the first, and so on, it will get closer and closer to the solution. The point will “travel” from projection to projection one step at a time. At some point, that step shall get too small, smaller than some predetermined threshold, and we will know that we got somewhere close to the solution.
-    </p>
-    <p>
+	</p>
+	<p>
 In terms of the 3 steps from above it looks like this:
-    </p>
-    <ol class="formula">
-    <li>
+	</p>
+	<ol class="formula">
+	<li>
 Start at any point in 2D space.
-    </li>
-    <li>
+	</li>
+	<li>
 Stop when the distance point travels in one iteration is less than some predefined threshold.
-    </li>
-    <li>
+	</li>
+	<li>
 Project current point on one of the lines.
-    </li>
-    </ol>
-    <div id="canvas_ex"></div>
-    <p>
+	</li>
+	</ol>
+	<div id="canvas_ex"></div>
+	<p>
 The plot below is the interactive illustration of the algorithm. You can move the equation-lines, change the starting point or set your own tolerance.
-    </p>
+	</p>
 
-    <div id="solver_buttons">
-    <center>
-        <button type="button" id="button_1" style="width: 180px;" onclick="radio(1)" disabled="true">Lines</button>
-        <button type="button" id="button_2" style="width: 180px;" onclick="radio(2)">Start point</button>
-        <button type="button" id="button_3" style="width: 180px;" onclick="radio(3)">Stop distance</button>
-    </center>
-    </div>
-    <canvas id="solver_1" width=640 height=512></canvas>
-    <div style="text-align:right; width:640px; padding-bottom:12pt;">
-        <button type="button" id="reset_solver" onclick="reset_solver()">Reset</button>
-    </div>
-    <p class="results" id="results">
-    </p>
-    <script language="JavaScript">
-    init_solver_1();
-    </script>
+	<div id="solver_buttons">
+	<center>
+		<button type="button" id="button_1" style="width: 180px;" onclick="radio(1)" disabled="true">Lines</button>
+		<button type="button" id="button_2" style="width: 180px;" onclick="radio(2)">Start point</button>
+		<button type="button" id="button_3" style="width: 180px;" onclick="radio(3)">Stop distance</button>
+	</center>
+	</div>
+	<canvas id="solver_1" width=640 height=512></canvas>
+	<div style="text-align:right; width:640px; padding-bottom:12pt;">
+		<button type="button" id="reset_solver" onclick="reset_solver()">Reset</button>
+	</div>
+	<p class="results" id="results">
+	</p>
+	<script language="JavaScript">
+	init_solver_1();
+	</script>
 
 
-    <p>
+	<p>
 As you can see, everything matters.
-    </p>
-    <p>
+	</p>
+	<p>
 You can get some more precise solution with more iterations, but sometimes you'd need too many. <i>(This particular algorithm doesn't go past 100)</i> Some systems can be solved very fast and some can't be solved at all. And sometimes you can solve an unpleasant system simply by taking a lucky guess with a starting point.
-    </p>
+	</p>
 
-    <p>
+	<p>
 This was probably the simplest iterative algorithm ever. It has no much use in the “real life” though. Real iterative algorithms for solving systems of linear equations look like this:
-    </p>
-    <p class="formula">
+	</p>
+	<p class="formula">
 <a href="https://en.wikipedia.org/wiki/Iterative_method#Linear_systems">https://en.wikipedia.org/wiki/Iterative_method#Linear_systems</a>.
-    </p>
-    <p>
+	</p>
+	<p>
 Iterative algorithms may seem simple in their 3-step idea, but every single step brings a problem on its own.
-    </p>
-    <p>
+	</p>
+	<p>
 Finding good <b>initial</b> values is not a real problem for us. We can pick just any point on a plane. But it gets vitally important if you use algorithms in a batch. Some algorithms may work fast and have terrible precision, some vice versa. It makes sense to use some fast algorithm if only to find a good initial guess for a precise one.
-    </p>
-    <p>
+	</p>
+	<p>
 Sometimes you don't even know what sub-algorithms do you have in your batch, you let the algorithm choose how it will evolve. You let it make attempts and choose the best results. Simply put, this is how <a href="https://en.wikipedia.org/wiki/Genetic_algorithm">genetic algorithms</a> work.
-    </p>
-    <p>
+	</p>
+	<p>
 The next problem is the <b>termination criteria</b>. As you might have noticed, what we use for termination criteria doesn't work all that well even for the simplest case. Yes, there is some correlation between the threshold we pick and an error we get but it also depends on the system itself. The sharper the angle between our lines, the sooner we will stop and the larger our error will be.
-    </p>
-    <p>
+	</p>
+	<p>
 Even in our simple case establishing some good termination criteria is not trivial.
-    </p>
-    <p>
+	</p>
+	<p>
 The last problem is the <b>convergence</b>. The algorithm converges if it gets closer to the solution on every iteration and diverges if it gets even further. Our algorithm can only converge or not converge meaning full stop. It happens when the lines are parallel. They simply don't have a point of intersection and therefore we will never find it.
-    </p>
-    <p>
+	</p>
+	<p>
 But convergence is not a categorical thing. It is measurable. Convergence analysis is the main part of developing a good iterative algorithm. Better convergence means fewer iterations and faster results.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Conclusion
-    </h2>
-    <p>
+	</h2>
+	<p>
 Iterative algorithms are very simple on high-level, but on low-level, they may get very sophisticated.
-    </p>
-    <p>
+	</p>
+	<p>
 This introduction should have shown you a general idea of initial guess, termination criteria and convergence. But for the details, you have to get acquainted with the very algorithm you want to use. Whichever it would be.
-    </p>
+	</p>
 
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
 		<a href="index.html"><img src="favicon.ico"></a>
@@ -645,6 +660,6 @@ This introduction should have shown you a general idea of initial guess, termina
 	</td>
 	</tr>
 	</table>
-    </center>
-  </body>
+	</center>
+</body>
 </html>
