@@ -226,6 +226,21 @@ function draw_grid_on(context){
 	context.closePath();
 }
 
+function draw_arrow(context, x1, y1, x2, y2, color) {
+	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	const t = d < 64 ? (d / 64.) : 1.;
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - ((y2 - y1) * 4.5 / d + (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d - (x2 - x1) * 4.5 / d) * t);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + ((y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d + (x2 - x1) * 4.5 / d) * t);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
+}
+
 function draw_dots_and_guides_on(context, grid_xs, grid_ys, grid_n, do_guides, client_x, client_y){
 	// dots
 	context.beginPath();
@@ -252,14 +267,9 @@ function draw_dots_and_guides_on(context, grid_xs, grid_ys, grid_n, do_guides, c
 
 	// guides
 	if(do_guides){
-		context.setLineDash([4, 4]);
-		context.beginPath();
-		context.moveTo(x_to_client(grid_xs[closest_i]), y_to_client(grid_ys[closest_i]));
-		context.lineTo(client_x, client_y);
-		context.strokeStyle="#AA3311";
-		context.stroke();
-		context.closePath();
-		context.setLineDash([]);
+		context.lineWidth = 0.5;
+		draw_arrow(context, x_to_client(grid_xs[closest_i]), y_to_client(grid_ys[closest_i]), client_x, client_y, "#AA3311");
+		context.lineWidth = 1;
 	}
 
 	return closest_i;
