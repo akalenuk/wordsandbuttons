@@ -689,10 +689,10 @@ NURBS is just an acronym
 Previously we only talked about Bézier-like <a href="https://wordsandbuttons.online/programmers_guide_to_polynomials_and_splines.html">spline interpolation</a> and <a href="https://wordsandbuttons.online/quadratic_splines_are_useful_too.html">a special case of local quadratic splines</a>, which is essentially an interpolation as well.
 	</p>
 	<p>
-Interpolation is simple. You set a number of control points and you expect a curve to run through all of them. It is intuitive. But it is also limiting. What if you want to control a curve between the control points? What if you want some points to denote a sharp angle and some not? What if you want some points to attract a curve more than the other?
+Interpolation is simple. You set some control points and you expect a curve to run through all of them. It is intuitive. But it is also limiting. What if you want to control a curve between the control points? What if you want some points to denote a sharp angle and some not? What if you want some points to attract a curve more than the other?
 	</p>
 	<p>
-NURBS is one way to answer these questions. It is basically three concepts put together. Basis spline that is non-uniform and rational.
+NURBS is one way to answer these questions. Basis spline that is non-uniform and rational.
 	</p>
 	<p style="font-family: monospace;">
 NURBS = Non
@@ -713,7 +713,7 @@ Let's go through these concept one in a time.
 ...BS is for basis spline
 	</h2>
 	<p>
-The idea here is: for each parameter <i>t</i> we can get a pair of <i>(x, y)</i>, that will form a nice continuous curve, by mixing our control points in different proportions determined by some function of <i>t</i>. For the basis spline, these proportions are determined by the basis polynomials of certain degree.
+The idea here is: for each parameter <i>t</i> we can get a pair of <i>(x, y)</i>, that will form a nice continuous curve, by mixing our control points in different proportions determined by some function of <i>t</i>. For the basis spline, these proportions are determined by the basis polynomials of a certain degree.
 	</p>
 	<p>
 Just like with the polynomial interpolation, you need a certain amount of points to set a polynomial. 2 points for linear, 3 for quadratic, 4 for cubic, etc. This means that if we have 5 control points, and we want to turn them into a piecewise polynomial function, we should expect a 4-piece piecewise linear, 3-piece piecewise quadratic, 2-piece piecewise cubic, or a single polynomial of a degree 4.
@@ -737,10 +737,10 @@ The very basic input for NURBS is a set of <b>control points</b> and a basis pol
 NU... is for non-uniform
 	</h2>
 	<p>
-Having equal parametric pieces may not always be a good idea. That's why we need our spline to be non-uniform. Being able to select how long we want our pieces to be, and where to start, and where to end, — it all adds another level of control.
+Having equal parametric pieces may not always be the best. That's why we need our spline to be non-uniform. Being able to select how long we want our pieces to be, and where to start, and where to end, — it all adds another level of control.
 	</p>
 	<p>
-Here is the same spline, but beneath it, there is a rainbow stripe. Every color represents a parametric piece. You can drag them left and right to make some of them bigger and some smaller on the spline above.
+Here is the same spline, but beneath it, there is a rainbow stripe. Every color represents a parametric piece. You can drag them left and right to change their lengths.
 	</p>
 	<canvas id="nurbs_nu" width=640 height=512></canvas>
 	<br>
@@ -778,7 +778,7 @@ These are the weights of points. You can drag them up and down.
 	<canvas id="nurbs_r_weights" width=640 height=128></canvas>
 
 	<p>
-Of course, you don't see this, but under the hood the points' <i>x</i> and <y>y</i> coordinates are aligned with the <i>w</i> to keep the ratio. This means, if you don't want to get deep into all this homogeneous stuff, that for NURBS every point has its <b>weight</b> put into all the three coordinates.
+Of course, you don't see this, but under the hood, the points' <i>x</i> and <y>y</i> coordinates are aligned with the <i>w</i> to keep the ratio. This means if you don't want to get deep into all this homogeneous stuff, that for NURBS every point has its <b>weight</b> put into all the three coordinates.
 	</p>
 	<p class="formula">
 <i>w<sub>h</sub></i>: <i>(x, y) = (x<sub>h</sub>w<sub>h</sub>, y<sub>h</sub>w<sub>h</sub>, w<sub>h</sub>)</i>.
@@ -794,7 +794,7 @@ To build a NURBS curve you need:
 	</p>
 	<ul>
 	<li>an integer degree of basis polynomials</li>
-	<li>control points in form of <i>(x, y, w)</i></li>
+	<li>control points in the form of <i>(x, y, w)</i></li>
 	<li>knot vector as a list of numbers</li>
 	</ul>
 	<p>
@@ -805,7 +805,7 @@ For one, you can't do this with Bézier:
 	</p>
 	<canvas id="circle" width=640 height=512></canvas>
 	<p>
-This is a real circle, not a model. The NURBS recepie is:
+This is a real circle, not a model. The NURBS recipe is:
 	</p>
 	<pre>
 degree = 2;
