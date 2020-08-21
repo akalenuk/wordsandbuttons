@@ -342,7 +342,9 @@ function init_approximation_canvas(){
 			approximation_i = points_for_approximation.length-1;
 		} else { // move
 			approximation_i = nearest_i(xy, points_for_approximation);
+			points_for_approximation[approximation_i] = xy;
 		}
+		draw_canvas("approximation_canvas");
 	}, false);
 
 	canvas.addEventListener('mousemove', function(e){
@@ -373,7 +375,9 @@ function init_interpolation_canvas(){
 			interpolation_i = points_for_interpolation.length-1;
 		} else { // move
 			interpolation_i = nearest_i(xy, points_for_interpolation);
+			points_for_interpolation[interpolation_i] = xy;
 		}
+		draw_canvas("interpolation_canvas");
 	}, false);
 
 	canvas.addEventListener('mousemove', function(e){
@@ -404,7 +408,9 @@ function init_both_canvas(){
 			both_i = points_for_both.length-1;
 		} else { // move
 			both_i = nearest_i(xy, points_for_both);
+			points_for_both[both_i] = xy;
 		}
+		draw_canvas("both_canvas");
 	}, false);
 
 	canvas.addEventListener('mousemove', function(e){
@@ -700,7 +706,6 @@ function draw_canvas(canvas_name){
 	context.lineWidth = 1;
 
 	// points
-
 	for (var i = 0; i < points.length; ++i) {
 		if(canvas_name == "approximation_canvas") {
 			context.fillStyle="#d64562";
@@ -713,7 +718,7 @@ function draw_canvas(canvas_name){
 				context.fillStyle="#d64562";
 		}
 		context.beginPath();
-		context.arc(points[i][0], points[i][1], 3, 0, 2*Math.PI);
+		context.arc(points[i][0], points[i][1], 4, 0, 2*Math.PI);
 		context.fill();
 		context.closePath();
 	}
@@ -811,8 +816,8 @@ The polynomial approximation is about composing a polynomial that could substitu
 	</form>
 	<canvas id="approximation_canvas" width=640 height=640></canvas>
 	<div style="text-align:center; padding-bottom:12pt;">
-		<input type="radio" name="approx" id="a_1" checked value="Add" /><label for="a_1">Add a point;</label> &nbsp;
-		<input type="radio" name="approx" id="a_2" value="Move"><label for="a_2">move a point.</label> &nbsp;
+		<input type="radio" name="approx" id="a_1" value="Add" /><label for="a_1">Add a point;</label> &nbsp;
+		<input type="radio" name="approx" id="a_2" checked value="Move"><label for="a_2">move a point.</label> &nbsp;
 		<button type="button" style="width: 120pt;" onclick="undo_last_for_approximation()">Remove last</button>
 		<button type="button" style="width: 120pt;" onclick="reset_all_for_approximation()">Reset all</button>
 	</div>
@@ -860,8 +865,8 @@ With polynomial interpolations, it is about finding a polynomial that runs exact
 	</p>
 	<canvas id="interpolation_canvas" width=640 height=640></canvas>
 	<div style="text-align:center; padding-bottom:12pt;">
-		<input type="radio" name="ipol" id="i_1" checked value="Add" /><label for="i_1">Add a point;</label> &nbsp;
-		<input type="radio" name="ipol" id="i_2" value="Move"><label for="i_2">move a point.</label> &nbsp;
+		<input type="radio" name="ipol" id="i_1" value="Add" /><label for="i_1">Add a point;</label> &nbsp;
+		<input type="radio" name="ipol" id="i_2" checked value="Move"><label for="i_2">move a point.</label> &nbsp;
 		<button type="button" style="width: 120pt;" onclick="undo_last_for_interpolation()">Undo last</button>
 		<button type="button" style="width: 120pt;" onclick="reset_all_for_interpolation()">Reset all</button>
 	</div>
@@ -916,8 +921,8 @@ You can try it out with an interactive plot, too:
 	</form>
 	<canvas id="both_canvas" width=640 height=640></canvas>
 	<div style="text-align:center; padding-bottom:12pt;">
-		<input type="radio" name="both" id="b_1" checked value="Add" /><label for="b_1">Add a point;</label> &nbsp;
-		<input type="radio" name="both" id="b_2" value="Move"><label for="b_2">move a point.</label> &nbsp;
+		<input type="radio" name="both" id="b_1" value="Add" /><label for="b_1">Add a point;</label> &nbsp;
+		<input type="radio" name="both" id="b_2" checked value="Move"><label for="b_2">move a point.</label> &nbsp;
 		<button type="button" style="width: 108pt;" onclick="undo_last_for_both()">Undo last</button>
 		<button type="button" style="width: 108pt;" onclick="reset_all_for_both()">Reset all</button>
 	</div>
