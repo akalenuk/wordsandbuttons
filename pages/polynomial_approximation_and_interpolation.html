@@ -331,72 +331,93 @@ function approximation_with_autoweighted_interpolating_n(points, n, interpolatin
 }
 
 // the canvases
+var approximation_i = 0;
 function init_approximation_canvas(){
 	var canvas = document.getElementById("approximation_canvas");
 	canvas.addEventListener('mousedown', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
-		points_for_approximation.push([e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]);
+		const xy = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		if(document.getElementById("a_1").checked) { // add
+			points_for_approximation.push(xy);
+			approximation_i = points_for_approximation.length-1;
+		} else { // move
+			approximation_i = nearest_i(xy, points_for_approximation);
+		}
 	}, false);
 
 	canvas.addEventListener('mousemove', function(e){
 		if(e.buttons == 1){
 			canvas_rect = canvas.getBoundingClientRect();
-			points_for_approximation[points_for_approximation.length-1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+			points_for_approximation[approximation_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
 			draw_canvas("approximation_canvas");
 		}
 	}, false);
 
 	canvas.addEventListener('mouseup', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
-		points_for_approximation[points_for_approximation.length-1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		points_for_approximation[approximation_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
 		draw_canvas("approximation_canvas");
 	}, false);
 
 	draw_canvas("approximation_canvas");
 }
 
+var interpolation_i = 0;
 function init_interpolation_canvas(){
 	var canvas = document.getElementById("interpolation_canvas");
 	canvas.addEventListener('mousedown', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
-		points_for_interpolation.push([e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]);
+		const xy = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		if(document.getElementById("i_1").checked) { // add
+			points_for_interpolation.push(xy);
+			interpolation_i = points_for_interpolation.length-1;
+		} else { // move
+			interpolation_i = nearest_i(xy, points_for_interpolation);
+		}
 	}, false);
 
 	canvas.addEventListener('mousemove', function(e){
 		if(e.buttons == 1){
 			canvas_rect = canvas.getBoundingClientRect();
-			points_for_interpolation[points_for_interpolation.length-1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+			points_for_interpolation[interpolation_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
 			draw_canvas("interpolation_canvas");
 		}
 	}, false);
 
 	canvas.addEventListener('mouseup', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
-		points_for_interpolation[points_for_interpolation.length-1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		points_for_interpolation[interpolation_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
 		draw_canvas("interpolation_canvas");
 	}, false);
 
 	draw_canvas("interpolation_canvas");
 }
 
+var both_i = 0;
 function init_both_canvas(){
 	var canvas = document.getElementById("both_canvas");
 	canvas.addEventListener('mousedown', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
-		points_for_both.push([e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]);
+		const xy = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		if(document.getElementById("b_1").checked) { // add
+			points_for_both.push(xy);
+			both_i = points_for_both.length-1;
+		} else { // move
+			both_i = nearest_i(xy, points_for_both);
+		}
 	}, false);
 
 	canvas.addEventListener('mousemove', function(e){
 		if(e.buttons == 1){
 			canvas_rect = canvas.getBoundingClientRect();
-			points_for_both[points_for_both.length-1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+			points_for_both[both_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
 			draw_canvas("both_canvas");
 		}
 	}, false);
 
 	canvas.addEventListener('mouseup', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
-		points_for_both[points_for_both.length-1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		points_for_both[both_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
 		draw_canvas("both_canvas");
 	}, false);
 
@@ -700,7 +721,8 @@ function draw_canvas(canvas_name){
 
 // under
 function reset_all_for_approximation() {
-	points_for_approximation = [];
+	points_for_approximation = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315], [587, 172]];
+	approximation_i = 0;
 	draw_canvas("approximation_canvas");
 }
 
@@ -785,12 +807,12 @@ Polynomial approximation is bringing a polynomial close enough to substitute ano
 	<button type="button" onclick="inc('app_degree')">+</button>
 	<br>
 	</form>
-	<input type="radio" name="approx" id="a_1" checked value="Add" /><label for="a_1">Add a point;</label> &nbsp;
-	<input type="radio" name="approx" id="a_2" value="Move"><label for="a_2">move a point.</label><br>
 	<canvas id="approximation_canvas" width=640 height=640></canvas>
-	<div style="text-align:right; width:640px; padding-bottom:12pt;">
-		<button type="button" style="width: 108pt;" onclick="undo_last_for_approximation()">Undo last</button>
-		<button type="button" style="width: 108pt;" onclick="reset_all_for_approximation()">Reset all</button>
+	<div style="text-align:center; padding-bottom:12pt;">
+		<input type="radio" name="approx" id="a_1" checked value="Add" /><label for="a_1">Add a point;</label> &nbsp;
+		<input type="radio" name="approx" id="a_2" value="Move"><label for="a_2">move a point.</label> &nbsp;
+		<button type="button" style="width: 120pt;" onclick="undo_last_for_approximation()">Remove last</button>
+		<button type="button" style="width: 120pt;" onclick="reset_all_for_approximation()">Reset all</button>
 	</div>
 	<div id="approximation_formula" class="formula">
 	</div>
@@ -835,9 +857,11 @@ The word <i>interpolation</i> also comes from Latin and it roughly translates as
 With polynomial interpolations, it is about finding a polynomial that runs exactly through the points we want. Here, try it out. You can add and remove points, but you can't select a polynomial degree now since you can't have this degree less than the number of your points minus one.
 	</p>
 	<canvas id="interpolation_canvas" width=640 height=640></canvas>
-	<div style="text-align:right; width:640px; padding-bottom:12pt;">
-		<button type="button" style="width: 108pt;" onclick="undo_last_for_interpolation()">Undo last</button>
-		<button type="button" style="width: 108pt;" onclick="reset_all_for_interpolation()">Reset all</button>
+	<div style="text-align:center; padding-bottom:12pt;">
+		<input type="radio" name="ipol" id="i_1" checked value="Add" /><label for="i_1">Add a point;</label> &nbsp;
+		<input type="radio" name="ipol" id="i_2" value="Move"><label for="i_2">move a point.</label> &nbsp;
+		<button type="button" style="width: 120pt;" onclick="undo_last_for_interpolation()">Undo last</button>
+		<button type="button" style="width: 120pt;" onclick="reset_all_for_interpolation()">Reset all</button>
 	</div>
 	<div id="interpolation_formula" class="formula">
 	</div>
@@ -889,7 +913,9 @@ You can try it out with an interactive plot, too:
 	<button type="button" onclick="inc('ips')">+</button>
 	</form>
 	<canvas id="both_canvas" width=640 height=640></canvas>
-	<div style="text-align:right; width:640px; padding-bottom:12pt;">
+	<div style="text-align:center; padding-bottom:12pt;">
+		<input type="radio" name="both" id="b_1" checked value="Add" /><label for="b_1">Add a point;</label> &nbsp;
+		<input type="radio" name="both" id="b_2" value="Move"><label for="b_2">move a point.</label> &nbsp;
 		<button type="button" style="width: 108pt;" onclick="undo_last_for_both()">Undo last</button>
 		<button type="button" style="width: 108pt;" onclick="reset_all_for_both()">Reset all</button>
 	</div>
