@@ -897,16 +897,16 @@ When the optimizer finishes, we will have our polynomial both interpolating and 
 The downside of this approach is that the optimizer may finish its work anytime between 10 nanoseconds and 6 billion years. This depends on the number of variables and the polynomial degree.
 	</p>
 	<p>
-The other approach is a hack. The thing is, in practice, we never get out polynomial exactly interpolating due to the computational error. Now if we're ok with this, why don't we agree on some tolerable error and use the orthogonal principle matrix multiplying our interpolating points more and more, until the approximating polynomial fits them within the error?
+The other approach is a hack. The thing is, in practice, we never get our polynomial exactly interpolating due to the computational error. If we're ok with this, we can choose some tolerable interpolation error beforehand and use the same orthogonal principle matrix. This will approximate our points. Then we'll duplicate our interpolating points and recalculate the approximating polynomial. The error for these points will go down. We'll keep duplicating them until the approximating polynomial fits them within the tolerable interpolation error.
 	</p>
 	<p>
-This works because what the approximation does, it minimizes the sum or squared residuals. If you put a point twice, its residual will be twice as important to the optimizer. If you add it 100 times, it will attract the polynomial 100 times stronger than any other point.
+This works because what the approximation does, it minimizes the sum of squared residuals. If you put a point twice, its residual will be twice as important to the optimizer as any other point. If you add it 128 times, it will attract the polynomial 128 times stronger than its neighbors.
 	</p>
 	<p>
-The brutal simplicity of this approach is its strength. You only need to optimize until you're ok with the error, and you only have one variable to alter.
+The brutal simplicity of this approach is also its strength. You only have one variable to alter, so the optimization process is trivial.
 	</p>
 	<p>
-You can try it out with an interactive plot, too:
+You can try it out with an interactive plot.
 	</p>
 	<form onsubmit="return false;">
 	Polynomial degree:
