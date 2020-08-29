@@ -7,6 +7,9 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 
 ## Pages
 
+- [Why is it ok to divide by 0.0?](https://wordsandbuttons.online/why_is_it_ok_to_divide_by_0_0.html) This explains why the division by zero in floating point numbers is ok.
+<sup>[#programming](https://wordsandbuttons.online/programming.html)</sup> 
+
 - [Can we use lemniscates for ultra-cheap vector graphics?](https://wordsandbuttons.online/can_we_use_lemniscates_for_ultra_cheap_vector_gaphics.html) This depicts an old idea of using multifocal lemniscates to draw arbitrary curves. In somewhat limited scope, this may be indeed an economical alternative to splines.
 <sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> <sup>[#show-and-tell](https://wordsandbuttons.online/show-and-tell.html)</sup> 
 
