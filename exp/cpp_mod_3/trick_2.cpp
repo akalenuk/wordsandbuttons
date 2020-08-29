@@ -4,7 +4,7 @@
 #include <array>
 
 unsigned int next_in_3(unsigned int x) {
-    return (x+1)%3;
+    return 2 >> (1 - x);
 }
 
 int main() {

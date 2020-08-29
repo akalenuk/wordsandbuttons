@@ -3,16 +3,16 @@
 #include <random>
 #include <array>
 
-static const std::array<int, 3> mods {1, 2, 0};
-int next_in_3(int x) {
+static const std::array<unsigned int, 3> mods {1u, 2u, 0u};
+unsigned int next_in_3(unsigned int x) {
     return mods[x];
 }
 
 int main() {
     constexpr auto TheSize = 16 * 10000000;
     std::mt19937 rng(0);
-    std::uniform_int_distribution<int> distribution(0, 2);
-    std::vector<int> xs(TheSize);
+    std::uniform_int_distribution<unsigned int> distribution(0, 2);
+    std::vector<unsigned int> xs(TheSize);
     for (auto &x : xs) {
         x = distribution(rng);
     }

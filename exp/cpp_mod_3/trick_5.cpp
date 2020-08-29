@@ -4,7 +4,7 @@
 #include <array>
 
 unsigned int next_in_3(unsigned int x) {
-    return (x+1)%3;
+    return (static_cast<__uint128_t>(static_cast<std::uint64_t>(6148914691236517206) * (x + 2)) * 3) >> 64u;
 }
 
 int main() {
