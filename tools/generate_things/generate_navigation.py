@@ -56,7 +56,7 @@ menu += '</p>'
 
 timeline = ''
 for (d, l, t, desc, kwds) in date_link_title_description_keywords[::-1]:
-	timeline += '<p class="title">' + '<a href="' + l + '">' + t + '</a><sup><span class="timestamp">' + d.replace('-', '/') + '</span></p>\n'
+	timeline += '<p class="title">' + '<a href="' + l + '">' + t + '</a></p>\n'
 	timeline += '<p class="description">' + desc + '</p>\n'
 	timeline += '<p class="links">'
 	for kw in sorted(list(kwds)):
@@ -87,7 +87,7 @@ for title in list(all_keywords):
 	for (d, l, t, desc, kwds) in date_link_title_description_keywords[::-1]:
 		if not title in kwds:
 			continue
-		timeline += '<p class="title">' + '<a href="' + l + '">' + t + '</a><sup><span class="timestamp">' + d.replace('-', '/') + '</span></p>\n'
+		timeline += '<p class="title">' + '<a href="' + l + '">' + t + '</a></p>\n'
 		timeline += '<p class="description">' + desc + '</p>\n'
 		timeline += '<p class="links">'
 		for kw in sorted(list(kwds)):
