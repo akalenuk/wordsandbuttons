@@ -20,9 +20,9 @@ for file_name in os.listdir(path):
 				continue
 			new_text = text
 			for span in spans:
-				new_text = new_text.replace('<span>' + span, '<span id="' + text_to_id(span) + '">' + span)
+				new_text = new_text.replace('<span>' + span, '<span id="index_' + text_to_id(span) + '">' + span)
 			for Span in Spans:
-				new_text = new_text.replace('<Span>' + Span, '<Span id="' + text_to_id(Span) + '">' + Span)
+				new_text = new_text.replace('<Span>' + Span, '<Span id="index_' + text_to_id(Span) + '">' + Span)
 			html = open(path + file_name, 'w')
 			html.write(new_text)
 			html.close()
