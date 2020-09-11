@@ -50,7 +50,13 @@ f.close()
 index = '%s' % template
 
 menu = '<p class="links">'
-for kw in sorted(list(all_keywords)):
+for kw in ['mathematics', 'algorithms', 'programming']:
+	menu += '<nobr><a style="padding-right: 12pt;" href="' + kw + '.html">#' + kw + '</a></nobr> '
+menu += '<br>'
+for kw in ['performance', 'languages']:
+	menu += '<nobr><a style="padding-right: 12pt;" href="' + kw + '.html">#' + kw + '</a></nobr> '
+menu += '<br>'
+for kw in ['tutorials', 'show-and-tell']:
 	menu += '<nobr><a style="padding-right: 12pt;" href="' + kw + '.html">#' + kw + '</a></nobr> '
 menu += '</p>'
 
@@ -77,7 +83,19 @@ for title in list(all_keywords):
 	timeline = ''
 
 	menu = '<p class="links">'
-	for kw in sorted(list(all_keywords)):
+	for kw in ['mathematics', 'algorithms', 'programming']:
+		if kw == title:
+			menu += '<nobr><span style="padding-right: 12pt; color: #999;">#' + kw + '</span></nobr> '
+		else:
+			menu += '<nobr><a style="padding-right: 12pt;" href="' + kw + '.html">#' + kw + '</a></nobr> '
+	menu += '<br>'
+	for kw in ['performance', 'languages']:
+		if kw == title:
+			menu += '<nobr><span style="padding-right: 12pt; color: #999;">#' + kw + '</span></nobr> '
+		else:
+			menu += '<nobr><a style="padding-right: 12pt;" href="' + kw + '.html">#' + kw + '</a></nobr> '
+	menu += '<br>'
+	for kw in ['tutorials', 'show-and-tell']:
 		if kw == title:
 			menu += '<nobr><span style="padding-right: 12pt; color: #999;">#' + kw + '</span></nobr> '
 		else:
