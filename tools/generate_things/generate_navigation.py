@@ -87,7 +87,7 @@ for (f, i, t) in sorted(spans, key = lambda fit: fit[2].upper()):
 		if cur_letter != '':
 			the_index += '</p>\n'
 		the_index += '<h2>'+letter+'</h2>\n'
-		the_index += '<p>\n'
+		the_index += '<p class="index_items">\n'
 		cur_letter = letter
 	the_index += '<nobr><a style="padding-right: 36pt;" href="' + f + '#' + i + '">' + t + '</a></nobr>\n'
 the_index += '</p>\n'
