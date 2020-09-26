@@ -1,5 +1,9 @@
-// Subset of rational numbers in u32/u32
-struct R<U> {
+pub trait U32U64Only {}
+impl U32U64Only for u32 {}
+impl U32U64Only for u64 {}
+
+// Subset of rational numbers in u32/u32 or u64/u64
+struct R<U:U32U64Only> {
     n : U,  // numerator
     d : U,  // denominator
     f : bool, // finite
@@ -19,6 +23,7 @@ fn simplify<U>(x: R<U>) -> R<U>
            + std::ops::Div<Output = U>
            + std::convert::From<u32>
            + std::marker::Copy
+           + U32U64Only
 {
     if !x.f || x.n == U::from(0_u32) { 
         x
