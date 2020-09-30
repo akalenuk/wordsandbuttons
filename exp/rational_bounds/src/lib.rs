@@ -66,6 +66,27 @@ impl std::cmp::PartialEq for R<u32> {
 	}
 }
 
+impl std::cmp::PartialOrd for R<u64> {
+	fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+		if self.p && !other.p {
+			Some(std::cmp::Ordering::Greater)
+		} else if !self.p && other.p {
+			Some(std::cmp::Ordering::Less)
+		} else {
+			// self.p = other.p
+			let a = if self.p {self.n as u128 * other.d as u128} else {other.n as u128 * self.d as u128};
+			let b = if other.p {other.n as u128 * self.d as u128} else {self.n as u128 * other.d as u128};
+			Some(a.cmp(&b))
+		}
+	}
+}
+
+impl std::cmp::PartialEq for R<u64> {
+	fn eq(&self, other: &Self) -> bool {
+		self.p == other.p && self.n == other.n && self.d == other.d
+	}
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -125,6 +146,22 @@ mod tests {
 	fn equality_on_r32() {
 		let a = R::<u32>{n:1, d:2, p:true};
 		let b = R::<u32>{n:1, d:2, p:true};
+		assert!(a == b);
+	}
+
+	#[test]
+	fn comparison_on_r64() {
+		let a = R::<u64>{n:1, d:2, p:true};
+		let b = R::<u64>{n:3, d:5, p:true};
+		assert!(a < b);
+		assert!(b > a);
+		assert!(a != b);
+	}
+
+	#[test]
+	fn equality_on_r64() {
+		let a = R::<u64>{n:1, d:2, p:true};
+		let b = R::<u64>{n:1, d:2, p:true};
 		assert!(a == b);
 	}
 }
