@@ -78,7 +78,7 @@ for (kw, _) in keyword_description.items():
 menu += '</p>'
 
 # index is now real index not a timeline
-the_index = ''
+the_index = '<h1 title="A real index on index.html! How cool is that!">Index</h1>'
 spans = read_index_spans(PAGES_DIR)
 cur_letter = ''
 for (f, i, t) in sorted(spans, key = lambda fit: fit[2].upper()):
