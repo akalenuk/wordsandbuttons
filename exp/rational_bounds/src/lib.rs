@@ -17,7 +17,7 @@ struct RB32 {
 
 fn simplify<U>(x: R<U>) -> R<U>
 	where U:std::cmp::PartialEq
-			+ std::ops::Sub<Output = U>
+			+ std::ops::SubAssign
 			+ std::cmp::PartialOrd
 			+ std::ops::Div<Output = U>
 			+ std::convert::From<u32>
@@ -27,16 +27,14 @@ fn simplify<U>(x: R<U>) -> R<U>
 	if x.n == U::from(0_u32) || x.d == U::from(0_u32) { 
 		x
 	} else {
-		fn gcd<U>(a:U, b:U) -> U 
-			where U: std::ops::Sub<Output = U>
-					+ std::cmp::PartialOrd
-					+ Copy
-		{
-			if a > b {gcd(a - b, b)}
-			else if a < b {gcd(a, b - a)}
-			else {a}
+		// recursive GCD can easily eat up all the stack on u64 numbers
+		let mut a = x.n;
+		let mut b = x.d;
+		while a != b {
+			if a > b {a -= b;}
+			else if a < b {b -= a;}
 		}
-		let cd = gcd(x.n, x.d); // common divisor
+		let cd = a; // common divisor
 		if cd == U::from(1_u32) {
 			x
 		} else {
@@ -89,17 +87,14 @@ impl std::cmp::PartialEq for R<u64> {
 
 fn downcast_to_lower_bound(x: R<u64>) -> R<u32>
 {
-	println!("before: {} {}", x.n, x.d);
 	let simple_x = simplify(x);
 	let mut n = simple_x.n;
 	let mut d = simple_x.d;
 	let p = simple_x.p;
-	println!("simple: {} {}", n, d);
 	while n > u32::MAX.into() || d > u32::MAX.into() {
-		n >> 1;
-		d >> 1;
+		n >>= 1;
+		d >>= 1;
 	}
-	println!("after all: {} {} \n\n", n, d);
 	// todo: real lower bound
 	R::<u32>{n: n as u32, d: d as u32, p: p}
 }
@@ -184,9 +179,9 @@ mod tests {
 
 	#[test]
 	fn downcast_doesnt_hang() {
-		let a = R::<u64>{n:5000000029 , d: 5000000039, p:true};
+		let a = R::<u64>{n:5000000029 , d: 5100000011, p:true};
 		let b = downcast_to_lower_bound(a);
-		assert_eq!(b.n, 991);
-		assert_eq!(b.d, 1);
+		assert_eq!(b.n, 2500000014);
+		assert_eq!(b.d, 2550000005);
 	}
 }
