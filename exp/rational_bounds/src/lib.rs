@@ -15,7 +15,7 @@ struct RB32 {
 	ub : R<u32>  // upper bound
 }
 
-fn simplify<U>(x: R<U>) -> R<U> 
+fn simplify<U>(x: R<U>) -> R<U>
 	where U:std::cmp::PartialEq
 			+ std::ops::Sub<Output = U>
 			+ std::cmp::PartialOrd
@@ -85,6 +85,23 @@ impl std::cmp::PartialEq for R<u64> {
 	fn eq(&self, other: &Self) -> bool {
 		self.p == other.p && self.n == other.n && self.d == other.d
 	}
+}
+
+fn downcast_to_lower_bound(x: R<u64>) -> R<u32>
+{
+	println!("before: {} {}", x.n, x.d);
+	let simple_x = simplify(x);
+	let mut n = simple_x.n;
+	let mut d = simple_x.d;
+	let p = simple_x.p;
+	println!("simple: {} {}", n, d);
+	while n > u32::MAX.into() || d > u32::MAX.into() {
+		n >> 1;
+		d >> 1;
+	}
+	println!("after all: {} {} \n\n", n, d);
+	// todo: real lower bound
+	R::<u32>{n: n as u32, d: d as u32, p: p}
 }
 
 #[cfg(test)]
@@ -163,5 +180,13 @@ mod tests {
 		let a = R::<u64>{n:1, d:2, p:true};
 		let b = R::<u64>{n:1, d:2, p:true};
 		assert!(a == b);
+	}
+
+	#[test]
+	fn downcast_doesnt_hang() {
+		let a = R::<u64>{n:5000000029 , d: 5000000039, p:true};
+		let b = downcast_to_lower_bound(a);
+		assert_eq!(b.n, 991);
+		assert_eq!(b.d, 1);
 	}
 }
