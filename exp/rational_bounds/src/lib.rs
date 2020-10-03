@@ -126,6 +126,14 @@ fn downcast_to_lower_bound(x: R<u64>) -> R<u32>
 	}
 }
 
+fn downcast_to_upper_bound(x: R<u64>) -> R<u32>
+{
+	let minus_x = R::<u64>{n: x.n, d: x.d, p: !x.p};
+	let downcasted_minus_x = downcast_to_lower_bound(minus_x);
+	let dmx = downcasted_minus_x;
+	R::<u32>{n: dmx.n as u32, d: dmx.d as u32, p: !dmx.p}
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -217,8 +225,18 @@ mod tests {
 		for i in 5000000000..5000000099 {
 			let a = R::<u64>{n: i , d: i + 100000000, p:true};
 			let b = downcast_to_lower_bound(a);
-			let c = R::<u64>{n: b.n as u64 , d: b.d as u64, p:true};
+			let c = R::<u64>{n: b.n as u64, d: b.d as u64, p:true};
 			assert!(c <= a);
+		}
+	}
+
+	#[test]
+	fn downcast_to_upper_bound_downcasts_to_upper() {	// warning! This is the same test as above so not very good
+		for i in 5000000000..5000000099 {
+			let a = R::<u64>{n: i , d: i + 100000000, p:true};
+			let b = downcast_to_upper_bound(a);
+			let c = R::<u64>{n: b.n as u64, d: b.d as u64, p:true};
+			assert!(c >= a);
 		}
 	}
 }
