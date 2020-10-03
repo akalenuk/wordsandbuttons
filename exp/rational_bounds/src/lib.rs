@@ -85,6 +85,11 @@ impl std::cmp::PartialEq for R<u64> {
 	}
 }
 
+fn upcast(x: R<u32>) -> R<u64>
+{
+	R::<u64>{n: x.n as u64, d: x.d as u64, p: x.p};
+}
+
 fn downcast_to_lower_bound(x: R<u64>) -> R<u32>
 {
 	let simple_x = simplify(x);
@@ -95,8 +100,22 @@ fn downcast_to_lower_bound(x: R<u64>) -> R<u32>
 		n >>= 1;
 		d >>= 1;
 	}
-	// todo: real lower bound
-	R::<u32>{n: n as u32, d: d as u32, p: p}
+	// lower bound (there is a specific logic behind that but I can't get it right so I'd just test all the variants)
+	let hypothesis1 = R::<u64>{n: n, d: d, p: p};
+	let hypothesis2 = R::<u64>{n: (n - 1), d: d, p: p};
+	let hypothesis3 = R::<u64>{n: n, d: (d + 1), p: p};
+	let mut hypotheses = Vec::new();
+	if hypothesis1 <= x {hypotheses.push(hypothesis1);}
+	if hypothesis2 <= x {hypotheses.push(hypothesis2);}
+	if hypothesis3 <= x {hypotheses.push(hypothesis3);}
+	let best_of_three = hypotheses.iter().max();
+	match best_of_three {
+		Some(y)	=> if y.n > u32::MAX.into() || d.n > u32::MAX.into()
+				{downcast_to_lower_bound(y)} 
+			else 
+				{R::<u32>{n: y.n as u32, d: y.d as u32, p: y.p}}
+		None	=> panic!("Um. That can't be right."),
+	}
 }
 
 #[cfg(test)]
