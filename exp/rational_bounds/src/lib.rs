@@ -3,6 +3,7 @@ impl U32U64Only for u32 {}
 impl U32U64Only for u64 {}
 
 // Subset of rational numbers in u32/u32 or u64/u64
+#[derive(Copy, Clone)]
 struct R<U:U32U64Only> {
 	n : U,  // numerator
 	d : U,  // denominator
@@ -87,7 +88,7 @@ impl std::cmp::PartialEq for R<u64> {
 
 fn upcast(x: R<u32>) -> R<u64>
 {
-	R::<u64>{n: x.n as u64, d: x.d as u64, p: x.p};
+	R::<u64>{n: x.n as u64, d: x.d as u64, p: x.p}
 }
 
 fn downcast_to_lower_bound(x: R<u64>) -> R<u32>
@@ -104,14 +105,21 @@ fn downcast_to_lower_bound(x: R<u64>) -> R<u32>
 	let hypothesis1 = R::<u64>{n: n, d: d, p: p};
 	let hypothesis2 = R::<u64>{n: (n - 1), d: d, p: p};
 	let hypothesis3 = R::<u64>{n: n, d: (d + 1), p: p};
+	let hypothesis4 = R::<u64>{n: (n + 1), d: d, p: p};
+	let hypothesis5 = R::<u64>{n: n, d: (d - 1), p: p};
 	let mut hypotheses = Vec::new();
-	if hypothesis1 <= x {hypotheses.push(hypothesis1);}
-	if hypothesis2 <= x {hypotheses.push(hypothesis2);}
-	if hypothesis3 <= x {hypotheses.push(hypothesis3);}
-	let best_of_three = hypotheses.iter().max();
+	if hypothesis1 <= simple_x {hypotheses.push(hypothesis1);}
+	if hypothesis2 <= simple_x {hypotheses.push(hypothesis2);}
+	if hypothesis3 <= simple_x {hypotheses.push(hypothesis3);}
+	if hypothesis4 <= simple_x {hypotheses.push(hypothesis4);}
+	if hypothesis5 <= simple_x {hypotheses.push(hypothesis5);}
+	let best_of_three = hypotheses.iter().max_by(|x, y|
+		if x <= y && x >= y {std::cmp::Ordering::Equal}
+		else if x <= y {std::cmp::Ordering::Less}
+		else {std::cmp::Ordering::Greater});
 	match best_of_three {
-		Some(y)	=> if y.n > u32::MAX.into() || d.n > u32::MAX.into()
-				{downcast_to_lower_bound(y)} 
+		Some(y)	=> if y.n > u32::MAX.into() || y.n > u32::MAX.into()
+				{downcast_to_lower_bound(*y)} 
 			else 
 				{R::<u32>{n: y.n as u32, d: y.d as u32, p: y.p}}
 		None	=> panic!("Um. That can't be right."),
@@ -202,5 +210,15 @@ mod tests {
 		let b = downcast_to_lower_bound(a);
 		assert_eq!(b.n, 2500000014);
 		assert_eq!(b.d, 2550000005);
+	}
+
+	#[test]
+	fn downcast_to_lower_bound_downcasts_to_lower() {	// warning! I lack mathematical intuition to do this properly
+		for i in 5000000000..5000000099 {
+			let a = R::<u64>{n: i , d: i + 100000000, p:true};
+			let b = downcast_to_lower_bound(a);
+			let c = R::<u64>{n: b.n as u64 , d: b.d as u64, p:true};
+			assert!(c <= a);
+		}
 	}
 }
