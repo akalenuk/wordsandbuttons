@@ -5,8 +5,8 @@ PAGES_DIR = "../../pages"
 
 keyword_description = {
 'tutorials': 'Tutorials with clickable, draggable, and discoverable things. As brief as possible while as comprehensive as necessary.',
-'quizzes': 'Challenge yourself, learn stuff, and have fun.',
 'demos': 'Clickable explanations of curious things.',
+'quizzes': 'Challenge yourself, learn stuff, and have fun.',
 'mathematics': 'Interactive explanations of mathematical concepts witten for the practicing programmers.',
 'algorithms': 'Playable algorithms.',
 'programming': 'Interactive essays on non-trivial programming ideas and languages. By the way, if you prefer books to blogs, <a href="https://wordsandbuttons.online/SYTYKC.pdf">there is a free book</a> that was originally made from this section.'
@@ -74,7 +74,7 @@ index = '%s' % template
 
 menu = '<p class="links">'
 for (kw, _) in keyword_description.items():
-	menu += '<nobr><a style="padding-right: 12pt;" href="all_' + kw + '.html">#' + kw + '</a></nobr> '
+	menu += '<nobr><a style="padding-right: 8pt;" href="all_' + kw + '.html">#' + kw + '</a></nobr> '
 menu += '</p>'
 
 # index is now real index not a timeline
@@ -89,7 +89,7 @@ for (f, i, t) in sorted(spans, key = lambda fit: fit[2].upper()):
 		the_index += '<h2>'+letter+'</h2>\n'
 		the_index += '<p class="index_items">\n'
 		cur_letter = letter
-	the_index += '<nobr><a style="padding-right: 36pt;" href="' + f + '#' + i + '">' + t + '</a></nobr>\n'
+	the_index += '<nobr><a style="padding-right: 24pt;" href="' + f + '#' + i + '">' + t + '</a></nobr>\n'
 the_index += '</p>\n'
 
 
@@ -110,9 +110,9 @@ for title in list(all_keywords):
 	menu = '<p class="links">'
 	for (kw, _) in keyword_description.items():
 		if kw == title:
-			menu += '<nobr><span style="padding-right: 12pt; color: #999;">#' + kw + '</span></nobr> '
+			menu += '<nobr><span style="padding-right: 8pt; color: #999;">#' + kw + '</span></nobr> '
 		else:
-			menu += '<nobr><a style="padding-right: 12pt;" href="all_' + kw + '.html">#' + kw + '</a></nobr> '
+			menu += '<nobr><a style="padding-right: 8pt;" href="all_' + kw + '.html">#' + kw + '</a></nobr> '
 	menu += '</p>'
 
 	for (d, l, t, desc, kwds) in date_link_title_description_keywords[::-1]:
@@ -123,9 +123,9 @@ for title in list(all_keywords):
 		timeline += '<p class="links">'
 		for kw in sorted(list(kwds)):
 			if kw == title:
-				timeline += '<span style="padding-right: 12pt; color: #999;">#' + kw + '</span> '
+				timeline += '<span style="padding-right: 8pt; color: #999;">#' + kw + '</span> '
 			else:
-				timeline += '<a style="padding-right: 12pt;" href="all_' + kw + '.html">#' + kw + '</a> '
+				timeline += '<a style="padding-right: 8pt;" href="all_' + kw + '.html">#' + kw + '</a> '
 		timeline += '</p>\n'
 	page = page.replace('<h1>Title</h1>', '<h1><a href="index.html">Words and Buttons</a>: ' + title + '</h1>')
 	page = page.replace('<p>Description</p>', '<p>' + keyword_description[title] + '</p>')
