@@ -134,6 +134,14 @@ fn downcast_to_upper_bound(x: R<u64>) -> R<u32>
 	R::<u32>{n: dmx.n as u32, d: dmx.d as u32, p: !dmx.p}
 }
 
+fn non_negative_add(a: R<u32>, b: R<u32>) -> R<u64> {
+	R::<u64> {n: a.n as u64 * b.d as u64 + b.n as u64 * a.d as u64, d: b.d as u64 * a.d as u64, p: true}
+}
+
+fn non_negative_sub(a: R<u32>, b: R<u32>) -> R<u64> {
+	R::<u64> {n: a.n as u64 * b.d as u64 - b.n as u64 * a.d as u64, d: b.d as u64 * a.d as u64, p: true}
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -238,5 +246,21 @@ mod tests {
 			let c = R::<u64>{n: b.n as u64, d: b.d as u64, p:true};
 			assert!(c >= a);
 		}
+	}
+
+	#[test]
+	fn non_negative_add_should_add() {
+		let a = R::<u32>{n:1, d:2, p:true};
+		let b = R::<u32>{n:1, d:3, p:true};
+		let c = non_negative_add(a, b);
+		assert!(c == R::<u64>{n:5, d:6, p:true})
+	}
+
+	#[test]
+	fn non_negative_sub_should_sub() {
+		let a = R::<u32>{n:1, d:2, p:true};
+		let b = R::<u32>{n:1, d:3, p:true};
+		let c = non_negative_sub(a, b);
+		assert!(c == R::<u64>{n:1, d:6, p:true})
 	}
 }
