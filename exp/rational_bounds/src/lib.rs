@@ -161,6 +161,15 @@ fn add(a: R<u32>, b: R<u32>) -> R<u64> {
 	else {inverted_r64(non_negative_add(a, b))}
 }
 
+fn mul(a: R<u32>, b: R<u32>) -> R<u64> {
+	R::<u64> {n: a.n as u64 * b.n as u64, d: a.d as u64 * b.d as u64, p: a.p == b.p}
+}
+
+fn div(a: R<u32>, b: R<u32>) -> R<u64> {
+	R::<u64> {n: a.n as u64 * b.d as u64, d: a.d as u64 * b.n as u64, p: a.p == b.p}
+}
+
+
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -305,5 +314,37 @@ mod tests {
 		assert!(g == R::<u64>{n:1, d:6, p:false});
 		let h = add(f, d);
 		assert!(h == R::<u64>{n:5, d:6, p:false})
+	}
+
+	#[test]
+	fn mul_should_mul() {
+		let a = R::<u32>{n:1, d:2, p:true};
+		let b = R::<u32>{n:1, d:3, p:true};
+		let c = mul(a, b);
+		assert!(c == R::<u64>{n:1, d:6, p:true});
+		let d = R::<u32>{n:1, d:3, p:false};
+		let e = mul(a, d);
+		assert!(e == R::<u64>{n:1, d:6, p:false});
+		let f = R::<u32>{n:1, d:2, p:false};
+		let g = mul(f, b);
+		assert!(g == R::<u64>{n:1, d:6, p:false});
+		let h = mul(f, d);
+		assert!(h == R::<u64>{n:1, d:6, p:true})
+	}
+
+	#[test]
+	fn div_should_div() {
+		let a = R::<u32>{n:1, d:2, p:true};
+		let b = R::<u32>{n:1, d:3, p:true};
+		let c = div(a, b);
+		assert!(c == R::<u64>{n:3, d:2, p:true});
+		let d = R::<u32>{n:1, d:3, p:false};
+		let e = div(a, d);
+		assert!(e == R::<u64>{n:3, d:2, p:false});
+		let f = R::<u32>{n:1, d:2, p:false};
+		let g = div(f, b);
+		assert!(g == R::<u64>{n:3, d:2, p:false});
+		let h = div(f, d);
+		assert!(h == R::<u64>{n:3, d:2, p:true})
 	}
 }
