@@ -161,6 +161,10 @@ fn add(a: R<u32>, b: R<u32>) -> R<u64> {
 	else {inverted_r64(non_negative_add(a, b))}
 }
 
+fn sub(a: R<u32>, b: R<u32>) -> R<u64> {
+	add(a, inverted_r32(b))
+}
+
 fn mul(a: R<u32>, b: R<u32>) -> R<u64> {
 	R::<u64> {n: a.n as u64 * b.n as u64, d: a.d as u64 * b.d as u64, p: a.p == b.p}
 }
@@ -314,6 +318,22 @@ mod tests {
 		assert!(g == R::<u64>{n:1, d:6, p:false});
 		let h = add(f, d);
 		assert!(h == R::<u64>{n:5, d:6, p:false})
+	}
+
+	#[test]
+	fn sub_should_sub() {
+		let a = R::<u32>{n:1, d:2, p:true};
+		let b = R::<u32>{n:1, d:3, p:true};
+		let c = sub(a, b);
+		assert!(c == R::<u64>{n:1, d:6, p:true});
+		let d = R::<u32>{n:1, d:3, p:false};
+		let e = sub(a, d);
+		assert!(e == R::<u64>{n:5, d:6, p:true});
+		let f = R::<u32>{n:1, d:2, p:false};
+		let g = sub(f, b);
+		assert!(g == R::<u64>{n:5, d:6, p:false});
+		let h = sub(f, d);
+		assert!(h == R::<u64>{n:1, d:6, p:false})
 	}
 
 	#[test]
