@@ -139,7 +139,26 @@ fn non_negative_add(a: R<u32>, b: R<u32>) -> R<u64> {
 }
 
 fn non_negative_sub(a: R<u32>, b: R<u32>) -> R<u64> {
-	R::<u64> {n: a.n as u64 * b.d as u64 - b.n as u64 * a.d as u64, d: b.d as u64 * a.d as u64, p: true}
+	if a >= b {
+		R::<u64> {n: a.n as u64 * b.d as u64 - b.n as u64 * a.d as u64, d: b.d as u64 * a.d as u64, p: true}
+	} else {
+		R::<u64> {n: b.n as u64 * a.d as u64 - a.n as u64 * b.d as u64, d: b.d as u64 * a.d as u64, p: false}
+	}
+}
+
+fn inverted_r32(x: R<u32>) -> R<u32> {
+	R::<u32> {n: x.n, d: x.d, p: !x.p}
+}
+
+fn inverted_r64(x: R<u64>) -> R<u64> {
+	R::<u64> {n: x.n, d: x.d, p: !x.p}
+}
+
+fn add(a: R<u32>, b: R<u32>) -> R<u64> {
+	if a.p && b.p {non_negative_add(a, b)}
+	else if a.p && !b.p {non_negative_sub(a, b)}
+	else if !a.p && b.p {inverted_r64(non_negative_sub(a, b))}
+	else {inverted_r64(non_negative_add(a, b))}
 }
 
 #[cfg(test)]
@@ -262,5 +281,29 @@ mod tests {
 		let b = R::<u32>{n:1, d:3, p:true};
 		let c = non_negative_sub(a, b);
 		assert!(c == R::<u64>{n:1, d:6, p:true})
+	}
+
+	#[test]
+	fn non_negative_sub_should_result_in_negative_when_a_less_than_b() {
+		let a = R::<u32>{n:1, d:3, p:true};
+		let b = R::<u32>{n:1, d:2, p:true};
+		let c = non_negative_sub(a, b);
+		assert!(c == R::<u64>{n:1, d:6, p:false})
+	}
+
+	#[test]
+	fn add_should_add() {
+		let a = R::<u32>{n:1, d:2, p:true};
+		let b = R::<u32>{n:1, d:3, p:true};
+		let c = add(a, b);
+		assert!(c == R::<u64>{n:5, d:6, p:true});
+		let d = R::<u32>{n:1, d:3, p:false};
+		let e = add(a, d);
+		assert!(e == R::<u64>{n:1, d:6, p:true});
+		let f = R::<u32>{n:1, d:2, p:false};
+		let g = add(f, b);
+		assert!(g == R::<u64>{n:1, d:6, p:false});
+		let h = add(f, d);
+		assert!(h == R::<u64>{n:5, d:6, p:false})
 	}
 }
