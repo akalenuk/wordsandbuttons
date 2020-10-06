@@ -156,8 +156,8 @@ fn inverted_r64(x: R<u64>) -> R<u64> {
 
 fn add(a: R<u32>, b: R<u32>) -> R<u64> {
 	if a.p && b.p {non_negative_add(a, b)}
-	else if a.p && !b.p {non_negative_sub(a, b)}
-	else if !a.p && b.p {inverted_r64(non_negative_sub(a, b))}
+	else if a.p && !b.p {non_negative_sub(a, inverted_r32(b))}
+	else if !a.p && b.p {inverted_r64(non_negative_sub(inverted_r32(a), b))}
 	else {inverted_r64(non_negative_add(a, b))}
 }
 
