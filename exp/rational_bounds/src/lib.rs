@@ -173,12 +173,31 @@ fn div(a: R<u32>, b: R<u32>) -> R<u64> {
 	R::<u64> {n: a.n as u64 * b.d as u64, d: a.d as u64 * b.n as u64, p: a.p == b.p}
 }
 
+impl std::cmp::PartialEq for RB32{
+	fn eq(&self, other: &Self) -> bool {
+		self.lb == other.lb && self.ub == other.ub
+	}
+}
+
 impl std::ops::Add for RB32 {
 	type Output = Self;
 	fn add(self, other: Self) -> Self {
 		Self {
 			lb: downcast_to_lower_bound(add(self.lb, other.lb)),
 			ub: downcast_to_upper_bound(add(self.ub, other.ub)),
+		}
+	}
+}
+
+impl std::ops::Sub for RB32 {
+	type Output = Self;
+	fn sub(self, other: Self) -> Self {
+		let b1 = sub(self.lb, other.lb);
+		let b2 = sub(self.ub, other.ub);
+		if b1 <= b2 {
+			Self {lb: downcast_to_lower_bound(b1), ub: downcast_to_upper_bound(b2)}
+		} else {
+			Self {lb: downcast_to_lower_bound(b2), ub: downcast_to_upper_bound(b1)}
 		}
 	}
 }
@@ -271,7 +290,7 @@ mod tests {
 
 	#[test]
 	fn downcast_to_lower_bound_downcasts_to_lower() {	// warning! I lack mathematical intuition to do this properly
-		for i in 5000000000..5000000099 {
+		for i in 5000000000..5000000009 {
 			let a = R::<u64>{n: i , d: i + 100000000, p:true};
 			let b = downcast_to_lower_bound(a);
 			let c = R::<u64>{n: b.n as u64, d: b.d as u64, p:true};
@@ -281,7 +300,7 @@ mod tests {
 
 	#[test]
 	fn downcast_to_upper_bound_downcasts_to_upper() {	// warning! This is the same test as above so not very good
-		for i in 5000000000..5000000099 {
+		for i in 5000000000..5000000009 {
 			let a = R::<u64>{n: i , d: i + 100000000, p:true};
 			let b = downcast_to_upper_bound(a);
 			let c = R::<u64>{n: b.n as u64, d: b.d as u64, p:true};
@@ -294,7 +313,7 @@ mod tests {
 		let a = R::<u32>{n:1, d:2, p:true};
 		let b = R::<u32>{n:1, d:3, p:true};
 		let c = non_negative_add(a, b);
-		assert!(c == R::<u64>{n:5, d:6, p:true})
+		assert!(c == R::<u64>{n:5, d:6, p:true});
 	}
 
 	#[test]
@@ -302,7 +321,7 @@ mod tests {
 		let a = R::<u32>{n:1, d:2, p:true};
 		let b = R::<u32>{n:1, d:3, p:true};
 		let c = non_negative_sub(a, b);
-		assert!(c == R::<u64>{n:1, d:6, p:true})
+		assert!(c == R::<u64>{n:1, d:6, p:true});
 	}
 
 	#[test]
@@ -310,7 +329,7 @@ mod tests {
 		let a = R::<u32>{n:1, d:3, p:true};
 		let b = R::<u32>{n:1, d:2, p:true};
 		let c = non_negative_sub(a, b);
-		assert!(c == R::<u64>{n:1, d:6, p:false})
+		assert!(c == R::<u64>{n:1, d:6, p:false});
 	}
 
 	#[test]
@@ -326,7 +345,7 @@ mod tests {
 		let g = add(f, b);
 		assert!(g == R::<u64>{n:1, d:6, p:false});
 		let h = add(f, d);
-		assert!(h == R::<u64>{n:5, d:6, p:false})
+		assert!(h == R::<u64>{n:5, d:6, p:false});
 	}
 
 	#[test]
@@ -342,7 +361,7 @@ mod tests {
 		let g = sub(f, b);
 		assert!(g == R::<u64>{n:5, d:6, p:false});
 		let h = sub(f, d);
-		assert!(h == R::<u64>{n:1, d:6, p:false})
+		assert!(h == R::<u64>{n:1, d:6, p:false});
 	}
 
 	#[test]
@@ -358,7 +377,7 @@ mod tests {
 		let g = mul(f, b);
 		assert!(g == R::<u64>{n:1, d:6, p:false});
 		let h = mul(f, d);
-		assert!(h == R::<u64>{n:1, d:6, p:true})
+		assert!(h == R::<u64>{n:1, d:6, p:true});
 	}
 
 	#[test]
@@ -374,13 +393,30 @@ mod tests {
 		let g = div(f, b);
 		assert!(g == R::<u64>{n:3, d:2, p:false});
 		let h = div(f, d);
-		assert!(h == R::<u64>{n:3, d:2, p:true})
+		assert!(h == R::<u64>{n:3, d:2, p:true});
 	}
 
 	#[test]
-	fn rb32_add_should_build() {
+	fn rb32_add_should_add() {
 		let a = RB32{lb: R::<u32>{n:1, d:3, p:true}, ub: R::<u32>{n:2, d:3, p:true}};
 		let b = RB32{lb: R::<u32>{n:2, d:7, p:true}, ub: R::<u32>{n:5, d:9, p:true}};
 		let c = a + b;
+		assert!(c == RB32{lb: R::<u32>{n:13, d:21, p:true}, ub: R::<u32>{n:11, d:9, p:true}});
+	}
+
+	#[test]
+	fn rb32_sub_should_sub() {
+		let a = RB32{lb: R::<u32>{n:2, d:1, p:true}, ub: R::<u32>{n:3, d:1, p:true}};
+		let b = RB32{lb: R::<u32>{n:1, d:1, p:true}, ub: R::<u32>{n:2, d:1, p:true}};
+		let c = a - b;
+		assert!(c == RB32{lb: R::<u32>{n:1, d:1, p:true}, ub: R::<u32>{n:1, d:1, p:true}});
+	}
+
+	#[test]
+	fn rb32_sub_should_invert_bounds() {
+		let a = RB32{lb: R::<u32>{n:1, d:1, p:true}, ub: R::<u32>{n:2, d:1, p:true}};
+		let b = RB32{lb: R::<u32>{n:4, d:1, p:false}, ub: R::<u32>{n:2, d:1, p:false}};
+		let c = a - b;
+		assert!(c == RB32{lb: R::<u32>{n:4, d:1, p:true}, ub: R::<u32>{n:5, d:1, p:true}});
 	}
 }
