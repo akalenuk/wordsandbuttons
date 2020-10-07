@@ -202,6 +202,33 @@ impl std::ops::Sub for RB32 {
 	}
 }
 
+impl std::ops::Mul for RB32 {
+	type Output = Self;
+	fn mul(self, other: Self) -> Self {
+		let b1 = mul(self.lb, other.lb);
+		let b2 = mul(self.ub, other.ub);
+		if b1 <= b2 {
+			Self {lb: downcast_to_lower_bound(b1), ub: downcast_to_upper_bound(b2)}
+		} else {
+			Self {lb: downcast_to_lower_bound(b2), ub: downcast_to_upper_bound(b1)}
+		}
+	}
+}
+
+impl std::ops::Div for RB32 {
+	type Output = Self;
+	fn div(self, other: Self) -> Self {
+		let b1 = div(self.lb, other.lb);
+		let b2 = div(self.ub, other.ub);
+		if b1 <= b2 {
+			Self {lb: downcast_to_lower_bound(b1), ub: downcast_to_upper_bound(b2)}
+		} else {
+			Self {lb: downcast_to_lower_bound(b2), ub: downcast_to_upper_bound(b1)}
+		}
+	}
+}
+
+
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -418,5 +445,21 @@ mod tests {
 		let b = RB32{lb: R::<u32>{n:4, d:1, p:false}, ub: R::<u32>{n:2, d:1, p:false}};
 		let c = a - b;
 		assert!(c == RB32{lb: R::<u32>{n:4, d:1, p:true}, ub: R::<u32>{n:5, d:1, p:true}});
+	}
+
+	#[test]
+	fn rb32_mul_should_mul() {
+		let a = RB32{lb: R::<u32>{n:1, d:1, p:true}, ub: R::<u32>{n:2, d:1, p:true}};
+		let b = RB32{lb: R::<u32>{n:4, d:1, p:false}, ub: R::<u32>{n:2, d:1, p:false}};
+		let c = a * b;
+		assert!(c == RB32{lb: R::<u32>{n:4, d:1, p:false}, ub: R::<u32>{n:4, d:1, p:false}});
+	}
+
+	#[test]
+	fn rb32_div_should_div() {
+		let a = RB32{lb: R::<u32>{n:1, d:1, p:true}, ub: R::<u32>{n:2, d:1, p:true}};
+		let b = RB32{lb: R::<u32>{n:4, d:1, p:false}, ub: R::<u32>{n:2, d:1, p:false}};
+		let c = a / b;
+		assert!(c == RB32{lb: R::<u32>{n:1, d:1, p:false}, ub: R::<u32>{n:1, d:4, p:false}});
 	}
 }
