@@ -86,11 +86,6 @@ impl std::cmp::PartialEq for R<u64> {
 	}
 }
 
-fn upcast(x: R<u32>) -> R<u64>
-{
-	R::<u64>{n: x.n as u64, d: x.d as u64, p: x.p}
-}
-
 fn downcast_to_lower_bound(x: R<u64>) -> R<u32>
 {
 	let simple_x = simplify(x);
