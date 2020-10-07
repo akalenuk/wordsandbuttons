@@ -173,6 +173,15 @@ fn div(a: R<u32>, b: R<u32>) -> R<u64> {
 	R::<u64> {n: a.n as u64 * b.d as u64, d: a.d as u64 * b.n as u64, p: a.p == b.p}
 }
 
+impl std::ops::Add for RB32 {
+	type Output = Self;
+	fn add(self, other: Self) -> Self {
+		Self {
+			lb: downcast_to_lower_bound(add(self.lb, other.lb)),
+			ub: downcast_to_upper_bound(add(self.ub, other.ub)),
+		}
+	}
+}
 
 #[cfg(test)]
 mod tests {
@@ -366,5 +375,12 @@ mod tests {
 		assert!(g == R::<u64>{n:3, d:2, p:false});
 		let h = div(f, d);
 		assert!(h == R::<u64>{n:3, d:2, p:true})
+	}
+
+	#[test]
+	fn rb32_add_should_build() {
+		let a = RB32{lb: R::<u32>{n:1, d:3, p:true}, ub: R::<u32>{n:2, d:3, p:true}};
+		let b = RB32{lb: R::<u32>{n:2, d:7, p:true}, ub: R::<u32>{n:5, d:9, p:true}};
+		let c = a + b;
 	}
 }
