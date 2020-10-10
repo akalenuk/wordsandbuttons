@@ -53,3 +53,9 @@ r32 downcast_to_lower_bound(r64 x) {
 	return downcast_to_lower_bound(best_hypothesis);
 }
 
+r32 downcast_to_upper_bound(r64 x) {
+	auto minus_x = r64{x.n, x.d, !x.p};
+	auto downcasted_minus_x = downcast_to_lower_bound(minus_x);
+	return r32{downcasted_minus_x.n, downcasted_minus_x.d, !downcasted_minus_x.p};
+}
+
