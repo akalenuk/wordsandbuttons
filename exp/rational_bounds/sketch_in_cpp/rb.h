@@ -37,6 +37,10 @@ bool operator<(const r64& l, const r64& r){
 	return static_cast<uint128_t>(l.n) * r.d < static_cast<uint128_t>(r.n) * l.d;
 }
 
+bool operator==(const r32& l, const r32& r){
+	return !(l < r || r < l);
+}
+
 r32 downcast_to_lower_bound(r64 x) {
 	if(x.n <= std::numeric_limits<uint32_t>::max() && x.d <= std::numeric_limits<uint32_t>::max())
 		return r32{static_cast<uint32_t>(x.n), static_cast<uint32_t>(x.d), x.p};

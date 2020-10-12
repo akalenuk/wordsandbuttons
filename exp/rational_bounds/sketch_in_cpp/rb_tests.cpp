@@ -14,6 +14,12 @@ int main(void) {
 		assert(!(b < na));
 		assert(nb < na);
 	}
+	// equality
+	if(true) {
+		auto a = r32{1, 5, true};
+		auto b = r32{2, 10, true};
+		assert(a == b);
+	}
 	// downcast
 	if(true) {
 		auto a = r64{5000000029ull, 5100000011ull, true};
