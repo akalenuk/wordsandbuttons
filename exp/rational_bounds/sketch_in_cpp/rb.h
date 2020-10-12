@@ -59,3 +59,47 @@ r32 downcast_to_upper_bound(r64 x) {
 	return r32{downcasted_minus_x.n, downcasted_minus_x.d, !downcasted_minus_x.p};
 }
 
+r64 non_negative_add(r32 a, r32 b) {
+	return r64{static_cast<uint64_t>(a.n) * b.d + static_cast<uint64_t>(b.n) * a.d, static_cast<uint64_t>(b.d) * a.d, true};
+}
+
+r64 non_negative_sub(r32 a, r32 b) {
+	if(!(a < b)){
+		return r64{static_cast<uint64_t>(a.n) * b.d - static_cast<uint64_t>(b.n) * a.d, static_cast<uint64_t>(b.d) * a.d, true};
+	} else {
+		return r64{static_cast<uint64_t>(b.n) * a.d - static_cast<uint64_t>(a.n) * b.d, static_cast<uint64_t>(b.d) * a.d, false};
+	}
+}
+
+r32 inverted_r32(r32 x) {
+	return r32{x.n, x.d, !x.p};
+}
+
+r64 inverted_r64(r64 x) {
+	return r64{x.n, x.d, !x.p};
+}
+
+r64 add(r32 a, r32 b) {
+	if(a.p && b.p) {
+		return non_negative_add(a, b);
+	} else if(a.p && !b.p) {
+		return non_negative_sub(a, inverted_r32(b));
+	} else if(!a.p && b.p) {
+		return inverted_r64(non_negative_sub(inverted_r32(a), b));
+	} else {
+		return inverted_r64(non_negative_add(a, b));
+	}
+}
+
+r64 sub(r32 a, r32 b) {
+	return add(a, inverted_r32(b));
+}
+
+r64 mul(r32 a, r32 b) {
+	return r64 {static_cast<uint64_t>(a.n) * b.n, static_cast<uint64_t>(a.d) * b.d, a.p == b.p};
+}
+
+r64 div(r32 a, r32 b) {
+	return r64 {static_cast<uint64_t>(a.n) * b.d, static_cast<uint64_t>(a.d) * b.n, a.p == b.p};
+}
+
