@@ -1,7 +1,6 @@
 #include "rb.h"
 #include <cassert>
 
-
 int main(void) {
 	// less predicate
 	if(true){

@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <limits>
 #include <algorithm>
+#include <array>
 #include <vector>
 
 
@@ -41,26 +42,33 @@ bool operator==(const r32& l, const r32& r){
 	return !(l < r || r < l);
 }
 
+r32 inverted_r32(r32 x) {
+	return r32{x.n, x.d, !x.p};
+}
+
+r64 inverted_r64(r64 x) {
+	return r64{x.n, x.d, !x.p};
+}
+
 r32 downcast_to_lower_bound(r64 x) {
 	if(x.n <= std::numeric_limits<uint32_t>::max() && x.d <= std::numeric_limits<uint32_t>::max())
 		return r32{static_cast<uint32_t>(x.n), static_cast<uint32_t>(x.d), x.p};
+	auto y = r64{x.n, x.d, x.p}; // shifted x
 	// todo: fast log
-	while(x.n > std::numeric_limits<uint32_t>::max() || x.d > std::numeric_limits<uint32_t>::max()){
-		x.n >>= 1;
-		x.d >>= 1;
+	while(y.n > std::numeric_limits<uint32_t>::max() || y.d > std::numeric_limits<uint32_t>::max()){
+		y.n >>= 1;
+		y.d >>= 1;
 	}
 	// todo: figure it out
-	std::vector<r64> hypotheses{r64{x.n+1, x.d, x.p}, r64{x.n-1, x.d, x.p}, r64{x.n, x.d-1, x.p}, r64{x.n, x.d+1, x.p}, r64{x.n, x.d, x.p}};
+	std::array<r64, 5> hypotheses{r64{y.n+1, y.d, y.p}, r64{y.n-1, y.d, y.p}, r64{y.n, y.d-1, y.p}, r64{y.n, y.d+1, y.p}, r64{y.n, y.d, y.p}};
 	std::vector<r64> not_greater_than_x(hypotheses.size());
-	auto last_copy = std::copy_if(hypotheses.begin(), hypotheses.end(), not_greater_than_x.begin(), [&x](const r64& y){return !(x < y);});
+	auto last_copy = std::copy_if(hypotheses.begin(), hypotheses.end(), not_greater_than_x.begin(), [&x](const r64& z){return !(x < z);});
 	auto best_hypothesis = *std::max_element(not_greater_than_x.begin(), last_copy);
 	return downcast_to_lower_bound(best_hypothesis);
 }
 
 r32 downcast_to_upper_bound(r64 x) {
-	auto minus_x = r64{x.n, x.d, !x.p};
-	auto downcasted_minus_x = downcast_to_lower_bound(minus_x);
-	return r32{downcasted_minus_x.n, downcasted_minus_x.d, !downcasted_minus_x.p};
+	return inverted_r32(downcast_to_lower_bound(inverted_r64(x)));
 }
 
 r64 non_negative_add(r32 a, r32 b) {
@@ -73,14 +81,6 @@ r64 non_negative_sub(r32 a, r32 b) {
 	} else {
 		return r64{static_cast<uint64_t>(b.n) * a.d - static_cast<uint64_t>(a.n) * b.d, static_cast<uint64_t>(b.d) * a.d, false};
 	}
-}
-
-r32 inverted_r32(r32 x) {
-	return r32{x.n, x.d, !x.p};
-}
-
-r64 inverted_r64(r64 x) {
-	return r64{x.n, x.d, !x.p};
 }
 
 r64 add(r32 a, r32 b) {
