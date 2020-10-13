@@ -107,3 +107,34 @@ r64 div(r32 a, r32 b) {
 	return r64 {static_cast<uint64_t>(a.n) * b.d, static_cast<uint64_t>(a.d) * b.n, a.p == b.p};
 }
 
+rb32 operator+(const rb32 l, const rb32 r) {
+	return r32{downcast_to_lower_bound(add(l.lb, r.lb)), downcast_to_upper_bound(add(l.ub, r.ub))};
+}
+
+rb32 operator-(const rb32 l, const rb32 r) {
+	const auto b1 = sub(l.lb, r.lb);
+	const auto b2 = sub(l.ub, r.ub);
+	if(b1 < b2)
+		return r32{downcast_to_lower_bound(b1), downcast_to_upper_bound(b2)};
+	else
+		return r32{downcast_to_lower_bound(b2), downcast_to_upper_bound(b1)};
+}
+
+rb32 operator*(const rb32 l, const rb32 r) {
+	const auto b1 = mul(l.lb, r.lb);
+	const auto b2 = mul(l.ub, r.ub);
+	if(b1 < b2)
+		return r32{downcast_to_lower_bound(b1), downcast_to_upper_bound(b2)};
+	else
+		return r32{downcast_to_lower_bound(b2), downcast_to_upper_bound(b1)};
+}
+
+rb32 operator/(const rb32 l, const rb32 r) {
+	const auto b1 = div(l.lb, r.lb);
+	const auto b2 = div(l.ub, r.ub);
+	if(b1 < b2)
+		return r32{downcast_to_lower_bound(b1), downcast_to_upper_bound(b2)};
+	else
+		return r32{downcast_to_lower_bound(b2), downcast_to_upper_bound(b1)};
+}
+
