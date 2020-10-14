@@ -100,31 +100,74 @@ int main(void) {
 		const auto a = rb32{r32{1, 3, true}, r32{2, 3, true}};
 		const auto b = rb32{r32{2, 7, true}, r32{5, 9, true}};
 		const auto c = a + b;
-		assert((c == rb32{r32{13, 21, true}, r32{11, 9, true}}));
+		assert(coincide(c, rb32{r32{13, 21, true}, r32{11, 9, true}}));
 	}
 	if(true){ // -
 		const auto a = rb32{r32{2, 1, true}, r32{3, 1, true}};
 		const auto b = rb32{r32{1, 1, true}, r32{2, 1, true}};
 		const auto c = a - b;
-		assert((c == rb32{r32{1, 1, true}, r32{1, 1, true}}));
+		assert(coincide(c, rb32{r32{1, 1, true}, r32{1, 1, true}}));
 	}
 	if(true){ // - with inverted bounds
 		const auto a = rb32{r32{1, 1, true}, r32{2, 1, true}};
 		const auto b = rb32{r32{4, 1, false}, r32{2, 1, false}};
 		const auto c = a - b;
-		assert((c == rb32{r32{4, 1, true}, r32{5, 1, true}}));
+		assert(coincide(c, rb32{r32{4, 1, true}, r32{5, 1, true}}));
 	}
 	if(true){ // *
 		const auto a = rb32{r32{1, 1, true}, r32{2, 1, true}};
 		const auto b = rb32{r32{4, 1, false}, r32{2, 1, false}};
 		const auto c = a * b;
-		assert((c == rb32{r32{4, 1, false}, r32{4, 1, false}}));
+		assert(coincide(c, rb32{r32{4, 1, false}, r32{4, 1, false}}));
 	}
 	if(true){ // /
 		const auto a = rb32{r32{1, 1, true}, r32{2, 1, true}};
 		const auto b = rb32{r32{4, 1, false}, r32{2, 1, false}};
 		const auto c = a / b;
-		assert((c == rb32{r32{1, 1, false}, r32{1, 4, false}}));
+		assert(coincide(c, rb32{r32{1, 1, false}, r32{1, 4, false}}));
+	}
+	// rational bounds logic
+	if(true){	// non-intersecting
+		const auto a = rb32{r32{1, 1, true}, r32{2, 1, true}};
+		const auto b = rb32{r32{3, 1, true}, r32{4, 1, true}};
+		assert(!intersect(a, b));
+		assert(!intersect(b, a));
+		assert(!coincide(a, b));
+		assert(!coincide(b, a));
+/*		assert(!(b == a));
+		assert(b != a);
+		assert(a < b);
+		assert(b > a);
+		assert(!(a <= b));
+		assert(!(b >= a));*/
+	}
+	if(true){	// intersecting
+		const auto a = rb32{r32{1, 1, true}, r32{3, 1, true}};
+		const auto b = rb32{r32{2, 1, true}, r32{4, 1, true}};
+		assert(intersect(a, b));
+		assert(intersect(b, a));
+		assert(!coincide(a, b));
+		assert(!coincide(b, a));
+/*		assert(!(b == a));
+		assert(!(b != a));
+		assert(!(a < b));
+		assert(!(b > a));
+		assert(!(a <= b));
+		assert(!(b >= a));*/
+	}
+	if(true){	// coinciding
+		const auto a = rb32{r32{1, 1, true}, r32{4, 1, true}};
+		const auto b = rb32{r32{1, 1, true}, r32{4, 1, true}};
+		assert(intersect(a, b));
+		assert(intersect(b, a));
+		assert(coincide(a, b));
+		assert(coincide(b, a));
+/*		assert(b == a);
+		assert(!(b != a));
+		assert(!(a < b));
+		assert(!(b > a));
+		assert(a <= b);
+		assert(b >= a);*/
 	}
 	return 0;
 }

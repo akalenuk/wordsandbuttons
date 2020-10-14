@@ -13,15 +13,15 @@ struct r32 {
 	bool p;	// is positive?
 };
 
+struct rb32 {
+	r32 lb;	// lower bound
+	r32 ub;	// upper bound
+};
+
 struct r64 {
 	uint64_t n;	// numenator
 	uint64_t d;	// denominator
 	bool p;	// is positive?
-};
-
-struct rb32 {
-	r32 lb;	// lower bound
-	r32 ub;	// upper bound
 };
 
 bool operator<(const r32& l, const r32& r){
@@ -31,6 +31,30 @@ bool operator<(const r32& l, const r32& r){
 	return static_cast<uint64_t>(l.n) * r.d < static_cast<uint64_t>(r.n) * l.d;
 }
 
+bool operator>(const r32& l, const r32& r){
+	return r < l;
+}
+
+bool operator==(const r32& l, const r32& r){
+	return !(l < r || r < l);
+}
+
+bool operator!=(const r32& l, const r32& r){
+	return l < r || r < l;
+}
+
+bool operator<=(const r32& l, const r32& r){
+	return l < r || l == r;
+}
+
+bool operator>=(const r32& l, const r32& r){
+	return r < l || r == l;
+}
+
+r32 inverted_r32(r32 x) {
+	return r32{x.n, x.d, !x.p};
+}
+
 bool operator<(const r64& l, const r64& r){
 	if(!l.p && r.p) return true;
 	if(l.p && !r.p) return false;
@@ -38,20 +62,16 @@ bool operator<(const r64& l, const r64& r){
 	return static_cast<uint128_t>(l.n) * r.d < static_cast<uint128_t>(r.n) * l.d;
 }
 
-bool operator==(const r32& l, const r32& r){
-	return !(l < r || r < l);
-}
-
 bool operator==(const r64& l, const r64& r){
 	return !(l < r || r < l);
 }
 
-r32 inverted_r32(r32 x) {
-	return r32{x.n, x.d, !x.p};
-}
-
 r64 inverted_r64(r64 x) {
 	return r64{x.n, x.d, !x.p};
+}
+
+r64 upcast(r32 x) {
+	return r64{x.n, x.d, x.p};
 }
 
 r32 downcast_to_lower_bound(r64 x) {
@@ -143,8 +163,38 @@ rb32 operator/(const rb32 l, const rb32 r) {
 		return rb32{downcast_to_lower_bound(b2), downcast_to_upper_bound(b1)};
 }
 
-// rational bounds logic
-bool operator==(const rb32& l, const rb32& r){
+// rational bounds relations
+bool coincide(const rb32& l, const rb32& r){
 	return l.lb == r.lb && l.ub == r.ub;
+}
+
+bool intersect(const rb32& l, const rb32& r){
+	return (l.ub >= r.lb && l.lb <= r.ub)
+		|| (r.ub >= l.lb && r.lb <= l.ub);
+}
+
+// the relation should keep for every number in l to every number in r
+bool operator==(const rb32& l, const rb32& r){
+	return l.lb == l.ub && coincide(l, r);
+}
+
+bool operator<(const rb32& l, const rb32& r){
+	return l.ub < r.lb;
+}
+
+bool operator>(const rb32& l, const rb32& r){
+	return r < l;
+}
+
+bool operator<=(const rb32& l, const rb32& r){
+	return l.ub < r.lb || l.ub == r.lb;
+}
+
+bool operator>=(const rb32& l, const rb32& r){
+	return r <= l;
+}
+
+bool operator!=(const rb32& l, const rb32& r){
+	return r < l || l < r;
 }
 
