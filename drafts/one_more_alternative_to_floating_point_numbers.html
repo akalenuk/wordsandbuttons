@@ -74,6 +74,91 @@ u {
 }
 	</style>
 	<script language="JavaScript">
+const slider_w = 608;
+const slider_h = 128;
+const slider_margin_left = 32;
+const slider_margin_right = 32;
+const slider_margin_top = 12;
+const slider_margin_bottom = 12;
+
+var slider_lb = [];
+var slider_ub = [];
+var slider_min_x = [];
+var slider_max_x = [];
+var slider_down = [];
+
+
+function position_slider(no, client_x) {
+	const lb = slider_lb[no];
+	const ub = slider_ub[no];
+	const min_x = slider_min_x[no];
+	const max_x = slider_max_x[no];
+	
+	var x = (client_x - slider_margin_left) / (slider_w - slider_margin_right - slider_margin_left);
+	x = min_x + x * (max_x - min_x);
+	x = Math.max(x, min_x);
+	x = Math.min(x, max_x);
+	if(Math.abs(x - lb) < Math.abs(x - ub))
+		slider_lb[no] = x;
+	else
+		slider_ub[no] = x;
+}
+
+function init_slider(no, min_x, max_x, initial_lb, initial_ub){
+	var slider = document.getElementById("interval_" + String(no));
+	// is this the JS lexical scope abuse? Maybe.
+	slider_min_x[no] = min_x;
+	slider_max_x[no] = max_x;
+	slider_lb[no] = initial_lb;
+	slider_ub[no] = initial_ub;
+	slider_down[no] = false;
+	draw_slider(no);
+
+	slider.addEventListener('mouseleave', function(e){
+		slider_down[no] = false;
+	}, false);
+
+	slider.addEventListener('mouseup', function(e){
+		slider_down[no] = false;
+	}, false);
+
+	slider.addEventListener('mousedown', function(e){
+		slider_down[no] = true;
+		var canvas_rect = slider.getBoundingClientRect();
+		position_slider(no, e.clientX - canvas_rect.left);
+		draw_slider(no);
+	}, false);
+
+	slider.addEventListener('mousemove', function(e){
+		if(slider_down[no] == true){
+			var canvas_rect = slider.getBoundingClientRect();
+			position_slider(no, e.clientX - canvas_rect.left);
+			draw_slider(no);
+		}
+	}, false);
+}
+
+function draw_slider(no){
+	var slider = document.getElementById("interval_" + String(no));
+	ctx = slider.getContext("2d");
+	const lb = slider_lb[no];
+	const ub = slider_ub[no];
+	const min_x = slider_min_x[no];
+	const max_x = slider_max_x[no];
+
+	ctx.clearRect(0, 0, slider_w, slider_h);
+	ctx.strokeStyle="#444444";
+	ctx.fillStyle="#BBBBBB";
+	const dw = slider_w - slider_margin_right - slider_margin_left;
+	const dh = slider_h - slider_margin_top - slider_margin_bottom;
+	
+	ctx.fillRect(slider_margin_left, slider_margin_top, dw, dh);
+	const lb01 = (lb - min_x) / (max_x - min_x);
+	const ub01 = (ub - min_x) / (max_x - min_x);
+	ctx.strokeStyle="#000000";
+	ctx.fillStyle="#777777";
+	ctx.fillRect(slider_margin_left + dw * lb01, slider_margin_top, dw * (ub01 - lb01), dh);
+}
 	</script>
 </head>
 <body>
@@ -84,12 +169,15 @@ One more alternative to floating point numbers
 	<p>
 ...
 	</p>
-
+	<canvas id="interval_0" width=608 height=128></canvas>
 
 	<p>
 ...
 	</p>
 
+	<script language="JavaScript">
+	init_slider(0, 0, 10, 2, 5);
+	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
