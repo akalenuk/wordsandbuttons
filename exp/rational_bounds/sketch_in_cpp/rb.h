@@ -77,17 +77,29 @@ r64 upcast(r32 x) {
 r32 downcast_to_lower_bound(r64 x) {
 	if(x.n <= std::numeric_limits<uint32_t>::max() && x.d <= std::numeric_limits<uint32_t>::max())
 		return r32{static_cast<uint32_t>(x.n), static_cast<uint32_t>(x.d), x.p};
-	auto y = r64{x.n, x.d, x.p}; // shifted x
-	// todo: fast log
+	// We need to shift both N and D so they could fit uint32_t.
+	// Unfortunatelly, C++ has no standard way of determining the last bit set so we could use it
+	// to find a shift operand without the extra checks.
+	// There is POSIX flsll() but it isn't C++ and there is good way to map fls, flsl, or flsll to uint64_t.
+	// The alternative would be probably to use the native Intel TZCNT on N | D, or de Bruijn algorithm.
+	// Anyway, at this point this would be an overoptimization.
+	auto y = r64{x.n, x.d, x.p}; // to contain shifted x
 	while(y.n > std::numeric_limits<uint32_t>::max() || y.d > std::numeric_limits<uint32_t>::max()){
 		y.n >>= 1;
 		y.d >>= 1;
 	}
-	// todo: figure it out
+
+	// There is a number that is representative in R32, isn't greater than X, and that the difference between
+	// X and this number is the least possible. The exact N and D of this number depends on the N/D proportion in the
+	// original X, on the shared sign on the numbers, and even on the proportion of the part we cut when shifted.
+	// The logic behind this becomes complicated.
+	// It's simpler to put five hypotheses into test and find a number that fits the most.
 	std::array<r64, 5> hypotheses{r64{y.n+1, y.d, y.p}, r64{y.n-1, y.d, y.p}, r64{y.n, y.d-1, y.p}, r64{y.n, y.d+1, y.p}, r64{y.n, y.d, y.p}};
 	std::vector<r64> not_greater_than_x(hypotheses.size());
 	auto last_copy = std::copy_if(hypotheses.begin(), hypotheses.end(), not_greater_than_x.begin(), [&x](const r64& z){return !(x < z);});
 	auto best_hypothesis = *std::max_element(not_greater_than_x.begin(), last_copy);
+
+	// It might now exceed the R32 due to +1s so it's best to double check.
 	return downcast_to_lower_bound(best_hypothesis);
 }
 
