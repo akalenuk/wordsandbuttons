@@ -7,17 +7,21 @@
 
 using uint128_t = __uint128_t;	// this is non-standard
 
+// The subset of rational numbers that fit uint32_ts.
 struct r32 {
 	uint32_t n;	// numenator
 	uint32_t d;	// denominator
 	bool p;	// is positive?
 };
 
+// Rational bounds structure. 
+// It represents a continuous interval from lower bound to upper bound inclusive
 struct rb32 {
 	r32 lb;	// lower bound
 	r32 ub;	// upper bound
 };
 
+// The subset of rational numbers that fit uint64_ts.
 struct r64 {
 	uint64_t n;	// numenator
 	uint64_t d;	// denominator
