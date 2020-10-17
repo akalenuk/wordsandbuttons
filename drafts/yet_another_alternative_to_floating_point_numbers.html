@@ -180,9 +180,19 @@ function draw_slider(no, x_template){
 	ctx.fillStyle="#942b3b";
 	ctx.textBaseline = "bottom";
 	ctx.textAlign = "left";
-	ctx.fillText("[" + x_template.replace("%x", lb.toFixed(2)) + ",", slider_margin_left + dw * lb01 + 6, slider_h - slider_margin_bottom - 6);
+	const left_piece_text = "[" + x_template.replace("%x", lb.toFixed(2)) + ",";
+	const left_width = ctx.measureText(left_piece_text).width;
+	const left_piece_x = slider_margin_left + dw * lb01 + 6;
+	const right_piece_x = slider_margin_left + dw * ub01 - 6;
+	const right_piece_text = x_template.replace("%x", ub.toFixed(2)) + "]";
+	const right_width = ctx.measureText(right_piece_text).width;
+	if(right_piece_x - left_piece_x - right_width - 12 > left_width)
+		ctx.fillText(left_piece_text, left_piece_x, slider_h - slider_margin_bottom - 6);
+	else
+		ctx.fillText(left_piece_text + " " + right_piece_text, left_piece_x, slider_h - slider_margin_bottom - 6);
 	ctx.textAlign = "right";
-	ctx.fillText(x_template.replace("%x", ub.toFixed(2)) + "]", slider_margin_left + dw * ub01 - 6, slider_h - slider_margin_bottom - 6);
+	if(right_piece_x - left_piece_x - right_width - 12 > left_width)
+		ctx.fillText(right_piece_text, right_piece_x, slider_h - slider_margin_bottom - 6);
 }
 
 function colorized(text) {
