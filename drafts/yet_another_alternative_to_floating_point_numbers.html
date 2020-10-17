@@ -113,7 +113,7 @@ function position_slider(no, client_x) {
 		slider_ub[no] = x;
 }
 
-function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template){
+function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template, on_slide){
 	var slider = document.getElementById("interval_" + String(no));
 	// is this the JS lexical scope abuse? Maybe.
 	slider_min_x[no] = min_x;
@@ -135,6 +135,7 @@ function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template){
 		slider_down[no] = true;
 		var canvas_rect = slider.getBoundingClientRect();
 		position_slider(no, e.clientX - canvas_rect.left);
+		on_slide(slider_lb[no], slider_ub[no]);
 		draw_slider(no, x_template);
 	}, false);
 
@@ -142,6 +143,7 @@ function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template){
 		if(slider_down[no] == true){
 			var canvas_rect = slider.getBoundingClientRect();
 			position_slider(no, e.clientX - canvas_rect.left);
+			on_slide(slider_lb[no], slider_ub[no]);
 			draw_slider(no, x_template);
 		}
 	}, false);
@@ -313,7 +315,7 @@ std::array&lt;double, 4&gt; cubic_for_roots(std::array&lt;double, 3&gt; xs) {
 	</p>
 
 	<script language="JavaScript">
-	init_slider(0, 0, 10, 2, 5, "10^%x");
+	init_slider(0, 0, 10, 2, 5, "10^%x", function(lb, ub) {console.log([lb, ub]);});
 	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
 	</script>
 
