@@ -113,7 +113,7 @@ function position_slider(no, client_x) {
 		slider_ub[no] = x;
 }
 
-function init_slider(no, min_x, max_x, initial_lb, initial_ub){
+function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template){
 	var slider = document.getElementById("interval_" + String(no));
 	// is this the JS lexical scope abuse? Maybe.
 	slider_min_x[no] = min_x;
@@ -121,7 +121,7 @@ function init_slider(no, min_x, max_x, initial_lb, initial_ub){
 	slider_lb[no] = initial_lb;
 	slider_ub[no] = initial_ub;
 	slider_down[no] = false;
-	draw_slider(no);
+	draw_slider(no, x_template);
 
 	slider.addEventListener('mouseleave', function(e){
 		slider_down[no] = false;
@@ -135,19 +135,19 @@ function init_slider(no, min_x, max_x, initial_lb, initial_ub){
 		slider_down[no] = true;
 		var canvas_rect = slider.getBoundingClientRect();
 		position_slider(no, e.clientX - canvas_rect.left);
-		draw_slider(no);
+		draw_slider(no, x_template);
 	}, false);
 
 	slider.addEventListener('mousemove', function(e){
 		if(slider_down[no] == true){
 			var canvas_rect = slider.getBoundingClientRect();
 			position_slider(no, e.clientX - canvas_rect.left);
-			draw_slider(no);
+			draw_slider(no, x_template);
 		}
 	}, false);
 }
 
-function draw_slider(no){
+function draw_slider(no, x_template){
 	var slider = document.getElementById("interval_" + String(no));
 	ctx = slider.getContext("2d");
 	const lb = slider_lb[no];
@@ -160,13 +160,29 @@ function draw_slider(no){
 	ctx.fillStyle="#BBBBBB";
 	const dw = slider_w - slider_margin_right - slider_margin_left;
 	const dh = slider_h - slider_margin_top - slider_margin_bottom;
-	
+
 	ctx.fillRect(slider_margin_left, slider_margin_top, dw, dh);
 	const lb01 = (lb - min_x) / (max_x - min_x);
 	const ub01 = (ub - min_x) / (max_x - min_x);
 	ctx.strokeStyle="#000000";
 	ctx.fillStyle="#777777";
 	ctx.fillRect(slider_margin_left + dw * lb01, slider_margin_top, dw * (ub01 - lb01), dh);
+
+	ctx.font = "16px sans-serif";
+	ctx.fillStyle="#d64562";
+	// the whole interval
+	ctx.textBaseline = "top";
+	ctx.textAlign = "left";
+	ctx.fillText("[" + x_template.replace("%x", String(min_x)) + ",", slider_margin_left + 6, slider_margin_top + 6);
+	ctx.textAlign = "right";
+	ctx.fillText(x_template.replace("%x", String(max_x)) + "]", slider_w - slider_margin_right - 6, slider_margin_top + 6);
+	// the selected interval
+	ctx.fillStyle="#942b3b";
+	ctx.textBaseline = "bottom";
+	ctx.textAlign = "left";
+	ctx.fillText("[" + x_template.replace("%x", lb.toFixed(2)) + ",", slider_margin_left + dw * lb01 + 6, slider_h - slider_margin_bottom - 6);
+	ctx.textAlign = "right";
+	ctx.fillText(x_template.replace("%x", ub.toFixed(2)) + "]", slider_margin_left + dw * ub01 - 6, slider_h - slider_margin_bottom - 6);
 }
 
 function colorized(text) {
@@ -287,7 +303,7 @@ std::array&lt;double, 4&gt; cubic_for_roots(std::array&lt;double, 3&gt; xs) {
 	</p>
 
 	<script language="JavaScript">
-	init_slider(0, 0, 10, 2, 5);
+	init_slider(0, 0, 10, 2, 5, "10^%x");
 	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
 	</script>
 
