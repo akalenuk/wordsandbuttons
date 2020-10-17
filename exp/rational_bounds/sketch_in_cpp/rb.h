@@ -70,6 +70,18 @@ bool operator==(const r64& l, const r64& r){
 	return !(l < r || r < l);
 }
 
+bool operator!=(const r64& l, const r64& r){
+	return l < r || r < l;
+}
+
+bool operator<=(const r64& l, const r64& r){
+	return l < r || l == r;
+}
+
+bool operator>=(const r64& l, const r64& r){
+	return r < l || r == l;
+}
+
 r64 inverted_r64(r64 x) {
 	return r64{x.n, x.d, !x.p};
 }
@@ -147,6 +159,10 @@ r64 div(r32 a, r32 b) {
 	return r64 {static_cast<uint64_t>(a.n) * b.d, static_cast<uint64_t>(a.d) * b.n, a.p == b.p};
 }
 
+r64 abs(r64 x) {
+	return r64 {x.n, x.d, true};
+}
+
 // rational bounds arithmetic
 rb32 operator+(const rb32 l, const rb32 r) {
 	return rb32{downcast_to_lower_bound(add(l.lb, r.lb)), downcast_to_upper_bound(add(l.ub, r.ub))};
@@ -214,3 +230,7 @@ bool operator!=(const rb32& l, const rb32& r){
 	return r < l || l < r;
 }
 
+// rational bounds inspection
+r64 interval_length(const rb32& x) {
+	return sub(x.ub, x.lb);
+}

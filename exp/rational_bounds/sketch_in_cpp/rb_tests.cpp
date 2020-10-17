@@ -169,5 +169,11 @@ int main(void) {
 		assert(a <= b);
 		assert(b >= a);*/
 	}
+	// inspection
+	if(true) {
+		const auto a = rb32{r32{1, 2, true}, r32{1, 1, true}};
+		const auto len = interval_length(a);
+		assert((len == r64{1, 2, true}));
+	}
 	return 0;
 }
