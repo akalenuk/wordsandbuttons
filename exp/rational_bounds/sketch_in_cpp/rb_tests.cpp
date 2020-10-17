@@ -1,6 +1,8 @@
 #include "rb.h"
 #include <cassert>
 
+using namespace rational_bounds;
+
 int main(void) {
 	// less predicate
 	if(true){
@@ -197,11 +199,31 @@ int main(void) {
 		assert(!(a <= b));
 		assert(!(b >= a));
 	}
-	// inspection
+	// interval characteristics
 	if(true) {
 		const auto a = rb32{r32{1, 2, true}, r32{1, 1, true}};
-		const auto len = interval_length(a);
+		const auto len = interval::length(a);
 		assert((len == r64{1, 2, true}));
+	}
+	if(true) {
+		const auto a = rb32{r32{1, 2, true}, r32{1, 1, true}};
+		const auto b = rb32{r32{1, 1, true}, r32{1, 1, true}};
+		assert(!interval::degenerate(a));
+		assert( interval::degenerate(b));
+	}
+	if(true) {
+		const auto a = rb32{r32{1, 0, true}, r32{1, 1, true}};
+		const auto b = rb32{r32{1, 1, true}, r32{1, 0, true}};
+		assert(!interval::left_bound(a) &&  interval::right_bound(a));
+		assert( interval::left_bound(b) && !interval::right_bound(b));
+	}
+	if(true) {
+		const auto a = rb32{r32{1, 0, true}, r32{1, 1, true}};
+		const auto b = rb32{r32{1, 1, true}, r32{1, 0, true}};
+		const auto c = rb32{r32{1, 1, true}, r32{1, 1, true}};
+		assert(!interval::finite(a));
+		assert(!interval::finite(b));
+		assert( interval::finite(c));
 	}
 	return 0;
 }
