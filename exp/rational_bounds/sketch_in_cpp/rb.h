@@ -163,7 +163,7 @@ namespace rational_bounds {
 		return r64 {x.n, x.d, true};
 	}
 
-	// rational bounds arithmetic
+	// rational bounds arithmetics
 	rb32 operator+(const rb32 l, const rb32 r) {
 		return rb32{downcast_to_lower_bound(add(l.lb, r.lb)), downcast_to_upper_bound(add(l.ub, r.ub))};
 	}
