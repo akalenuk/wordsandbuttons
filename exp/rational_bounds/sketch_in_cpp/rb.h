@@ -219,7 +219,7 @@ bool operator>(const rb32& l, const rb32& r){
 }
 
 bool operator<=(const rb32& l, const rb32& r){
-	return l.ub < r.lb || l.ub == r.lb;
+	return l.lb < r.ub && l.ub == r.lb;
 }
 
 bool operator>=(const rb32& l, const rb32& r){

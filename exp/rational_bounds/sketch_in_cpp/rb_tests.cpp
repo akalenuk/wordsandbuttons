@@ -134,12 +134,12 @@ int main(void) {
 		assert(!intersect(b, a));
 		assert(!coincide(a, b));
 		assert(!coincide(b, a));
-/*		assert(!(b == a));
-		assert(b != a);
-		assert(a < b);
-		assert(b > a);
+		assert(!(b == a));
+		assert( (b != a));
+		assert( (a < b));
+		assert( (b > a));
 		assert(!(a <= b));
-		assert(!(b >= a));*/
+		assert(!(b >= a));
 	}
 	if(true){	// intersecting
 		const auto a = rb32{r32{1, 1, true}, r32{3, 1, true}};
@@ -148,12 +148,12 @@ int main(void) {
 		assert(intersect(b, a));
 		assert(!coincide(a, b));
 		assert(!coincide(b, a));
-/*		assert(!(b == a));
+		assert(!(b == a));
 		assert(!(b != a));
 		assert(!(a < b));
 		assert(!(b > a));
 		assert(!(a <= b));
-		assert(!(b >= a));*/
+		assert(!(b >= a));
 	}
 	if(true){	// coinciding
 		const auto a = rb32{r32{1, 1, true}, r32{4, 1, true}};
@@ -162,12 +162,40 @@ int main(void) {
 		assert(intersect(b, a));
 		assert(coincide(a, b));
 		assert(coincide(b, a));
-/*		assert(b == a);
+		assert(!(b == a));
 		assert(!(b != a));
 		assert(!(a < b));
 		assert(!(b > a));
-		assert(a <= b);
-		assert(b >= a);*/
+		assert(!(a <= b));
+		assert(!(b >= a));
+	}
+	if(true){	// one is the exact number
+		const auto a = rb32{r32{1, 1, true}, r32{4, 1, true}};
+		const auto b = rb32{r32{4, 1, true}, r32{4, 1, true}};
+		assert(intersect(a, b));
+		assert(intersect(b, a));
+		assert(!coincide(a, b));
+		assert(!coincide(b, a));
+		assert(!(b == a));
+		assert(!(b != a));
+		assert(!(a < b));
+		assert(!(b > a));
+		assert( (a <= b));
+		assert( (b >= a));
+	}
+	if(true){	// both are the exact numbers
+		const auto a = rb32{r32{1, 1, true}, r32{1, 1, true}};
+		const auto b = rb32{r32{1, 1, true}, r32{1, 1, true}};
+		assert(intersect(a, b));
+		assert(intersect(b, a));
+		assert(coincide(a, b));
+		assert(coincide(b, a));
+		assert( (b == a));
+		assert(!(b != a));
+		assert(!(a < b));
+		assert(!(b > a));
+		assert(!(a <= b));
+		assert(!(b >= a));
 	}
 	// inspection
 	if(true) {
