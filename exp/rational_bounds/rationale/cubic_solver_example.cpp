@@ -58,6 +58,7 @@ void print_error_for_roots(double r1, double r2, double r3) {
 	std::array<double, 3> error = {std::abs(original_roots[0] - solution[0]), std::abs(original_roots[1] - solution[1]), std::abs(original_roots[2] - solution[2])};
 	std::array<double, 3> relative_error = {std::abs(error[0] / original_roots[0]), std::abs(error[1] / original_roots[1]), std::abs(error[2] / original_roots[2])};
 	std::cout << "Original roots: " << original_roots[0] << " " << original_roots[1] << " " << original_roots[2] << "\n";
+	std::cout << "Equation: " << equation[0] << "*X^3 + " << equation[1] << "*X^2 + " << equation[2] << "*X + " << equation[3] << "\n";
 	std::cout << "Solved roots: " << solution[0] << " " << solution[1] << " " << solution[2] << "\n";
 	std::cout << "Error: " << error[0] << " " << error[1] << " " << error[2] << "\n";
 	std::cout << "Relative error: " << relative_error[0] << " " << relative_error[1] << " " << relative_error[2] << "\n";
