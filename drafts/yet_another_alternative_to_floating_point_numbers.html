@@ -285,14 +285,26 @@ Luckily I have a friend who is smarter than me and he advised to fuzz the input 
 We all know that computations work with some error. It's fine, we get input data from sensors and they work with some error. We print out our finished models, and the printers have some limited precision as well. It's all good while the error is small. But what if it isn't?
 	</p>
 	<p>
-In my case, a completely correct algorithm had a computational error of about 1. Not 1e-16 or 1e-5 but 1. Just 1. So if you expect your &mu; to be somewhat close to -0.7, and the estimator says it's 0.3, it is in fact correct. It is still a correct estimation within its error range.
+As it turns out, in my case, a completely correct algorithm had a computational error of about 1. Not 1e-16 or 1e-5 but 1. Just 1. So if you expect your &mu; to be somewhat close to -0.7, and the estimator says it's 0.3, it is in fact correct. It is still a correct estimation within its error range.
 	</p>
 	<p>
 Correct but entirely useless.
 	</p>
 	<h2>
-Challenge your intuition with guess an error game
+Challenge your intuition with a “Guess the Error” game
 	</h2>
+	<p>
+Ok, so it's not the error per se that causes trouble but unexpected and unpredictable error. Can we predict it though?
+	</p>
+	<p>
+Well, of course we can. There is a whole field of numerical error anaysis for that but let's be honest, most of the time we use our intuition instead. So how good is our intuition exactly?
+	</p>
+	<p>
+I propose a game to find out. Let's take a cubic equation solver. It's a relatively complex computation with a very simple way to validate how it works. We will pick some roots and then we will generate the cubic equation for these roots. Then we'll make the cubic solver find our roots through the computation. The difference between the original and the computed value for each root will be our measurable error. This error divided by the original value will be our relative error.
+	</p>
+	<p>
+This is the code for the experiment. It's also <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/rational_bounds/rationale/cubic_solver_example.cpp">available on GitHub</a>.
+	</p>
 	<div id="shown_code_1">
 	<span style="line-height: 2.0;">
 	<button type="button" onclick="show('code_1')">Show the code</button>
@@ -344,6 +356,9 @@ std::array&lt;double, 4&gt; cubic_for_roots(std::array&lt;double, 3&gt; xs) {
 	</span>
 	</div>
 	<br>
+	<p>
+	</p>
+
 	<canvas id="interval_0" width=608 height=128></canvas>
 
 	<p>
