@@ -71,6 +71,14 @@ u {
 	text-decoration: none;
 	cursor: pointer;
 }
+
+.formula {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: italic;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
 	</style>
 	<script language="JavaScript">
 function show(n){
@@ -182,11 +190,11 @@ function draw_slider(no, x_template){
 	ctx.fillStyle="#942b3b";
 	ctx.textBaseline = "bottom";
 	ctx.textAlign = "left";
-	const left_piece_text = "[" + x_template.replace("%x", lb.toFixed(2)) + ",";
+	const left_piece_text = "[" + x_template.replace("%x", lb.toFixed(0)) + ",";
 	const left_width = ctx.measureText(left_piece_text).width;
 	const left_piece_x = slider_margin_left + dw * lb01 + 6;
 	const right_piece_x = slider_margin_left + dw * ub01 - 6;
-	const right_piece_text = x_template.replace("%x", ub.toFixed(2)) + "]";
+	const right_piece_text = x_template.replace("%x", ub.toFixed(0)) + "]";
 	const right_width = ctx.measureText(right_piece_text).width;
 	if(right_piece_x - left_piece_x - right_width - 12 > left_width)
 		ctx.fillText(left_piece_text, left_piece_x, slider_h - slider_margin_bottom - 6);
@@ -357,8 +365,33 @@ std::array&lt;double, 4&gt; cubic_for_roots(std::array&lt;double, 3&gt; xs) {
 	</div>
 	<br>
 	<p>
+Now if we pick our roots as 1, 2, and 3, the equation produced will be:
 	</p>
-
+	<p class="formula">
+(x - 1) (x - 2) (x - 3) = 0
+	</p>
+	<p>
+Expanding the brackets we get this:
+	</p>
+	<p class="formula">
+x<sup>3</sup> - 6x<sup>2</sup> + 11x - 6 = 0
+	</p>
+	<p>
+And when we run our solver we get:
+	</p>
+	<p class="formula">
+x = 1, x = 2, x = 3
+	</p>
+	<p>
+Well, yes. On the equation this simple the computation works flawlessly, there is no error. So let's start breaking stuff.
+	</p>
+	<h2>Round 1</h2>
+	<p>
+The slider below lets you pick an interval in a logarithmic scale. The interval may start at 10<sup>-12</sup> and end at 10<sup>12</sup>. It's impossible to predict the exact error up to a single number so you should just pick an appropriate interval that covers the error<span id="shown_note_1"><u onclick="show('note_1')">*</u>.</span><span id="hidden_note_1" style="display: none">. <span style="font-size: 14pt;">Of course, you can select the whole interval, too. This estimation is guaranteed to be correct. And entirely useless. </span><u onclick="hide('note_1')">&larr;</u></span>
+	</p>
+	<p>
+Let's say we have the roots of 0.001, 2, 3&hairsp;000. So in which interval, in your opinion, the maximum relative error for a cubic solver belongs?
+	</p>
 	<canvas id="interval_0" width=608 height=128></canvas>
 
 	<p>
@@ -366,7 +399,7 @@ std::array&lt;double, 4&gt; cubic_for_roots(std::array&lt;double, 3&gt; xs) {
 	</p>
 
 	<script language="JavaScript">
-	init_slider(0, 0, 10, 2, 5, "10^%x", function(lb, ub) {console.log([lb, ub]);});
+	init_slider(0, -12, 12, -8, -2, "e%x", function(lb, ub) {console.log([lb, ub]);});
 	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
 	</script>
 
