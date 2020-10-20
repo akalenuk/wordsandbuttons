@@ -261,8 +261,38 @@ const log10_max_relative_errors = [log10(max_relative_errors[0]), log10(max_rela
 Yet another alternative to floating point numbers
 	</h1>
 	<p>
-...
+Floating point numbers are fine. They are decently designed and well standardized, they provide a good compromise between performance and precision. They work great most of the time. Until the day when they suddenly don't and nobody knows why.
 	</p>
+	<p>
+For me, that day came when I got a complaint about a bug in a Taubin smoothing estimator. <a href="https://graphics.stanford.edu/courses/cs468-01-fall/Papers/taubin-smoothing.pdf">Taubin smoothing</a> takes a triangle mesh, a pair of magic numbers called &lambda; and &mu;, a little time to think, and it makes the mesh smooth. It also makes sure that the mesh isn't reduced to a perfectly smooth but rather uninteresting sphere or a point.
+	</p>
+	<p>
+The first magic number &lambda; is something between 0 and 1. When it's 0 — nothing happens at all, and when it's 1 — nothing good happens either. It should be somewhere in between. Nobody really knows how to pick this number but an experienced engineer can at least make an educated guess. 
+	</p>
+	<p>
+The second magic number governs the shrinkage compensation. It's a negative number slightly greater than &lambda; in its absolute value. Nodoby knows how to pick it either but this time even an educated guess is a challenge.
+	</p>
+	<p>
+That's why you need an estimator. Something that picks the &mu; for you. And we have one. And it was bugged. And I was the one to fix it.
+	</p>
+	<p>
+The first day of investigation showed that the estimator is in fact entirely correct. The second day of invetigation showed that the tests covering the bug are just as well correct. The third day of investigation brought a promising hypothesis that the whole story is just a bad dream and all it takes to solve the mystery is to wake up. The fourth morning killed that hypothesis just as many others before.
+	</p>
+	<p>
+Luckily I have a friend who is smarter than me and he advised to fuzz the input a little and see what will happen. I did. And somehting happened. The bug didn't go away but the &mu; changed unproportionally large for the small changes in the input. Fascinating!
+	</p>
+	<p>
+We all know that computations work with some error. It's fine, we get input data from sensors and they work with some error. We print out our finished models, and the printers have some limited precision as well. It's all good while the error is small. But what if it isn't?
+	</p>
+	<p>
+In my case, a completely correct algorithm had a computational error of about 1. Not 1e-16 or 1e-5 but 1. Just 1. So if you expect your &mu; to be somewhat close to -0.7, and the estimator says it's 0.3, it is in fact correct. It is still a correct estimation within its error range.
+	</p>
+	<p>
+Correct but entirely useless.
+	</p>
+	<h2>
+Challenge your intuition with guess an error game
+	</h2>
 	<div id="shown_code_1">
 	<span style="line-height: 2.0;">
 	<button type="button" onclick="show('code_1')">Show the code</button>
