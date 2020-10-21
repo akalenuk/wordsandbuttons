@@ -103,7 +103,8 @@ var slider_ub = [];
 var slider_min_x = [];
 var slider_max_x = [];
 var slider_down = [];
-
+var slider_template = [];
+var slider_value = [];
 
 function position_slider(no, client_x) {
 	const lb = slider_lb[no];
@@ -123,13 +124,14 @@ function position_slider(no, client_x) {
 
 function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template, on_slide){
 	var slider = document.getElementById("interval_" + String(no));
-	// is this the JS lexical scope abuse? Maybe.
 	slider_min_x[no] = min_x;
 	slider_max_x[no] = max_x;
 	slider_lb[no] = initial_lb;
 	slider_ub[no] = initial_ub;
 	slider_down[no] = false;
-	draw_slider(no, x_template);
+	slider_template[no] = x_template;
+	slider_value[no] = min_x - 1.0; // anything below min is "none"
+	draw_slider(no);
 
 	slider.addEventListener('mouseleave', function(e){
 		slider_down[no] = false;
@@ -144,7 +146,7 @@ function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template, on_sl
 		var canvas_rect = slider.getBoundingClientRect();
 		position_slider(no, e.clientX - canvas_rect.left);
 		on_slide(slider_lb[no], slider_ub[no]);
-		draw_slider(no, x_template);
+		draw_slider(no);
 	}, false);
 
 	slider.addEventListener('mousemove', function(e){
@@ -152,12 +154,14 @@ function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template, on_sl
 			var canvas_rect = slider.getBoundingClientRect();
 			position_slider(no, e.clientX - canvas_rect.left);
 			on_slide(slider_lb[no], slider_ub[no]);
-			draw_slider(no, x_template);
+			draw_slider(no);
 		}
 	}, false);
 }
 
-function draw_slider(no, x_template){
+function draw_slider(no){
+	x_template = slider_template[no]
+
 	var slider = document.getElementById("interval_" + String(no));
 	ctx = slider.getContext("2d");
 	const lb = slider_lb[no];
@@ -203,6 +207,23 @@ function draw_slider(no, x_template){
 	ctx.textAlign = "right";
 	if(right_piece_x - left_piece_x - right_width - 12 > left_width)
 		ctx.fillText(right_piece_text, right_piece_x, slider_h - slider_margin_bottom - 6);
+
+	// value if exists
+	if(slider_value[no] >= min_x) {
+		const value01 = (slider_value[no] - min_x) / (max_x - min_x);
+		ctx.strokeStyle="#000000";
+		ctx.beginPath();
+		ctx.moveTo(slider_margin_left + dw * value01, slider_margin_top);
+		ctx.lineTo(slider_margin_left + dw * value01, slider_h - slider_margin_bottom);
+		ctx.stroke();
+		ctx.closePath();
+		ctx.textBaseline = "middle";
+		ctx.textAlign = "left";
+		ctx.fillStyle="#000000";
+		// ok, this is simply dirty. Don't reuse this code
+		const value_to_print = Math.pow(10, slider_value[no]).toExponential(1);
+		ctx.fillText(value_to_print, slider_margin_left + dw * value01 + 6, slider_h / 2);
+	}
 }
 
 function colorized(text) {
@@ -261,6 +282,13 @@ function log10(x) {	// for IE compatibility
 	return Math.log(x) / Math.log(10);
 }
 const log10_max_relative_errors = [log10(max_relative_errors[0]), log10(max_relative_errors[1]), log10(max_relative_errors[2])];
+
+function reveal(no){
+	document.getElementById("the_truth_" + no).style.display = "block";
+	document.getElementById("button_" + no).style.display = "none";
+	slider_value[no] = log10(3.3675e-08);
+	draw_slider(no);
+}
 	</script>
 </head>
 <body>
@@ -392,14 +420,22 @@ The slider below lets you pick an interval in a logarithmic scale. The interval 
 	<p>
 Let's say we have the roots of 0.001, 2, 3&hairsp;000. So in which interval, in your opinion, the maximum relative error for a cubic solver belongs?
 	</p>
-	<canvas id="interval_0" width=608 height=128></canvas>
-
+	<canvas id="interval_1" width=608 height=128></canvas>
+	<div id="button_1">
+	<br>
+	<button type="button" onclick="reveal(1)">Reveal the truth</button>
+	</div>
+	<div id="the_truth_1" style="display:none;">
+	<p>
+It's measured as 3.3675e-08 so the estimation between e-8 and e-7 would be more than adequate.
+	</p>
+	</div>
 	<p>
 ...
 	</p>
 
 	<script language="JavaScript">
-	init_slider(0, -12, 12, -8, -2, "e%x", function(lb, ub) {console.log([lb, ub]);});
+	init_slider(1, -12, +12, -4, +4, "e%x", function(lb, ub) {console.log([lb, ub]);});
 	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
 	</script>
 
