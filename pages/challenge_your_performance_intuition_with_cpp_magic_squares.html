@@ -1,333 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Challenge your performance intuition with C++ magic squares</title>
-    <meta name="description" content="Interactive quiz where you get to estimate the performance difference between several variants of the same code.">
-    <meta name="keywords" content="programming, quizzes">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
-    <style>
+<head>
+	<meta charset="utf-8">
+	<title>Challenge your performance intuition with C++ magic squares</title>
+	<meta name="description" content="Interactive quiz where you get to estimate the performance difference between several variants of the same code.">
+	<meta name="keywords" content="programming, quizzes">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
 body{
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a{
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 20pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 .comment {
-    font-size: 14pt;
-    text-align:center;
-    font-family: sans-serif;
-    padding-bottom: 24pt;
+	font-size: 14pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
 }
 
 table.footer {
-    padding: 64pt 0pt 32pt 0pt;
-    background-color: transparent;
-    width: 505pt;
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
 }
 
 td.footer {
-    font-family: sans-serif;
-    font-size: 16pt;
-    font-style: normal;
-    padding: 0;
-    margin: 0;
-    border: 0;
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
 }
 
 pre {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 12pt;
-    text-align: left;
-    width: 360pt;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 360pt;
 }
 
 .code {
-    background-color: #ccccff;
-    color: #000;
+	background-color: #ccccff;
+	color: #000;
 }
 
 .code_piece {
-    background-color: #ccccff;
-    color: #000;
-    font-family: monospace;
-    padding-left: 4pt;
-    padding-right: 4pt;
+	background-color: #ccccff;
+	color: #000;
+	font-family: monospace;
+	padding-left: 4pt;
+	padding-right: 4pt;
 }
 
 
 table {
-    text-align: center;
-    border-width: 0pt;
+	text-align: center;
+	border-width: 0pt;
 }
 
 td {
-    padding: 6pt 12pt 6pt 12pt;
-    font-size: 16pt;
-    border: 1px solid black;
+	padding: 6pt 12pt 6pt 12pt;
+	font-size: 16pt;
+	border: 1px solid black;
 }
 
 button{
-    width: 304pt;
-    height: 42pt;
-    margin-left:4pt;
-    margin-right:4pt;
-    font-size: 18pt;
+	width: 304pt;
+	height: 42pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 18pt;
 }
 
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 var slider_set = [false, false, false, false,  false, false, false, false,  false, false, false, false];
 var slider_true_xs = [
-    0.77 / (0.77 + 3.87) * 512,
-    0.77 / (0.77 + 0.96) * 512,
-    0.77 / (0.77 + 0.94) * 512,
-    1.0 / (1.0 + 0.9) * 512,
+	0.77 / (0.77 + 3.87) * 512,
+	0.77 / (0.77 + 0.96) * 512,
+	0.77 / (0.77 + 0.94) * 512,
+	1.0 / (1.0 + 0.9) * 512,
 
-    1.0 / (1.0 + 0.6) * 512,
-    1.0 / (1.0 + 17.8) * 512,
-    17.8 / (17.8 + 8.7) * 512,
-    8.7 / (8.7 + 12.7) * 512,
+	1.0 / (1.0 + 0.6) * 512,
+	1.0 / (1.0 + 17.8) * 512,
+	17.8 / (17.8 + 8.7) * 512,
+	8.7 / (8.7 + 12.7) * 512,
 
-    17.8 / (17.8 + 0.9) * 512,
-    1.0 / (1.0 + 0.6) * 512,
-    0.6 / (0.6 + 0.8) * 512,
-    0.6 / (0.6 + 1.4) * 512];
+	17.8 / (17.8 + 0.9) * 512,
+	1.0 / (1.0 + 0.6) * 512,
+	0.6 / (0.6 + 0.8) * 512,
+	0.6 / (0.6 + 1.4) * 512];
 var slider_user_xs = [255, 255, 255, 255,  255, 255, 255, 255,  255, 255, 255, 255];
 var slider_xs = [255, 255, 255, 255,  255, 255, 255, 255,  255, 255, 255, 255];
 
 var slider_down = false;
 
 function comment_on_slider(no){
-    var left = document.getElementById("left_" + (no + 1));
-    var right = document.getElementById("right_" + (no + 1));
-    var x = slider_xs[no]
-    var xl = x;
-    var xr = 511 - x;
-    if(x < 255){
-        left.style.backgroundColor = "#" + (Math.round(xl)).toString(16) + "ff" + (Math.round(xl)).toString(16);
-        right.style.backgroundColor = "#ff" + (Math.round(xl)).toString(16) + (Math.round(xl)).toString(16);
-    }else{
-        right.style.backgroundColor = "#" + (Math.round(xr)).toString(16) + "ff" + (Math.round(xr)).toString(16);
-        left.style.backgroundColor = "#ff" + (Math.round(xr)).toString(16) + (Math.round(xr)).toString(16);
-    }
+	var left = document.getElementById("left_" + (no + 1));
+	var right = document.getElementById("right_" + (no + 1));
+	var x = slider_xs[no]
+	var xl = x;
+	var xr = 511 - x;
+	if(x < 255){
+		left.style.backgroundColor = "#" + (Math.round(xl)).toString(16) + "ff" + (Math.round(xl)).toString(16);
+		right.style.backgroundColor = "#ff" + (Math.round(xl)).toString(16) + (Math.round(xl)).toString(16);
+	}else{
+		right.style.backgroundColor = "#" + (Math.round(xr)).toString(16) + "ff" + (Math.round(xr)).toString(16);
+		left.style.backgroundColor = "#ff" + (Math.round(xr)).toString(16) + (Math.round(xr)).toString(16);
+	}
 
-    var comment = document.getElementById("comment_" + (no + 1));
-    if(xl > xr){
-        if(xl > 20*xr){
-            comment.innerHTML = "Right is more than 20 times faster!";
-        }else if(xl > 10*xr){
-            comment.innerHTML = "Right is more than 10 times faster!";
-        }else if(xl > 5*xr){
-            comment.innerHTML = "Right is more than 5 times faster!";
-        }else if(xl > 3*xr){
-            comment.innerHTML = "Right is more than 3 times faster!";
-        }else if(xl > 2*xr){
-            comment.innerHTML = "Right is more than 2 times faster!";
-        }else if(xl > 1.5*xr){
-            comment.innerHTML = "Right is more than 50% faster.";
-        }else if(xl > 1.25*xr){
-            comment.innerHTML = "Right is more than 25% faster.";
-        }else if(xl > 1.1*xr){
-            comment.innerHTML = "Right is more than 10% faster.";
-        }else{
-            comment.innerHTML = "Right is slightly faster.";
-        }
-    }else if(xr > xl){
-        if(xr > 20*xl){
-            comment.innerHTML = "Left is more than 20 times faster!";
-        }else if(xr > 10*xl){
-            comment.innerHTML = "Left is more than 10 times faster!";
-        }else if(xr > 5*xl){
-            comment.innerHTML = "Left is more than 5 times faster!";
-        }else if(xr > 3*xl){
-            comment.innerHTML = "Left is more than 3 times faster!";
-        }else if(xr > 2*xl){
-            comment.innerHTML = "Left is more than 2 times faster!";
-        }else if(xr > 1.5*xl){
-            comment.innerHTML = "Left is more than 50% faster.";
-        }else if(xr > 1.25*xl){
-            comment.innerHTML = "Left is more than 25% faster.";
-        }else if(xr > 1.1*xl){
-            comment.innerHTML = "Left is more than 10% faster.";
-        }else{
-            comment.innerHTML = "Left is slightly faster.";
-        }
+	var comment = document.getElementById("comment_" + (no + 1));
+	if(xl > xr){
+		if(xl > 20*xr){
+			comment.innerHTML = "Right is more than 20 times faster!";
+		}else if(xl > 10*xr){
+			comment.innerHTML = "Right is more than 10 times faster!";
+		}else if(xl > 5*xr){
+			comment.innerHTML = "Right is more than 5 times faster!";
+		}else if(xl > 3*xr){
+			comment.innerHTML = "Right is more than 3 times faster!";
+		}else if(xl > 2*xr){
+			comment.innerHTML = "Right is more than 2 times faster!";
+		}else if(xl > 1.5*xr){
+			comment.innerHTML = "Right is more than 50% faster.";
+		}else if(xl > 1.25*xr){
+			comment.innerHTML = "Right is more than 25% faster.";
+		}else if(xl > 1.1*xr){
+			comment.innerHTML = "Right is more than 10% faster.";
+		}else{
+			comment.innerHTML = "Right is slightly faster.";
+		}
+	}else if(xr > xl){
+		if(xr > 20*xl){
+			comment.innerHTML = "Left is more than 20 times faster!";
+		}else if(xr > 10*xl){
+			comment.innerHTML = "Left is more than 10 times faster!";
+		}else if(xr > 5*xl){
+			comment.innerHTML = "Left is more than 5 times faster!";
+		}else if(xr > 3*xl){
+			comment.innerHTML = "Left is more than 3 times faster!";
+		}else if(xr > 2*xl){
+			comment.innerHTML = "Left is more than 2 times faster!";
+		}else if(xr > 1.5*xl){
+			comment.innerHTML = "Left is more than 50% faster.";
+		}else if(xr > 1.25*xl){
+			comment.innerHTML = "Left is more than 25% faster.";
+		}else if(xr > 1.1*xl){
+			comment.innerHTML = "Left is more than 10% faster.";
+		}else{
+			comment.innerHTML = "Left is slightly faster.";
+		}
 
-    }else if(xl == xr){
-        comment.innerHTML = "They are equally fast.";
-    }
+	}else if(xl == xr){
+		comment.innerHTML = "They are equally fast.";
+	}
 }
 
 function position_slider(no, client_x){
-    if(!slider_set[no]){
-        var slider = document.getElementById("slider_" + (no + 1));
-        var canvas_rect = slider.getBoundingClientRect();
-        var x = client_x - canvas_rect.left - 48;
-        if(x < 16)
-            x = 16;
-        if(x > 511 - 16)
-            x = 511 - 16;
-        slider_xs[no] = x;
+	if(!slider_set[no]){
+		var slider = document.getElementById("slider_" + (no + 1));
+		var canvas_rect = slider.getBoundingClientRect();
+		var x = client_x - canvas_rect.left - 48;
+		if(x < 16)
+			x = 16;
+		if(x > 511 - 16)
+			x = 511 - 16;
+		slider_xs[no] = x;
 
-        comment_on_slider(no);
-    }
+		comment_on_slider(no);
+	}
 }
 
 function init_slider(no){
-    draw_slider(no);
-    var slider = document.getElementById("slider_" + (no + 1));
+	draw_slider(no);
+	var slider = document.getElementById("slider_" + (no + 1));
 
-    slider.addEventListener('mouseleave', function(e){
-        slider_down = false;
-    }, false);
+	slider.addEventListener('mouseleave', function(e){
+		slider_down = false;
+	}, false);
 
-    slider.addEventListener('mouseup', function(e){
-        slider_down = false;
-    }, false);
+	slider.addEventListener('mouseup', function(e){
+		slider_down = false;
+	}, false);
 
-    slider.addEventListener('mousedown', function(e){
-        slider_down = true;
-        position_slider(no, e.clientX);
-        draw_slider(no);
-    }, false);
+	slider.addEventListener('mousedown', function(e){
+		slider_down = true;
+		position_slider(no, e.clientX);
+		draw_slider(no);
+	}, false);
 
-    slider.addEventListener('mousemove', function(e){
-        if(slider_down){
-            position_slider(no, e.clientX);
-            draw_slider(no);
-        }
-    }, false);
+	slider.addEventListener('mousemove', function(e){
+		if(slider_down){
+			position_slider(no, e.clientX);
+			draw_slider(no);
+		}
+	}, false);
 }
 
 function draw_slider(no){
-    ctx = document.getElementById("slider_" + (no + 1)).getContext("2d");
-    x = slider_xs[no] + 48 + 0.5;
+	ctx = document.getElementById("slider_" + (no + 1)).getContext("2d");
+	x = slider_xs[no] + 48 + 0.5;
 
-    ctx.clearRect(0, 0, 608, 128);
+	ctx.clearRect(0, 0, 608, 128);
 	ctx.beginPath();
 	ctx.moveTo(64.5-16, 32.5);
 	ctx.lineTo(0.5 + 16, 127.5 - 32);
 	ctx.lineTo(607.5 - 16, 127.5 - 32);
 	ctx.lineTo(607.5 - 64 + 16, 32.5);
-    ctx.lineTo(64.5-16, 32.5);
+	ctx.lineTo(64.5-16, 32.5);
 	ctx.strokeStyle="#000000";
-    ctx.stroke();
-    ctx.closePath();
-    ctx.fillStyle="#999999";
-  	ctx.fill();
+	ctx.stroke();
+	ctx.closePath();
+	ctx.fillStyle="#999999";
+	ctx.fill();
 
 	if(slider_set[no]){
-    	x_red = slider_user_xs[no] + 48 + 0.5;
-	    ctx.beginPath();
-	    ctx.moveTo(x_red, 0);
-	    ctx.lineTo(x_red - 64, 127);
-	    ctx.lineTo(x_red + 64, 127);
-	    ctx.lineTo(x_red, 0);
-	    ctx.strokeStyle="#660000";
-        ctx.stroke();
-        ctx.closePath();
-        ctx.fillStyle="#ffcccc";
-    	ctx.fill();
-    }
+		x_red = slider_user_xs[no] + 48 + 0.5;
+		ctx.beginPath();
+		ctx.moveTo(x_red, 0);
+		ctx.lineTo(x_red - 64, 127);
+		ctx.lineTo(x_red + 64, 127);
+		ctx.lineTo(x_red, 0);
+		ctx.strokeStyle="#660000";
+		ctx.stroke();
+		ctx.closePath();
+		ctx.fillStyle="#ffcccc";
+		ctx.fill();
+	}
 
-  	ctx.beginPath();
+	ctx.beginPath();
 	ctx.moveTo(x, 0);
 	ctx.lineTo(x - 64, 127);
 	ctx.lineTo(x + 64, 127);
 	ctx.lineTo(x, 0);
 	ctx.strokeStyle="#000000";
-    ctx.stroke();
-    ctx.closePath();
-    ctx.fillStyle="#cccccc";
-  	ctx.fill();
+	ctx.stroke();
+	ctx.closePath();
+	ctx.fillStyle="#cccccc";
+	ctx.fill();
 }
 
 function reveal(no){
-    slider_set[no] = true;
-    slider_user_xs[no] = slider_xs[no];
-    slider_xs[no] = slider_true_xs[no];
-    draw_slider(no);
-    comment_on_slider(no);
-    document.getElementById("the_truth_" + (no + 1)).style.display = "block";
-    document.getElementById("button_" + (no + 1)).style.display = "none";
+	slider_set[no] = true;
+	slider_user_xs[no] = slider_xs[no];
+	slider_xs[no] = slider_true_xs[no];
+	draw_slider(no);
+	comment_on_slider(no);
+	document.getElementById("the_truth_" + (no + 1)).style.display = "block";
+	document.getElementById("button_" + (no + 1)).style.display = "none";
 
-    for(var i = 0; i < 12; i++){
-        if(slider_set[i] == false)
-            return;
-    }
+	for(var i = 0; i < 12; i++){
+		if(slider_set[i] == false)
+			return;
+	}
 
-    document.getElementById("show_in_the_end").style.display = "block";
-    var score = 0;
-    var default_score = 0;
-    for(var i = 0; i < 12; i++){
-        score += Math.abs(slider_user_xs[i] - slider_xs[i]);
-        default_score += Math.abs(255 - slider_xs[i]);
-    }
+	document.getElementById("show_in_the_end").style.display = "block";
+	var score = 0;
+	var default_score = 0;
+	for(var i = 0; i < 12; i++){
+		score += Math.abs(slider_user_xs[i] - slider_xs[i]);
+		default_score += Math.abs(255 - slider_xs[i]);
+	}
 
-    document.getElementById("score").innerHTML = "<b>" + score.toFixed(0) + "</b>";
-    document.getElementById("default_score").innerHTML = "<b>" + default_score.toFixed(0) + "</b>";
+	document.getElementById("score").innerHTML = "<b>" + score.toFixed(0) + "</b>";
+	document.getElementById("default_score").innerHTML = "<b>" + default_score.toFixed(0) + "</b>";
 }
-    </script>
-  </head>
-  <body>
-    <center>
-    <h1>
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
 Challenge your performance intuition with C++ magic squares
-    </h1>
-    <p>
+	</h1>
+	<p>
 This was supposed to be a five-minute interview question. I came up with it on Thursday, then spent a night looking for a good answer. Then the other night. Then the Saturday morning. Then it finally occurred to me that it's more like 500 minutes now and it wouldn't work for an interview.
-    </p>
-    <p>
+	</p>
+	<p>
 But it's still a fun problem to fiddle with. And it goes like this.
-    </p>
-    <p>
+	</p>
+	<p>
 Here is a magic square:
-    </p>
-    <table><tr>
-    <td>8</td><td>3</td><td>4</td>
-    </tr><tr>
-    <td>1</td><td>5</td><td>9</td>
-    </tr><tr>
-    <td>6</td><td>7</td><td>2</td>
-    </tr></table>
-    <p>
+	</p>
+	<table><tr>
+	<td>8</td><td>3</td><td>4</td>
+	</tr><tr>
+	<td>1</td><td>5</td><td>9</td>
+	</tr><tr>
+	<td>6</td><td>7</td><td>2</td>
+	</tr></table>
+	<p>
 It has all the numbers from 1 to 9 each occurring exactly once. The sum in every row is 15. The sum in every column is 15. And the sum in both diagonals is 15, too. We can write a square as a 9-character string like this: <span class="code">"834159672"</span>.
-    </p>
-    <p>
+	</p>
+	<p>
 <b>The problem:</b> propose a function that tells if a 3x3 square written as an ASCII string of digits is magic or not <i>fast</i>.
-    </p>
-    <p>
+	</p>
+	<p>
 Here is a benchmark. It has no dependencies, and it's C++11 standard compliant, so it runs in basically every environment.
-    </p>
-    <pre style="background-color: #bbbbff; width: 505pt; color: #000;">
+	</p>
+	<pre style="background-color: #bbbbff; width: 505pt; color: #000;">
 #include &lt;iostream&gt;
 #include &lt;chrono&gt;
 
@@ -381,35 +381,35 @@ int main()
     difference = end - start;
   cout &lt;&lt; difference.count() &lt;&lt; "\n\n";
 }
-    </pre>
-    <p>
+	</pre>
+	<p>
 I ran it with an empty checker to see how much time the generator takes. Then ran thirteen different solutions three times each, and picked the best time for every solution. Now I know what works and what doesn't.
-    </p>
-    <p>
+	</p>
+	<p>
 Now let's play a game. There will be twelve rounds, each round is a match between two solutions. Or rather between their execution times. Using your intuition and best judgment, please estimate their <i>relative</i> performance. Use the sliders below the code samples.
-    </p>
-    <p class="comment">
+	</p>
+	<p class="comment">
 All is measured on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz. <br>Compiled with g++ 5.4.0 -std=c++11 -O2.
-    </p>
+	</p>
 
-    <h2>
+	<h2>
 Round 1. Check 15 and check digits vs. check digits and then check 15
-    </h2>
-    <p>
+	</h2>
+	<p>
 The naïve solution would be to check every row, column, and diagonal sum and then assert that all the numbers are there. We don't have to parse actual numbers, we can go with ASCII.
-    </p>
-    <p>
+	</p>
+	<p>
 To check that all the numbers are there and each occurs only once, we can fill the array of counters and then check that every number has its counter set to 1.
-    </p>
-    <p>
+	</p>
+	<p>
 The question is, what should we do first? On the left, the rows, columns, and diagonals checks come first and then there's a counter check. On the right, the counter check comes first. Let's find out which one if faster.
-    </p>
-    <p>
+	</p>
+	<p>
 Now place your bets!
-    </p>
-    <table><tr>
-    <td id="left_1">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_1">
+	<pre>
 bool check_if_magic(const std::string& sq)
   {
   if ((sq[0] + sq[1] + sq[2] != '5'*3)
@@ -460,40 +460,40 @@ bool check_if_magic(const std::string& sq)
 
   return true;
   }
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_1" width=608 height=128></canvas>
-    <p class="comment" id="comment_1">
+	</pre>
+	</td></tr></table>
+	<canvas id="slider_1" width=608 height=128></canvas>
+	<p class="comment" id="comment_1">
 They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
-    <div id="the_truth_1" style="display:none;">
-    <p>
+	</p>
+	<button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
+	<div id="the_truth_1" style="display:none;">
+	<p>
 Yes, the difference is huge. The thing is, short-circuiting makes every line in 15-checks an independent optimizing heuristic. We only go past the first line when the numbers in the first row sum up to 15. Which only happens in 8.36% of all cases. So the very first line cuts out 91.74% of computation.
-    </p>
-    <p>
+	</p>
+	<p>
 It's very effective.
-    </p>
-    </div>
-    <script language="JavaScript">
-    init_slider(0);
-    </script>
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(0);
+	</script>
 
-    <h2>
+	<h2>
 Round 2. All checks vs. fewer checks
-    </h2>
-    <p>
+	</h2>
+	<p>
 Not all the checks are that effective though. Sure, the first three are independent but if you have established that all your rows sum up to 15 each that means that the total is 45. Now if we check that the first two columns sum up to 15, the third one has to be 45 - 15*2 = 15. The fifth check is redundant.
-    </p>
-    <p>
+	</p>
+	<p>
 And we will gain a bit of performance if we throw it away. But in fact, we can also throw away the third check as well. If we assert that the numbers are unique then the total sum is 45 anyway.
-    </p>
-    <p>
+	</p>
+	<p>
 So let's throw away two redundant lines and see what will happen.
-    </p>
-    <table><tr>
-    <td id="left_2">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_2">
+	<pre>
 bool check_if_magic(const std::string& sq)
   {
   if ((sq[0] + sq[1] + sq[2] != '5'*3)
@@ -517,10 +517,10 @@ bool check_if_magic(const std::string& sq)
 
   return true;
   }
-    </pre>
-    </td>
-    <td id="right_2">
-    <pre>
+	</pre>
+	</td>
+	<td id="right_2">
+	<pre>
 bool check_if_magic(const std::string& sq)
   {
   if ((sq[0] + sq[1] + sq[2] != '5'*3)
@@ -544,34 +544,34 @@ bool check_if_magic(const std::string& sq)
 
   return true;
   }
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_2" width=608 height=128></canvas>
-    <p class="comment" id="comment_2">
+	</pre>
+	</td></tr></table>
+	<canvas id="slider_2" width=608 height=128></canvas>
+	<p class="comment" id="comment_2">
 They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
-    <div id="the_truth_2" style="display:none;">
-    <p>
+	</p>
+	<button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
+	<div id="the_truth_2" style="display:none;">
+	<p>
 Not the best idea. Yes, we do assert that the numbers are unique but we do this in the most expensive part of the code. The fifth check is redundant because of the first three, but the third — only because of the thing we still have to compute. We retire a line of code but we lose pretty effective heuristic.
-    </p>
-    </div>
-    <script language="JavaScript">
-    init_slider(1);
-    </script>
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(1);
+	</script>
 
-    <h2>
+	<h2>
 Round 3. Naïve solution vs. micro-optimization
-    </h2>
-    <p>
+	</h2>
+	<p>
 The naïve solution is the eight sum-is-15 checks and the digits-are-unique check. The micro-optimization concerns the latter part. To check if the string is a permutation of digits, we want to fill a map of bools and assert that its content is all true. Yes, with a binary map, if there are three equal digits in a square, the value in the map for the digit will be true. But then we wouldn't have enough digits left to fill all nine positions so it works.
-    </p>
-    <p>
+	</p>
+	<p>
 Since we are here for the performance, we would use an <span class="code_piece">uint_fast64_t</span> instead of a real map and trigger its bits. The assertion then would be a mere integer comparison. Also, we will start with the loaded map and check it with 0. All for performance sake, right?
-    </p>
-    <table><tr>
-    <td id="left_3">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_3">
+	<pre>
 bool check_if_magic(const std::string& sq)
   {
   if ((sq[0] + sq[1] + sq[2] != '5'*3)
@@ -595,10 +595,10 @@ bool check_if_magic(const std::string& sq)
 
   return true;
   }
-    </pre>
-    </td>
-    <td id="right_3">
-    <pre>
+	</pre>
+	</td>
+	<td id="right_3">
+	<pre>
 auto c15 = '5' * 3;
 uint_fast64_t ideal_char_map =
     static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
@@ -626,49 +626,49 @@ bool check_if_magic(const std::string& sq)
 
   return true;
   }
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_3" width=608 height=128></canvas>
-    <p class="comment" id="comment_3">
+	</pre>
+	</td></tr></table>
+	<canvas id="slider_3" width=608 height=128></canvas>
+	<p class="comment" id="comment_3">
 They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(2)" id="button_3">Reveal the truth</button>
-    <div id="the_truth_3" style="display:none;">
-    <p>
+	</p>
+	<button type="button" onclick="reveal(2)" id="button_3">Reveal the truth</button>
+	<div id="the_truth_3" style="display:none;">
+	<p>
 The optimization seems legit. It seems sane. Yet apparently, the optimization makes the code slightly slower. How come?
-    </p>
-    <p>
+	</p>
+	<p>
 The thing is, it doesn't. Generally. The optimization only works as a pessimization with this particular processor, compiler, and compiling options. Here are my measurements for other configurations:
-    </p>
-    <p>
+	</p>
+	<p>
 ARMv7 (v71), clang 3.5.0, -O2: <b>24.8</b> vs <b>24.4</b>
-    </p>
-    <p>
+	</p>
+	<p>
 Intel i7-7700HQ, g++, -O3: <b>0.89</b> vs <b>0.75</b>
-    </p>
-    <p>
+	</p>
+	<p>
 Intel i7-4700, MSVC 15.9.11, -O2: <b>4.0</b> vs <b>3.7</b>
-    </p>
-    <p>
+	</p>
+	<p>
 So yes, using an integer as a binary map is a good thing. Generally. But sometimes it just isn't.
-    </p>
-    </div>
-    <script language="JavaScript">
-    init_slider(2);
-    </script>
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(2);
+	</script>
 
-    <h2>
+	<h2>
 Round 4. Microoptimized solution vs. the oddity heuristic
-    </h1>
-    <p>
+	</h1>
+	<p>
 The heuristic proposed is meant to end the function as early as possible. It is based on a fact that in a magic square, the corner values are always even and the rest are odd. If one of the numbers fails to pass the oddity test, then there is no point in the full magic check at all.
-    </p>
-    <p>
+	</p>
+	<p>
 This heuristic is rather effective. On random numbers, it narrows down our cases with a pretty good 2<sup>9</sup> to 1 ratio. So only one string in 512 will get to the actual check. Well, technically our numbers are not entirely random, we have more odds than evens, but still.
-    </p>
-    <table><tr>
-    <td id="left_4">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_4">
+	<pre>
 auto c15 = '5' * 3;
 uint_fast64_t ideal_char_map =
     static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
@@ -696,10 +696,10 @@ bool check_if_magic(const std::string& sq)
 
   return true;
   }
-    </pre>
-    </td>
-    <td id="right_4">
-    <pre>
+	</pre>
+	</td>
+	<td id="right_4">
+	<pre>
 auto c15 = '5' * 3;
 uint_fast64_t ideal_char_map =
     static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
@@ -734,33 +734,33 @@ bool check_if_magic(const std::string& sq)
 
   return true;
   }
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_4" width=608 height=128></canvas>
-    <p class="comment" id="comment_4">
+	</pre>
+	</td></tr></table>
+	<canvas id="slider_4" width=608 height=128></canvas>
+	<p class="comment" id="comment_4">
 They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(3)" id="button_4">Reveal the truth</button>
-    <p id="the_truth_4" style="display:none;">
+	</p>
+	<button type="button" onclick="reveal(3)" id="button_4">Reveal the truth</button>
+	<p id="the_truth_4" style="display:none;">
 The right is only slightly more than 10% faster. The thing is, although this heuristic is great in narrowing, the computation itself is so light, the cost of heuristic eats up its benefit.
-    </p>
-    <script language="JavaScript">
-    init_slider(3);
-    </script>
+	</p>
+	<script language="JavaScript">
+	init_slider(3);
+	</script>
 
 
-    <h2>
+	<h2>
 Round 5. Direct solution vs. the central 5 heuristic
-    </h1>
-    <p>
+	</h1>
+	<p>
 We can choose less effective but cheaper heuristic. For instance, we know that all the 3x3 magic squares have 5 in the center. Let's try and exploit this fact.
-    </p>
-    <p>
+	</p>
+	<p>
 Also, this makes the main check a little bit cheaper since we don't have to check for the central 5 in a sum anymore.
-    </p>
-    <table><tr>
-    <td id="left_5">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_5">
+	<pre>
 auto c15 = '5' * 3;
 uint_fast64_t ideal_char_map =
     static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
@@ -788,10 +788,10 @@ bool check_if_magic(const std::string& sq)
 
   return true;
   }
-    </pre>
-    </td>
-    <td id="right_5">
-    <pre>
+	</pre>
+	</td>
+	<td id="right_5">
+	<pre>
 auto magic_number = '5' * 3;
 auto not_so_magic_number = '5' * 2;
 uint_fast64_t ideal_char_map =
@@ -822,40 +822,40 @@ bool check_if_magic(const std::string& sq)
 
   return true;
   }
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_5" width=608 height=128></canvas>
-    <p class="comment" id="comment_5">
+	</pre>
+	</td></tr></table>
+	<canvas id="slider_5" width=608 height=128></canvas>
+	<p class="comment" id="comment_5">
 They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(4)" id="button_5">Reveal the truth</button>
-    <div id="the_truth_5" style="display:none;">
-    <p>
+	</p>
+	<button type="button" onclick="reveal(4)" id="button_5">Reveal the truth</button>
+	<div id="the_truth_5" style="display:none;">
+	<p>
 The right is more than 50% faster. But it shouldn't be. Trying to understand why it is, I got it wrong the first time. Luckily, I was corrected.
-    </p>
-    <p>
+	</p>
+	<p>
 <b>[spoilers!]</b> <a href="https://medium.com/@veedrac/learning-the-value-of-good-benchmarking-technique-with-c-magic-squares-b61b3386c97f">Learning the value of good benchmarking technique with C++ magic squares</a> is an excellent explanation of why my benchmark sucks. Long story short, branch prediction.
-    </p>
-    <p>
+	</p>
+	<p>
 When the numbers come in order, this 5-check works in a very branch prediction friendly way. The data have a pattern. It's 26244 not fives, then 6561 fives, then 52488 not fives, and then its 6561 fives again. Of course, it's cheap.
-    </p>
-    <p>
+	</p>
+	<p>
 But with randomized input, <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/cpp_magic_cubes/better_benchmark">it isn't</a>. It's still cheap, sure, but not enough to pay off own weight. The code on the right loses a bit to the code on the left.
-    </p>
-    </div>
-    <script language="JavaScript">
-    init_slider(4);
-    </script>
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(4);
+	</script>
 
-    <h2>
+	<h2>
 Round 6. Fair magic test vs. precached answers
-    </h1>
-    <p>
+	</h1>
+	<p>
 There are only 8 3x3 magic squares in existence. So do we really have to test the string against the magic definition? Why couldn't we precache the magic values somewhere and simply compare with that?
-    </p>
-    <table><tr>
-    <td id="left_6">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_6">
+	<pre>
 auto c15 = '5' * 3;
 uint_fast64_t ideal_char_map =
     static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
@@ -883,10 +883,10 @@ bool check_if_magic(const std::string& sq)
 
   return true;
   }
-    </pre>
-    </td>
-    <td id="right_6">
-    <pre>
+	</pre>
+	</td>
+	<td id="right_6">
+	<pre>
 const std::array&lt;std::string, 8&gt;
   all_magic_squares = {
   "816357492", "492357816",
@@ -903,33 +903,33 @@ bool check_if_magic(const std::string& sq)
 
   return false;
 }
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_6" width=608 height=128></canvas>
-    <p class="comment" id="comment_6">
+	</pre>
+	</td></tr></table>
+	<canvas id="slider_6" width=608 height=128></canvas>
+	<p class="comment" id="comment_6">
 They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(5)" id="button_6">Reveal the truth</button>
-    <p id="the_truth_6" style="display:none;">
+	</p>
+	<button type="button" onclick="reveal(5)" id="button_6">Reveal the truth</button>
+	<p id="the_truth_6" style="display:none;">
 The right is more than 10 times slower. Apparently, string comparisons are way heavier than the whole testing thing.
-    </p>
-    <script language="JavaScript">
-    init_slider(5);
-    </script>
+	</p>
+	<script language="JavaScript">
+	init_slider(5);
+	</script>
 
 
-    <h2>
+	<h2>
 Round 7. String array vs. string set
-    </h1>
-    <p>
+	</h1>
+	<p>
 Well, strings comparisons are relatively slow. But we don't have to do all eight comparisons every time. If we organize our comparison work-flow as a tree-like structure, we could minimize the number of comparisons to somewhere form 1 to 3 per string.
-    </p>
-    <p>
+	</p>
+	<p>
 Luckily we don't have to reinvent the tree, we can take the standard <i>set</i> instead.
-    </p>
-    <table><tr>
-    <td id="left_7">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_7">
+	<pre>
 const std::array&lt;std::string, 8&gt;
   all_magic_squares = {
   "816357492", "492357816",
@@ -946,10 +946,10 @@ bool check_if_magic(const std::string& sq)
 
   return false;
 }
-    </pre>
-    </td>
-    <td id="right_7">
-    <pre>
+	</pre>
+	</td>
+	<td id="right_7">
+	<pre>
 const <b>std::set</b>&lt;std::string&gt;
   all_magic_squares = {
   "816357492", "492357816",
@@ -963,30 +963,30 @@ bool check_if_magic(const std::string& sq)
   return all_magic_squares.find(sq) !=
     all_magic_squares.end());
 }
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_7" width=608 height=128></canvas>
-    <p class="comment" id="comment_7">
+	</pre>
+	</td></tr></table>
+	<canvas id="slider_7" width=608 height=128></canvas>
+	<p class="comment" id="comment_7">
 They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(6)" id="button_7">Reveal the truth</button>
-    <p id="the_truth_7" style="display:none;">
+	</p>
+	<button type="button" onclick="reveal(6)" id="button_7">Reveal the truth</button>
+	<p id="the_truth_7" style="display:none;">
 The right is considerably better. Well, better than the string array.
-    </p>
-    <script language="JavaScript">
-    init_slider(6);
-    </script>
+	</p>
+	<script language="JavaScript">
+	init_slider(6);
+	</script>
 
 
-    <h2>
+	<h2>
 Round 8. String set vs. string unordered set
-    </h1>
-    <p>
+	</h1>
+	<p>
 We have another structure that seems promising in terms of performance. The unordered set is known to have constant complexity for the cases with no collisions. Since our data is small, it is unlikely to cause collisions in a hash map. Let's try that.
-    </p>
-    <table><tr>
-    <td id="left_8">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_8">
+	<pre>
 const std::set&lt;std::string&gt;
   all_magic_squares = {
   "816357492", "492357816",
@@ -1000,10 +1000,10 @@ bool check_if_magic(const std::string& sq)
   return all_magic_squares.find(sq) !=
     all_magic_squares.end());
 }
-    </pre>
-    </td>
-    <td id="right_8">
-    <pre>
+	</pre>
+	</td>
+	<td id="right_8">
+	<pre>
 const <b>std::unordered_set</b>&lt;std::string&gt;
   all_magic_squares = {
   "816357492", "492357816",
@@ -1017,30 +1017,30 @@ bool check_if_magic(const std::string& sq)
   return all_magic_squares.find(sq) !=
     all_magic_squares.end());
 }
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_8" width=608 height=128></canvas>
-    <p class="comment" id="comment_8">
+	</pre>
+	</td></tr></table>
+	<canvas id="slider_8" width=608 height=128></canvas>
+	<p class="comment" id="comment_8">
 They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(7)" id="button_8">Reveal the truth</button>
-    <p id="the_truth_8" style="display:none;">
+	</p>
+	<button type="button" onclick="reveal(7)" id="button_8">Reveal the truth</button>
+	<p id="the_truth_8" style="display:none;">
 The usual set works better here. Yes, we saved on comparisons, but the hash function for a string turns out to be rather heavy itself.
-    </p>
-    <script language="JavaScript">
-    init_slider(7);
-    </script>
+	</p>
+	<script language="JavaScript">
+	init_slider(7);
+	</script>
 
 
-    <h2>
+	<h2>
 Round 9. String array vs. string array plus the oddity heuristic
-    </h1>
-    <p>
+	</h1>
+	<p>
 Now, when we have heavier body, maybe we can gain more from the heuristic. Let's try our oddity one here.
-    </p>
-    <table><tr>
-    <td id="left_9">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_9">
+	<pre>
 const std::array&lt;std::string, 8&gt;
   all_magic_squares = {
   "816357492", "492357816",
@@ -1057,10 +1057,10 @@ bool check_if_magic(const std::string& sq)
 
   return false;
 }
-    </pre>
-    </td>
-    <td id="right_9">
-    <pre>
+	</pre>
+	</td>
+	<td id="right_9">
+	<pre>
 const std::array&lt;std::string, 8&gt;
   all_magic_squares = {
   "816357492", "492357816",
@@ -1084,30 +1084,30 @@ bool check_if_magic(const std::string& sq)
 
   return false;
 }
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_9" width=608 height=128></canvas>
-    <p class="comment" id="comment_9">
+	</pre>
+	</td></tr></table>
+	<canvas id="slider_9" width=608 height=128></canvas>
+	<p class="comment" id="comment_9">
 They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(8)" id="button_9">Reveal the truth</button>
-    <p id="the_truth_9" style="display:none;">
+	</p>
+	<button type="button" onclick="reveal(8)" id="button_9">Reveal the truth</button>
+	<p id="the_truth_9" style="display:none;">
 And it works like a charm.
-    </p>
-    <script language="JavaScript">
-    init_slider(8);
-    </script>
+	</p>
+	<script language="JavaScript">
+	init_slider(8);
+	</script>
 
 
-    <h2>
+	<h2>
 Round 10. Direct solution vs. answers in uint64_t.
-    </h1>
-    <p>
+	</h1>
+	<p>
 Since we know that the center value is always five, we don't have to store it in our answers either. This leaves us with exactly 8 bytes per string that can be cheaply encoded as a single 64-bit value. Why don't we store these values instead of strings?
-    </p>
-    <table><tr>
-    <td id="left_10">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_10">
+	<pre>
 auto c15 = '5' * 3;
 uint_fast64_t ideal_char_map =
     static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
@@ -1135,10 +1135,10 @@ bool check_if_magic(const std::string& sq)
 
   return true;
   }
-    </pre>
-    </td>
-    <td id="right_10">
-    <pre>
+	</pre>
+	</td>
+	<td id="right_10">
+	<pre>
 const std::array&lt;uint64_t, 8&gt; magic_numbers
 {
   3545515123101087289, 3690191062107239479,
@@ -1164,30 +1164,30 @@ bool check_if_magic(const std::string& sq)
       return true;
   return false;
 }
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_10" width=608 height=128></canvas>
-    <p class="comment" id="comment_10">
+	</pre>
+	</td></tr></table>
+	<canvas id="slider_10" width=608 height=128></canvas>
+	<p class="comment" id="comment_10">
 They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(9)" id="button_10">Reveal the truth</button>
-    <p id="the_truth_10" style="display:none;">
+	</p>
+	<button type="button" onclick="reveal(9)" id="button_10">Reveal the truth</button>
+	<p id="the_truth_10" style="display:none;">
 It's fast! In fact, it is as fast as our best choice from the earlier.
-    </p>
-    <script language="JavaScript">
-    init_slider(9);
-    </script>
+	</p>
+	<script language="JavaScript">
+	init_slider(9);
+	</script>
 
 
-    <h2>
+	<h2>
 Round 11. An array on uint64_t vs. a set of uint64_t.
-    </h1>
-    <p>
+	</h1>
+	<p>
 Let's now use a set instead of an array here. There should be fewer comparisons anyway, but would it help?
-    </p>
-    <table><tr>
-    <td id="left_11">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_11">
+	<pre>
 const std::array&lt;uint64_t, 8&gt; magic_numbers
 {
   3545515123101087289, 3690191062107239479,
@@ -1240,30 +1240,30 @@ bool check_if_magic(const std::string& sq)
   return magic_numbers.find(magic_number)
     != magic_numbers.end();
 }
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_11" width=608 height=128></canvas>
-    <p class="comment" id="comment_11">
+	</pre>
+	</td></tr></table>
+	<canvas id="slider_11" width=608 height=128></canvas>
+	<p class="comment" id="comment_11">
 They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(10)" id="button_11">Reveal the truth</button>
-    <p id="the_truth_11" style="display:none;">
+	</p>
+	<button type="button" onclick="reveal(10)" id="button_11">Reveal the truth</button>
+	<p id="the_truth_11" style="display:none;">
 Well, on this data a simple loop works better. Perhaps, it's because we only need to go through 64 bytes and it fits into a single cache line. We lose this compactness with the set.
-    </p>
-    <script language="JavaScript">
-    init_slider(10);
-    </script>
+	</p>
+	<script language="JavaScript">
+	init_slider(10);
+	</script>
 
 
-    <h2>
+	<h2>
 Round 12. An array on uint64_t vs. an unordered set of uint64_t.
-    </h1>
-    <p>
+	</h1>
+	<p>
 Could we gain some speed from using unordered set?
-    </p>
-    <table><tr>
-    <td id="left_12">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_12">
+	<pre>
 const std::array&lt;uint64_t, 8&gt; magic_numbers
 {
   3545515123101087289, 3690191062107239479,
@@ -1289,10 +1289,10 @@ bool check_if_magic(const std::string& sq)
       return true;
   return false;
 }
-    </pre>
-    </td>
-    <td id="right_12">
-    <pre>
+	</pre>
+	</td>
+	<td id="right_12">
+	<pre>
 const <b>std::unordered_set</b>&lt;uint64_t&gt; magic_numbers
 {
   3545515123101087289, 3690191062107239479,
@@ -1316,52 +1316,52 @@ bool check_if_magic(const std::string& sq)
   return magic_numbers.find(magic_number)
     != magic_numbers.end();
 }
-    </pre>
-    </td></tr></table>
-    <canvas id="slider_12" width=608 height=128></canvas>
-    <p class="comment" id="comment_12">
+	</pre>
+	</td></tr></table>
+	<canvas id="slider_12" width=608 height=128></canvas>
+	<p class="comment" id="comment_12">
 They are equally fast.
-    </p>
-    <button type="button" onclick="reveal(11)" id="button_12">Reveal the truth</button>
-    <p id="the_truth_12" style="display:none;">
+	</p>
+	<button type="button" onclick="reveal(11)" id="button_12">Reveal the truth</button>
+	<p id="the_truth_12" style="display:none;">
 Apparently, not. Unordered sets may work wonders for large and uniformly distributed data. But our loop is just too small to beat.
-    </p>
-    <script language="JavaScript">
-    init_slider(11);
-    </script>
+	</p>
+	<script language="JavaScript">
+	init_slider(11);
+	</script>
 
-    <div id="show_in_the_end" style="display:none;">
-    <h2>
+	<div id="show_in_the_end" style="display:none;">
+	<h2>
 Congratulations!
-    </h2>
-    <p>
+	</h2>
+	<p>
 You scored <span id="score"></span> pixels of error. I'm not sure if it's good or bad, but if you leave every answer untouched as “exactly equal”, there is <span id="default_score"></span> pixels of error.
-    </p>
-    </div>
+	</p>
+	</div>
 
-    <h2>
+	<h2>
 Conclusion
-    </h2>
-    <p>
+	</h2>
+	<p>
 Probably, I shouldn't talk for everyone but in my case, the conclusion would have been: <i>“bad measurements beat good intuition nine times out of ten”</i>. Even though I do have a long history of making things fast, this extreme case — small data, cheap body — neglected my experience to naught. String operations seemed to be cheaper, heuristics — more effective and there were also high hopes for the standard containers. Well, at least slightly higher hopes.
-    </p>
-    <p>
+	</p>
+	<p>
 I've learned something from this experience. Hope you did too. If so, then no matter what your score is, you are still a winner.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Links
-    </h2>
-    <p>
+	</h2>
+	<p>
 Further reading: <a href="https://medium.com/@veedrac/learning-the-value-of-good-benchmarking-technique-with-c-magic-squares-b61b3386c97f">Learning the value of good benchmarking technique with C++ magic squares</a>.
-    </p>
-    <p>
+	</p>
+	<p>
 Reddit discussions: <a href="https://www.reddit.com/r/programming/comments/7e9ty4/challenge_your_performance_intuition_with_c_magic/">r/programming</a>; <a href="https://www.reddit.com/r/cpp/comments/7e826b/challenge_your_performance_intuition_with_c_magic/">r/cpp</a>
-    </p>
-    <p>
+	</p>
+	<p>
 Github with <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/cpp_magic_cubes">all the experiments</a>.
-    </p>
+	</p>
 
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
 		<a href="index.html"><img src="favicon.svg"></a>
@@ -1376,6 +1376,6 @@ Github with <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp
 	</td>
 	</tr>
 	</table>
-    </center>
-  </body>
+	</center>
+</body>
 </html>
