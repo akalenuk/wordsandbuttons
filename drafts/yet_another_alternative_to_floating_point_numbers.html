@@ -210,6 +210,9 @@ function draw_slider(no){
 
 	// value if exists
 	if(slider_value[no] >= min_x) {
+		// ok, this is simply dirty. Don't reuse this code
+		const value_to_print = Math.pow(10, slider_value[no]).toExponential(1);
+
 		const value01 = (slider_value[no] - min_x) / (max_x - min_x);
 		ctx.strokeStyle="#000000";
 		ctx.beginPath();
@@ -218,11 +221,14 @@ function draw_slider(no){
 		ctx.stroke();
 		ctx.closePath();
 		ctx.textBaseline = "middle";
-		ctx.textAlign = "left";
 		ctx.fillStyle="#000000";
-		// ok, this is simply dirty. Don't reuse this code
-		const value_to_print = Math.pow(10, slider_value[no]).toExponential(1);
-		ctx.fillText(value_to_print, slider_margin_left + dw * value01 + 6, slider_h / 2);
+		if(value01 < 0.75) {
+			ctx.textAlign = "left";
+			ctx.fillText(value_to_print, slider_margin_left + dw * value01 + 6, slider_h / 2);
+		} else {
+			ctx.textAlign = "right";
+			ctx.fillText(value_to_print, slider_margin_left + dw * value01 - 6, slider_h / 2);
+		}
 	}
 }
 
@@ -286,7 +292,12 @@ const log10_max_relative_errors = [log10(max_relative_errors[0]), log10(max_rela
 function reveal(no){
 	document.getElementById("the_truth_" + no).style.display = "block";
 	document.getElementById("button_" + no).style.display = "none";
-	slider_value[no] = log10(3.3675e-08);
+	if(no == 1)
+		slider_value[no] = log10(3.3675e-08);
+	else if(no == 2)
+		slider_value[no] = log10(29.3984);
+	else if(no == 3)
+		slider_value[no] = log10(7.60319e+09);
 	draw_slider(no);
 }
 	</script>
@@ -430,12 +441,44 @@ Let's say we have the roots of 0.001, 2, 3&hairsp;000. So in which interval, in 
 It's measured as 3.3675e-08 so the estimation between e-8 and e-7 would be more than adequate.
 	</p>
 	</div>
+
+	<h2>Round 2</h2>
+	<p>
+...
+	</p>
+	<canvas id="interval_2" width=608 height=128></canvas>
+	<div id="button_2">
+	<br>
+	<button type="button" onclick="reveal(2)">Reveal the truth</button>
+	</div>
+	<div id="the_truth_2" style="display:none;">
+	<p>
+...
+	</p>
+	</div>
+
+	<h2>Round 3</h2>
+	<p>
+...
+	</p>
+	<canvas id="interval_3" width=608 height=128></canvas>
+	<div id="button_3">
+	<br>
+	<button type="button" onclick="reveal(3)">Reveal the truth</button>
+	</div>
+	<div id="the_truth_3" style="display:none;">
+	<p>
+...
+	</p>
+	</div>
 	<p>
 ...
 	</p>
 
 	<script language="JavaScript">
-	init_slider(1, -12, +12, -4, +4, "e%x", function(lb, ub) {console.log([lb, ub]);});
+	init_slider(1, -12, +12, -4, +4, "e%x", function(lb, ub) {});
+	init_slider(2, -12, +12, -4, +4, "e%x", function(lb, ub) {});
+	init_slider(3, -12, +12, -4, +4, "e%x", function(lb, ub) {});
 	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
 	</script>
 
