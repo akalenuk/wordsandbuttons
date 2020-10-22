@@ -480,8 +480,55 @@ The error is much-much larger than the smallest root value. It's even larger tha
 Note that the computation is still correct. Within some margin of error. It's the scale of this margin that makes the computation useless.
 	</p>
 	</div>
+	<h2>Meet the rational bounds</h2>
 	<p>
-...
+It's not the error per se that is bad. Error is omnipresent. Every measuring device has its error, every 3D printer and every milling machine has its maximal precision. Error is fine.
+	</p>
+	<p>
+It's only the unpredictability that makes it unpleasant.
+	</p>
+	<p>
+People address errors in multiple ways. In metrology, a measured value is supplemented with the absolute error. You don't say that the temperature outside is 10&deg;, you say it's 10&deg;&hairsp;&plusmn;&hairsp;0.5&deg;. This might seem redundant, sine this is a small error for the weather, but in some other context this very error would be essential. If you're measuring body temperature, a 1 degree difference is enough to tell if a person is sick. You can not afford a whole 1 degree error in this scenario.
+	</p>
+	<p>
+If you have this input error written down, you can pull it through your computation to see if the resulting error is still tolerable. To do that, you need to exchange your measured numbers for intervals. A number with error becomes an interval: 10&deg;&hairsp;&plusmn;&hairsp;0.5&deg; becomes [9.5, 10.5]&deg;.
+	</p>
+	<p>
+You can add these intervals just like you add numbers 
+	</p>
+	<p>
+... add a summator here
+	</p>
+	<p>
+You can multiply them as well.
+	</p>
+	<p>
+... add a summator here
+	</p>
+	<p>
+So you can accomodate for the input error with intervals. But what about computational error?
+	</p>
+	<p>
+It's a common practice to use intervals to accomodate for error. It's also a common practice in computing to use rational numbers to avoid computational error. The problem with the latter is that these numbers grow uncontrolably. A computation takes an increasing amount of memory and time as its rationals grow. There should be a reasonable compromise providing measurable error and predictable speed. And if we blend these two ideas, we'll get one.
+	</p>
+	<p>
+Consider a value that is represented by two finite rational numbers. One represents a lower boundary, and the other — the upper boundary. That makes them <b>rational boundaries</b>. The interval they form represents a number with error.
+	</p>
+	<p>
+Let's say you want to sum two intervals and the upper bound now doesn't fit our small-capacity rational number. Instead of enlarging the capacity, we find the other rational number that fits it and that is not less than the sum we want to represent. This way we admit some error, we embrace it but we also keep it under control. The resulting interval after the computation not represent a number with both input and computational error.
+	</p>
+	<p>
+Here's the code example for such a truncation.
+	</p>
+<p>
+... show Rust and C++
+</p>
+	<p>
+Disclaimer: <i>the solution shown here is just a sketch. There are better implementations of both intervals and rational numbers out there. This only shows that it's possible to brign them together but not how it should be done exactly</i>.
+	</p>
+	<h2>Conclusion</h2>
+	<p>
+Computational error may become a problem at the least appropriate time of the year. Rational boundaries let you manage both measurement error and computational error in the coherent way without compromising computational speed all that much.
 	</p>
 
 	<script language="JavaScript">
