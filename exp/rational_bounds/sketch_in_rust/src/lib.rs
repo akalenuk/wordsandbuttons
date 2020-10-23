@@ -16,7 +16,7 @@ struct RB32 {
 	ub : R<u32>  // upper bound
 }
 
-fn simplify<U>(x: R<U>) -> R<U>
+fn simplified<U>(x: R<U>) -> R<U>
 	where U:std::cmp::PartialEq
 			+ std::ops::SubAssign
 			+ std::cmp::PartialOrd
@@ -39,7 +39,7 @@ fn simplify<U>(x: R<U>) -> R<U>
 		if cd == U::from(1_u32) {
 			x
 		} else {
-			simplify(R::<U>{n: x.n / cd, d: x.d / cd, p: x.p})
+			simplified(R::<U>{n: x.n / cd, d: x.d / cd, p: x.p})
 		}
 	}
 }
@@ -88,33 +88,34 @@ impl std::cmp::PartialEq for R<u64> {
 
 fn downcast_to_lower_bound(x: R<u64>) -> R<u32>
 {
-	let simple_x = simplify(x);
-	let mut n = simple_x.n;
-	let mut d = simple_x.d;
-	let p = simple_x.p;
-	while n > u32::MAX.into() || d > u32::MAX.into() {
-		n >>= 1;
-		d >>= 1;
-	}
-	// lower bound (there is a specific logic behind that but I can't get it right so I'd just test all the variants)
+	// shift and lose precision if necessary
+	let shift = 32 - (x.d | x.n).leading_zeros() as i64;
+	let n = if shift > 0 {x.n >> shift} else {x.n};
+	let d = if shift > 0 {x.d >> shift} else {x.d};
+	let p = x.p;
+
+	// The rational number that do not exceed x but is closest to it
+	// (there is a specific logic behind that but I can't get it right,
+	// the correct lower bound seem to depend on multiple things.
+	// It's easier to just test all the variants)
 	let hypothesis1 = R::<u64>{n: n, d: d, p: p};
 	let hypothesis2 = R::<u64>{n: (n - 1), d: d, p: p};
 	let hypothesis3 = R::<u64>{n: n, d: (d + 1), p: p};
 	let hypothesis4 = R::<u64>{n: (n + 1), d: d, p: p};
 	let hypothesis5 = R::<u64>{n: n, d: (d - 1), p: p};
 	let mut hypotheses = Vec::new();
-	if hypothesis1 <= simple_x {hypotheses.push(hypothesis1);}
-	if hypothesis2 <= simple_x {hypotheses.push(hypothesis2);}
-	if hypothesis3 <= simple_x {hypotheses.push(hypothesis3);}
-	if hypothesis4 <= simple_x {hypotheses.push(hypothesis4);}
-	if hypothesis5 <= simple_x {hypotheses.push(hypothesis5);}
-	let best_of_three = hypotheses.iter().max_by(|x, y|
+	if hypothesis1 <= x {hypotheses.push(hypothesis1);}
+	if hypothesis2 <= x {hypotheses.push(hypothesis2);}
+	if hypothesis3 <= x {hypotheses.push(hypothesis3);}
+	if hypothesis4 <= x {hypotheses.push(hypothesis4);}
+	if hypothesis5 <= x {hypotheses.push(hypothesis5);}
+	let closest_one = hypotheses.iter().max_by(|x, y|
 		if x <= y && x >= y {std::cmp::Ordering::Equal}
 		else if x <= y {std::cmp::Ordering::Less}
 		else {std::cmp::Ordering::Greater});
-	match best_of_three {
+	match closest_one {
 		Some(y)	=> if y.n > u32::MAX.into() || y.n > u32::MAX.into()
-				{downcast_to_lower_bound(*y)} 
+				{downcast_to_lower_bound(*y)}  // just to be safe because of +1s
 			else 
 				{R::<u32>{n: y.n as u32, d: y.d as u32, p: y.p}}
 		None	=> panic!("Um. That can't be right."),
@@ -231,7 +232,7 @@ mod tests {
 	#[test]
 	fn simplification_stops() {
 		let simplifiable = R::<u32>{n:0, d:1, p:true};
-		let simplified = simplify(simplifiable);
+		let simplified = simplified(simplifiable);
 		assert_eq!(simplified.n, 0);
 		assert_eq!(simplified.d, 1);
 	}
@@ -239,7 +240,7 @@ mod tests {
 	#[test]
 	fn simplification_works() {
 		let simplifiable = R::<u32>{n:3*5*7*11, d:2*5*7*13, p:true};
-		let simplified = simplify(simplifiable);
+		let simplified = simplified(simplifiable);
 		assert_eq!(simplified.n, 3*11);
 		assert_eq!(simplified.d, 2*13);
 	}
@@ -247,7 +248,7 @@ mod tests {
 	#[test]
 	fn simplification_works_on_64_bits() {
 		let simplifiable = R::<u64>{n:3*5*7*11, d:2*5*7*13, p:true};
-		let simplified = simplify(simplifiable);
+		let simplified = simplified(simplifiable);
 		assert_eq!(simplified.n, 3*11);
 		assert_eq!(simplified.d, 2*13);
 	}
@@ -423,7 +424,8 @@ mod tests {
 		let a = RB32{lb: R::<u32>{n:1, d:3, p:true}, ub: R::<u32>{n:2, d:3, p:true}};
 		let b = RB32{lb: R::<u32>{n:2, d:7, p:true}, ub: R::<u32>{n:5, d:9, p:true}};
 		let c = a + b;
-		assert!(c == RB32{lb: R::<u32>{n:13, d:21, p:true}, ub: R::<u32>{n:11, d:9, p:true}});
+		let d = RB32{lb: simplified(c.lb), ub: simplified(c.ub)};
+		assert!(d == RB32{lb: R::<u32>{n:13, d:21, p:true}, ub: R::<u32>{n:11, d:9, p:true}});
 	}
 
 	#[test]
@@ -431,7 +433,8 @@ mod tests {
 		let a = RB32{lb: R::<u32>{n:2, d:1, p:true}, ub: R::<u32>{n:3, d:1, p:true}};
 		let b = RB32{lb: R::<u32>{n:1, d:1, p:true}, ub: R::<u32>{n:2, d:1, p:true}};
 		let c = a - b;
-		assert!(c == RB32{lb: R::<u32>{n:1, d:1, p:true}, ub: R::<u32>{n:1, d:1, p:true}});
+		let d = RB32{lb: simplified(c.lb), ub: simplified(c.ub)};
+		assert!(d == RB32{lb: R::<u32>{n:1, d:1, p:true}, ub: R::<u32>{n:1, d:1, p:true}});
 	}
 
 	#[test]
@@ -439,7 +442,8 @@ mod tests {
 		let a = RB32{lb: R::<u32>{n:1, d:1, p:true}, ub: R::<u32>{n:2, d:1, p:true}};
 		let b = RB32{lb: R::<u32>{n:4, d:1, p:false}, ub: R::<u32>{n:2, d:1, p:false}};
 		let c = a - b;
-		assert!(c == RB32{lb: R::<u32>{n:4, d:1, p:true}, ub: R::<u32>{n:5, d:1, p:true}});
+		let d = RB32{lb: simplified(c.lb), ub: simplified(c.ub)};
+		assert!(d == RB32{lb: R::<u32>{n:4, d:1, p:true}, ub: R::<u32>{n:5, d:1, p:true}});
 	}
 
 	#[test]
@@ -447,7 +451,8 @@ mod tests {
 		let a = RB32{lb: R::<u32>{n:1, d:1, p:true}, ub: R::<u32>{n:2, d:1, p:true}};
 		let b = RB32{lb: R::<u32>{n:4, d:1, p:false}, ub: R::<u32>{n:2, d:1, p:false}};
 		let c = a * b;
-		assert!(c == RB32{lb: R::<u32>{n:4, d:1, p:false}, ub: R::<u32>{n:4, d:1, p:false}});
+		let d = RB32{lb: simplified(c.lb), ub: simplified(c.ub)};
+		assert!(d == RB32{lb: R::<u32>{n:4, d:1, p:false}, ub: R::<u32>{n:4, d:1, p:false}});
 	}
 
 	#[test]
@@ -455,6 +460,7 @@ mod tests {
 		let a = RB32{lb: R::<u32>{n:1, d:1, p:true}, ub: R::<u32>{n:2, d:1, p:true}};
 		let b = RB32{lb: R::<u32>{n:4, d:1, p:false}, ub: R::<u32>{n:2, d:1, p:false}};
 		let c = a / b;
-		assert!(c == RB32{lb: R::<u32>{n:1, d:1, p:false}, ub: R::<u32>{n:1, d:4, p:false}});
+		let d = RB32{lb: simplified(c.lb), ub: simplified(c.ub)};
+		assert!(d == RB32{lb: R::<u32>{n:1, d:1, p:false}, ub: R::<u32>{n:1, d:4, p:false}});
 	}
 }
