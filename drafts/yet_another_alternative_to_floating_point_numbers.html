@@ -518,11 +518,115 @@ Consider a value that is represented by two finite rational numbers. One represe
 Let's say you want to sum two intervals and the upper bound now doesn't fit our small-capacity rational number. Instead of enlarging the capacity, we find the other rational number that fits it and that is not less than the sum we want to represent. This way we admit some error, we embrace it but we also keep it under control. The resulting interval after the computation not represent a number with both input and computational error.
 	</p>
 	<p>
-Here's the code example for such a truncation.
+Here's the code example for such a truncation and an arithmetic operation that collects its own error. I'ts also <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/rational_bounds/sketch_in_cpp">agailable on GitHub</a> in its full form.
 	</p>
-<p>
-... show Rust and C++
-</p>
+	<div id="shown_code_2">
+	<span style="line-height: 2.0;">
+	<button type="button" onclick="show('code_2')">Show the code</button>
+	</span>
+	</div>
+	<div id="hidden_code_2" style="display: none">
+	<table><tr>
+	<td>
+	<pre id="code_2">
+// The subset of rational numbers that fit uint32_ts.
+struct r32 {
+    uint32_t n;    // numenator
+    uint32_t d;    // denominator
+    bool p;    // is positive?
+};
+
+// Rational bounds structure. 
+// It represents a continuous interval 
+// from lower to upper bound inclusive.
+struct rb32 {
+    r32 lb;    // lower bound
+    r32 ub;    // upper bound
+};
+
+// ...
+
+r32 downcast_to_lower_bound(r64 x) {
+    if(x.n &lt;= std::numeric_limits&lt;uint32_t&gt;::max() 
+    && x.d &lt;= std::numeric_limits&lt;uint32_t&gt;::max())
+        return r32{static_cast&lt;uint32_t&gt;(x.n)
+                 , static_cast&lt;uint32_t&gt;(x.d), x.p};
+    // We need to shift both N and D so they could fit uint32_t.
+    // Unfortunatelly, C++ has no standard way of determining 
+    // the last bit set so we could use it to find 
+    // a shift operand without the extra checks.
+    // There is POSIX flsll() but it isn't C++ and there is good
+    // way to map fls, flsl, or flsll to uint64_t.
+    // The alternative would be probably to use the native 
+    // Intel TZCNT on (N | D), or de Bruijn algorithm.
+    auto y = r64{x.n, x.d, x.p}; // to contain shifted x
+    while(y.n &gt; std::numeric_limits&lt;uint32_t&gt;::max() 
+       || y.d &gt; std::numeric_limits&lt;uint32_t&gt;::max()){
+        y.n &gt;&gt;= 1;
+        y.d &gt;&gt;= 1;
+    }
+
+    // There is a number that is representative in R32,
+    // isn't greater than X, and that the difference between
+    // X and this number is the least possible. The exact
+    // N and D of this number depends on the N/D proportion in the
+    // original X, on the shared sign on the numbers, and even
+    // on the proportion of the part we cut when shifted.
+    // The logic behind this becomes complicated.
+    // It's simpler to put five hypotheses into test
+    // and find a number that fits the most.
+    std::array&lt;r64, 5&gt; hypotheses{
+        r64{y.n+1, y.d, y.p},
+        r64{y.n-1, y.d, y.p},
+        r64{y.n, y.d-1, y.p},
+        r64{y.n, y.d+1, y.p},
+        r64{y.n, y.d, y.p}};
+    std::vector&lt;r64&gt; ng_x(hypotheses.size());
+    auto last_copy = std::copy_if(
+        hypotheses.begin(),
+        hypotheses.end(),
+        ng_x.begin(),
+        [&x](const r64& z){return !(x &lt; z);});
+    auto best_hypothesis = *std::max_element(ng_x.begin(), last_copy);
+
+    // It might now exceed the R32 due to +1s so double check.
+    return downcast_to_lower_bound(best_hypothesis);
+}
+
+// ...
+
+r64 non_negative_add(r32 a, r32 b) {
+    return r64{static_cast&lt;uint64_t&gt;(a.n) * b.d
+             + static_cast&lt;uint64_t&gt;(b.n) * a.d
+             , static_cast&lt;uint64_t&gt;(b.d) * a.d, true};
+}
+
+// ...
+
+r64 add(r32 a, r32 b) {
+    if(a.p && b.p) {
+        return non_negative_add(a, b);
+    } else if(a.p && !b.p) {
+        return non_negative_sub(a, inverted_r32(b));
+    } else if(!a.p && b.p) {
+        return inverted_r64(non_negative_sub(inverted_r32(a), b));
+    } else {
+        return inverted_r64(non_negative_add(a, b));
+    }
+}
+
+// ...
+
+rb32 operator+(const rb32 l, const rb32 r) {
+    return rb32{downcast_to_lower_bound(add(l.lb, r.lb))
+              , downcast_to_upper_bound(add(l.ub, r.ub))};
+}
+
+	</td></tr></table>
+	<span style="line-height: 2.0;">
+	<button type="button" onclick="hide('code_2')">Hide the code</button>
+	</span>
+	</div>
 	<p>
 Disclaimer: <i>the solution shown here is just a sketch. There are better implementations of both intervals and rational numbers out there. This only shows that it's possible to brign them together but not how it should be done exactly</i>.
 	</p>
@@ -536,6 +640,7 @@ Computational error may become a problem at the least appropriate time of the ye
 	init_slider(2, -12, +12, -4, +4, "e%x", function(lb, ub) {});
 	init_slider(3, -12, +12, -4, +4, "e%x", function(lb, ub) {});
 	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
+	document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
