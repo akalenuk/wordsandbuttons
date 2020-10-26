@@ -180,7 +180,7 @@ function draw_slider(no){
 	const ub01 = (ub - min_x) / (max_x - min_x);
 	ctx.strokeStyle="#000000";
 	ctx.fillStyle="#777777";
-	ctx.fillRect(slider_margin_left + dw * lb01, slider_margin_top, dw * (ub01 - lb01), dh);
+	ctx.fillRect(slider_margin_left + dw * lb01 - 0.5, slider_margin_top, dw * (ub01 - lb01) + 0.5, dh);
 
 	ctx.font = "16px sans-serif";
 	ctx.fillStyle="#d64562";
@@ -508,9 +508,15 @@ You can add these intervals just like you add numbers:
 	<p>
 You can multiply them as well.
 	</p>
-	<p>
-... add a summator here
+<canvas id="interval_7" width=608 height=128></canvas>
+	<p style="font-size: 84pt; margin: -32pt 0 -32pt 0; text-align: center;">
+&times;
 	</p>
+<canvas id="interval_8" width=608 height=128></canvas>
+	<p style="font-size: 84pt; margin: -32pt 0 -32pt 0; text-align: center;">
+=
+	</p>
+<canvas id="interval_9" width=608 height=128></canvas>
 	<p>
 So you can accomodate for the input error with intervals. But what about computational error?
 	</p>
@@ -645,7 +651,9 @@ Computational error may become a problem at the least appropriate time of the ye
 	init_slider(1, -12, +12, -4, +4, "e%x", function(lb, ub) {});
 	init_slider(2, -12, +12, -4, +4, "e%x", function(lb, ub) {});
 	init_slider(3, -12, +12, -4, +4, "e%x", function(lb, ub) {});
+
 	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
+
 	init_slider(4, 0, 10, 3, 4, "%x", function(lb, ub) {
 		slider_lb[6] = slider_lb[4] + slider_lb[5];
 		slider_ub[6] = slider_ub[4] + slider_ub[5];
@@ -661,6 +669,31 @@ Computational error may become a problem at the least appropriate time of the ye
 		slider_ub[5] = slider_ub[6] - slider_ub[4];
 		draw_slider(5);
 	});
+
+	init_slider(7, 0, 10, 3, 4, "%x", function(lb, ub) {
+		slider_lb[9] = slider_lb[7] * slider_lb[8];
+		slider_ub[9] = slider_ub[7] * slider_ub[8];
+		draw_slider(9);
+	});
+	init_slider(8, 0, 10, 5, 8, "%x", function(lb, ub) {
+		slider_lb[9] = slider_lb[7] * slider_lb[8];
+		slider_ub[9] = slider_ub[7] * slider_ub[8];
+		draw_slider(9);
+	});
+	init_slider(9, 0, 100, 15, 32, "%x", function(lb, ub) {
+		slider_lb[8] = slider_lb[9] / slider_lb[7];
+		slider_ub[8] = slider_ub[9] / slider_ub[7];
+		if(slider_lb[8] > slider_ub[8]) {
+			const mid = (slider_lb[8] + slider_ub[8]) / 2.;
+			slider_lb[8] = mid;
+			slider_ub[8] = mid;
+			slider_lb[9] = slider_lb[7] * slider_lb[8];
+			slider_ub[9] = slider_ub[7] * slider_ub[8];
+			draw_slider(9);
+		}
+		draw_slider(8);
+	});
+
 	document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
 
 	</script>
