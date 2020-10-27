@@ -312,6 +312,29 @@ function float_changed() {
 	document.getElementById("float_lb").innerHTML = String(Math.floor(value * 10) / 10);
 	document.getElementById("float_ub").innerHTML = String(Math.ceil(value * 10) / 10);
 }
+
+function rational_changed() {
+	const value = document.getElementById("rational_n").value / document.getElementById("rational_d").value;
+	var lb_n = 0;
+	var lb_d = 99;
+	var ub_n = 99;
+	var ub_d = 0;
+	for(var n = 0; n < 100; n += 1)
+		for(var d = 0; d < 100; d += 1) {
+			if (n/d <= value && n/d > lb_n/lb_d){
+				lb_n = n;
+				lb_d = d;
+			}
+			if (n/d >= value && n/d < ub_n/ub_d){
+				ub_n = n;
+				ub_d = d;
+			}
+		}
+	document.getElementById("rational_lb_n").innerHTML = String(lb_n);
+	document.getElementById("rational_lb_d").innerHTML = String(lb_d);
+	document.getElementById("rational_ub_n").innerHTML = String(ub_n);
+	document.getElementById("rational_ub_d").innerHTML = String(ub_d);
+}
 	</script>
 </head>
 <body>
@@ -537,13 +560,28 @@ So you can accomodate for the input error with intervals. But what about computa
 	</p>
 
 	<table><tr>
-	<td style="margin: 8pt 8pt 8pt 8pt; vertical-align: middle;"><div id="float_lb">1.2</div></td>
+	<td style="margin: 8pt 8pt 8pt 8pt; vertical-align: middle;"><div id="float_lb"></div></td>
 	<td style="margin: 8pt 8pt 8pt 8pt; vertical-align: middle;">&leq;</td>
 	<td><input type="text" id="float_" value="1.23" style="margin: 8pt 8pt 8pt 8pt; width: 48pt;" oninput="float_changed();"></td>
 	<td style="margin: 8pt 8pt 8pt 8pt; vertical-align: middle;">&leq;</td>
-	<td style="margin: 8pt 8pt 8pt 8pt; vertical-align: middle;"><div id="float_ub">1.3</div></td>
+	<td style="margin: 8pt 8pt 8pt 8pt; vertical-align: middle;"><div id="float_ub"></div></td>
 	</tr></table>
 
+	<p>
+...
+	</p>
+
+	<table><tr>
+	<td style="margin: 8pt 8pt 8pt 8pt; vertical-align: middle; border-bottom: 1px solid black;"><div id="rational_lb_n"></div></td>
+	<td style="margin: 8pt 8pt 8pt 8pt; vertical-align: middle;" rowspan="2">&leq;</td>
+	<td style="border-bottom: 1px solid black;"><input type="text" id="rational_n" value="123" style="margin: 8pt 8pt 8pt 8pt; width: 48pt;" oninput="rational_changed();"></td>
+	<td style="margin: 8pt 8pt 8pt 8pt; vertical-align: middle;" rowspan="2">&leq;</td>
+	<td style="margin: 8pt 8pt 8pt 8pt; vertical-align: middle; border-bottom: 1px solid black;"><div id="rational_ub_n"></div></td>
+	</tr><tr>
+	<td style="margin: 8pt 8pt 8pt 8pt; vertical-align: middle;"><div id="rational_lb_d"></div></td>
+	<td><input type="text" id="rational_d" value="100" style="margin: 8pt 8pt 8pt 8pt; width: 48pt;" oninput="rational_changed();"></td>
+	<td style="margin: 8pt 8pt 8pt 8pt; vertical-align: middle;"><div id="rational_ub_d"></div></td>
+	</tr></table>
 
 	<p>
 REWRITE It's a common practice to use intervals to accomodate for error. It's also a common practice in computing to use rational numbers to avoid computational error. The problem with the latter is that these numbers grow uncontrolably. A computation takes an increasing amount of memory and time as its rationals grow.
@@ -725,7 +763,8 @@ Computational error may become a problem at the least appropriate time of the ye
 	});
 
 	document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
-
+	float_changed();
+	rational_changed();
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
