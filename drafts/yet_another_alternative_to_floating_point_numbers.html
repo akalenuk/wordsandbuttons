@@ -313,7 +313,7 @@ function float_changed() {
 	document.getElementById("float_ub").innerHTML = String(Math.ceil(value * 10) / 10);
 }
 
-function rational_changed(no) {
+function rational_changed() {
 	const value = document.getElementById("rational_n").value / document.getElementById("rational_d").value;
 	var lb_n = 0;
 	var lb_d = 99;
@@ -336,9 +336,21 @@ function rational_changed(no) {
 	document.getElementById("rational_ub_d").innerHTML = String(ub_d);
 }
 
-function interval_changed() {
+function interval_changed(no) {
 	const value_1 = document.getElementById("interval_1_n").value / document.getElementById("interval_1_d").value;
 	const value_2 = document.getElementById("interval_2_n").value / document.getElementById("interval_2_d").value;
+	if(value_1 > value_2) {
+		if(no == 1) {
+			document.getElementById("interval_2_n").value = document.getElementById("interval_1_n").value;
+			document.getElementById("interval_2_d").value = document.getElementById("interval_1_d").value;
+		} else {
+			document.getElementById("interval_1_n").value = document.getElementById("interval_2_n").value;
+			document.getElementById("interval_1_d").value = document.getElementById("interval_2_d").value;
+		}
+		interval_changed(no);
+		return;
+	}
+
 	var lb_n = 0;
 	var lb_d = 99;
 	var ub_n = 99;
