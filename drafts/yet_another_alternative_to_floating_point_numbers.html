@@ -592,9 +592,20 @@ You can multiply them as well.
 So you can accomodate for the input error with intervals. But what about computational error?
 	</p>
 	<p>
-The computational error occurs when we can't store the operation result in the units we kept our operands. If all our operations could be boled down to 
+The computational error occurs when we can't store the operation result in the same types we keep our operands in, and we have to throw some data away. Let's say we have Python style “unlimited” length integers. This means that if our computation only consists of addition, subtraction, and multiplication, we would never face any computational error.
 	</p>
-
+	<p>
+Of course, with division, things get a little bit different. E. g. we can't store <nobr>16&hairsp;&frac34;</nobr> in integers so we have to truncate it into 16. In this case, the whole fractional part becomes our error.
+	</p>
+	<p>
+We can use pairs of integers to represent rational numbers. This will solve the division issue. However, this type of rational numbers, while does not accumulate errors, accumulate digits. The more digits it has, the slower the computation goes. At some point, it may simply become impractically slow. Just like with uncontrollable error, uncontrollable size becomes an issue.
+	</p>
+	<p>
+We want a compromise. Some entity that grows error controlably yet still operates in constant speed. And we can get it by merging two ideas: intervals and rational numbers together.
+	</p>
+	<p>
+Let's say, we want to write a number as an interval of its tenths. We can do that. This should be obscenely intuitive.
+	</p>
 	<table><tr>
 	<td style="padding: 2pt 6pt 2pt 6pt; vertical-align: middle;"><div id="float_lb"></div></td>
 	<td style="padding: 2pt 6pt 2pt 6pt; vertical-align: middle;">&leq;</td>
@@ -602,11 +613,9 @@ The computational error occurs when we can't store the operation result in the u
 	<td style="padding: 2pt 6pt 2pt 6pt; vertical-align: middle;">&leq;</td>
 	<td style="padding: 2pt 6pt 2pt 6pt; vertical-align: middle;"><div id="float_ub"></div></td>
 	</tr></table>
-
 	<p>
-...
+Just like we can do this with decimal fraction, we can do this with any rational number. We can put it between a pair of rational numbers made by finite integers. In this case, every integer is in range [0, 1, ..., 99].
 	</p>
-
 	<table><tr>
 	<td style="padding: 2pt 6pt 2pt 6pt; vertical-align: middle; border-bottom: 1px solid black;"><div id="rational_lb_n"></div></td>
 	<td style="padding: 2pt 6pt 2pt 6pt; vertical-align: middle;" rowspan="2">&leq;</td>
@@ -618,11 +627,9 @@ The computational error occurs when we can't store the operation result in the u
 	<td><input type="text" id="rational_d" value="100" style="margin: 2pt 6pt 2pt 6pt; width: 48pt;" oninput="rational_changed();"></td>
 	<td style="padding: 2pt 6pt 2pt 6pt; vertical-align: middle;"><div id="rational_ub_d"></div></td>
 	</tr></table>
-
 	<p>
-...
+Now if we want to accomodate for both input error and computational error, all we have to do is to represent an input interval in its finite rational numbers. Finite rational lower boundary of this interval and finite rational upper boundary of the same interval.
 	</p>
-
 	<table><tr>
 	<td style="padding: 2pt 6pt 2pt 6pt; vertical-align: middle; border-bottom: 1px solid black;"><div id="interval_lb_n"></div></td>
 	<td style="padding: 2pt 6pt 2pt 6pt; vertical-align: middle;" rowspan="2">&leq;</td>
@@ -637,23 +644,11 @@ The computational error occurs when we can't store the operation result in the u
 	<td><input type="text" id="interval_2_d" value="100" style="margin: 2pt 6pt 2pt 6pt; width: 48pt;" oninput="interval_changed(2);"></td>
 	<td style="padding: 2pt 6pt 2pt 6pt; vertical-align: middle;"><div id="interval_ub_d"></div></td>
 	</tr></table>
-
 	<p>
-REWRITE It's a common practice to use intervals to accomodate for error. It's also a common practice in computing to use rational numbers to avoid computational error. The problem with the latter is that these numbers grow uncontrolably. A computation takes an increasing amount of memory and time as its rationals grow.
+This entity — a pair of finite rational boundaries represents a real number along with its input error, and representational error. It also grows computational error controllably while the size of entity remains constant.
 	</p>
 	<p>
-	</p>
-	<p>
-REWRITE There should be a reasonable compromise providing measurable error and predictable speed. And if we blend these two ideas, we'll get one.
-	</p>
-	<p>
-REWRITE Consider a value that is represented by two finite rational numbers. One represents a lower boundary, and the other — the upper boundary. That makes them <b>rational boundaries</b>. The interval they form represents a number with error.
-	</p>
-	<p>
-REWRITE Let's say you want to sum two intervals and the upper bound now doesn't fit our small-capacity rational number. Instead of enlarging the capacity, we find the other rational number that fits it and that is not less than the sum we want to represent. This way we admit some error, we embrace it but we also keep it under control. The resulting interval after the computation not represent a number with both input and computational error.
-	</p>
-	<p>
-The implementation example is <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/rational_bounds/sketch_in_cpp">agailable on GitHub</a>. Please note that it's just a proof of concept and not the best possible solution in terms of neither error minimisation nor speed.
+The implementation example is <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/rational_bounds/sketch_in_cpp">available on GitHub</a>. Please note that it's just a proof of concept and not the best possible solution in terms of neither error minimisation nor speed.
 	</p>
 
 	<h2>Conclusion</h2>
@@ -708,7 +703,6 @@ Computational error may become a problem at the least appropriate time of the ye
 		draw_slider(8);
 	});
 
-	document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
 	float_changed();
 	rational_changed(1);
 	interval_changed();
