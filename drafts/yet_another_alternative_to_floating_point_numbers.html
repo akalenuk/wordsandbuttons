@@ -398,7 +398,7 @@ Yet another alternative to floating point numbers
 Floating point numbers are fine. They are decently designed and well standardized, they provide a good compromise between performance and precision. They work great most of the time. Until the day when they suddenly don't and nobody knows why.
 	</p>
 	<p>
-For me, that day came when I got a complaint about a bug in a Taubin smoothing estimator. <a href="https://graphics.stanford.edu/courses/cs468-01-fall/Papers/taubin-smoothing.pdf">Taubin smoothing</a> takes a triangle mesh, a pair of magic numbers called &lambda; and &mu;, a little time to think, and it makes the mesh smooth. It also makes sure that the mesh isn't reduced to a perfectly smooth but rather uninteresting sphere or a point.
+For me, that day came when I encountered bug in Taubin estimator. <a href="https://graphics.stanford.edu/courses/cs468-01-fall/Papers/taubin-smoothing.pdf">Taubin smoothing</a> takes a triangle mesh, a pair of magic numbers called &lambda; and &mu;, a little time to think, and it makes the mesh smooth. It also makes sure that the mesh isn't reduced to a perfectly smooth but rather uninteresting sphere or a point.
 	</p>
 	<p>
 The first magic number &lambda; is something between 0 and 1. When it's 0 — nothing happens at all, and when it's 1 — nothing good happens either. It should be somewhere in between. Nobody really knows how to pick this number but an experienced engineer can at least make an educated guess. 
@@ -410,13 +410,13 @@ The second magic number governs the shrinkage compensation. It's a negative numb
 That's why you need an estimator. Something that picks the &mu; for you. And we have one. And it was bugged. And I was the one to fix it.
 	</p>
 	<p>
-The first day of investigation showed that the estimator is in fact entirely correct. The second day of invetigation showed that the tests covering the bug are just as well correct. The third day of investigation brought a promising hypothesis that the whole story is just a bad dream and all it takes to solve the mystery is to wake up. The fourth morning killed that hypothesis just as many others before.
+The first day of investigation showed that the estimator is in fact entirely correct. The second day of invetigation showed that the tests covering the bug are correct just as well. The third day of investigation brought a promising hypothesis that the whole story is just a bad dream and all it takes to solve the mystery is to wake up. The fourth morning killed that hypothesis and left me completely clueless.
 	</p>
 	<p>
-Luckily I have a friend who is smarter than me and he advised to fuzz the input a little and see what will happen. I did. And somehting happened. The bug didn't go away but the &mu; changed unproportionally large for the small changes in the input. Fascinating!
+Luckily I have a friend who is smarter than me and he advised to fuzz the input a little and see what happens then. I did. And somehting happened. The bug didn't go away but the &mu; changed unproportionally to the small changes in the input. Fascinating!
 	</p>
 	<p>
-We all know that computations work with some error. It's fine, we get input data from sensors and they work with some error. We print out our finished models, and the printers have some limited precision as well. It's all good while the error is small. But what if it isn't?
+We can expect a computation to work with some error. It's fine, we get input data from sensors and they embed some error to begin with. We print out our finished models, and the printers have some limited precision as well so a small error doesn't upset anyone. It's all good while the error is small. But what if it isn't?
 	</p>
 	<p>
 As it turns out, in my case, a completely correct algorithm had a computational error of about 1. Not 1e-16 or 1e-5 but 1. Just 1. So if you expect your &mu; to be somewhat close to -0.7, and the estimator says it's 0.3, it is in fact correct. It is still a correct estimation within its error range.
@@ -428,16 +428,16 @@ Correct but entirely useless.
 Challenge your intuition with a “Guess the Error” game
 	</h2>
 	<p>
-Ok, so it's not the error per se that causes trouble but unexpected and unpredictable error. Can we predict it though?
+Ok, so it's not the computational error per se that causes trouble but only the unexpected and unpredictable error. Can we predict it though?
 	</p>
 	<p>
 Well, of course we can. There is a whole field of numerical error anaysis for that but let's be honest, most of the time we use our intuition instead. So how good is our intuition exactly?
 	</p>
 	<p>
-I propose a game to find out. Let's take a cubic equation solver. It's a relatively complex computation with a very simple way to validate how it works. We will pick some roots and then we will generate the cubic equation for these roots. Then we'll make the cubic solver find our roots through the computation. The difference between the original and the computed value for each root will be our measurable error. This error divided by the original value will be our relative error.
+I propose a game to find out. Let's take a cubic equation solver. It's a relatively complex computation with a very simple way to validate its precision. We will pick some roots first and then we will generate the cubic equation for these roots. Then we'll make the cubic solver find our roots back through the computation. The difference between the original and the computed value for each root will be our measurable error. This error divided by the original value will be our relative error.
 	</p>
 	<p>
-This is the code for the experiment. It's also <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/rational_bounds/rationale/cubic_solver_example.cpp">available on GitHub</a>.
+Here is the exact code for the experiment. It's also <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/rational_bounds/rationale/cubic_solver_example.cpp">available on GitHub</a>.
 	</p>
 	<div id="shown_code_1">
 	<span style="line-height: 2.0;">
@@ -509,14 +509,14 @@ And when we run our solver we get:
 x = 1, x = 2, x = 3
 	</p>
 	<p>
-Well, yes. On the equation this simple the computation works flawlessly, there is no error. So let's start breaking stuff.
+Well, yes. On the equation this simple there is no error whatsoever. The computation works flawlessly. So let's start making it worse.
 	</p>
 	<h2>Round 1</h2>
 	<p>
-The slider below lets you pick an interval in a logarithmic scale. The interval may start at 10<sup>-12</sup> and end at 10<sup>12</sup>. It's impossible to predict the exact error up to a single number so you should just pick an appropriate interval that covers the error<span id="shown_note_1"><u onclick="show('note_1')">*</u>.</span><span id="hidden_note_1" style="display: none">. <span style="font-size: 14pt;">Of course, you can select the whole interval, too. This estimation is guaranteed to be correct. And entirely useless. </span><u onclick="hide('note_1')">&larr;</u></span>
+The slider below lets you pick an interval in logarithmic scale. The interval may start at 10<sup>-12</sup> and end at 10<sup>12</sup>. It's impossible to predict the exact error up to a single number so you should just pick an appropriate interval that covers the error<span id="shown_note_1"><u onclick="show('note_1')">*</u>.</span><span id="hidden_note_1" style="display: none">. <span style="font-size: 14pt;">Of course, you can select the whole interval, too. This estimation is guaranteed to be correct. And entirely useless. </span><u onclick="hide('note_1')">&larr;</u></span>
 	</p>
 	<p>
-Let's say we have the roots of 0.001, 2, 3&hairsp;000. So in which interval, in your opinion, the maximum relative error for a cubic solver belongs?
+Let's say we have the roots of 0.001, 2, 3&hairsp;000. So to which interval, in your opinion, the maximum relative error for a cubic solver belongs?
 	</p>
 	<canvas id="interval_1" width=608 height=84></canvas>
 	<div id="button_1">
@@ -543,10 +543,10 @@ Where do you think the error might be?
 	</div>
 	<div id="the_truth_2" style="display:none;">
 	<p>
-It's significantly more than 1. Since it's a relative error, this means than the error for the smallest root value is larger than the value itself. So the computation is essentially uselses.
+It's significantly more than 1. Since it's a relative error, this means than the error for the smallest root value is larger than the value itself. So the computation is now essentially uselses.
 	</p>
 	<p>
-Well, we're talking about a rather small value but not that small. Consider you're a multi-bilionaire and you want to put your net worth and a few cents in one cubic equation. 10&hairsp;000&hairsp;000&hairsp;000 and a 0.01 has the same difference in magnitude as the roots for our synthetic case. The difference is large but it's not inconcievable.
+While we're talking about a synthetic case just to test our solver, it is frigtengly close to the real world numbers. Consider you're a multi-bilionaire and you want to put your net worth and a few cents in one cubic equation. 10&hairsp;000&hairsp;000&hairsp;000 and a 0.01 has the same difference in magnitude as the roots for our synthetic case. The difference is large but it's not inconcievable.
 	</p>
 	</div>
 
@@ -561,10 +561,10 @@ And what about 1e-9, 2, and 3e9?
 	</div>
 	<div id="the_truth_3" style="display:none;">
 	<p>
-The error is much-much larger than the smallest root value. It's even larger than the second smallest root value. 
+The error is much-much larger than the smallest root value. It's even larger than the second smallest root value. Essentially, what we got as the output is more noise than the values we're expecting to compute.
 	</p>
 	<p>
-Note that the computation is still correct. Within some margin of error. It's the scale of this margin that makes the computation useless.
+Note that the computation is still correct. Within, of course, some margin of error. It's only the scale of this margin that makes the computation useless.
 	</p>
 	</div>
 	<h2>Meet the rational bounds</h2>
@@ -575,13 +575,13 @@ It's not the error per se that is bad. Error is omnipresent. Every measuring dev
 It's only the unpredictability that makes it unpleasant.
 	</p>
 	<p>
-People address errors in multiple ways. In metrology, a measured value is supplemented with the absolute error. You don't say that the temperature outside is 10&deg;, you say it's 10&deg;&hairsp;&plusmn;&hairsp;0.5&deg;. This might seem redundant, sine this is a small error for the weather, but in some other context this very error would be essential. If you're measuring body temperature, a 1 degree difference is enough to tell if a person is sick. You can not afford a whole 1 degree error in this scenario.
+People address errors in multiple ways. In metrology, a measured value is supplemented with its absolute error. You don't say that the temperature outside is 10&deg;, you say it's 10&deg;&hairsp;&plusmn;&hairsp;0.5&deg;. This might seem redundant, since this is a small error for the weather outside, but in some other context this very error might become significant. If you're measuring body temperature, a 1 degree difference is enough to tell a sick person from perfectly healthy one. You can not afford a whole 1 degree error in this scenario.
 	</p>
 	<p>
 If you have this input error written down, you can pull it through your computation to see if the resulting error is still tolerable. To do that, you need to exchange your measured numbers for intervals. A number with error becomes an interval: 10&deg;&hairsp;&plusmn;&hairsp;0.5&deg; becomes [9.5, 10.5]&deg;.
 	</p>
 	<p>
-You can add these intervals just like you add numbers:
+You can sum these intervals just as you add numbers:
 	</p>
 <canvas id="interval_4" width=608 height=84></canvas>
 	<p class="big">
@@ -605,10 +605,10 @@ You can multiply them as well.
 	</p>
 <canvas id="interval_9" width=608 height=84></canvas>
 	<p>
-So you can accomodate for the input error with intervals. But what about computational error?
+So with intervals, you can accomodate for the input error. You can drag it through the computation and see how it plays with other values with error. In the end you will have your computed value within some interval and the size of this interval will indicate the ouput error. But what about the error of the computation itself?
 	</p>
 	<p>
-Computational error occurs when we can't store the operation result in the same types we keep our operands in and we have to throw some data away. Let's say we have Python style “unlimited” length integers. This means that if our computation only consists of addition, subtraction, and multiplication, we would never face any computational error.
+Computational error occurs when we can't store the operation result in the same types we keep our operands in and we're forced to throw some data away. Let's say we have Python style “unlimited” length integers. This means that if our computation only consists of addition, subtraction, and multiplication, we would never face any computational error.
 	</p>
 	<p>
 Of course, with division, things get a little bit different. E. g. we can't store <nobr>16&hairsp;&frac34;</nobr> in integers so we have to truncate it into 16. In this case, the whole fractional part becomes our error.
@@ -617,10 +617,10 @@ Of course, with division, things get a little bit different. E. g. we can't stor
 We can use pairs of integers to represent rational numbers. This will solve the division issue. However, this type of rational numbers, while does not accumulate errors, accumulate digits. The more digits it has, the slower the computation goes. At some point, it may simply become impractically slow. Just like with uncontrollable error, uncontrollable size becomes an issue.
 	</p>
 	<p>
-We want a compromise. Some entity that grows error controlably yet still operates in constant speed. And we can get it by merging two ideas: intervals and rational numbers together.
+We want a compromise. Some entity that grows error controlably yet still operates in constant speed. And we can get it, for example, by merging two ideas: intervals and rational numbers together.
 	</p>
 	<p>
-Let's say, we want to write a number as an interval of its tenths. We can do that. This should be obscenely intuitive.
+Let's say, we want to write a number as an interval of its tenths. We can do that in the most intuitive manner by throwing away all the digits after the first one.
 	</p>
 	<table><tr>
 	<td class="n"><div id="float_lb"></div></td>
@@ -643,6 +643,9 @@ Just like we can do this with decimal fraction, we can do this with any rational
 	<td><input type="text" id="rational_d" value="100" oninput="rational_changed();"></td>
 	<td class="n"><div id="rational_ub_d"></div></td>
 	</tr></table>
+	<p>
+Ok, this is not entirely true. If the number is greater than 99, then we can't really store it in our tiny rationals but we can say that it's larger than 99 by assigning the 0 divisor to its upper bound. Of course, it's just a dirty hack but let's leave it as that.
+	</p>
 	<p>
 Now if we want to accomodate for both input error and computational error, all we have to do is to represent an input interval in its finite rational numbers. Finite rational lower boundary of this interval and finite rational upper boundary of the same interval.
 	</p>
@@ -669,8 +672,12 @@ The implementation example is <a href="https://github.com/akalenuk/wordsandbutto
 
 	<h2>Conclusion</h2>
 	<p>
-Computational error may become a problem at the least appropriate moment. Rational boundaries let you manage both measurement error and computational error in the coherent way without compromising performance all that much.
+Computational error may become a problem at the least appropriate moment. Both rational numbers and intervals are well-known alternatives for floating-point numbers when the error becomes an issue.
 	</p>
+	<p>
+Rational boundaries, being a chimeric product of both ideas, let you manage both measurement error and computational error in the coherent way without compromising performance all that much.
+	</p>
+
 
 	<script language="JavaScript">
 	init_slider(1, -12, +12, -4, +4, "e%x", function(lb, ub) {});
