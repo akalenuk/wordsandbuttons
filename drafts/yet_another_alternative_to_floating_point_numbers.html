@@ -392,31 +392,31 @@ function interval_changed(no) {
 <body>
 	<center>
 	<h1>
-Yet another alternative to floating point numbers
+Yet another alternative to floating-point numbers
 	</h1>
 	<p>
-Floating point numbers are fine. They are decently designed and well standardized, they provide a good compromise between performance and precision. They work great most of the time. Until the day when they suddenly don't and nobody knows why.
+Floating-point numbers are fine. They are decently designed and well standardized, they provide a good compromise between performance and precision. They work great most of the time. Until the day when they suddenly don't and nobody knows why.
 	</p>
 	<p>
-For me, that day came when I encountered bug in Taubin estimator. <a href="https://graphics.stanford.edu/courses/cs468-01-fall/Papers/taubin-smoothing.pdf">Taubin smoothing</a> takes a triangle mesh, a pair of magic numbers called &lambda; and &mu;, a little time to think, and it makes the mesh smooth. It also makes sure that the mesh isn't reduced to a perfectly smooth but rather uninteresting sphere or a point.
+For me, that day came when I encountered a bug in the Taubin estimator. <a href="https://graphics.stanford.edu/courses/cs468-01-fall/Papers/taubin-smoothing.pdf">Taubin smoothing</a> takes a triangle mesh, a pair of magic numbers called &lambda; and &mu;, a little time to think, and it makes the input mesh smooth. It also makes sure that the mesh isn't reduced to a perfectly smooth but rather uninteresting sphere or a point.
 	</p>
 	<p>
 The first magic number &lambda; is something between 0 and 1. When it's 0 — nothing happens at all, and when it's 1 — nothing good happens either. It should be somewhere in between. Nobody really knows how to pick this number but an experienced engineer can at least make an educated guess. 
 	</p>
 	<p>
-The second magic number governs the shrinkage compensation. It's a negative number slightly greater than &lambda; in its absolute value. Nodoby knows how to pick it either but this time even an educated guess is a challenge.
+The second magic number governs shrinkage compensation. It's a negative number slightly greater than &lambda; in its absolute value. Nobody knows how to pick it either but this time even an educated guess is a challenge.
 	</p>
 	<p>
 That's why you need an estimator. Something that picks the &mu; for you. And we have one. And it was bugged. And I was the one to fix it.
 	</p>
 	<p>
-The first day of investigation showed that the estimator is in fact entirely correct. The second day of invetigation showed that the tests covering the bug are correct just as well. The third day of investigation brought a promising hypothesis that the whole story is just a bad dream and all it takes to solve the mystery is to wake up. The fourth morning killed that hypothesis and left me completely clueless.
+The first day of the investigation showed that the estimator is in fact entirely correct. The second day of the investigation  showed that the tests covering the bug are correct just as well. The third day of the investigation brought a promising hypothesis that the whole story is just a bad dream and all it takes to solve the mystery is to wake up. The fourth morning killed that hypothesis and left me completely clueless.
 	</p>
 	<p>
-Luckily I have a friend who is smarter than me and he advised to fuzz the input a little and see what happens then. I did. And somehting happened. The bug didn't go away but the &mu; changed unproportionally to the small changes in the input. Fascinating!
+Luckily I have a friend who is smarter than me and he advised to fuzz the input a little and see what happens then. I did. And something happened. The bug didn't go away but the &mu; changed a lot. Way unproportionally to the small changes in the input. Fascinating!
 	</p>
 	<p>
-We can expect a computation to work with some error. It's fine, we get input data from sensors and they embed some error to begin with. We print out our finished models, and the printers have some limited precision as well so a small error doesn't upset anyone. It's all good while the error is small. But what if it isn't?
+We can expect a computation to work with some error. It's fine, we get input data from sensors and they embed some error, to begin with. We print out our finished models, and the printers have some limited precision as well so a small error doesn't upset anyone. It's all good while the error is small. But what if it isn't?
 	</p>
 	<p>
 As it turns out, in my case, a completely correct algorithm had a computational error of about 1. Not 1e-16 or 1e-5 but 1. Just 1. So if you expect your &mu; to be somewhat close to -0.7, and the estimator says it's 0.3, it is in fact correct. It is still a correct estimation within its error range.
@@ -431,7 +431,7 @@ Challenge your intuition with a “Guess the Error” game
 Ok, so it's not the computational error per se that causes trouble but only the unexpected and unpredictable error. Can we predict it though?
 	</p>
 	<p>
-Well, of course we can. There is a whole field of numerical error anaysis for that but let's be honest, most of the time we use our intuition instead. So how good is our intuition exactly?
+Well, of course, we can. There is a whole field of numerical error analysis for that but let's be honest, most of the time we use our intuition instead. So how good is our intuition exactly?
 	</p>
 	<p>
 I propose a game to find out. Let's take a cubic equation solver. It's a relatively complex computation with a very simple way to validate its precision. We will pick some roots first and then we will generate the cubic equation for these roots. Then we'll make the cubic solver find our roots back through the computation. The difference between the original and the computed value for each root will be our measurable error. This error divided by the original value will be our relative error.
@@ -513,7 +513,7 @@ Well, yes. On the equation this simple there is no error whatsoever. The computa
 	</p>
 	<h2>Round 1</h2>
 	<p>
-The slider below lets you pick an interval in logarithmic scale. The interval may start at 10<sup>-12</sup> and end at 10<sup>12</sup>. It's impossible to predict the exact error up to a single number so you should just pick an appropriate interval that covers the error<span id="shown_note_1"><u onclick="show('note_1')">*</u>.</span><span id="hidden_note_1" style="display: none">. <span style="font-size: 14pt;">Of course, you can select the whole interval, too. This estimation is guaranteed to be correct. And entirely useless. </span><u onclick="hide('note_1')">&larr;</u></span>
+The slider below lets you pick an interval in the logarithmic scale. The interval may start at 10<sup>-12</sup> and end at 10<sup>12</sup>. It's impossible to predict the exact error up to a single number so you should just pick an appropriate interval that covers the error<span id="shown_note_1"><u onclick="show('note_1')">*</u>.</span><span id="hidden_note_1" style="display: none">. <span style="font-size: 14pt;">Of course, you can select the whole interval, too. This estimation is guaranteed to be correct. And entirely useless. </span><u onclick="hide('note_1')">&larr;</u></span>
 	</p>
 	<p>
 Let's say we have the roots of 0.001, 2, 3&hairsp;000. So to which interval, in your opinion, the maximum relative error for a cubic solver belongs?
@@ -569,13 +569,13 @@ Note that the computation is still correct. Within, of course, some margin of er
 	</div>
 	<h2>Meet the rational bounds</h2>
 	<p>
-It's not the error per se that is bad. Error is omnipresent. Every measuring device has its error, every 3D printer and every milling machine has its maximal precision. Error is fine.
+It's not the error per se that is bad. Error is omnipresent. Every measuring device has its error, every 3D printer and every milling machine has its maximal precision. The error is fine.
 	</p>
 	<p>
 It's only the unpredictability that makes it unpleasant.
 	</p>
 	<p>
-People address errors in multiple ways. In metrology, a measured value is supplemented with its absolute error. You don't say that the temperature outside is 10&deg;, you say it's 10&deg;&hairsp;&plusmn;&hairsp;0.5&deg;. This might seem redundant, since this is a small error for the weather outside, but in some other context this very error might become significant. If you're measuring body temperature, a 1 degree difference is enough to tell a sick person from perfectly healthy one. You can not afford a whole 1 degree error in this scenario.
+People address errors in multiple ways. In metrology, a measured value is supplemented with its absolute error. You don't say that the temperature outside is 10&deg;, you say it's 10&deg;&hairsp;&plusmn;&hairsp;0.5&deg;. This might seem redundant since this is a small error for the weather outside, but in some other context, this very error might become significant. If you're measuring body temperature, a 1-degree difference is enough to tell a sick person from a perfectly healthy one. You can not afford a whole 1-degree error in this scenario.
 	</p>
 	<p>
 If you have this input error written down, you can pull it through your computation to see if the resulting error is still tolerable. To do that, you need to exchange your measured numbers for intervals. A number with error becomes an interval: 10&deg;&hairsp;&plusmn;&hairsp;0.5&deg; becomes [9.5, 10.5]&deg;.
@@ -605,22 +605,22 @@ You can multiply them as well.
 	</p>
 <canvas id="interval_9" width=608 height=84></canvas>
 	<p>
-So with intervals, you can accomodate for the input error. You can drag it through the computation and see how it plays with other values with error. In the end you will have your computed value within some interval and the size of this interval will indicate the ouput error. But what about the error of the computation itself?
+So with intervals, you can accommodate the input error. You can drag it through the computation and see how it plays with other values with their own error. In the end, you will have your computed value within some interval and the size of this interval will indicate the output error. But what about the error of the computation itself?
 	</p>
 	<p>
-Computational error occurs when we can't store the operation result in the same types we keep our operands in and we're forced to throw some data away. Let's say we have Python style “unlimited” length integers. This means that if our computation only consists of addition, subtraction, and multiplication, we would never face any computational error.
+A computational error occurs when we can't store the operation result in the same types we keep our operands in and we're forced to throw some data away. Let's say we have Python-style “unlimited” length integers. This means that if our computation only consists of addition, subtraction, and multiplication, we would never face any computational error.
 	</p>
 	<p>
 Of course, with division, things get a little bit different. E. g. we can't store <nobr>16&hairsp;&frac34;</nobr> in integers so we have to truncate it into 16. In this case, the whole fractional part becomes our error.
 	</p>
 	<p>
-We can use pairs of integers to represent rational numbers. This will solve the division issue. However, this type of rational numbers, while does not accumulate errors, accumulate digits. The more digits it has, the slower the computation goes. At some point, it may simply become impractically slow. Just like with uncontrollable error, uncontrollable size becomes an issue.
+We can use pairs of integers to represent rational numbers. This will solve the division issue. However, this type of rational number, while does not accumulate errors, accumulates digits. The more digits it has, the slower the computation goes. At some point, it may simply become impractically slow. Just like with the uncontrollable error, uncontrollable size becomes an issue.
 	</p>
 	<p>
-We want a compromise. Some entity that grows error controlably yet still operates in constant speed. And we can get it, for example, by merging two ideas: intervals and rational numbers together.
+We want a compromise. Some entity that grows error controllably yet still operates in constant speed. And we can get it, for example, by merging two ideas: intervals and rational numbers together.
 	</p>
 	<p>
-Let's say, we want to write a number as an interval of its tenths. We can do that in the most intuitive manner by throwing away all the digits after the first one.
+Let's say, we want to write a number as an interval of its tenths. We can do that most intuitively by throwing away all the digits after the first one.
 	</p>
 	<table><tr>
 	<td class="n"><div id="float_lb"></div></td>
@@ -630,7 +630,7 @@ Let's say, we want to write a number as an interval of its tenths. We can do tha
 	<td class="n"><div id="float_ub"></div></td>
 	</tr></table>
 	<p>
-Just like we can do this with decimal fraction, we can do this with any rational number. We can put it between a pair of rational numbers made by finite integers. In this case, every integer is in range [0, 1, ..., 99].
+Just like we can do this with decimal fraction, we can do this with any rational number. We can put it between a pair of rational numbers made by finite integers. In this case, every integer is in the range [0, 1, ..., 99].
 	</p>
 	<table><tr>
 	<td class="un"><div id="rational_lb_n"></div></td>
@@ -644,10 +644,10 @@ Just like we can do this with decimal fraction, we can do this with any rational
 	<td class="n"><div id="rational_ub_d"></div></td>
 	</tr></table>
 	<p>
-Ok, this is not entirely true. If the number is greater than 99, then we can't really store it in our tiny rationals but we can say that it's larger than 99 by assigning the 0 divisor to its upper bound. Of course, it's just a dirty hack but let's leave it as that.
+Ok, this is not entirely true. If the number is greater than 99, then we can't really store it in our tiny rationals but we can say that it's larger than 99 by assigning the 0 divisor to its upper bound. Of course, it's just a dirty hack but let's leave it like that.
 	</p>
 	<p>
-Now if we want to accomodate for both input error and computational error, all we have to do is to represent an input interval in its finite rational numbers. Finite rational lower boundary of this interval and finite rational upper boundary of the same interval.
+Now if we want to accommodate both input error and computational error, all we have to do is to represent an input interval in its finite rational numbers. A finite rational lower boundary of this interval and a finite rational upper boundary of the same interval.
 	</p>
 	<table><tr>
 	<td class="un"><div id="interval_lb_n"></div></td>
@@ -664,18 +664,18 @@ Now if we want to accomodate for both input error and computational error, all w
 	<td class="n"><div id="interval_ub_d"></div></td>
 	</tr></table>
 	<p>
-This entity — a pair of finite rational boundaries, represents a real number along with both its input error and representational error. It also grows computational error explicitly while the size of entity remains constant.
+This entity — a pair of finite rational boundaries, represents a real number along with both its input error and representational error. It also grows computational error explicitly while the size of the entity remains constant.
 	</p>
 	<p>
-The implementation example is <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/rational_bounds/sketch_in_cpp">available on GitHub</a>. Please note that it's just a proof of concept and not the best possible solution in terms of neither error minimisation nor speed.
+The implementation example is <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/rational_bounds/sketch_in_cpp">available on GitHub</a>. Please note that it's just a proof of concept and not the best possible solution in terms of neither error minimization nor speed.
 	</p>
 
 	<h2>Conclusion</h2>
 	<p>
-Computational error may become a problem at the least appropriate moment. Both rational numbers and intervals are well-known alternatives for floating-point numbers when the error becomes an issue.
+The computational error may become a problem at the least appropriate moment. Both rational numbers and intervals are well-known alternatives for floating-point numbers when the error becomes an issue.
 	</p>
 	<p>
-Rational boundaries, being a chimeric product of both ideas, let you manage both measurement error and computational error in the coherent way without compromising performance all that much.
+Rational boundaries, being a chimeric product of both ideas, let you manage both measurement error and computational error in a coherent way without compromising performance all that much.
 	</p>
 
 
