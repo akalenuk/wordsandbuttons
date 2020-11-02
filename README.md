@@ -7,6 +7,9 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 
 ## Pages
 
+- [Yet another alternative to floating point numbers](https://wordsandbuttons.online/yet_another_alternative_to_floating_point_numbers.html) This shows how computeable intervals written in rational bounds may not only account for the input error but keep computational error under control as well.
+<sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/programming.html)</sup> <sup>[#quizzes](https://wordsandbuttons.online/quizzes.html)</sup> 
+
 - [Why is it ok to divide by 0.0?](https://wordsandbuttons.online/why_is_it_ok_to_divide_by_0_0.html) This explains why the division by zero in floating point numbers is ok.
 <sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/programming.html)</sup> 
 
@@ -147,9 +150,6 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 
 - [Learn you a Lisp in 0 minutes](https://wordsandbuttons.online/learn_you_a_lisp_in_0_minutes.html) A short quiz to reveal your hidden knowledge of Lisp.
 <sup>[#programming](https://wordsandbuttons.online/programming.html)</sup> <sup>[#quizzes](https://wordsandbuttons.online/quizzes.html)</sup> 
-
-- [Yet another alternative to floating point numbers](https://wordsandbuttons.online/yet_another_alternative_to_floating_point_numbers.html) This shows how computeable intervals written in rational bounds may not only account for the input error but keep computational error under control as well.
-<sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/programming.html)</sup> <sup>[#quizzes](https://wordsandbuttons.online/quizzes.html)</sup> 
 
 ---
 
