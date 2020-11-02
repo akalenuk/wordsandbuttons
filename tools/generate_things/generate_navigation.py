@@ -9,7 +9,7 @@ keyword_description = {
 'quizzes': 'Challenge yourself, learn stuff, and have fun.',
 'mathematics': 'Interactive explanations of mathematical concepts witten for the practicing programmers.',
 'algorithms': 'Playable algorithms.',
-'programming': 'Interactive essays on non-trivial programming ideas and languages. By the way, if you prefer books to blogs, <a href="https://wordsandbuttons.online/SYTYKC.pdf">there is a free book</a> that was originally made from this section.'
+'programming': 'Interactive essays on non-trivial programming ideas and languages.</p><p>By the way, if you prefer books to blogs, <a href="https://wordsandbuttons.online/SYTYKC.pdf">there is a free book</a> that was originally made from this section.'
 }
 
 index_title = 'Hello, world!'
