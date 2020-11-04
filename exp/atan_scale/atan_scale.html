@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Arctangent scale. It's like the logarithmic scale but infinite</title>
+	<meta name="description" content="Arctangent scale">
+	<meta name="keywords" content="mathematics, demos">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body {
+	margin: 0 0 0 0;
+}
+
+a {
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding: 12pt 12pt 12pt 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+}
+
+textarea {
+	width: 100%;
+	font-size: 12pt;
+	font-family: monospace;
+	padding: 0pt 0pt 0pt 0pt;
+	margin: 0pt 0pt 0pt 0pt;
+}
+
+input[type="radio"] {
+	height: 16pt;
+	width: 16pt;
+	font-size: 16pt;
+}
+
+input[type="text"] {
+	font-size: 12pt;
+	font-family: monospace;
+	width: 64pt;
+	height: 20pt;
+	text-align: center;
+}
+
+button {
+	width: 148pt;
+	height: 26pt;
+	font-size: 12pt;
+	text-align: center;
+	margin: 3pt 0pt 3pt 0pt;
+}
+
+.comment {
+	font-size: 12pt;
+	text-align: center;
+	font-family: sans-serif;
+	padding-bottom: 12pt;
+}
+
+	</style>
+	<script language="JavaScript">
+const w = 640;
+const h = 640;
+
+
+// Math. aliases
+const E = Math.E;			const LN2 = Math.LN2;		const LN10 = Math.LN10;
+const LOG10E = Math.LOG10E;	const PI = Math.PI;			const SQRT1_2 = Math.SQRT1_2;
+const abs = Math.abs;		const acos = Math.acos;		const acosh = Math.acosh;
+const asinh = Math.asinh;	const atan = Math.atan;		const atanh = Math.atanh;
+const cbrt = Math.cbrt;		const ceil = Math.ceil;		const clz32 = Math.clz32;
+const cosh = Math.cosh;		const exp = Math.exp;		const expm1 = Math.expm1;
+const fround = Math.fround;	const hypot = Math.hypot;	const imul = Math.imul;
+const log1p = Math.log1p;	const log10 = Math.log10;	const log2 = Math.log2;
+const min = Math.min;		const pow = Math.pow;		const random = Math.random;
+const sign = Math.sign;		const sin = Math.sin;		const sinh = Math.sinh;
+const tan = Math.tan;		const tanh = Math.tanh;		const toSource = Math.toSource;
+const floor = Math.floor;
+const cos = Math.cos;
+const sqrt = function(x) {return Math.pow(x, 0.5);}
+
+
+function linear_real_to_screen (x, dx, scale, w) {
+	return (w / 2) + ((x - dx) / scale) * (w / 2);
+}
+
+function linear_screen_to_real (x, dx, scale, w) {
+	return ((x - (w / 2)) / (w / 2) * scale + dx);
+}
+
+function atan_real_to_screen (x, dx, scale, w) {
+	return atan((x - dx) / scale) / PI * (w - 1.) + (w / 2);
+}
+
+function atan_screen_to_real (x, dx, scale, w) {
+	return scale * tan((x - (w / 2)) * PI / (w - 1.)) + dx;
+}
+
+// returns 4 translation functions from/to screen and real coordinates
+// types: LINEAR, ATAN
+const LINEAR = 0;
+const ATAN = 1;
+function s2x_x2s_s2y_y2s(type, center_x, center_y, scale) {
+	if(type == LINEAR) {
+		return [
+			function(i) {return linear_screen_to_real(i, center_x, scale, w);},
+			function(x) {return linear_real_to_screen(x, center_x, scale, w);},
+			function(i) {return linear_screen_to_real(h - i, center_y, scale, h);},
+			function(y) {return h - linear_real_to_screen(y, center_y, scale, h);}
+		];
+	} else if(type == ATAN) {
+		return [
+			function(i) {return atan_screen_to_real(i, center_x, scale, w);},
+			function(x) {return atan_real_to_screen(x, center_x, scale, w);},
+			function(i) {return atan_screen_to_real(h - i, center_y, scale, h);},
+			function(y) {return h - atan_real_to_screen(y, center_y, scale, h);}
+		];
+	}
+}
+
+function s2x_x2s_s2y_y2s_from_UI() {
+	const center_x = Number(document.getElementById("center_x").value);
+	const center_y = Number(document.getElementById("center_y").value);
+	const scale = Number(document.getElementById("scale").value);
+	const type = document.getElementById("scale_1").checked
+		? LINEAR
+		: ATAN;
+	return s2x_x2s_s2y_y2s(type, center_x, center_y, scale);
+}
+
+var mousedown_sx;
+var mousedown_sy;
+var mousemove_sx;
+var mousemove_sy;
+function init_canvas() {
+	canvas = document.getElementById("canvas");
+	const canvas_rect = canvas.getBoundingClientRect();
+
+	canvas.addEventListener('click', function(e) {
+		const canvas_rect = canvas.getBoundingClientRect();
+		const sx = e.clientX - canvas_rect.left;
+		const sy = e.clientY - canvas_rect.top;
+		if(mousedown_sx == mousemove_sx && mousedown_sy == mousemove_sy) {
+			const functions = s2x_x2s_s2y_y2s_from_UI();
+			const s2x = functions[0];
+			const s2y = functions[2];
+			document.getElementById("center_x").value = s2x(sx).toFixed(5);
+			document.getElementById("center_y").value = s2y(sy).toFixed(5);
+			draw_canvas();
+		}
+	}, false);
+
+	canvas.addEventListener('mousemove', function(e) {
+		if(e.buttons == 1) {
+			const canvas_rect = canvas.getBoundingClientRect();
+			const sx = e.clientX - canvas_rect.left;
+			const sy = e.clientY - canvas_rect.top;
+			const cx = 320 - (sx - mousemove_sx);
+			const cy = 320 - (sy - mousemove_sy);
+			const functions = s2x_x2s_s2y_y2s_from_UI();
+			const s2x = functions[0];
+			const s2y = functions[2];
+			document.getElementById("center_x").value = s2x(cx).toFixed(5);
+			document.getElementById("center_y").value = s2y(cy).toFixed(5);
+			mousemove_sx = sx;
+			mousemove_sy = sy;
+			draw_canvas();
+		}
+	}, false);
+
+	canvas.addEventListener('mousedown', function(e) {
+		const canvas_rect = canvas.getBoundingClientRect();
+		const sx = e.clientX - canvas_rect.left;
+		const sy = e.clientY - canvas_rect.top;
+		mousedown_sx = sx;
+		mousedown_sy = sy;
+		mousemove_sx = mousedown_sx;
+		mousemove_sy = mousedown_sy;
+	}, false);
+
+	canvas.addEventListener('wheel', function(e) {
+		if(e.shiftKey) {
+			const scale = Number(document.getElementById("scale").value);
+			if(e.deltaY < 0)
+				document.getElementById("scale").value = scale / 2;
+			else
+				document.getElementById("scale").value = scale * 2;
+			draw_canvas();
+		}
+	}, false);
+
+	draw_canvas();
+}
+
+function draw_arrow(context, x1, y1, x2, y2, color) {
+	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - (y2 - y1) * 4.3 / d - (x2 - x1) * 16.7 / d, y2 - (y2 - y1) * 16.7 / d + (x2 - x1) * 4.3 / d);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + (y2 - y1) * 4.3 / d - (x2 - x1) * 16.7 / d, y2 - (y2 - y1) * 16.7 / d - (x2 - x1) * 4.3 / d);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
+}
+
+function draw_canvas() {
+	canvas = document.getElementById("canvas");
+	var context = canvas.getContext("2d");
+
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// translation functions
+	const functions = s2x_x2s_s2y_y2s_from_UI();
+	const s2x = functions[0];
+	const x2s = functions[1];
+	const s2y = functions[2];
+	const y2s = functions[3];
+
+	// the grid
+	const scale = Number(document.getElementById("scale").value);
+	const step = scale < 16 ? 1 : floor(scale / 8);
+	const stepped = function(x) {return floor(x / step) * step;}
+
+	context.beginPath();
+	context.setLineDash([2, 3]);
+	if(document.getElementById("scale_1").checked) {
+		// horizontal
+		for(var j = stepped(s2x(0)); j <= stepped(s2x(640)); j += step) {
+			if(j != 0) {
+				context.moveTo(sharp(x2s(j)), 0);
+				context.lineTo(sharp(x2s(j)), h);
+			}
+			context.fillText(j, sharp(x2s(j)) + 12, sharp(y2s(0)) - 12);
+		}
+		// vertical
+		for(var i = stepped(s2y(640)); i <= stepped(s2y(0)); i += step) {
+			if(i != 0) {
+				context.moveTo(0, sharp(y2s(i)));
+				context.lineTo(w, sharp(y2s(i)));
+			}
+		}
+	} else if(document.getElementById("scale_2").checked) {
+		// horizontal
+		const x_from = s2x(20);
+		const x_to = s2x(620);
+		for(var i = sign(x_from) * floor(log2(abs(x_from))) - 1; i <= sign(x_to) * ceil(log2(abs(x_to))); ++i) {
+			if(i == 0)
+				continue;
+			const x_i = sign(i) * pow(2, abs(i) - 1);
+			context.moveTo(sharp(x2s(x_i)), 0);
+			context.lineTo(sharp(x2s(x_i)), h);
+		}
+		// vertical
+		const y_from = s2y(620);
+		const y_to = s2y(20);
+		for(var i = sign(y_from) * floor(log2(abs(y_from))) - 1; i <= sign(y_to) * ceil(log2(abs(y_to))); ++i) {
+			if(i == 0)
+				continue;
+			const y_i = sign(i) * pow(2, abs(i) - 1);
+			context.moveTo(0, sharp(y2s(y_i)));
+			context.lineTo(w, sharp(y2s(y_i)));
+		}
+	}
+	context.strokeStyle = "#AAA";
+	context.lineWidth = 1;
+	context.stroke();
+	context.setLineDash([]);
+	context.closePath();
+
+
+	// function
+	const f_text = document.getElementById("f").value;
+	const f_lines = f_text.split('\n');
+	for(var line_i = 0; line_i < f_lines.length; ++line_i) {
+		const f_line = f_lines[line_i];
+		try {
+			eval("var f = function(x) { return " + f_line + ";}")
+			document.getElementById("error").innerHTML = "";
+		} catch (error) {
+			var f = function(x) {return 0;}
+			document.getElementById("error").innerHTML = "<b>Error:</b> " + error.message;
+		}
+		// helper for coloring
+		function color_by_hash_of(string) {
+			var code_sum = 0;
+			for(var i = 0; i < string.length; ++i)
+				code_sum += ([1, 7, 11, 13][i % 4] * string.charCodeAt(i));
+			const zero_channel = code_sum % 3;
+			const color = '#' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
+				+ (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
+				+ (zero_channel == 2 ? '0' : '');
+			return color;
+		}
+		// draw
+		context.beginPath();
+		var the_gap = true;
+		var old_i;
+		for(var j = 0.5; j < w - 0.5; j += 0.5) {
+			const x = s2x(j);
+			const y = f(x);
+			const i = y2s(y);
+			if(the_gap) {
+				context.moveTo(j, i)
+				the_gap = false;
+			} else {
+				if(abs(i - old_i) >= h)
+					the_gap = true;
+				else
+					context.lineTo(j, i);
+			}
+			old_i = i;
+		}
+		context.strokeStyle = color_by_hash_of(f_line);
+		context.lineWidth = 1.5;
+		context.stroke();
+		context.closePath();
+	}
+
+	// the axes
+	function sharp(x) {return floor(x) + 0.5;}
+	context.font = "14px Arial";
+	context.fillStyle = "#444444";
+	context.textAlign = "center";
+	context.textBaseline = "middle";
+	context.strokeStyle = "#000000";
+	context.lineWidth = 1;
+	context.beginPath();
+	if(document.getElementById("scale_1").checked) {
+		draw_arrow(context, 0, sharp(y2s(0)), w, sharp(y2s(0)), "#000000");
+		draw_arrow(context, sharp(x2s(0)), h, sharp(x2s(0)), 0, "#000000");
+		// horizontal
+		for(var j = stepped(s2x(0)); j <= stepped(s2x(640)); j += step) {
+			if(j != 0) {
+				context.moveTo(sharp(x2s(j)), sharp(y2s(0)) + 2);
+				context.lineTo(sharp(x2s(j)), sharp(y2s(0)) - 2);
+			}
+			context.fillText(j, sharp(x2s(j)) + 12, sharp(y2s(0)) - 12);
+		}
+		// vertical
+		for(var i = stepped(s2y(640)); i <= stepped(s2y(0)); i += step) {
+			if(i != 0) {
+				context.moveTo(sharp(x2s(0)) - 2, sharp(y2s(i)));
+				context.lineTo(sharp(x2s(0)) + 2, sharp(y2s(i)));
+				context.fillText(i, sharp(x2s(0)) + 12, sharp(y2s(i)) - 12);
+			}
+		}
+	} else if(document.getElementById("scale_2").checked) {
+		context.moveTo(20.5, sharp(y2s(0)));
+		context.lineTo(w - 20.5, sharp(y2s(0)));
+		context.moveTo(sharp(x2s(0)), h - 20.5);
+		context.lineTo(sharp(x2s(0)), 20.5);
+		context.stroke();
+		context.closePath();
+
+		context.beginPath();
+		context.setLineDash([3, 2]);
+		context.moveTo(20.5, sharp(y2s(0)));
+		context.lineTo(-0.5, sharp(y2s(0)));
+		context.moveTo(w - 20.5, sharp(y2s(0)));
+		context.lineTo(w + 0.5, sharp(y2s(0)));
+		context.moveTo(sharp(x2s(0)), h - 20.5);
+		context.lineTo(sharp(x2s(0)), h + 0.5);
+		context.moveTo(sharp(x2s(0)), 20.5);
+		context.lineTo(sharp(x2s(0)), -0.5);
+		context.stroke();
+		context.closePath();
+		context.setLineDash([]);
+
+		context.beginPath();
+		// horizontal
+		const x_from = s2x(20);
+		const x_to = s2x(620);
+		for(var i = sign(x_from) * floor(log2(abs(x_from))) - 1; i <= sign(x_to) * ceil(log2(abs(x_to))); ++i) {
+			if(i == 0)
+				continue;
+			const x_i = sign(i) * pow(2, abs(i) - 1);
+			context.moveTo(sharp(x2s(x_i)), sharp(y2s(0)) + 2);
+			context.lineTo(sharp(x2s(x_i)), sharp(y2s(0)) - 2);
+			const to_print = (i < 0) ? "-" + String(pow(2, abs(i+1))) : String(pow(2, i-1));
+			if(i % 2 == 0)
+				context.fillText(to_print, sharp(x2s(x_i)), sharp(y2s(0)) - 12);
+			else
+				context.fillText(to_print, sharp(x2s(x_i)), sharp(y2s(0)) + 12);
+		}
+		// vertical
+		const y_from = s2y(620);
+		const y_to = s2y(20);
+		for(var i = sign(y_from) * floor(log2(abs(y_from))) - 1; i <= sign(y_to) * ceil(log2(abs(y_to))); ++i) {
+			if(i == 0)
+				continue;
+			const y_i = sign(i) * pow(2, abs(i) - 1);
+			context.moveTo(sharp(x2s(0)) + 2, sharp(y2s(y_i)));
+			context.lineTo(sharp(x2s(0)) - 2, sharp(y2s(y_i)));
+			const to_print = (i < 0) ? "-" + String(pow(2, abs(i+1))) : String(pow(2, i-1));
+			if(i % 2 == 0)
+				context.fillText(to_print, sharp(x2s(0)) - 12, sharp(y2s(y_i)) - 12);
+			else
+				context.fillText(to_print, sharp(x2s(0)) + 12, sharp(y2s(y_i)) + 12);
+		}
+	}
+
+	context.stroke();
+	context.closePath();
+
+	// cross
+	if(x2s(0) != 2/w || y2s(0) != h/2) {
+		context.beginPath();
+		context.moveTo(sharp(w/2) - 14.5, sharp(h/2));
+		context.lineTo(sharp(w/2) + 14.5, sharp(h/2));
+		context.moveTo(sharp(w/2), sharp(h/2) - 14.5);
+		context.lineTo(sharp(w/2), sharp(h/2) + 14.5);
+		context.strokeStyle = "#222222";
+		context.lineWidth = 1;
+		context.stroke();
+		context.closePath();
+	}
+}
+
+function snap_focus_to_nearest() {
+	// translation
+	const functions = s2x_x2s_s2y_y2s_from_UI();
+	const s2x = functions[0];
+	const x2s = functions[1];
+	const s2y = functions[2];
+	const y2s = functions[3];
+	const x0 = s2x(w / 2);
+	const y0 = s2y(h / 2);
+	var y = 0.0;
+	// function
+	const f_text = document.getElementById("f").value;
+	const f_lines = f_text.split('\n');
+	for(var line_i = 0; line_i < f_lines.length; ++line_i) {
+		const f_line = f_lines[line_i];
+		try {
+			eval("var f = function(x) { return " + f_line + ";}")
+			document.getElementById("error").innerHTML = "";
+			if(abs(f(x0) - y0) < abs(y - y0))
+				y = f(x0);
+		} catch (error) {
+			var f = function(x) {return 0;}
+			document.getElementById("error").innerHTML = "<b>Error:</b> " + error.message;
+		}
+	}
+	document.getElementById("center_y").value = y.toFixed(5);
+	draw_canvas();
+}
+
+function reset_focus() {
+	document.getElementById("center_x").value = 0;
+	document.getElementById("center_y").value = 0;
+	draw_canvas();
+}
+
+function divide_scale() {
+	document.getElementById("scale").value = Number(document.getElementById("scale").value / 2);
+	draw_canvas();
+}
+
+function multiply_scale() {
+	document.getElementById("scale").value = Number(document.getElementById("scale").value * 2);
+	draw_canvas();
+}
+
+function reset_scale() {
+	document.getElementById("scale").value = 4;
+	draw_canvas();
+}
+
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
+Arctangent scale
+	</h1>
+
+	<p>
+This is a function plotter that can do both linear and arctangent scales. Everything is clickable-draggable, there is even a shortcut for the scale on <nobr>Shift + mouse wheel</nobr>.
+	</p>
+	<p>
+Feel free to try your own functions. The plotter accepts lines of JavaScript code each evaluated to <i>f(x)</i>.
+	</p>
+	<form>
+	<div style="margin-bottom: 12pt;">
+	The scale:<br>
+	<input type="radio" name="scale" id="scale_1" value="A" onInput="draw_canvas()"checked="true"><label for="scale_1">Linear</label><br>
+	<input type="radio" name="scale" id="scale_2" value="B" onInput="draw_canvas()"><label for="scale_2">Arctagent</label><br>
+	</div>
+	<div style="margin-bottom: 12pt;">
+	Functions to plot:<br>
+	<textarea id="f" onInput="draw_canvas()" rows=3>exp(x - 1) - 4
+x*x*x - sqrt(2.)*x
+-exp(-x - 1) + 4
+</textarea>
+	<br>
+	<p id="error" class="comment"></p>
+	</div>
+	<div style="text-align: center; margin-bottom: 12pt;">
+	<canvas id="canvas" width=640 height=640></canvas>
+	</div>
+	<div style="text-align: center; margin-bottom: 12pt;">
+	Focus <i>x</i> at:<input type="text" id="center_x" value="0" onInput="draw_canvas()"/>
+	, <i>y</i> at:<input type="text" id="center_y" value="0" onInput="draw_canvas()"/>
+	;&nbsp;&nbsp;&nbsp;scale:
+		<button type="button" onclick="divide_scale();" style="width:28pt;">/2</button>
+		<input type="text" id="scale" value="4" onInput="draw_canvas()"/>
+		<button type="button" onclick="multiply_scale();" style="width:28pt;">*2</button>
+	<br>
+	<button type="button" onclick="snap_focus_to_nearest();">Snap to <i>f(x)</i></button>
+	<button type="button" onclick="reset_focus();">Reset focus</button>
+	<button type="button" onclick="reset_scale();">Reset scale</button>
+	</div>
+	</form>
+
+	<p>
+Of course, we can not fool the mathematics. E. g. this plot has only 409600 pixels which means that we can't possibly display more than 1.2 MB of information on it. The information needed to display every point of a function plot from -&infin; to &infin; is certainly infinite. So we have to live with the error of representation. Still, the arctangent scale lets you choose where do you want this error to manifest and when.
+	</p>
+	<p>
+This makes it a useful tool for exploring functions, their limits, systems of equations etc.
+	</p>
+
+	<script language="JavaScript">
+		reset_focus();
+		reset_scale();
+		init_canvas();
+	</script>
+
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html"><img src="favicon.svg"></a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+		+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+</body>
+</html>
