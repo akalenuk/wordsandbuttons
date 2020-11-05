@@ -153,6 +153,7 @@ function s2x_x2s_s2y_y2s_from_UI() {
 	return s2x_x2s_s2y_y2s(type, center_x, center_y, scale);
 }
 
+// todo: this could be enclosed in canvas along with the draw
 var mousedown_sx;
 var mousedown_sy;
 var mousemove_sx;
@@ -304,7 +305,7 @@ function draw_canvas() {
 	for(var line_i = 0; line_i < f_lines.length; ++line_i) {
 		const f_line = f_lines[line_i];
 		try {
-			eval("var f = function(x) { return " + f_line + ";}")
+			eval("var f = function(x) { return " + f_line + ";}");
 			document.getElementById("error").innerHTML = "";
 		} catch (error) {
 			var f = function(x) {return 0;}
@@ -462,7 +463,7 @@ function snap_focus_to_nearest() {
 	for(var line_i = 0; line_i < f_lines.length; ++line_i) {
 		const f_line = f_lines[line_i];
 		try {
-			eval("var f = function(x) { return " + f_line + ";}")
+			eval("var f = function(x) { return " + f_line + ";}");
 			document.getElementById("error").innerHTML = "";
 			if(abs(f(x0) - y0) < abs(y - y0))
 				y = f(x0);
@@ -541,13 +542,6 @@ x*x*x - sqrt(2.)*x
 	<button type="button" onclick="reset_scale();">Reset scale</button>
 	</div>
 	</form>
-
-	<p>
-Of course, we can not fool the mathematics. E. g. this plot has only 409600 pixels which means that we can't possibly display more than 1.2 MB of information on it. The information needed to display every point of a function plot from -&infin; to &infin; is certainly infinite. So we have to live with the error of representation. Still, the arctangent scale lets you choose where do you want this error to manifest and when.
-	</p>
-	<p>
-This makes it a useful tool for exploring functions, their limits, systems of equations etc.
-	</p>
 
 	<script language="JavaScript">
 		reset_focus();
