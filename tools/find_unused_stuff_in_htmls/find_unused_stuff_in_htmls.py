@@ -21,7 +21,7 @@ for file in sorted(files):
                 print( '  ' + file + ' has style "' + style + '" unused')
     if text.find('</script>') != -1:
         functions = text.split('<script language="JavaScript">')[1].split('</script>')[0]
-        functions = [fun.split('(')[0].strip() for fun in functions.split('function ')[1:]]
+        functions = [fun.split('(')[0].strip() for fun in functions.split('\nfunction ')[1:]]
         for fun in functions:
             if text.count(fun) == 1:
                 print( '  ' + file + ' has function "' + fun + '" unused')
