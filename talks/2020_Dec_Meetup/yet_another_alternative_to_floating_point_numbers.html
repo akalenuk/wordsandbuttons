@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Yet another alternative to floating point numbers</title>
+	<meta name="description" content="This shows how computeable intervals written in rational bounds may not only account for the input error but keep computational error under control as well.">
+	<meta name="keywords" content="mathematics, programming, quizzes">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body {
+	margin: 0 0 0 0;
+}
+
+a {
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+p.big {
+	font-size: 84pt;
+	margin: -32pt 0 -32pt 0;
+	text-align: center;
+}
+
+pre {
+	margin: 0 0 0 0;
+	padding: 12pt 12pt 12pt 12pt;
+	font-size: 12pt;
+	text-align: left;
+	border: none;
+	width: 505pt;
+}
+
+table {
+	border-width: 0pt;
+}
+
+td {
+	vertical-align: top;
+	font-size: 18pt;
+}
+
+td.n {
+	padding: 2pt 6pt 2pt 6pt;
+	vertical-align: middle;
+}
+
+td.un {
+	padding: 2pt 6pt 2pt 6pt;
+	vertical-align: middle;
+	border-bottom: 1px solid black;
+}
+
+button {
+	width: 248pt;
+	height: 42pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 16pt;
+}
+
+u {
+	border-bottom: 1px dotted #000;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: italic;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+input[type="text"] {
+	width: 100pt;
+	height: 22pt;
+	padding-left: 3pt;
+	font-size: 16pt;
+	margin: 2pt 6pt 2pt 6pt;
+	width: 48pt;
+}
+	</style>
+	<script language="JavaScript">
+function show(n){
+	document.getElementById("shown_" + n).style.display = "none";
+	document.getElementById("hidden_" + n).style.display = "inline";
+}
+
+function hide(n){
+	document.getElementById("shown_" + n).style.display = "inline";
+	document.getElementById("hidden_" + n).style.display = "none";
+}
+
+const slider_w = 608;
+const slider_h = 84;
+const slider_margin_left = 32;
+const slider_margin_right = 32;
+const slider_margin_top = 12;
+const slider_margin_bottom = 12;
+
+var slider_lb = [];
+var slider_ub = [];
+var slider_min_x = [];
+var slider_max_x = [];
+var slider_down = [];
+var slider_template = [];
+var slider_value = [];
+
+function position_slider(no, client_x) {
+	const lb = slider_lb[no];
+	const ub = slider_ub[no];
+	const min_x = slider_min_x[no];
+	const max_x = slider_max_x[no];
+	
+	var x = (client_x - slider_margin_left) / (slider_w - slider_margin_right - slider_margin_left);
+	x = min_x + x * (max_x - min_x);
+	x = Math.max(x, min_x);
+	x = Math.min(x, max_x);
+	if(Math.abs(x - lb) < Math.abs(x - ub))
+		slider_lb[no] = x;
+	else
+		slider_ub[no] = x;
+}
+
+function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template, on_slide){
+	var slider = document.getElementById("interval_" + String(no));
+	slider_min_x[no] = min_x;
+	slider_max_x[no] = max_x;
+	slider_lb[no] = initial_lb;
+	slider_ub[no] = initial_ub;
+	slider_down[no] = false;
+	slider_template[no] = x_template;
+	slider_value[no] = min_x - 1.0; // anything below min is "none"
+	draw_slider(no);
+
+	slider.addEventListener('mouseleave', function(e){
+		slider_down[no] = false;
+	}, false);
+
+	slider.addEventListener('mouseup', function(e){
+		slider_down[no] = false;
+	}, false);
+
+	slider.addEventListener('mousedown', function(e){
+		slider_down[no] = true;
+		var canvas_rect = slider.getBoundingClientRect();
+		position_slider(no, e.clientX - canvas_rect.left);
+		on_slide(slider_lb[no], slider_ub[no]);
+		draw_slider(no);
+	}, false);
+
+	slider.addEventListener('mousemove', function(e){
+		if(slider_down[no] == true){
+			var canvas_rect = slider.getBoundingClientRect();
+			position_slider(no, e.clientX - canvas_rect.left);
+			on_slide(slider_lb[no], slider_ub[no]);
+			draw_slider(no);
+		}
+	}, false);
+}
+
+function draw_slider(no){
+	x_template = slider_template[no]
+
+	const slider = document.getElementById("interval_" + String(no));
+	ctx = slider.getContext("2d");
+	const lb = slider_lb[no];
+	const ub = slider_ub[no];
+	const min_x = slider_min_x[no];
+	const max_x = slider_max_x[no];
+
+	ctx.clearRect(0, 0, slider_w, slider_h);
+	ctx.strokeStyle="#444444";
+	ctx.fillStyle="#BBBBBB";
+	const dw = slider_w - slider_margin_right - slider_margin_left;
+	const dh = slider_h - slider_margin_top - slider_margin_bottom;
+
+	ctx.fillRect(slider_margin_left, slider_margin_top, dw, dh);
+	const lb01 = (lb - min_x) / (max_x - min_x);
+	const ub01 = (ub - min_x) / (max_x - min_x);
+	ctx.strokeStyle="#000000";
+	ctx.fillStyle="#777777";
+	ctx.fillRect(slider_margin_left + dw * lb01 - 0.5, slider_margin_top, dw * (ub01 - lb01) + 0.5, dh);
+
+	ctx.font = "16px sans-serif";
+	ctx.fillStyle="#d64562";
+	// the whole interval
+	ctx.textBaseline = "top";
+	ctx.textAlign = "left";
+	ctx.fillText("[" + x_template.replace("%x", String(min_x)) + ",", slider_margin_left + 6, slider_margin_top + 6);
+	ctx.textAlign = "right";
+	ctx.fillText(x_template.replace("%x", String(max_x)) + "]", slider_w - slider_margin_right - 6, slider_margin_top + 6);
+	// the selected interval
+	ctx.fillStyle="#942b3b";
+	ctx.textBaseline = "bottom";
+	ctx.textAlign = "left";
+	const left_piece_text = "[" + x_template.replace("%x", lb.toFixed(0)) + ",";
+	const left_width = ctx.measureText(left_piece_text).width;
+	const left_piece_x = slider_margin_left + dw * lb01 + 6;
+	const right_piece_x = slider_margin_left + dw * ub01 - 6;
+	const right_piece_text = x_template.replace("%x", ub.toFixed(0)) + "]";
+	const right_width = ctx.measureText(right_piece_text).width;
+	if(right_piece_x - left_piece_x - right_width - 12 > left_width)
+		ctx.fillText(left_piece_text, left_piece_x, slider_h - slider_margin_bottom - 6);
+	else
+		ctx.fillText(left_piece_text + " " + right_piece_text, left_piece_x, slider_h - slider_margin_bottom - 6);
+	ctx.textAlign = "right";
+	if(right_piece_x - left_piece_x - right_width - 12 > left_width)
+		ctx.fillText(right_piece_text, right_piece_x, slider_h - slider_margin_bottom - 6);
+
+	// value if exists
+	if(slider_value[no] >= min_x) {
+		// ok, this is simply dirty. Don't reuse this code
+		const value_to_print = Math.pow(10, slider_value[no]).toExponential(1);
+
+		const value01 = (slider_value[no] - min_x) / (max_x - min_x);
+		ctx.strokeStyle="#000000";
+		ctx.beginPath();
+		ctx.moveTo(slider_margin_left + dw * value01, slider_margin_top);
+		ctx.lineTo(slider_margin_left + dw * value01, slider_h - slider_margin_bottom);
+		ctx.stroke();
+		ctx.closePath();
+		ctx.textBaseline = "middle";
+		ctx.fillStyle="#000000";
+		if(value01 < 0.75) {
+			ctx.textAlign = "left";
+			ctx.fillText(value_to_print, slider_margin_left + dw * value01 + 6, slider_h / 2);
+		} else {
+			ctx.textAlign = "right";
+			ctx.fillText(value_to_print, slider_margin_left + dw * value01 - 6, slider_h / 2);
+		}
+	}
+}
+
+function colorized(text) {
+	const separators = [' if(', 'return ', ' for(',
+		'\n', ' ', '\t', ',', ':', ';', '+', '-', '/', '*', '(', ')', '<', '>', '[', ']', '{', '}',
+		'==', '!=', '<=', '>=', '=', '-=', '+=', '*=', '/='];
+	const quotes = ['\'', '"'];
+	const comments = [['//', '\n'], ['/*', '*/']];
+
+	function painted_in(line, color) {
+		return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+	}
+
+	function colorized(token) {
+		var code_sum = 0;
+		for(var i = 0; i < token.length; ++i)
+			code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+		var zero_channel = code_sum % 3;
+		var color = '' + (zero_channel == 0 ? '3' : '') + (1 + (code_sum % 5) * 2)
+			+ (zero_channel == 1 ? '3' : '') + (4 + (code_sum % 2) * 5)
+			+ (zero_channel == 2 ? '3' : '');
+		return painted_in(token, color);
+	}
+
+	function separated(line, i) {
+		if(i == separators.length)
+			return colorized(line);
+		return line.split(separators[i]).map(function(subline) {
+			return separated(subline, i + 1);}).join(separators[i]);
+	}
+
+	function unquoted(line, i) {
+		if(i == quotes.length)
+			return separated(line, 0);
+		var chunk_no = 0;
+		return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {
+			return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {
+				return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "777");}).join('');
+	}
+
+	function uncommented(line, i) {
+		if(i == comments.length)
+			return unquoted(line, 0);
+		const chunks = line.split(comments[i][0]);
+		return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+			var in_out_comment = chunk.split(comments[i][1]);
+			return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "777")
+				+ uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+	}
+
+	return uncommented(text.split('&lt;').join('<').split('&gt;').join('>'), 0);
+}
+
+const max_relative_errors = [3.3675e-08, 29.3984, 7.60319e+09];
+function log10(x) {	// for IE compatibility
+	return Math.log(x) / Math.log(10);
+}
+const log10_max_relative_errors = [log10(max_relative_errors[0]), log10(max_relative_errors[1]), log10(max_relative_errors[2])];
+
+function reveal(no){
+	document.getElementById("the_truth_" + no).style.display = "block";
+	document.getElementById("button_" + no).style.display = "none";
+	if(no == 1)
+		slider_value[no] = log10(3.3675e-08);
+	else if(no == 2)
+		slider_value[no] = log10(29.3984);
+	else if(no == 3)
+		slider_value[no] = log10(7.60319e+09);
+	draw_slider(no);
+}
+
+function float_changed() {
+	const value = document.getElementById("float_").value;
+	document.getElementById("float_lb").innerHTML = String(Math.floor(value * 10) / 10);
+	document.getElementById("float_ub").innerHTML = String(Math.ceil(value * 10) / 10);
+}
+
+function rational_changed() {
+	const value = document.getElementById("rational_n").value / document.getElementById("rational_d").value;
+	var lb_n = 0;
+	var lb_d = 99;
+	var ub_n = 99;
+	var ub_d = 0;
+	for(var n = 0; n < 100; n += 1)
+		for(var d = 0; d < 100; d += 1) {
+			if (n/d <= value && n/d > lb_n/lb_d){
+				lb_n = n;
+				lb_d = d;
+			}
+			if (n/d >= value && n/d < ub_n/ub_d){
+				ub_n = n;
+				ub_d = d;
+			}
+		}
+	document.getElementById("rational_lb_n").innerHTML = String(lb_n);
+	document.getElementById("rational_lb_d").innerHTML = String(lb_d);
+	document.getElementById("rational_ub_n").innerHTML = String(ub_n);
+	document.getElementById("rational_ub_d").innerHTML = String(ub_d);
+}
+
+function interval_changed(no) {
+	const value_1 = document.getElementById("interval_1_n").value / document.getElementById("interval_1_d").value;
+	const value_2 = document.getElementById("interval_2_n").value / document.getElementById("interval_2_d").value;
+	if(value_1 > value_2) {
+		if(no == 1) {
+			document.getElementById("interval_2_n").value = document.getElementById("interval_1_n").value;
+			document.getElementById("interval_2_d").value = document.getElementById("interval_1_d").value;
+		} else {
+			document.getElementById("interval_1_n").value = document.getElementById("interval_2_n").value;
+			document.getElementById("interval_1_d").value = document.getElementById("interval_2_d").value;
+		}
+		interval_changed(no);
+		return;
+	}
+
+	var lb_n = 0;
+	var lb_d = 99;
+	var ub_n = 99;
+	var ub_d = 0;
+	for(var n = 0; n < 100; n += 1)
+		for(var d = 0; d < 100; d += 1) {
+			if (n/d <= value_1 && n/d > lb_n/lb_d){
+				lb_n = n;
+				lb_d = d;
+			}
+			if (n/d >= value_2 && n/d < ub_n/ub_d){
+				ub_n = n;
+				ub_d = d;
+			}
+		}
+	document.getElementById("interval_lb_n").innerHTML = String(lb_n);
+	document.getElementById("interval_lb_d").innerHTML = String(lb_d);
+	document.getElementById("interval_ub_n").innerHTML = String(ub_n);
+	document.getElementById("interval_ub_d").innerHTML = String(ub_d);
+}
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
+Yet another alternative to floating-point numbers
+	</h1>
+	<p>
+Floating-point numbers are fine. They are decently designed and well standardized, they provide a good compromise between performance and precision. They work great most of the time. Until the day when they suddenly don't and nobody knows why.
+	</p>
+	<p>
+For me, that day came when I encountered a bug in the Taubin estimator. <a href="https://graphics.stanford.edu/courses/cs468-01-fall/Papers/taubin-smoothing.pdf">Taubin smoothing</a> takes a triangle mesh, a pair of magic numbers called &lambda; and &mu;, a little time to think, and it makes the input mesh smooth. It also makes sure that the mesh isn't reduced to a perfectly smooth but rather uninteresting sphere or a point.
+	</p>
+	<p>
+The first magic number &lambda; is something between 0 and 1. When it's 0 — nothing happens at all, and when it's 1 — nothing good happens either. It should be somewhere in between. Nobody really knows how to pick this number but an experienced engineer can at least make an educated guess. 
+	</p>
+	<p>
+The second magic number governs shrinkage compensation. It's a negative number slightly greater than &lambda; in its absolute value. Nobody knows how to pick it either but this time even an educated guess is a challenge.
+	</p>
+	<p>
+That's why you need an estimator. Something that picks the &mu; for you. And we have one. And it was bugged. And I was the one to fix it.
+	</p>
+	<p>
+The first day of the investigation showed that the estimator is in fact entirely correct. The second day of the investigation  showed that the tests covering the bug are correct just as well. The third day of the investigation brought a promising hypothesis that the whole story is just a bad dream and all it takes to solve the mystery is to wake up. The fourth morning killed that hypothesis and left me completely clueless.
+	</p>
+	<p>
+Luckily I have a friend who is smarter than me and he advised to fuzz the input a little and see what happens then. I did. And something happened. The bug didn't go away but the &mu; changed a lot. Way unproportionally to the small changes in the input. Fascinating!
+	</p>
+	<p>
+We can expect a computation to work with some error. It's fine, we get input data from sensors and they embed some error, to begin with. We print out our finished models, and the printers have some limited precision as well so a small error doesn't upset anyone. It's all good while the error is small. But what if it isn't?
+	</p>
+	<p>
+As it turns out, in my case, a completely correct algorithm had a computational error of about 1. Not 1e-16 or 1e-5 but 1. Just 1. So if you expect your &mu; to be somewhat close to -0.7, and the estimator says it's 0.3, it is in fact correct. It is still a correct estimation within its error range.
+	</p>
+	<p>
+Correct but entirely useless.
+	</p>
+	<h2>
+Challenge your intuition with a “Guess the Error” game
+	</h2>
+	<p>
+Ok, so it's not the computational error per se that causes trouble but only the unexpected and unpredictable error. Can we predict it though?
+	</p>
+	<p>
+Well, of course, we can. There is a whole field of numerical error analysis for that but let's be honest, most of the time we use our intuition instead. So how good is our intuition exactly?
+	</p>
+	<p>
+I propose a game to find out. Let's take a cubic equation solver. It's a relatively complex computation with a very simple way to validate its precision. We will pick some roots first and then we will generate the cubic equation for these roots. Then we'll make the cubic solver find our roots back through the computation. The difference between the original and the computed value for each root will be our measurable error. This error divided by the original value will be our relative error.
+	</p>
+	<p>
+Here is the exact code for the experiment. It's also <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/rational_bounds/rationale/cubic_solver_example.cpp">available on GitHub</a>.
+	</p>
+	<div id="shown_code_1">
+	<span style="line-height: 2.0;">
+	<button type="button" onclick="show('code_1')">Show the code</button>
+	</span>
+	</div>
+	<div id="hidden_code_1" style="display: none">
+	<table><tr>
+	<td>
+	<pre id="code_1">
+// find roots for ax^3 + bx^2 + cx + d = 0
+std::array&lt;double, 3&gt; roots_for_cubic(std::array&lt;double, 4&gt; abcd) {
+    double PI = std::atan(1.) * 4.;
+
+    double a1 = abcd[1] / abcd[0];
+    double a2 = abcd[2] / abcd[0];
+    double a3 = abcd[3] / abcd[0];
+    double q = (a1 * a1 - 3. * a2) / 9.;
+    double sq = -2. * std::sqrt(q);
+    double r = (2. * a1 * a1 * a1 - 9. * a1 * a2 + 27. * a3) / 54.0;
+    double z = r * r - q * q * q;
+
+    std::array&lt;double, 3&gt; roots;
+    if(z &lt;= 0.) {
+        double t = std::acos(r / std::sqrt(q * q * q));
+        roots[0] = sq * std::cos(t / 3.) - a1 / 3.;
+        roots[1] = sq * std::cos((t + 2. * PI) / 3.) - a1 / 3.;
+        roots[2] = sq * std::cos((t + 4. * PI) / 3.) - a1 / 3.;
+    } else {
+        roots[0] = pow(std::sqrt(z) + std::abs(r) , 1. / 3.);
+        roots[0] += q / roots[0];
+        roots[0] *= ( r &lt; 0. ) ? 1 : -1;
+        roots[0] -= a1 / 3.;
+        roots[1] = std::numeric_limits&lt;double&gt;::quiet_NaN();
+        roots[2] = std::numeric_limits&lt;double&gt;::quiet_NaN();
+    }
+    return roots;
+}
+
+// find polynomial coefficients a, b, c, and d for the roots
+std::array&lt;double, 4&gt; cubic_for_roots(std::array&lt;double, 3&gt; xs) {
+    return {1. // one of them should be set as a constant
+    , - (xs[0] + xs[1] + xs[2])
+    , + (xs[0] * xs[1] + xs[1] * xs[2] + xs[2] * xs[0])
+    , - (xs[0] * xs[1] * xs[2])};
+}
+	</td></tr></table>
+	<span style="line-height: 2.0;">
+	<button type="button" onclick="hide('code_1')">Hide the code</button>
+	</span>
+	</div>
+	<br>
+	<p>
+Now if we pick our roots as 1, 2, and 3, the equation produced will be:
+	</p>
+	<p class="formula">
+(x - 1) (x - 2) (x - 3) = 0
+	</p>
+	<p>
+Expanding the brackets we get this:
+	</p>
+	<p class="formula">
+x<sup>3</sup> - 6x<sup>2</sup> + 11x - 6 = 0
+	</p>
+	<p>
+And when we run our solver we get:
+	</p>
+	<p class="formula">
+x = 1, x = 2, x = 3
+	</p>
+	<p>
+Well, yes. On the equation this simple there is no error whatsoever. The computation works flawlessly. So let's start making it worse.
+	</p>
+	<h2>Round 1</h2>
+	<p>
+The slider below lets you pick an interval in the logarithmic scale. The interval may start at 10<sup>-12</sup> and end at 10<sup>12</sup>. It's impossible to predict the exact error up to a single number so you should just pick an appropriate interval that covers the error<span id="shown_note_1"><u onclick="show('note_1')">*</u>.</span><span id="hidden_note_1" style="display: none">. <span style="font-size: 14pt;">Of course, you can select the whole interval, too. This estimation is guaranteed to be correct. And entirely useless. </span><u onclick="hide('note_1')">&larr;</u></span>
+	</p>
+	<p>
+Let's say we have the roots of 0.001, 2, 3&hairsp;000. So to which interval, in your opinion, the maximum relative error for a cubic solver belongs?
+	</p>
+	<canvas id="interval_1" width=608 height=84></canvas>
+	<div id="button_1">
+	<br>
+	<button type="button" onclick="reveal(1)">Reveal the truth</button>
+	</div>
+	<div id="the_truth_1" style="display:none;">
+	<p>
+It's measured as 3.3675e-08 so the estimation between e-8 and e-7 would be more than adequate.
+	</p>
+	</div>
+
+	<h2>Round 2</h2>
+	<p>
+Now let's make our roots even more diverse in magnitude. How about 1e-6, 2, and 3e6?
+	</p>
+	<p>
+Where do you think the error might be?
+	</p>
+	<canvas id="interval_2" width=608 height=84></canvas>
+	<div id="button_2">
+	<br>
+	<button type="button" onclick="reveal(2)">Reveal the truth</button>
+	</div>
+	<div id="the_truth_2" style="display:none;">
+	<p>
+It's significantly more than 1. Since it's a relative error, this means than the error for the smallest root value is larger than the value itself. So the computation is now essentially uselses.
+	</p>
+	<p>
+While we're talking about a synthetic case just to test our solver, it is frigtengly close to the real world numbers. Consider you're a multi-bilionaire and you want to put your net worth and a few cents in one cubic equation. 10&hairsp;000&hairsp;000&hairsp;000 and a 0.01 has the same difference in magnitude as the roots for our synthetic case. The difference is large but it's not inconcievable.
+	</p>
+	</div>
+
+	<h2>Round 3</h2>
+	<p>
+And what about 1e-9, 2, and 3e9?
+	</p>
+	<canvas id="interval_3" width=608 height=84></canvas>
+	<div id="button_3">
+	<br>
+	<button type="button" onclick="reveal(3)">Reveal the truth</button>
+	</div>
+	<div id="the_truth_3" style="display:none;">
+	<p>
+The error is much-much larger than the smallest root value. It's even larger than the second smallest root value. Essentially, what we got as the output is more noise than the values we're expecting to compute.
+	</p>
+	<p>
+Note that the computation is still correct. Within, of course, some margin of error. It's only the scale of this margin that makes the computation useless.
+	</p>
+	</div>
+	<h2>Meet the <span id="index_rational_bounds">rational bounds</span></h2>
+	<p>
+It's not the error per se that is bad. Error is omnipresent. Every measuring device has its error, every 3D printer and every milling machine has its maximal precision. The error is fine.
+	</p>
+	<p>
+It's only the unpredictability that makes it unpleasant.
+	</p>
+	<p>
+People address errors in multiple ways. In metrology, a measured value is supplemented with its absolute error. You don't say that the temperature outside is 10&deg;, you say it's 10&deg;&hairsp;&plusmn;&hairsp;0.5&deg;. This might seem redundant since this is a small error for the weather outside, but in some other context, this very error might become significant. If you're measuring body temperature, a 1-degree difference is enough to tell a sick person from a perfectly healthy one. You can not afford a whole 1-degree error in this scenario.
+	</p>
+	<p>
+If you have this input error written down, you can pull it through your computation to see if the resulting error is still tolerable. To do that, you need to exchange your measured numbers for intervals. A number with error becomes an interval: 10&deg;&hairsp;&plusmn;&hairsp;0.5&deg; becomes [9.5, 10.5]&deg;.
+	</p>
+	<p>
+You can sum these intervals just as you add numbers:
+	</p>
+<canvas id="interval_4" width=608 height=84></canvas>
+	<p class="big">
++
+	</p>
+<canvas id="interval_5" width=608 height=84></canvas>
+	<p class="big">
+=
+	</p>
+<canvas id="interval_6" width=608 height=84></canvas>
+	<p>
+You can multiply them as well.
+	</p>
+<canvas id="interval_7" width=608 height=84></canvas>
+	<p class="big">
+&times;
+	</p>
+<canvas id="interval_8" width=608 height=84></canvas>
+	<p class="big">
+=
+	</p>
+<canvas id="interval_9" width=608 height=84></canvas>
+	<p>
+So with intervals, you can accommodate the input error. You can drag it through the computation and see how it plays with other values with their own error. In the end, you will have your computed value within some interval and the size of this interval will indicate the output error. But what about the error of the computation itself?
+	</p>
+	<p>
+A computational error occurs when we can't store the operation result in the same types we keep our operands in and we're forced to throw some data away. Let's say we have Python-style “unlimited” length integers. This means that if our computation only consists of addition, subtraction, and multiplication, we would never face any computational error.
+	</p>
+	<p>
+Of course, with division, things get a little bit different. E. g. we can't store <nobr>16&hairsp;&frac34;</nobr> in integers so we have to truncate it into 16. In this case, the whole fractional part becomes our error.
+	</p>
+	<p>
+We can use pairs of integers to represent rational numbers. This will solve the division issue. However, this type of rational number, while does not accumulate errors, accumulates digits. The more digits it has, the slower the computation goes. At some point, it may simply become impractically slow. Just like with the uncontrollable error, uncontrollable size becomes an issue.
+	</p>
+	<p>
+We want a compromise. Some entity that grows error controllably yet still operates in constant speed. And we can get it, for example, by merging two ideas: intervals and rational numbers together.
+	</p>
+	<p>
+Let's say, we want to write a number as an interval of its tenths. We can do that most intuitively by throwing away all the digits after the first one.
+	</p>
+	<table><tr>
+	<td class="n"><div id="float_lb"></div></td>
+	<td class="n">&leq;</td>
+	<td><input type="text" id="float_" value="1.23" style="margin: 2pt 6pt 2pt 6pt; width: 48pt;" oninput="float_changed();"></td>
+	<td class="n">&leq;</td>
+	<td class="n"><div id="float_ub"></div></td>
+	</tr></table>
+	<p>
+Just like we can do this with decimal fraction, we can do this with any rational number. We can put it between a pair of rational numbers made by finite integers. In this case, every integer is in the range [0, 1, ..., 99].
+	</p>
+	<table><tr>
+	<td class="un"><div id="rational_lb_n"></div></td>
+	<td class="n" rowspan="2">&leq;</td>
+	<td style="border-bottom: 1px solid black;"><input type="text" id="rational_n" value="123" oninput="rational_changed();"></td>
+	<td class="n" rowspan="2">&leq;</td>
+	<td class="un"><div id="rational_ub_n"></div></td>
+	</tr><tr>
+	<td class="n"><div id="rational_lb_d"></div></td>
+	<td><input type="text" id="rational_d" value="100" oninput="rational_changed();"></td>
+	<td class="n"><div id="rational_ub_d"></div></td>
+	</tr></table>
+	<p>
+Ok, this is not entirely true. If the number is greater than 99, then we can't really store it in our tiny rationals but we can say that it's larger than 99 by assigning the 0 divisor to its upper bound. Of course, it's just a dirty hack but let's leave it like that.
+	</p>
+	<p>
+Now if we want to accommodate both input error and computational error, all we have to do is to represent an input interval in its finite rational numbers. A finite rational lower bound of this interval and a finite rational upper bound of the same interval.
+	</p>
+	<table><tr>
+	<td class="un"><div id="interval_lb_n"></div></td>
+	<td class="n" rowspan="2">&leq;</td>
+	<td style="border-bottom: 1px solid black;"><input type="text" id="interval_1_n" value="123" oninput="interval_changed(1);"></td>
+	<td class="n" rowspan="2">&leq;</td>
+	<td style="border-bottom: 1px solid black;"><input type="text" id="interval_2_n" value="124" oninput="interval_changed(2);"></td>
+	<td class="n" rowspan="2">&leq;</td>
+	<td class="un"><div id="interval_ub_n"></div></td>
+	</tr><tr>
+	<td class="n"><div id="interval_lb_d"></div></td>
+	<td><input type="text" id="interval_1_d" value="100" oninput="interval_changed(1);"></td>
+	<td><input type="text" id="interval_2_d" value="100" oninput="interval_changed(2);"></td>
+	<td class="n"><div id="interval_ub_d"></div></td>
+	</tr></table>
+	<p>
+This entity — a pair of finite rational bounds, represents a real number along with both its input error and representational error. It also grows computational error explicitly while the size of the entity remains constant.
+	</p>
+	<p>
+The implementation example is <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/rational_bounds/sketch_in_cpp">available on GitHub</a>. Please note that it's just a proof of concept and not the best possible solution in terms of neither error minimization nor speed.
+	</p>
+
+	<h2>Conclusion</h2>
+	<p>
+The computational error may become a problem at the least appropriate moment. Both rational numbers and intervals are well-known alternatives for floating-point numbers when the error becomes an issue.
+	</p>
+	<p>
+Rational bounds, being a chimeric product of both ideas, let you manage both measurement error and computational error in a coherent way without compromising performance all that much.
+	</p>
+	<h2>See also</h2>
+	<p>
+A library for arbitrary size floating-point numbers: <a href="https://bellard.org/libbf/">LibBF Library</a>.
+	</p>
+	<p>
+Implementations of <a href="https://en.wikipedia.org/wiki/Fixed-point_arithmetic">fixed-point</a> numbers <a href="https://gcc.gnu.org/onlinedocs/gcc/Fixed-Point.html">in C</a> and <a href="https://www.adaic.org/resources/add_content/standards/05rm/html/RM-3-5-9.html">in Ada</a>.
+	</p>
+	<p>
+On interval arithmetic: <a href="https://en.wikipedia.org/wiki/Interval_arithmetic">https://en.wikipedia.org/wiki/Interval_arithmetic</a>.
+	</p>
+	<p>
+On universal numbers and Posits in particular: <a href="https://en.wikipedia.org/wiki/Unum_(number_format)">https://en.wikipedia.org/wiki/Unum_(number_format)</a>.
+	</p>
+	<p>
+On surreal numbers: <a href="https://en.wikipedia.org/wiki/Surreal_number">https://en.wikipedia.org/wiki/Surreal_number</a>.
+	</p>
+
+	<script language="JavaScript">
+	init_slider(1, -12, +12, -4, +4, "e%x", function(lb, ub) {});
+	init_slider(2, -12, +12, -4, +4, "e%x", function(lb, ub) {});
+	init_slider(3, -12, +12, -4, +4, "e%x", function(lb, ub) {});
+
+	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
+
+	init_slider(4, 0, 10, 3, 4, "%x", function(lb, ub) {
+		slider_lb[6] = slider_lb[4] + slider_lb[5];
+		slider_ub[6] = slider_ub[4] + slider_ub[5];
+		draw_slider(6);
+	});
+	init_slider(5, 0, 10, 5, 8, "%x", function(lb, ub) {
+		slider_lb[6] = slider_lb[4] + slider_lb[5];
+		slider_ub[6] = slider_ub[4] + slider_ub[5];
+		draw_slider(6);
+	});
+	init_slider(6, 0, 20, 8, 12, "%x", function(lb, ub) {
+		slider_lb[5] = slider_lb[6] - slider_lb[4];
+		slider_ub[5] = slider_ub[6] - slider_ub[4];
+		draw_slider(5);
+	});
+
+	init_slider(7, 0, 10, 3, 4, "%x", function(lb, ub) {
+		slider_lb[9] = slider_lb[7] * slider_lb[8];
+		slider_ub[9] = slider_ub[7] * slider_ub[8];
+		draw_slider(9);
+	});
+	init_slider(8, 0, 10, 5, 8, "%x", function(lb, ub) {
+		slider_lb[9] = slider_lb[7] * slider_lb[8];
+		slider_ub[9] = slider_ub[7] * slider_ub[8];
+		draw_slider(9);
+	});
+	init_slider(9, 0, 100, 15, 32, "%x", function(lb, ub) {
+		slider_lb[8] = slider_lb[9] / slider_lb[7];
+		slider_ub[8] = slider_ub[9] / slider_ub[7];
+		if(slider_lb[8] > slider_ub[8]) {
+			const mid = (slider_lb[8] + slider_ub[8]) / 2.;
+			slider_lb[8] = mid;
+			slider_ub[8] = mid;
+			slider_lb[9] = slider_lb[7] * slider_lb[8];
+			slider_ub[9] = slider_ub[7] * slider_ub[8];
+			draw_slider(9);
+		}
+		draw_slider(8);
+	});
+
+	float_changed();
+	rational_changed(1);
+	interval_changed();
+	</script>
+
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html"><img src="favicon.svg"></a> 
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+		+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+</body>
+</html>

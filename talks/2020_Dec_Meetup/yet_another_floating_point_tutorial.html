@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Yet another floating-point tutorial</title>
+    <meta name="description" content="Most of what you should know about floating-point numbers put together in an interactive tutorial with quests and puzzles.">
+    <meta name="keywords" content="mathematics, tutorials">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+    <style>
+body{
+    margin: 0 0 0 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+h1 {
+    padding-top: 36pt;
+    font-size: 24pt;
+    width: 600pt;
+    text-align: left;
+}
+
+h2 {
+    padding-top: 20pt;
+    font-size: 20pt;
+    width: 555pt;
+    text-align: left;
+}
+
+p {
+    line-height: 1.42;
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+}
+
+.comment {
+    font-size: 12pt;
+    text-align:center;
+    font-family: sans-serif;
+    padding-bottom: 24pt;
+}
+
+.formula {
+    font-family: sans-serif;
+    font-size: 15pt;
+    font-style: italic;
+    text-align: center;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+.footer {
+    margin-top: 64pt;
+    padding-bottom: 32pt;
+    font-family: sans-serif;
+    font-size: 16pt;
+    text-align: left;
+}
+
+table {
+    font-family: sans-serif;
+    font-size: 13pt;
+    font-style: italic;
+    width: 505pt;
+    text-align: center;
+}
+
+th {
+    vertical-align: text-top;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+    font-style: bold;
+}
+
+td {
+    vertical-align: text-top;
+    padding-top: 6pt;
+    padding-bottom: 6pt;
+}
+
+li {
+    font-size: 16pt;
+    width: 505pt;
+    text-align: left;
+    padding-bottom: 6pt;
+}
+
+form {
+    margin: 0 0 0 0;
+    padding-top: 12pt;
+    padding-left: 12pt;
+    padding-right: 12pt;
+    padding-bottom: 12pt;
+    font-size: 16pt;
+    text-align: left;
+    width: 505pt;
+    background-color: #eeee99;
+    color: #000;
+}
+
+input[type="text"] {
+    width: 84pt;
+    height: 22pt;
+    font-size: 16pt;
+    text-align: right;
+}
+
+button {
+    width: 32pt;
+    height: 26pt;
+    font-size: 16pt;
+    text-align: center;
+}
+
+select {
+    width: 84pt;
+    height: 26pt;
+    font-size: 16pt;
+    text-align: center;
+}
+
+pre {
+    font-style: normal;
+    text-align: left;
+    font-size: 16pt;
+}
+
+.colored1 {
+    font-weight: bold;
+    color: #d64562;
+}
+
+.colored2 {
+    font-weight: bold;
+    color: #457fd6;
+}
+    </style>
+    <script language="JavaScript">
+const w = 640;
+const h = 200;
+const cell_width = 64;
+const cell_height = 64;
+const cell_y = 20;
+
+const button_border = "#999";
+const button_shadow = "#444";
+
+// integer point
+integer_cell_xs = [20, 20 + 90 + 43, 20 + 90*2 + 43 + 11, 20 + 90*3 + 43 + 11*2, 20 + 90*4 + 43 + 11*3, 20 + 90*5 + 43 + 11*4];
+integer_cell_colors = ["#dba0ac", "#cfa0db", "#cfa0db", "#cfa0db", "#cfa0db", "#cfa0db"];
+integer_cell_bits = [0, 0, 0, 1, 1, 0];
+
+function init_integer() {
+    var integer = document.getElementById("integer");
+    integer_draw();
+
+    integer.addEventListener('mousedown', function(e){
+        var canvas_rect = integer.getBoundingClientRect();
+        var x = e.clientX - canvas_rect.left;
+        var y = e.clientY - canvas_rect.top;
+        for(var i = 0; i < integer_cell_xs.length; ++i) {
+            if (x > integer_cell_xs[i] && x < integer_cell_xs[i] + cell_width && y > cell_y && y < cell_y + cell_height)
+                integer_cell_bits[i] = 1 - integer_cell_bits[i];
+        }
+        integer_draw('down', x, y);
+    }, false);
+
+    integer.addEventListener('mouseup', function(e){
+        var canvas_rect = integer.getBoundingClientRect();
+        var x = e.clientX - canvas_rect.left;
+        var y = e.clientY - canvas_rect.top;
+        integer_draw('up', x, y);
+    }, false);
+}
+
+var cur_integer = 0;
+function integer_draw(mouse_state, x, y) {
+    var integer = document.getElementById("integer");
+    var context = integer.getContext("2d");
+
+    // background
+    context.fillStyle="#eeee99";
+    context.fillRect(0, 0, w, h);
+
+    // cells
+    for(var i = 0; i < integer_cell_xs.length; ++i) {
+        var text_dx = 0;
+        var text_dy = 0;
+        if(mouse_state == "down"
+        && x >= integer_cell_xs[i] && x - integer_cell_xs[i] < cell_width
+        && y >= cell_y && y - cell_y < cell_height) {
+            context.fillStyle = button_shadow;
+            context.fillRect(integer_cell_xs[i] -1 , cell_y - 1, cell_width + 2, cell_height + 2);
+            context.fillStyle = button_border;
+            context.fillRect(integer_cell_xs[i], cell_y, cell_width + 1, cell_height + 2);
+            text_dx = 1;
+            text_dy = 1;
+        } else {
+            context.fillStyle = button_border;
+            context.fillRect(integer_cell_xs[i] -1 , cell_y - 1, cell_width + 1, cell_height + 1);
+            context.fillStyle = button_shadow;
+            context.fillRect(integer_cell_xs[i], cell_y, cell_width + 1, cell_height + 1);
+        }
+        context.fillStyle = integer_cell_colors[i];
+        context.fillRect(integer_cell_xs[i], cell_y, cell_width, cell_height);
+
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.font = "48px sans-serif";
+        context.fillStyle = "#222222";
+        context.fillText(integer_cell_bits[i], text_dx + integer_cell_xs[i] + cell_width / 2.0, text_dx + cell_y + cell_height / 2.0 + 4);
+    }
+
+    // the number
+    var sign = integer_cell_bits[0] ? -1.0 : 1.0;
+    var n = integer_cell_bits[5] + 2*integer_cell_bits[4] + 4*integer_cell_bits[3] + 8*integer_cell_bits[2] + 16*integer_cell_bits[1];
+    if(sign == -1.0)
+      n = 32 - n;
+
+    // comment
+    context.fillStyle = "#914853"
+    context.textAlign = "left";
+    context.textBaseline = "alphabetic";
+    context.font = "20px sans-serif";
+    context.fillText(sign == -1.0 ? "Negative number" : "Positive number", 20, 120);
+    context.fillText("which is " + sign * n + ".", 20, 170);
+
+    context.fillStyle = "#673670";
+    context.fillText("of " + n + " things,", 20, 145);
+    cur_integer = sign * n;
+}
+
+// fixed point
+fixed_cell_xs = [20, 20 + 90 + 43, 20 + 90*2 + 43, 20 + 90*3 + 43, 20 + 90*4 + 43*2, 20 + 90*5 + 43*2];
+fixed_cell_colors = ["#dba0ac", "#cfa0db", "#cfa0db", "#cfa0db", "#cfa0db", "#cfa0db"];
+fixed_cell_bits = [0, 0, 0, 1, 1, 0];
+
+function init_fixed() {
+    var fixed = document.getElementById("fixed");
+    fixed_draw();
+
+    fixed.addEventListener('mousedown', function(e){
+        var canvas_rect = fixed.getBoundingClientRect();
+        var x = e.clientX - canvas_rect.left;
+        var y = e.clientY - canvas_rect.top;
+        for(var i = 0; i < fixed_cell_xs.length; ++i) {
+            if (x > fixed_cell_xs[i] && x < fixed_cell_xs[i] + cell_width && y > cell_y && y < cell_y + cell_height)
+                fixed_cell_bits[i] = 1 - fixed_cell_bits[i];
+        }
+        fixed_draw('down', x, y);
+    }, false);
+
+    fixed.addEventListener('mouseup', function(e){
+        var canvas_rect = fixed.getBoundingClientRect();
+        var x = e.clientX - canvas_rect.left;
+        var y = e.clientY - canvas_rect.top;
+        fixed_draw('up', x, y);
+    }, false);
+}
+
+var cur_fixed = 0.00;
+function fixed_draw(mouse_state, x, y) {
+    var fixed = document.getElementById("fixed");
+    var context = fixed.getContext("2d");
+
+    // background
+    context.fillStyle="#eeee99";
+    context.fillRect(0, 0, w, h);
+
+    // cells
+    for(var i = 0; i < fixed_cell_xs.length; ++i) {
+        var text_dx = 0;
+        var text_dy = 0;
+        if(mouse_state == "down"
+        && x >= fixed_cell_xs[i] && x - fixed_cell_xs[i] < cell_width
+        && y >= cell_y && y - cell_y < cell_height) {
+            context.fillStyle = button_shadow;
+            context.fillRect(fixed_cell_xs[i] -1 , cell_y - 1, cell_width + 2, cell_height + 2);
+            context.fillStyle = button_border;
+            context.fillRect(fixed_cell_xs[i], cell_y, cell_width + 1, cell_height + 2);
+            text_dx = 1;
+            text_dy = 1;
+        } else {
+            context.fillStyle = button_border;
+            context.fillRect(fixed_cell_xs[i] -1 , cell_y - 1, cell_width + 1, cell_height + 1);
+            context.fillStyle = button_shadow;
+            context.fillRect(fixed_cell_xs[i], cell_y, cell_width + 1, cell_height + 1);
+        }
+        context.fillStyle = fixed_cell_colors[i];
+        context.fillRect(fixed_cell_xs[i], cell_y, cell_width, cell_height);
+
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.font = "48px sans-serif";
+        context.fillStyle = "#222222";
+        context.fillText(fixed_cell_bits[i], text_dx + fixed_cell_xs[i] + cell_width / 2.0, text_dy + cell_y + cell_height / 2.0 + 4);
+    }
+
+    // the number
+    var sign = fixed_cell_bits[0] ? -1.0 : 1.0;
+    var n = fixed_cell_bits[5] + 2*fixed_cell_bits[4] + 4*fixed_cell_bits[3] + 8*fixed_cell_bits[2] + 16*fixed_cell_bits[1];
+    if(sign == -1.0)
+        n = 32 - n;
+
+    // explicit point
+    context.fillStyle = "#597052";
+    context.fillText(".", 430, cell_y + cell_height / 2.0 + 4);
+
+    // comment
+    context.fillStyle = "#914853"
+    context.textAlign = "left";
+    context.textBaseline = "alphabetic";
+    context.font = "20px sans-serif";
+    context.fillText(sign == -1.0 ? "Negative number" : "Positive number", 20, 120);
+
+    context.fillStyle = "#673670"
+    context.fillText("of " + n + " quarters,", 20, 145);
+    context.fillText("which is " + sign * (n / 4.0).toFixed(2) + " in real numbers.", 20, 170);
+    cur_fixed = sign * (n / 4.0).toFixed(2);
+}
+
+// floating-point
+floating_cell_xs = [20, 20 + 90 + 43 - 32, 20 + 90*2 + 43 - 32, 20 + 90*3 + 43 - 32, 20 + 90*4 + 43*2, 20 + 90*5 + 43*2];
+floating_cell_colors = ["#dba0ac", "#acdba0", "#acdba0", "#acdba0", "#cfa0db", "#cfa0db"];
+floating_cell_bits = [0, 0, 0, 1, 1, 0];
+
+function init_floating() {
+    var floating = document.getElementById("floating");
+    floating_draw();
+
+    floating.addEventListener('mousedown', function(e){
+        var canvas_rect = floating.getBoundingClientRect();
+        var x = e.clientX - canvas_rect.left;
+        var y = e.clientY - canvas_rect.top;
+        for(var i = 0; i < floating_cell_xs.length; ++i) {
+            if (x > floating_cell_xs[i] && x < floating_cell_xs[i] + cell_width && y > cell_y && y < cell_y + cell_height)
+                floating_cell_bits[i] = 1 - floating_cell_bits[i];
+        }
+        floating_draw('down', x, y);
+    }, false);
+
+    floating.addEventListener('mouseup', function(e){
+        var canvas_rect = floating.getBoundingClientRect();
+        var x = e.clientX - canvas_rect.left;
+        var y = e.clientY - canvas_rect.top;
+        floating_draw('up', x, y);
+    }, false);
+}
+
+var cur_float = 0.;
+function floating_draw(mouse_state, x, y) {
+    var floating = document.getElementById("floating");
+    var context = floating.getContext("2d");
+
+    // background
+    context.fillStyle="#eeee99";
+    context.fillRect(0, 0, w, h);
+
+    // cells
+    for(var i = 0; i < floating_cell_xs.length; ++i) {
+        var text_dx = 0;
+        var text_dy = 0;
+        if(mouse_state == "down"
+        && x >= floating_cell_xs[i] && x - floating_cell_xs[i] < cell_width
+        && y >= cell_y && y - cell_y < cell_height) {
+            context.fillStyle = button_shadow;
+            context.fillRect(floating_cell_xs[i] -1 , cell_y - 1, cell_width + 2, cell_height + 2);
+            context.fillStyle = button_border;
+            context.fillRect(floating_cell_xs[i], cell_y, cell_width + 1, cell_height + 2);
+            text_dx = 1;
+            text_dy = 1;
+        } else {
+            context.fillStyle = button_border;
+            context.fillRect(floating_cell_xs[i] -1 , cell_y - 1, cell_width + 1, cell_height + 1);
+            context.fillStyle = button_shadow;
+            context.fillRect(floating_cell_xs[i], cell_y, cell_width + 1, cell_height + 1);
+        }
+        context.fillStyle = floating_cell_colors[i];
+        context.fillRect(floating_cell_xs[i], cell_y, cell_width, cell_height);
+
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.font = "48px sans-serif";
+        context.fillStyle = "#222222";
+        context.fillText(floating_cell_bits[i], text_dx + floating_cell_xs[i] + cell_width / 2.0, text_dy + cell_y + cell_height / 2.0 + 4);
+    }
+
+    // the number
+    var sign = floating_cell_bits[0] ? -1.0 : 1.0;
+    var e = floating_cell_bits[3] + floating_cell_bits[2] * 2 + floating_cell_bits[1] * 4;
+    var n = floating_cell_bits[5] + floating_cell_bits[4] * 2 + ((e != 0 && e != 7) ? 4 : 0);
+
+    // explicit point
+    if (e != 0 && e != 7) {
+        context.fillStyle = "#673670";
+        context.fillText("1", 420, cell_y + cell_height / 2.0 + 4);
+    }
+
+    // comment
+    context.textAlign = "left";
+    context.textBaseline = "alphabetic";
+    context.font = "20px sans-serif";
+
+    if( e == 7 ) {
+        if ( n == 0 ) {
+            context.fillStyle = "#914853";
+            context.fillText(sign == -1.0 ? "Negative" : "Positive", 20, 120);
+            context.fillStyle = "#673670";
+            context.fillText("infinite number.", 20, 145);
+        } else {
+            context.fillStyle = "#673670";
+            context.fillText("Not a number.", 20, 120);
+        }
+        cur_float = NaN;
+    } else {
+        context.fillStyle = "#914853";
+        context.fillText(sign == -1.0 ? "Negative number" : "Positive number", 20, 120);
+
+        context.fillStyle = "#673670"
+        context.fillText("of " + n, 20, 145);
+        context.fillStyle = "#597052";
+        var measures = "quarters,";
+        if(e == 2)
+            measures = "halves,";
+        if(e == 3)
+            measures = "wholes,";
+        if(e == 4)
+            measures = "pairs,";
+        if(e == 5)
+            measures = "four-packs,";
+        if(e == 6)
+            measures = "eight-packs,";
+        context.fillText(measures, 64, 145);
+
+        context.fillStyle = "#673670"
+        context.fillText("which is " + sign * (n * Math.pow(2, e - 2 - (e > 0 ? 1 : 0))).toFixed(2) + " in real numbers", 20, 170);
+        cur_float = sign * (n * Math.pow(2, e - 2 - (e > 0 ? 1 : 0))).toFixed(2);
+    }
+}
+
+// numeric table: binary, fixed point, floating-point
+const all_6_bit_numbers = [
+    ["000000", "0.00", "0"],
+    ["000001", "0.25", "0.25"],
+    ["000010", "0.50", "0.5"],
+    ["000011", "0.75", "0.75"],
+    ["000100", "1.00", "1"],
+    ["000101", "1.25", "1.25"],
+    ["000110", "1.50", "1.5"],
+    ["000111", "1.75", "1.75"],
+    ["001000", "2.00", "2"],
+    ["001001", "2.25", "2.5"],
+    ["001010", "2.50", "3"],
+    ["001011", "2.75", "3.5"],
+    ["001100", "3.00", "4"],
+    ["001101", "3.25", "5"],
+    ["001110", "3.50", "6"],
+    ["001111", "3.75", "7"],
+    ["010000", "4.00", "8"],
+    ["010001", "4.25", "10"],
+    ["010010", "4.50", "12"],
+    ["010011", "4.75", "14"],
+    ["010100", "5.00", "16"],
+    ["010101", "5.25", "20"],
+    ["010110", "5.50", "24"],
+    ["010111", "5.75", "28"],
+    ["011000", "6.00", "32"],
+    ["011001", "6.25", "40"],
+    ["011010", "6.50", "48"],
+    ["011011", "6.75", "56"],
+    ["011100", "7.00", "positive infinite"],
+    ["011101", "7.25", "not a number"],
+    ["011110", "7.50", "not a number"],
+    ["011111", "7.75", "not a number"],
+    ["100000", "-8.00", "-0"],
+    ["100001", "-7.75", "-0.25"],
+    ["100010", "-7.50", "-0.5"],
+    ["100011", "-7.25", "-0.75"],
+    ["100100", "-7.00", "-1"],
+    ["100101", "-6.75", "-1.25"],
+    ["100110", "-6.50", "-1.5"],
+    ["100111", "-6.25", "-1.75"],
+    ["101000", "-6.00", "-2"],
+    ["101001", "-5.75", "-2.5"],
+    ["101010", "-5.50", "-3"],
+    ["101011", "-5.25", "-3.5"],
+    ["101100", "-5.00", "-4"],
+    ["101101", "-4.75", "-5"],
+    ["101110", "-4.50", "-6"],
+    ["101111", "-4.25", "-7"],
+    ["110000", "-4.00", "-8"],
+    ["110001", "-3.75", "-10"],
+    ["110010", "-3.50", "-12"],
+    ["110011", "-3.25", "-14"],
+    ["110100", "-3.00", "-16"],
+    ["110101", "-2.75", "-20"],
+    ["110110", "-2.50", "-24"],
+    ["110111", "-2.25", "-28"],
+    ["111000", "-2.00", "-32"],
+    ["111001", "-1.75", "-40"],
+    ["111010", "-1.50", "-48"],
+    ["111011", "-1.25", "-56"],
+    ["111100", "-1.00", "negative infinite"],
+    ["111101", "-0.75", "not a number"],
+    ["111110", "-0.50", "not a number"],
+    ["111111", "-0.25", "not a number"]
+];
+
+function fill_all_numbers_table() {
+    var all_numbers_table = document.getElementById("all_numbers_table");
+    all_numbers_table.innerHTML += "<tr><th>Binary</th><th>Fixed point</th><th>Floating-point</th></tr>";
+    for(var i = 0; i < all_6_bit_numbers.length; ++i) {
+        var colored_number = "<b><span style='color: #914853'>" + all_6_bit_numbers[i][0][0] + "</span>";
+        colored_number += "<span style='color: #597052'>" + all_6_bit_numbers[i][0][1] + all_6_bit_numbers[i][0][2] + all_6_bit_numbers[i][0][3] + "</span>";
+        colored_number += "<span style='color: #673670'>" + all_6_bit_numbers[i][0][4] + all_6_bit_numbers[i][0][5] + "</span></b>";
+        all_numbers_table.innerHTML += "<tr><td>" + colored_number + "</td><td>" + all_6_bit_numbers[i][1] + "</td><td>" + all_6_bit_numbers[i][2] + "</td></tr>";
+    }
+}
+
+// "calculator"
+var number_as_string = "0";
+
+function in_6_bit(fpn) {
+    if(isNaN(fpn))
+        return NaN;
+    var min_diff = Number.MAX_VALUE;
+    var best_i = 0;
+    for(var i = 0; i < 28; ++i) {
+        const in_table = parseFloat(all_6_bit_numbers[i][2]);
+        const diff = Math.abs((Math.abs(fpn) - in_table));
+        if(diff < min_diff){
+            min_diff = diff;
+            best_i = i;
+        }
+    }
+    return parseFloat(all_6_bit_numbers[best_i][2]) * Math.sign(fpn);
+}
+
+var instrumental_error = NaN;
+function instrumental_error_fill() {
+    var text1 = document.getElementById("number_as_string");
+    var text2 = document.getElementById("number_in_6_bit");
+    var text3 = document.getElementById("error_in_6_bit");
+
+    text1.value = number_as_string;
+
+    var fpn = parseFloat(number_as_string);
+    if(!isNaN(fpn)) {
+        const fpn_6_bit = in_6_bit(fpn);
+        text2.value = fpn_6_bit;
+        const number_len = number_as_string.split('.').length < 2 ? 0 : number_as_string.split('.')[1].length;
+        const another_number_len = fpn_6_bit.toString().split('.').length < 2 ? 0 : fpn_6_bit.toString().split('.')[1].length;
+        const real_number_len = another_number_len > number_len ? another_number_len : number_len;
+        text3.value = Math.abs(fpn - fpn_6_bit).toFixed(real_number_len);
+        instrumental_error = text3.value;
+    } else {
+        text2.value = "NaN";
+        text3.value = "?";
+    }
+}
+
+
+function number_clear() {
+    number_as_string = "0";
+    instrumental_error_fill();
+}
+
+function number_backspace() {
+    number_as_string = number_as_string.substr(0, number_as_string.length - 1);
+    if(number_as_string.length > 0 && number_as_string[number_as_string.length-1] == '.')   // floating-point
+        number_as_string = number_as_string.substr(0, number_as_string.length - 1);
+    if(number_as_string == "-" || number_as_string.length == 0)
+        number_as_string = "0";
+    instrumental_error_fill();
+}
+
+function number_add(digit) {
+    if(number_as_string == "0")
+        number_as_string = digit;
+    else if(number_as_string == "-0")
+        number_as_string = "-" + digit;
+    else
+        number_as_string += digit;
+    instrumental_error_fill();
+}
+
+function number_invert_sign() {
+    if(number_as_string.length == 0)
+        return;
+    if(number_as_string[0] == '-')
+        number_as_string = number_as_string.substr(1, number_as_string.length - 1);
+    else
+        number_as_string = '-' + number_as_string;
+    instrumental_error_fill();
+}
+
+function number_place_point() {
+    number_as_string = number_as_string.split('.').join('') + '.';
+    instrumental_error_fill();
+}
+
+function number_read() {
+    number_as_string = document.getElementById("number_as_string").value;
+    instrumental_error_fill();
+}
+
+// sum error
+function sum_error_fill() {
+    var a = document.getElementById("sum_a").value;
+    var b = document.getElementById("sum_b").value;
+    var result = Number(a) + Number(b);
+    document.getElementById("sum_result").value = in_6_bit(result);
+    document.getElementById("sum_error").value = result - in_6_bit(result);
+}
+
+// quests and puzzles
+var quests = [1, 0, 0, 0, 0, 0, 0];
+var puzzles = [1, 0, 0];
+
+function check_quest_1() {
+    if(cur_integer != "31"){
+        document.getElementById("reply_quest_1").innerHTML = "That's not <i>31</i>. Please try again.";
+    } else {
+        document.getElementById("reply_quest_1").innerHTML = "Correct! <i>31</i> is the largest number you can represent as a 6-bit signed integer.";
+        document.getElementById("buttons_quest_1").style.display = 'none';
+        quests[1] = 1;
+    }
+}
+
+function check_quest_2() {
+    if(cur_integer != "-32"){
+        document.getElementById("reply_quest_2").innerHTML = "That's not <i>-32</i>. Please try again.";
+    } else {
+        document.getElementById("reply_quest_2").innerHTML = "Yes! Since negative numbers take the higher half of the range, <i>-32</i> comes right after <i>31</i>.";
+        document.getElementById("buttons_quest_2").style.display = 'none';
+        quests[2] = 1;
+    }
+}
+
+function check_puzzle_1() {
+    var guess = document.getElementById("puzzle_1_select").value;
+    if(guess != "18446744071914584320"){
+        if(guess == "0")
+            document.getElementById("reply_puzzle_1").innerHTML = "No. Sometimes overflows are implemented to result in <i>0</i> but not with this particular compiler and processor.";
+        else if(guess == "500000000")
+            document.getElementById("reply_puzzle_1").innerHTML = "I wish! This is the correct answer in any other universe.";
+        else
+            document.getElementById("reply_puzzle_1").innerHTML = "Almost! The result is unsigned though so it can't be negative.";
+    } else {
+        document.getElementById("reply_puzzle_1").innerHTML = "Yes! This particular quirk is actually standardized in C++ language. If all the arguments of an expression can be stored in the native signed integer type without losses, the expression will be promoted to the <i>native signed integer</i> type. And only then converted to the resulting type. This means implicit conversion to a 32-bit integer (see the hint in the comment), and then an explicit one to uint64_t. Integers are not easy!";
+        document.getElementById("buttons_puzzle_1").style.display = 'none';
+        puzzle[1] = 1;
+    }
+}
+
+function check_quest_3() {
+    if(cur_fixed != "-8"){
+        document.getElementById("reply_quest_3").innerHTML = "That's not <i>-8</i>. Please try again.";
+    } else {
+        document.getElementById("reply_quest_3").innerHTML = "Exactly! <i>-8</i> is the least possible number in this notation so, in binary, it comes right after <i>7.75</i> — the greatest possible number.";
+        document.getElementById("buttons_quest_3").style.display = 'none';
+        quests[3] = 1;
+    }
+}
+
+function check_quest_4() {
+    if(cur_float != "1"){
+        document.getElementById("reply_quest_4").innerHTML = "That's not 1. Please try again.";
+    } else {
+        document.getElementById("reply_quest_4").innerHTML = "Right! In our tiny model, <i>1</i> comes from <i>4&times;2<sup>-2</sup></i>. And the <i>4</i> is <i>100</i> in binary. Implicit one and two zeros.";
+        document.getElementById("buttons_quest_4").style.display = 'none';
+        quests[4] = 1;
+    }
+}
+
+function check_quest_5() {
+    if(cur_float != "0.25"){
+        document.getElementById("reply_quest_5").innerHTML = "That's not <i>0.25</i>. Please try again.";
+    } else {
+        document.getElementById("reply_quest_5").innerHTML = "Yes! This is a denormalized number. There is no implicit \"1\" and you can write meaningful digits less than <i>100</i> now.";
+        document.getElementById("buttons_quest_5").style.display = 'none';
+        quests[5] = 1;
+    }
+}
+
+function check_quest_6() {
+    if(cur_float != "2"){
+        document.getElementById("reply_quest_6").innerHTML = "That's not 2. Please try again.";
+    } else {
+        document.getElementById("reply_quest_6").innerHTML = "Sure! It's the same as <i>1</i>, but with incremented exponent. It's <i>4&times;2<sup>-1</sup></i>.";
+        document.getElementById("buttons_quest_6").style.display = 'none';
+        quests[5] = 1;
+    }
+}
+
+function check_puzzle_2() {
+    var guess = document.getElementById("puzzle_2_select").value;
+    if(guess != "It depends"){
+        if(guess == "0")
+            document.getElementById("reply_puzzle_2").innerHTML = "It might be. But the point is, it might be not.";
+        if(guess == "-0")
+            document.getElementById("reply_puzzle_2").innerHTML = "I'm not sure myself if this is possible. Please try again.";
+        if(guess == "1.4013e-45")
+            document.getElementById("reply_puzzle_2").innerHTML = "Sorry. Please try again.";
+        if(guess == "-1.4013e-45")
+            document.getElementById("reply_puzzle_2").innerHTML = "This might be true in some conditions. But it's not guaranteed so no.";
+    } else {
+        document.getElementById("reply_puzzle_2").innerHTML = "Indeed! It depends on the compiler's optimizations. Algebraically, <i>0 - (min_float / 2) = -min_float /2</i>. But strictly computationally, it's <i>0 - (0)</i>";
+        document.getElementById("buttons_puzzle_2").style.display = 'none';
+        puzzle[2] = 1;
+    }
+}
+
+function check_quest_7() {
+    if(instrumental_error != "0.001"){
+        document.getElementById("reply_quest_7").innerHTML = "That's not exactly <i>0.001</i>. Please try again.";
+    } else {
+        document.getElementById("reply_quest_7").innerHTML = "Yes! Since <i>0.001</i> don't fit 6-bit floating-point numbers, you can just add it to any number that does.";
+        document.getElementById("buttons_quest_7").style.display = 'none';
+        quests[7] = 1;
+    }
+}
+
+function check_quest_8() {
+    if(instrumental_error != "1000"){
+        document.getElementById("reply_quest_8").innerHTML = "That's not <i>1000</i>. Please try again.";
+    } else {
+        document.getElementById("reply_quest_8").innerHTML = "Right. Since <i>1000</i> is higher than any 6-bit number but isn't yet infinite, you can just add it to the greatest representable number.";
+        document.getElementById("buttons_quest_8").style.display = 'none';
+        quests[8] = 1;
+    }
+}
+
+function check_puzzle_3() {
+    var guess = document.getElementById("puzzle_3_select").value;
+    if(guess != "8"){
+        if(guess == "0")
+            document.getElementById("reply_puzzle_3").innerHTML = "Definitely not <i>0</i>. Please try again.";
+        if(guess == "2")
+            document.getElementById("reply_puzzle_3").innerHTML = "More than that. Please try again.";
+        if(guess == "4")
+            document.getElementById("reply_puzzle_3").innerHTML = "Even more than that. Please try again.";
+        if(guess == "16")
+            document.getElementById("reply_puzzle_3").innerHTML = "Not all of them, no. Please try again.";
+    } else {
+        document.getElementById("reply_puzzle_3").innerHTML = "Yes! Of course, it's more visible on toy numbers, but even with full sized floating-point numbers, there is still a subset of operations and arguments that is safe.";
+        document.getElementById("buttons_puzzle_3").style.display = 'none';
+        puzzle[3] = 1;
+    }
+}
+
+
+    </script>
+  </head>
+  <body>
+    <center>
+    <h1>
+Yet another floating-point tutorial
+    </h1>
+    <h2>
+Why though?
+    </h2>
+    <p>
+I know, the topic is already covered by excellent tutorials and explanations. To name a few,
+    </p>
+    <ul>
+    <li>
+<a href="https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html">What Every Computer Scientist Should Know About Floating-Point Arithmetic</a>
+    </li>
+    <li>
+<a href="http://blog.reverberate.org/2014/09/what-every-computer-programmer-should.html">Floating-point Demystified</a>
+    </li>
+    <li>
+<a href="http://fabiensanglard.net/floating_point_visually_explained/">Floating-point Visually Explained</a>
+    </li>
+    <li>
+Bruce Dawson's <a href="https://randomascii.wordpress.com/category/floating-point/">blog posts</a>
+    </li>
+    </ul>
+    <p>
+I still think that reexplaining some obscure concepts with different words (and buttons) might help someone understand floating-point numbers better. To do fewer mistakes, to make things faster, to create better software in general.
+    </p>
+    <p>
+So here we are.
+    </p>
+
+    <h2>
+6-bit <span id="index_integer_number">integer number</span>
+    </h2>
+    <p>
+Floating-point numbers were invented to represent real numbers. Like <i>0.5</i> or <i>3.1415926</i>. The ones that can't be represented by integers like <i>1</i> or <i>3</i>. But in fact, computers only do integers.
+    </p>
+    <p>
+And only some finite subset of it. Computers operate with bit tuples, and there are only as many different combinations of bits as <i>2<sup>n</sup></i> where <i>n</i> is the length of a tuple.
+    </p>
+    <p>
+Here's a model of a 6-bit integer number.
+    </p>
+    <canvas id="integer" width=640 height=200></canvas>
+    <script language="JavaScript">
+        init_integer();
+    </script>
+    <p class="comment">
+The number-buttons are clickable.
+    </p>
+    <form>
+        <b>Quest 1.</b> Please make a model from the above show <i>31</i>.
+        <div id="reply_quest_1" style="padding-top:6pt;"></div>
+        <div id="buttons_quest_1" style="text-align:right;">
+            <button type="button" id="button_quest_1" onclick="check_quest_1()" style="width: 108pt;">Check!</button>
+        </div>
+    </form>
+
+    <p>
+Integer numbers are not universally standardized but there are some common conventions. For instance, the most common way to represent negative integers is by using the higher half of the range.
+    </p>
+    <form>
+        <b>Quest 2.</b> Please make a model from the above show <i>-32</i>.
+        <div id="reply_quest_2" style="padding-top:6pt;"></div>
+        <div id="buttons_quest_2" style="text-align:right;">
+            <button type="button" id="button_quest_2" onclick="check_quest_2()" style="width: 108pt;">Check!</button>
+        </div>
+    </form>
+    <p>
+Bitwise, it looks a little odd, but it all makes perfect sense when we see all the range in one picture. Let's pick an even simpler model. The 1-digit decimal number will do.
+    </p>
+    <table>
+    <tr><td><b>Unsigned 1-digit decimal</b></td><td><b>Signed 1-digit decimal<b></td></tr>
+    <tr><td>0</td><td>0</td></tr>
+    <tr><td>1</td><td>1</td></tr>
+    <tr><td>2</td><td>2</td></tr>
+    <tr><td>3</td><td>3</td></tr>
+    <tr><td>4</td><td>4</td></tr>
+    <tr><td>5</td><td>-5</td></tr>
+    <tr><td>6</td><td>-4</td></tr>
+    <tr><td>7</td><td>-3</td></tr>
+    <tr><td>8</td><td>-2</td></tr>
+    <tr><td>9</td><td>-1</td></tr>
+    </table>
+    <p>
+The first half of the range is shared between signed and unsigned types. Then there's a leap back for the signed ones. After that, they diverge by exactly half a range.
+    </p>
+    <p>
+If you take overflows into consideration, it seems natural. Yes, signed numbers overflow at half-range, but unsigned numbers overflow too, only half a range later. It's like two continuous rolls of numbers going along each other.
+    </p>
+    <table>
+    <tr><td><b>Unsigned 1-digit decimal</b></td><td><b>Signed 1-digit decimal<b></td></tr>
+    <tr><td>...</td><td>...</td></tr>
+    <tr><td>9</td><td>-1</td></tr>
+    <tr><td><span class="colored1">0</span></td><td>0</td></tr>
+    <tr><td><span class="colored1">1</span></td><td>1</td></tr>
+    <tr><td><span class="colored1">2</span></td><td>2</td></tr>
+    <tr><td><span class="colored1">3</span></td><td>3</td></tr>
+    <tr><td><span class="colored1">4</span></td><td>4</td></tr>
+    <tr><td><span class="colored1">5</span></td><td><span class="colored2">-5</span></td></tr>
+    <tr><td><span class="colored1">6</span></td><td><span class="colored2">-4</span></td></tr>
+    <tr><td><span class="colored1">7</span></td><td><span class="colored2">-3</span></td></tr>
+    <tr><td><span class="colored1">8</span></td><td><span class="colored2">-2</span></td></tr>
+    <tr><td><span class="colored1">9</span></td><td><span class="colored2">-1</span></td></tr>
+    <tr><td>0</td><td><span class="colored2">0</span></td></tr>
+    <tr><td>1</td><td><span class="colored2">1</span></td></tr>
+    <tr><td>2</td><td><span class="colored2">2</span></td></tr>
+    <tr><td>3</td><td><span class="colored2">3</span></td></tr>
+    <tr><td>4</td><td><span class="colored2">4</span></td></tr>
+    <tr><td>5</td><td>-5</td></tr>
+    <tr><td>...</td><td>...</td></tr>
+    </table>
+
+    <p>
+Please don't write your code expecting this behavior though. Integer overflows are not universally standardized. And even when they are, you'd be better off not exploiting them because it makes code obscure, error-prone, and often non-portable.
+    </p>
+
+    <form>
+        <b>Puzzle 1.</b> What will this C++ program print out?
+        <p>
+This puzzle requires significant C++ knowledge. If you're not familiar with the language, feel free to guess.
+        </p>
+        <table>
+        <tr>
+        <td style="border: 1px solid black;">
+        <pre>
+  // built with Clang 3.8 on Intel Core i7
+  uint16_t a = 50'000;
+  uint16_t b = 50'000;
+  uint64_t c = a*b;
+  std::cout &lt;&lt; c;</pre>
+        </td>
+        </tr>
+        </table>
+        <div id="reply_puzzle_1" style="padding-top:6pt;"></div>
+        <div id="buttons_puzzle_1" style="text-align: right;">
+            <select id="puzzle_1_select" style="width: 250pt;">
+            <option value="0">0</option>
+            <option value="500000000">500000000</option>
+            <option value="-1794967296">-1794967296</option>
+            <option value="18446744071914584320">18446744071914584320</option>
+            </select>
+            <button type="button" id="button_puzzle_1" onclick="check_puzzle_1()" style="width: 108pt;">Check!</button>
+        </div>
+    </form>
+
+    <p>
+Integer numbers may be used to represent some non-integer values. For instance, <i>0.45</i> of a meter is <i>45</i> centimeters. <i>45.6</i> centimeters is <i>456</i> millimeters, and so on.
+    </p>
+    <p class="formula">
+    <br>
+456 mm = 45.6 cm = 0.456 m
+    <br><br>
+    </p>
+    <p>
+It's just a matter of representation. It's all about where to put the decimal point.
+    </p>
+
+    <h2>
+6-bit <span id="index_fixed_point_number">fixed point number</span>
+    </h2>
+    <p>
+With things like price tags or body temperature, we know where the decimal point goes. These things could be manipulated with the decimal point in mind.
+    </p>
+    <p class="formula">
+    <br>
+    $ <b>9.<sup>99</sup></b>
+    <br><br>
+    <b>36.6&deg;C</b>
+    <br><br>
+    </p>
+    <canvas id="fixed" width=640 height=200></canvas>
+    <script language="JavaScript">
+        init_fixed();
+    </script>
+    <p>
+They are still integers, but they are integer number of fractional numbers. In our case, an integer number of quarters.
+    </p>
+    <form>
+        <b>Quest 3.</b> Please make a model from the above show <i>-8</i>.
+        <div id="reply_quest_3" style="padding-top:6pt;"></div>
+        <div id="buttons_quest_3" style="text-align:right;">
+            <button type="button" id="button_quest_3" onclick="check_quest_3()" style="width: 108pt;">Check!</button>
+        </div>
+    </form>
+
+    <p>
+You can add and subtract them like the regular numbers, but you have to introduce more elaborate rules for division and multiplication. And you have to watch for overflows and underflows accordingly.
+    </p>
+
+    <h2>
+6-bit <span id="index_floating_point_number">floating-point number</span>
+    </h2>
+    <p>
+Floating-point numbers are that popular because they work even if you don't know where the decimal point should be or where it will appear after the computation.
+    </p>
+    <p>
+They come from scientific (AKA exponential) notation. With this notation, you can write down both astronomical and subatomic values.
+    </p>
+    <p class="formula">
+    <br>
+    m<sub>Sun</sub>: <b>1.989e+30</b> kg
+    <br><br>
+    m<sub>e</sub>: <b>9.1093897e-31</b> kg
+    <br><br>
+    </p>
+    <p>
+Just like a number in scientific notation, a floating-point number has a sign, some meaningful digits, and an exponent.
+    </p>
+    <canvas id="floating" width=640 height=200></canvas>
+    <script language="JavaScript">
+        init_floating();
+    </script>
+    <p>
+The three major differences are:
+    </p>
+    <ol>
+    <li>
+it's all binary not decimal;
+    </li>
+    <li>
+the exponent value goes before meaningful digits;
+    </li>
+    <li>
+and since its binary, and all the numbers except for <i>0</i> start from "1", you don't have to write down the first "1" most of the time. It will be there implicitly. Saves you a bit.
+    </li>
+    </ol>
+    </p>
+    <form>
+        <b>Quest 4.</b> Please make a model from the above show <i>1</i>.
+        <div id="reply_quest_4" style="padding-top:6pt;"></div>
+        <div id="buttons_quest_4" style="text-align:right;">
+            <button type="button" id="button_quest_4" onclick="check_quest_4()" style="width: 108pt;">Check!</button>
+        </div>
+    </form>
+    <p>
+Only for the very small numbers, when we want our exponent to be smaller than we can afford, we do not imply the "1". In scientific notation, its like writing "0.00123e-45". It's not normal. So we call these numbers <span id="index_subnormal_numbers">subnormal numbers</span> or <span id="index_denormalized_numbers">denormalized numbers</span>.
+    </p>
+    <form>
+        <b>Quest 5.</b> Please make a model from the above show <i>0.25</i>.
+        <div id="reply_quest_5" style="padding-top:6pt;"></div>
+        <div id="buttons_quest_5" style="text-align:right;">
+            <button type="button" id="button_quest_5" onclick="check_quest_5()" style="width: 108pt;">Check!</button>
+        </div>
+    </form>
+    <p>
+Since you're still working with bits, and every number is still just an integer in disguise, you can imagine a floating-point number as an integer number of <i>2<sup>n</sup></i>.
+    </p>
+    <form>
+        <b>Quest 6.</b> Please make a model from the above show <i>2</i>.
+        <div id="reply_quest_6" style="padding-top:6pt;"></div>
+        <div id="buttons_quest_6" style="text-align:right;">
+            <button type="button" id="button_quest_6" onclick="check_quest_6()" style="width: 108pt;">Check!</button>
+        </div>
+    </form>
+   <p>
+Unlike integer numbers, floating-point numbers are <a href="https://en.wikipedia.org/wiki/IEEE_754">standardized</a>, and the standard specifies several useful conventions. The whole range of possible bits consists not only of numbers, but of two distinct zeros, two values for infinitely large values, and a whole subrange of "not a number"s.
+    </p>
+    <br><br>
+
+    <table id="all_numbers_table">
+    </table>
+    <script language="JavaScript">
+        fill_all_numbers_table();
+    </script>
+    <p>
+To understand why do you need special values for infinite numbers, you need to understand floating-point zeros first. They are not actual zeros. They model anything that is absolutely smaller than the smallest representable number. Of course, the may occasionally represent an actual zero, but they very well may be some small numbers instead. And as such, they deserve to retain their signs.
+    </p>
+    <table>
+    <tr>
+    <td style="border: 1px solid black;">
+    <pre>
+  auto min_float
+    = std::numeric_limits&lt;float&gt;::denorm_min();
+  std::cout &lt;&lt; min_float;
+  // prints 1.4013e-45
+
+
+  std::cout &lt;&lt; min_float / 2.f;
+  // prints 0
+
+
+  std::cout &lt;&lt; -min_float / 2.f;
+  // prints -0
+    </pre>
+    </td>
+    </tr>
+    </table>
+    <p>
+The smallest representable number is the smallest denormalized number. One half of it is semantically a number, but pragmatically a zero.
+    </p>
+    <p>
+Denormalized values are not universally available. If you don't want that precision, you can win some performance by turning them off.
+    </p>
+    <p>
+Speaking of performance, some of the compiler optimizations are algebraic. This means that the compiler optimizes floating-point numbers such as if they were real. Usually, it's not a problem. Sometimes it is.
+    </p>
+    <form>
+        <b>Puzzle 2.</b> What will this C++ program print out?
+        <table>
+        <tr>
+        <td style="border: 1px solid black;">
+        <pre>
+  std::cout &lt;&lt; 0 - (min_float / 2.f);
+        </td>
+        </tr>
+        </table>
+        <div id="reply_puzzle_2" style="padding-top:6pt;"></div>
+        <div id="buttons_puzzle_2" style="text-align: right;">
+            <select id="puzzle_2_select" style="width: 250pt;">
+            <option value="-1.4013e-45">-1.4013e-45</option>
+            <option value="-0">-0</option>
+            <option value="0">0</option>
+            <option value="1.4013e-45">1.4013e-45</option>
+            <option value="It depends">It depends</option>
+            </select>
+            <button type="button" id="button_puzzle_2" onclick="check_puzzle_2()" style="width: 108pt;">Check!</button>
+        </div>
+    </form>
+    <p>
+When you divide a non-zero number by a zero, you get an infinite. And just like zeros are not zeros, these are not infinities. These are just numbers that are too big to be represented.
+    </p>
+    <p>
+There are also numbers that can't possibly be represented in this model at all, like square roots of negative numbers. Technically, they are still numbers, but being complex numbers and not real, they don't have the representation. Operations that take numbers as input and can't provide numbers as output return special "<span id="index_not_a_number">not a number</span>" values then.
+    </p>
+
+    <h2>
+<span id="index_representation_error">Representation error</span>
+    </h2>
+    <p>
+Of course, even real numbers are only represented partially. We have only that many bits, that many combinations, and the real number's range is infinite.
+    </p>
+    <p>
+When a number doesn't have the representation, we pick the nearest number that has one instead.
+    </p>
+    <form>
+    <table>
+    <tr>
+    <td align="right">
+    <button type="button" id="button_clear" onclick="number_clear();" >C</button>
+    <button type="button" id="button_backspace" onclick="number_backspace();">&larr;</button>
+    <button type="button" id="button_7" onclick="number_add('7');">7</button>
+    <button type="button" id="button_8" onclick="number_add('8');">8</button>
+    <button type="button" id="button_9" onclick="number_add('9');">9</button>
+    <br>
+    <button type="button" id="button_4" onclick="number_add('4');">4</button>
+    <button type="button" id="button_5" onclick="number_add('5');">5</button>
+    <button type="button" id="button_6" onclick="number_add('6');">6</button>
+    <br>
+    <button type="button" id="button_1" onclick="number_add('1');">1</button>
+    <button type="button" id="button_2" onclick="number_add('2');">2</button>
+    <button type="button" id="button_3" onclick="number_add('3');">3</button>
+    <br>
+    <button type="button" id="button_minus" onclick="number_invert_sign();">-</button>
+    <button type="button" id="button_0" onclick="number_add('0');">0</button>
+    <button type="button" id="button_dot" onclick="number_place_point();">.</button>
+    <br>
+    </td>
+    <td align="right">
+    <label for="number_as_string">Input number: </label><input type="text" id="number_as_string" value="0" onchange="number_read();"><br>
+    <label for="number_in_6_bit">As 6-bit FP: </label><input type="text" id="number_in_6_bit" value="0" readonly><br>
+    <label for="error_in_6_bit">Instrumental error: </label><input type="text" id="error_in_6_bit" value="0" readonly><br>
+    </td>
+    </tr>
+    </table>
+    </form>
+    <script language="JavaScript">
+        instrumental_error_fill();
+    </script>
+    <p>
+The difference between their values is our representation error.
+    </p>
+    <form>
+        <b>Quest 7.</b> Using the thing from the above, please enter a number with the error of exactly <i>0.001</i>.
+        <div id="reply_quest_7" style="padding-top:6pt;"></div>
+        <div id="buttons_quest_7" style="text-align:right;">
+            <button type="button" id="button_quest_7" onclick="check_quest_7()" style="width: 108pt;">Check!</button>
+        </div>
+    </form>
+    <p>
+The common misconception is, since our smallest representable numbers are small, the representation error should be small too. But remember, we are talking about integer numbers of <i>2<sup>n</sup></i>. The greater the <i>n</i>, the greater the possible representation error is.
+    </p>
+    <form>
+        <b>Quest 8.</b> Using the thing from the above, please enter a number with the error of <i>1000</i>.
+        <div id="reply_quest_8" style="padding-top:6pt;"></div>
+        <div id="buttons_quest_8" style="text-align:right;">
+            <button type="button" id="button_quest_8" onclick="check_quest_8()" style="width: 108pt;">Check!</button>
+        </div>
+    </form>
+
+    <h2>
+<span id="index_computational_error">Computational error</span>
+    </h2>
+    <p>
+Representational error is not our worst enemy. The real world data, the values that come from sensors or user input, have their own errors too. And they usually shade the representation error of floating-point numbers.
+    </p>
+    <p>
+However, as we process the data, we introduce computational error, too.
+    </p>
+    <form>
+    <select id="sum_a" onchange="sum_error_fill()">
+        <option value="0.25" selected>0.25</option>
+        <option value="0.5">0.5</option>
+        <option value="2">2</option>
+        <option value="16">16</option>
+    </select>
++
+    <select id="sum_b" onchange="sum_error_fill()">
+        <option value="0.25">0.25</option>
+        <option value="0.5">0.5</option>
+        <option value="2">2</option>
+        <option value="16" selected>16</option>
+    </select>
+    <label for="sum_result"> = </label><input type="text" id="sum_result" value="0.5">
+    <label for="sum_error">, error: </label><input type="text" id="sum_error" value="0">
+    </form>
+    <script language="JavaScript">
+        sum_error_fill();
+    </script>
+
+    <p>
+Computational error is not imminent. If the arguments are close enough exponentially, the operation result may be represented without an error.
+    </p>
+    <form>
+        <b>Puzzle 3.</b> The thing from the above lets you pick 16 variants of 6-bit floats addition. How many of them cause no error?
+        <br>
+        <div id="reply_puzzle_3" style="padding-top:6pt;"></div>
+        <div id="buttons_puzzle_3" style="text-align: right;">
+            <select id="puzzle_3_select" style="width: 250pt;">
+            <option value="0">0</option>
+            <option value="2">2</option>
+            <option value="4">4</option>
+            <option value="8">8</option>
+            <option value="16">16</option>
+            </select>
+            <button type="button" id="button_puzzle_3" onclick="check_puzzle_3()" style="width: 108pt;">Check!</button>
+        </div>
+    </form>
+    <p>
+There is a common belief that comparing two floats exactly is unsafe because of the possible error, but this error is often manageable. For instance, this loop is quite safe (remember, floats are just integer numbers of <i>2<sup>n</sup></i>).
+    </p>
+    <table>
+    <tr>
+    <td style="border: 1px solid black;">
+    <pre>
+  // 16 iterations loop
+  for(auto i = 0.; i != 4; i += 0.25)
+      cout &lt;&lt; i &lt;&lt; ' ';
+    </pre>
+    </td>
+    </tr>
+    </table>
+    <p>
+It might get needlessly tricky to recognize safe from unsafe. For instance, this one isn't safe since <i>0.1</i> is only represented in floating-point model with an error.
+    </p>
+    <table>
+    <tr>
+    <td style="border: 1px solid black;">
+    <pre>
+  // "infinite" loop
+  for(auto i = 0.; i != 4; i += 0.1)
+      cout &lt;&lt; i &lt;&lt; ' ';
+    </pre>
+    </td>
+    </tr>
+    </table>
+    <p>
+What's worse, this error tends to accumulate as the computation goes. Of course, it depends on the algorithm, some are more prone to accumulate error than others.
+    </p>
+    <p>
+If you want to learn more about how to estimate this error, please see <a href="https://wordsandbuttons.online/estimating_floating_point_error_the_easy_way.html">Estimating floating-point error the easy way</a>.
+    </p>
+
+
+    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html"><img src="favicon.svg"></a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+		+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+    </center>
+  </body>
+</html>
