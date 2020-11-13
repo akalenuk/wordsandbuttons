@@ -12,6 +12,9 @@ for file_name in os.listdir(path):
 			if text.find('<meta name="keywords"') == -1:
 				continue
 			tags = text.split('<meta name="keywords"')[1].split('"')[1].split(', ')
+			if len(tags) == 0 or len(tags[0]) == 0:
+				continue
+			
 			print(file_name, tags)
 			tag_line = ' '.join(['<a href="all_'+tag+'.html">#'+tag+'</a>' for tag in tags])
 			text = text.replace('<a href="index.html"><img src="favicon.svg"></a>', tag_line)
