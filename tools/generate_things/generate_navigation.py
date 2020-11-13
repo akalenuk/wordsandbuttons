@@ -7,8 +7,8 @@ keyword_description = {
 'tutorials': 'Tutorials with clickable, draggable, and discoverable things. As brief as possible while as comprehensive as necessary.',
 'demos': 'Clickable explanations of curious things.',
 'quizzes': 'Challenge yourself, learn stuff, and have fun.',
-'mathematics': 'Interactive explanations of mathematical concepts witten for the practicing programmers.',
-'algorithms': 'Playable algorithms.',
+'mathematics': 'Interactive explanations of mathematical concepts written with practicing programmers in mind.',
+'algorithms': 'Playable essays on algorithms.',
 'programming': 'Interactive essays on non-trivial programming ideas and languages.</p><p>By the way, if you prefer books to blogs, <a href="https://wordsandbuttons.online/SYTYKC.pdf">there is a free book</a> that was originally made from this section.'
 }
 
