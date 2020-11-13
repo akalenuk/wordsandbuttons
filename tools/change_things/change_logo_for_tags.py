@@ -19,5 +19,4 @@ for file_name in os.listdir(path):
 			html = open(path + file_name, 'w')
 			html.write(text)
 			html.close()
-			break
 
