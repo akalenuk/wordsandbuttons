@@ -16,7 +16,7 @@ for file_name in os.listdir(path):
 			tag_line = ' '.join(['<a href="all_'+tag+'.html">#'+tag+'</a>' for tag in tags])
 			text = text.replace('<a href="index.html"><img src="favicon.svg"></a>', tag_line)
 			
-			html = open(path + "__" + file_name, 'w')
+			html = open(path + file_name, 'w')
 			html.write(text)
 			html.close()
 			break
