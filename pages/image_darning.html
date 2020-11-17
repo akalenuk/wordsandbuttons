@@ -323,13 +323,13 @@ function load() {
 <span id="index_image_darning">Image darning</span>
 	</h1>
 	<p>
-My father is a historical metrologist. He has been a professional metrologist and a hobbyist historian before retirement. Now, these two things merged. He publishes books and papers on the matter and uses really crappy pictures to illustrate them. The worst picture he had to deal with was, if I'm not mistaken, a photo of a scan of a book page with a picture of a roadsign in it.
+My father is a historical metrologist. He was a professional metrologist and a hobbyist historian before retirement and now he does both. He publishes books and papers on the matter and he uses really crappy pictures to illustrate them. The worst one he had, if I'm not mistaken, was a photo of a book page with a scan of an old newspaper with a roadsign in it.
 	</p>
 	<p>
-I'm trying to help him with this stuff without getting too much involved. So naturally, I write code. I've made <a href="https://github.com/akalenuk/unpager">Unpager</a> — a thing that bends pictures of book pages, straightens roadsigns, and cleans up dirt stains from aged newspapers.
+I'm willing to help him without getting involved too much so, naturally, I write code. I wrote <a href="https://github.com/akalenuk/unpager">Unpager</a> — a thing that bends pictures of book pages, straightens roadsigns, and cleans up dirt stains from old newspapers.
 	</p>
 	<p>
-The latter appeared to be the most demanded feature. I called it darning because of how it works. It is surprisingly potent. With it, you can even erase Russia from the political map of the world. Literally.
+The latter appeared to be the most demanded feature. I called it darning because of how it works. It is surprisingly potent. With it, you can literally erase Russia from the political map of the world.
 	</p>
 	<form>
 	<div style="text-align: center">
@@ -348,7 +348,7 @@ The latter appeared to be the most demanded feature. I called it darning because
 How it works
 	</h2>
 	<p>
-The rectangular space in the selection is filled by interpolating the pixel values on the sides. The <span id="index_inverse_weights_intepolation">inverse-weights interpolation</span> is used. In the general case, a point <i>(x, y)</i> in the rectangular selection of bitmap <i>B</i> bound by <i>(x<sub>0</sub>, y<sub>0</sub>); (x<sub>1</sub>, y<sub>1</sub>)</i> will have each of its channels computed by this formula.
+The selected rectangular is filled using only the pixel values on the rectangular border. The whole magic is in <span id="index_inverse_weights_intepolation">inverse-weights interpolation</span>. In the general case, a point <i>(x, y)</i> in the rectangular selection of bitmap <i>B</i> bound by <i>(x<sub>0</sub>, y<sub>0</sub>); (x<sub>1</sub>, y<sub>1</sub>)</i> will have each of its channels computed by this formula.
 	</p>
 	<table class="formula">
 	<tr>
@@ -382,10 +382,16 @@ k(x - x<sub>0</sub>) + k(x<sub>1</sub> - x) + k(y - y<sub>0</sub>) + k(y<sub>1</
 	</table>
 
 	<p>
-But that's when all the borderlines of the rectangle are still in the bitmap. But what if we have a stain in the corner? We don't want the stain color to get into the mix.
+To fill a rectanlge, you have to compute every pixel inside using this formula. Since only the border contributes, the noise on the border gets prolongated inside the rectangular and, if you look very closely, you'll see that the noise in the rectangular consists of vertical and horisontal lines. It looks a bit like the image was darned by a thread and a needle.
 	</p>
 	<p>
-Luckily, with weight intepolation, it's dead simple. If you don't want some particular <i>B(x<sub>j</sub>, y<sub>i</sub>)</i> influence your result, simply assign its coefficient <i>k(z)</i> to <i>0</i>. For instante, for the top left corner, the formula will reduce to:
+This is the general case meaning that the rectangular has all the border inside the bitmap. But what if we have a stain somewhere in the corner? Then only the two sides of the rectangular should contribute.
+	</p>
+	<p>
+Luckily, with weight intepolation, it's trivial. If you don't want some particular <i>B(x<sub>j</sub>, y<sub>i</sub>)</i> to influence your result, assign its coefficient <i>k(z)</i> to <i>0</i>. You don't want it — you throw it away, and that's it.
+	</p>
+	<p>
+For instante, for the top left corner, the formula will reduce to:
 	</p>
 	<table class="formula">
 	<tr>
@@ -403,7 +409,7 @@ k(x<sub>1</sub> - x) + k(y<sub>1</sub> - y)
 	</tr>
 	</table>
 	<p>
-And that's it. In JavaScript, <a href="https://github.com/akalenuk/wordsandbuttons/blob/fdfefbbae5a5b8885ffe02855eb5578012fcff7c/pages/image_darning.html#L190">it's only 27 lines</a>.
+It's as simple as that. The whole algorithm is only <a href="https://github.com/akalenuk/wordsandbuttons/blob/fdfefbbae5a5b8885ffe02855eb5578012fcff7c/pages/image_darning.html#L190">27 lines in JavaScript</a>.
 	</p>
 
 	<script language="JavaScript">
