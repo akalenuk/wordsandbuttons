@@ -2,7 +2,7 @@
 <head>
 	<meta charset="utf-8">
 	<title>Image darning</title>
-	<meta name="description" content="A simple image processing algorithm that cleans up dirt stains from aged newspapers. I called it “darning” because of how it works.">
+	<meta name="description" content="A simple image processing algorithm that cleans up dirt stains from old newspapers. I called it “darning” because of how it works.">
 	<meta name="keywords" content="mathematics, algorithms, demos">
 	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
 	<style>
@@ -348,7 +348,7 @@ The latter appeared to be the most demanded feature. I called it darning because
 How it works
 	</h2>
 	<p>
-The selected rectangular is filled using only the pixel values on the rectangular border. The whole magic is in <span id="index_inverse_weights_intepolation">inverse-weights interpolation</span>. In the general case, a point <i>(x, y)</i> in the rectangular selection of bitmap <i>B</i> bound by <i>(x<sub>0</sub>, y<sub>0</sub>); (x<sub>1</sub>, y<sub>1</sub>)</i> will have each of its channels computed by this formula.
+The selected rectangle is filled using only the pixel values on its border. The whole magic is in <span id="index_inverse_weights_intepolation">inverse-weights interpolation</span>. In the general case, a point <i>(x, y)</i> in the rectangular selection of bitmap <i>B</i> bound by <i>(x<sub>0</sub>, y<sub>0</sub>); (x<sub>1</sub>, y<sub>1</sub>)</i> should have each of its channels computed by this formula.
 	</p>
 	<table class="formula">
 	<tr>
@@ -382,16 +382,16 @@ k(x - x<sub>0</sub>) + k(x<sub>1</sub> - x) + k(y - y<sub>0</sub>) + k(y<sub>1</
 	</table>
 
 	<p>
-To fill a rectanlge, you have to compute every pixel inside using this formula. Since only the border contributes, the noise on the border gets prolongated inside the rectangular and, if you look very closely, you'll see that the noise in the rectangular consists of vertical and horisontal lines. It looks a bit like the image was darned by a thread and a needle.
+To fill the rectangle, you compute every pixel inside one by one. Since only the border contributes, the noise on the border gets dragged inside the rectangle and, if you look very closely, you'll see that the noise inside now consists of vertical and horizontal lines. It looks a bit like the image was darned by a thread and a needle.
 	</p>
 	<p>
-This is the general case meaning that the rectangular has all the border inside the bitmap. But what if we have a stain somewhere in the corner? Then only the two sides of the rectangular should contribute.
+This is, of course, in general case meaning that the rectangle has all the border inside the bitmap. But what if we have a stain somewhere in the corner? Then only the two sides of the rectangle should contribute.
 	</p>
 	<p>
-Luckily, with weight intepolation, it's trivial. If you don't want some particular <i>B(x<sub>j</sub>, y<sub>i</sub>)</i> to influence your result, assign its coefficient <i>k(z)</i> to <i>0</i>. You don't want it — you throw it away, and that's it.
+Luckily, with weight interpolation, it's trivial. If you don't want some particular <i>B(x<sub>j</sub>, y<sub>i</sub>)</i> to influence your result, assign its coefficient <i>k(z)</i> to <i>0</i>. You don't want it — you throw it away, and that's it.
 	</p>
 	<p>
-For instante, for the top left corner, the formula will reduce to:
+For instance, for the top left corner, the formula will reduce to:
 	</p>
 	<table class="formula">
 	<tr>
