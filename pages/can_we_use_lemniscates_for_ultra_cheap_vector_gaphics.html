@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<title>Can we use lemniscates for ultra-cheap vector graphics?</title>
-	<meta name="description" content="This depicts an old idea of using multifocal lemniscates to draw arbitrary curves. In somewhat limited scope, this may be indeed an economical alternative to splines.">
+	<meta name="description" content="This depicts an old idea of using multifocal lemniscates to draw arbitrary shapes. In some applications, this may be indeed an economical alternative to splines.">
 	<meta name="keywords" content="mathematics, demos">
 	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
 	<style>
@@ -478,7 +478,7 @@ function select_image() {
 	<h1>
 Can we use lemniscates for ultra-cheap vector graphics?
 	</h1>
-	<p>
+	<p style="font-style: italic;">
 TL&DR: Yes, but you get what you pay for.
 	</p>
 	<p>
@@ -488,14 +488,14 @@ I stole this idea from an old Russian book named Notable Curves by Alekséi Mark
 In that book, there was a casual mention that it is mathematically proven that the multifocal <a href="https://en.wikipedia.org/wiki/Lemniscate">lemniscate</a> can approximate any possible curve with some given error. There were also some promising but frankly unrealistic pictures of a man's face and a bird, both produced by lemniscates with a handful of foci.
 	</p>
 	<p>
-Which got me thinking. SVG is relatively cheap memory-wise but this looks even cheaper. For instance, to approximate just a piece of a curve with the <a href="https://en.wikipedia.org/wiki/B%C3%A9zier_curve">Bézier cubic</a>, you already have to store 4 points somewhere. With the lemniscate, you can approximate a whole face or a bird with only 6 or 7 points. Isn't it wonderful! Almost too good to be true, right?
+Which got me thinking. SVG is relatively cheap memory-wise but this looks even cheaper. For instance, to approximate just a piece of a curve with the <a href="https://en.wikipedia.org/wiki/B%C3%A9zier_curve">Bézier cubic</a>, you already have to store 4 points somewhere. With the lemniscate, you can approximate a whole face or a bird with only 6 or 7 points. Isn't it wonderful?! Almost too good to be true, right?
 	</p>
 
 	<h2>
 <span id="index_multifocal_lemniscate">Multifocal lemniscate</span>
 	</h2>
 	<p>
-<span id="index_lemniscate">Lemniscate</span> is an isoline of a product of distances to the foci. So you set some <span class="formula">n</span> points <span class="formula">x<sub>i</sub></span> you call foci, then you build a function that for any point <span class="formula">x</span>, computes all the distances to the foci, and multiply them together. Where your function meets some number — there is your curve.
+A <span id="index_lemniscate">lemniscate</span> is an isoline of a product of distances to the foci. First, you set some <span class="formula">n</span> points <span class="formula">x<sub>i</sub></span> you call foci, then you build a function that for any point <span class="formula">x</span>, computes all the distances to the foci, and multiply them together. Where your function meets some number — there is your curve.
 	</p>
 	<p class="formula">
 |<b>x</b> - <b>x</b><sub>1</sub>| &times; |<b>x</b> - <b>x</b><sub>2</sub>| &times; ... &times; |<b>x</b> - <b>x</b><sub>n</sub>| = &rho;
@@ -543,16 +543,16 @@ You can export your image into a set of points, and reimport it back.
 	<textarea id="radius_and_points" rows=3>
 	</textarea>
 	<p>
-Ok, so it's not that easy to make it draw exactly what you want it to. It is mathematically possible to draw everything, sure, but pragmatically it only makes sense to draw some simple curvy shapes with this tool. With a limited set of points, it's not very powerful, and with adding more points, it gets less and less user-friendly.
+Ok, so it's not that easy to make it draw exactly what you want it to. It is mathematically possible to draw everything, sure, but pragmatically it only makes sense to draw some simple curvy shapes with this tool. With a limited set of points, it's not very powerful, and with adding more and more points, it gets less and less user-friendly.
 	</p>
 	<p>
 But what about image tracing? Shouldn't it automagically turn poorly pixelated pictures into nice and smooth vector images?
 	</p>
 	<p>
-Well, yes and no. With lemniscate approximating a pixel image, the error function is not very friendly to the gradient descent either. There are some seemingly random platoes and points masquerading as local minimums that make the minimizer stall every now and then. I tried a few approaches but apparently, a simple random crawler works the best.
+Well, yes and no. With lemniscate approximating a pixel image, the error function is not very friendly to the <a href="https://en.wikipedia.org/wiki/Gradient_descent">gradient descent</a> method either. There are some seemingly random platoes and points masquerading as local minimums that make the minimizer stall every now and then. I tried a few approaches but apparently, a simple random crawler works the best.
 	</p>
 	<p>
-And this best is still not very good.
+And this “the best” is still not very good.
 	</p>
 	<p>
 Here's my tracer. It minimizes the error function one small step at a time, making a vector image closer to the pixelated original. If you're not afraid of putting your browser into a coma, you can ask for drastically more iterations or raise the step size.
