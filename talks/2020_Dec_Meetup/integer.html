@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Integer number</title>
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+	<style>
+body{
+	margin: 0 0 0 0;
+}
+
+a{
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 32pt;
+	font-size: 24pt;
+	width: 600pt;
+}
+
+h2 {
+	padding-top: 16pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+.comment {
+	font-size: 12pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 15pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+.footer {
+	margin-top: 64pt;
+	padding-bottom: 32pt;
+	font-family: sans-serif;
+	font-size: 16pt;
+	text-align: left;
+}
+
+table {
+	font-family: sans-serif;
+	font-size: 13pt;
+	font-style: italic;
+	width: 505pt;
+	text-align: center;
+}
+
+th {
+	vertical-align: text-top;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+	font-style: bold;
+}
+
+td {
+	vertical-align: text-top;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+li {
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+	padding-bottom: 6pt;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+}
+
+input[type="text"] {
+	width: 32pt;
+	height: 22pt;
+	font-size: 16pt;
+	text-align: center;
+}
+
+button {
+	width: 32pt;
+	height: 26pt;
+	font-size: 16pt;
+	text-align: center;
+}
+
+pre {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 505pt;
+}
+
+u {
+	border-bottom: 1px dotted #000;
+	text-decoration: none;
+	cursor: pointer;
+}
+	</style>
+	<script language="JavaScript">
+const w = 640;
+const h = 200;	
+const cell_width = 64;	
+const cell_height = 64;
+const cell_y = 20;
+	
+// integer point
+var integer_cell_xs = [];
+for(var i = 0; i < 6; ++i)
+	integer_cell_xs.push(38 + 100*i);
+const integer_cell_colors = ["#cfa0db", "#cfa0db", "#cfa0db", "#cfa0db", "#cfa0db", "#cfa0db"];
+var integer_cell_bits = [0, 0, 0, 1, 1, 0];
+
+function init_integer() {
+	var integer = document.getElementById("integer");
+	integer_draw();
+	
+	integer.addEventListener('click', function(e){
+		var canvas_rect = integer.getBoundingClientRect();
+		var x = e.clientX - canvas_rect.left;
+		var y = e.clientY - canvas_rect.top;
+		for(var i = 0; i < integer_cell_xs.length; ++i) {
+			if (x > integer_cell_xs[i] && x < integer_cell_xs[i] + cell_width && y > cell_y && y < cell_y + cell_height)
+				integer_cell_bits[i] = 1 - integer_cell_bits[i];
+		}
+		integer_draw();
+	}, false);
+}
+
+function integer_draw() {
+	var integer = document.getElementById("integer");
+	var integer_context = integer.getContext("2d");
+
+	// background
+	integer_context.fillStyle="#dbd5a0";
+	integer_context.fillRect(0, 0, w, h);
+	
+	// cells
+	for(var i = 0; i < integer_cell_xs.length; ++i) {
+		integer_context.fillStyle = integer_cell_colors[i];
+		integer_context.fillRect(integer_cell_xs[i], cell_y, cell_width, cell_height);
+		
+		integer_context.textAlign = "center";
+		integer_context.textBaseline = "middle"; 
+		integer_context.font = "48px sans-serif";
+		integer_context.fillStyle = "#222222";
+		integer_context.fillText(integer_cell_bits[i], integer_cell_xs[i] + cell_width / 2.0, cell_y + cell_height / 2.0 + 4);
+	}
+	
+	// the number
+	var n = integer_cell_bits[5] + 2*integer_cell_bits[4] + 4*integer_cell_bits[3] + 8*integer_cell_bits[2] + 16*integer_cell_bits[1] + 32*integer_cell_bits[0];
+
+	// comment
+	integer_context.textAlign = "left";
+	integer_context.textBaseline = "alphabetic"; 
+	integer_context.font = "20px sans-serif";
+	integer_context.fillStyle = "#673670";
+	var bits = [];
+	for(i = 0; i < 6; ++i) {
+		if (integer_cell_bits[i] == 1)
+			bits.push(String(Math.pow(2, 5-i)));
+	}
+	if(n == 0)
+		integer_context.fillText("0", 20, 120);
+	else
+		integer_context.fillText(bits.join(" + ") + " = " + n, 20, 120);
+}
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
+6-bit integer number
+	</h1>
+	<p class="formula">
+<br>
+1000 mm = 100 cm = 1 m
+<br><br>
+	</p>
+	<canvas id="integer" width=640 height=200></canvas>
+	<script language="JavaScript">
+		init_integer();
+	</script>
+	<p>
+16-bit: 65&hairsp;535
+	</p>
+	<p>
+32-bit: 4&hairsp;294&hairsp;967&hairsp;295 — we can tell a point on the equator with 1 cm presision.
+	</p>
+	<p>
+64-bit: 18&hairsp;446&hairsp;744&hairsp;073&hairsp;709&hairsp;551&hairsp;615 — we can make a quadratic equation from the previous number.
+	</p>
+
+	</center>
+</body>
+</html>
