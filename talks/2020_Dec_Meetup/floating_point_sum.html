@@ -134,8 +134,8 @@ p.big {
 	</style>
 	<script language="JavaScript">
 const w = 640;
-const h = 200;	
-const cell_width = 64;	
+const h = 138;
+const cell_width = 64;
 const cell_height = 64;
 const cell_y = 20;
 
@@ -162,22 +162,22 @@ function init_floating(n) {
 
 function floating_draw(n) {
 	var floating = document.getElementById("floating_" + String(n));
-	var floating_context = floating.getContext("2d");
+	var context = floating.getContext("2d");
 
 	// background
-	floating_context.fillStyle="#dbd5a0";
-	floating_context.fillRect(0, 0, w, h);
+	context.fillStyle="#dbd5a0";
+	context.fillRect(0, 0, w, h);
 	
 	// cells
 	for(var i = 0; i < floating_cell_xs.length; ++i) {
-		floating_context.fillStyle = floating_cell_colors[i];
-		floating_context.fillRect(floating_cell_xs[i], cell_y, cell_width, cell_height);
+		context.fillStyle = floating_cell_colors[i];
+		context.fillRect(floating_cell_xs[i], cell_y, cell_width, cell_height);
 		
-		floating_context.textAlign = "center";
-		floating_context.textBaseline = "middle"; 
-		floating_context.font = "48px sans-serif";
-		floating_context.fillStyle = "#222222";
-		floating_context.fillText(floating_cell_bits[n][i], floating_cell_xs[i] + cell_width / 2.0, cell_y + cell_height / 2.0 + 4);
+		context.textAlign = "center";
+		context.textBaseline = "middle"; 
+		context.font = "48px sans-serif";
+		context.fillStyle = "#222222";
+		context.fillText(floating_cell_bits[n][i], floating_cell_xs[i] + cell_width / 2.0, cell_y + cell_height / 2.0 + 4);
 	}
 	
 	// the number
@@ -187,32 +187,38 @@ function floating_draw(n) {
 	
 	// explicit point
 	if (e != 0 && e != 7) {
-		floating_context.fillStyle = "#673670";
-		floating_context.fillText("1", 420, cell_y + cell_height / 2.0 + 4);
+		context.fillStyle = "#673670";
+		context.fillText("1", 420, cell_y + cell_height / 2.0 + 4);
 	}
 	
 	// comment
-	floating_context.textAlign = "left";
-	floating_context.textBaseline = "alphabetic"; 
-	floating_context.font = "20px sans-serif";
-			
+	context.textAlign = "left";
+	context.textBaseline = "alphabetic"; 
+	context.font = "20px sans-serif";
+
 	if( e == 7 ) {
 		if ( n == 0 ) {
-			floating_context.fillStyle = "#914853";
-			floating_context.fillText(sign == -1.0 ? "Negative" : "Positive", 20, 120);
-			floating_context.fillStyle = "#673670";
-			floating_context.fillText("infinite number.", 20, 145);
+			context.fillStyle = "#914853";
+			const text = sign == -1.0 ? "Negative" : "Positive";
+			const width = context.measureText(text).width;
+			context.fillText(text, 20, 120);
+			context.fillStyle = "#673670";
+			context.fillText("infinite number.", 20 + width, 120);
 		} else {
-			floating_context.fillStyle = "#673670";
-			floating_context.fillText("Not a number.", 20, 120);
+			context.fillStyle = "#673670";
+			context.fillText("Not a number.", 20, 120);
 		}
 	} else {
-		floating_context.fillStyle = "#914853";
-		floating_context.fillText(sign == -1.0 ? "Negative number" : "Positive number", 20, 120);
-		
-		floating_context.fillStyle = "#673670"
-		floating_context.fillText("of " + n, 20, 145);
-		floating_context.fillStyle = "#597052";
+		context.fillStyle = "#914853";
+		const text1 = (sign == -1.0) ? "Negative number"  : "Positive number";
+		const width1 = context.measureText(text1).width;
+		context.fillText(text1, 20, 120);
+
+		context.fillStyle = "#673670"
+		const text2 = " of " + n + " ";
+		const width2 = context.measureText(text2).width;
+		context.fillText(text2, 20 + width1, 120);
+		context.fillStyle = "#597052";
 		var measures = "quarters,";
 		if(e == 2)
 			measures = "halves,";
@@ -224,10 +230,13 @@ function floating_draw(n) {
 			measures = "four-packs,";
 		if(e == 6)
 			measures = "eight-packs,";
-		floating_context.fillText(measures, 64, 145);
+		const text3 = measures;
+		const width3 = context.measureText(text3).width;
+		context.fillText(text3, 20 + width1 + width2, 120);
 		
-		floating_context.fillStyle = "#673670"
-		floating_context.fillText("which is " + sign * (n * Math.pow(2, e - 2 - (e > 0 ? 1 : 0))).toFixed(2) + " in real numbers", 20, 170);
+		context.fillStyle = "#673670"
+		const text4 = " which is " + sign * (n * Math.pow(2, e - 2 - (e > 0 ? 1 : 0))).toFixed(2) + " in real numbers";
+		context.fillText(text4, 20 + width1 + width2 + width3, 120);
 	}
 }
 	</script>
@@ -240,21 +249,21 @@ function floating_draw(n) {
 	<p>
 ...
 	</p>
-	<canvas id="floating_1" width=640 height=200></canvas>
+	<canvas id="floating_1" width=640 height=138></canvas>
 	<script language="JavaScript">
 		init_floating(1);
 	</script>
 	<p class="big">
 +
 	</p>
-	<canvas id="floating_2" width=640 height=200></canvas>
+	<canvas id="floating_2" width=640 height=138></canvas>
 	<script language="JavaScript">
 		init_floating(2);
 	</script>
 	<p class="big">
 =
 	</p>
-	<canvas id="floating_3" width=640 height=200></canvas>
+	<canvas id="floating_3" width=640 height=138></canvas>
 	<script language="JavaScript">
 		init_floating(3);
 	</script>
