@@ -149,14 +149,18 @@ function init_floating(n) {
 	floating_draw(n);
 	
 	floating.addEventListener('click', function(e){
-		var canvas_rect = floating.getBoundingClientRect();
-		var x = e.clientX - canvas_rect.left;
-		var y = e.clientY - canvas_rect.top;
-		for(var i = 0; i < floating_cell_xs.length; ++i) {
-			if (x > floating_cell_xs[i] && x < floating_cell_xs[i] + cell_width && y > cell_y && y < cell_y + cell_height)
-				floating_cell_bits[n][i] = 1 - floating_cell_bits[n][i];
+		if(n < 3) {
+			var canvas_rect = floating.getBoundingClientRect();
+			var x = e.clientX - canvas_rect.left;
+			var y = e.clientY - canvas_rect.top;
+			for(var i = 0; i < floating_cell_xs.length; ++i) {
+				if (x > floating_cell_xs[i] && x < floating_cell_xs[i] + cell_width && y > cell_y && y < cell_y + cell_height)
+					floating_cell_bits[n][i] = 1 - floating_cell_bits[n][i];
+			}
+			floating_draw(n);
+			floating_cell_bits[3] = bits_from_num(num_from_bits(floating_cell_bits[1]) + num_from_bits(floating_cell_bits[2]));
+			floating_draw(3);
 		}
-		floating_draw(n);
 	}, false);
 }
 
@@ -165,7 +169,10 @@ function floating_draw(n) {
 	var context = floating.getContext("2d");
 
 	// background
-	context.fillStyle="#dbd5a0";
+	if(n == 3)
+		context.fillStyle="#dddddd";
+	else
+		context.fillStyle="#dbd5a0";
 	context.fillRect(0, 0, w, h);
 	
 	// cells
@@ -233,11 +240,45 @@ function floating_draw(n) {
 		const text3 = measures;
 		const width3 = context.measureText(text3).width;
 		context.fillText(text3, 20 + width1 + width2, 120);
-		
+
 		context.fillStyle = "#673670"
 		const text4 = " which is " + sign * (n * Math.pow(2, e - 2 - (e > 0 ? 1 : 0))).toFixed(2) + " in real numbers";
 		context.fillText(text4, 20 + width1 + width2 + width3, 120);
 	}
+}
+
+function num_from_bits(bits) {
+	var sign = bits[0] ? -1.0 : 1.0;
+	var e = bits[3] + bits[2] * 2 + bits[1] * 4;
+	var n = bits[5] + bits[4] * 2 + ((e != 0 && e != 7) ? 4 : 0);
+	if( e == 7 ) {
+		if ( n == 0 ) {
+			return sign / 0.;
+		} else {
+			return (1./0.)/0.;
+		}
+	} else
+		return sign * (n * Math.pow(2, e - 2 - (e > 0 ? 1 : 0)));
+}
+
+function bits_from_num(x) {
+	if (Number.isNaN(x))
+		return [1, 1, 1, 1, 1, 1];
+	if (!Number.isFinite(x))
+		return (x < 0) ? [1, 1, 1, 1, 0, 0] : [0, 1, 1, 1, 0, 0]
+	best_bits = [0, 0, 0, 0, 0, 0];
+	best_diff = Math.abs(num_from_bits(best_bits) - x);
+	for(var i = 1; i < 64; ++i) {
+		bits = [i >> 5 & 1, i >> 4 & 1, i >> 3 & 1, i >> 2 & 1, i >> 1 & 1, i & 1];
+		if(!Number.isFinite(num_from_bits(bits)))
+			continue
+		diff = Math.abs(num_from_bits(bits) - x);
+		if(diff < best_diff) {
+			best_diff = diff;
+			best_bits = bits;
+		}
+	}
+	return best_bits;
 }
 	</script>
 </head>
