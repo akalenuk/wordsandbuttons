@@ -1,345 +1,345 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Challenge your performance intuition with C++ operators</title>
-    <meta name="description" content="Another interactive quiz where you get to estimate the performance difference between several variants of the same code.">
-    <meta name="keywords" content="programming, quizzes">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
-    <style>
+<head>
+	<meta charset="utf-8">
+	<title>Challenge your performance intuition with C++ operators</title>
+	<meta name="description" content="Another interactive quiz where you get to estimate the performance difference between several variants of the same code.">
+	<meta name="keywords" content="programming, quizzes">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
 body{
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a{
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 64pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 64pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 .comment {
-    font-size: 14pt;
-    text-align:center;
-    font-family: sans-serif;
-    padding-bottom: 24pt;
+	font-size: 14pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
 }
 
 table.footer {
-    padding: 64pt 0pt 32pt 0pt;
-    background-color: transparent;
-    width: 505pt;
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
 }
 
 td.footer {
-    font-family: sans-serif;
-    font-size: 16pt;
-    font-style: normal;
-    padding: 0;
-    margin: 0;
-    border: 0;
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
 }
 
 pre {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 12pt;
-    text-align: left;
-    width: 360pt;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 360pt;
 }
 
 table {
-    text-align: center;
-    border-width: 0pt;
+	text-align: center;
+	border-width: 0pt;
 }
 
 td {
-    padding: 6pt 12pt 6pt 12pt;
-    font-size: 16pt;
-    border: 1px solid black;
+	padding: 6pt 12pt 6pt 12pt;
+	font-size: 16pt;
+	border: 1px solid black;
 }
 
 button{
-    width: 304pt;
-    height: 42pt;
-    margin-left:4pt;
-    margin-right:4pt;
-    font-size: 18pt;
+	width: 304pt;
+	height: 42pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 18pt;
 }
 
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 var slider_set = [false, false, false, false,  false, false, false, false,  false, false];
 var slider_true_xs = [
-    7.6 / (7.6 + 7.6) * 512,
-    7.6 / (7.6 + 8.2) * 512,
-    7.6 / (7.6 + 3.1) * 512,
-    3.1 / (3.1 + 4.2) * 512,
+	7.6 / (7.6 + 7.6) * 512,
+	7.6 / (7.6 + 8.2) * 512,
+	7.6 / (7.6 + 3.1) * 512,
+	3.1 / (3.1 + 4.2) * 512,
 
-    7.6 / (7.6 + 7.7) * 512,
-    3.1 / (3.1 + 4.2) * 512,
-    7.7 / (7.6 + 7.6) * 512,
-    7.6 / (7.6 + 7.6) * 512
-    ];
+	7.6 / (7.6 + 7.7) * 512,
+	3.1 / (3.1 + 4.2) * 512,
+	7.7 / (7.6 + 7.6) * 512,
+	7.6 / (7.6 + 7.6) * 512
+	];
 var slider_user_xs = [256, 256, 256, 256,  256, 256, 256, 256];
 var slider_xs = [256, 256, 256, 256,  256, 256, 256, 256];
 
 var slider_down = false;
 
 function comment_on_slider(no){
-    var left = document.getElementById("left_" + (no + 1));
-    var right = document.getElementById("right_" + (no + 1));
-    var x = slider_xs[no]
-    var xl = x;
-    var xr = 511 - x;
-    if(x < 255){
-        left.style.backgroundColor = "#" + (Math.round(xl)).toString(16) + "ff" + (Math.round(xl)).toString(16);
-        right.style.backgroundColor = "#ff" + (Math.round(xl)).toString(16) + (Math.round(xl)).toString(16);
-    }else{
-        right.style.backgroundColor = "#" + (Math.round(xr)).toString(16) + "ff" + (Math.round(xr)).toString(16);
-        left.style.backgroundColor = "#ff" + (Math.round(xr)).toString(16) + (Math.round(xr)).toString(16);
-    }
+	var left = document.getElementById("left_" + (no + 1));
+	var right = document.getElementById("right_" + (no + 1));
+	var x = slider_xs[no]
+	var xl = x;
+	var xr = 511 - x;
+	if(x < 255){
+		left.style.backgroundColor = "#" + (Math.round(xl)).toString(16) + "ff" + (Math.round(xl)).toString(16);
+		right.style.backgroundColor = "#ff" + (Math.round(xl)).toString(16) + (Math.round(xl)).toString(16);
+	}else{
+		right.style.backgroundColor = "#" + (Math.round(xr)).toString(16) + "ff" + (Math.round(xr)).toString(16);
+		left.style.backgroundColor = "#ff" + (Math.round(xr)).toString(16) + (Math.round(xr)).toString(16);
+	}
 
-    var comment = document.getElementById("comment_" + (no + 1));
-    if(Math.abs(xl - xr) < 3){
-        comment.innerHTML = "They are almost the same.";
-    }else if(xl > xr){
-        if(xl > 20*xr){
-            comment.innerHTML = "Right is more than 20 times faster!";
-        }else if(xl > 10*xr){
-            comment.innerHTML = "Right is more than 10 times faster!";
-        }else if(xl > 5*xr){
-            comment.innerHTML = "Right is more than 5 times faster!";
-        }else if(xl > 3*xr){
-            comment.innerHTML = "Right is more than 3 times faster!";
-        }else if(xl > 2*xr){
-            comment.innerHTML = "Right is more than 2 times faster!";
-        }else if(xl > 1.5*xr){
-            comment.innerHTML = "Right is more than 50% faster.";
-        }else if(xl > 1.25*xr){
-            comment.innerHTML = "Right is more than 25% faster.";
-        }else if(xl > 1.1*xr){
-            comment.innerHTML = "Right is more than 10% faster.";
-        }else{
-            comment.innerHTML = "Right is slightly faster.";
-        }
-    }else if(xr > xl){
-        if(xr > 20*xl){
-            comment.innerHTML = "Left is more than 20 times faster!";
-        }else if(xr > 10*xl){
-            comment.innerHTML = "Left is more than 10 times faster!";
-        }else if(xr > 5*xl){
-            comment.innerHTML = "Left is more than 5 times faster!";
-        }else if(xr > 3*xl){
-            comment.innerHTML = "Left is more than 3 times faster!";
-        }else if(xr > 2*xl){
-            comment.innerHTML = "Left is more than 2 times faster!";
-        }else if(xr > 1.5*xl){
-            comment.innerHTML = "Left is more than 50% faster.";
-        }else if(xr > 1.25*xl){
-            comment.innerHTML = "Left is more than 25% faster.";
-        }else if(xr > 1.1*xl){
-            comment.innerHTML = "Left is more than 10% faster.";
-        }else{
-            comment.innerHTML = "Left is slightly faster.";
-        }
-    }
+	var comment = document.getElementById("comment_" + (no + 1));
+	if(Math.abs(xl - xr) < 3){
+		comment.innerHTML = "They are almost the same.";
+	}else if(xl > xr){
+		if(xl > 20*xr){
+			comment.innerHTML = "Right is more than 20 times faster!";
+		}else if(xl > 10*xr){
+			comment.innerHTML = "Right is more than 10 times faster!";
+		}else if(xl > 5*xr){
+			comment.innerHTML = "Right is more than 5 times faster!";
+		}else if(xl > 3*xr){
+			comment.innerHTML = "Right is more than 3 times faster!";
+		}else if(xl > 2*xr){
+			comment.innerHTML = "Right is more than 2 times faster!";
+		}else if(xl > 1.5*xr){
+			comment.innerHTML = "Right is more than 50% faster.";
+		}else if(xl > 1.25*xr){
+			comment.innerHTML = "Right is more than 25% faster.";
+		}else if(xl > 1.1*xr){
+			comment.innerHTML = "Right is more than 10% faster.";
+		}else{
+			comment.innerHTML = "Right is slightly faster.";
+		}
+	}else if(xr > xl){
+		if(xr > 20*xl){
+			comment.innerHTML = "Left is more than 20 times faster!";
+		}else if(xr > 10*xl){
+			comment.innerHTML = "Left is more than 10 times faster!";
+		}else if(xr > 5*xl){
+			comment.innerHTML = "Left is more than 5 times faster!";
+		}else if(xr > 3*xl){
+			comment.innerHTML = "Left is more than 3 times faster!";
+		}else if(xr > 2*xl){
+			comment.innerHTML = "Left is more than 2 times faster!";
+		}else if(xr > 1.5*xl){
+			comment.innerHTML = "Left is more than 50% faster.";
+		}else if(xr > 1.25*xl){
+			comment.innerHTML = "Left is more than 25% faster.";
+		}else if(xr > 1.1*xl){
+			comment.innerHTML = "Left is more than 10% faster.";
+		}else{
+			comment.innerHTML = "Left is slightly faster.";
+		}
+	}
 }
 
 function position_slider(no, client_x){
-    if(!slider_set[no]){
-        var slider = document.getElementById("slider_" + (no + 1));
-        var canvas_rect = slider.getBoundingClientRect();
-        var x = client_x - canvas_rect.left - 48;
-        if(x < 16)
-            x = 16;
-        if(x > 511 - 16)
-            x = 511 - 16;
-        slider_xs[no] = x;
+	if(!slider_set[no]){
+		var slider = document.getElementById("slider_" + (no + 1));
+		var canvas_rect = slider.getBoundingClientRect();
+		var x = client_x - canvas_rect.left - 48;
+		if(x < 16)
+			x = 16;
+		if(x > 511 - 16)
+			x = 511 - 16;
+		slider_xs[no] = x;
 
-        comment_on_slider(no);
-    }
+		comment_on_slider(no);
+	}
 }
 
 function init_slider(no){
-    draw_slider(no);
-    var slider = document.getElementById("slider_" + (no + 1));
+	draw_slider(no);
+	var slider = document.getElementById("slider_" + (no + 1));
 
-    slider.addEventListener('mouseleave', function(e){
-        slider_down = false;
-    }, false);
+	slider.addEventListener('mouseleave', function(e){
+		slider_down = false;
+	}, false);
 
-    slider.addEventListener('mouseup', function(e){
-        slider_down = false;
-    }, false);
+	slider.addEventListener('mouseup', function(e){
+		slider_down = false;
+	}, false);
 
-    slider.addEventListener('mousedown', function(e){
-        slider_down = true;
-        position_slider(no, e.clientX);
-        draw_slider(no);
-    }, false);
+	slider.addEventListener('mousedown', function(e){
+		slider_down = true;
+		position_slider(no, e.clientX);
+		draw_slider(no);
+	}, false);
 
-    slider.addEventListener('mousemove', function(e){
-        if(slider_down){
-            position_slider(no, e.clientX);
-            draw_slider(no);
-        }
-    }, false);
+	slider.addEventListener('mousemove', function(e){
+		if(slider_down){
+			position_slider(no, e.clientX);
+			draw_slider(no);
+		}
+	}, false);
 }
 
 function draw_slider(no){
-    ctx = document.getElementById("slider_" + (no + 1)).getContext("2d");
-    x = slider_xs[no] + 48 + 0.5;
+	ctx = document.getElementById("slider_" + (no + 1)).getContext("2d");
+	x = slider_xs[no] + 48 + 0.5;
 
-    ctx.clearRect(0, 0, 608, 128);
-    ctx.beginPath();
-    ctx.moveTo(64.5-16, 32.5);
-    ctx.lineTo(0.5 + 16, 127.5 - 32);
-    ctx.lineTo(607.5 - 16, 127.5 - 32);
-    ctx.lineTo(607.5 - 64 + 16, 32.5);
-    ctx.lineTo(64.5-16, 32.5);
-    ctx.strokeStyle="#000000";
-    ctx.stroke();
-    ctx.closePath();
-    ctx.fillStyle="#999999";
-    ctx.fill();
+	ctx.clearRect(0, 0, 608, 128);
+	ctx.beginPath();
+	ctx.moveTo(64.5-16, 32.5);
+	ctx.lineTo(0.5 + 16, 127.5 - 32);
+	ctx.lineTo(607.5 - 16, 127.5 - 32);
+	ctx.lineTo(607.5 - 64 + 16, 32.5);
+	ctx.lineTo(64.5-16, 32.5);
+	ctx.strokeStyle="#000000";
+	ctx.stroke();
+	ctx.closePath();
+	ctx.fillStyle="#999999";
+	ctx.fill();
 
-    if(slider_set[no]){
-        x_red = slider_user_xs[no] + 48 + 0.5;
-        ctx.beginPath();
-        ctx.moveTo(x_red, 0);
-        ctx.lineTo(x_red - 64, 127);
-        ctx.lineTo(x_red + 64, 127);
-        ctx.lineTo(x_red, 0);
-        ctx.strokeStyle="#660000";
-        ctx.stroke();
-        ctx.closePath();
-        ctx.fillStyle="#ffcccc";
-        ctx.fill();
-    }
+	if(slider_set[no]){
+		x_red = slider_user_xs[no] + 48 + 0.5;
+		ctx.beginPath();
+		ctx.moveTo(x_red, 0);
+		ctx.lineTo(x_red - 64, 127);
+		ctx.lineTo(x_red + 64, 127);
+		ctx.lineTo(x_red, 0);
+		ctx.strokeStyle="#660000";
+		ctx.stroke();
+		ctx.closePath();
+		ctx.fillStyle="#ffcccc";
+		ctx.fill();
+	}
 
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x - 64, 127);
-    ctx.lineTo(x + 64, 127);
-    ctx.lineTo(x, 0);
-    ctx.strokeStyle="#000000";
-    ctx.stroke();
-    ctx.closePath();
-    ctx.fillStyle="#cccccc";
-    ctx.fill();
+	ctx.beginPath();
+	ctx.moveTo(x, 0);
+	ctx.lineTo(x - 64, 127);
+	ctx.lineTo(x + 64, 127);
+	ctx.lineTo(x, 0);
+	ctx.strokeStyle="#000000";
+	ctx.stroke();
+	ctx.closePath();
+	ctx.fillStyle="#cccccc";
+	ctx.fill();
 }
 
 function reveal(no){
-    slider_set[no] = true;
-    slider_user_xs[no] = slider_xs[no];
-    slider_xs[no] = slider_true_xs[no];
-    draw_slider(no);
-    comment_on_slider(no);
-    document.getElementById("the_truth_" + (no + 1)).style.display = "block";
-    document.getElementById("button_" + (no + 1)).style.display = "none";
+	slider_set[no] = true;
+	slider_user_xs[no] = slider_xs[no];
+	slider_xs[no] = slider_true_xs[no];
+	draw_slider(no);
+	comment_on_slider(no);
+	document.getElementById("the_truth_" + (no + 1)).style.display = "block";
+	document.getElementById("button_" + (no + 1)).style.display = "none";
 
-    for(var i = 0; i < 8; i++){
-        if(slider_set[i] == false)
-            return;
-    }
+	for(var i = 0; i < 8; i++){
+		if(slider_set[i] == false)
+			return;
+	}
 
-    document.getElementById("show_in_the_end").style.display = "block";
-    var score = 0;
-    var default_score = 0;
-    for(var i = 0; i < 8; i++){
-        score += Math.abs(slider_user_xs[i] - slider_xs[i]);
-        default_score += Math.abs(256 - slider_xs[i]);
-    }
+	document.getElementById("show_in_the_end").style.display = "block";
+	var score = 0;
+	var default_score = 0;
+	for(var i = 0; i < 8; i++){
+		score += Math.abs(slider_user_xs[i] - slider_xs[i]);
+		default_score += Math.abs(256 - slider_xs[i]);
+	}
 
-    document.getElementById("score").innerHTML = "<b>" + score.toFixed(0) + "</b>";
-    document.getElementById("default_score").innerHTML = "<b>" + default_score.toFixed(0) + "</b>";
+	document.getElementById("score").innerHTML = "<b>" + score.toFixed(0) + "</b>";
+	document.getElementById("default_score").innerHTML = "<b>" + default_score.toFixed(0) + "</b>";
 }
 
 function colorized(text) {
-    const separators = ['\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')'];
-    const comments = [['/*', '*/'], ['#', '\n']];
+	const separators = ['\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')'];
+	const comments = [['/*', '*/'], ['#', '\n']];
 
-    function painted_in(line, color) {
-        return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
-    }
+	function painted_in(line, color) {
+		return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+	}
 
-    function colorized(token) {
-        var code_sum = 0;
-        for(var i = 0; i < token.length; ++i)
-            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
-        var zero_channel = code_sum % 3;
-        var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
-            + (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
-            + (zero_channel == 2 ? '0' : '');
-        return painted_in(token, color);
-    }
+	function colorized(token) {
+		var code_sum = 0;
+		for(var i = 0; i < token.length; ++i)
+			code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+		var zero_channel = code_sum % 3;
+		var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
+			+ (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
+			+ (zero_channel == 2 ? '0' : '');
+		return painted_in(token, color);
+	}
 
-    function separated(line, i) {
-        if(i == separators.length)
-            return colorized(line);
-        return line.split(separators[i]).map(function(subline) {
-            return separated(subline, i + 1);}).join(separators[i]);
-    }
+	function separated(line, i) {
+		if(i == separators.length)
+			return colorized(line);
+		return line.split(separators[i]).map(function(subline) {
+			return separated(subline, i + 1);}).join(separators[i]);
+	}
 
-    function uncommented(line, i) {
-        if(i == comments.length)
-            return separated(line, 0);
-        var chunks = line.split(comments[i][0]);
-        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
-            var in_out_comment = chunk.split(comments[i][1]);
-            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "777")
-                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
-    }
+	function uncommented(line, i) {
+		if(i == comments.length)
+			return separated(line, 0);
+		var chunks = line.split(comments[i][0]);
+		return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+			var in_out_comment = chunk.split(comments[i][1]);
+			return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "777")
+				+ uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+	}
 
-    return uncommented(text, 0);
+	return uncommented(text, 0);
 }
-    </script>
-  </head>
-  <body>
-    <center>
-    <h1>
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
 Challenge your performance intuition with C++ operators
-    </h1>
-    <p>
+	</h1>
+	<p>
 I made a mistake one day. More of a typo really. I used “bitwise and” instead of “logical and” in the code. A colleague of mine noticed that during the review and said something like this. “You shouldn't use bitwise operators instead of logical ones, the latter do <a href="https://en.wikipedia.org/wiki/Short-circuit_evaluation">short-circuiting</a>.”
-    </p>
-    <p>
+	</p>
+	<p>
 Yes. Both parts of that sentence are valid. You shouldn't use bitwise operators instead of logical ones. Logical operators in C++ perform short-circuit evaluation. That's true. But the invisible implication between the two parts is wrong.
-    </p>
-    <p>
+	</p>
+	<p>
 Short-circuiting may be or may be not beneficial for the performance. It may be or may be not performed on bitwise operators too. And sometimes you're better off not doing logic the most logical way to begin with.
-    </p>
-    <p>
+	</p>
+	<p>
 I want to propose a game. Let's measure things and see if we can predict the measurements before they come. We did <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_magic_squares.html">a similar thing</a> last year, and that was fun, so why not?
-    </p>
-    <p>
+	</p>
+	<p>
 So here is the benchmark example.
-    </p>
-    <table><tr>
-    <td>
-    <pre style="width: 505pt;">
+	</p>
+	<table><tr>
+	<td>
+	<pre style="width: 505pt;">
 #include &lt;chrono&gt;
 #include &lt;iostream&gt;
 #include &lt;random&gt;
@@ -365,23 +365,23 @@ int main() {
   std::cout &lt;&lt; "time: " &lt;&lt; (end-start).count() * 1e-9
     &lt;&lt; "  1111s: " &lt;&lt; four_1_in_a_row &lt;&lt; "\n";
 }</pre>
-    </td></tr></table>
-    <p>
+	</td></tr></table>
+	<p>
 I've made several variants of this code, compiled it with clang 3.8.0-2ubuntu4 -std=c++14 -O2, and measured their run time on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz.
-    </p>
-    <p>
+	</p>
+	<p>
 Using your intuition and best judgment, please estimate their relative performance. Please use the slider below the code samples.
-    </p>
+	</p>
 
-    <h2>
+	<h2>
 Round 1. && vs &
-    </h2>
-    <p>
+	</h2>
+	<p>
 The main question. Is && faster than &?
-    </p>
-    <table><tr>
-    <td id="left_1">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_1">
+	<pre>
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
     if(xs[i] == 1
     && xs[i+1] == 1
@@ -399,19 +399,19 @@ The main question. Is && faster than &?
      & xs[i+3] == 1)
       ++four_1_in_a_row;
     </pre>
-    </td></tr></table>
-    <canvas id="slider_1" width=608 height=128></canvas>
-    <p class="comment" id="comment_1">
+	</td></tr></table>
+	<canvas id="slider_1" width=608 height=128></canvas>
+	<p class="comment" id="comment_1">
 They are almost the same.
-    </p>
-    <button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
-    <div id="the_truth_1" style="display:none;">
-    <p>
+	</p>
+	<button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
+	<div id="the_truth_1" style="display:none;">
+	<p>
 They are almost the same. In fact, they generate almost the same code.
-    </p>
-    <table><tr>
-    <td>
-    <pre id="code_1_1">
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_1_1">
   movq  %rax, %r14
   .align  16, 0x90
 .LBB0_6:
@@ -436,9 +436,9 @@ They are almost the same. In fact, they generate almost the same code.
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td>
-    <td>
-    <pre id="code_1_2">
+	</td>
+	<td>
+	<pre id="code_1_2">
   movq  %rax, %r14
   .align  16, 0x90
 .LBB0_6:
@@ -462,24 +462,24 @@ They are almost the same. In fact, they generate almost the same code.
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td></tr></table>
-    <p>
+	</td></tr></table>
+	<p>
 The trick is in the context. Since == generates only 0 or 1, the short-circuiting for 0 and & is still possible. 0 & anything is still 0. Although, the same trick <a href="https://godbolt.org/z/0eEz_G">doesn't work with |</a> anymore.
-    </p>
-    </div>
-    <script language="JavaScript">
-    init_slider(0);
-    </script>
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(0);
+	</script>
 
-    <h2>
+	<h2>
 Round 2. & vs *
-    </h2>
-    <p>
+	</h2>
+	<p>
 “Logical and” can also be substituted with a multiplication operator. It has the same truth table on 0 and 1.
-    </p>
-    <table><tr>
-    <td id="left_2">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_2">
+	<pre>
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
     if(xs[i] == 1
      & xs[i+1] == 1
@@ -498,18 +498,18 @@ Round 2. & vs *
       ++four_1_in_a_row;
     </pre>
     </td></tr></table>
-    <canvas id="slider_2" width=608 height=128></canvas>
-    <p class="comment" id="comment_2">
+	<canvas id="slider_2" width=608 height=128></canvas>
+	<p class="comment" id="comment_2">
 They are almost the same.
-    </p>
-    <button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
-    <div id="the_truth_2" style="display:none;">
-    <p>
+	</p>
+	<button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
+	<div id="the_truth_2" style="display:none;">
+	<p>
 Surprisingly, they perform almost the same while their code is completely different.
-    </p>
-    <table><tr>
-    <td>
-    <pre id="code_2_1">
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_2_1">
   movq  %rax, %r14
   .align  16, 0x90
 .LBB0_6:
@@ -533,9 +533,9 @@ Surprisingly, they perform almost the same while their code is completely differ
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td>
-    <td>
-    <pre id="code_2_2">
+	</td>
+	<td>
+	<pre id="code_2_2">
   movq  %rax, %r14
   movl  $-1, %eax
   .align  16, 0x90
@@ -569,24 +569,24 @@ Surprisingly, they perform almost the same while their code is completely differ
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td></tr></table>
-    <p>
+	</td></tr></table>
+	<p>
 There are 4 comparisons and the rest is just about turning flags into registers. I think we can get rid of that.
-    </p>
-    </div>
-    <script language="JavaScript">
-    init_slider(1);
-    </script>
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(1);
+	</script>
 
-    <h2>
+	<h2>
 Round 3. ==, && vs *, +, -
-    </h2>
-    <p>
+	</h2>
+	<p>
 In this simple example, we can substitute almost all the logic with computation. Instead of comparing each value separately we can calculate the squared error for the whole 4-tuple.
-    </p>
-    <table><tr>
-    <td id="left_3">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_3">
+	<pre>
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
     if(xs[i] == 1
     && xs[i+1] == 1
@@ -609,19 +609,19 @@ inline int sq(int x) {
      + sq(xs[i+3] - 1) == 0)
       ++four_1_in_a_row;
     </pre>
-    </td></tr></table>
-    <canvas id="slider_3" width=608 height=128></canvas>
-    <p class="comment" id="comment_3">
+	</td></tr></table>
+	<canvas id="slider_3" width=608 height=128></canvas>
+	<p class="comment" id="comment_3">
 They are almost the same.
-    </p>
-    <button type="button" onclick="reveal(2)" id="button_3">Reveal the truth</button>
-    <div id="the_truth_3" style="display:none;">
-    <p>
+	</p>
+	<button type="button" onclick="reveal(2)" id="button_3">Reveal the truth</button>
+	<div id="the_truth_3" style="display:none;">
+	<p>
 And this works perfectly. The code is a few lines longer, but there are no comparisons until the very end. Everything is blunt number crunching. Computers love this kind of code.
-    </p>
-    <table><tr>
-    <td>
-    <pre id="code_3_1">
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_3_1">
   movq  %rax, %r14
   .align  16, 0x90
 .LBB0_6:
@@ -646,9 +646,9 @@ And this works perfectly. The code is a few lines longer, but there are no compa
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td>
-    <td>
-    <pre id="code_3_2">
+	</td>
+	<td>
+	<pre id="code_3_2">
   movq  %rax, %r14
   .align  16, 0x90
 .LBB0_6:
@@ -679,21 +679,21 @@ And this works perfectly. The code is a few lines longer, but there are no compa
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td></tr></table>
-    </div>
-    <script language="JavaScript">
-    init_slider(2);
-    </script>
+	</td></tr></table>
+	</div>
+	<script language="JavaScript">
+	init_slider(2);
+	</script>
 
-    <h2>
+	<h2>
 Round 4. * vs abs
-    </h2>
-    <p>
+	</h2>
+	<p>
 We don't really need multiplications. We don't really need squared error. Why don't we calculate an absolute error instead?
-    </p>
-    <table><tr>
-    <td id="left_4">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_4">
+	<pre>
 ...
 inline int sq(int x) {
   return x*x;
@@ -706,9 +706,9 @@ inline int sq(int x) {
      + sq(xs[i+3] - 1) == 0)
       ++four_1_in_a_row;
     </pre>
-    </td>
-    <td id="right_4">
-    <pre>
+	</td>
+	<td id="right_4">
+	<pre>
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
     if(std::abs(xs[i] - 1)
      + std::abs(xs[i+1] - 1)
@@ -716,19 +716,19 @@ inline int sq(int x) {
      + std::abs(xs[i+3] - 1) == 0)
       ++four_1_in_a_row;
     </pre>
-    </td></tr></table>
-    <canvas id="slider_4" width=608 height=128></canvas>
-    <p class="comment" id="comment_4">
+	</td></tr></table>
+	<canvas id="slider_4" width=608 height=128></canvas>
+	<p class="comment" id="comment_4">
 They are almost the same.
-    </p>
-    <button type="button" onclick="reveal(3)" id="button_4">Reveal the truth</button>
-    <div id="the_truth_4" style="display:none;">
-    <p>
+	</p>
+	<button type="button" onclick="reveal(3)" id="button_4">Reveal the truth</button>
+	<div id="the_truth_4" style="display:none;">
+	<p>
 That's why. Getting an absolute value of an int is not a trivial job. It's not about clipping a bit off; it is a fair comparison and a conditional move. This pair is heavier than a simple multiplication.
-    </p>
-    <table><tr>
-    <td>
-    <pre id="code_4_1">
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_4_1">
   movq  %rax, %r14
   .align  16, 0x90
 .LBB0_6:
@@ -759,9 +759,9 @@ That's why. Getting an absolute value of an int is not a trivial job. It's not a
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td>
-    <td>
-    <pre id="code_4_2">
+	</td>
+	<td>
+	<pre id="code_4_2">
   movq  %rax, %r14
   .align  16, 0x90
 .LBB0_6:
@@ -802,24 +802,24 @@ That's why. Getting an absolute value of an int is not a trivial job. It's not a
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td></tr></table>
-    <p>
+	</td></tr></table>
+	<p>
 What's interesting, in floating point numbers, when getting an absolute value <i>is</i> about clipping a bit off, <a href="https://godbolt.org/z/ZoFInw">there are no tests or conditions</a>.
-    </p>
-    </div>
-    <script language="JavaScript">
-    init_slider(3);
-    </script>
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(3);
+	</script>
 
-    <h2>
+	<h2>
 Round 5. int vs double
-    </h2>
-    <p>
+	</h2>
+	<p>
 The question is, will there be any gain if we simply translate our code to work with doubles?
-    </p>
-    <table><tr>
-    <td id="left_5">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_5">
+	<pre>
 ...
   using TheType = int;
 ...
@@ -830,9 +830,9 @@ The question is, will there be any gain if we simply translate our code to work 
     && xs[i+3] == 1)
       ++four_1_in_a_row;
     </pre>
-    </td>
-    <td id="right_5">
-    <pre>
+	</td>
+	<td id="right_5">
+	<pre>
 ...
   using TheType = double;
 ...
@@ -843,19 +843,19 @@ The question is, will there be any gain if we simply translate our code to work 
     && xs[i+3] == 1)
       ++four_1_in_a_row;
     </pre>
-    </td></tr></table>
-    <canvas id="slider_5" width=608 height=128></canvas>
-    <p class="comment" id="comment_5">
+	</td></tr></table>
+	<canvas id="slider_5" width=608 height=128></canvas>
+	<p class="comment" id="comment_5">
 They are almost the same.
-    </p>
-    <button type="button" onclick="reveal(4)" id="button_5">Reveal the truth</button>
-    <div id="the_truth_5" style="display:none;">
-    <p>
+	</p>
+	<button type="button" onclick="reveal(4)" id="button_5">Reveal the truth</button>
+	<div id="the_truth_5" style="display:none;">
+	<p>
 Not really, no. The operations are different, but essentially the code is the same. It's still about comparing and jumping.
-    </p>
-    <table><tr>
-    <td>
-    <pre id="code_5_1">
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_5_1">
   movq  %rax, %r14
   .align  16, 0x90
 .LBB0_6:
@@ -880,9 +880,9 @@ Not really, no. The operations are different, but essentially the code is the sa
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td>
-    <td>
-    <pre id="code_5_2">
+	</td>
+	<td>
+	<pre id="code_5_2">
   movq  %rax, %r14
   .align  16, 0x90
 .LBB0_6:
@@ -915,21 +915,21 @@ Not really, no. The operations are different, but essentially the code is the sa
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td></tr></table>
-    </div>
-    <script language="JavaScript">
-    init_slider(4);
-    </script>
+	</td></tr></table>
+	</div>
+	<script language="JavaScript">
+	init_slider(4);
+	</script>
 
-    <h2>
+	<h2>
 Round 6. *, +, - int vs double
-    </h2>
-    <p>
+	</h2>
+	<p>
 But if we change the code to avoid logic, will there be any gain?
-    </p>
-    <table><tr>
-    <td id="left_6">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_6">
+	<pre>
 ...
 inline int sq(int x) {
   return x*x;
@@ -961,19 +961,19 @@ inline double sq(int x) {
      + sq(xs[i+3] - 1) == 0)
       ++four_1_in_a_row;
     </pre>
-    </td></tr></table>
-    <canvas id="slider_6" width=608 height=128></canvas>
-    <p class="comment" id="comment_6">
+	</td></tr></table>
+	<canvas id="slider_6" width=608 height=128></canvas>
+	<p class="comment" id="comment_6">
 They are almost the same.
-    </p>
-    <button type="button" onclick="reveal(5)" id="button_6">Reveal the truth</button>
-    <div id="the_truth_6" style="display:none;">
-    <p>
+	</p>
+	<button type="button" onclick="reveal(5)" id="button_6">Reveal the truth</button>
+	<div id="the_truth_6" style="display:none;">
+	<p>
 No. The code is conceptually the same though, so the loss is also not that drastic.
-    </p>
-    <table><tr>
-    <td>
-    <pre id="code_6_1">
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_6_1">
   movq  %rax, %r14
   .align  16, 0x90
 .LBB0_6:
@@ -1004,9 +1004,9 @@ No. The code is conceptually the same though, so the loss is also not that drast
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td>
-    <td>
-    <pre id="code_6_2">
+	</td>
+	<td>
+	<pre id="code_6_2">
   movq  %rax, %r14
   vmovsd  .LCPI1_0(%rip), %xmm0
   vxorps  %xmm1, %xmm1, %xmm1
@@ -1036,21 +1036,21 @@ No. The code is conceptually the same though, so the loss is also not that drast
   cmpq  $160000000, %rbx
   jne  .LBB1_6
     </pre>
-    </td></tr></table>
-    </div>
-    <script language="JavaScript">
-    init_slider(5);
-    </script>
+	</td></tr></table>
+	</div>
+	<script language="JavaScript">
+	init_slider(5);
+	</script>
 
-    <h2>
+	<h2>
 Round 7. double vs float
-    </h2>
-    <p>
+	</h2>
+	<p>
 That sound a bit like cheating because with single precision types we would have to read two times less from the memory but let's give it a go.
-    </p>
-    <table><tr>
-    <td id="left_7">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_7">
+	<pre>
 ...
   using TheType = double;
 ...
@@ -1061,9 +1061,9 @@ That sound a bit like cheating because with single precision types we would have
     && xs[i+3] == 1)
       ++four_1_in_a_row;
     </pre>
-    </td>
-    <td id="right_7">
-    <pre>
+	</td>
+	<td id="right_7">
+	<pre>
 ...
   using TheType = float;
 ...
@@ -1074,19 +1074,19 @@ That sound a bit like cheating because with single precision types we would have
     && xs[i+3] == 1)
       ++four_1_in_a_row;
     </pre>
-    </td></tr></table>
-    <canvas id="slider_7" width=608 height=128></canvas>
-    <p class="comment" id="comment_7">
+	</td></tr></table>
+	<canvas id="slider_7" width=608 height=128></canvas>
+	<p class="comment" id="comment_7">
 They are almost the same.
-    </p>
-    <button type="button" onclick="reveal(6)" id="button_7">Reveal the truth</button>
-    <div id="the_truth_7" style="display:none;">
-    <p>
+	</p>
+	<button type="button" onclick="reveal(6)" id="button_7">Reveal the truth</button>
+	<div id="the_truth_7" style="display:none;">
+	<p>
 And that's the most peculiar thing. Although the code now reads much less from the memory, performance wise it's almost identical to its original form.
-    </p>
-    <table><tr>
-    <td>
-    <pre id="code_7_1">
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_7_1">
   movq  %rax, %r14
   .align  16, 0x90
 .LBB0_6:
@@ -1119,9 +1119,9 @@ And that's the most peculiar thing. Although the code now reads much less from t
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td>
-    <td>
-    <pre id="code_7_2">
+	</td>
+	<td>
+	<pre id="code_7_2">
   movq  %rax, %r14
   .align  16, 0x90
 .LBB0_6:
@@ -1154,24 +1154,24 @@ And that's the most peculiar thing. Although the code now reads much less from t
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td></tr></table>
-    <p>
+	</td></tr></table>
+	<p>
 This has probably something to do with the bus and the CPU working asynchronously. If the CPU is busy enough, the bus load doesn't matter.
-    </p>
-    </div>
-    <script language="JavaScript">
-    init_slider(6);
-    </script>
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(6);
+	</script>
 
-    <h2>
+	<h2>
 Round 8. 1 vs 0
-    </h2>
-    <p>
+	</h2>
+	<p>
 This is the bonus round. There is a notion, right along with the short-circuiting being good for performance, that the comparison with zero is cheaper than any other comparison. Let's try it out.
-    </p>
-    <table><tr>
-    <td id="left_8">
-    <pre>
+	</p>
+	<table><tr>
+	<td id="left_8">
+	<pre>
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
     if(xs[i] == 1
     && xs[i+1] == 1
@@ -1179,9 +1179,9 @@ This is the bonus round. There is a notion, right along with the short-circuitin
     && xs[i+3] == 1)
       ++four_1_in_a_row;
     </pre>
-    </td>
-    <td id="right_8">
-    <pre>
+	</td>
+	<td id="right_8">
+	<pre>
   for (auto i = 0u; i &lt; TheSize - 3; ++i)
     if(xs[i] == 0
     && xs[i+1] == 0
@@ -1189,19 +1189,19 @@ This is the bonus round. There is a notion, right along with the short-circuitin
     && xs[i+3] == 0)
       four_0_in_a_row++;
     </pre>
-    </td></tr></table>
-    <canvas id="slider_8" width=608 height=128></canvas>
-    <p class="comment" id="comment_8">
+	</td></tr></table>
+	<canvas id="slider_8" width=608 height=128></canvas>
+	<p class="comment" id="comment_8">
 They are almost the same.
-    </p>
-    <button type="button" onclick="reveal(7)" id="button_8">Reveal the truth</button>
-    <div id="the_truth_8" style="display:none;">
-    <p>
+	</p>
+	<button type="button" onclick="reveal(7)" id="button_8">Reveal the truth</button>
+	<div id="the_truth_8" style="display:none;">
+	<p>
 Of course, it isn't. It may be contextually beneficial to check against zero because with Intel architecture there is a dedicated zero flag, and most of the time you can read it from the previous operation skipping the comparison part altogether. But in our example, there is no operation to load the zero flag so the code on both sides is almost identical.
-    </p>
-    <table><tr>
-    <td>
-    <pre id="code_8_1">
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_8_1">
   movq  %rax, %r14
   .align  16, 0x90
 .LBB0_6:
@@ -1226,9 +1226,9 @@ Of course, it isn't. It may be contextually beneficial to check against zero bec
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td>
-    <td>
-    <pre id="code_8_2">
+	</td>
+	<td>
+	<pre id="code_8_2">
   movq  %rax, %r14
   .align  16, 0x90
 .LBB0_6:
@@ -1253,48 +1253,48 @@ Of course, it isn't. It may be contextually beneficial to check against zero bec
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td></tr></table>
-    </div>
-    <script language="JavaScript">
-    init_slider(7);
-    </script>
+	</td></tr></table>
+	</div>
+	<script language="JavaScript">
+	init_slider(7);
+	</script>
 
-    <div id="show_in_the_end" style="display:none;">
-    <h2>
+	<div id="show_in_the_end" style="display:none;">
+	<h2>
 Congratulations!
-    </h2>
-    <p>
+	</h2>
+	<p>
 You scored <span id="score"></span> pixels of error. As a reference, if you leave every slider untouched there would be exactly <span id="default_score"></span> pixels of error.
-    </p>
+	</p>
 
-    <h2>
+	<h2>
 Conclusion
-    </h2>
-    <p>
+	</h2>
+	<p>
 Truisms don't help performance. That's my conclusion. We all know that logical operations perform short-circuiting; that floats are shorter than doubles; that throwing away a sign from a number is easier than computing its square. It's all true. It's all irrelevant without a proper context.
-    </p>
-    </div>
-    <script language="JavaScript">
-    document.getElementById("code_1_1").innerHTML = colorized(document.getElementById("code_1_1").innerHTML);
-    document.getElementById("code_1_2").innerHTML = colorized(document.getElementById("code_1_2").innerHTML);
-    document.getElementById("code_2_1").innerHTML = colorized(document.getElementById("code_2_1").innerHTML);
-    document.getElementById("code_2_2").innerHTML = colorized(document.getElementById("code_2_2").innerHTML);
-    document.getElementById("code_3_1").innerHTML = colorized(document.getElementById("code_3_1").innerHTML);
-    document.getElementById("code_3_2").innerHTML = colorized(document.getElementById("code_3_2").innerHTML);
-    document.getElementById("code_4_1").innerHTML = colorized(document.getElementById("code_4_1").innerHTML);
-    document.getElementById("code_4_2").innerHTML = colorized(document.getElementById("code_4_2").innerHTML);
-    document.getElementById("code_5_1").innerHTML = colorized(document.getElementById("code_5_1").innerHTML);
-    document.getElementById("code_5_2").innerHTML = colorized(document.getElementById("code_5_2").innerHTML);
-    document.getElementById("code_6_1").innerHTML = colorized(document.getElementById("code_6_1").innerHTML);
-    document.getElementById("code_6_2").innerHTML = colorized(document.getElementById("code_6_2").innerHTML);
-    document.getElementById("code_7_1").innerHTML = colorized(document.getElementById("code_7_1").innerHTML);
-    document.getElementById("code_7_2").innerHTML = colorized(document.getElementById("code_7_2").innerHTML);
-    document.getElementById("code_8_1").innerHTML = colorized(document.getElementById("code_8_1").innerHTML);
-    document.getElementById("code_8_2").innerHTML = colorized(document.getElementById("code_8_2").innerHTML);
-    </script>
+	</p>
+	</div>
+	<script language="JavaScript">
+	document.getElementById("code_1_1").innerHTML = colorized(document.getElementById("code_1_1").innerHTML);
+	document.getElementById("code_1_2").innerHTML = colorized(document.getElementById("code_1_2").innerHTML);
+	document.getElementById("code_2_1").innerHTML = colorized(document.getElementById("code_2_1").innerHTML);
+	document.getElementById("code_2_2").innerHTML = colorized(document.getElementById("code_2_2").innerHTML);
+	document.getElementById("code_3_1").innerHTML = colorized(document.getElementById("code_3_1").innerHTML);
+	document.getElementById("code_3_2").innerHTML = colorized(document.getElementById("code_3_2").innerHTML);
+	document.getElementById("code_4_1").innerHTML = colorized(document.getElementById("code_4_1").innerHTML);
+	document.getElementById("code_4_2").innerHTML = colorized(document.getElementById("code_4_2").innerHTML);
+	document.getElementById("code_5_1").innerHTML = colorized(document.getElementById("code_5_1").innerHTML);
+	document.getElementById("code_5_2").innerHTML = colorized(document.getElementById("code_5_2").innerHTML);
+	document.getElementById("code_6_1").innerHTML = colorized(document.getElementById("code_6_1").innerHTML);
+	document.getElementById("code_6_2").innerHTML = colorized(document.getElementById("code_6_2").innerHTML);
+	document.getElementById("code_7_1").innerHTML = colorized(document.getElementById("code_7_1").innerHTML);
+	document.getElementById("code_7_2").innerHTML = colorized(document.getElementById("code_7_2").innerHTML);
+	document.getElementById("code_8_1").innerHTML = colorized(document.getElementById("code_8_1").innerHTML);
+	document.getElementById("code_8_2").innerHTML = colorized(document.getElementById("code_8_2").innerHTML);
+	</script>
 
 
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
 		<a href="all_programming.html">#programming</a> <a href="all_quizzes.html">#quizzes</a>
@@ -1309,6 +1309,6 @@ Truisms don't help performance. That's my conclusion. We all know that logical o
 	</td>
 	</tr>
 	</table>
-    </center>
-  </body>
+	</center>
+</body>
 </html>
