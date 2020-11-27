@@ -1,136 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Estimating floating point error the easy way</title>
-    <meta name="description" content="An interactive explanation of how to measure computational error while working with floating point numbers and why.">
-    <meta name="keywords" content="programming, mathematics, demos">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
-    <style>
+<head>
+	<meta charset="utf-8">
+	<title>Estimating floating point error the easy way</title>
+	<meta name="description" content="An interactive explanation of how to measure computational error while working with floating point numbers and why.">
+	<meta name="keywords" content="programming, mathematics, demos">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
 body{
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a{
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 20pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 .comment {
-    font-size: 12pt;
-    text-align:center;
-    font-family: sans-serif;
-    padding-bottom: 24pt;
+	font-size: 12pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
 }
 
 table.footer {
-    padding: 64pt 0pt 32pt 0pt;
-    background-color: transparent;
-    width: 505pt;
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
 }
 
 td.footer {
-    font-family: sans-serif;
-    font-size: 16pt;
-    font-style: normal;
-    padding: 0;
-    margin: 0;
-    border: 0;
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
 }
 
 table {
-    font-family: sans-serif;
-    font-size: 13pt;
-    font-style: italic;
-    width: 505pt;
-    text-align: center;
+	font-family: sans-serif;
+	font-size: 13pt;
+	font-style: italic;
+	width: 505pt;
+	text-align: center;
 }
 
 th {
-    vertical-align: text-top;
-    padding-top: 6pt;
-    padding-bottom: 6pt;
-    font-style: bold;
+	vertical-align: text-top;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+	font-style: bold;
 }
 
 td {
-    vertical-align: text-top;
-    padding-top: 6pt;
-    padding-bottom: 6pt;
+	vertical-align: text-top;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
 }
 
 li {
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
-    padding-bottom: 6pt;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+	padding-bottom: 6pt;
 }
 
 form {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 16pt;
-    text-align: left;
-    width: 505pt;
-    background-color: #eeee99;
-    color: #000;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
 }
 
 input[type="text"] {
-    width: 32pt;
-    height: 22pt;
-    font-size: 16pt;
-    text-align: center;
+	width: 32pt;
+	height: 22pt;
+	font-size: 16pt;
+	text-align: center;
 }
 
 button {
-    width: 32pt;
-    height: 26pt;
-    font-size: 16pt;
-    text-align: center;
+	width: 32pt;
+	height: 26pt;
+	font-size: 16pt;
+	text-align: center;
 }
 
 pre {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 12pt;
-    text-align: left;
-    width: 505pt;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 505pt;
 }
 
 u {
-    border-bottom: 1px dotted #000;
-    text-decoration: none;
-    cursor: pointer;
+	border-bottom: 1px dotted #000;
+	text-decoration: none;
+	cursor: pointer;
 }
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 const w = 640;
 const h = 200;
 const cell_width = 64;
@@ -140,20 +140,20 @@ const cell_y = 20;
 
 // tri-float to RGB
 function as_XX(x) {
-    return ((x < 16) ? "0" : "") +x.toString(16);
+	return ((x < 16) ? "0" : "") +x.toString(16);
 }
 
 function as_RRGGBB(r_01, g_01, b_01) {
-    var rgb = [r_01, g_01, b_01];
-    var RRGGBB = "#";
-    for(var i = 0; i < 3; ++i) {
-        if (rgb[i] < 0.0)
-            rgb[i] = 0.0;
-        if (rgb[i] > 255.0/256.0)
-            rgb[i] = 255.0/256;
-        RRGGBB += as_XX(Math.floor(rgb[i] * 256.0));
-    }
-    return RRGGBB;
+	var rgb = [r_01, g_01, b_01];
+	var RRGGBB = "#";
+	for(var i = 0; i < 3; ++i) {
+		if (rgb[i] < 0.0)
+			rgb[i] = 0.0;
+		if (rgb[i] > 255.0/256.0)
+			rgb[i] = 255.0/256;
+		RRGGBB += as_XX(Math.floor(rgb[i] * 256.0));
+	}
+	return RRGGBB;
 }
 
 // tables
@@ -456,15 +456,15 @@ const prognosed_relative_error = [ // changes from -14 to 12
 //for(var i1 = 0; i1 <= 10; ++i1)
 //for(var i2 = 0; i2 <= 10; ++i2)
 //for(var i3 = 0; i3 <= 10; ++i3)
-//    {
-//    var x = prognosed_relative_error[i1][i2][i3];
-//    if(x <= 0.0) continue;
-//    var e = Math.log10(x);
-//    if(e < min_e)
-//        min_e = e;
-//    if(e > max_e)
-//        max_e = e;
-//    }
+//	{
+//	var x = prognosed_relative_error[i1][i2][i3];
+//	if(x <= 0.0) continue;
+//	var e = Math.log10(x);
+//	if(e < min_e)
+//		min_e = e;
+//	if(e > max_e)
+//		max_e = e;
+//	}
 //alert(Math.floor(min_e));
 //alert(Math.floor(max_e));
 
@@ -478,467 +478,467 @@ const dzx = -14;
 const dzy = -13;
 
 function n_from_x_y(x, y) {
-    var n = (x - zero_x) / dzx;
-    n = Math.floor(n);
-    if(n < 0)
-        return 0;
-    if(n > 10)
-        return 10
-    return n;
+	var n = (x - zero_x) / dzx;
+	n = Math.floor(n);
+	if(n < 0)
+		return 0;
+	if(n > 10)
+		return 10
+	return n;
 }
 
 function x_to_RRGGBB1(x) {
-    if (x < 0.0)
-        return "#666666";
-    var e = Math.floor( Math.log(x) * Math.LOG10E );
-    var t01 = (e + 16.0) / (12.0 + 16.0);
-    return as_RRGGBB(Math.sin(t01 * 1.6), Math.cos(t01 * 1.4) * 0.8, 0.3);
+	if (x < 0.0)
+		return "#666666";
+	var e = Math.floor( Math.log(x) * Math.LOG10E );
+	var t01 = (e + 16.0) / (12.0 + 16.0);
+	return as_RRGGBB(Math.sin(t01 * 1.6), Math.cos(t01 * 1.4) * 0.8, 0.3);
 }
 
 function x_to_RRGGBB2(x) {
-    if (x < 0.0)
-        return "#444444";
-    var e = Math.floor( Math.log(x) * Math.LOG10E);
-    var t01 = (e + 16.0) / (12.0 + 16.0);
-    return as_RRGGBB(Math.sin(t01 * 1.6) * 0.8, Math.cos(t01 * 1.4) * 0.7, 0.2);
+	if (x < 0.0)
+		return "#444444";
+	var e = Math.floor( Math.log(x) * Math.LOG10E);
+	var t01 = (e + 16.0) / (12.0 + 16.0);
+	return as_RRGGBB(Math.sin(t01 * 1.6) * 0.8, Math.cos(t01 * 1.4) * 0.7, 0.2);
 }
 
 function x_to_RRGGBB3(x) {
-    if (x < 0.0)
-        return "#222222";
-    var e = Math.floor( Math.log(x) * Math.LOG10E);
-    var t01 = (e + 16.0) / (12.0 + 16.0);
-    return as_RRGGBB(Math.sin(t01 * 1.6) * 0.6, Math.cos(t01 * 1.4) * 0.6, 0.1);
+	if (x < 0.0)
+		return "#222222";
+	var e = Math.floor( Math.log(x) * Math.LOG10E);
+	var t01 = (e + 16.0) / (12.0 + 16.0);
+	return as_RRGGBB(Math.sin(t01 * 1.6) * 0.6, Math.cos(t01 * 1.4) * 0.6, 0.1);
 }
 
 // real error image
 var real_error_n = 0;
 
 function init_real_error() {
-    var real_error = document.getElementById("real_error");
-    var canvas_rect = real_error.getBoundingClientRect();
-    real_error_draw(0, 0, false);
+	var real_error = document.getElementById("real_error");
+	var canvas_rect = real_error.getBoundingClientRect();
+	real_error_draw(0, 0, false);
 
-    real_error.addEventListener('mousemove', function(e){
-        var canvas_rect = real_error.getBoundingClientRect();
-        real_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-        if(e.buttons == 1){
-           real_error_n = n_from_x_y(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
-           real_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
-        }
-    }, false);
+	real_error.addEventListener('mousemove', function(e){
+		var canvas_rect = real_error.getBoundingClientRect();
+		real_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+		   real_error_n = n_from_x_y(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+		   real_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+		}
+	}, false);
 
-    real_error.addEventListener('mousedown', function(e){
-        var canvas_rect = real_error.getBoundingClientRect();
-        real_error_n = n_from_x_y(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
-        real_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-    }, false);
+	real_error.addEventListener('mousedown', function(e){
+		var canvas_rect = real_error.getBoundingClientRect();
+		real_error_n = n_from_x_y(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+		real_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+	}, false);
 
-    real_error.addEventListener('mouseleave', function(e){
-        real_error_draw(0, 0, false);
-    }, false);
+	real_error.addEventListener('mouseleave', function(e){
+		real_error_draw(0, 0, false);
+	}, false);
 }
 
 function real_error_draw(client_x, client_y, do_guides) {
-    var real_error = document.getElementById("real_error");
-    var real_error_context = real_error.getContext("2d");
-    // background
-    real_error_context.fillStyle="#eeeeee";
-    real_error_context.fillRect(0, 0, 640, 538);
+	var real_error = document.getElementById("real_error");
+	var real_error_context = real_error.getContext("2d");
+	// background
+	real_error_context.fillStyle="#eeeeee";
+	real_error_context.fillRect(0, 0, 640, 538);
 
-    for(var i1 = 0; i1 <= 10; ++i1) {
-        for(var i2 = 0; i2 <= 10; ++i2) {
-            for(var i3 = 0; i3 <= 10; ++i3) {
-                var x = zero_x + dx * i1 + dzx * i2;
-                var y = zero_y + dy * i3 + dzy * i2;
-                // front
-                if(i2 == real_error_n) {
-                    real_error_context.fillStyle = x_to_RRGGBB1(real_relative_error[i1][i2][i3]);
-                    real_error_context.beginPath();
-                    real_error_context.moveTo(x, y);
-                    real_error_context.lineTo(x + dx, y);
-                    real_error_context.lineTo(x + dx, y + dy);
-                    real_error_context.lineTo(x, y + dy);
-                    real_error_context.lineTo(x, y);
-                    real_error_context.fill();
-                    real_error_context.closePath();
-                }
-                if(i2 < real_error_n)
-                    continue;
-                // left
-                if(i1 == 0) {
-                    real_error_context.fillStyle = x_to_RRGGBB2(real_relative_error[i1][i2][i3]);
-                    real_error_context.beginPath();
-                    real_error_context.moveTo(x, y);
-                    real_error_context.lineTo(x + dzx, y + dzy);
-                    real_error_context.lineTo(x + dzx, y + dzy + dy);
-                    real_error_context.lineTo(x, y + dy);
-                    real_error_context.lineTo(x, y);
-                    real_error_context.fill();
-                    real_error_context.closePath();
-                }
-                // top
-                if(i3 == 10) {
-                    real_error_context.fillStyle = x_to_RRGGBB3(real_relative_error[i1][i2][i3]);
-                    real_error_context.beginPath();
-                    real_error_context.moveTo(x, y + dy);
-                    real_error_context.lineTo(x + dzx, y + dzy + dy);
-                    real_error_context.lineTo(x + dzx + dx, y + dzy + dy);
-                    real_error_context.lineTo(x + dx, y + dy);
-                    real_error_context.lineTo(x, y + dy);
-                    real_error_context.fill();
-                    real_error_context.closePath();
-                }
-            }
-        }
-    }
-    // grid
-    real_error_context.beginPath();
-    real_error_context.strokeStyle="#000000";
-    real_error_context.fillStyle="#000000";
-    real_error_context.font = "16px sans-serif";
-    real_error_context.textAlign = "center";
-    real_error_context.textBaseline = "middle";
-    // right
-    real_error_context.moveTo(zero_x, zero_y);
-    real_error_context.lineTo(zero_x + dx * 11, zero_y);
-    real_error_context.lineTo(zero_x + dx * 11 - dx*0.8, zero_y - dy*0.2);
-    real_error_context.moveTo(zero_x + dx * 11, zero_y);
-    real_error_context.lineTo(zero_x + dx * 11 - dx*0.8, zero_y + dy*0.2);
-    for(var i = -10; i <= 10; i += 4) {
-        var x = zero_x + dx * (i + 10 + 1) / 2;
-        var y = zero_y + 12;
-        real_error_context.fillText("e" + i, x, y);
-    }
+	for(var i1 = 0; i1 <= 10; ++i1) {
+		for(var i2 = 0; i2 <= 10; ++i2) {
+			for(var i3 = 0; i3 <= 10; ++i3) {
+				var x = zero_x + dx * i1 + dzx * i2;
+				var y = zero_y + dy * i3 + dzy * i2;
+				// front
+				if(i2 == real_error_n) {
+					real_error_context.fillStyle = x_to_RRGGBB1(real_relative_error[i1][i2][i3]);
+					real_error_context.beginPath();
+					real_error_context.moveTo(x, y);
+					real_error_context.lineTo(x + dx, y);
+					real_error_context.lineTo(x + dx, y + dy);
+					real_error_context.lineTo(x, y + dy);
+					real_error_context.lineTo(x, y);
+					real_error_context.fill();
+					real_error_context.closePath();
+				}
+				if(i2 < real_error_n)
+					continue;
+				// left
+				if(i1 == 0) {
+					real_error_context.fillStyle = x_to_RRGGBB2(real_relative_error[i1][i2][i3]);
+					real_error_context.beginPath();
+					real_error_context.moveTo(x, y);
+					real_error_context.lineTo(x + dzx, y + dzy);
+					real_error_context.lineTo(x + dzx, y + dzy + dy);
+					real_error_context.lineTo(x, y + dy);
+					real_error_context.lineTo(x, y);
+					real_error_context.fill();
+					real_error_context.closePath();
+				}
+				// top
+				if(i3 == 10) {
+					real_error_context.fillStyle = x_to_RRGGBB3(real_relative_error[i1][i2][i3]);
+					real_error_context.beginPath();
+					real_error_context.moveTo(x, y + dy);
+					real_error_context.lineTo(x + dzx, y + dzy + dy);
+					real_error_context.lineTo(x + dzx + dx, y + dzy + dy);
+					real_error_context.lineTo(x + dx, y + dy);
+					real_error_context.lineTo(x, y + dy);
+					real_error_context.fill();
+					real_error_context.closePath();
+				}
+			}
+		}
+	}
+	// grid
+	real_error_context.beginPath();
+	real_error_context.strokeStyle="#000000";
+	real_error_context.fillStyle="#000000";
+	real_error_context.font = "16px sans-serif";
+	real_error_context.textAlign = "center";
+	real_error_context.textBaseline = "middle";
+	// right
+	real_error_context.moveTo(zero_x, zero_y);
+	real_error_context.lineTo(zero_x + dx * 11, zero_y);
+	real_error_context.lineTo(zero_x + dx * 11 - dx*0.8, zero_y - dy*0.2);
+	real_error_context.moveTo(zero_x + dx * 11, zero_y);
+	real_error_context.lineTo(zero_x + dx * 11 - dx*0.8, zero_y + dy*0.2);
+	for(var i = -10; i <= 10; i += 4) {
+		var x = zero_x + dx * (i + 10 + 1) / 2;
+		var y = zero_y + 12;
+		real_error_context.fillText("e" + i, x, y);
+	}
 
-    // up
-    real_error_context.moveTo(zero_x + dzx*11, zero_y + dzy*11);
-    real_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11 + dy*11);
-    real_error_context.lineTo(zero_x + dzx*11 - dx*0.2, zero_y + dzy*11 + dy*11 - dy*0.8);
-    real_error_context.moveTo(zero_x + dzx*11, zero_y + dzy*11 + dy*11);
-    real_error_context.lineTo(zero_x + dzx*11 + dx*0.2, zero_y + dzy*11 + dy*11 - dy*0.8);
-    for(var i = -6; i <= 10; i += 4) {
-        var x = zero_x - 22 + dzx*11;
-        var y = zero_y + dy * (i + 10 + 1) / 2 + dzy*11;
-        real_error_context.fillText("e" + i, x, y);
-    }
+	// up
+	real_error_context.moveTo(zero_x + dzx*11, zero_y + dzy*11);
+	real_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11 + dy*11);
+	real_error_context.lineTo(zero_x + dzx*11 - dx*0.2, zero_y + dzy*11 + dy*11 - dy*0.8);
+	real_error_context.moveTo(zero_x + dzx*11, zero_y + dzy*11 + dy*11);
+	real_error_context.lineTo(zero_x + dzx*11 + dx*0.2, zero_y + dzy*11 + dy*11 - dy*0.8);
+	for(var i = -6; i <= 10; i += 4) {
+		var x = zero_x - 22 + dzx*11;
+		var y = zero_y + dy * (i + 10 + 1) / 2 + dzy*11;
+		real_error_context.fillText("e" + i, x, y);
+	}
 
-    // away
-    real_error_context.moveTo(zero_x, zero_y);
-    real_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11);
-    real_error_context.lineTo(zero_x + dzx*11 - dzx*0.8 - dzy*0.2, zero_y + dzy*11 - dzy*0.8 + dzx * 0.2);
-    real_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11);
-    real_error_context.lineTo(zero_x + dzx*11 - dzx*0.8 + dzy*0.2, zero_y + dzy*11 - dzy*0.8 - dzx * 0.2);
-    for(var i = -6; i <= 10; i += 4) {
-        var x = zero_x + dzx * (i + 10 + 1) / 2 - 20;
-        var y = zero_y + dzy * (i + 10 + 1) / 2 + 8;
-        real_error_context.fillText("e" + i, x, y);
-    }
+	// away
+	real_error_context.moveTo(zero_x, zero_y);
+	real_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11);
+	real_error_context.lineTo(zero_x + dzx*11 - dzx*0.8 - dzy*0.2, zero_y + dzy*11 - dzy*0.8 + dzx * 0.2);
+	real_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11);
+	real_error_context.lineTo(zero_x + dzx*11 - dzx*0.8 + dzy*0.2, zero_y + dzy*11 - dzy*0.8 - dzx * 0.2);
+	for(var i = -6; i <= 10; i += 4) {
+		var x = zero_x + dzx * (i + 10 + 1) / 2 - 20;
+		var y = zero_y + dzy * (i + 10 + 1) / 2 + 8;
+		real_error_context.fillText("e" + i, x, y);
+	}
 
-    real_error_context.stroke();
-    real_error_context.closePath();
+	real_error_context.stroke();
+	real_error_context.closePath();
 
-    // legend
-    var legend_dx = 640 / (16 + 12 + 1);
-    var legend_dy = 24;
-    for(var i = -16; i <= 12; ++i) {
-        real_error_context.fillStyle = x_to_RRGGBB1(Math.pow(10, i));
-        real_error_context.fillRect((16 + i) * legend_dx, 538 - legend_dy, legend_dx, legend_dy);
-    }
+	// legend
+	var legend_dx = 640 / (16 + 12 + 1);
+	var legend_dy = 24;
+	for(var i = -16; i <= 12; ++i) {
+		real_error_context.fillStyle = x_to_RRGGBB1(Math.pow(10, i));
+		real_error_context.fillRect((16 + i) * legend_dx, 538 - legend_dy, legend_dx, legend_dy);
+	}
 
-    real_error_context.fillStyle="#000000";
-    for(var i = -14; i <= 10; i += 4) {
-        var x = (16 + i + 0.5) * legend_dx;
-        var y = 538 - legend_dy * 0.5;
-        real_error_context.fillText("e" + i, x, y);
-    }
+	real_error_context.fillStyle="#000000";
+	for(var i = -14; i <= 10; i += 4) {
+		var x = (16 + i + 0.5) * legend_dx;
+		var y = 538 - legend_dy * 0.5;
+		real_error_context.fillText("e" + i, x, y);
+	}
 }
 
 // prognosed error image
 var prognosed_error_n = 0;
 
 function init_prognosed_error() {
-    var prognosed_error = document.getElementById("prognosed_error");
-    var canvas_rect = prognosed_error.getBoundingClientRect();
-    prognosed_error_draw(0, 0, false);
+	var prognosed_error = document.getElementById("prognosed_error");
+	var canvas_rect = prognosed_error.getBoundingClientRect();
+	prognosed_error_draw(0, 0, false);
 
-    prognosed_error.addEventListener('mousemove', function(e){
-        var canvas_rect = prognosed_error.getBoundingClientRect();
-        prognosed_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-        if(e.buttons == 1){
-           prognosed_error_n = n_from_x_y(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
-           prognosed_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
-        }
-    }, false);
+	prognosed_error.addEventListener('mousemove', function(e){
+		var canvas_rect = prognosed_error.getBoundingClientRect();
+		prognosed_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+		   prognosed_error_n = n_from_x_y(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+		   prognosed_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+		}
+	}, false);
 
-    prognosed_error.addEventListener('mousedown', function(e){
-        var canvas_rect = prognosed_error.getBoundingClientRect();
-        prognosed_error_n = n_from_x_y(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
-        prognosed_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-    }, false);
+	prognosed_error.addEventListener('mousedown', function(e){
+		var canvas_rect = prognosed_error.getBoundingClientRect();
+		prognosed_error_n = n_from_x_y(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+		prognosed_error_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+	}, false);
 
-    prognosed_error.addEventListener('mouseleave', function(e){
-        prognosed_error_draw(0, 0, false);
-    }, false);
+	prognosed_error.addEventListener('mouseleave', function(e){
+		prognosed_error_draw(0, 0, false);
+	}, false);
 }
 
 function prognosed_error_draw(client_x, client_y, do_guides) {
-    var prognosed_error = document.getElementById("prognosed_error");
-    var prognosed_error_context = prognosed_error.getContext("2d");
-    // background
-    prognosed_error_context.fillStyle="#eeeeee";
-    prognosed_error_context.fillRect(0, 0, 640, 538);
+	var prognosed_error = document.getElementById("prognosed_error");
+	var prognosed_error_context = prognosed_error.getContext("2d");
+	// background
+	prognosed_error_context.fillStyle="#eeeeee";
+	prognosed_error_context.fillRect(0, 0, 640, 538);
 
-    for(var i1 = 0; i1 <= 10; ++i1) {
-        for(var i2 = 0; i2 <= 10; ++i2) {
-            for(var i3 = 0; i3 <= 10; ++i3) {
-                var x = zero_x + dx * i1 + dzx * i2;
-                var y = zero_y + dy * i3 + dzy * i2;
-                // front
-                if(i2 == prognosed_error_n) {
-                    prognosed_error_context.fillStyle = x_to_RRGGBB1(prognosed_relative_error[i1][i2][i3]);
-                    prognosed_error_context.beginPath();
-                    prognosed_error_context.moveTo(x, y);
-                    prognosed_error_context.lineTo(x + dx, y);
-                    prognosed_error_context.lineTo(x + dx, y + dy);
-                    prognosed_error_context.lineTo(x, y + dy);
-                    prognosed_error_context.lineTo(x, y);
-                    prognosed_error_context.fill();
-                    prognosed_error_context.closePath();
-                }
-                if(i2 < prognosed_error_n)
-                    continue;
-                // left
-                if(i1 == 0) {
-                    prognosed_error_context.fillStyle = x_to_RRGGBB2(prognosed_relative_error[i1][i2][i3]);
-                    prognosed_error_context.beginPath();
-                    prognosed_error_context.moveTo(x, y);
-                    prognosed_error_context.lineTo(x + dzx, y + dzy);
-                    prognosed_error_context.lineTo(x + dzx, y + dzy + dy);
-                    prognosed_error_context.lineTo(x, y + dy);
-                    prognosed_error_context.lineTo(x, y);
-                    prognosed_error_context.fill();
-                    prognosed_error_context.closePath();
-                }
-                // top
-                if(i3 == 10) {
-                    prognosed_error_context.fillStyle = x_to_RRGGBB3(prognosed_relative_error[i1][i2][i3]);
-                    prognosed_error_context.beginPath();
-                    prognosed_error_context.moveTo(x, y + dy);
-                    prognosed_error_context.lineTo(x + dzx, y + dzy + dy);
-                    prognosed_error_context.lineTo(x + dzx + dx, y + dzy + dy);
-                    prognosed_error_context.lineTo(x + dx, y + dy);
-                    prognosed_error_context.lineTo(x, y + dy);
-                    prognosed_error_context.fill();
-                    prognosed_error_context.closePath();
-                }
-            }
-        }
-    }
-    // grid
-    prognosed_error_context.beginPath();
-    prognosed_error_context.strokeStyle="#000000";
-    prognosed_error_context.fillStyle="#000000";
-    prognosed_error_context.font = "16px sans-serif";
-    prognosed_error_context.textAlign = "center";
-    prognosed_error_context.textBaseline = "middle";
-    // right
-    prognosed_error_context.moveTo(zero_x, zero_y);
-    prognosed_error_context.lineTo(zero_x + dx * 11, zero_y);
-    prognosed_error_context.lineTo(zero_x + dx * 11 - dx*0.8, zero_y - dy*0.2);
-    prognosed_error_context.moveTo(zero_x + dx * 11, zero_y);
-    prognosed_error_context.lineTo(zero_x + dx * 11 - dx*0.8, zero_y + dy*0.2);
-    for(var i = -10; i <= 10; i += 4) {
-        var x = zero_x + dx * (i + 10 + 1) / 2;
-        var y = zero_y + 12;
-        prognosed_error_context.fillText("e" + i, x, y);
-    }
+	for(var i1 = 0; i1 <= 10; ++i1) {
+		for(var i2 = 0; i2 <= 10; ++i2) {
+			for(var i3 = 0; i3 <= 10; ++i3) {
+				var x = zero_x + dx * i1 + dzx * i2;
+				var y = zero_y + dy * i3 + dzy * i2;
+				// front
+				if(i2 == prognosed_error_n) {
+					prognosed_error_context.fillStyle = x_to_RRGGBB1(prognosed_relative_error[i1][i2][i3]);
+					prognosed_error_context.beginPath();
+					prognosed_error_context.moveTo(x, y);
+					prognosed_error_context.lineTo(x + dx, y);
+					prognosed_error_context.lineTo(x + dx, y + dy);
+					prognosed_error_context.lineTo(x, y + dy);
+					prognosed_error_context.lineTo(x, y);
+					prognosed_error_context.fill();
+					prognosed_error_context.closePath();
+				}
+				if(i2 < prognosed_error_n)
+					continue;
+				// left
+				if(i1 == 0) {
+					prognosed_error_context.fillStyle = x_to_RRGGBB2(prognosed_relative_error[i1][i2][i3]);
+					prognosed_error_context.beginPath();
+					prognosed_error_context.moveTo(x, y);
+					prognosed_error_context.lineTo(x + dzx, y + dzy);
+					prognosed_error_context.lineTo(x + dzx, y + dzy + dy);
+					prognosed_error_context.lineTo(x, y + dy);
+					prognosed_error_context.lineTo(x, y);
+					prognosed_error_context.fill();
+					prognosed_error_context.closePath();
+				}
+				// top
+				if(i3 == 10) {
+					prognosed_error_context.fillStyle = x_to_RRGGBB3(prognosed_relative_error[i1][i2][i3]);
+					prognosed_error_context.beginPath();
+					prognosed_error_context.moveTo(x, y + dy);
+					prognosed_error_context.lineTo(x + dzx, y + dzy + dy);
+					prognosed_error_context.lineTo(x + dzx + dx, y + dzy + dy);
+					prognosed_error_context.lineTo(x + dx, y + dy);
+					prognosed_error_context.lineTo(x, y + dy);
+					prognosed_error_context.fill();
+					prognosed_error_context.closePath();
+				}
+			}
+		}
+	}
+	// grid
+	prognosed_error_context.beginPath();
+	prognosed_error_context.strokeStyle="#000000";
+	prognosed_error_context.fillStyle="#000000";
+	prognosed_error_context.font = "16px sans-serif";
+	prognosed_error_context.textAlign = "center";
+	prognosed_error_context.textBaseline = "middle";
+	// right
+	prognosed_error_context.moveTo(zero_x, zero_y);
+	prognosed_error_context.lineTo(zero_x + dx * 11, zero_y);
+	prognosed_error_context.lineTo(zero_x + dx * 11 - dx*0.8, zero_y - dy*0.2);
+	prognosed_error_context.moveTo(zero_x + dx * 11, zero_y);
+	prognosed_error_context.lineTo(zero_x + dx * 11 - dx*0.8, zero_y + dy*0.2);
+	for(var i = -10; i <= 10; i += 4) {
+		var x = zero_x + dx * (i + 10 + 1) / 2;
+		var y = zero_y + 12;
+		prognosed_error_context.fillText("e" + i, x, y);
+	}
 
-    // up
-    prognosed_error_context.moveTo(zero_x + dzx*11, zero_y + dzy*11);
-    prognosed_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11 + dy*11);
-    prognosed_error_context.lineTo(zero_x + dzx*11 - dx*0.2, zero_y + dzy*11 + dy*11 - dy*0.8);
-    prognosed_error_context.moveTo(zero_x + dzx*11, zero_y + dzy*11 + dy*11);
-    prognosed_error_context.lineTo(zero_x + dzx*11 + dx*0.2, zero_y + dzy*11 + dy*11 - dy*0.8);
-    for(var i = -6; i <= 10; i += 4) {
-        var x = zero_x - 22 + dzx*11;
-        var y = zero_y + dy * (i + 10 + 1) / 2 + dzy*11;
-        prognosed_error_context.fillText("e" + i, x, y);
-    }
+	// up
+	prognosed_error_context.moveTo(zero_x + dzx*11, zero_y + dzy*11);
+	prognosed_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11 + dy*11);
+	prognosed_error_context.lineTo(zero_x + dzx*11 - dx*0.2, zero_y + dzy*11 + dy*11 - dy*0.8);
+	prognosed_error_context.moveTo(zero_x + dzx*11, zero_y + dzy*11 + dy*11);
+	prognosed_error_context.lineTo(zero_x + dzx*11 + dx*0.2, zero_y + dzy*11 + dy*11 - dy*0.8);
+	for(var i = -6; i <= 10; i += 4) {
+		var x = zero_x - 22 + dzx*11;
+		var y = zero_y + dy * (i + 10 + 1) / 2 + dzy*11;
+		prognosed_error_context.fillText("e" + i, x, y);
+	}
 
-    // away
-    prognosed_error_context.moveTo(zero_x, zero_y);
-    prognosed_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11);
-    prognosed_error_context.lineTo(zero_x + dzx*11 - dzx*0.8 - dzy*0.2, zero_y + dzy*11 - dzy*0.8 + dzx * 0.2);
-    prognosed_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11);
-    prognosed_error_context.lineTo(zero_x + dzx*11 - dzx*0.8 + dzy*0.2, zero_y + dzy*11 - dzy*0.8 - dzx * 0.2);
-    for(var i = -6; i <= 10; i += 4) {
-        var x = zero_x + dzx * (i + 10 + 1) / 2 - 20;
-        var y = zero_y + dzy * (i + 10 + 1) / 2 + 8;
-        prognosed_error_context.fillText("e" + i, x, y);
-    }
+	// away
+	prognosed_error_context.moveTo(zero_x, zero_y);
+	prognosed_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11);
+	prognosed_error_context.lineTo(zero_x + dzx*11 - dzx*0.8 - dzy*0.2, zero_y + dzy*11 - dzy*0.8 + dzx * 0.2);
+	prognosed_error_context.lineTo(zero_x + dzx*11, zero_y + dzy*11);
+	prognosed_error_context.lineTo(zero_x + dzx*11 - dzx*0.8 + dzy*0.2, zero_y + dzy*11 - dzy*0.8 - dzx * 0.2);
+	for(var i = -6; i <= 10; i += 4) {
+		var x = zero_x + dzx * (i + 10 + 1) / 2 - 20;
+		var y = zero_y + dzy * (i + 10 + 1) / 2 + 8;
+		prognosed_error_context.fillText("e" + i, x, y);
+	}
 
-    prognosed_error_context.stroke();
-    prognosed_error_context.closePath();
+	prognosed_error_context.stroke();
+	prognosed_error_context.closePath();
 
-    // legend
-    var legend_dx = 640 / (16 + 12 + 1);
-    var legend_dy = 24;
-    for(var i = -16; i <= 12; ++i) {
-        prognosed_error_context.fillStyle = x_to_RRGGBB1(Math.pow(10, i));
-        prognosed_error_context.fillRect((16 + i) * legend_dx, 538 - legend_dy, legend_dx, legend_dy);
-    }
+	// legend
+	var legend_dx = 640 / (16 + 12 + 1);
+	var legend_dy = 24;
+	for(var i = -16; i <= 12; ++i) {
+		prognosed_error_context.fillStyle = x_to_RRGGBB1(Math.pow(10, i));
+		prognosed_error_context.fillRect((16 + i) * legend_dx, 538 - legend_dy, legend_dx, legend_dy);
+	}
 
-    prognosed_error_context.fillStyle="#000000";
-    for(var i = -14; i <= 10; i += 4) {
-        var x = (16 + i + 0.5) * legend_dx;
-        var y = 538 - legend_dy * 0.5;
-        prognosed_error_context.fillText("e" + i, x, y);
-    }
+	prognosed_error_context.fillStyle="#000000";
+	for(var i = -14; i <= 10; i += 4) {
+		var x = (16 + i + 0.5) * legend_dx;
+		var y = 538 - legend_dy * 0.5;
+		prognosed_error_context.fillText("e" + i, x, y);
+	}
 }
-    </script>
-  </head>
-  <body>
-    <center>
-    <h1>
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
 Estimating floating point error the easy way
-    </h1>
-    <p>
+	</h1>
+	<p>
 Floating point numbers are not real numbers. You can't squeeze an infinity into a finite number of bits. You have to accept that real numbers are represented with some error.
-    </p>
-    <p>
+	</p>
+	<p>
 The common misconception is ”in practice, we have enough bits to make this error negligible.” The problem with this point of view is that quite often it's true, so it perpetuates itself until something goes horribly wrong. But is it enough or not depends on these three things:
-    <ol>
-    <li>The stability of the operation.</li>
-    <li>The ranges of variables involved.</li>
-    <li>How much error can we tolerate?</li>
-    </ol>
-    <p>
+	<ol>
+	<li>The stability of the operation.</li>
+	<li>The ranges of variables involved.</li>
+	<li>How much error can we tolerate?</li>
+	</ol>
+	<p>
 It just cant be enough all the time for all the computations.
-    </p>
-    <p>
+	</p>
+	<p>
 Unforeseen <span id="index_floating_point_error">floating point error</span> is the source of the most unpleasant bugs. The bugs that come and go unpredictably. The bugs that don't reproduce on unit-tests and lay low through the integration phase only to be seen by your most important customer.
-    </p>
-    <p>
+	</p>
+	<p>
 How to protect yourself from this threat? Engineering has one ultimate answer for this kind of questions and it's: ”measurement!”
-    </p>
+	</p>
 
-    <h2>
+	<h2>
 Measuring the floating point error using an inverse operation
-    </h2>
-    <p>
+	</h2>
+	<p>
 Here's a <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/floating_point_surrealismmeter/double_interval/cubic_solver.hpp">cubic equation solver</a>. It is surprisingly computationally rich for such a primitive operation. It has multiple multiplications, trigonometry, and square roots.
-    </p>
-    <p>
+	</p>
+	<p>
 Fortunately, the inverse operation for solving a cubic equation, getting the coefficients from the given roots, is simple.
-    </p>
-    <table>
-    <tr><td>
+	</p>
+	<table>
+	<tr><td>
 ax<sup>3</sup> + bx<sup>3</sup> + cx + d = 0
-    </td></tr><tr><td>
+	</td></tr><tr><td>
 (x - x<sub>1</sub>)(x - x<sub>2</sub>)(x - x<sub>3</sub>) = 0
-    </td></tr><tr><td>
+	</td></tr><tr><td>
 a = 1
-    </td></tr><tr><td>
+	</td></tr><tr><td>
 b = x<sub>1</sub> + x<sub>2</sub> + x<sub>3</sub>
-    </td></tr><tr><td>
+	</td></tr><tr><td>
 c = x<sub>1</sub>x<sub>2</sub> + x<sub>2</sub>x<sub>3</sub> + x<sub>3</sub>x<sub>1</sub>
-    </td></tr><tr><td>
+	</td></tr><tr><td>
 d = x<sub>1</sub>x<sub>2</sub>x<sub>3</sub>
-    </td></tr>
-    </table>
-    <p>
+	</td></tr>
+	</table>
+	<p>
 This means that we can measure the error of solving a cubic equation for every 3 roots we want. Yes, it will also have the error of the coefficients computation, but this error should be small enough to be considered negligible (yes, I see the irony).
-    </p>
-    <p>
+	</p>
+	<p>
 Let's do an <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/floating_point_surrealismmeter/double_interval/exp_2.cpp">experiment</a>. Let's measure the relative error for a triplet of roots defined in some exponential range.
-    </p>
-    <table>
-    <tr><td>
+	</p>
+	<table>
+	<tr><td>
 x<sub>1</sub> = 1*10<sup>i<sub>1</sub></sup>, x<sub>2</sub> = 2*10<sup>i<sub>2</sub></sup>, x<sub>3</sub> = 3*10<sup>i<sub>3</sub></sup>,
-    </td></tr><tr><td>
+	</td></tr><tr><td>
 i<sub>1</sub> = -10, -8,... 10,
-    </td></tr><tr><td>
+	</td></tr><tr><td>
 i<sub>2</sub> = -10, -8,... 10,
-    </td></tr><tr><td>
+	</td></tr><tr><td>
 i<sub>3</sub> = -10, -8,... 10.
-    </td></tr>
-    </table>
-    <p>
+	</td></tr>
+	</table>
+	<p>
 We get a 3D grid of errors for different configurations of roots' orders of magnitude. Here it is.
-    </p>
-    <canvas id="real_error" width=640 height=538></canvas>
-    <p class="comment">
+	</p>
+	<canvas id="real_error" width=640 height=538></canvas>
+	<p class="comment">
 You can click or drag over the left side of the cube.
-    </p>
-    <p>
+	</p>
+	<p>
 The black cells are where the algorithm failed to find all the roots. The red ones are the ones with the largest error. The green ones are the ones with the least error. All and all, the error changes from e<sup>-16</sup> to e<sup>12</sup>. Remember, this is relative error, so e<sup>12</sup> for a root of e<sup>10</sup> is actually an enormous number that looks like this: 10'000'000'000'000'000'000'000. That's our worse error.
-    </p>
-    <p>
+	</p>
+	<p>
 There is a pattern here. The green area shoots through the diagonal. This means that it's all good when the orders of the roots are roughly the same. Whether they are e<sup>-8</sup> or e<sup>2</sup> or e<sup>+10</sup>. It's all fine as long as there is no significant difference. But when there is, he have trouble.
-    </p>
-    <p>
+	</p>
+	<p>
 I once had a really nasty bug that eventually boiled down to the equation with one root being exactly 600, and the other two at about 2e-5. I had to track it down, and, of course, it really helped me to have the error measured. But it also became an eye-opening experience. These are not astronomical numbers. It's like 2 cents and 600'000 euros in one equation. Not even millions.
-    </p>
-    <p>
+	</p>
+	<p>
 So here is a trivial advice: when in doubt — measure. When not in doubt — measure and be surprised.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Estimating the floating point error using intervals
-    </h2>
-    <p>
+	</h2>
+	<p>
 What if we don't have a reverse operation at all? Or what if it introduces the greater error than the operation itself? It's problematic to calculate computational error when we don't have a reliable way to obtain the ground truth. Can we know the error without the actual measurements?
-    </p>
-    <p>
+	</p>
+	<p>
 Well, no. But we can do some estimate instead.
-    </p>
-    <p>
+	</p>
+	<p>
 We can consider a real number representation to be not a floating point number, but an interval between two adjacent floating point numbers. An operation on intervals widens the resulting interval depending on the values involved.
-    </p>
-    <p>
+	</p>
+	<p>
 This is a simplification since we don't account for proper rounding. But since we're estimating an error and not doing an actual computation, it's fine.
-    </p>
-    <p>
+	</p>
+	<p>
 This way we can measure how the difference between the real numbers and their floating point representation accumulates through the calculation. We measure not the actual error, but the width of the interval that definitely holds our value.
-    </p>
-    <p>
+	</p>
+	<p>
 Unless our algorithm is stable, operating on intervals make them larger and larger, and the size of each interval subsequently represents the potential error we might face. Of course, out real error should be smaller than that, so measuring interval sizes doesn't substitute the exact measurements. Still, for our cubic solver, <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/floating_point_surrealismmeter/double_interval/exp_3.cpp">the estimation</a> actually follows the measurements rather well.
-    </p>
-    <canvas id="prognosed_error" width=640 height=538></canvas>
-    <script language="JavaScript">
-        init_real_error();
-        init_prognosed_error();
-    </script>
-    <p>
+	</p>
+	<canvas id="prognosed_error" width=640 height=538></canvas>
+	<script language="JavaScript">
+		init_real_error();
+		init_prognosed_error();
+	</script>
+	<p>
 You don't have to rewrite all your code to work on intervals instead of floats only to get these estimates. For instance, in C++ you can make <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/floating_point_surrealismmeter/double_interval/double_interval.hpp">an interval representing type</a> disguise itself as a double with a simple #define. Yes, it's a dirty hack, and you have to be careful to have all your maths functions reimplemented for the intervals, but it has its perks.
-    </p>
-    <p>
+	</p>
+	<p>
 First of all, it's simple. You do <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/floating_point_surrealismmeter/double_interval/exp_1.cpp">something like this</a>:
-    </p>
-    <table style="border: 1px solid black;font-style: normal;">
-    <tr><td><pre>
+	</p>
+	<table style="border: 1px solid black;font-style: normal;">
+	<tr><td><pre>
 #include "double_interval.hpp"
 
 #define double DoubleInterval
 #include "cubic_solver.hpp"
 
 ...
-    </pre></td></tr>
-    </table>
-    <p>
+	</pre></td></tr>
+	</table>
+	<p>
 And all your doubles acquire <i>from</i> and <i>to</i> fields automatically. You just run your tests then and check the intervals. Simple!
-    </p>
-    <p>
+	</p>
+	<p>
 Second, it enables you to do what almost no one does but almost everyone should. It enables you to debug computational errors. You can see them, you can trace the execution to find their sources, you can make the code better.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Conclusion
-    </h2>
-    <p>
+	</h2>
+	<p>
 Floating point computational error is measurable and manageable. By having it under control you can make your clients happy, and yourself — free from the nights of fruitless debugging.
-    </p>
+	</p>
 
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
 		<a href="all_programming.html">#programming</a> <a href="all_mathematics.html">#mathematics</a> <a href="all_demos.html">#demos</a>
@@ -953,6 +953,6 @@ Floating point computational error is measurable and manageable. By having it un
 	</td>
 	</tr>
 	</table>
-    </center>
-  </body>
+	</center>
+</body>
 </html>
