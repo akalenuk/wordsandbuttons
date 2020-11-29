@@ -159,8 +159,18 @@ function init_floating(n) {
 					floating_cell_bits[n][i] = 1 - floating_cell_bits[n][i];
 			}
 			floating_draw(n);
-			floating_cell_bits[3] = bits_from_num(num_from_bits(floating_cell_bits[1]) + num_from_bits(floating_cell_bits[2]));
+			const n1 = num_from_bits(floating_cell_bits[1]);
+			const n2 = num_from_bits(floating_cell_bits[2]);
+			floating_cell_bits[3] = bits_from_num(n1 + n2);
 			floating_draw(3);
+			const n3 = num_from_bits(floating_cell_bits[3]);
+			console.log(n3);
+			if(Number.isNaN(n1) || Number.isNaN(n2))
+				document.getElementById("error").innerHTML = "not a number";
+			else if(!Number.isFinite(n1) || !Number.isFinite(n2))
+				document.getElementById("error").innerHTML = "infinite";
+			else
+				document.getElementById("error").innerHTML = String(Math.abs(n1 + n2 - n3));
 		}
 	}, false);
 }
@@ -207,7 +217,7 @@ function floating_draw(n) {
 	if( e == 7 ) {
 		if ( n == 0 ) {
 			context.fillStyle = "#914853";
-			const text = sign == -1.0 ? "Negative" : "Positive";
+			const text = sign == -1.0 ? "Negative " : "Positive ";
 			const width = context.measureText(text).width;
 			context.fillText(text, 20, 120);
 			context.fillStyle = "#673670";
@@ -256,7 +266,7 @@ function num_from_bits(bits) {
 		if ( n == 0 ) {
 			return sign / 0.;
 		} else {
-			return (1./0.)/0.;
+			return NaN;
 		}
 	} else
 		return sign * (n * Math.pow(2, e - 2 - (e > 0 ? 1 : 0)));
@@ -285,12 +295,6 @@ function bits_from_num(x) {
 </head>
 <body>
 	<center>
-	<h1>
-6-bit floating point number
-	</h1>
-	<p>
-...
-	</p>
 	<canvas id="floating_1" width=640 height=138></canvas>
 	<script language="JavaScript">
 		init_floating(1);
@@ -309,7 +313,7 @@ function bits_from_num(x) {
 	<script language="JavaScript">
 		init_floating(3);
 	</script>
-
+	<p>The error is: <b><span id="error">0</error></b>.</p>
 
 	</center>
 </body>
