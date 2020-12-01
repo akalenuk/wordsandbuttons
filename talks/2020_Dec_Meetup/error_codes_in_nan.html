@@ -339,9 +339,11 @@ function colorized(text) {
 #include &lt;cstdint&gt;
 
 enum class ECode : uint64_t {
-    INPUT_IS_NAN = 0xFFF0'0000'0000'0001,
+    OK = 0xFFF0'0000'0000'0001,
+    ERROR,
+    INPUT_IS_NAN,
     INPUT_IS_INFINITE,
-    INPUT_IS_NEGATIVE
+    INPUT_IS_NEGATIVE,
 };
 
 union Result_or_code
@@ -383,24 +385,6 @@ int main(void) {
 I've made this simple benchmark to test how noticeable the gains really are.
 	</p>
 	<pre id="code_2">
-enum class ECode : uint64_t {
-    OK = 0xFFF0'0000'0000'0001,
-    ERROR,
-    INPUT_IS_NAN,
-    INPUT_IS_INFINITE,
-    INPUT_IS_NEGATIVE,
-};
-
-union Result_or_code
-{
-    double result;
-    ECode code;
-    Result_or_code(double x) {result = x;}
-    Result_or_code(ECode c) {code = c;}
-    operator double() {return result;}
-    operator ECode() {return code;}
-};
-
 #define MEASURE(CODE_TO_MEASURE) \
     { \
     auto start = std::chrono::system_clock::now(); \
