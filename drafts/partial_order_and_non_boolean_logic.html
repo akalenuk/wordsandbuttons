@@ -133,8 +133,9 @@ var slider_max_x = [];
 var slider_down = [];
 var slider_template = [];
 var slider_value = [];
+var slider_lb_is_ub = [];
 
-function position_slider(no, client_x) {
+function position_slider(no, client_x, ub_is_lb) {
 	const lb = slider_lb[no];
 	const ub = slider_ub[no];
 	const min_x = slider_min_x[no];
@@ -144,10 +145,15 @@ function position_slider(no, client_x) {
 	x = min_x + x * (max_x - min_x);
 	x = Math.max(x, min_x);
 	x = Math.min(x, max_x);
-	if(Math.abs(x - lb) < Math.abs(x - ub))
+	if(ub_is_lb) {
 		slider_lb[no] = x;
-	else
 		slider_ub[no] = x;
+	} else {
+		if(Math.abs(x - lb) < Math.abs(x - ub))
+			slider_lb[no] = x;
+		else
+			slider_ub[no] = x;
+	}
 
 	// they could still be swapped via 0-length interval
 	if(slider_lb[no] > slider_ub[no]) {
@@ -157,7 +163,7 @@ function position_slider(no, client_x) {
 	}
 }
 
-function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template, on_slide){
+function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template, lb_is_ub, on_slide){
 	var slider = document.getElementById("interval_" + String(no));
 	slider_min_x[no] = min_x;
 	slider_max_x[no] = max_x;
@@ -166,6 +172,7 @@ function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template, on_sl
 	slider_down[no] = false;
 	slider_template[no] = x_template;
 	slider_value[no] = min_x - 1.0; // anything below min is "none"
+	slider_lb_is_ub[no] = lb_is_ub;
 	draw_slider(no);
 
 	slider.addEventListener('mouseleave', function(e){
@@ -187,7 +194,7 @@ function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template, on_sl
 	slider.addEventListener('mousedown', function(e){
 		slider_down[no] = true;
 		var canvas_rect = slider.getBoundingClientRect();
-		position_slider(no, e.clientX - canvas_rect.left);
+		position_slider(no, e.clientX - canvas_rect.left, slider_lb_is_ub[no]);
 		on_slide(slider_lb[no], slider_ub[no]);
 		draw_slider(no);
 	}, false);
@@ -195,7 +202,7 @@ function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template, on_sl
 	slider.addEventListener('mousemove', function(e){
 		if(slider_down[no] == true){
 			var canvas_rect = slider.getBoundingClientRect();
-			position_slider(no, e.clientX - canvas_rect.left);
+			position_slider(no, e.clientX - canvas_rect.left, slider_lb_is_ub[no]);
 			on_slide(slider_lb[no], slider_ub[no]);
 			draw_slider(no);
 		}
@@ -239,41 +246,24 @@ function draw_slider(no){
 	ctx.fillStyle="#942b3b";
 	ctx.textBaseline = "bottom";
 	ctx.textAlign = "left";
-	const left_piece_text = "[" + x_template.replace("%x", lb.toFixed(1)) + ",";
-	const left_width = ctx.measureText(left_piece_text).width;
-	const left_piece_x = slider_margin_left + dw * lb01 + 6;
-	const right_piece_x = slider_margin_left + dw * ub01 - 6;
-	const right_piece_text = x_template.replace("%x", ub.toFixed(1)) + "]";
-	const right_width = ctx.measureText(right_piece_text).width;
-	if(right_piece_x - left_piece_x - right_width - 12 > left_width)
-		ctx.fillText(left_piece_text, left_piece_x, slider_h - slider_margin_bottom - 6);
-	else
-		ctx.fillText(left_piece_text + " " + right_piece_text, left_piece_x, slider_h - slider_margin_bottom - 6);
-	ctx.textAlign = "right";
-	if(right_piece_x - left_piece_x - right_width - 12 > left_width)
-		ctx.fillText(right_piece_text, right_piece_x, slider_h - slider_margin_bottom - 6);
-
-	// value if exists
-	if(slider_value[no] >= min_x) {
-		// ok, this is simply dirty. Don't reuse this code
-		const value_to_print = Math.pow(10, slider_value[no]).toExponential(1);
-
-		const value01 = (slider_value[no] - min_x) / (max_x - min_x);
-		ctx.strokeStyle="#000000";
-		ctx.beginPath();
-		ctx.moveTo(slider_margin_left + dw * value01, slider_margin_top);
-		ctx.lineTo(slider_margin_left + dw * value01, slider_h - slider_margin_bottom);
-		ctx.stroke();
-		ctx.closePath();
-		ctx.textBaseline = "middle";
-		ctx.fillStyle="#000000";
-		if(value01 < 0.75) {
-			ctx.textAlign = "left";
-			ctx.fillText(value_to_print, slider_margin_left + dw * value01 + 6, slider_h / 2);
-		} else {
-			ctx.textAlign = "right";
-			ctx.fillText(value_to_print, slider_margin_left + dw * value01 - 6, slider_h / 2);
-		}
+	if(slider_lb_is_ub[no]) {
+		const text = x_template.replace("%x", lb.toFixed(1));
+		const text_x = slider_margin_left + dw * lb01 + 6;
+		ctx.fillText(text, text_x, slider_h - slider_margin_bottom - 6);
+	} else {
+		const left_piece_text = "[" + x_template.replace("%x", lb.toFixed(1)) + ",";
+		const left_width = ctx.measureText(left_piece_text).width;
+		const left_piece_x = slider_margin_left + dw * lb01 + 6;
+		const right_piece_x = slider_margin_left + dw * ub01 - 6;
+		const right_piece_text = x_template.replace("%x", ub.toFixed(1)) + "]";
+		const right_width = ctx.measureText(right_piece_text).width;
+		if(right_piece_x - left_piece_x - right_width - 12 > left_width)
+			ctx.fillText(left_piece_text, left_piece_x, slider_h - slider_margin_bottom - 6);
+		else
+			ctx.fillText(left_piece_text + " " + right_piece_text, left_piece_x, slider_h - slider_margin_bottom - 6);
+		ctx.textAlign = "right";
+		if(right_piece_x - left_piece_x - right_width - 12 > left_width)
+			ctx.fillText(right_piece_text, right_piece_x, slider_h - slider_margin_bottom - 6);
 	}
 }
 
@@ -351,6 +341,17 @@ Partial order and non-boolean logic
 	</h1>
 
 	<p>
+There is total order
+	</p>
+	<table>
+	<tr>
+	<td class="big">a:</td><td><canvas id="interval_3" width=608 height=84></canvas></td>
+	</tr><tr>
+	<td class="big">b:</td><td><canvas id="interval_4" width=608 height=84></canvas></td>
+	</tr>
+	</table>
+
+	<p>
 There is only partial order.
 	</p>
 	<table>
@@ -376,12 +377,16 @@ There is only partial order.
 </table>
 
 	<script language="JavaScript">
-	init_slider(1, 0, 10, 3, 4, "%x", function(lb, ub) {
+	init_slider(1, 0, 10, 3, 4, "%x", false, function(lb, ub) {
 		reevaluate();
 	});
-	init_slider(2, 0, 10, 5, 8, "%x", function(lb, ub) {
+	init_slider(2, 0, 10, 5, 8, "%x", false, function(lb, ub) {
 		reevaluate();
 	});
+
+	init_slider(3, 0, 10, 3, 3, "%x", true, function(lb, ub) {});
+	init_slider(4, 0, 10, 7, 7, "%x", true, function(lb, ub) {});
+
 	reevaluate();
 	</script>
 
