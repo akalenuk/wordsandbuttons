@@ -13,22 +13,22 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 - [Why is it ok to divide by 0.0?](https://wordsandbuttons.online/why_is_it_ok_to_divide_by_0_0.html) This explains why the division by zero in floating point numbers is ok.
 <sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/programming.html)</sup> 
 
-- [Can we use lemniscates for ultra-cheap vector graphics?](https://wordsandbuttons.online/can_we_use_lemniscates_for_ultra_cheap_vector_gaphics.html) This depicts an old idea of using multifocal lemniscates to draw arbitrary curves. In somewhat limited scope, this may be indeed an economical alternative to splines.
+- [Can we use lemniscates for ultra-cheap vector graphics?](https://wordsandbuttons.online/can_we_use_lemniscates_for_ultra_cheap_vector_gaphics.html) This depicts an old idea of using multifocal lemniscates to draw arbitrary shapes. In some applications, this may be indeed an economical alternative to splines.
 <sup>[#demos](https://wordsandbuttons.online/demos.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> 
 
 - [Bi-whatever transformations](https://wordsandbuttons.online/biwhatever_transformations.html) An interactive explanation of how polynomial transformations such as trilinear or biquadratic or even linear-cubic work, and how to craft your own that fits your particular task the best.
-<sup>[#demos](https://wordsandbuttons.online/demos.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/programming.html)</sup> 
+<sup>[#demos](https://wordsandbuttons.online/demos.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> 
 
 - [Arctangent scale. It's like the logarithmic scale but infinite](https://wordsandbuttons.online/arctangent_scale_its_like_the_logarithmic_scale_but_infinite.html) An interactive demo of how, with arctangent used as a scale, we can show any function on a screen. And not just a fragment of it but the whole function.
 <sup>[#demos](https://wordsandbuttons.online/demos.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> 
 
-- [Image darning](https://wordsandbuttons.online/image_darning.html) A simple image processing algorithm that cleans up dirt stains from aged newspapers. I called it “darning” because of how it works.
+- [Image darning](https://wordsandbuttons.online/image_darning.html) A simple image processing algorithm that cleans up dirt stains from old newspapers. I called it “darning” because of how it works.
 <sup>[#algorithms](https://wordsandbuttons.online/algorithms.html)</sup> <sup>[#demos](https://wordsandbuttons.online/demos.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> 
 
 - [Error codes are not numbers. But they are. Can we exploit that?](https://wordsandbuttons.online/error_codes_are_not_numbers_but_they_are_can_we_exploit_that.html) An interactive explanation of how we can use floating-point NaNs as error code holders in C++.
 <sup>[#demos](https://wordsandbuttons.online/demos.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/programming.html)</sup> 
 
-- [Binary search](https://wordsandbuttons.online/binary_search.html) An interactive demo of the binary algorithm search along with its one promising variant.
+- [Binary search](https://wordsandbuttons.online/binary_search.html) An interactive demo of the binary search algorithm along with its one slightly more obscure but promising variant.
 <sup>[#algorithms](https://wordsandbuttons.online/algorithms.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/tutorials.html)</sup> 
 
 - [Honeycomb texture generator](https://wordsandbuttons.online/honeycomb_texture_generator.html) This generates honeycomb textures of a special quasi-irrational form. Explanation included.
