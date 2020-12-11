@@ -268,6 +268,7 @@ function draw_slider(no){
 }
 
 function reevaluate() {
+	// partial order. de = deffinitely equal, pe = possibly equal
 	if(slider_lb[1] == slider_ub[1] && slider_lb[1] == slider_lb[2] && slider_lb[2] == slider_ub[2])
 		document.getElementById('de').innerHTML = 'true';
 	else
@@ -331,6 +332,37 @@ function reevaluate() {
 		document.getElementById('pge').innerHTML = 'true';
 	else
 		document.getElementById('pge').innerHTML = 'false';
+
+	// total order e = equal
+	if(slider_lb[3] == slider_lb[4])
+		document.getElementById('e').innerHTML = 'true';
+	else
+		document.getElementById('e').innerHTML = 'false';
+
+	if(slider_lb[3] < slider_lb[4])
+		document.getElementById('l').innerHTML = 'true';
+	else
+		document.getElementById('l').innerHTML = 'false';
+
+	if(slider_lb[3] > slider_lb[4])
+		document.getElementById('g').innerHTML = 'true';
+	else
+		document.getElementById('g').innerHTML = 'false';
+
+	if(slider_lb[3] != slider_lb[4])
+		document.getElementById('ne').innerHTML = 'true';
+	else
+		document.getElementById('ne').innerHTML = 'false';
+
+	if(slider_lb[3] <= slider_lb[4])
+		document.getElementById('le').innerHTML = 'true';
+	else
+		document.getElementById('le').innerHTML = 'false';
+
+	if(slider_lb[3] >= slider_lb[4])
+		document.getElementById('ge').innerHTML = 'true';
+	else
+		document.getElementById('ge').innerHTML = 'false';
 }
 	</script>
 </head>
@@ -350,6 +382,24 @@ There is total order
 	<td class="big">b:</td><td><canvas id="interval_4" width=608 height=84></canvas></td>
 	</tr>
 	</table>
+
+<br>
+<br>
+<br>
+
+<table class="comparison">
+<tr><th>Predicate</th><th>Result</th></tr>
+<tr><td class="comparison">a = b</td>		<td id='e' class="comparison_result"></td></tr>
+<tr><td class="comparison">a &lt; b</td>	<td id='l' class="comparison_result"></td></tr>
+<tr><td class="comparison">a &gt; b</td>	<td id='g' class="comparison_result"></td></tr>
+<tr><td class="comparison">a &ne; b</td>	<td id='ne' class="comparison_result"></td></tr>
+<tr><td class="comparison">a &le; b</td>	<td id='le' class="comparison_result"></td></tr>
+<tr><td class="comparison">a &ge; b</td>	<td id='ge' class="comparison_result"></td></tr>
+</table>
+
+<br>
+<br>
+<br>
 
 	<p>
 There is only partial order.
@@ -384,8 +434,12 @@ There is only partial order.
 		reevaluate();
 	});
 
-	init_slider(3, 0, 10, 3, 3, "%x", true, function(lb, ub) {});
-	init_slider(4, 0, 10, 7, 7, "%x", true, function(lb, ub) {});
+	init_slider(3, 0, 10, 3, 3, "%x", true, function(lb, ub) {
+		reevaluate();
+	});
+	init_slider(4, 0, 10, 7, 7, "%x", true, function(lb, ub) {
+		reevaluate();
+	});
 
 	reevaluate();
 	</script>
