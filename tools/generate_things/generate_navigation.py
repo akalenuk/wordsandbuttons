@@ -3,13 +3,13 @@ import subprocess
 
 PAGES_DIR = "../../pages"
 
-keyword_description = {
-'tutorials': 'Tutorials with clickable, draggable, and discoverable things. As brief as possible while as comprehensive as necessary.',
-'demos': 'Clickable explanations of curious things.',
-'quizzes': 'Challenge yourself, learn stuff, and have fun.',
-'mathematics': 'Interactive explanations of mathematical concepts written with practicing programmers in mind.',
-'algorithms': 'Playable essays on algorithms.',
-'programming': 'Interactive essays on non-trivial programming ideas and languages.</p><p style="width: 555pt;">By the way, if you prefer books to blogs, <a href="https://wordsandbuttons.online/SYTYKC.pdf">there is a free book</a> that was originally made from this section.'
+keyword_note = {
+'tutorials': '',
+'demos': '',
+'quizzes': '',
+'mathematics': '',
+'algorithms': '',
+'programming': 'By the way, if you prefer books to blogs, <a href="https://wordsandbuttons.online/SYTYKC.pdf">there is a free book</a> that was originally made from this section.'
 }
 
 index_title = 'Hello, world!'
@@ -89,7 +89,7 @@ for link in links:
 		links_html += '<p style="margin-bottom: 12pt;">'+title+'<br><a href="'+url+'">'+url+'</a></p>\n'
 
 menu = '<p class="links" style="width: 555pt;">'
-for (kw, _) in keyword_description.items():
+for (kw, _) in keyword_note.items():
 	menu += '<nobr><a style="padding-right: 4pt;" href="all_' + kw + '.html">#' + kw + '</a></nobr> '
 menu += '</p>'
 
@@ -112,6 +112,7 @@ the_index += '</p>\n'
 index = index.replace('<h1>Title</h1>', '<h1>' + index_title + '</h1>')
 index = index.replace('<p>Description</p>', '<p style="width: 555pt;">' + index_description + '</p>')
 index = index.replace('<div id="menu"></div>', '\n' + menu + '\n')
+index = index.replace('<p>Note</p>', '')
 index = index.replace('<div id="timeline"></div>', '\n' + the_index + '\n')
 index = index.replace('<div id="links"></div>', '\n' + links_html + '\n')
 
@@ -126,7 +127,7 @@ for title in list(all_keywords):
 	timeline = ''
 
 	menu = '<p class="links" style="width: 555pt;">'
-	for (kw, _) in keyword_description.items():
+	for (kw, _) in keyword_note.items():
 		if kw == title:
 			menu += '<nobr><span style="padding-right: 4pt; color: #999;">#' + kw + '</span></nobr> '
 		else:
@@ -146,8 +147,9 @@ for title in list(all_keywords):
 				timeline += '<a style="padding-right: 8pt;" href="all_' + kw + '.html">#' + kw + '</a> '
 		timeline += '</p>\n'
 	page = page.replace('<h1>Title</h1>', '<h1><a href="index.html">Words and Buttons</a>: ' + title + '</h1>')
-	page = page.replace('<p>Description</p>', '<p style="width: 555pt;">' + keyword_description[title] + '</p>')
+	page = page.replace('<p>Description</p>', '')
 	page = page.replace('<div id="menu"></div>', '\n' + menu + '\n')
+	page = page.replace('<p>Note</p>', '<p style="width: 555pt;">' + keyword_note[title] + '</p>')
 	page = page.replace('<div id="timeline"></div>', '\n' + timeline + '\n')
 	page = page.replace('<div id="links"></div>', '')
 
