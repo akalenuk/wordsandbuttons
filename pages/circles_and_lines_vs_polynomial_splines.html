@@ -1,452 +1,452 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Circles and lines vs. polynomial splines</title>
-    <meta name="description" content="An alternative to polynomial splines. Smooth parametric curves made from arcs and line segments.">
-    <meta name="keywords" content="mathematics, demos">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
-    <style>
+<head>
+	<meta charset="utf-8">
+	<title>Circles and lines vs. polynomial splines</title>
+	<meta name="description" content="An alternative to polynomial splines. Smooth parametric curves made from arcs and line segments.">
+	<meta name="keywords" content="mathematics, demos">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
 body{
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a{
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 20pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 .comment {
-    font-size: 12pt;
-    text-align:center;
-    font-family: sans-serif;
-    padding-bottom: 24pt;
+	font-size: 12pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
 }
 
 pre {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 0pt;
-    padding-right: 0pt;
-    padding-bottom: 12pt;
-    font-size: 12pt;
-    text-align: left;
-    width: 505pt;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 0pt;
+	padding-right: 0pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 505pt;
 }
 
 table {
-    border-width: 0pt;
+	border-width: 0pt;
 }
 
 td {
-    vertical-align: top;
-    padding: 6pt 12pt 6pt 12pt;
-    font-size: 16pt;
-    border: 1px solid black;
-    width: 600pt;
+	vertical-align: top;
+	padding: 6pt 12pt 6pt 12pt;
+	font-size: 16pt;
+	border: 1px solid black;
+	width: 600pt;
 }
 
 form {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 16pt;
-    text-align: left;
-    width: 505pt;
-    background-color: #eeee99;
-    color: #000;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
 }
 
 input[type="text"] {
-    width: 64pt;
-    height: 22pt;
-    font-size: 16pt;
-    text-align: center;
+	width: 64pt;
+	height: 22pt;
+	font-size: 16pt;
+	text-align: center;
 }
 
 button {
-    width: 84pt;
-    height: 32pt;
-    font-size: 16pt;
-    text-align: center;
+	width: 84pt;
+	height: 32pt;
+	font-size: 16pt;
+	text-align: center;
 }
 
 input[type="radio"]{
-    width: 16pt;
-    height: 16pt;
+	width: 16pt;
+	height: 16pt;
 
 }
 
 u {
-    border-bottom: 1px dotted #000;
-    text-decoration: none;
-    cursor: pointer;
+	border-bottom: 1px dotted #000;
+	text-decoration: none;
+	cursor: pointer;
 }
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 // client
 var w = 640.0;
 var h = 640.0;
 
 // solver specific to [0..1] parametrized splines
 function spline_for(p1, p1d, p2, p2d) {
-//     A = [
-//         [1, 0, 0, 0],
-//         [0, 1, 0, 0],
-//         [1, 1, 1, 1],
-//         [0, 1, 2, 3]];
-//     B = [p1, p1d, p2, p2d]
-    return [
-        p1,
-        p1d,
-        3 * p2 - p2d - 3*p1 - 2*p1d,
-        p2d + p1d - 2*p2 + 2*p1
-    ];
+//	 A = [
+//		 [1, 0, 0, 0],
+//		 [0, 1, 0, 0],
+//		 [1, 1, 1, 1],
+//		 [0, 1, 2, 3]];
+//	 B = [p1, p1d, p2, p2d]
+	return [
+		p1,
+		p1d,
+		3 * p2 - p2d - 3*p1 - 2*p1d,
+		p2d + p1d - 2*p2 + 2*p1
+	];
 }
 
 // polynomial
 function polynomial_in_t(A, t){
-    var pt = 0.0;
-    for(var i = 0; i < A.length; ++i){
-        pt += A[i] * Math.pow(t, i);
-    }
-    return pt;
+	var pt = 0.0;
+	for(var i = 0; i < A.length; ++i){
+		pt += A[i] * Math.pow(t, i);
+	}
+	return pt;
 }
 
 // in radians
 function t_distance(t1, t2) {
-    if(t2 < t1)
-        return t_distance(t1, t2 + 2*Math.PI);
-    return t2-t1;
+	if(t2 < t1)
+		return t_distance(t1, t2 + 2*Math.PI);
+	return t2-t1;
 }
 
 // biarc
 function biarcs_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
-    // for detailed comments see combined_patch_and_its_length
-    const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
-    const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
-    dx1 /= norm1;
-    dy1 /= norm1;
-    dx2 /= norm2;
-    dy2 /= norm2;
+	// for detailed comments see combined_patch_and_its_length
+	const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+	const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+	dx1 /= norm1;
+	dy1 /= norm1;
+	dx2 /= norm2;
+	dy2 /= norm2;
 
-    const x12 = (dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy2*x2 - dx2*dy1*x1)/(dx1*dy2 - dx2*dy1);
-    const y12 = (dx1*dy2*y1 - dx2*dy1*y2 - dy1*dy2*x1 + dy1*dy2*x2)/(dx1*dy2 - dx2*dy1);
-    const t2 = (dx1*y1 - dx1*y2 - dy1*x1 + dy1*x2)/(dx1*dy2 - dx2*dy1);
-    const t1 = (dx2*y1 - dx2*y2 - dy2*x1 + dy2*x2)/(dx1*dy2 - dx2*dy1);
+	const x12 = (dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy2*x2 - dx2*dy1*x1)/(dx1*dy2 - dx2*dy1);
+	const y12 = (dx1*dy2*y1 - dx2*dy1*y2 - dy1*dy2*x1 + dy1*dy2*x2)/(dx1*dy2 - dx2*dy1);
+	const t2 = (dx1*y1 - dx1*y2 - dy1*x1 + dy1*x2)/(dx1*dy2 - dx2*dy1);
+	const t1 = (dx2*y1 - dx2*y2 - dy2*x1 + dy2*x2)/(dx1*dy2 - dx2*dy1);
 
-    const root_piece = Math.sqrt(
-        - dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1
-        + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2
-        - dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2
-        - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2
-        + 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2
-        + 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2);
-    const divisor_piece = 1./(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
+	const root_piece = Math.sqrt(
+		- dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1
+		+ 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2
+		- dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2
+		- 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2
+		+ 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2
+		+ 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2);
+	const divisor_piece = 1./(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
 
-    const ax1_1 = (dx1*dx1*x1 - 2*dx1*dx2*x1 + dx1*dy1*y1 - dx1*dy1*y2 + dx2*dx2*x1 - dx2*dy1*y1 + dx2*dy1*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 - dy1*root_piece + dy2*dy2*x1 - 4*x1)*divisor_piece;
-    const ay1_1 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy1*x1 - dx1*dy1*x2 - dx1*dy2*x1 + dx1*dy2*x2 + dx1*root_piece + dx2*dx2*y1 + dy1*dy1*y1 - 2*dy1*dy2*y1 + dy2*dy2*y1 - 4*y1)*divisor_piece;
-    const ax2_1 = (dx1*dx1*x2 - 2*dx1*dx2*x2 + dx1*dy2*y1 - dx1*dy2*y2 + dx2*dx2*x2 - dx2*dy2*y1 + dx2*dy2*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy2*dy2*x1 - dy2*root_piece - 4*x2)*divisor_piece;
-    const ay2_1 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx2*dx2*y1 + dx2*dy1*x1 - dx2*dy1*x2 - dx2*dy2*x1 + dx2*dy2*x2 + dx2*root_piece + dy1*dy1*y2 - 2*dy1*dy2*y2 + dy2*dy2*y2 - 4*y2)*divisor_piece;
-    const r1_1 = (dx1*y1 - dx1*y2 - dx2*y1 + dx2*y2 - dy1*x1 + dy1*x2 + dy2*x1 - dy2*x2 - root_piece)*divisor_piece;
-    const r2_1 = -(-dx1*y1 + dx1*y2 + dx2*y1 - dx2*y2 + dy1*x1 - dy1*x2 - dy2*x1 + dy2*x2)*divisor_piece - root_piece*divisor_piece;
+	const ax1_1 = (dx1*dx1*x1 - 2*dx1*dx2*x1 + dx1*dy1*y1 - dx1*dy1*y2 + dx2*dx2*x1 - dx2*dy1*y1 + dx2*dy1*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 - dy1*root_piece + dy2*dy2*x1 - 4*x1)*divisor_piece;
+	const ay1_1 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy1*x1 - dx1*dy1*x2 - dx1*dy2*x1 + dx1*dy2*x2 + dx1*root_piece + dx2*dx2*y1 + dy1*dy1*y1 - 2*dy1*dy2*y1 + dy2*dy2*y1 - 4*y1)*divisor_piece;
+	const ax2_1 = (dx1*dx1*x2 - 2*dx1*dx2*x2 + dx1*dy2*y1 - dx1*dy2*y2 + dx2*dx2*x2 - dx2*dy2*y1 + dx2*dy2*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy2*dy2*x1 - dy2*root_piece - 4*x2)*divisor_piece;
+	const ay2_1 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx2*dx2*y1 + dx2*dy1*x1 - dx2*dy1*x2 - dx2*dy2*x1 + dx2*dy2*x2 + dx2*root_piece + dy1*dy1*y2 - 2*dy1*dy2*y2 + dy2*dy2*y2 - 4*y2)*divisor_piece;
+	const r1_1 = (dx1*y1 - dx1*y2 - dx2*y1 + dx2*y2 - dy1*x1 + dy1*x2 + dy2*x1 - dy2*x2 - root_piece)*divisor_piece;
+	const r2_1 = -(-dx1*y1 + dx1*y2 + dx2*y1 - dx2*y2 + dy1*x1 - dy1*x2 - dy2*x1 + dy2*x2)*divisor_piece - root_piece*divisor_piece;
 
-    const ax1_2 = (dx1*dx1*x1 - 2*dx1*dx2*x1 + dx1*dy1*y1 - dx1*dy1*y2 + dx2*dx2*x1 - dx2*dy1*y1 + dx2*dy1*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy1*root_piece + dy2*dy2*x1 - 4*x1)*divisor_piece;
-    const ay1_2 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy1*x1 - dx1*dy1*x2 - dx1*dy2*x1 + dx1*dy2*x2 - dx1*root_piece + dx2*dx2*y1 + dy1*dy1*y1 - 2*dy1*dy2*y1 + dy2*dy2*y1 - 4*y1)*divisor_piece;
-    const ax2_2 = (dx1*dx1*x2 - 2*dx1*dx2*x2 + dx1*dy2*y1 - dx1*dy2*y2 + dx2*dx2*x2 - dx2*dy2*y1 + dx2*dy2*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy2*dy2*x1 + dy2*root_piece - 4*x2)*divisor_piece;
-    const ay2_2 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx2*dx2*y1 + dx2*dy1*x1 - dx2*dy1*x2 - dx2*dy2*x1 + dx2*dy2*x2 - dx2*root_piece + dy1*dy1*y2 - 2*dy1*dy2*y2 + dy2*dy2*y2 - 4*y2)*divisor_piece;
-    const r1_2 = (dx1*y1 - dx1*y2 - dx2*y1 + dx2*y2 - dy1*x1 + dy1*x2 + dy2*x1 - dy2*x2 + root_piece)*divisor_piece;
-    const r2_2 = -(-dx1*y1 + dx1*y2 + dx2*y1 - dx2*y2 + dy1*x1 - dy1*x2 - dy2*x1 + dy2*x2)*divisor_piece + root_piece*divisor_piece;
+	const ax1_2 = (dx1*dx1*x1 - 2*dx1*dx2*x1 + dx1*dy1*y1 - dx1*dy1*y2 + dx2*dx2*x1 - dx2*dy1*y1 + dx2*dy1*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy1*root_piece + dy2*dy2*x1 - 4*x1)*divisor_piece;
+	const ay1_2 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy1*x1 - dx1*dy1*x2 - dx1*dy2*x1 + dx1*dy2*x2 - dx1*root_piece + dx2*dx2*y1 + dy1*dy1*y1 - 2*dy1*dy2*y1 + dy2*dy2*y1 - 4*y1)*divisor_piece;
+	const ax2_2 = (dx1*dx1*x2 - 2*dx1*dx2*x2 + dx1*dy2*y1 - dx1*dy2*y2 + dx2*dx2*x2 - dx2*dy2*y1 + dx2*dy2*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy2*dy2*x1 + dy2*root_piece - 4*x2)*divisor_piece;
+	const ay2_2 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx2*dx2*y1 + dx2*dy1*x1 - dx2*dy1*x2 - dx2*dy2*x1 + dx2*dy2*x2 - dx2*root_piece + dy1*dy1*y2 - 2*dy1*dy2*y2 + dy2*dy2*y2 - 4*y2)*divisor_piece;
+	const r1_2 = (dx1*y1 - dx1*y2 - dx2*y1 + dx2*y2 - dy1*x1 + dy1*x2 + dy2*x1 - dy2*x2 + root_piece)*divisor_piece;
+	const r2_2 = -(-dx1*y1 + dx1*y2 + dx2*y1 - dx2*y2 + dy1*x1 - dy1*x2 - dy2*x1 + dy2*x2)*divisor_piece + root_piece*divisor_piece;
 
-    const solution_no = (Math.abs(r1_1) + Math.abs(r2_1)) < (Math.abs(r1_2) + Math.abs(r2_2)) ? 1 : 2;
-    if(solution_no == 1) {
-        var ax1 = ax1_1;
-        var ay1 = ay1_1;
-        var ax2 = ax2_1;
-        var ay2 = ay2_1;
-        var r1 = r1_1;
-        var r2 = r2_1;
-        var cx = (ax1 + ax2) / 2.;
-        var cy = (ay1 + ay2) / 2.;
-        var t12 = Math.PI/2 - Math.atan2(x1 - ax1, y1 - ay1)
-        var t11 = Math.PI/2 - Math.atan2(cx - ax1, cy - ay1)
-        var t22 = Math.PI/2 - Math.atan2(x2 - ax2, y2 - ay2)
-        var t21 = Math.PI/2 - Math.atan2(cx - ax2, cy - ay2)
-    } else if(solution_no == 2){
-        var ax1 = ax1_2;
-        var ay1 = ay1_2;
-        var ax2 = ax2_2;
-        var ay2 = ay2_2;
-        var r1 = r1_2;
-        var r2 = r2_2;
-        var cx = (ax1 + ax2) / 2.;
-        var cy = (ay1 + ay2) / 2.;
-        var t11 = Math.PI/2 - Math.atan2(x1 - ax1, y1 - ay1)
-        var t12 = Math.PI/2 - Math.atan2(cx - ax1, cy - ay1)
-        var t21 = Math.PI/2 - Math.atan2(x2 - ax2, y2 - ay2)
-        var t22 = Math.PI/2 - Math.atan2(cx - ax2, cy - ay2)
-    }
-    const len = Math.abs(r1 * t_distance(t11, t12)) + Math.abs(r2 * t_distance(t21, t22));
-    const len1 = Math.abs(r1 * t_distance(t11, t12));
-    const fun = function(t) {
-        if(t < len1) {
-            const d = solution_no == 1 ? (1. - t / len1) :t / len1;
-            const at = t11 + t_distance(t11, t12) * d;
-            return [ax1 + Math.cos(at) * Math.abs(r1), ay1 + Math.sin(at) * Math.abs(r1)];
-        } else {
-            const d = solution_no == 1 ? (t - len1) / (len - len1) : (1. - (t - len1) / (len - len1));
-            const at = t21 + t_distance(t21, t22) * d;
-            return [ax2 + Math.cos(at) * Math.abs(r2), ay2 + Math.sin(at) * Math.abs(r1)];
-        }
-    };
-    return [fun, len];
+	const solution_no = (Math.abs(r1_1) + Math.abs(r2_1)) < (Math.abs(r1_2) + Math.abs(r2_2)) ? 1 : 2;
+	if(solution_no == 1) {
+		var ax1 = ax1_1;
+		var ay1 = ay1_1;
+		var ax2 = ax2_1;
+		var ay2 = ay2_1;
+		var r1 = r1_1;
+		var r2 = r2_1;
+		var cx = (ax1 + ax2) / 2.;
+		var cy = (ay1 + ay2) / 2.;
+		var t12 = Math.PI/2 - Math.atan2(x1 - ax1, y1 - ay1)
+		var t11 = Math.PI/2 - Math.atan2(cx - ax1, cy - ay1)
+		var t22 = Math.PI/2 - Math.atan2(x2 - ax2, y2 - ay2)
+		var t21 = Math.PI/2 - Math.atan2(cx - ax2, cy - ay2)
+	} else if(solution_no == 2){
+		var ax1 = ax1_2;
+		var ay1 = ay1_2;
+		var ax2 = ax2_2;
+		var ay2 = ay2_2;
+		var r1 = r1_2;
+		var r2 = r2_2;
+		var cx = (ax1 + ax2) / 2.;
+		var cy = (ay1 + ay2) / 2.;
+		var t11 = Math.PI/2 - Math.atan2(x1 - ax1, y1 - ay1)
+		var t12 = Math.PI/2 - Math.atan2(cx - ax1, cy - ay1)
+		var t21 = Math.PI/2 - Math.atan2(x2 - ax2, y2 - ay2)
+		var t22 = Math.PI/2 - Math.atan2(cx - ax2, cy - ay2)
+	}
+	const len = Math.abs(r1 * t_distance(t11, t12)) + Math.abs(r2 * t_distance(t21, t22));
+	const len1 = Math.abs(r1 * t_distance(t11, t12));
+	const fun = function(t) {
+		if(t < len1) {
+			const d = solution_no == 1 ? (1. - t / len1) :t / len1;
+			const at = t11 + t_distance(t11, t12) * d;
+			return [ax1 + Math.cos(at) * Math.abs(r1), ay1 + Math.sin(at) * Math.abs(r1)];
+		} else {
+			const d = solution_no == 1 ? (t - len1) / (len - len1) : (1. - (t - len1) / (len - len1));
+			const at = t21 + t_distance(t21, t22) * d;
+			return [ax2 + Math.cos(at) * Math.abs(r2), ay2 + Math.sin(at) * Math.abs(r1)];
+		}
+	};
+	return [fun, len];
 }
 
 // arc + line
 function arcline_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
-    // for detailed comments see combined_patch_and_its_length
-    const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
-    const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
-    dx1 /= norm1;
-    dy1 /= norm1;
-    dx2 /= norm2;
-    dy2 /= norm2;
+	// for detailed comments see combined_patch_and_its_length
+	const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+	const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+	dx1 /= norm1;
+	dy1 /= norm1;
+	dx2 /= norm2;
+	dy2 /= norm2;
 
-    const x12 = (dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy2*x2 - dx2*dy1*x1)/(dx1*dy2 - dx2*dy1);
-    const y12 = (dx1*dy2*y1 - dx2*dy1*y2 - dy1*dy2*x1 + dy1*dy2*x2)/(dx1*dy2 - dx2*dy1);
-    const t2 = (dx1*y1 - dx1*y2 - dy1*x1 + dy1*x2)/(dx1*dy2 - dx2*dy1);
-    const t1 = (dx2*y1 - dx2*y2 - dy2*x1 + dy2*x2)/(dx1*dy2 - dx2*dy1);
+	const x12 = (dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy2*x2 - dx2*dy1*x1)/(dx1*dy2 - dx2*dy1);
+	const y12 = (dx1*dy2*y1 - dx2*dy1*y2 - dy1*dy2*x1 + dy1*dy2*x2)/(dx1*dy2 - dx2*dy1);
+	const t2 = (dx1*y1 - dx1*y2 - dy1*x1 + dy1*x2)/(dx1*dy2 - dx2*dy1);
+	const t1 = (dx2*y1 - dx2*y2 - dy2*x1 + dy2*x2)/(dx1*dy2 - dx2*dy1);
 
-    const a = (Math.atan2(x1 - x12, y1 - y12) - Math.atan2(x2 - x12, y2 - y12)) / 2.;
-    const r = -Math.min(t1, t2) * Math.tan(a)
-    if(t1 < t2) {
-        var ax = -dy1*r + x1;
-        var ay = dx1*r + y1;
-        var t = (dx1*dy2*r - dx2*dy1*r + dx2*x1 - dx2*x2 + dy2*y1 - dy2*y2)/(dx2*dx2 + dy2*dy2);
-        var ix = (dx1*dx2*dy2*r - dx2*dx2*dy1*r + dx2*dx2*x1 + dx2*dy2*y1 - dx2*dy2*y2 + dy2*dy2*x2)/(dx2*dx2 + dy2*dy2);
-        var iy = (dx1*dy2*dy2*r + dx2*dx2*y2 - dx2*dy1*dy2*r + dx2*dy2*x1 - dx2*dy2*x2 + dy2*dy2*y1)/(dx2*dx2 + dy2*dy2);
-        var segx1 = x2;
-        var segy1 = y2;
-        var segx2 = x2 + dx2 * (Math.abs(t2) - Math.abs(t1)) * Math.sign(t2);
-        var segy2 = y2 + dy2 * (Math.abs(t2) - Math.abs(t1)) * Math.sign(t2);
-        var at1 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
-        var at2 = Math.PI/2 - Math.atan2(x1 - ax, y1 - ay);
-    } else {
-        var ax = dy2*r + x2;
-        var ay = -dx2*r + y2;
-        var t = (dx2*dy1*r - dx1*dy2*r + dx1*x2 - dx1*x1 + dy1*y2 - dy1*y1)/(dx1*dx1 + dy1*dy1);
-        var ix = (dx2*dx1*dy1*r - dx1*dx1*dy2*r + dx1*dx1*x2 + dx1*dy1*y2 - dx1*dy1*y1 + dy1*dy1*x1)/(dx1*dx1 + dy1*dy1);
-        var iy = (dx2*dy1*dy1*r + dx1*dx1*y1 - dx1*dy2*dy1*r + dx1*dy1*x2 - dx1*dy1*x1 + dy1*dy1*y2)/(dx1*dx1 + dy1*dy1);
-        var segx1 = x1;
-        var segy1 = y1;
-        var segx2 = x1 + dx1 * (Math.abs(t1) - Math.abs(t2)) * Math.sign(t1);
-        var segy2 = y1 + dy1 * (Math.abs(t1) - Math.abs(t2)) * Math.sign(t1);
-        var at1 = Math.PI/2 - Math.atan2(x2 - ax, y2 - ay);
-        var at2 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
-    }
-    if(t1 < t2){
-        const len = Math.abs(r * t_distance(at2, at1)) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
-        const len1 = Math.abs(r * t_distance(at2, at1));
-        const fun = function(t) {
-            if(t < len1) {
-                const d = r > 0 ? t / len1 : (1. - t / len1);
-                const at = r > 0 ? at2 + t_distance(at2, at1) * d : at1 + t_distance(at1, at2) * d;
-                return [ax + Math.cos(at) * Math.abs(r), ay + Math.sin(at) * Math.abs(r)];
-            } else {
-                const d = (t - len1) / (len - len1);
-                return [segx1 + (segx2 - segx1) * d, segy1 + (segy2 - segy1) * d];
-            }
-        };
-        return [fun, len];
-    } else {
-        const len = Math.abs(r * t_distance(at1, at2)) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
-        const len1 = Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
-        const fun = function(t) {
-            if(t < len1) {
-                const d = t / len1;
-                return [segx1 + (segx2 - segx1) * d, segy1 + (segy2 - segy1) * d];
-            } else {
-                const d = r > 0 ? ((t - len1) / (len - len1)) : (1. - (t - len1) / (len - len1));
-                const at = r > 0 ? at2 + t_distance(at2, at1) * d : at1 + t_distance(at1, at2) * d;
-                return [ax + Math.cos(at) * Math.abs(r), ay + Math.sin(at) * Math.abs(r)];
-            }
-        };
-        return [fun, len];
-    }
+	const a = (Math.atan2(x1 - x12, y1 - y12) - Math.atan2(x2 - x12, y2 - y12)) / 2.;
+	const r = -Math.min(t1, t2) * Math.tan(a)
+	if(t1 < t2) {
+		var ax = -dy1*r + x1;
+		var ay = dx1*r + y1;
+		var t = (dx1*dy2*r - dx2*dy1*r + dx2*x1 - dx2*x2 + dy2*y1 - dy2*y2)/(dx2*dx2 + dy2*dy2);
+		var ix = (dx1*dx2*dy2*r - dx2*dx2*dy1*r + dx2*dx2*x1 + dx2*dy2*y1 - dx2*dy2*y2 + dy2*dy2*x2)/(dx2*dx2 + dy2*dy2);
+		var iy = (dx1*dy2*dy2*r + dx2*dx2*y2 - dx2*dy1*dy2*r + dx2*dy2*x1 - dx2*dy2*x2 + dy2*dy2*y1)/(dx2*dx2 + dy2*dy2);
+		var segx1 = x2;
+		var segy1 = y2;
+		var segx2 = x2 + dx2 * (Math.abs(t2) - Math.abs(t1)) * Math.sign(t2);
+		var segy2 = y2 + dy2 * (Math.abs(t2) - Math.abs(t1)) * Math.sign(t2);
+		var at1 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
+		var at2 = Math.PI/2 - Math.atan2(x1 - ax, y1 - ay);
+	} else {
+		var ax = dy2*r + x2;
+		var ay = -dx2*r + y2;
+		var t = (dx2*dy1*r - dx1*dy2*r + dx1*x2 - dx1*x1 + dy1*y2 - dy1*y1)/(dx1*dx1 + dy1*dy1);
+		var ix = (dx2*dx1*dy1*r - dx1*dx1*dy2*r + dx1*dx1*x2 + dx1*dy1*y2 - dx1*dy1*y1 + dy1*dy1*x1)/(dx1*dx1 + dy1*dy1);
+		var iy = (dx2*dy1*dy1*r + dx1*dx1*y1 - dx1*dy2*dy1*r + dx1*dy1*x2 - dx1*dy1*x1 + dy1*dy1*y2)/(dx1*dx1 + dy1*dy1);
+		var segx1 = x1;
+		var segy1 = y1;
+		var segx2 = x1 + dx1 * (Math.abs(t1) - Math.abs(t2)) * Math.sign(t1);
+		var segy2 = y1 + dy1 * (Math.abs(t1) - Math.abs(t2)) * Math.sign(t1);
+		var at1 = Math.PI/2 - Math.atan2(x2 - ax, y2 - ay);
+		var at2 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
+	}
+	if(t1 < t2){
+		const len = Math.abs(r * t_distance(at2, at1)) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
+		const len1 = Math.abs(r * t_distance(at2, at1));
+		const fun = function(t) {
+			if(t < len1) {
+				const d = r > 0 ? t / len1 : (1. - t / len1);
+				const at = r > 0 ? at2 + t_distance(at2, at1) * d : at1 + t_distance(at1, at2) * d;
+				return [ax + Math.cos(at) * Math.abs(r), ay + Math.sin(at) * Math.abs(r)];
+			} else {
+				const d = (t - len1) / (len - len1);
+				return [segx1 + (segx2 - segx1) * d, segy1 + (segy2 - segy1) * d];
+			}
+		};
+		return [fun, len];
+	} else {
+		const len = Math.abs(r * t_distance(at1, at2)) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
+		const len1 = Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
+		const fun = function(t) {
+			if(t < len1) {
+				const d = t / len1;
+				return [segx1 + (segx2 - segx1) * d, segy1 + (segy2 - segy1) * d];
+			} else {
+				const d = r > 0 ? ((t - len1) / (len - len1)) : (1. - (t - len1) / (len - len1));
+				const at = r > 0 ? at2 + t_distance(at2, at1) * d : at1 + t_distance(at1, at2) * d;
+				return [ax + Math.cos(at) * Math.abs(r), ay + Math.sin(at) * Math.abs(r)];
+			}
+		};
+		return [fun, len];
+	}
 }
 
 // arc + line & biarc
 function combined_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2) {
-    // tangents should be normalised for both arcs and line segments
-    const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
-    const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
-    dx1 /= norm1;
-    dy1 /= norm1;
-    dx2 /= norm2;
-    dy2 /= norm2;
+	// tangents should be normalised for both arcs and line segments
+	const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+	const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+	dx1 /= norm1;
+	dy1 /= norm1;
+	dx2 /= norm2;
+	dy2 /= norm2;
 
-    // tangent rays' intersection point and intersection parameters
-    // A parameter ti is something you multiply a normalized tangent (dxi, dyi)
-    // to get to the intersection point from the patch point (xi, yi)
-    const x12 = (dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy2*x2 - dx2*dy1*x1)/(dx1*dy2 - dx2*dy1);
-    const y12 = (dx1*dy2*y1 - dx2*dy1*y2 - dy1*dy2*x1 + dy1*dy2*x2)/(dx1*dy2 - dx2*dy1);
-    const t2 = (dx1*y1 - dx1*y2 - dy1*x1 + dy1*x2)/(dx1*dy2 - dx2*dy1);
-    const t1 = (dx2*y1 - dx2*y2 - dy2*x1 + dy2*x2)/(dx1*dy2 - dx2*dy1);
+	// tangent rays' intersection point and intersection parameters
+	// A parameter ti is something you multiply a normalized tangent (dxi, dyi)
+	// to get to the intersection point from the patch point (xi, yi)
+	const x12 = (dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy2*x2 - dx2*dy1*x1)/(dx1*dy2 - dx2*dy1);
+	const y12 = (dx1*dy2*y1 - dx2*dy1*y2 - dy1*dy2*x1 + dy1*dy2*x2)/(dx1*dy2 - dx2*dy1);
+	const t2 = (dx1*y1 - dx1*y2 - dy1*x1 + dy1*x2)/(dx1*dy2 - dx2*dy1);
+	const t1 = (dx2*y1 - dx2*y2 - dy2*x1 + dy2*x2)/(dx1*dy2 - dx2*dy1);
 
-    // line segment and arcs parameters
-    if(Math.sign(t1) == Math.sign(t2)) { // tangnets share the same semi-plane
-        const a = (Math.atan2(x2 - x12, y2 - y12) - Math.atan2(x1 - x12, y1 - y12)) / 2.; // angle between vectors to intersection
-        const r = Math.min(t1, t2) * Math.tan(a)    // arc radius
-        if(t1 < t2) {   // both solutions are from SymPy
-            var ax = -dy1*r + x1;
-            var ay = dx1*r + y1;
-            var t = (dx1*dy2*r - dx2*dy1*r + dx2*x1 - dx2*x2 + dy2*y1 - dy2*y2)/(dx2*dx2 + dy2*dy2);
-            var ix = (dx1*dx2*dy2*r - dx2*dx2*dy1*r + dx2*dx2*x1 + dx2*dy2*y1 - dx2*dy2*y2 + dy2*dy2*x2)/(dx2*dx2 + dy2*dy2);
-            var iy = (dx1*dy2*dy2*r + dx2*dx2*y2 - dx2*dy1*dy2*r + dx2*dy2*x1 - dx2*dy2*x2 + dy2*dy2*y1)/(dx2*dx2 + dy2*dy2);
-            // segment points and arc center are computed numerically though
-            var segx1 = x2;
-            var segy1 = y2;
-            var segx2 = x2 + dx2 * (Math.abs(t2) - Math.abs(t1)) * Math.sign(t2);
-            var segy2 = y2 + dy2 * (Math.abs(t2) - Math.abs(t1)) * Math.sign(t2);
-            var at1 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
-            var at2 = Math.PI/2 - Math.atan2(x1 - ax, y1 - ay);
-        } else {
-            var ax = dy2*r + x2;
-            var ay = -dx2*r + y2;
-            var t = (dx2*dy1*r - dx1*dy2*r + dx1*x2 - dx1*x1 + dy1*y2 - dy1*y1)/(dx1*dx1 + dy1*dy1);
-            var ix = (dx2*dx1*dy1*r - dx1*dx1*dy2*r + dx1*dx1*x2 + dx1*dy1*y2 - dx1*dy1*y1 + dy1*dy1*x1)/(dx1*dx1 + dy1*dy1);
-            var iy = (dx2*dy1*dy1*r + dx1*dx1*y1 - dx1*dy2*dy1*r + dx1*dy1*x2 - dx1*dy1*x1 + dy1*dy1*y2)/(dx1*dx1 + dy1*dy1);
-            var segx1 = x1;
-            var segy1 = y1;
-            var segx2 = x1 + dx1 * (Math.abs(t1) - Math.abs(t2)) * Math.sign(t1);
-            var segy2 = y1 + dy1 * (Math.abs(t1) - Math.abs(t2)) * Math.sign(t1);
-            var at1 = Math.PI/2 - Math.atan2(x2 - ax, y2 - ay);
-            var at2 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
-        }
-        const arc_t_d = r > 0 ? t_distance(at2, at1) : t_distance(at1, at2); // arcs angular length
+	// line segment and arcs parameters
+	if(Math.sign(t1) == Math.sign(t2)) { // tangnets share the same semi-plane
+		const a = (Math.atan2(x2 - x12, y2 - y12) - Math.atan2(x1 - x12, y1 - y12)) / 2.; // angle between vectors to intersection
+		const r = Math.min(t1, t2) * Math.tan(a)	// arc radius
+		if(t1 < t2) {   // both solutions are from SymPy
+			var ax = -dy1*r + x1;
+			var ay = dx1*r + y1;
+			var t = (dx1*dy2*r - dx2*dy1*r + dx2*x1 - dx2*x2 + dy2*y1 - dy2*y2)/(dx2*dx2 + dy2*dy2);
+			var ix = (dx1*dx2*dy2*r - dx2*dx2*dy1*r + dx2*dx2*x1 + dx2*dy2*y1 - dx2*dy2*y2 + dy2*dy2*x2)/(dx2*dx2 + dy2*dy2);
+			var iy = (dx1*dy2*dy2*r + dx2*dx2*y2 - dx2*dy1*dy2*r + dx2*dy2*x1 - dx2*dy2*x2 + dy2*dy2*y1)/(dx2*dx2 + dy2*dy2);
+			// segment points and arc center are computed numerically though
+			var segx1 = x2;
+			var segy1 = y2;
+			var segx2 = x2 + dx2 * (Math.abs(t2) - Math.abs(t1)) * Math.sign(t2);
+			var segy2 = y2 + dy2 * (Math.abs(t2) - Math.abs(t1)) * Math.sign(t2);
+			var at1 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
+			var at2 = Math.PI/2 - Math.atan2(x1 - ax, y1 - ay);
+		} else {
+			var ax = dy2*r + x2;
+			var ay = -dx2*r + y2;
+			var t = (dx2*dy1*r - dx1*dy2*r + dx1*x2 - dx1*x1 + dy1*y2 - dy1*y1)/(dx1*dx1 + dy1*dy1);
+			var ix = (dx2*dx1*dy1*r - dx1*dx1*dy2*r + dx1*dx1*x2 + dx1*dy1*y2 - dx1*dy1*y1 + dy1*dy1*x1)/(dx1*dx1 + dy1*dy1);
+			var iy = (dx2*dy1*dy1*r + dx1*dx1*y1 - dx1*dy2*dy1*r + dx1*dy1*x2 - dx1*dy1*x1 + dy1*dy1*y2)/(dx1*dx1 + dy1*dy1);
+			var segx1 = x1;
+			var segy1 = y1;
+			var segx2 = x1 + dx1 * (Math.abs(t1) - Math.abs(t2)) * Math.sign(t1);
+			var segy2 = y1 + dy1 * (Math.abs(t1) - Math.abs(t2)) * Math.sign(t1);
+			var at1 = Math.PI/2 - Math.atan2(x2 - ax, y2 - ay);
+			var at2 = Math.PI/2 - Math.atan2(segx2 - ax, segy2 - ay);
+		}
+		const arc_t_d = r > 0 ? t_distance(at2, at1) : t_distance(at1, at2); // arcs angular length
 
-        // different parameterizations for arc + line and line + arc
-        if(t1 < t2){
-            const len = Math.abs(r * arc_t_d) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
-            const len1 = Math.abs(r * arc_t_d);
-            const fun = function(t) {
-                if(t < len1) {
-                    const d = r > 0 ? t / len1 : (1. - t / len1);
-                    const at = r > 0 ? at2 + arc_t_d * d : at1 + arc_t_d * d;
-                    return [ax + Math.cos(at) * Math.abs(r), ay + Math.sin(at) * Math.abs(r)];
-                } else {
-                    const d = (t - len1) / (len - len1);
-                    return [segx2 + (segx1 - segx2) * d, segy2 + (segy1 - segy2) * d];
-                }
-            };
-            return [fun, len];
-        } else {
-            const len = Math.abs(r * arc_t_d) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
-            const len1 = Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
-            const fun = function(t) {
-                if(t < len1) {
-                    const d = t / len1;
-                    return [segx1 + (segx2 - segx1) * d, segy1 + (segy2 - segy1) * d];
-                } else {
-                    const d = r > 0 ? ((t - len1) / (len - len1)) : (1. - (t - len1) / (len - len1));
-                    const at = r > 0 ? at2 + arc_t_d * d : at1 + arc_t_d * d;
-                    return [ax + Math.cos(at) * Math.abs(r), ay + Math.sin(at) * Math.abs(r)];
-                }
-            };
-            return [fun, len];
-        }
-    } else { // arcs
-        // this whole wall of code is SymPy generated
-        const root_piece = Math.sqrt(
-            - dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1
-            + 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2
-            - dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2
-            - 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2
-            + 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2
-            + 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2);
-        const divisor_piece = 1./(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
+		// different parameterizations for arc + line and line + arc
+		if(t1 < t2){
+			const len = Math.abs(r * arc_t_d) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
+			const len1 = Math.abs(r * arc_t_d);
+			const fun = function(t) {
+				if(t < len1) {
+					const d = r > 0 ? t / len1 : (1. - t / len1);
+					const at = r > 0 ? at2 + arc_t_d * d : at1 + arc_t_d * d;
+					return [ax + Math.cos(at) * Math.abs(r), ay + Math.sin(at) * Math.abs(r)];
+				} else {
+					const d = (t - len1) / (len - len1);
+					return [segx2 + (segx1 - segx2) * d, segy2 + (segy1 - segy2) * d];
+				}
+			};
+			return [fun, len];
+		} else {
+			const len = Math.abs(r * arc_t_d) + Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
+			const len1 = Math.sqrt(Math.pow(segx2-segx1, 2) + Math.pow(segy2-segy1, 2));
+			const fun = function(t) {
+				if(t < len1) {
+					const d = t / len1;
+					return [segx1 + (segx2 - segx1) * d, segy1 + (segy2 - segy1) * d];
+				} else {
+					const d = r > 0 ? ((t - len1) / (len - len1)) : (1. - (t - len1) / (len - len1));
+					const at = r > 0 ? at2 + arc_t_d * d : at1 + arc_t_d * d;
+					return [ax + Math.cos(at) * Math.abs(r), ay + Math.sin(at) * Math.abs(r)];
+				}
+			};
+			return [fun, len];
+		}
+	} else { // arcs
+		// this whole wall of code is SymPy generated
+		const root_piece = Math.sqrt(
+			- dx1*dx1*x1*x1 + 2*dx1*dx1*x1*x2 - dx1*dx1*x2*x2 + 2*dx1*dx2*x1*x1 - 4*dx1*dx2*x1*x2 + 2*dx1*dx2*x2*x2 - 2*dx1*dy1*x1*y1
+			+ 2*dx1*dy1*x1*y2 + 2*dx1*dy1*x2*y1 - 2*dx1*dy1*x2*y2 + 2*dx1*dy2*x1*y1 - 2*dx1*dy2*x1*y2 - 2*dx1*dy2*x2*y1 + 2*dx1*dy2*x2*y2
+			- dx2*dx2*x1*x1 + 2*dx2*dx2*x1*x2 - dx2*dx2*x2*x2 + 2*dx2*dy1*x1*y1 - 2*dx2*dy1*x1*y2 - 2*dx2*dy1*x2*y1 + 2*dx2*dy1*x2*y2
+			- 2*dx2*dy2*x1*y1 + 2*dx2*dy2*x1*y2 + 2*dx2*dy2*x2*y1 - 2*dx2*dy2*x2*y2 - dy1*dy1*y1*y1 + 2*dy1*dy1*y1*y2 - dy1*dy1*y2*y2
+			+ 2*dy1*dy2*y1*y1 - 4*dy1*dy2*y1*y2 + 2*dy1*dy2*y2*y2 - dy2*dy2*y1*y1 + 2*dy2*dy2*y1*y2 - dy2*dy2*y2*y2
+			+ 4*x1*x1 - 8*x1*x2 + 4*x2*x2 + 4*y1*y1 - 8*y1*y2 + 4*y2*y2);
+		const divisor_piece = 1./(dx1*dx1 - 2*dx1*dx2 + dx2*dx2 + dy1*dy1 - 2*dy1*dy2 + dy2*dy2 - 4);
 
-        const ax1_1 = (dx1*dx1*x1 - 2*dx1*dx2*x1 + dx1*dy1*y1 - dx1*dy1*y2 + dx2*dx2*x1 - dx2*dy1*y1 + dx2*dy1*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 - dy1*root_piece + dy2*dy2*x1 - 4*x1)*divisor_piece;
-        const ay1_1 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy1*x1 - dx1*dy1*x2 - dx1*dy2*x1 + dx1*dy2*x2 + dx1*root_piece + dx2*dx2*y1 + dy1*dy1*y1 - 2*dy1*dy2*y1 + dy2*dy2*y1 - 4*y1)*divisor_piece;
-        const ax2_1 = (dx1*dx1*x2 - 2*dx1*dx2*x2 + dx1*dy2*y1 - dx1*dy2*y2 + dx2*dx2*x2 - dx2*dy2*y1 + dx2*dy2*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy2*dy2*x1 - dy2*root_piece - 4*x2)*divisor_piece;
-        const ay2_1 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx2*dx2*y1 + dx2*dy1*x1 - dx2*dy1*x2 - dx2*dy2*x1 + dx2*dy2*x2 + dx2*root_piece + dy1*dy1*y2 - 2*dy1*dy2*y2 + dy2*dy2*y2 - 4*y2)*divisor_piece;
-        const r1_1 = (dx1*y1 - dx1*y2 - dx2*y1 + dx2*y2 - dy1*x1 + dy1*x2 + dy2*x1 - dy2*x2 - root_piece)*divisor_piece;
-        const r2_1 = -(-dx1*y1 + dx1*y2 + dx2*y1 - dx2*y2 + dy1*x1 - dy1*x2 - dy2*x1 + dy2*x2)*divisor_piece - root_piece*divisor_piece;
+		const ax1_1 = (dx1*dx1*x1 - 2*dx1*dx2*x1 + dx1*dy1*y1 - dx1*dy1*y2 + dx2*dx2*x1 - dx2*dy1*y1 + dx2*dy1*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 - dy1*root_piece + dy2*dy2*x1 - 4*x1)*divisor_piece;
+		const ay1_1 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy1*x1 - dx1*dy1*x2 - dx1*dy2*x1 + dx1*dy2*x2 + dx1*root_piece + dx2*dx2*y1 + dy1*dy1*y1 - 2*dy1*dy2*y1 + dy2*dy2*y1 - 4*y1)*divisor_piece;
+		const ax2_1 = (dx1*dx1*x2 - 2*dx1*dx2*x2 + dx1*dy2*y1 - dx1*dy2*y2 + dx2*dx2*x2 - dx2*dy2*y1 + dx2*dy2*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy2*dy2*x1 - dy2*root_piece - 4*x2)*divisor_piece;
+		const ay2_1 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx2*dx2*y1 + dx2*dy1*x1 - dx2*dy1*x2 - dx2*dy2*x1 + dx2*dy2*x2 + dx2*root_piece + dy1*dy1*y2 - 2*dy1*dy2*y2 + dy2*dy2*y2 - 4*y2)*divisor_piece;
+		const r1_1 = (dx1*y1 - dx1*y2 - dx2*y1 + dx2*y2 - dy1*x1 + dy1*x2 + dy2*x1 - dy2*x2 - root_piece)*divisor_piece;
+		const r2_1 = -(-dx1*y1 + dx1*y2 + dx2*y1 - dx2*y2 + dy1*x1 - dy1*x2 - dy2*x1 + dy2*x2)*divisor_piece - root_piece*divisor_piece;
 
-        const ax1_2 = (dx1*dx1*x1 - 2*dx1*dx2*x1 + dx1*dy1*y1 - dx1*dy1*y2 + dx2*dx2*x1 - dx2*dy1*y1 + dx2*dy1*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy1*root_piece + dy2*dy2*x1 - 4*x1)*divisor_piece;
-        const ay1_2 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy1*x1 - dx1*dy1*x2 - dx1*dy2*x1 + dx1*dy2*x2 - dx1*root_piece + dx2*dx2*y1 + dy1*dy1*y1 - 2*dy1*dy2*y1 + dy2*dy2*y1 - 4*y1)*divisor_piece;
-        const ax2_2 = (dx1*dx1*x2 - 2*dx1*dx2*x2 + dx1*dy2*y1 - dx1*dy2*y2 + dx2*dx2*x2 - dx2*dy2*y1 + dx2*dy2*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy2*dy2*x1 + dy2*root_piece - 4*x2)*divisor_piece;
-        const ay2_2 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx2*dx2*y1 + dx2*dy1*x1 - dx2*dy1*x2 - dx2*dy2*x1 + dx2*dy2*x2 - dx2*root_piece + dy1*dy1*y2 - 2*dy1*dy2*y2 + dy2*dy2*y2 - 4*y2)*divisor_piece;
-        const r1_2 = (dx1*y1 - dx1*y2 - dx2*y1 + dx2*y2 - dy1*x1 + dy1*x2 + dy2*x1 - dy2*x2 + root_piece)*divisor_piece;
-        const r2_2 = -(-dx1*y1 + dx1*y2 + dx2*y1 - dx2*y2 + dy1*x1 - dy1*x2 - dy2*x1 + dy2*x2)*divisor_piece + root_piece*divisor_piece;
+		const ax1_2 = (dx1*dx1*x1 - 2*dx1*dx2*x1 + dx1*dy1*y1 - dx1*dy1*y2 + dx2*dx2*x1 - dx2*dy1*y1 + dx2*dy1*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy1*root_piece + dy2*dy2*x1 - 4*x1)*divisor_piece;
+		const ay1_2 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx1*dy1*x1 - dx1*dy1*x2 - dx1*dy2*x1 + dx1*dy2*x2 - dx1*root_piece + dx2*dx2*y1 + dy1*dy1*y1 - 2*dy1*dy2*y1 + dy2*dy2*y1 - 4*y1)*divisor_piece;
+		const ax2_2 = (dx1*dx1*x2 - 2*dx1*dx2*x2 + dx1*dy2*y1 - dx1*dy2*y2 + dx2*dx2*x2 - dx2*dy2*y1 + dx2*dy2*y2 + dy1*dy1*x2 - dy1*dy2*x1 - dy1*dy2*x2 + dy2*dy2*x1 + dy2*root_piece - 4*x2)*divisor_piece;
+		const ay2_2 = (dx1*dx1*y2 - dx1*dx2*y1 - dx1*dx2*y2 + dx2*dx2*y1 + dx2*dy1*x1 - dx2*dy1*x2 - dx2*dy2*x1 + dx2*dy2*x2 - dx2*root_piece + dy1*dy1*y2 - 2*dy1*dy2*y2 + dy2*dy2*y2 - 4*y2)*divisor_piece;
+		const r1_2 = (dx1*y1 - dx1*y2 - dx2*y1 + dx2*y2 - dy1*x1 + dy1*x2 + dy2*x1 - dy2*x2 + root_piece)*divisor_piece;
+		const r2_2 = -(-dx1*y1 + dx1*y2 + dx2*y1 - dx2*y2 + dy1*x1 - dy1*x2 - dy2*x1 + dy2*x2)*divisor_piece + root_piece*divisor_piece;
 
-        // the criterion to shose the solution
-        const solution_no = (Math.abs(r1_1) + Math.abs(r2_1)) < (Math.abs(r1_2) + Math.abs(r2_2)) ? 1 : 2;
-        // the solution boils down to arc centers, radiuses, and angular start-stop parameters
-        if(solution_no == 1) {
-            var ax1 = ax1_1;
-            var ay1 = ay1_1;
-            var ax2 = ax2_1;
-            var ay2 = ay2_1;
-            var r1 = r1_1;
-            var r2 = r2_1;
-            var cx = (ax1 + ax2) / 2.;
-            var cy = (ay1 + ay2) / 2.;
-            var t12 = Math.PI/2 - Math.atan2(x1 - ax1, y1 - ay1)
-            var t11 = Math.PI/2 - Math.atan2(cx - ax1, cy - ay1)
-            var t22 = Math.PI/2 - Math.atan2(x2 - ax2, y2 - ay2)
-            var t21 = Math.PI/2 - Math.atan2(cx - ax2, cy - ay2)
-        } else if(solution_no == 2){
-            var ax1 = ax1_2;
-            var ay1 = ay1_2;
-            var ax2 = ax2_2;
-            var ay2 = ay2_2;
-            var r1 = r1_2;
-            var r2 = r2_2;
-            var cx = (ax1 + ax2) / 2.;
-            var cy = (ay1 + ay2) / 2.;
-            var t11 = Math.PI/2 - Math.atan2(x1 - ax1, y1 - ay1)
-            var t12 = Math.PI/2 - Math.atan2(cx - ax1, cy - ay1)
-            var t21 = Math.PI/2 - Math.atan2(x2 - ax2, y2 - ay2)
-            var t22 = Math.PI/2 - Math.atan2(cx - ax2, cy - ay2)
-        }
-        const len = Math.abs(r1 * t_distance(t11, t12)) + Math.abs(r2 * t_distance(t21, t22));
-        const len1 = Math.abs(r1 * t_distance(t11, t12));
-        const fun = function(t) {
-            if(t < len1) {
-                const d = solution_no == 1 ? (1. - t / len1) :t / len1;
-                const at = t11 + t_distance(t11, t12) * d;
-                return [ax1 + Math.cos(at) * Math.abs(r1), ay1 + Math.sin(at) * Math.abs(r1)];
-            } else {
-                const d = solution_no == 1 ? (t - len1) / (len - len1) : (1. - (t - len1) / (len - len1));
-                const at = t21 + t_distance(t21, t22) * d;
-                return [ax2 + Math.cos(at) * Math.abs(r2), ay2 + Math.sin(at) * Math.abs(r1)];
-            }
-        };
-        return [fun, len];
-    }
+		// the criterion to shose the solution
+		const solution_no = (Math.abs(r1_1) + Math.abs(r2_1)) < (Math.abs(r1_2) + Math.abs(r2_2)) ? 1 : 2;
+		// the solution boils down to arc centers, radiuses, and angular start-stop parameters
+		if(solution_no == 1) {
+			var ax1 = ax1_1;
+			var ay1 = ay1_1;
+			var ax2 = ax2_1;
+			var ay2 = ay2_1;
+			var r1 = r1_1;
+			var r2 = r2_1;
+			var cx = (ax1 + ax2) / 2.;
+			var cy = (ay1 + ay2) / 2.;
+			var t12 = Math.PI/2 - Math.atan2(x1 - ax1, y1 - ay1)
+			var t11 = Math.PI/2 - Math.atan2(cx - ax1, cy - ay1)
+			var t22 = Math.PI/2 - Math.atan2(x2 - ax2, y2 - ay2)
+			var t21 = Math.PI/2 - Math.atan2(cx - ax2, cy - ay2)
+		} else if(solution_no == 2){
+			var ax1 = ax1_2;
+			var ay1 = ay1_2;
+			var ax2 = ax2_2;
+			var ay2 = ay2_2;
+			var r1 = r1_2;
+			var r2 = r2_2;
+			var cx = (ax1 + ax2) / 2.;
+			var cy = (ay1 + ay2) / 2.;
+			var t11 = Math.PI/2 - Math.atan2(x1 - ax1, y1 - ay1)
+			var t12 = Math.PI/2 - Math.atan2(cx - ax1, cy - ay1)
+			var t21 = Math.PI/2 - Math.atan2(x2 - ax2, y2 - ay2)
+			var t22 = Math.PI/2 - Math.atan2(cx - ax2, cy - ay2)
+		}
+		const len = Math.abs(r1 * t_distance(t11, t12)) + Math.abs(r2 * t_distance(t21, t22));
+		const len1 = Math.abs(r1 * t_distance(t11, t12));
+		const fun = function(t) {
+			if(t < len1) {
+				const d = solution_no == 1 ? (1. - t / len1) :t / len1;
+				const at = t11 + t_distance(t11, t12) * d;
+				return [ax1 + Math.cos(at) * Math.abs(r1), ay1 + Math.sin(at) * Math.abs(r1)];
+			} else {
+				const d = solution_no == 1 ? (t - len1) / (len - len1) : (1. - (t - len1) / (len - len1));
+				const at = t21 + t_distance(t21, t22) * d;
+				return [ax2 + Math.cos(at) * Math.abs(r2), ay2 + Math.sin(at) * Math.abs(r1)];
+			}
+		};
+		return [fun, len];
+	}
 }
 
 // cubic
@@ -455,30 +455,30 @@ var ys = [ 80, 140, 560, 340];
 var point_i = 0;
 
 function init(canvas_name){
-    const canvas = document.getElementById(canvas_name + "_canvas");
-    const canvas_rect = canvas.getBoundingClientRect();
-    draw_batch(0, 0, false);
+	const canvas = document.getElementById(canvas_name + "_canvas");
+	const canvas_rect = canvas.getBoundingClientRect();
+	draw_batch(0, 0, false);
 
-    canvas.addEventListener('mousemove', function(e){
-        var canvas_rect = canvas.getBoundingClientRect();
-        draw_batch(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-        if(e.buttons == 1){
-            xs[point_i] = e.clientX - canvas_rect.left;
-            ys[point_i] = e.clientY - canvas_rect.top;
-            draw_batch(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-        }
-    }, false);
+	canvas.addEventListener('mousemove', function(e){
+		var canvas_rect = canvas.getBoundingClientRect();
+		draw_batch(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			xs[point_i] = e.clientX - canvas_rect.left;
+			ys[point_i] = e.clientY - canvas_rect.top;
+			draw_batch(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		}
+	}, false);
 
-    canvas.addEventListener('mousedown', function(e){
-        var canvas_rect = canvas.getBoundingClientRect();
-        xs[point_i] = e.clientX - canvas_rect.left;
-        ys[point_i] = e.clientY - canvas_rect.top;
-        draw_batch(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-    }, false);
+	canvas.addEventListener('mousedown', function(e){
+		var canvas_rect = canvas.getBoundingClientRect();
+		xs[point_i] = e.clientX - canvas_rect.left;
+		ys[point_i] = e.clientY - canvas_rect.top;
+		draw_batch(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+	}, false);
 
-    canvas.addEventListener('mouseleave', function(e){
-        draw_batch(0, 0, false);
-    }, false);
+	canvas.addEventListener('mouseleave', function(e){
+		draw_batch(0, 0, false);
+	}, false);
 }
 
 function draw_arrow(context, x1, y1, x2, y2, color) {
@@ -497,53 +497,53 @@ function draw_arrow(context, x1, y1, x2, y2, color) {
 }
 
 function draw_common(context, client_x, client_y, do_guides) {
-    // dots
-    for(var i = 1; i <= 2; ++i){
-        context.beginPath();
-        context.arc(xs[i], ys[i], 3, 0, 2*Math.PI);
-        context.fillStyle="#707070";
-        context.fill();
-        context.closePath();
-    }
+	// dots
+	for(var i = 1; i <= 2; ++i){
+		context.beginPath();
+		context.arc(xs[i], ys[i], 3, 0, 2*Math.PI);
+		context.fillStyle="#707070";
+		context.fill();
+		context.closePath();
+	}
 
-    // tangents
-    context.lineWidth = 1;
-    draw_arrow(context, xs[1], ys[1], xs[0], ys[0], "#707070");
-    draw_arrow(context, xs[4-2], ys[4-2], xs[4-1], ys[4-1], "#707070");
+	// tangents
+	context.lineWidth = 1;
+	draw_arrow(context, xs[1], ys[1], xs[0], ys[0], "#707070");
+	draw_arrow(context, xs[4-2], ys[4-2], xs[4-1], ys[4-1], "#707070");
 
-    // guides
-    if(do_guides){
-        min_d = Math.pow(xs[0] - client_x, 2) + Math.pow(ys[0] - client_y, 2);
-        min_i = 0;
-        for(var i = 1; i < 4; ++i){
-            var di = Math.pow(xs[i] - client_x, 2) + Math.pow(ys[i] - client_y, 2);
-            if(di < min_d){
-                min_d = di;
-                min_i = i;
-            }
-        }
-        point_i = min_i;
-        context.setLineDash([4, 4]);
-        context.beginPath();
-        context.moveTo(xs[min_i], ys[min_i]);
-        context.lineTo(client_x, client_y);
-        context.strokeStyle="#707070";
-        context.stroke();
-        context.closePath();
-        context.setLineDash([]);
-    }
+	// guides
+	if(do_guides){
+		min_d = Math.pow(xs[0] - client_x, 2) + Math.pow(ys[0] - client_y, 2);
+		min_i = 0;
+		for(var i = 1; i < 4; ++i){
+			var di = Math.pow(xs[i] - client_x, 2) + Math.pow(ys[i] - client_y, 2);
+			if(di < min_d){
+				min_d = di;
+				min_i = i;
+			}
+		}
+		point_i = min_i;
+		context.setLineDash([4, 4]);
+		context.beginPath();
+		context.moveTo(xs[min_i], ys[min_i]);
+		context.lineTo(client_x, client_y);
+		context.strokeStyle="#707070";
+		context.stroke();
+		context.closePath();
+		context.setLineDash([]);
+	}
 
-    // labels
-    context.font = "14px Arial";
-    context.fillStyle = "#000000";
-    context.textBaseline = "middle";
-    context.textAlign = "right";
-    context.fillText("point 1", xs[1] - 8, ys[1]);
-    context.textAlign = "left";
-    context.fillText("point 2", xs[2] + 8, ys[2]);
-    context.textAlign = "center";
-    context.fillText("tangent 1", (xs[0] + xs[1]) / 2, (ys[0] + ys[1]) / 2);
-    context.fillText("tangent 2", (xs[2] + xs[3]) / 2, (ys[2] + ys[3]) / 2);
+	// labels
+	context.font = "14px Arial";
+	context.fillStyle = "#000000";
+	context.textBaseline = "middle";
+	context.textAlign = "right";
+	context.fillText("point 1", xs[1] - 8, ys[1]);
+	context.textAlign = "left";
+	context.fillText("point 2", xs[2] + 8, ys[2]);
+	context.textAlign = "center";
+	context.fillText("tangent 1", (xs[0] + xs[1]) / 2, (ys[0] + ys[1]) / 2);
+	context.fillText("tangent 2", (xs[2] + xs[3]) / 2, (ys[2] + ys[3]) / 2);
 }
 
 
@@ -551,196 +551,196 @@ var param_client_x;
 var param_client_y;
 var param_do_guides;
 function draw_batch(client_x, client_y, do_guides) {
-    draw_cubic_canvas(client_x, client_y, do_guides);
-    draw_biarcs_canvas(client_x, client_y, do_guides);
-    draw_arcline_canvas(client_x, client_y, do_guides);
-    draw_combined_canvas(client_x, client_y, do_guides);
+	draw_cubic_canvas(client_x, client_y, do_guides);
+	draw_biarcs_canvas(client_x, client_y, do_guides);
+	draw_arcline_canvas(client_x, client_y, do_guides);
+	draw_combined_canvas(client_x, client_y, do_guides);
 
-    // for param functions AND animations
-    param_client_x = client_x;
-    param_client_y = client_y;
-    param_do_guides = do_guides;
-    compute_param_functions();
-    draw_param_canvas(client_x, client_y, do_guides);
+	// for param functions AND animations
+	param_client_x = client_x;
+	param_client_y = client_y;
+	param_do_guides = do_guides;
+	compute_param_functions();
+	draw_param_canvas(client_x, client_y, do_guides);
 }
 
 function draw_cubic_canvas(client_x, client_y, do_guides) {
-    var canvas = document.getElementById("cubic_canvas");
-    var context = canvas.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	var canvas = document.getElementById("cubic_canvas");
+	var context = canvas.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    var Px = spline_for(xs[1], 3*(xs[0] - xs[1]), xs[2], -3*(xs[3] - xs[2]));
-    var Py = spline_for(ys[1], 3*(ys[0] - ys[1]), ys[2], -3*(ys[3] - ys[2]));
+	var Px = spline_for(xs[1], 3*(xs[0] - xs[1]), xs[2], -3*(xs[3] - xs[2]));
+	var Py = spline_for(ys[1], 3*(ys[0] - ys[1]), ys[2], -3*(ys[3] - ys[2]));
 
-    context.beginPath();
-    context.lineWidth = 3;
-    for(var i = 0; i < 256; ++i) {
-        var _t1 = (i) / 256;
-        var _t2 = (i + 1) / 256;
-        var _x1 = polynomial_in_t(Px, _t1);
-        var _y1 = polynomial_in_t(Py, _t1);
-        var _x2 = polynomial_in_t(Px, _t2);
-        var _y2 = polynomial_in_t(Py, _t2);
-        context.moveTo(_x1, _y1);
-        context.lineTo(_x2, _y2);
-        if(i % 32 == 31) {
-            context.strokeStyle=((i / 32)%2 < 1) ? "#d64562" : "#457fd6";
-            context.stroke();
-            context.closePath();
-            context.beginPath();
-        }
-    }
-    context.stroke();
-    context.closePath();
-    context.lineWidth = 1;
+	context.beginPath();
+	context.lineWidth = 3;
+	for(var i = 0; i < 256; ++i) {
+		var _t1 = (i) / 256;
+		var _t2 = (i + 1) / 256;
+		var _x1 = polynomial_in_t(Px, _t1);
+		var _y1 = polynomial_in_t(Py, _t1);
+		var _x2 = polynomial_in_t(Px, _t2);
+		var _y2 = polynomial_in_t(Py, _t2);
+		context.moveTo(_x1, _y1);
+		context.lineTo(_x2, _y2);
+		if(i % 32 == 31) {
+			context.strokeStyle=((i / 32)%2 < 1) ? "#d64562" : "#457fd6";
+			context.stroke();
+			context.closePath();
+			context.beginPath();
+		}
+	}
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
 
-    draw_common(context, client_x, client_y, do_guides);
+	draw_common(context, client_x, client_y, do_guides);
 }
 
 function draw_biarcs_canvas(client_x, client_y, do_guides){
-    var canvas = document.getElementById("biarcs_canvas");
-    var context = canvas.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	var canvas = document.getElementById("biarcs_canvas");
+	var context = canvas.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // biarcs
-    const x1 = xs[1];
-    const y1 = ys[1];
-    const x2 = xs[2];
-    const y2 = ys[2];
-    var dx1 = xs[0] - xs[1];
-    var dy1 = ys[0] - ys[1];
-    var dx2 = xs[3] - xs[2];
-    var dy2 = ys[3] - ys[2];
-    const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
-    const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
-    dx1 /= norm1;
-    dy1 /= norm1;
-    dx2 /= norm2;
-    dy2 /= norm2;
-    const fun_len = biarcs_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2);
-    const fun = fun_len[0];
-    const len = fun_len[1];
+	// biarcs
+	const x1 = xs[1];
+	const y1 = ys[1];
+	const x2 = xs[2];
+	const y2 = ys[2];
+	var dx1 = xs[0] - xs[1];
+	var dy1 = ys[0] - ys[1];
+	var dx2 = xs[3] - xs[2];
+	var dy2 = ys[3] - ys[2];
+	const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+	const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+	dx1 /= norm1;
+	dy1 /= norm1;
+	dx2 /= norm2;
+	dy2 /= norm2;
+	const fun_len = biarcs_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2);
+	const fun = fun_len[0];
+	const len = fun_len[1];
 
-    context.lineWidth = 3;
-    context.strokeStyle="#62d645";
+	context.lineWidth = 3;
+	context.strokeStyle="#62d645";
 
-    context.beginPath();
-    for(var i = 0; i < len; i += 2) {
-        const xy1 = fun(i);
-        const xy2 = fun(i+2);
-        if((xy1[0] >= 0 && xy1[0] <= 640 && xy1[1] >= 0 && xy1[1] <= 640)
-        || (xy2[0] >= 0 && xy2[0] <= 640 && xy2[1] >= 0 && xy2[1] <= 640)) {
-            context.moveTo(xy1[0], xy1[1]);
-            context.lineTo(xy2[0], xy2[1]);
-        }
-    }
-    context.stroke();
-    context.closePath();
+	context.beginPath();
+	for(var i = 0; i < len; i += 2) {
+		const xy1 = fun(i);
+		const xy2 = fun(i+2);
+		if((xy1[0] >= 0 && xy1[0] <= 640 && xy1[1] >= 0 && xy1[1] <= 640)
+		|| (xy2[0] >= 0 && xy2[0] <= 640 && xy2[1] >= 0 && xy2[1] <= 640)) {
+			context.moveTo(xy1[0], xy1[1]);
+			context.lineTo(xy2[0], xy2[1]);
+		}
+	}
+	context.stroke();
+	context.closePath();
 
-    // arrows and labels
-    draw_common(context, client_x, client_y, do_guides);
+	// arrows and labels
+	draw_common(context, client_x, client_y, do_guides);
 }
 
 function draw_arcline_canvas(client_x, client_y, do_guides){
-    var canvas = document.getElementById("arcline_canvas");
-    var context = canvas.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
-    draw_common(context, client_x, client_y, do_guides);
+	var canvas = document.getElementById("arcline_canvas");
+	var context = canvas.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+	draw_common(context, client_x, client_y, do_guides);
 
-    // arc and line
-    const x1 = xs[1];
-    const y1 = ys[1];
-    const x2 = xs[2];
-    const y2 = ys[2];
-    var dx1 = xs[0] - xs[1];
-    var dy1 = ys[0] - ys[1];
-    var dx2 = xs[3] - xs[2];
-    var dy2 = ys[3] - ys[2];
-    const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
-    const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
-    dx1 /= norm1;
-    dy1 /= norm1;
-    dx2 /= norm2;
-    dy2 /= norm2;
-    const fun_len = arcline_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2);
-    const fun = fun_len[0];
-    const len = fun_len[1];
+	// arc and line
+	const x1 = xs[1];
+	const y1 = ys[1];
+	const x2 = xs[2];
+	const y2 = ys[2];
+	var dx1 = xs[0] - xs[1];
+	var dy1 = ys[0] - ys[1];
+	var dx2 = xs[3] - xs[2];
+	var dy2 = ys[3] - ys[2];
+	const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+	const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+	dx1 /= norm1;
+	dy1 /= norm1;
+	dx2 /= norm2;
+	dy2 /= norm2;
+	const fun_len = arcline_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2);
+	const fun = fun_len[0];
+	const len = fun_len[1];
 
-    context.lineWidth = 3;
-    context.strokeStyle="#62d645";
+	context.lineWidth = 3;
+	context.strokeStyle="#62d645";
 
-    context.beginPath();
-    for(var i = 0; i < len; i += 2) {
-        const xy1 = fun(i);
-        const xy2 = fun(i+2);
-        if((xy1[0] >= 0 && xy1[0] <= 640 && xy1[1] >= 0 && xy1[1] <= 640)
-        || (xy2[0] >= 0 && xy2[0] <= 640 && xy2[1] >= 0 && xy2[1] <= 640)) {
-            context.moveTo(xy1[0], xy1[1]);
-            context.lineTo(xy2[0], xy2[1]);
-        }
-    }
-    context.stroke();
-    context.closePath();
+	context.beginPath();
+	for(var i = 0; i < len; i += 2) {
+		const xy1 = fun(i);
+		const xy2 = fun(i+2);
+		if((xy1[0] >= 0 && xy1[0] <= 640 && xy1[1] >= 0 && xy1[1] <= 640)
+		|| (xy2[0] >= 0 && xy2[0] <= 640 && xy2[1] >= 0 && xy2[1] <= 640)) {
+			context.moveTo(xy1[0], xy1[1]);
+			context.lineTo(xy2[0], xy2[1]);
+		}
+	}
+	context.stroke();
+	context.closePath();
 
-    // arrows and labels
-    draw_common(context, client_x, client_y, do_guides);
+	// arrows and labels
+	draw_common(context, client_x, client_y, do_guides);
 }
 
 function draw_combined_canvas(client_x, client_y, do_guides){
-    var canvas = document.getElementById("combined_canvas");
-    var context = canvas.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
-    draw_common(context, client_x, client_y, do_guides);
+	var canvas = document.getElementById("combined_canvas");
+	var context = canvas.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+	draw_common(context, client_x, client_y, do_guides);
 
-    // arc and line
-    const x1 = xs[1];
-    const y1 = ys[1];
-    const x2 = xs[2];
-    const y2 = ys[2];
-    var dx1 = xs[0] - xs[1];
-    var dy1 = ys[0] - ys[1];
-    var dx2 = xs[3] - xs[2];
-    var dy2 = ys[3] - ys[2];
-    const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
-    const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
-    dx1 /= norm1;
-    dy1 /= norm1;
-    dx2 /= norm2;
-    dy2 /= norm2;
-    const fun_len = combined_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2);
-    const fun = fun_len[0];
-    const len = fun_len[1];
+	// arc and line
+	const x1 = xs[1];
+	const y1 = ys[1];
+	const x2 = xs[2];
+	const y2 = ys[2];
+	var dx1 = xs[0] - xs[1];
+	var dy1 = ys[0] - ys[1];
+	var dx2 = xs[3] - xs[2];
+	var dy2 = ys[3] - ys[2];
+	const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+	const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+	dx1 /= norm1;
+	dy1 /= norm1;
+	dx2 /= norm2;
+	dy2 /= norm2;
+	const fun_len = combined_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2);
+	const fun = fun_len[0];
+	const len = fun_len[1];
 
-    context.lineWidth = 3;
-    context.strokeStyle="#62d645";
+	context.lineWidth = 3;
+	context.strokeStyle="#62d645";
 
-    context.beginPath();
-    for(var i = 0; i < len; i += 2) {
-        const xy1 = fun(i);
-        const xy2 = fun(i+2);
-        if((xy1[0] >= 0 && xy1[0] <= 640 && xy1[1] >= 0 && xy1[1] <= 640)
-        || (xy2[0] >= 0 && xy2[0] <= 640 && xy2[1] >= 0 && xy2[1] <= 640)) {
-            context.moveTo(xy1[0], xy1[1]);
-            context.lineTo(xy2[0], xy2[1]);
-        }
-    }
-    context.stroke();
-    context.closePath();
+	context.beginPath();
+	for(var i = 0; i < len; i += 2) {
+		const xy1 = fun(i);
+		const xy2 = fun(i+2);
+		if((xy1[0] >= 0 && xy1[0] <= 640 && xy1[1] >= 0 && xy1[1] <= 640)
+		|| (xy2[0] >= 0 && xy2[0] <= 640 && xy2[1] >= 0 && xy2[1] <= 640)) {
+			context.moveTo(xy1[0], xy1[1]);
+			context.lineTo(xy2[0], xy2[1]);
+		}
+	}
+	context.stroke();
+	context.closePath();
 
-    // arrows and labels
-    draw_common(context, client_x, client_y, do_guides);
+	// arrows and labels
+	draw_common(context, client_x, client_y, do_guides);
 }
 
 
@@ -748,140 +748,140 @@ var param_Pxy;
 var param_Fd;
 var param_Fxy;
 function compute_param_functions() {
-    var Px = spline_for(xs[1], 3*(xs[0] - xs[1]), xs[2], -3*(xs[3] - xs[2]));
-    var Py = spline_for(ys[1], 3*(ys[0] - ys[1]), ys[2], -3*(ys[3] - ys[2]));
-    param_Pxy = function(t) {
-        return [polynomial_in_t(Px, t), polynomial_in_t(Py, t)];
-    }
-    const x1 = xs[1];
-    const y1 = ys[1];
-    const x2 = xs[2];
-    const y2 = ys[2];
-    var dx1 = xs[0] - xs[1];
-    var dy1 = ys[0] - ys[1];
-    var dx2 = xs[3] - xs[2];
-    var dy2 = ys[3] - ys[2];
-    const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
-    const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
-    dx1 /= norm1;
-    dy1 /= norm1;
-    dx2 /= norm2;
-    dy2 /= norm2;
-    const fun_len = combined_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2);
-    param_Fd = fun_len[1];
-    param_Fxy = fun_len[0];
+	var Px = spline_for(xs[1], 3*(xs[0] - xs[1]), xs[2], -3*(xs[3] - xs[2]));
+	var Py = spline_for(ys[1], 3*(ys[0] - ys[1]), ys[2], -3*(ys[3] - ys[2]));
+	param_Pxy = function(t) {
+		return [polynomial_in_t(Px, t), polynomial_in_t(Py, t)];
+	}
+	const x1 = xs[1];
+	const y1 = ys[1];
+	const x2 = xs[2];
+	const y2 = ys[2];
+	var dx1 = xs[0] - xs[1];
+	var dy1 = ys[0] - ys[1];
+	var dx2 = xs[3] - xs[2];
+	var dy2 = ys[3] - ys[2];
+	const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+	const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+	dx1 /= norm1;
+	dy1 /= norm1;
+	dx2 /= norm2;
+	dy2 /= norm2;
+	const fun_len = combined_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2);
+	param_Fd = fun_len[1];
+	param_Fxy = fun_len[0];
 }
 
 
 function draw_param_canvas(client_x, client_y, do_guides){
-    var canvas = document.getElementById("param_canvas");
-    var context = canvas.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
-    draw_common(context, client_x, client_y, do_guides);
+	var canvas = document.getElementById("param_canvas");
+	var context = canvas.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+	draw_common(context, client_x, client_y, do_guides);
 
-    if(document.getElementById("method1").checked || document.getElementById("method12").checked) {
-        // cubic
-        var Px = spline_for(xs[1], 3*(xs[0] - xs[1]), xs[2], -3*(xs[3] - xs[2]));
-        var Py = spline_for(ys[1], 3*(ys[0] - ys[1]), ys[2], -3*(ys[3] - ys[2]));
-        param_Pxy = function(t) {
-            return [polynomial_in_t(Px, t), polynomial_in_t(Py, t)];
-        }
+	if(document.getElementById("method1").checked || document.getElementById("method12").checked) {
+		// cubic
+		var Px = spline_for(xs[1], 3*(xs[0] - xs[1]), xs[2], -3*(xs[3] - xs[2]));
+		var Py = spline_for(ys[1], 3*(ys[0] - ys[1]), ys[2], -3*(ys[3] - ys[2]));
+		param_Pxy = function(t) {
+			return [polynomial_in_t(Px, t), polynomial_in_t(Py, t)];
+		}
 
-        context.beginPath();
-        context.lineWidth = 3;
-        for(var i = 0; i < 256; ++i) {
-            const t1 = (i) / 256;
-            const t2 = (i + 1) / 256;
-            const xy1 = param_Pxy(t1);
-            const xy2 = param_Pxy(t2);
-            context.moveTo(xy1[0], xy1[1]);
-            context.lineTo(xy2[0], xy2[1]);
-            if(i % 32 == 31) {
-                context.strokeStyle=((i / 32) % 2 < 1) ? "#d64562" : "#457fd6";
-                context.stroke();
-                context.closePath();
-                context.beginPath();
-            }
-        }
-        context.stroke();
-        context.closePath();
-        context.lineWidth = 1;
+		context.beginPath();
+		context.lineWidth = 3;
+		for(var i = 0; i < 256; ++i) {
+			const t1 = (i) / 256;
+			const t2 = (i + 1) / 256;
+			const xy1 = param_Pxy(t1);
+			const xy2 = param_Pxy(t2);
+			context.moveTo(xy1[0], xy1[1]);
+			context.lineTo(xy2[0], xy2[1]);
+			if(i % 32 == 31) {
+				context.strokeStyle=((i / 32) % 2 < 1) ? "#d64562" : "#457fd6";
+				context.stroke();
+				context.closePath();
+				context.beginPath();
+			}
+		}
+		context.stroke();
+		context.closePath();
+		context.lineWidth = 1;
 
-        // animation
-        const t = (time / 1000 / 3) % 1.;
-        const xy = param_Pxy(t);
-        context.beginPath();
-        context.arc(xy[0], xy[1], 7, 0, 2*Math.PI);
-        context.fillStyle="#707070";
-        context.fill();
-        context.closePath();
-    }
+		// animation
+		const t = (time / 1000 / 3) % 1.;
+		const xy = param_Pxy(t);
+		context.beginPath();
+		context.arc(xy[0], xy[1], 7, 0, 2*Math.PI);
+		context.fillStyle="#707070";
+		context.fill();
+		context.closePath();
+	}
 
-    if(document.getElementById("method2").checked || document.getElementById("method12").checked) {
-        // arc and a line segment
-        context.lineWidth = 3;
-        context.strokeStyle="#62d645";
+	if(document.getElementById("method2").checked || document.getElementById("method12").checked) {
+		// arc and a line segment
+		context.lineWidth = 3;
+		context.strokeStyle="#62d645";
 
-        for(var i = 0; i < param_Fd; i += 2) {
-            context.beginPath();
-            const xy1 = param_Fxy(i);
-            const xy2 = param_Fxy(i+2);
-            context.moveTo(xy1[0], xy1[1]);
-            context.lineTo(xy2[0], xy2[1]);
-            context.strokeStyle= ((i / 32) % 2) < 1 ? "#62d645" : "#d67f45"; // stripes
-            context.stroke();
-            context.closePath();
-        }
+		for(var i = 0; i < param_Fd; i += 2) {
+			context.beginPath();
+			const xy1 = param_Fxy(i);
+			const xy2 = param_Fxy(i+2);
+			context.moveTo(xy1[0], xy1[1]);
+			context.lineTo(xy2[0], xy2[1]);
+			context.strokeStyle= ((i / 32) % 2) < 1 ? "#62d645" : "#d67f45"; // stripes
+			context.stroke();
+			context.closePath();
+		}
 
-        // animation
-        const t = ((time / 1000 / 3) * param_Fd) % param_Fd;
-        const xy = param_Fxy(t);
-        context.beginPath();
-        context.arc(xy[0], xy[1], 7, 0, 2*Math.PI);
-        context.fillStyle="#707070";
-        context.fill();
-        context.closePath();
-    }
-    draw_common(context, client_x, client_y, do_guides);
+		// animation
+		const t = ((time / 1000 / 3) * param_Fd) % param_Fd;
+		const xy = param_Fxy(t);
+		context.beginPath();
+		context.arc(xy[0], xy[1], 7, 0, 2*Math.PI);
+		context.fillStyle="#707070";
+		context.fill();
+		context.closePath();
+	}
+	draw_common(context, client_x, client_y, do_guides);
 }
 
 function set_biarcs_1() {
-    xs = [280,  80, 560, 360];
-    ys = [ 60, 110, 540, 580];
-    draw_batch(0, 0, false);
+	xs = [280,  80, 560, 360];
+	ys = [ 60, 110, 540, 580];
+	draw_batch(0, 0, false);
 }
 
 function set_biarcs_2() {
-    xs = [280,  80, 420, 560];
-    ys = [ 60, 110, 320, 420];
-    draw_batch(0, 0, false);
+	xs = [280,  80, 420, 560];
+	ys = [ 60, 110, 320, 420];
+	draw_batch(0, 0, false);
 }
 
 function set_biarcs_3() {
-    xs = [78, 240, 400, 560];
-    ys = [80, 240, 400, 563];
-    draw_batch(0, 0, false);
+	xs = [78, 240, 400, 560];
+	ys = [80, 240, 400, 563];
+	draw_batch(0, 0, false);
 }
 
 function set_arcline_1() {
-    xs = [220,  80, 440, 560];
-    ys = [160,  80, 520, 580];
-    draw_batch(0, 0, false);
+	xs = [220,  80, 440, 560];
+	ys = [160,  80, 520, 580];
+	draw_batch(0, 0, false);
 }
 
 function set_arcline_2() {
-    xs = [280,  80, 560, 360];
-    ys = [ 60, 110, 540, 580];
-    draw_batch(0, 0, false);
+	xs = [280,  80, 560, 360];
+	ys = [ 60, 110, 540, 580];
+	draw_batch(0, 0, false);
 }
 
 function set_arcline_3() {
-    xs = [80, 160, 400, 560];
-    ys = [160, 80, 400, 560];
-    draw_batch(0, 0, false);
+	xs = [80, 160, 400, 560];
+	ys = [160, 80, 400, 560];
+	draw_batch(0, 0, false);
 }
 
 var curve_xs = [ 115, 203, 560, 561, 504, 412, 193, 179 ];
@@ -889,30 +889,30 @@ var curve_ys = [ 160, 134,  80, 191, 542, 518, 470, 414 ];
 var curve_point_i = 0;
 
 function init_curve_canvas() {
-    const canvas = document.getElementById("curve_canvas");
-    const canvas_rect = canvas.getBoundingClientRect();
-    compute_and_draw_curve_canvas(0, 0, false);
+	const canvas = document.getElementById("curve_canvas");
+	const canvas_rect = canvas.getBoundingClientRect();
+	compute_and_draw_curve_canvas(0, 0, false);
 
-    canvas.addEventListener('mousemove', function(e){
-        var canvas_rect = canvas.getBoundingClientRect();
-        compute_and_draw_curve_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-        if(e.buttons == 1){
-            curve_xs[curve_point_i] = e.clientX - canvas_rect.left;
-            curve_ys[curve_point_i] = e.clientY - canvas_rect.top;
-            compute_and_draw_curve_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-        }
-    }, false);
+	canvas.addEventListener('mousemove', function(e){
+		var canvas_rect = canvas.getBoundingClientRect();
+		compute_and_draw_curve_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			curve_xs[curve_point_i] = e.clientX - canvas_rect.left;
+			curve_ys[curve_point_i] = e.clientY - canvas_rect.top;
+			compute_and_draw_curve_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		}
+	}, false);
 
-    canvas.addEventListener('mousedown', function(e){
-        var canvas_rect = canvas.getBoundingClientRect();
-        curve_xs[curve_point_i] = e.clientX - canvas_rect.left;
-        curve_ys[curve_point_i] = e.clientY - canvas_rect.top;
-        compute_and_draw_curve_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-    }, false);
+	canvas.addEventListener('mousedown', function(e){
+		var canvas_rect = canvas.getBoundingClientRect();
+		curve_xs[curve_point_i] = e.clientX - canvas_rect.left;
+		curve_ys[curve_point_i] = e.clientY - canvas_rect.top;
+		compute_and_draw_curve_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+	}, false);
 
-    canvas.addEventListener('mouseleave', function(e){
-        compute_and_draw_curve_canvas(0, 0, false);
-    }, false);
+	canvas.addEventListener('mouseleave', function(e){
+		compute_and_draw_curve_canvas(0, 0, false);
+	}, false);
 }
 
 
@@ -923,228 +923,228 @@ var curve_funs = [null, null, null, null];
 var curve_lens = [0, 0, 0, 0];
 var curve_speed = 200;
 function compute_and_draw_curve_canvas(client_x, client_y, do_guides){
-    curve_client_x = client_x;
-    curve_client_y = client_y;
-    curve_do_guides = do_guides;
-    const xs = curve_xs;
-    const ys = curve_ys;
-    for(var i = 0; i < 4; ++i) {
-        // arc and line
-        const x1 = xs[i*2];
-        const y1 = ys[i*2];
-        const x2 = xs[(i*2+2)%8];
-        const y2 = ys[(i*2+2)%8];
-        var dx1 = xs[i*2+1] - xs[i*2];
-        var dy1 = ys[i*2+1] - ys[i*2];
-        var dx2 = xs[(i*2+2)%8] - xs[(i*2+2+1)%8];
-        var dy2 = ys[(i*2+2)%8] - ys[(i*2+2+1)%8];
-        const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
-        const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
-        dx1 /= norm1;
-        dy1 /= norm1;
-        dx2 /= norm2;
-        dy2 /= norm2;
-        const fun_len = combined_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2);
-        curve_funs[i] = fun_len[0];
-        curve_lens[i] = fun_len[1];
-    }
-    draw_curve_canvas(client_x, client_y, do_guides);
+	curve_client_x = client_x;
+	curve_client_y = client_y;
+	curve_do_guides = do_guides;
+	const xs = curve_xs;
+	const ys = curve_ys;
+	for(var i = 0; i < 4; ++i) {
+		// arc and line
+		const x1 = xs[i*2];
+		const y1 = ys[i*2];
+		const x2 = xs[(i*2+2)%8];
+		const y2 = ys[(i*2+2)%8];
+		var dx1 = xs[i*2+1] - xs[i*2];
+		var dy1 = ys[i*2+1] - ys[i*2];
+		var dx2 = xs[(i*2+2)%8] - xs[(i*2+2+1)%8];
+		var dy2 = ys[(i*2+2)%8] - ys[(i*2+2+1)%8];
+		const norm1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+		const norm2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+		dx1 /= norm1;
+		dy1 /= norm1;
+		dx2 /= norm2;
+		dy2 /= norm2;
+		const fun_len = combined_patch_and_its_length(x1, y1, dx1, dy1, x2, y2, dx2, dy2);
+		curve_funs[i] = fun_len[0];
+		curve_lens[i] = fun_len[1];
+	}
+	draw_curve_canvas(client_x, client_y, do_guides);
 }
 
 function draw_curve_canvas(client_x, client_y, do_guides){
-    var canvas = document.getElementById("curve_canvas");
-    var context = canvas.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	var canvas = document.getElementById("curve_canvas");
+	var context = canvas.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    const xs = curve_xs;
-    const ys = curve_ys;
+	const xs = curve_xs;
+	const ys = curve_ys;
 
-    // curve
-    for(var i = 0; i < 4; ++i) {
-        // arc and line
-        context.lineWidth = 3;
-        context.strokeStyle="#62d645";
-        context.beginPath();
-        for(var j = 0; j < curve_lens[i]; j += 2) {
-            const xy1 = curve_funs[i](j);
-            const xy2 = curve_funs[i](j+2);
-            if((xy1[0] >= 0 && xy1[0] <= 640 && xy1[1] >= 0 && xy1[1] <= 640)
-            || (xy2[0] >= 0 && xy2[0] <= 640 && xy2[1] >= 0 && xy2[1] <= 640)) {
-                context.moveTo(xy1[0], xy1[1]);
-                context.lineTo(xy2[0], xy2[1]);
-            }
-        }
-        context.stroke();
-        context.closePath();
-    }
+	// curve
+	for(var i = 0; i < 4; ++i) {
+		// arc and line
+		context.lineWidth = 3;
+		context.strokeStyle="#62d645";
+		context.beginPath();
+		for(var j = 0; j < curve_lens[i]; j += 2) {
+			const xy1 = curve_funs[i](j);
+			const xy2 = curve_funs[i](j+2);
+			if((xy1[0] >= 0 && xy1[0] <= 640 && xy1[1] >= 0 && xy1[1] <= 640)
+			|| (xy2[0] >= 0 && xy2[0] <= 640 && xy2[1] >= 0 && xy2[1] <= 640)) {
+				context.moveTo(xy1[0], xy1[1]);
+				context.lineTo(xy2[0], xy2[1]);
+			}
+		}
+		context.stroke();
+		context.closePath();
+	}
 
-    // animation
-    const d = curve_lens[0] + curve_lens[1] + curve_lens[2] + curve_lens[3];
-    const t = (time / 1000 * curve_speed) % d;
-    var di = 0;
-    for(var i = 0; i < 4; ++i) {
-        if (0 < t - di && t - di < curve_lens[i]) {
-            const xy = curve_funs[i](t - di);
-            context.beginPath();
-            context.arc(xy[0], xy[1], 7, 0, 2*Math.PI);
-            context.fillStyle="#707070";
-            context.fill();
-            context.closePath();
-        }
-        di += curve_lens[i];
-    }
+	// animation
+	const d = curve_lens[0] + curve_lens[1] + curve_lens[2] + curve_lens[3];
+	const t = (time / 1000 * curve_speed) % d;
+	var di = 0;
+	for(var i = 0; i < 4; ++i) {
+		if (0 < t - di && t - di < curve_lens[i]) {
+			const xy = curve_funs[i](t - di);
+			context.beginPath();
+			context.arc(xy[0], xy[1], 7, 0, 2*Math.PI);
+			context.fillStyle="#707070";
+			context.fill();
+			context.closePath();
+		}
+		di += curve_lens[i];
+	}
 
-    // dots
-    for(var i = 0; i < 4; ++i){
-        context.beginPath();
-        context.arc(xs[i*2], ys[i*2], 3, 0, 2*Math.PI);
-        context.fillStyle="#707070";
-        context.fill();
-        context.closePath();
-    }
+	// dots
+	for(var i = 0; i < 4; ++i){
+		context.beginPath();
+		context.arc(xs[i*2], ys[i*2], 3, 0, 2*Math.PI);
+		context.fillStyle="#707070";
+		context.fill();
+		context.closePath();
+	}
 
-    // tangents
-    context.lineWidth = 1;
-    for(var i = 0; i < 4; ++i) {
-        draw_arrow(context, xs[i*2], ys[i*2], xs[i*2+1], ys[i*2+1], "#707070");
-    }
+	// tangents
+	context.lineWidth = 1;
+	for(var i = 0; i < 4; ++i) {
+		draw_arrow(context, xs[i*2], ys[i*2], xs[i*2+1], ys[i*2+1], "#707070");
+	}
 
-    // guides
-    if(do_guides){
-        min_d = Math.pow(xs[0] - client_x, 2) + Math.pow(ys[0] - client_y, 2);
-        min_i = 0;
-        for(var i = 1; i < 8; ++i){
-            var di = Math.pow(xs[i] - client_x, 2) + Math.pow(ys[i] - client_y, 2);
-            if(di < min_d){
-                min_d = di;
-                min_i = i;
-            }
-        }
-        curve_point_i = min_i;
-        context.setLineDash([4, 4]);
-        context.beginPath();
-        context.moveTo(xs[min_i], ys[min_i]);
-        context.lineTo(client_x, client_y);
-        context.strokeStyle="#707070";
-        context.stroke();
-        context.closePath();
-        context.setLineDash([]);
-    }
+	// guides
+	if(do_guides){
+		min_d = Math.pow(xs[0] - client_x, 2) + Math.pow(ys[0] - client_y, 2);
+		min_i = 0;
+		for(var i = 1; i < 8; ++i){
+			var di = Math.pow(xs[i] - client_x, 2) + Math.pow(ys[i] - client_y, 2);
+			if(di < min_d){
+				min_d = di;
+				min_i = i;
+			}
+		}
+		curve_point_i = min_i;
+		context.setLineDash([4, 4]);
+		context.beginPath();
+		context.moveTo(xs[min_i], ys[min_i]);
+		context.lineTo(client_x, client_y);
+		context.strokeStyle="#707070";
+		context.stroke();
+		context.closePath();
+		context.setLineDash([]);
+	}
 }
 
 function colorized(text) {
-    const separators = ['def ', ' for ', ' else', ' if ', ' break', 'return', 'class ', ' in ', 'global ',
-        '\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')', '+', '-', '*', '/'];
-    const quotes = ['\'', '"'];
-    const comments = [['#', '\n']];
+	const separators = ['def ', ' for ', ' else', ' if ', ' break', 'return', 'class ', ' in ', 'global ',
+		'\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')', '+', '-', '*', '/'];
+	const quotes = ['\'', '"'];
+	const comments = [['#', '\n']];
 
-    function painted_in(line, color) {
-        return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
-    }
+	function painted_in(line, color) {
+		return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+	}
 
-    function colorized(token) {
-        var code_sum = 0;
-        for(var i = 0; i < token.length; ++i)
-            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
-        var zero_channel = code_sum % 3;
-        var color = '' + (zero_channel == 0 ? '3' : '') + (1 + (code_sum % 5) * 2)
-            + (zero_channel == 1 ? '3' : '') + (4 + (code_sum % 2) * 5)
-            + (zero_channel == 2 ? '3' : '');
-        return painted_in(token, color);
-    }
+	function colorized(token) {
+		var code_sum = 0;
+		for(var i = 0; i < token.length; ++i)
+			code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+		var zero_channel = code_sum % 3;
+		var color = '' + (zero_channel == 0 ? '3' : '') + (1 + (code_sum % 5) * 2)
+			+ (zero_channel == 1 ? '3' : '') + (4 + (code_sum % 2) * 5)
+			+ (zero_channel == 2 ? '3' : '');
+		return painted_in(token, color);
+	}
 
-    function separated(line, i) {
-        if(i == separators.length)
-            return colorized(line);
-        return line.split(separators[i]).map(function(subline) {
-            return separated(subline, i + 1);}).join(separators[i]);
-    }
+	function separated(line, i) {
+		if(i == separators.length)
+			return colorized(line);
+		return line.split(separators[i]).map(function(subline) {
+			return separated(subline, i + 1);}).join(separators[i]);
+	}
 
-    function unquoted(line, i) {
-        if(i == quotes.length)
-            return separated(line, 0);
-        var chunk_no = 0;
-        return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {
-            return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {
-                return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "555");}).join('');
-    }
+	function unquoted(line, i) {
+		if(i == quotes.length)
+			return separated(line, 0);
+		var chunk_no = 0;
+		return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {
+			return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {
+				return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "555");}).join('');
+	}
 
-    function uncommented(line, i) {
-        if(i == comments.length)
-            return unquoted(line, 0);
-        var chunks = line.split(comments[i][0]);
-        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
-            var in_out_comment = chunk.split(comments[i][1]);
-            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555")
-                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
-    }
+	function uncommented(line, i) {
+		if(i == comments.length)
+			return unquoted(line, 0);
+		var chunks = line.split(comments[i][0]);
+		return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+			var in_out_comment = chunk.split(comments[i][1]);
+			return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555")
+				+ uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+	}
 
-    return uncommented(text, 0);
+	return uncommented(text, 0);
 }
 
 function more_speed() {
-    curve_speed += 50;
-    document.getElementById("speed").value = curve_speed;
+	curve_speed += 50;
+	document.getElementById("speed").value = curve_speed;
 }
 
 function change_speed() {
-    curve_speed = Number(document.getElementById("speed").value);
-    if(isNaN(curve_speed) || curve_speed < 0.0) {
-        curve_speed = 0.0;
-        document.getElementById("speed").value = 10;
-    }
+	curve_speed = Number(document.getElementById("speed").value);
+	if(isNaN(curve_speed) || curve_speed < 0.0) {
+		curve_speed = 0.0;
+		document.getElementById("speed").value = 10;
+	}
 }
 
 function less_speed() {
-    curve_speed -= 50;
-    if(isNaN(curve_speed) || curve_speed < 0.0) {
-        curve_speed = 0.0;
-        document.getElementById("speed").value = 0;
-    } else
-        document.getElementById("speed").value = curve_speed;
+	curve_speed -= 50;
+	if(isNaN(curve_speed) || curve_speed < 0.0) {
+		curve_speed = 0.0;
+		document.getElementById("speed").value = 0;
+	} else
+		document.getElementById("speed").value = curve_speed;
 }
 
 var time = 0.;
 function animation_tick() {
-    draw_param_canvas(param_client_x, param_client_y, param_do_guides);
-    draw_curve_canvas(curve_client_x, curve_client_y, curve_do_guides);
-    time += 50;
-    setTimeout(animation_tick, 50);
+	draw_param_canvas(param_client_x, param_client_y, param_do_guides);
+	draw_curve_canvas(curve_client_x, curve_client_y, curve_do_guides);
+	time += 50;
+	setTimeout(animation_tick, 50);
 }
-    </script>
+	</script>
   </head>
   <body>
-    <center>
-    <h1>
+	<center>
+	<h1>
 Circles and lines vs. polynomial splines
-    </h1>
-    <p>
+	</h1>
+	<p>
 Usually, when you want to make a parametric curve, you should go for a polynomial spline. It can be a Bézier curve, which is very obviously a bunch of polynomials stacked on top of each other under a trench coat. Or it can be a NURBS which is essentially the same as Bézier but in slightly different space. It can also be a <a href="https://wordsandbuttons.online/quadratic_splines_are_useful_too.html">hand-crafted spline</a> tailored for your specific task. A polynomial spline is a decent choice. But it's not the only one possible.
-    </p>
-    <p>
+	</p>
+	<p>
 Sometimes, for the reasons mentioned only in the second half of this page to keep you intrigued, you are not satisfied with polynomials. You have to look elsewhere. This page shows you one possible option apart from polynomials and it is an old-school parametric curve made from arcs and line segments stitched together. Yes, it's that simple. Euclid would have been proud.
-    </p>
-    <h2>Cubic polynomial</h2>
-    <p>
+	</p>
+	<h2>Cubic polynomial</h2>
+	<p>
 To build a smooth parametric curve we need appropriate building blocks. Smoothness means that the function has tangent vector continuity, so a decent building block for it would be something that gives you full control over its tangents in points. A cubic polynomial is a fine example.
-    </p>
-    <canvas id="cubic_canvas" width=640 height=640></canvas>
-    <p class="comment">Points and tangents are clickable/dragable.</p>
-    <p>
+	</p>
+	<canvas id="cubic_canvas" width=640 height=640></canvas>
+	<p class="comment">Points and tangents are clickable/dragable.</p>
+	<p>
 Two points imply two linear equations. Two tangents are two more. Four equations, four polynomial coefficients — nice little linear system. Solve it and you have your building block.
-    </p>
+	</p>
 
-    <h2><span id="index_biarcs">Biarcs</span></h2>
-    <p>
+	<h2><span id="index_biarcs">Biarcs</span></h2>
+	<p>
 We can construct an alternative building block by making two circles go through the points so the tangents will be orthogonal to the radius vector, and then touch. The point where the circles touch is the point where they share the tangent. Then we'll cut two arcs out of them, and that's it. The pair of arcs will be our building block.
-    </p>
-    <p>
+	</p>
+	<p>
 In SymPy equations, these conditions look like this:
-    </p>
-    <pre id="code_1">
+	</p>
+	<pre id="code_1">
 # input: point and tangent
 x1, y1, dx1, dy1 = symbols('x1 y1 dx1 dy1')
 x2, y2, dx2, dy2 = symbols('x2 y2 dx2 dy2')
@@ -1163,35 +1163,35 @@ solutions = solve(
     (ax1-ax2)**2 + (ay1-ay2)**2 - (r1+r2)**2 # circles touch
 ], (ax1, ay1, ax2, ay2, r1, r2))
     </pre>
-    <p>
+	<p>
 Yes, this is a quadratic system. It results in not one but two solutions. You can see <a href="https://github.com/akalenuk/wordsandbuttons/blob/28e430f1d7eeef560d1e4af44676ecea3f8f1e4b/pages/circles_and_lines_vs_polynomial_splines.html#L379">both cases on Github</a>.
-    </p>
-    <p>
+	</p>
+	<p>
 We only want one though, so let's just pick the one with the least sum of radiuses and see what will happen.
-    </p>
-    <canvas id="biarcs_canvas" width=640 height=640></canvas>
-    <form onsubmit="return false;">
-        <center>
-        Show
-        <button type="button" id="biarcs_button_1" onclick="set_biarcs_1();">good</button> &nbsp;
-        <button type="button" id="biarcs_button_2" onclick="set_biarcs_2();">bad</button> &nbsp;
-        <button type="button" id="biarcs_button_3" onclick="set_biarcs_3();">ugly</button>
-        </center>
-    </form>
-    <p>
+	</p>
+	<canvas id="biarcs_canvas" width=640 height=640></canvas>
+	<form onsubmit="return false;">
+		<center>
+		Show
+		<button type="button" id="biarcs_button_1" onclick="set_biarcs_1();">good</button> &nbsp;
+		<button type="button" id="biarcs_button_2" onclick="set_biarcs_2();">bad</button> &nbsp;
+		<button type="button" id="biarcs_button_3" onclick="set_biarcs_3();">ugly</button>
+		</center>
+	</form>
+	<p>
 We have our building block. The problem is, it only works ok when tangents are contradirected-ish. As tangents become codirected, it tends to “bubble”. And when they are also codirected with the points vector, the radiuses become too big and it introduces computational and performance problems. It's a building block for very particular kind of buildings.
-    </p>
-    <p>
+	</p>
+	<p>
 But that's easy to fix. Let's complement it with something else.
-    </p>
-    <h2>Arc and line segment</h2>
-    <p>
+	</p>
+	<h2>Arc and line segment</h2>
+	<p>
 And something else is an arc and a line segment. This should work with codirected tangents making nice cane-like curves where the biarc takes a giant detour.
-    </p>
-    <p>
+	</p>
+	<p>
 An arc and a segment is again a radius vector orthogonal to the tangent of the first point, plus a segment from the second point to the point where the circle touches the second tangent ray emited from the second point. Ok, the verbal description is a little messy, let's try SymPy equations.
-    </p>
-    <pre id="code_2">
+	</p>
+	<pre id="code_2">
 # input
 x1, y1, dx1, dy1 = symbols('x1 y1 dx1 dy1')
 x2, y2, dx2, dy2 = symbols('x2 y2 dx2 dy2')
@@ -1213,99 +1213,99 @@ solutions = solve(
                                           # touching the arc
 ], (ax1, ay1, t2, ix, iy))
     </pre>
-    <p>
+	<p>
 Ah, that's not it! You can add an equation so the SymPy will get the arc radius for you too but it will take more time to compute. Not sure how much, let's just say after 25 hours on my machine I had to stop the process.
-    </p>
-    <p>
+	</p>
+	<p>
 It's faster to compute in numerically.
-    </p>
-    <p>
+	</p>
+	<p>
 To do that, you need to find an intersection point of the tangent rays. Then you compute the angle between the rays. Then the shortest distance from one of starting points to the point of tangent intersection multiplied by the tangent function of the found angle is the radius. Also, the shortest distance determines which of the points will touch an arc and which will get the line segment. Again, I'm not sure that the words are helping, the <a href="https://github.com/akalenuk/wordsandbuttons/blob/28e430f1d7eeef560d1e4af44676ecea3f8f1e4b/pages/circles_and_lines_vs_polynomial_splines.html#L308">code for this is on Github</a>.
-    </p>
-    <canvas id="arcline_canvas" width=640 height=640></canvas>
-    <form onsubmit="return false;">
-        <center>
-        Show
-        <button type="button" id="arcline_button_1" onclick="set_arcline_1()">good</button> &nbsp;
-        <button type="button" id="arcline_button_2" onclick="set_arcline_2()">bad</button> &nbsp;
-        <button type="button" id="arcline_button_3" onclick="set_arcline_3()">ugly</button>
-        </center>
-    </form>
-    <p>
+	</p>
+	<canvas id="arcline_canvas" width=640 height=640></canvas>
+	<form onsubmit="return false;">
+		<center>
+		Show
+		<button type="button" id="arcline_button_1" onclick="set_arcline_1()">good</button> &nbsp;
+		<button type="button" id="arcline_button_2" onclick="set_arcline_2()">bad</button> &nbsp;
+		<button type="button" id="arcline_button_3" onclick="set_arcline_3()">ugly</button>
+		</center>
+	</form>
+	<p>
 This building block isn't perfect either. Where the tangents are contraoriented, the point where the arc meets the segment will appear sharp. Also, it still tends to take detours. But it complements the biarcs. In most of the cases biarcs fail, it works fine.
-    </p>
+	</p>
 
-    <h2>Combined method</h2>
-    <p>
+	<h2>Combined method</h2>
+	<p>
 Since we have biarcs that work half the time and arc-and-lines that work half of the time, why don't we combine them and hope this would work all the time? All we have to do is to decide when to run the former and when the latter.
-    </p>
-    <p>
+	</p>
+	<p>
 I think the nice criterion is how the tangents are oriented towards each other. If they share a half-plane, meaning they are more or less cooriented, then the arc and line would be a good choice. If they don't share the same halfplane, so more like contraoriented, then the biarcs should work.
-    </p>
-    <p>
+	</p>
+	<p>
 Again, it might be easier to read code than the explanation, so <a href="https://github.com/akalenuk/wordsandbuttons/blob/28e430f1d7eeef560d1e4af44676ecea3f8f1e4b/pages/circles_and_lines_vs_polynomial_splines.html#L299">it's also on GitHub</a> like everything else here.
-    </p>
-    <canvas id="combined_canvas" width=640 height=640></canvas>
-    <p class="comment">
+	</p>
+	<canvas id="combined_canvas" width=640 height=640></canvas>
+	<p class="comment">
 Just a reminder, this is a live plot. Points and tangents are movable.
-    </p>
-    <h2><span id="index_parameterization">Parameterization</span></h2>
-    <p>
+	</p>
+	<h2><span id="index_parameterization">Parameterization</span></h2>
+	<p>
 And now for the “why bother” part. Let's say you want something to go along the curve with constant speed. With polynomials, this is possible but complicated. You'd have to measure polynomials' derivatives, compute the curve own “speed” and then compensate for it doing small steps of different parameter increment. It's doable but cumbersome.
-    </p>
-    <p>
+	</p>
+	<p>
 With arcs and segments, this task is trivial. Line segments are linear by definition and circles are linearly parametrized by their radial coordinates, so as a motorcycle goes with the constant speed with constant revs, the object will go along the curve with the constant speed if the parameterization changes constantly.
-    </p>
-    <canvas id="param_canvas" width=640 height=640></canvas>
-    <form onsubmit="return false;">
-        <center>
-        <input type="radio" name="method" id="method1" value="cubic" onclick="draw_param_canvas(0, 0, false);"><label for="method1">cubic only</label> &nbsp;
-        <input type="radio" name="method" id="method2" value="combined" checked="true" onclick="draw_param_canvas(0, 0, false);"><label for="method2">ars and lines only</label> &nbsp;
-        <input type="radio" name="method" id="method12" value="both" onclick="draw_param_canvas(0, 0, false);"><label for="method12">both</label> &nbsp;
-        </center>
-    </form>
-    <p>
+	</p>
+	<canvas id="param_canvas" width=640 height=640></canvas>
+	<form onsubmit="return false;">
+		<center>
+		<input type="radio" name="method" id="method1" value="cubic" onclick="draw_param_canvas(0, 0, false);"><label for="method1">cubic only</label> &nbsp;
+		<input type="radio" name="method" id="method2" value="combined" checked="true" onclick="draw_param_canvas(0, 0, false);"><label for="method2">ars and lines only</label> &nbsp;
+		<input type="radio" name="method" id="method12" value="both" onclick="draw_param_canvas(0, 0, false);"><label for="method12">both</label> &nbsp;
+		</center>
+	</form>
+	<p>
 Also, since it's trivial to compute arcs length, it's easy to parametrize these curves not only linearly but in their natural scale. For instance, I can make a small circle run around the track with the speed of exactly 200 pixels per second.
-    </p>
-    <canvas id="curve_canvas" width=640 height=640></canvas>
-    <form onsubmit="return false;">
-    Or you can set your own speed:
-    <button type="button" onclick="less_speed();" style="width: 32pt;">-</button>
-    <input type="text" id="speed" value="200" oninput="change_speed();">
-    <button type="button" onclick="more_speed();" style="width: 32pt;">+</button>
-    </form>
-    <p>
+	</p>
+	<canvas id="curve_canvas" width=640 height=640></canvas>
+	<form onsubmit="return false;">
+	Or you can set your own speed:
+	<button type="button" onclick="less_speed();" style="width: 32pt;">-</button>
+	<input type="text" id="speed" value="200" oninput="change_speed();">
+	<button type="button" onclick="more_speed();" style="width: 32pt;">+</button>
+	</form>
+	<p>
 Of course, this approach has its flaws. It still doesn't work for when tangents and points all lie on the same line. It requires classification to chose among 4 possible solutions and this contributes to the algorithm size and performance. Polynomials are simpler.
-    </p>
-    <p>
+	</p>
+	<p>
 But it's only one possible approach of an infinite number of possible approaches. This exercise shows that you can build your own parametric curves with desired properties and not rely on some particular mathematical apparatus. The options are limitless.
-    </p>
-    <p>
+	</p>
+	<p>
 By the way, if you know a better option for regularly parametrized parametric curves (which are not NURBS), please <a href="mailto:ok@wordsandbuttons.online">let me know</a>.
-    </p>
+	</p>
 
-    <h2>P. S.</h2>
-    <p>
+	<h2>P. S.</h2>
+	<p>
 <a href="https://twitter.com/JohnSelstad">Johnathon Selstad</a> came up with this awesome idea: what if we <a href="https://twitter.com/JohnSelstad/status/1165097629929230336">put a line segment between arcs</a>? Now the radii become adjustable and we can cover both my cases, too.
-    </p>
-    <p>
+	</p>
+	<p>
 How cool is that!
-    </p>
+	</p>
 
-    <script language="JavaScript">
-    // init all canvases in a batch
-    init("cubic");
-    init("biarcs");
-    init("arcline");
-    init("combined");
-    init("param");
-    init_curve_canvas();
-    animation_tick();
-    document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
-    document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
-    </script>
+	<script language="JavaScript">
+	// init all canvases in a batch
+	init("cubic");
+	init("biarcs");
+	init("arcline");
+	init("combined");
+	init("param");
+	init_curve_canvas();
+	animation_tick();
+	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
+	document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
+	</script>
 
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
 		<a href="all_mathematics.html">#mathematics</a> <a href="all_demos.html">#demos</a>
@@ -1320,6 +1320,6 @@ How cool is that!
 	</td>
 	</tr>
 	</table>
-    </center>
+	</center>
   </body>
 </html>
