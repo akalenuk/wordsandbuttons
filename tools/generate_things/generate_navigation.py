@@ -72,6 +72,22 @@ f.close()
 
 index = '%s' % template
 
+f = open('links.txt')
+links = f.readlines()
+f.close()
+links_html = '<h2>More interactive learning</h2>'
+for link in links:
+	if link.strip().find(' ') != -1:
+		url = link.split(' ')[0]
+		title_chunks = link.split(' ')[1:]
+		title = title_chunks[0]
+		for chunk in title_chunks[1:]: # no hanging short words
+			if len(chunk) < 2:
+				title += '&nbsp;' + chunk
+			else:
+				title += ' ' + chunk
+		links_html += '<p style="margin-bottom: 12pt;">'+title+'<br><a href="'+url+'">'+url+'</a></p>\n'
+
 menu = '<p class="links" style="width: 555pt;">'
 for (kw, _) in keyword_description.items():
 	menu += '<nobr><a style="padding-right: 4pt;" href="all_' + kw + '.html">#' + kw + '</a></nobr> '
@@ -97,12 +113,14 @@ index = index.replace('<h1>Title</h1>', '<h1>' + index_title + '</h1>')
 index = index.replace('<p>Description</p>', '<p style="width: 555pt;">' + index_description + '</p>')
 index = index.replace('<div id="menu"></div>', '\n' + menu + '\n')
 index = index.replace('<div id="timeline"></div>', '\n' + the_index + '\n')
+index = index.replace('<div id="links"></div>', '\n' + links_html + '\n')
 
 f = open('../../pages/' + 'index.html', 'w')
 f.write(index)
 f.close
 
 
+# tag's all_* pages
 for title in list(all_keywords):
 	page = '%s' % template
 	timeline = ''
@@ -131,6 +149,7 @@ for title in list(all_keywords):
 	page = page.replace('<p>Description</p>', '<p style="width: 555pt;">' + keyword_description[title] + '</p>')
 	page = page.replace('<div id="menu"></div>', '\n' + menu + '\n')
 	page = page.replace('<div id="timeline"></div>', '\n' + timeline + '\n')
+	page = page.replace('<div id="links"></div>', '')
 
 	f = open('../../pages/all_' + title + '.html', 'w')
 	f.write(page)
