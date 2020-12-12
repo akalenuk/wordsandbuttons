@@ -181,6 +181,8 @@ impl std::cmp::PartialOrd for RB32{
 			Some(std::cmp::Ordering::Less)
 		} else if self.lb > other.ub {
 			Some(std::cmp::Ordering::Greater)
+		} else if self.lb == other.lb && self.ub == other.ub {
+			Some(std::cmp::Ordering::Equal)
 		} else {
 			None
 		}
