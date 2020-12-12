@@ -75,7 +75,7 @@ index = '%s' % template
 f = open('links.txt')
 links = f.readlines()
 f.close()
-links_html = '<h2>More interactive learning</h2>'
+links_html = '<h1>More interactive learning</h1>'
 for link in links:
 	if link.strip().find(' ') != -1:
 		url = link.split(' ')[0]
