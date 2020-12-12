@@ -1,125 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>C++ magic squares demystified with Valgrind and disassembly</title>
-    <meta name="description" content="A comment on the 'Magic Squares Quiz'.">
-    <meta name="keywords" content="">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
-    <style>
+<head>
+	<meta charset="utf-8">
+	<title>C++ magic squares demystified with Valgrind and disassembly</title>
+	<meta name="description" content="A comment on the 'Magic Squares Quiz'.">
+	<meta name="keywords" content="">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
 body{
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a{
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 20pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 .comment {
-    font-size: 12pt;
-    text-align: center;
-    font-family: sans-serif;
-    padding-bottom: 24pt;
+	font-size: 12pt;
+	text-align: center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
 }
 
 table.footer {
-    padding: 64pt 0pt 32pt 0pt;
-    background-color: transparent;
-    width: 505pt;
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
 }
 
 td.footer {
-    font-family: sans-serif;
-    font-size: 16pt;
-    font-style: normal;
-    padding: 0;
-    margin: 0;
-    border: 0;
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
 }
 
 pre {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 12pt;
-    text-align: left;
-    width: 360pt;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 360pt;
 }
 
 table {
-    text-align: center;
-    border-width: 0pt;
+	text-align: center;
+	border-width: 0pt;
 }
 
 td {
-    padding: 6pt 12pt 6pt 12pt;
-    font-size: 16pt;
-    border: 1px solid black;
+	padding: 6pt 12pt 6pt 12pt;
+	font-size: 16pt;
+	border: 1px solid black;
 }
 
 button{
-    width: 304pt;
-    height: 42pt;
-    margin-left:4pt;
-    margin-right:4pt;
-    font-size: 18pt;
+	width: 304pt;
+	height: 42pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 18pt;
 }
 
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 
-    </script>
-  </head>
-  <body>
-    <center>
-    <h1>
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
 C++ magic squares demystified with Valgrind and disassembly
-    </h1>
-    <p>
+	</h1>
+	<p>
 This is a follow-up on <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_magic_squares.html">Challenge your performance intuition with C++ magic squares</a>. The original post got some public attention and also raised some intriguing questions. Measurements, sure, let's say we measure code A against code B and the B is faster. But why?
-    </p>
-    <p>
+	</p>
+	<p>
 We can get a hint or two with varlgrind's cachegrind and with good old disassembly. So let's do that.
-    </p>
-    <p>
+	</p>
+	<p>
 But just before we start, I want to remind you that it is all only a game and the CPU, the compiler, and the benchmark are the rules. They might not necessarily represent the “real life” well enough, although in the “real life” knights don't walk in a silly “L” pattern either, and it doesn't make chess any less interesting.
-    </p>
-    <p>
+	</p>
+	<p>
 However, the benchmark proposed <b>does have a flaw</b>! It produces data in certain order that shadows the importance of branch prediction. Branch mis-prediction is certainly not something you would want to ignore. If you are interested in more relevant benchmarking, please take a look at <a href="https://medium.com/@veedrac/learning-the-value-of-good-benchmarking-technique-with-c-magic-squares-b61b3386c97f">Learning the value of good benchmarking technique with C++ magic squares</a> by Veedrac. It's very insightful!
-    </p>
+	</p>
 
-    <h2>
+	<h2>
 Shifts vs. no shifts
-    </h2>
-    <p>
+	</h2>
+	<p>
 <a href="https://www.reddit.com/user/ioquatix">ioquatix</a> from Reddit wonders how lookups can be faster than direct shifts. Honestly, for me this was also a mystery.
-    </p>
-    <table><tr>
-    <td>
-    <pre>
+	</p>
+	<table><tr>
+	<td>
+	<pre>
 auto c15 = '5' * 3;
 uint_fast64_t ideal_char_map =
     static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
@@ -148,9 +148,9 @@ bool check_if_magic(const std::string& sq)
   return true;
   }
     </pre>
-    </td>
-    <td>
-    <pre>
+	</td>
+	<td>
+	<pre>
 auto magic_number = '5' * 3;
 auto not_so_magic_number = '5' * 2;
 const std::array&lt;uint16_t, 58&gt; bit_shifts {
@@ -188,13 +188,13 @@ bool check_if_magic(const std::string& sq)
   return true;
   }
     </pre>
-    </td></tr></table>
-    <p>
+	</td></tr></table>
+	<p>
 I think it would be helpful to look at the disassembly.
-    </p>
-    <table><tr>
-    <td>
-    <pre>
+	</p>
+	<table><tr>
+	<td>
+	<pre>
 Z14check_if_magic ...
 .LFB1711:
 	.cfi_startproc
@@ -294,10 +294,10 @@ Z14check_if_magic ...
 	<a title="Set byte to one on condition, zero otherwise">sete</a>	%al
 	<a title="Jump">jmp</a>	.L13
 	.cfi_endproc
-    </pre>
-    </td>
-    <td>
-    <pre>
+	</pre>
+	</td>
+	<td>
+	<pre>
 _Z14check_if_magic ...
 .LFB1752:
 	.cfi_startproc
@@ -393,17 +393,17 @@ _Z14check_if_magic ...
 	<a title="Set byte to one on condition, zero otherwise">sete</a>	%al
 	<a title="Jump">jmp</a>	.L2
 	.cfi_endproc
-    </pre>
-    </td></tr></table>
-    <p>
+	</pre>
+	</td></tr></table>
+	<p>
 <a title="Logical AND">And... I was wrong. It is not really helpful. Apparently, we read more data, and do less instructions, but what does this mean in terms of performance? To settle this we need Valgrind.</a>
-    </p>
-    <p>
+	</p>
+	<p>
 Valgrind is a dynamic analyzer, it can do lots of stuff for us. In this case I would be the most interested in the memory read/writes vs. instruction reads.
-    </p>
-    <table><tr>
-    <td>
-    <pre>
+	</p>
+	<table><tr>
+	<td>
+	<pre>
 I   refs:      13,099,624,571
 I1  misses:             1,846
 LLi misses:             1,705
@@ -436,9 +436,9 @@ LL misses:             10,860
 LL miss rate:             0.0%
     (          0.0%     +           0.0%  )
     </pre>
-    </td>
-    <td>
-    <pre>
+	</td>
+	<td>
+	<pre>
 I   refs:      13,041,321,061
 I1  misses:             1,843
 LLi misses:             1,705
@@ -471,22 +471,22 @@ LL misses:             10,861
 LL miss rate:             0.0%
     (          0.0%     +           0.0%  )
     </pre>
-    </td></tr></table>
-    <p>
+	</td></tr></table>
+	<p>
 Apparently, we now have 3 000 000 more data cache reads, but also 60 000 000 less instruction cache reads. All and all, it is more effective with the lookup.
-    </p>
-    <p>
+	</p>
+	<p>
 But this works only because all the data fit in L1-cache perfectly. Which is, of course, rarely the case on practice, so it is generally better to abstain from using lookups. It is true, it just doesn't help in this particular exercise.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Variables vs. constants
-    </h2>
-    <p>
+	</h2>
+	<p>
 <a href="https://www.reddit.com/user/FbF_">FbF_</a> from Reddit justly points out that leaving global variables non-constant is very wrong. Excellent point! This is indeed a mistake, of course, everything that is meant to be constant should be `const`. But does it affect performance all that much?
-    </p>
-    <table><tr>
-    <td>
-    <pre>
+	</p>
+	<table><tr>
+	<td>
+	<pre>
 auto c15 = '5' * 3;
 uint_fast64_t ideal_char_map =
     static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
@@ -515,9 +515,9 @@ bool check_if_magic(const std::string& sq)
   return true;
   }
     </pre>
-    </td>
-    <td>
-    <pre>
+	</td>
+	<td>
+	<pre>
 const auto c15 = '5' * 3;
 const uint_fast64_t ideal_char_map =
     static_cast&lt;uint_fast64_t&gt;(0x1FF) &lt;&lt; 49;
@@ -546,13 +546,13 @@ bool check_if_magic(const std::string& sq)
   return true;
   }
     </pre>
-    </td></tr></table>
-    <p>
+	</td></tr></table>
+	<p>
 Well, the difference in runtime is subtle. They both run for about 1.8 seconds along with the generator. But the difference is quite visible in the code. Indeed, the constant version does look better.
-    </p>
-    <table><tr>
-    <td>
-    <pre>
+	</p>
+	<table><tr>
+	<td>
+	<pre>
 Z14check_if_magic ...
 .LFB1711:
 	.cfi_startproc
@@ -652,10 +652,10 @@ Z14check_if_magic ...
 	<a title="Set byte to one on condition, zero otherwise">sete</a>	%al
 	<a title="Jump">jmp</a>	.L13
 	.cfi_endproc
-    </pre>
-    </td>
-    <td>
-    <pre>
+	</pre>
+	</td>
+	<td>
+	<pre>
 _Z14check_if_magic ...
 .LFB1711:
 	.cfi_startproc
@@ -748,17 +748,17 @@ _Z14check_if_magic ...
 	<a title="Set byte to one on condition, zero otherwise">sete</a>	%al
 	<a title="Jump">jmp</a>	.L2
 	.cfi_endproc
-    </pre>
-    </td></tr></table>
-    <p class="comment">
+	</pre>
+	</td></tr></table>
+	<p class="comment">
 By the way, did you notice that mnemonics have little tooltips on them? I'm not sure if they help, but this wouldn't be words and buttons without any interactive stuff whatsoever.
-    </p>
-    <p>
+	</p>
+	<p>
 How come they do not show the difference in the runtime? Let's take a look at what Valgrind has to say.
-    </p>
-    <table><tr>
-    <td>
-    <pre>
+	</p>
+	<table><tr>
+	<td>
+	<pre>
 I   refs:      13,099,624,571
 I1  misses:             1,846
 LLi misses:             1,705
@@ -783,9 +783,9 @@ LL misses:             10,860
 LL miss rate:             0.0%
     (          0.0%     +           0.0%  )
     </pre>
-    </td>
-    <td>
-    <pre>
+	</td>
+	<td>
+	<pre>
 I   refs:      12,856,556,965
 I1  misses:             1,843
 LLi misses:             1,703
@@ -810,23 +810,23 @@ LL misses:             10,857
 LL miss rate:             0.0%
     (          0.0%     +           0.0%  )
     </pre>
-    </td></tr></table>
-    <p>
+	</td></tr></table>
+	<p>
 There is a difference, and it shows up in larger numbers, it's just that the benchmark is too small to show it properly. Most of the time we don't even get to do this map thing, we fail earlier.
-    </p>
-    <p>
+	</p>
+	<p>
 So yes, it is best to have your constants constant, even if it doesn't show immediately.
-    </p>
+	</p>
 
-    <h2>
+	<h2>
 Global vs. local
-    </h2>
-    <p>
+	</h2>
+	<p>
 <a href="https://twitter.com/FolwarcznyAdam">FolwarcznyAdam</a> from Twitter suggests that changing data locality might be a good thing.
-    </p>
-    <table><tr>
-    <td>
-    <pre>
+	</p>
+	<table><tr>
+	<td>
+	<pre>
 const std::array&lt;uint64_t, 8&gt; magic_numbers
 {
   3545515123101087289, 3690191062107239479,
@@ -853,9 +853,9 @@ bool check_if_magic(const std::string& sq)
   return false;
 }
     </pre>
-    </td>
-    <td>
-    <pre>
+	</td>
+	<td>
+	<pre>
 bool check_if_magic(const std::string& sq)
 {
   const std::array&lt;uint64_t, 8&gt; magic_numbers
@@ -883,13 +883,13 @@ bool check_if_magic(const std::string& sq)
   return false;
 }
     </pre>
-    </td></tr></table>
-    <p>
+	</td></tr></table>
+	<p>
 It doesn't look rather relevant on the first glance, but GCC does produce quite a different code for global and local variables.
-    </p>
-    <table><tr>
-    <td>
-    <pre>
+	</p>
+	<table><tr>
+	<td>
+	<pre>
 _Z14check_if_magic ...
 .LFB1752:
 	.cfi_startproc
@@ -926,10 +926,10 @@ _Z14check_if_magic ...
 	<a title="Move">movl</a>	$1, %eax
 	<a title="Return from procedure">ret</a>
 	.cfi_endproc
-    </pre>
-    </td>
-    <td>
-    <pre>
+	</pre>
+	</td>
+	<td>
+	<pre>
 _Z14check_if_magic ...
 .LFB1752:
 	.cfi_startproc
@@ -998,24 +998,24 @@ _Z14check_if_magic ...
 .L11:
 	<a title="Call procedure">call</a>	__stack_chk_fail
 	.cfi_endproc
-    </pre>
-    </td></tr></table>
-    <p>
+	</pre>
+	</td></tr></table>
+	<p>
 Well, you might think that the right one is obviously worse. It fills the stack with out values every time the function is called. And it kind of is worse, but that's only because it's not what Adam had in mind. His version actually looks like this: <a href="https://godbolt.org/g/swssJY">godbolt.org/g/swssJY</a> and it is, of course, much-much better than mine.
-    </p>
-    <p>
+	</p>
+	<p>
 The reason for this difference is me using an outdated compiler. And the moral is — update your compiler often.
-    </p>
+	</p>
 
-    <h2>
+	<h2>
 Loop vs. binary search
-    </h2>
-    <p>
+	</h2>
+	<p>
 Some guys from Reddit, particularly <a href="https://www.reddit.com/user/bschindl">bschindl</a>, <a href="https://www.reddit.com/user/Veedrac">Veedrac</a>, and <a href="https://www.reddit.com/user/PhilipTrettner">PhilipTrettner</a> came up with the idea of doing binary search. It is a great idea, but once again it doesn't work very well in this case because ideally all 8 64-bit squares fit in a single cache line anyway.
-    </p>
-    <table><tr>
-    <td>
-    <pre>
+	</p>
+	<table><tr>
+	<td>
+	<pre>
 const std::array&lt;uint64_t, 8&gt; magic_numbers
 {
   3545515123101087289, 3690191062107239479,
@@ -1042,9 +1042,9 @@ bool check_if_magic(const std::string& sq)
   return false;
 }
     </pre>
-    </td>
-    <td>
-    <pre>
+	</td>
+	<td>
+	<pre>
 const std::array&lt;uint64_t, 8&gt; magic_numbers
 {
 3545515123101087289, 3690191062107239479,
@@ -1089,13 +1089,13 @@ bool check_if_magic(const std::string& sq)
         return nr == 4123101758198592049;
 }
     </pre>
-    </td></tr></table>
-    <p>
+	</td></tr></table>
+	<p>
 Valgrind may confirm that sequential reading of 64 bytes is cheap. No only the version on the left has less instruction reads, but the data reads as well, which seems nonsensical.
-    </p>
-    <table><tr>
-    <td>
-    <pre>
+	</p>
+	<table><tr>
+	<td>
+	<pre>
 I   refs:      10,699,297,900
 I1  misses:             1,838
 LLi misses:             1,701
@@ -1120,9 +1120,9 @@ LL misses:             10,855
 LL miss rate:             0.0%
     (          0.0%     +           0.0%  )
     </pre>
-    </td>
-    <td>
-    <pre>
+	</td>
+	<td>
+	<pre>
 I   refs:      11,323,056,252
 I1  misses:             1,845
 LLi misses:             1,705
@@ -1147,22 +1147,22 @@ LL misses:             10,859
 LL miss rate:             0.0%
     (          0.0%     +           0.0%  )
     </pre>
-    </td></tr></table>
-    <p>
+	</td></tr></table>
+	<p>
 So a binary search is a bit worse than a simple loop. It is still extremely effective though. It's just with the plain loop being so small it doesn't make sense to make it even better.
-    </p>
-    <p>
+	</p>
+	<p>
 But the most amazing thing was found by <a href="https://www.reddit.com/user/adamf88">adamf88</a>. It turn out, Clang can do this by itself: <a href="https://godbolt.org/g/cXtdbB">https://godbolt.org/g/cXtdbB</a>! I'm astonished.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Smart lookup
-    </h2>
-    <p>
+	</h2>
+	<p>
 One of the best ideas was proposed by <a href="https://www.reddit.com/user/Veedrac">Veedrac</a>. I'm not sure how it works exactly, the indexing thins looks a bit magical to me, but it goes like this:
-    </p>
-    <table><tr>
-    <td style="width: 505pt;">
-    <pre>
+	</p>
+	<table><tr>
+	<td style="width: 505pt;">
+	<pre>
 const char squares[] =
     "   " "   " "   "  // -/1
 
@@ -1194,14 +1194,14 @@ bool check_if_magic(const std::string& square_as_string) {
         (!memcmp(square, &squares[idx+9], 9));
 }
     </pre>
-    </td>
-    </td></tr></table>
-    <p>
+	</td>
+	</td></tr></table>
+	<p>
 Unfortunately, I had to change the function signature to match the benchmark and it lost quite a lot of speed because of that. It runs for 1.7 seconds that is a little bit slower than 64-bits hack. It does have nicer disassembly though.
-    </p>
-    <table><tr>
-    <td style="width: 505pt;">
-    <pre>
+	</p>
+	<table><tr>
+	<td style="width: 505pt;">
+	<pre>
 _Z14check_if_magic ...
 .LFB1779:
 	.cfi_startproc
@@ -1257,10 +1257,10 @@ _Z14check_if_magic ...
 	.cfi_def_cfa_offset 8
 	<a title="Return from procedure">ret</a>
 	.cfi_endproc
-    </pre>
-    </td>
-    </td></tr></table>
-    <p>
+	</pre>
+	</td>
+	</td></tr></table>
+	<p>
 On Valgrind it shows like this:
     </p>
     <table><tr>
@@ -1296,20 +1296,20 @@ LL misses:             10,872
 LL miss rate:             0.0%
     (          0.0%     +           0.0%  )
     </pre>
-    </td>
-    </td></tr></table>
-    <p>
+	</td>
+	</td></tr></table>
+	<p>
 Data-wise it's absolutely splendid! But it is a bit fat on instruction reads. I would blame `memcmp`. I heard, with better compilers and better standard library implementation it might get properly inlined and optimized contextually, but with my GCC it only gets called twice which is, in such a tight piece of code, simply too expensive.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Smart indexing
-    </h2>
-    <p>
+	</h2>
+	<p>
 But the absolutely magical is the version from <a href="https://www.reddit.com/user/kocsis1david">kocsis1david</a>.
-    </p>
-    <table><tr>
-    <td style="width: 505pt;">
-    <pre>
+	</p>
+	<table><tr>
+	<td style="width: 505pt;">
+	<pre>
 static uint64_t magic_numbers[8] = {
     0x3336313832393437,
     0x3134333832373639,
@@ -1337,17 +1337,17 @@ bool check_if_magic(const std::string& square) {
     return magic_numbers[index] == magic_number(sq);
 }
     </pre>
-    </td>
-    </td></tr></table>
-    <p>
+	</td>
+	</td></tr></table>
+	<p>
 It also exploits the same smart indexing idea, but it uses less instructions and no external calls whatsoever.
-    </p>
-    <p>
+	</p>
+	<p>
 Its Valgrind report is impressive too!
-    </p>
-    <table><tr>
-    <td style="width: 505pt;">
-    <pre>
+	</p>
+	<table><tr>
+	<td style="width: 505pt;">
+	<pre>
 I   refs:      8,977,429,337
 I1  misses:            1,842
 LLi misses:            1,704
@@ -1380,26 +1380,26 @@ LL misses:            10,859
 LL miss rate:            0.0%
     (          0.0%     +           0.0%  )
     </pre>
-    </td>
-    </td></tr></table>
-    <p>
+	</td>
+	</td></tr></table>
+	<p>
 <a title="Logical AND">And</a> it runs for little less than a second which, considering the generator takes some 0.8 of it, is almost 3 times faster than the best take I had to offer.
-    </p>
-    <p>
+	</p>
+	<p>
 Excellent!
-    </p>
-    <h2>
+	</p>
+	<h2>
 Conclusion
-    </h2>
-    <p>
+	</h2>
+	<p>
 I don't know about you, but I learned from this idea exchange quite a lot. Way more than from tinkering with a toy problem all on my own.
-    </p>
-    <p>
+	</p>
+	<p>
 We should do this again sometime. Probably, with better benchmark though. And a better problem. And Clang. I'm fascinated to try Clang at this point.
-    </p>
+	</p>
 
 
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
 		<a href="index.html"><img src="favicon.svg"></a>
@@ -1414,6 +1414,6 @@ We should do this again sometime. Probably, with better benchmark though. And a 
 	</td>
 	</tr>
 	</table>
-    </center>
-  </body>
+	</center>
+</body>
 </html>
