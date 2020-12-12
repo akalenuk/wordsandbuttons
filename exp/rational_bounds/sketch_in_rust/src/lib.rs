@@ -175,6 +175,27 @@ impl std::cmp::PartialEq for RB32{
 	}
 }
 
+impl std::cmp::PartialOrd for RB32{
+	fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+		if self.ub < other.lb {
+			Some(std::cmp::Ordering::Less)
+		} else if self.lb > other.ub {
+			Some(std::cmp::Ordering::Greater)
+		} else {
+			None
+		}
+	}
+	fn le(&self, other: &Self) -> bool {
+		(self.lb == other.lb && self.lb == self.ub) ||
+		(self.ub == other.ub && other.lb == other.ub)
+	}
+	fn ge(&self, other: &Self) -> bool {
+		(self.ub == other.ub && self.lb == self.ub) ||
+		(self.lb == other.lb && other.lb == other.ub)
+	}
+}
+
+
 impl std::ops::Add for RB32 {
 	type Output = Self;
 	fn add(self, other: Self) -> Self {
@@ -463,4 +484,33 @@ mod tests {
 		let d = RB32{lb: simplified(c.lb), ub: simplified(c.ub)};
 		assert!(d == RB32{lb: R::<u32>{n:1, d:1, p:false}, ub: R::<u32>{n:1, d:4, p:false}});
 	}
+
+	#[test]
+	fn rb32_predicate_eq() {
+		let a = RB32{lb: R::<u32>{n:1, d:1, p:true}, ub: R::<u32>{n:1, d:1, p:true}};
+		let b = RB32{lb: R::<u32>{n:1, d:1, p:true}, ub: R::<u32>{n:1, d:1, p:true}};
+		assert!(a == b);
+	}
+
+	#[test]
+	fn rb32_predicates_lt_gt_ne() {
+		let a = RB32{lb: R::<u32>{n:1, d:1, p:true}, ub: R::<u32>{n:2, d:1, p:true}};
+		let b = RB32{lb: R::<u32>{n:3, d:1, p:true}, ub: R::<u32>{n:4, d:1, p:true}};
+		assert!(a < b);
+		assert!(b > a);
+		assert!(a != b);
+	}
+
+	#[test]
+	fn rb32_predicates_le_ge() {
+		let a = RB32{lb: R::<u32>{n:1, d:1, p:true}, ub: R::<u32>{n:2, d:1, p:true}};
+		let b = RB32{lb: R::<u32>{n:2, d:1, p:true}, ub: R::<u32>{n:2, d:1, p:true}};
+		assert!(a <= b);
+		assert!(b >= a);
+		assert!(!(a < b));
+		assert!(!(b > a));
+		assert!(a != b);
+		assert!(!(a == b));
+	}
+
 }
