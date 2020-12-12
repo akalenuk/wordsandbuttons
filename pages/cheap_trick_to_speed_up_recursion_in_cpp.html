@@ -1,118 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Cheap trick to speed up recursion in C++</title>
-    <meta name="description" content="More often than not, recursion is not your performance problem, to begin with. But even if it is, you can often avoid recursion altogether. When for some reason you can't, this trick helps.">
-    <meta name="keywords" content="programming, demos">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
-    <style>
+<head>
+	<meta charset="utf-8">
+	<title>Cheap trick to speed up recursion in C++</title>
+	<meta name="description" content="More often than not, recursion is not your performance problem, to begin with. But even if it is, you can often avoid recursion altogether. When for some reason you can't, this trick helps.">
+	<meta name="keywords" content="programming, demos">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
 body{
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a{
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 20pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 pre {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 12pt;
-    text-align: left;
-    width: 300pt;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 300pt;
 }
 
 table {
-    border-width: 0pt;
+	border-width: 0pt;
 }
 
 td {
-    vertical-align: top;
-    padding: 6pt 12pt 6pt 12pt;
-    font-size: 16pt;
-    border: 1px solid black;
-    width: 505pt;
+	vertical-align: top;
+	padding: 6pt 12pt 6pt 12pt;
+	font-size: 16pt;
+	border: 1px solid black;
+	width: 505pt;
 }
 
 button{
-    width: 248pt;
-    height: 42pt;
-    margin-left:4pt;
-    margin-right:4pt;
-    font-size: 16pt;
+	width: 248pt;
+	height: 42pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 16pt;
 }
 
 u {
-    border-bottom: 1px dotted #000;
-    text-decoration: none;
-    cursor: pointer;
+	border-bottom: 1px dotted #000;
+	text-decoration: none;
+	cursor: pointer;
 }
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 function next(slides){
-    // show the next slide
-    var first_slide = document.getElementById(slides + "_" + 1);
-    for(var i = 1; i < 9; ++i)
-    {
-        var this_slide = document.getElementById(slides + "_" + i);
-        var next_slide = document.getElementById(slides + "_" + (i+1));
-        if(this_slide)
-            if(this_slide.style.display == "block")
-                {
-                this_slide.style.display = "none";
-                if(next_slide)
-                    next_slide.style.display = "block";
-                else
-                    first_slide.style.display = "block";
-                break;
-                }
-    }
-    // name the button
-    var button = document.getElementById(slides + "_button")
-    for(var i = 1; i < 9; ++i)
-    {
-        var this_slide = document.getElementById(slides + "_" + i);
-        var next_slide = document.getElementById(slides + "_" + (i+1));
-        if (this_slide && !next_slide && this_slide.style.display == "block") {
-            button.innerHTML = "Back to the 1-st slide";
-            break;
-        }
-        else
-            button.innerHTML = "Next slide";
-    }
+	// show the next slide
+	var first_slide = document.getElementById(slides + "_" + 1);
+	for(var i = 1; i < 9; ++i)
+	{
+		var this_slide = document.getElementById(slides + "_" + i);
+		var next_slide = document.getElementById(slides + "_" + (i+1));
+		if(this_slide)
+			if(this_slide.style.display == "block")
+				{
+				this_slide.style.display = "none";
+				if(next_slide)
+					next_slide.style.display = "block";
+				else
+					first_slide.style.display = "block";
+				break;
+				}
+	}
+	// name the button
+	var button = document.getElementById(slides + "_button")
+	for(var i = 1; i < 9; ++i)
+	{
+		var this_slide = document.getElementById(slides + "_" + i);
+		var next_slide = document.getElementById(slides + "_" + (i+1));
+		if (this_slide && !next_slide && this_slide.style.display == "block") {
+			button.innerHTML = "Back to the 1-st slide";
+			break;
+		}
+		else
+			button.innerHTML = "Next slide";
+	}
 }
 
 function draw_irefs(){
-    var d = document.getElementById("irefs");
-    var d_context = d.getContext("2d");
-    d_context.font = "15px sans-serif";
-    // background
-    d_context.fillStyle="#eeeeee";
+	var d = document.getElementById("irefs");
+	var d_context = d.getContext("2d");
+	d_context.font = "15px sans-serif";
+	// background
+	d_context.fillStyle="#eeeeee";
 	d_context.fillRect(0, 0, 700, 500);
 
 	var x = 0.0;
@@ -143,7 +143,7 @@ function draw_irefs(){
 	d_context.stroke();
 	d_context.closePath();
 
-    // 2x
+	// 2x
 	x = 200.5;
 	y = 499.5 - (877.0 / 2.0);
 	d_context.fillStyle="#664422";
@@ -156,7 +156,7 @@ function draw_irefs(){
 	d_context.stroke();
 	d_context.closePath();
 
-    // 4x
+	// 4x
 	x = 300.5;
 	y = 499.5 - (779.0 / 2.0);
 	d_context.fillStyle="#666622";
@@ -169,7 +169,7 @@ function draw_irefs(){
 	d_context.stroke();
 	d_context.closePath();
 
-    // 8x
+	// 8x
 	x = 400.5;
 	y = 499.5 - (729.0 / 2.0);
 	d_context.fillStyle="#556622";
@@ -195,7 +195,7 @@ function draw_irefs(){
 	d_context.stroke();
 	d_context.closePath();
 
-    // 32x
+	// 32x
 	x = 600.5;
 	y = 499.5 - (769.0 / 2.0);
 	d_context.fillStyle="#554422";
@@ -210,11 +210,11 @@ function draw_irefs(){
 }
 
 function draw_drefs(){
-    var d = document.getElementById("drefs");
-    var d_context = d.getContext("2d");
-    d_context.font = "15px sans-serif";
-    // background
-    d_context.fillStyle="#eeeeee";
+	var d = document.getElementById("drefs");
+	var d_context = d.getContext("2d");
+	d_context.font = "15px sans-serif";
+	// background
+	d_context.fillStyle="#eeeeee";
 	d_context.fillRect(0, 0, 700, 500);
 
 	var x = 0.0;
@@ -245,7 +245,7 @@ function draw_drefs(){
 	d_context.stroke();
 	d_context.closePath();
 
-    // 2x
+	// 2x
 	x = 200.5;
 	y = 499.5 - 500.0 * (230.0 / 300.0);
 	d_context.fillStyle="#664422";
@@ -258,7 +258,7 @@ function draw_drefs(){
 	d_context.stroke();
 	d_context.closePath();
 
-    // 4x
+	// 4x
 	x = 300.5;
 	y = 499.5 - 500.0 * (198.0 / 300.0);
 	d_context.fillStyle="#666622";
@@ -271,7 +271,7 @@ function draw_drefs(){
 	d_context.stroke();
 	d_context.closePath();
 
-    // 8x
+	// 8x
 	x = 400.5;
 	y = 499.5 - 500.0 * (181.0 / 300.0);
 	d_context.fillStyle="#556622";
@@ -297,7 +297,7 @@ function draw_drefs(){
 	d_context.stroke();
 	d_context.closePath();
 
-    // 32x
+	// 32x
 	x = 600.5;
 	y = 499.5 - 500.0 * (247.0 / 300.0);
 	d_context.fillStyle="#554422";
@@ -310,28 +310,28 @@ function draw_drefs(){
 	d_context.stroke();
 	d_context.closePath();
 }
-    </script>
-  </head>
-  <body>
-    <center>
-    <h1>
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
 Cheap trick to speed up recursion in C++
-    </h1>
-    <p>
+	</h1>
+	<p>
 <b>Disclaimer.</b> The trick I am about to show is not an example of good engineering. It depends on implementation-specific optimization and as such is unreliable. In some contexts, it may give you some noticeable performance gains, but in other, it may even lead to performance degradation.
-    </p>
-    <p>
+	</p>
+	<p>
 However, quoting Donald Knuth, <i>“in established engineering disciplines a 12% improvement, easily obtained, is never considered marginal; and I believe the same viewpoint should prevail in software engineering.”</i>
-    </p>
-    <h2>
+	</p>
+	<h2>
 Tail call optimization vs. no tail call optimization
-    </h2>
-    <p>
+	</h2>
+	<p>
 C++ has <span id="index_tail_call_optimization">tail call optimization</span>. It's when a recursive function that ends with a self-call is replaced with a simple loop. Let me show you how it works
-    </p>
-    <table><tr>
-    <td>
-    <pre><span id="slides_tco_1" style="display:block"><div style="color:#994466"><b>1. C++ source code</b></div>
+	</p>
+	<table><tr>
+	<td>
+	<pre><span id="slides_tco_1" style="display:block"><div style="color:#994466"><b>1. C++ source code</b></div>
 int <b>sum_of_first</b>(int n) {
     return (n == 1) ? 1 : n + <b>sum_of_first</b>(n-1); <span style="color:#224400">// tail call</span>
 }
@@ -391,22 +391,22 @@ LLd miss rate:     4.4% (   4.4%     +    4.5%  )
 LL refs:         2,464  ( 1,969 rd   +    495 wr)
 LL misses:       2,271  ( 1,798 rd   +    473 wr)
 LL miss rate:      0.6% (   0.5%     +    4.5%  )</span></pre></td>
-    </td></tr></table>
-    <p style="text-align:right">
-    <button type="button" id="slides_tco_button" onclick="next('slides_tco')">Next step</button>
-    </p>
-    <p>
+	</td></tr></table>
+	<p style="text-align:right">
+	<button type="button" id="slides_tco_button" onclick="next('slides_tco')">Next step</button>
+	</p>
+	<p>
 From disassembly, you can see that there is no actual self-call in the “recursive” <i>sum_of_first</i> function. From the Valgrind report, you can also see why this is important.
-    </p>
-    <p>
+	</p>
+	<p>
 Normally, every time you call a function, you have to store its return address in a stack. Even if the address remains the same. Which means that if you call your function 65536 times in a nested way, you will be writing the same address 65536 times only to read it all back on returns. It is pure overhead. But if the self-call is a tail call, meaning that all the nested calls will eventually return to the same place, you don't have to do the calls at all. A simple loop will be enough.
-    </p>
-    <p>
+	</p>
+	<p>
 Compilers can do that for you. They rewrite your code to minimize overhead whenever they can. But what if they can't?
-    </p>
-    <table><tr>
-    <td>
-    <pre><span id="slides_no_tco_1" style="display:block"><div style="color:#994466"><b>1. C++ source code</b></div>
+	</p>
+	<table><tr>
+	<td>
+	<pre><span id="slides_no_tco_1" style="display:block"><div style="color:#994466"><b>1. C++ source code</b></div>
 int <b>sum_of_first</b>(int n) {
     if(n == 0)
         return 0;
@@ -466,22 +466,22 @@ LLd miss rate:     6.0% (    0.7%     +    11.8%  )
 LL refs:        34,745  ( 17,883 rd   +  16,862 wr)
 LL misses:      18,583  (  1,798 rd   +  16,785 wr)
 LL miss rate:      1.5% (    0.2%     +    11.8%  )</span></pre></td>
-    </td></tr></table>
-    <p style="text-align:right">
-    <button type="button" id="slides_no_tco_button" onclick="next('slides_no_tco')">Next step</button>
-    </p>
-    <p>
+	</td></tr></table>
+	<p style="text-align:right">
+	<button type="button" id="slides_no_tco_button" onclick="next('slides_no_tco')">Next step</button>
+	</p>
+	<p>
 When the self-call is not a tail call, and can't even be made a tail call, the compiler skips the TCO optimization. And yes, you get all the overheads: all the amount of needless reads and writes.
-    </p>
-    <h2>
+	</p>
+	<h2>
 The idea
-    </h2>
-    <p>
+	</h2>
+	<p>
 What if instead of a self-call, we would instantiate a copy of the original function and call that instead? The copy then will call the original. In theory, this allows a compiler to inline the copy, so instead of all 65536 nested calls, we will only have 32768. Let's try it out.
-    </p>
-    <table><tr>
-    <td>
-    <pre><span id="slides_no_tco_trick_1" style="display:block"><div style="color:#994466"><b>1. C++ source code</b></div>
+	</p>
+	<table><tr>
+	<td>
+	<pre><span id="slides_no_tco_trick_1" style="display:block"><div style="color:#994466"><b>1. C++ source code</b></div>
 template <b>&lt;int I, N&gt;</b> <span style="color:#224400">// 2 instances: &lt;0, 2&gt; and &lt;1, 2&gt;</span>
 int sum_of_first(int n) {
     if(n == 0)
@@ -559,55 +559,55 @@ LL miss rate:      1.7% (    0.2%     +    15.4%  )
 
 
 </span></pre></td>
-    </td></tr></table>
-    <p style="text-align:right">
-    <button type="button" id="slides_no_tco_trick_button" onclick="next('slides_no_tco_trick')">Next step</button>
-    </p>
-    <p>
+	</td></tr></table>
+	<p style="text-align:right">
+	<button type="button" id="slides_no_tco_trick_button" onclick="next('slides_no_tco_trick')">Next step</button>
+	</p>
+	<p>
 Well, the theory and compiler optimizations don't always work together. Yes, we have fewer calls, but the code itself became larger, so the instruction count remained almost as is was. Although the data read and write count lowered, it is still far from the desired TCO-like result.
-    </p>
-    <p>
+	</p>
+	<p>
 But it is something.
-    </p>
-    <p>
+	</p>
+	<p>
 Besides, who said we should stop there? Let's try the same principle, but with more instances.
-    </p>
-    <p>
+	</p>
+	<p>
 It's not trivial to relevantly micro-benchmark this kind of functions. The thing is, if we make the operation larger, it will just overflow the stack. We can request a larger stack, but then the operation itself will become unrealistic. Let's not measure the time then. Let's thick to instruction counts and memory operations instead.
-    </p>
-    <p>
+	</p>
+	<p>
 This is not the same thing as the time of execution, but it more or less correlates with the performance expectations.
-    </p>
-    <p>
+	</p>
+	<p>
 Here are the instruction counts for (almost) the same code with TCO, without TCO, and with self-calls spread through 2, 4, 8, 16, and 32 instances.
-    </p>
-    <canvas id="irefs" width=700 height=500></canvas>
-    <script language="JavaScript">
-    draw_irefs();
-    </script>
-    <p>
+	</p>
+	<canvas id="irefs" width=700 height=500></canvas>
+	<script language="JavaScript">
+	draw_irefs();
+	</script>
+	<p>
 Now let's measure total data reads and writes for the same family of implementations.
-    </p>
-    <canvas id="drefs" width=700 height=500></canvas>
-    <script language="JavaScript">
-    draw_drefs();
-    </script>
+	</p>
+	<canvas id="drefs" width=700 height=500></canvas>
+	<script language="JavaScript">
+	draw_drefs();
+	</script>
 
-    <h2>
+	<h2>
 Conclusion
-    </h2>
-    <p>
+	</h2>
+	<p>
 The trick shows some performance gain, and it's safe to use. It does rely on compiler's implementation details, but in the worse case, it will merely not give you the gain you wish.
-    </p>
-    <p>
+	</p>
+	<p>
 On the other hand, it is merely a cheap trick. If you have a bottleneck in the recursion, it is still best to rewrite it in an iterative way or in the manner that enables the TCO. It is more work, but the benefit will not then depend on the current compiler's optimizations. Also, the code will not look stupid in the future, when the compilers learn to do that recursion semi-inlining themselves.
-    </p>
-    <p style="font-family: sans-serif; font-size: 14pt;">
+	</p>
+	<p style="font-family: sans-serif; font-size: 14pt;">
 All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the code is compiled with g++ 5.4.0 (-O2). The source code for the benchmark is available on <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/recursion_optimization/">Github</a>.
-    </p>
+	</p>
 
 
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
 		<a href="all_programming.html">#programming</a> <a href="all_demos.html">#demos</a>
@@ -622,6 +622,6 @@ All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the
 	</td>
 	</tr>
 	</table>
-    </center>
-  </body>
+	</center>
+</body>
 </html>
