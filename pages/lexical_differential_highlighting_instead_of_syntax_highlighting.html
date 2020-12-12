@@ -1,324 +1,324 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Lexical differential highlighting instead of syntax highlighting</title>
-    <meta name="description" content="This type of highlighting is ideal for assembly. With it, the things that shouldn't seem similar usually don't.">
-    <meta name="keywords" content="programming, demos">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
-    <style>
+<head>
+	<meta charset="utf-8">
+	<title>Lexical differential highlighting instead of syntax highlighting</title>
+	<meta name="description" content="This type of highlighting is ideal for assembly. With it, the things that shouldn't seem similar usually don't.">
+	<meta name="keywords" content="programming, demos">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
 body{
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a{
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 20pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 pre {
-    margin: 0 0 0 0;
-    padding-top: 6pt;
-    padding-left: 6pt;
-    padding-right: 6pt;
-    padding-bottom: 6pt;
-    font-size: 12pt;
-    text-align: left;
+	margin: 0 0 0 0;
+	padding-top: 6pt;
+	padding-left: 6pt;
+	padding-right: 6pt;
+	padding-bottom: 6pt;
+	font-size: 12pt;
+	text-align: left;
 }
 
 table {
-    border-width: 0pt;
+	border-width: 0pt;
 }
 
 td {
-    vertical-align: top;
-    padding: 1pt 1pt 1pt 1pt;
-    font-size: 16pt;
-    width: 100%;
+	vertical-align: top;
+	padding: 1pt 1pt 1pt 1pt;
+	font-size: 16pt;
+	width: 100%;
 }
 
 form {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 16pt;
-    text-align: left;
-    width: 505pt;
-    background-color: #eeee99;
-    color: #000;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
 }
 
 input[type="checkbox"] {
-    height: 16pt;
-    width: 16pt;
-    font-size: 16pt;
-    margin-bottom: 16pt;
+	height: 16pt;
+	width: 16pt;
+	font-size: 16pt;
+	margin-bottom: 16pt;
 }
 
 input[type="radio"] {
-    height: 16pt;
-    width: 16pt;
-    font-size: 16pt;
+	height: 16pt;
+	width: 16pt;
+	font-size: 16pt;
 }
 
 label {
-    font-size: 16pt;
+	font-size: 16pt;
 }
 
 input[type="text"] {
-    width: 100%;
-    height: 22pt;
-    font-size: 16pt;
-    text-align: left;
+	width: 100%;
+	height: 22pt;
+	font-size: 16pt;
+	text-align: left;
 }
 
 button {
-    width: 128pt;
-    height: 26pt;
-    font-size: 16pt;
-    text-align: center;
+	width: 128pt;
+	height: 26pt;
+	font-size: 16pt;
+	text-align: center;
 }
 
 textarea {
-    width: 100%;
-    font-size: 12pt;
-    font-family: monospace;
-    padding: 0pt 0pt 0pt 0pt;
-    margin: 0pt 0pt 0pt 0pt;
+	width: 100%;
+	font-size: 12pt;
+	font-family: monospace;
+	padding: 0pt 0pt 0pt 0pt;
+	margin: 0pt 0pt 0pt 0pt;
 }
 
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 function colorized_with_sample_highlighter(text) {
-   const separators = ['\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')'];
-   const comments = [['/*', '*/'], ['#', '\n']];
+	const separators = ['\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')'];
+	const comments = [['/*', '*/'], ['#', '\n']];
 
-    function painted_in(line, color) {
-        return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
-    }
+	function painted_in(line, color) {
+		return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+	}
 
-    function colorized(token) {
-        var code_sum = 0;
-        for(var i = 0; i < token.length; ++i)
-            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
-        var zero_channel = code_sum % 3;
-        var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
-            + (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
-            + (zero_channel == 2 ? '0' : '');
-        return painted_in(token, color);
-    }
+	function colorized(token) {
+		var code_sum = 0;
+		for(var i = 0; i < token.length; ++i)
+			code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+		var zero_channel = code_sum % 3;
+		var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
+			+ (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
+			+ (zero_channel == 2 ? '0' : '');
+		return painted_in(token, color);
+	}
 
-    function separated(line, i) {
-        if(i == separators.length)
-            return colorized(line);
-        return line.split(separators[i]).map(function(subline) {
-            return separated(subline, i + 1);}).join(separators[i]);
-    }
+	function separated(line, i) {
+		if(i == separators.length)
+			return colorized(line);
+		return line.split(separators[i]).map(function(subline) {
+			return separated(subline, i + 1);}).join(separators[i]);
+	}
 
-    function uncommented(line, i) {
-        if(i == comments.length)
-            return separated(line, 0);
-        var chunks = line.split(comments[i][0]);
-        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
-            var in_out_comment = chunk.split(comments[i][1]);
-            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555")
-                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
-    }
+	function uncommented(line, i) {
+		if(i == comments.length)
+			return separated(line, 0);
+		var chunks = line.split(comments[i][0]);
+		return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+			var in_out_comment = chunk.split(comments[i][1]);
+			return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555")
+				+ uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+	}
 
-    return uncommented(text, 0);
+	return uncommented(text, 0);
 }
 
 function colorized_with_js_highlighter(text) {
-    const separators = ['function ', ' if(', 'return ', 'var ', 'const ', ' for(',
-        '\n', '&lt;', '&gt;', ' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '<', '>', '[', ']', '{', '}'];
-    const quotes = ['\'', '"'];
-    const comments = [['//', '\n'], ['/*', '*/']];
+	const separators = ['function ', ' if(', 'return ', 'var ', 'const ', ' for(',
+		'\n', '&lt;', '&gt;', ' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '<', '>', '[', ']', '{', '}'];
+	const quotes = ['\'', '"'];
+	const comments = [['//', '\n'], ['/*', '*/']];
 
-    function painted_in(line, color) {
-        return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
-    }
+	function painted_in(line, color) {
+		return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+	}
 
-    function colorized(token) {
-        var code_sum = 0;
-        for(var i = 0; i < token.length; ++i)
-            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
-        var zero_channel = code_sum % 3;
-        var color = '' + (zero_channel == 0 ? '3' : '') + (1 + (code_sum % 5) * 2)
-            + (zero_channel == 1 ? '3' : '') + (4 + (code_sum % 2) * 5)
-            + (zero_channel == 2 ? '3' : '');
-        return painted_in(token, color);
-    }
+	function colorized(token) {
+		var code_sum = 0;
+		for(var i = 0; i < token.length; ++i)
+			code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+		var zero_channel = code_sum % 3;
+		var color = '' + (zero_channel == 0 ? '3' : '') + (1 + (code_sum % 5) * 2)
+			+ (zero_channel == 1 ? '3' : '') + (4 + (code_sum % 2) * 5)
+			+ (zero_channel == 2 ? '3' : '');
+		return painted_in(token, color);
+	}
 
-    function separated(line, i) {
-        if(i == separators.length)
-            return colorized(line);
-        return line.split(separators[i]).map(function(subline) {
-            return separated(subline, i + 1);}).join(separators[i]);
-    }
+	function separated(line, i) {
+		if(i == separators.length)
+			return colorized(line);
+		return line.split(separators[i]).map(function(subline) {
+			return separated(subline, i + 1);}).join(separators[i]);
+	}
 
-    function unquoted(line, i) {
-        if(i == quotes.length)
-            return separated(line, 0);
-        var chunk_no = 0;
-        return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {
-            return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {
-                return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "555");}).join('');
-    }
+	function unquoted(line, i) {
+		if(i == quotes.length)
+			return separated(line, 0);
+		var chunk_no = 0;
+		return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {
+			return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {
+				return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "555");}).join('');
+	}
 
-    function uncommented(line, i) {
-        if(i == comments.length)
-            return unquoted(line, 0);
-        var chunks = line.split(comments[i][0]);
-        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
-            var in_out_comment = chunk.split(comments[i][1]);
-            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555")
-                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
-    }
+	function uncommented(line, i) {
+		if(i == comments.length)
+			return unquoted(line, 0);
+		var chunks = line.split(comments[i][0]);
+		return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+			var in_out_comment = chunk.split(comments[i][1]);
+			return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555")
+				+ uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+	}
 
-    return uncommented(text, 0);
+	return uncommented(text, 0);
 }
 
 function generate_highlighter_code() {
-    var function_name = document.getElementById("function_name").value;
-    var do_quotes = document.getElementById("do_quotes").checked;
-    var do_comments = document.getElementById("do_comments").checked;
+	var function_name = document.getElementById("function_name").value;
+	var do_quotes = document.getElementById("do_quotes").checked;
+	var do_comments = document.getElementById("do_comments").checked;
 
-    var code = "\n";
-    code += "function " + function_name + "(text) {\n";
-    code += "    const separators = " + document.getElementById("separators_list").value + ";\n"
-    if(do_quotes)
-        code += "    const quotes = " + document.getElementById("quotes_list").value + ";\n"
-    if(do_comments)
-        code += "    const comments = " + document.getElementById("comments_list").value + ";\n"
+	var code = "\n";
+	code += "function " + function_name + "(text) {\n";
+	code += "    const separators = " + document.getElementById("separators_list").value + ";\n"
+	if(do_quotes)
+		code += "    const quotes = " + document.getElementById("quotes_list").value + ";\n"
+	if(do_comments)
+		code += "    const comments = " + document.getElementById("comments_list").value + ";\n"
 
-    code += "\n";
-    code += "    function painted_in(line, color) {\n";
-    code += "        return line.length == 0 ? \"\" : \"&lt;span style=\\\"color:#\" + color + \"\\\"&gt;\" + line + \"&lt;/span&gt;\";\n";
-    code += "    }\n"
+	code += "\n";
+	code += "    function painted_in(line, color) {\n";
+	code += "    	return line.length == 0 ? \"\" : \"&lt;span style=\\\"color:#\" + color + \"\\\"&gt;\" + line + \"&lt;/span&gt;\";\n";
+	code += "    }\n"
 
-    code += "\n";
-    code += "    function colorized(token) {\n";
-    code += "        var code_sum = 0;\n";
-    code += "        for(var i = 0; i < token.length; ++i)\n";
-    code += "            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));\n";
-    code += "        var zero_channel = code_sum % 3;\n";
-    code += "        var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)\n";
-    code += "            + (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)\n";
-    code += "            + (zero_channel == 2 ? '0' : '');\n";
-    code += "        return painted_in(token, color);\n";
-    code += "    }\n";
+	code += "\n";
+	code += "    function colorized(token) {\n";
+	code += "        var code_sum = 0;\n";
+	code += "        for(var i = 0; i < token.length; ++i)\n";
+	code += "            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));\n";
+	code += "        var zero_channel = code_sum % 3;\n";
+	code += "        var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)\n";
+	code += "            + (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)\n";
+	code += "            + (zero_channel == 2 ? '0' : '');\n";
+	code += "        return painted_in(token, color);\n";
+	code += "    }\n";
 
 
-    code += "\n";
-    code += "    function separated(line, i) {\n";
-    code += "        if(i == separators.length)\n";
-    code += "            return colorized(line);\n";
-    code += "        return line.split(separators[i]).map(function(subline) {\n";
-    code += "            return separated(subline, i + 1);}).join(separators[i]);\n";
-    code += "    }\n";
+	code += "\n";
+	code += "    function separated(line, i) {\n";
+	code += "        if(i == separators.length)\n";
+	code += "            return colorized(line);\n";
+	code += "        return line.split(separators[i]).map(function(subline) {\n";
+	code += "            return separated(subline, i + 1);}).join(separators[i]);\n";
+	code += "    }\n";
 
-    if(do_quotes) {
-        code += "\n";
-        code += "    function unquoted(line, i) {\n";
-        code += "        if(i == quotes.length)\n";
-        code += "            return separated(line, 0);\n";
-        code += "        var chunk_no = 0;\n";
-        code += "        return line.split('\\\\' + quotes[i]).join('\\0').split(quotes[i]).map(function (chunk) {\n";
-        code += "            return chunk.split('\\0').join('\\\\' + quotes[i]);}).map(function (chunk) {\n";
-        code += "                return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], \"555\");}).join('');\n";
-        code += "    }\n";
-    }
+	if(do_quotes) {
+		code += "\n";
+		code += "    function unquoted(line, i) {\n";
+		code += "        if(i == quotes.length)\n";
+		code += "            return separated(line, 0);\n";
+		code += "        var chunk_no = 0;\n";
+		code += "        return line.split('\\\\' + quotes[i]).join('\\0').split(quotes[i]).map(function (chunk) {\n";
+		code += "            return chunk.split('\\0').join('\\\\' + quotes[i]);}).map(function (chunk) {\n";
+		code += "                return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], \"555\");}).join('');\n";
+		code += "    }\n";
+	}
 
-    if(do_comments) {
-        code += "\n";
-        code += "    function uncommented(line, i) {\n";
-        code += "        if(i == comments.length)\n";
-        if(do_quotes)
-            code += "            return unquoted(line, 0);\n";
-        else
-            code += "            return separated(line, 0);\n";
-        code += "        var chunks = line.split(comments[i][0]);\n";
-        code += "        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {\n";
-        code += "            var in_out_comment = chunk.split(comments[i][1]);\n";
-        code += "            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), \"555\") \n";
-        code += "                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');\n";
-        code += "    }\n";
-    }
+	if(do_comments) {
+		code += "\n";
+		code += "    function uncommented(line, i) {\n";
+		code += "        if(i == comments.length)\n";
+		if(do_quotes)
+			code += "            return unquoted(line, 0);\n";
+		else
+			code += "            return separated(line, 0);\n";
+		code += "        var chunks = line.split(comments[i][0]);\n";
+		code += "        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {\n";
+		code += "            var in_out_comment = chunk.split(comments[i][1]);\n";
+		code += "            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), \"555\") \n";
+		code += "                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');\n";
+		code += "    }\n";
+	}
 
-    code += "\n";
-    if(do_comments)
-        code += "    return uncommented(text, 0);\n";
-    else if(do_quotes)
-        code += "    return unquoted(text, 0);\n";
-    else
-        code += "    return separated(text, 0);\n";
-    code += "}\n";
+	code += "\n";
+	if(do_comments)
+		code += "    return uncommented(text, 0);\n";
+	else if(do_quotes)
+		code += "    return unquoted(text, 0);\n";
+	else
+		code += "    return separated(text, 0);\n";
+	code += "}\n";
 
-    document.getElementById("highlighter_code").innerHTML = code;
-    highlight_test_area();
+	document.getElementById("highlighter_code").innerHTML = code;
+	highlight_test_area();
 }
 
 function highlight_test_area() {
-    var code = document.getElementById("highlighter_code").innerHTML;
-    code = code.split('&lt;').join('<').split('&gt;').join('>');
-    var function_name_context = code.split('function ');
-    if(function_name_context.length == 1)
-        return
-    function_name = function_name_context[1].split('(')[0];
-    eval(code);
+	var code = document.getElementById("highlighter_code").innerHTML;
+	code = code.split('&lt;').join('<').split('&gt;').join('>');
+	var function_name_context = code.split('function ');
+	if(function_name_context.length == 1)
+		return
+	function_name = function_name_context[1].split('(')[0];
+	eval(code);
 
-    var text = document.getElementById("testing_area").value;
-    chunks = text.split('<')
-    plain_text = chunks[0] + chunks.slice(1).map(function(chunk) {return chunk.split('>')[1]}).join('');
-    document.getElementById("testing_pre").innerHTML = eval(function_name + '(plain_text);');
+	var text = document.getElementById("testing_area").value;
+	chunks = text.split('<')
+	plain_text = chunks[0] + chunks.slice(1).map(function(chunk) {return chunk.split('>')[1]}).join('');
+	document.getElementById("testing_pre").innerHTML = eval(function_name + '(plain_text);');
 }
-    </script>
-  </head>
-  <body>
-    <center>
-    <h1>
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
 Lexical differential highlighting instead of&nbsp;syntax highlighting
-    </h1>
-    <p>
+	</h1>
+	<p>
 In 2013 I was working in nuclear power plant automation. Can't talk much since I still haven't figured out which part of it was classified. But I probably wouldn't get arrested for mentioning that the job required reading a lot of assembly code.
-    </p>
-    <p>
+	</p>
+	<p>
 Reading assembly is not as hard as it might occur to an untrained person. In fact, <a href="https://wordsandbuttons.online/you_dont_have_to_learn_assembly_to_read_disassembly.html">everyone can read a bit of assembly</a>. But in large quantities, it's not too easy either. The mnemonics like RCR, SHRD, WBINVD, and CMPXCHG8B are fun to write, but hell to read.
-    </p>
-    <p>
+	</p>
+	<p>
 What's worse, the standard approach to syntax highlighting doesn't help at all. It's fine that <span style="color:#022; font-weight:bold;">mov</span> doesn't look like <span style="color:#462; font-weight:bold;">eax</span>, but I'd rather prefer <span style="color:#022; font-weight:bold;">pmulhw</span> and <span style="color:#022; font-weight:bold;">pmulhuw</span> to be shown as differently as possible.
-    </p>
-    <p>
+	</p>
+	<p>
 So I employed <a href="https://github.com/akalenuk/chalks">another kind of highlighting</a>. It's not sytnax but <i><span id="index_lexical_differential_highlighting">lexical differential highlighting</span></i>. “Lexical” since it doesn't need true syntax analysis, primitive tokenization and filtering are enough. And it's “differential” because it aims to highlight the difference between lexemes. Ideally, the smaller the lexical difference, the greater the color difference should be.
-    </p>
-    <p>
+	</p>
+	<p>
 It works like this.
-    </p>
-    <table><tr>
-    <td>
-    <pre id="sample_code">
+	</p>
+	<table><tr>
+	<td>
+	<pre id="sample_code">
   movq  %rax, %r14
   .align  16, 0x90
 .LBB0_6:
@@ -349,60 +349,60 @@ It works like this.
   cmpq  $160000000, %rbx
   jne  .LBB0_6
     </pre>
-    </td>
-    </tr></table>
-    <p>
+	</td>
+	</tr></table>
+	<p>
 It's 2019, and I'm getting back to this idea. I'm using lexical differential highlighting not only for assembly but for most of the code published on Words and Buttons. There are two reasons to do so. First, it works with other languages too. And second, it saves your traffic. Yes, including right now.
-    </p>
-    <p>
+	</p>
+	<p>
 Even considering quotes and comments, the tokenizer itself can be implemented in about 30 lines of code. And the painting function is even smaller. So instead of doing syntax highlighting statically or dragging a third-party library as a dependency, I simply rewrite the coloring code specifically for every page.
-    </p>
-    <p>
+	</p>
+	<p>
 This way I can highlight code for any assembly dialect or any language including the most obscure and outdated ones. And it only takes a few KB per instance.
-    </p>
-    <p>
+	</p>
+	<p>
 But, of course, rewriting the highlighter by hand would be extravagant, so I made this generator to do it for me.
-    </p>
+	</p>
 <h2 id="highlighter_generator">
 Highlighter generator
 </h2>
-    <form>
-    Separators:
-    <br>
-    <textarea id="separators_list" rows=2>['\n', ' ', '\t', '.', ',', ':', '=', '[', ']']</textarea>
-    <br>
-    <br>
-    <input type="checkbox" id="do_quotes" checked /><label for="do_quotes">Quotes</label>
-    <br>
-    <textarea id="quotes_list" rows=2>['\'', '"']</textarea>
-    <br>
-    <br>
-    <input type="checkbox" id="do_comments" checked /><label for="do_comments">Comments</label>
-    <br>
-    <textarea id="comments_list" rows=2>[['/*', '*/'], [';', '\n']]</textarea>
-    <br>
-    <br>
-    Function name:
-    <br>
-    <input type="text" id="function_name" value="colorized">
-    <br>
-    <br>
-    <button type="button" style="width: auto;" onclick="generate_highlighter_code()">Regenerate the highlighter</button><br>
-    </form>
+	<form>
+	Separators:
+	<br>
+	<textarea id="separators_list" rows=2>['\n', ' ', '\t', '*', '+', '.', ',', ':', '=', '[', ']']</textarea>
+	<br>
+	<br>
+	<input type="checkbox" id="do_quotes" checked /><label for="do_quotes">Quotes</label>
+	<br>
+	<textarea id="quotes_list" rows=2>['\'', '"']</textarea>
+	<br>
+	<br>
+	<input type="checkbox" id="do_comments" checked /><label for="do_comments">Comments</label>
+	<br>
+	<textarea id="comments_list" rows=2>[['/*', '*/'], [';', '\n']]</textarea>
+	<br>
+	<br>
+	Function name:
+	<br>
+	<input type="text" id="function_name" value="colorized">
+	<br>
+	<br>
+	<button type="button" style="width: auto;" onclick="generate_highlighter_code()">Regenerate the highlighter</button><br>
+	</form>
 
-    <table><tr>
-    <td style="border: 1px solid black;">
-    <pre id="highlighter_code">
+	<table><tr>
+	<td style="border: 1px solid black;">
+	<pre id="highlighter_code">
 ... here will be the highlighter code...
-    </pre>
-    </td></tr></table>
+	</pre>
+	</td></tr></table>
 
-    <form style="width:600pt;">
-    Testing area:
-    <table style="width:100%;">
-    <tr>
-    <td style="width:50%;">
-    <textarea id="testing_area" rows=25 onInput="highlight_test_area()">
+	<form style="width:600pt;">
+	Testing area:
+	<table style="width:100%;">
+	<tr>
+	<td style="width:50%;">
+	<textarea id="testing_area" rows=25 onInput="highlight_test_area()">
 .data
 /* some sample strings */
 ClassName db "SimpleWinClass", 0
@@ -426,26 +426,26 @@ AppName  db " ", 0
     dec eax
     mov [esi + ecx*4], eax
     </textarea>
-    </td>
-    <td style="width:50%;">
-    <pre id="testing_pre"></pre>
-    </td>
-    </tr>
-    </table>
-    </form>
-    <p>
+	</td>
+	<td style="width:50%;">
+	<pre id="testing_pre"></pre>
+	</td>
+	</tr>
+	</table>
+	</form>
+	<p>
 Feel free to use it however you like. Just as every other <a href="https://github.com/akalenuk/wordsandbuttons">piece of code</a> on Words and Buttons, it's properly <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/LICENSE">unlicensed</a>.
-    </p>
+	</p>
 
-    <h2>
+	<h2>
 P. S.
-    </h2>
-    <p>
+	</h2>
+	<p>
 After a very fruitful <a href="https://www.reddit.com/r/programming/comments/bc943p/lexical_differential_highlighting_instead_of/">discussion on Reddit</a>, I've tried to emulate a bit of syntax highlighting to work together with the lexical highlighting. And it worked! Here's a quasi-sytnax-differential highlighter for JavaScript. It's highlighterd by itself.
-    </p>
-    <table><tr>
-    <td style="border: 1px solid black;">
-    <pre id="js_sample">
+	</p>
+	<table><tr>
+	<td style="border: 1px solid black;">
+	<pre id="js_sample">
 function colorized_with_js_highlighter(text) {
     const separators = ['function ', ' if(', 'return ', 'var ', 'const ', ' for(',
         '\n', ' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '&lt;', '&gt;', '[', ']', '{', '}'];
@@ -496,16 +496,16 @@ function colorized_with_js_highlighter(text) {
     return uncommented(text, 0);
 }
     </pre>
-    </td></tr></table>
-    <script language="JavaScript">
-    generate_highlighter_code();
-    document.getElementById("sample_code").innerHTML = colorized_with_sample_highlighter(document.getElementById("sample_code").innerHTML);
-    document.getElementById("js_sample").innerHTML = colorized_with_js_highlighter(document.getElementById("js_sample").innerHTML);
-    </script>
+	</td></tr></table>
+	<script language="JavaScript">
+	generate_highlighter_code();
+	document.getElementById("sample_code").innerHTML = colorized_with_sample_highlighter(document.getElementById("sample_code").innerHTML);
+	document.getElementById("js_sample").innerHTML = colorized_with_js_highlighter(document.getElementById("js_sample").innerHTML);
+	</script>
 
 
 
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
 		<a href="all_programming.html">#programming</a> <a href="all_demos.html">#demos</a>
@@ -520,6 +520,6 @@ function colorized_with_js_highlighter(text) {
 	</td>
 	</tr>
 	</table>
-    </center>
-  </body>
+	</center>
+</body>
 </html>
