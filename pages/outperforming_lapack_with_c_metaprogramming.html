@@ -1,140 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Outperforming LAPACK with C metaprogramming</title>
-    <meta name="description" content="Ok, it's not really about LAPACK. You can consider it a clickbait if you wish. It's about how to tell a compiler to write the code you want with a limited arsenal of tools the C language provides.">
-    <meta name="keywords" content="programming, demos">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
-    <style>
+<head>
+	<meta charset="utf-8">
+	<title>Outperforming LAPACK with C metaprogramming</title>
+	<meta name="description" content="Ok, it's not really about LAPACK. You can consider it a clickbait if you wish. It's about how to tell a compiler to write the code you want with a limited arsenal of tools the C language provides.">
+	<meta name="keywords" content="programming, demos">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
 body{
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a{
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 20pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 table.footer {
-    padding: 64pt 0pt 32pt 0pt;
-    background-color: transparent;
-    width: 505pt;
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
 }
 
 td.footer {
-    font-family: sans-serif;
-    font-size: 16pt;
-    font-style: normal;
-    padding: 0;
-    margin: 0;
-    border: 0;
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
 }
 
 pre {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 12pt;
-    text-align: left;
-    width: 505pt;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 505pt;
 }
 
 table {
-    border-width: 0pt;
+	border-width: 0pt;
 }
 
 td {
-    vertical-align: top;
-    padding: 6pt 12pt 6pt 12pt;
-    font-size: 16pt;
-    border: 1px solid black;
-    width: 505pt;
+	vertical-align: top;
+	padding: 6pt 12pt 6pt 12pt;
+	font-size: 16pt;
+	border: 1px solid black;
+	width: 505pt;
 }
 
 button{
-    width: 248pt;
-    height: 42pt;
-    margin-left:4pt;
-    margin-right:4pt;
-    font-size: 16pt;
+	width: 248pt;
+	height: 42pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 16pt;
 }
 
 li {
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
-    padding-bottom: 6pt;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+	padding-bottom: 6pt;
+	line-height: 1.42;
 }
 
 u {
-    border-bottom: 1px dotted #000;
-    text-decoration: none;
-    cursor: pointer;
+	border-bottom: 1px dotted #000;
+	text-decoration: none;
+	cursor: pointer;
 }
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 function next(slides){
-    // show the next slide
-    var first_slide = document.getElementById(slides + "_" + 1);
-    for(var i = 1; i < 9; ++i)
-    {
-        var this_slide = document.getElementById(slides + "_" + i);
-        var next_slide = document.getElementById(slides + "_" + (i+1));
-        if(this_slide)
-            if(this_slide.style.display == "block")
-                {
-                this_slide.style.display = "none";
-                if(next_slide)
-                    next_slide.style.display = "block";
-                else
-                    first_slide.style.display = "block";
-                break;
-                }
-    }
-    // name the button
-    var button = document.getElementById(slides + "_button")
-    for(var i = 1; i < 9; ++i)
-    {
-        var this_slide = document.getElementById(slides + "_" + i);
-        var next_slide = document.getElementById(slides + "_" + (i+1));
-        if (this_slide && !next_slide && this_slide.style.display == "block") {
-            button.innerHTML = "Back to the 1-st step";
-            break;
-        }
-        else
-            button.innerHTML = "Next step";
-    }
+	// show the next slide
+	var first_slide = document.getElementById(slides + "_" + 1);
+	for(var i = 1; i < 9; ++i)
+	{
+		var this_slide = document.getElementById(slides + "_" + i);
+		var next_slide = document.getElementById(slides + "_" + (i+1));
+		if(this_slide)
+			if(this_slide.style.display == "block") {
+				this_slide.style.display = "none";
+				if(next_slide)
+					next_slide.style.display = "block";
+				else
+					first_slide.style.display = "block";
+				break;
+			}
+	}
+	// name the button
+	var button = document.getElementById(slides + "_button")
+	for(var i = 1; i < 9; ++i)
+	{
+		var this_slide = document.getElementById(slides + "_" + i);
+		var next_slide = document.getElementById(slides + "_" + (i+1));
+		if (this_slide && !next_slide && this_slide.style.display == "block") {
+			button.innerHTML = "Back to the 1-st step";
+			break;
+		}
+		else
+			button.innerHTML = "Next step";
+	}
 }
 
 function draw_results(){
-    var d = document.getElementById("results");
-    var d_context = d.getContext("2d");
-    d_context.font = "14px sans-serif";
-    // background
-    d_context.fillStyle="#eeeeee";
+	var d = document.getElementById("results");
+	var d_context = d.getContext("2d");
+	d_context.font = "14px sans-serif";
+	// background
+	d_context.fillStyle="#eeeeee";
 	d_context.fillRect(0, 0, 700, 500);
 
 	var x = 0.0;
@@ -225,45 +225,45 @@ function draw_results(){
 }
 
 function init_results(){
-    draw_results();
+	draw_results();
 }
-    </script>
-  </head>
-  <body>
-    <center>
-    <h1>
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
 Outperforming LAPACK with C metaprogramming
-    </h1>
-    <p>
+	</h1>
+	<p>
 We don't have many tools for <Span id="index_metaprogramming_in_c">metaprogramming in C</Span>. We don't have templates or <a href="http://en.cppreference.com/w/cpp/language/constexpr">constexpr</a>s C++ has; we don't have <a href="https://dlang.org/mixin.html">mixins</a> like in D; and we certainly don't have <a href="https://en.wikipedia.org/wiki/Homoiconicity">homoiconicity</a> of Lisp and Julia. All we have in C is the preprocessor that supports macros. And we don't even have recursive macros neither as in macros that recurrently call themselves, nor as in macros that define macros. Apparently, you can't implement something as awesome as <a href="https://github.com/kw-udon/constexpr-8cc">a compile time compiler</a> with this.
-    </p>
-    <p>
+	</p>
+	<p>
 Yet with preprocessor macros only you can still explain your compiler what do you want, and the compiler, being sophisticated machine, will use this knowledge to generate better code. You can make it compute rather elaborate things statically, and more importantly you can make it generate zero-overhead code to win quite a lot in performance.
-    </p>
-    <p>
+	</p>
+	<p>
 I'll show you a pair of tricks that will turn a crude and inefficient algorithm for solving small linear systems into something that can outrun LAPACK.
-    </p>
-    <h2>
+	</p>
+	<h2>
 1. Quasi-recursive inlinable functions
-    </h2>
-    <p>
+	</h2>
+	<p>
 Function inlining is the basics of compiler optimization. When the body of a function is small and the arguments are numerous it makes perfect sense to build the body into the code directly without arranging the conventional data configuring and jumping there and back in the memory. However, there are things that effectively prevent function inlining and one of them is the recursion.
-    </p>
-    <p>
+	</p>
+	<p>
 Indeed, when a function calls itself simply building its body into its body will not work. You can force GCC to do that, but it will only eat up all the memory and crash.
-    </p>
-    <p>
+	</p>
+	<p>
 The trick is to promise a compiler that the recursion will soon end. You have to unroll a recursive call into a finite number of specific function calls. And you can do this with macros.
-    </p>
-    <p>
+	</p>
+	<p>
 Yes, the compiler would have to generate extra code on the first steps of compilation, but it will eventually eliminate the dead calls once the variables are proven to be constant during the runtime. GCC is very good in doing this. In fact, you don't even have to help it with const modifiers. If it can, it will minimize the runtime computation to the very possible extend.
-    </p>
-    <p>
+	</p>
+	<p>
 In this example we will make it compute a quasi-recursive factorial function statically. Please press the “next step” button to see how the preprocessor and the compiler work together.
-    </p>
-    <table><tr>
-    <td>
-    <pre><span id="slides_recursive_1" style="display:block"><div style="color:#994466"><b>Step 1. C source code</b></div>
+	</p>
+	<table><tr>
+	<td>
+	<pre><span id="slides_recursive_1" style="display:block"><div style="color:#994466"><b>Step 1. C source code</b></div>
 <b>#define RECURSIVE(PREFIX, CHUNK1, SUFFIX, END_SUFFIX) \
 inline PREFIX##_8 END_SUFFIX \
 inline PREFIX##_7 CHUNK1##_8 SUFFIX \
@@ -389,29 +389,29 @@ int main(){
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc</span></pre>
-    </td>
-    </td></tr></table>
-    <p style="text-align:right">
-    <button type="button" id="slides_recursive_button" onclick="next('slides_recursive')">Next step</button>
-    </p>
-    <p>
+	</td>
+	</td></tr></table>
+	<p style="text-align:right">
+	<button type="button" id="slides_recursive_button" onclick="next('slides_recursive')">Next step</button>
+	</p>
+	<p>
 Of course, this hack has its limits. For instance, when you have to do several calls from a quasi-recursive function, the compiler would have to build not a list of bodies, but a whole tree. This slows down compilation enormously. It takes noticeable time to compile 4-depth 4-branches quasi-recursion on a modern desktop. 6-depth 6-branches might turn it catatonic.
-    </p>
-    <h2>
+	</p>
+	<h2>
 2. Forced loop unroll
-    </h2>
-    <p>
+	</h2>
+	<p>
 Compilers are usually good in unrolling loops. In fact, they are usually better than us, regular people. The good side of the loop unrolling is that it removes the overhead on index counting and comparison. The bad side is larger code. Sometimes we would win more from a small loop running completely in the instruction cache than from a huge unrolled loop that has to be read from uncached memory. Usually, compilers can balance these things for a specific processor architecture better than people with assemblers.
-    </p>
-    <p>
+	</p>
+	<p>
 Sometimes however we know better than the compiler. We know that even if the loop is not quite short, and even if it has inner loops it should still be eligible for unrolling because it will shrink after the dead code elimination. Here is the trick that will leave no options to the C compiler.
-    </p>
-    <p>
+	</p>
+	<p>
 This is a bubble sort conducted in compile time. Once again, please use the “next step” button to see how it goes.
-    </p>
-    <table><tr>
-    <td>
-    <pre><span id="unroll_1" style="display:block"><div style="color:#994466"><b>Step 1. C source code</b></div>
+	</p>
+	<table><tr>
+	<td>
+	<pre><span id="unroll_1" style="display:block"><div style="color:#994466"><b>Step 1. C source code</b></div>
 <b>#define LOOP_TO_0(ID, N, BODY) {int ID; switch(N){\
 case 4: ID=4;{BODY};\
 case 3: ID=3;{BODY};\
@@ -552,26 +552,26 @@ int main(){
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc</span></pre>
-    </td>
-    </td></tr></table>
-    <p style="text-align:right">
-    <button type="button" id="unroll_button" onclick="next('unroll')">Next step</button>
-    </p>
-    <p>
+	</td>
+	</td></tr></table>
+	<p style="text-align:right">
+	<button type="button" id="unroll_button" onclick="next('unroll')">Next step</button>
+	</p>
+	<p>
 Technically, one can do the very same hack with the inlined pseudo-recursion from before. But this compiles faster and it has shown itself easier to debug.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Racing LAPACK
-    </h2>
-    <p>
+	</h2>
+	<p>
 <a href="http://www.netlib.org/lapack/">LAPACK</a> is known to be a rather effective library for solving linear algebra problems. I'm going to measure how it performs on 1M small linear systems, and compare it to the brute Cramer's rule solution done with loops and recursive functions first, and with metaprogramming tricks to remove overhead then.
-    </p>
-    <p>
+	</p>
+	<p>
 That's exactly what I want to measure:
-    </p>
-    <table><tr>
-    <td>
-    <pre>
+	</p>
+	<table><tr>
+	<td>
+	<pre>
 #include "stdio.h"
 
 void dgesv_( int* n, int* nrhs, double* a, int* lda, int* ipiv,
@@ -608,16 +608,16 @@ int main() {
       sum_x[0], sum_x[1], sum_x[2], sum_x[3], sum_x[4]);
 }
     </pre>
-    </td></tr></table>
-    <p>
+	</td></tr></table>
+	<p>
 I know this is <a href="https://medium.com/@veedrac/learning-the-value-of-good-benchmarking-technique-with-c-magic-squares-b61b3386c97f">not a perfect benchmark</a>, for the very least it doesn't account for branch mis-prediction. But I'm ok with this. The metaprogrammed version I am going to compare it to simply has no branches to mis-predict.
-    </p>
-    <p>
+	</p>
+	<p>
 But first, the version with all the overheads:
-    </p>
-    <table><tr>
-    <td>
-    <pre>
+	</p>
+	<table><tr>
+	<td>
+	<pre>
 #include "stdio.h"
 
 double aijn(double* a, double* b, int i, int j, int n, int m){
@@ -669,13 +669,13 @@ int main() {
       sum_x[0], sum_x[1], sum_x[2], sum_x[3], sum_x[4]);
 }
     </pre>
-    </td></tr></table>
-    <p>
+	</td></tr></table>
+	<p>
 It has a loop, a nested loop and a pair of recursive functions. Nothing we can't linearize with macros. The version with metaprogramming tricks looks like this:
-    </p>
-    <table><tr>
-    <td>
-    <pre style="width: 650pt;">
+	</p>
+	<table><tr>
+	<td>
+	<pre style="width: 650pt;">
 <b>// from static_recursion.h</b>
 #define RECURSIVE_4_CALLS(PREFIX, CHUNK1, CHUNK2, CHUNK3, CHUNK4, SUFFIX, END_SUFFIX) \
 inline PREFIX##_4 END_SUFFIX \
@@ -765,72 +765,72 @@ int main() {
     printf("%f, %f, %f, %f, %f\n", sum_x[0], sum_x[1], sum_x[2], sum_x[3], sum_x[4]);
 }
     </pre>
-    </td></tr></table>
-    <p>
+	</td></tr></table>
+	<p>
 Note that the input arrays start as volatile but then get copied to the non-modified arrays used as the STATIC_SOLVE's input. The thing is, if we don't do that, the whole thing gets solved statically for 0 runtime cost. That's not all I want to measure. I want my compiler to build a code that would work on arbitrary data, that's why the input data should be volatile.
-    </p>
-    <p>
+	</p>
+	<p>
 On the other hand, having volatile as function argument inside the macros would kill the optimization for constant data, and I want static and semi-static solutions measured as well.
-    </p>
-    <p>
+	</p>
+	<p>
 We can have both static and runtime solution with explicit copying. This way a single macros fits every possible configuration of constant and volatile data. In this regard it makes sense to measure not only LAPACK and metaprogrammed solution, but several other things as well. Here are the measurements.
-    </p>
-    <ol>
-    <li>
+	</p>
+	<ol>
+	<li>
 Full static solution. 1 KLOC of assembly running for 0.00 seconds.
-    </li>
-    <li>
+	</li>
+	<li>
 Static A matrix, volatile B vector. 5 KLOC of assembly, 0.04 seconds.
-    </li>
-    <li>
+	</li>
+	<li>
 Volatile A matrix, static B vector. 7.5 KLOC, 0.10 seconds.
-    </li>
-    <li>
+	</li>
+	<li>
 <b>The metaprogrammed solution for all volatile data. 8.3 KLOC, 0.10 seconds.</b>
-    </li>
-    <li>
+	</li>
+	<li>
 The solution when the matrix is triangle, meaning upper right half is all 0, and the other data is volatile. 6.5 KLOC, 0.08 seconds.
-    </li>
-    <li>
+	</li>
+	<li>
 <b>LAPACK. 0.65 seconds.</b>
-    </li>
-    <li>
+	</li>
+	<li>
 Original solution with recursion and loops. 10 KLOC, 2.10 seconds.
-    </li>
-    </ol>
-    <canvas id="results" width=700 height=500></canvas>
-    <script language="JavaScript">
-    init_results();
-    </script>
-    <p>
+	</li>
+	</ol>
+	<canvas id="results" width=700 height=500></canvas>
+	<script language="JavaScript">
+	init_results();
+	</script>
+	<p>
 Of course, these measurements are not at all precise but I think they still work since the numbers are so distinct.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Conclusion
-    </h2>
-    <p>
+	</h2>
+	<p>
 You can trick the compiler into doing things it wouldn't normally do, and benefit from this performance-wise. Technically, you can even do this without macros, but macros make it easier.
-    </p>
-    <p>
+	</p>
+	<p>
 Apart from the tricks themselves there are also some things worth mentioning.
-    </p>
-    <ul>
-    <li>
+	</p>
+	<ul>
+	<li>
 The compiler can be surprisingly good in localizing constant data. You can copy some of the array elements from side-effect source, and leave other defined in the compile time, and the compiler would account for that. The solution with triangle matrix clearly wins from this.
-    </li>
-    <li>
+	</li>
+	<li>
 Semi-static computation does not necessary give good advantage. The solution with static B is roughly the same and sometimes even worse than the solution with both arrays being volatile.
-    </li>
-    <li>
+	</li>
+	<li>
 The compiled size of the solution with loops and calls unrolled would not necessarily be large. In my case the unrolled solution results into roughly 8 KLOC of assembly, while the direct one compiles to 10 KLOC.
-    </li>
-    </ul>
-    <p style="font-family: sans-serif; font-size: 14pt;">
+	</li>
+	</ul>
+	<p style="font-family: sans-serif; font-size: 14pt;">
 All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the code is compiled with g++ 5.4.0 -std=c++11 -O2. The source code for the benchmark is available on <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/static_c/benchmark">Github</a>.
-    </p>
+	</p>
 
 
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
 		<a href="all_programming.html">#programming</a> <a href="all_demos.html">#demos</a>
@@ -845,6 +845,6 @@ All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the
 	</td>
 	</tr>
 	</table>
-    </center>
-  </body>
+	</center>
+</body>
 </html>
