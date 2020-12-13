@@ -1,94 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>SymPy makes math fun again</title>
-    <meta name="description" content="An introduction into symbolic computations in Python. Don't worry, it's much simpler than it sounds. It's about making Python do your math for you with very little investment in the technology.">
-    <meta name="keywords" content="programming, mathematics, tutorials">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
-    <style>
+<head>
+	<meta charset="utf-8">
+	<title>SymPy makes math fun again</title>
+	<meta name="description" content="An introduction into symbolic computations in Python. Don't worry, it's much simpler than it sounds. It's about making Python do your math for you with very little investment in the technology.">
+	<meta name="keywords" content="programming, mathematics, tutorials">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
 body{
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a{
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 20pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 pre {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 12pt;
-    text-align: left;
-    width: 505pt;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 505pt;
 }
 
 table {
-    border-width: 0pt;
+	border-width: 0pt;
 }
 
 td {
-    vertical-align: top;
-    padding: 6pt 12pt 6pt 12pt;
-    font-size: 16pt;
-    border: 1px solid black;
+	vertical-align: top;
+	padding: 6pt 12pt 6pt 12pt;
+	font-size: 16pt;
+	border: 1px solid black;
 
 }
 
 .comment {
-    font-size: 12pt;
-    text-align:center;
-    font-family: sans-serif;
-    padding-bottom: 24pt;
+	font-size: 12pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
 }
 
 .result {
-    font-size: 12pt;
-    text-align: left;
-    font-family: monospace;
-    padding-top: 12pt;
-    padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	font-family: monospace;
+	padding-top: 12pt;
+	padding-bottom: 12pt;
 }
 
 button {
-    width: 128pt;
-    height: 26pt;
-    font-size: 16pt;
-    text-align: center;
+	width: 128pt;
+	height: 26pt;
+	font-size: 16pt;
+	text-align: center;
 }
 
 textarea {
-    width: 505pt;
-    font-size: 12pt;
-    font-family: monospace;
+	width: 505pt;
+	font-size: 12pt;
+	font-family: monospace;
 }
 
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 // client
 var w = 640.0;
 var h = 480.0;
@@ -110,436 +110,436 @@ var client_y_center = h - h*(0-y_min)/(y_max-y_min);
 var client_y_step = (h/(y_max-y_min));
 
 function client_to_x(client_x){
-    return (client_x - client_x_center) / client_x_step;
+	return (client_x - client_x_center) / client_x_step;
 }
 
 function client_to_y(client_y){
-    return (client_y_center - client_y) / client_y_step;
+	return (client_y_center - client_y) / client_y_step;
 }
 
 function x_to_client(x){
-    return x * client_x_step + client_x_center;
+	return x * client_x_step + client_x_center;
 }
 
 function y_to_client(y){
-    return client_y_center - y * client_y_step;
+	return client_y_center - y * client_y_step;
 }
 
 // for illustrations
 function draw_grid_on(context){
-    context.font = "16px sans-serif";
-    // axes
-    context.beginPath();
-    context.moveTo(0, client_y_center);
-    context.lineTo(w, client_y_center);
-    context.lineTo(w - 12, client_y_center - 5);
-    context.moveTo(w, client_y_center);
-    context.lineTo(w - 12, client_y_center + 5);
-    context.moveTo(client_x_center, h);
-    context.lineTo(client_x_center, 0);
-    context.lineTo(client_x_center - 5, 12);
-    context.moveTo(client_x_center, 0);
-    context.lineTo(client_x_center + 5, 12);
-    context.fillStyle="#000000";
-    // numbers
-    for(var i = x_min + 1; i <= x_max - 1; i++){
-        context.moveTo(client_x_center + i*client_x_step, client_y_center);
-        context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
-        context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
-    }
-    for(var i = y_min + 1; i <= y_max - 1; i++){
-        if(i != 0) {
-            context.moveTo(client_x_center, client_y_center - i*client_y_step);
-            context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
-            context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
-        }
-    }
-    // letters
-    context.fillText("x", client_x_center + x_max*client_x_step - 24, client_y_center - 8);
-    context.fillText("y", client_x_center - 18, client_y_center - y_max*client_y_step + 16);
+	context.font = "16px sans-serif";
+	// axes
+	context.beginPath();
+	context.moveTo(0, client_y_center);
+	context.lineTo(w, client_y_center);
+	context.lineTo(w - 12, client_y_center - 5);
+	context.moveTo(w, client_y_center);
+	context.lineTo(w - 12, client_y_center + 5);
+	context.moveTo(client_x_center, h);
+	context.lineTo(client_x_center, 0);
+	context.lineTo(client_x_center - 5, 12);
+	context.moveTo(client_x_center, 0);
+	context.lineTo(client_x_center + 5, 12);
+	context.fillStyle="#000000";
+	// numbers
+	for(var i = x_min + 1; i <= x_max - 1; i++){
+		context.moveTo(client_x_center + i*client_x_step, client_y_center);
+		context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+		context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+	}
+	for(var i = y_min + 1; i <= y_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x_center, client_y_center - i*client_y_step);
+			context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+			context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+		}
+	}
+	// letters
+	context.fillText("x", client_x_center + x_max*client_x_step - 24, client_y_center - 8);
+	context.fillText("y", client_x_center - 18, client_y_center - y_max*client_y_step + 16);
 
-    context.strokeStyle="#000000";
-    context.stroke();
-    context.closePath();
+	context.strokeStyle="#000000";
+	context.stroke();
+	context.closePath();
 }
 
 function draw_sine() {
-    plot = document.getElementById("sine");
-    var context = plot.getContext("2d");
+	plot = document.getElementById("sine");
+	var context = plot.getContext("2d");
 
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // grid
-    draw_grid_on(context);
+	// grid
+	draw_grid_on(context);
 
-    // sine
-    context.lineWidth = 1;
-    context.beginPath();
-    context.strokeStyle = colors[0];
-    for(var j = 1; j < w; j += 1) {
-	var x = client_to_x(j);
-	var x_ = client_to_x(j-1);
-	var y = Math.sin(x);
-	var y_ = Math.sin(x_);
-        context.moveTo(j-1, y_to_client(y_));
-        context.lineTo(j, y_to_client(y));
-        context.stroke();
-    }
-    context.closePath();
+	// sine
+	context.lineWidth = 1;
+	context.beginPath();
+	context.strokeStyle = colors[0];
+	for(var j = 1; j < w; j += 1) {
+		var x = client_to_x(j);
+		var x_ = client_to_x(j-1);
+		var y = Math.sin(x);
+		var y_ = Math.sin(x_);
+		context.moveTo(j-1, y_to_client(y_));
+		context.lineTo(j, y_to_client(y));
+		context.stroke();
+	}
+	context.closePath();
 
-    context.lineWidth = 1;
-    context.strokeStyle = "#444444";
-    context.setLineDash([4, 4]);
-    context.beginPath();
-    context.moveTo(x_to_client(Math.PI/2), y_to_client(-2));
-    context.lineTo(x_to_client(Math.PI/2), y_to_client(2));
-    context.moveTo(x_to_client(-1), y_to_client(1));
-    context.lineTo(x_to_client(5), y_to_client(1));
-    context.moveTo(x_to_client(-1), y_to_client(-1));
-    context.lineTo(x_to_client(2), y_to_client(2));
-    context.moveTo(x_to_client(Math.PI+2), y_to_client(-2));
-    context.lineTo(x_to_client(Math.PI-2), y_to_client(2));
-    context.stroke();
-    context.closePath();
-    context.setLineDash([]);
+	context.lineWidth = 1;
+	context.strokeStyle = "#444444";
+	context.setLineDash([4, 4]);
+	context.beginPath();
+	context.moveTo(x_to_client(Math.PI/2), y_to_client(-2));
+	context.lineTo(x_to_client(Math.PI/2), y_to_client(2));
+	context.moveTo(x_to_client(-1), y_to_client(1));
+	context.lineTo(x_to_client(5), y_to_client(1));
+	context.moveTo(x_to_client(-1), y_to_client(-1));
+	context.lineTo(x_to_client(2), y_to_client(2));
+	context.moveTo(x_to_client(Math.PI+2), y_to_client(-2));
+	context.lineTo(x_to_client(Math.PI-2), y_to_client(2));
+	context.stroke();
+	context.closePath();
+	context.setLineDash([]);
 
-    context.fillStyle="#222222";
-    context.fillText("π", x_to_client(Math.PI) + 4, y_to_client(0) - 4);
-    context.fillText("π/2", x_to_client(Math.PI/2) + 4, y_to_client(0) - 4);
+	context.fillStyle="#222222";
+	context.fillText("π", x_to_client(Math.PI) + 4, y_to_client(0) - 4);
+	context.fillText("π/2", x_to_client(Math.PI/2) + 4, y_to_client(0) - 4);
 }
 
 function draw_sine_model() {
-    plot = document.getElementById("sine_model");
-    var context = plot.getContext("2d");
+	plot = document.getElementById("sine_model");
+	var context = plot.getContext("2d");
 
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // grid
-    draw_grid_on(context);
+	// grid
+	draw_grid_on(context);
 
-    // sine
-    context.lineWidth = 3;
-    context.beginPath();
-    context.strokeStyle = "#bbbbbb";
-    for(var j = 1; j < w; j += 1) {
-	var x = client_to_x(j);
-	var x_ = client_to_x(j-1);
-	var y = Math.sin(x);
-	var y_ = Math.sin(x_);
-        context.moveTo(j-1, y_to_client(y_));
-        context.lineTo(j, y_to_client(y));
-        context.stroke();
-    }
-    context.closePath();
+	// sine
+	context.lineWidth = 3;
+	context.beginPath();
+	context.strokeStyle = "#bbbbbb";
+	for(var j = 1; j < w; j += 1) {
+		var x = client_to_x(j);
+		var x_ = client_to_x(j-1);
+		var y = Math.sin(x);
+		var y_ = Math.sin(x_);
+		context.moveTo(j-1, y_to_client(y_));
+		context.lineTo(j, y_to_client(y));
+		context.stroke();
+	}
+	context.closePath();
 
-    // model
-    function sin_model(x) {
-        var a = -0.001252339343723109;
-        var b = 0.011803020246125803;
-        var c = -0.004920726827865508;
-        var d = -0.16323406244002545;
-        var e = -0.0009078019260986406;
-        var f = 1;
-        var g = 0;
-        return a*x*x*x*x*x*x + b*x*x*x*x*x + c*x*x*x*x + d*x*x*x + e*x*x + f*x + g;
-    }
-    context.lineWidth = 1;
-    context.beginPath();
-    context.strokeStyle = colors[1];
-    for(var j = 1; j < w; j += 1) {
-	var x = client_to_x(j);
-	var x_ = client_to_x(j-1);
-	var y = sin_model(x);
-	var y_ = sin_model(x_);
-        context.moveTo(j-1, y_to_client(y_));
-        context.lineTo(j, y_to_client(y));
-        context.stroke();
-    }
-    context.closePath();
+	// model
+	function sin_model(x) {
+		var a = -0.001252339343723109;
+		var b = 0.011803020246125803;
+		var c = -0.004920726827865508;
+		var d = -0.16323406244002545;
+		var e = -0.0009078019260986406;
+		var f = 1;
+		var g = 0;
+		return a*x*x*x*x*x*x + b*x*x*x*x*x + c*x*x*x*x + d*x*x*x + e*x*x + f*x + g;
+	}
+	context.lineWidth = 1;
+	context.beginPath();
+	context.strokeStyle = colors[1];
+	for(var j = 1; j < w; j += 1) {
+		var x = client_to_x(j);
+		var x_ = client_to_x(j-1);
+		var y = sin_model(x);
+		var y_ = sin_model(x_);
+		context.moveTo(j-1, y_to_client(y_));
+		context.lineTo(j, y_to_client(y));
+		context.stroke();
+	}
+	context.closePath();
 }
 
 var px = Math.PI/2;
 var py = 1;
 
 function init_not_sine_model() {
-    plot = document.getElementById("not_sine");
+	plot = document.getElementById("not_sine");
 
-    plot.addEventListener('mousemove', function(e){
-       if(e.buttons == 1){
-           var canvas_rect = plot.getBoundingClientRect();
-           px = client_to_x(e.clientX - canvas_rect.left);
-           py = client_to_y(e.clientY - canvas_rect.top);
-           draw_not_sine_model();
-       }
-    }, false);
+	plot.addEventListener('mousemove', function(e){
+		if(e.buttons == 1){
+			var canvas_rect = plot.getBoundingClientRect();
+			px = client_to_x(e.clientX - canvas_rect.left);
+			py = client_to_y(e.clientY - canvas_rect.top);
+			draw_not_sine_model();
+		}
+	}, false);
 
-    plot.addEventListener('mousedown', function(e){
-       var canvas_rect = plot.getBoundingClientRect();
-       px = client_to_x(e.clientX - canvas_rect.left);
-       py = client_to_y(e.clientY - canvas_rect.top);
-        draw_not_sine_model()
-    }, false);
+	plot.addEventListener('mousedown', function(e){
+		var canvas_rect = plot.getBoundingClientRect();
+		px = client_to_x(e.clientX - canvas_rect.left);
+		py = client_to_y(e.clientY - canvas_rect.top);
+		draw_not_sine_model()
+	}, false);
 
-    plot.addEventListener('mouseup', function(e){
-        draw_not_sine_model();
-    }, false);
+	plot.addEventListener('mouseup', function(e){
+		draw_not_sine_model();
+	}, false);
 
-    plot.addEventListener('mouseleave', function(e){
-       draw_not_sine_model();
-    }, false);
+	plot.addEventListener('mouseleave', function(e){
+		draw_not_sine_model();
+	}, false);
 
-    draw_not_sine_model();
+	draw_not_sine_model();
 }
 
 function draw_not_sine_model() {
-    plot = document.getElementById("not_sine");
-    var context = plot.getContext("2d");
+	plot = document.getElementById("not_sine");
+	var context = plot.getContext("2d");
 
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // grid
-    draw_grid_on(context);
+	// grid
+	draw_grid_on(context);
 
-    // This came directly out of the "Make JS" thing
-    function not_sin_model(x) {
-        var a = (Math.pow(px, -2)*py*(Math.PI+(-1*2*px))*Math.pow((Math.pow(px, 2)+(-1*2*Math.PI*px)+Math.pow(Math.PI, 2)), -1));
-        var b = (Math.pow(px, -2)*py*((3*Math.pow(px, 2))+(-1*Math.pow(Math.PI, 2)))*Math.pow((Math.pow(px, 2)+(-1*2*Math.PI*px)+Math.pow(Math.PI, 2)), -1));
-        var c = (Math.PI*Math.pow(px, -1)*py*((-1*3*px)+(2*Math.PI))*Math.pow((Math.pow(px, 2)+(-1*2*Math.PI*px)+Math.pow(Math.PI, 2)), -1));
-        var d = 0;
-        return a*x*x*x + b*x*x + c*x + d;
-    }
+	// This came directly out of the "Make JS" thing
+	function not_sin_model(x) {
+		var a = (Math.pow(px, -2)*py*(Math.PI+(-1*2*px))*Math.pow((Math.pow(px, 2)+(-1*2*Math.PI*px)+Math.pow(Math.PI, 2)), -1));
+		var b = (Math.pow(px, -2)*py*((3*Math.pow(px, 2))+(-1*Math.pow(Math.PI, 2)))*Math.pow((Math.pow(px, 2)+(-1*2*Math.PI*px)+Math.pow(Math.PI, 2)), -1));
+		var c = (Math.PI*Math.pow(px, -1)*py*((-1*3*px)+(2*Math.PI))*Math.pow((Math.pow(px, 2)+(-1*2*Math.PI*px)+Math.pow(Math.PI, 2)), -1));
+		var d = 0;
+		return a*x*x*x + b*x*x + c*x + d;
+	}
 
-    context.lineWidth = 1;
-    context.beginPath();
-    context.strokeStyle = colors[2];
-    for(var j = 1; j < w; j += 1) {
-	var x = client_to_x(j);
-	var x_ = client_to_x(j-1);
-	var y = not_sin_model(x);
-	var y_ = not_sin_model(x_);
-        context.moveTo(j-1, y_to_client(y_));
-        context.lineTo(j, y_to_client(y));
-        context.stroke();
-    }
-    context.closePath();
+	context.lineWidth = 1;
+	context.beginPath();
+	context.strokeStyle = colors[2];
+	for(var j = 1; j < w; j += 1) {
+		var x = client_to_x(j);
+		var x_ = client_to_x(j-1);
+		var y = not_sin_model(x);
+		var y_ = not_sin_model(x_);
+		context.moveTo(j-1, y_to_client(y_));
+		context.lineTo(j, y_to_client(y));
+		context.stroke();
+	}
+	context.closePath();
 
-    context.beginPath();
-    context.arc(x_to_client(px), y_to_client(py), 5, 0, 2*Math.PI);
-    context.fillStyle = colors[2];
-    context.fill();
-    context.closePath();
+	context.beginPath();
+	context.arc(x_to_client(px), y_to_client(py), 5, 0, 2*Math.PI);
+	context.fillStyle = colors[2];
+	context.fill();
+	context.closePath();
 }
 
 // The partial interpreter for SymPy s-expressions
 function evaluated_sympy(expr) {
-    const pi = "Math.PI";
+	const pi = "Math.PI";
 
-    var Symbol = function(x) {
-        return x;
-    }
-    var Integer = function(x) {
-        return x.toString();
-    }
-    var Float = function(x) {
-        return '(' + parseFloat(x) + ')';
-    }
-    var Rational = function(x, y) {
-        return x + '/' + y;
-    }
+	var Symbol = function(x) {
+		return x;
+	}
+	var Integer = function(x) {
+		return x.toString();
+	}
+	var Float = function(x) {
+		return '(' + parseFloat(x) + ')';
+	}
+	var Rational = function(x, y) {
+		return x + '/' + y;
+	}
 
-    var Add = function() {
-        var args = [];
-        for(var i = 0; i < arguments.length; ++i)
-            args.push(arguments[i].toString());
-        return '(' + args.join(' + ') + ')';
-    }
-    var Mul = function() {
-        var args = [];
-        for(var i = 0; i < arguments.length; ++i)
-            args.push(arguments[i].toString());
-        return '(' + args.join(' * ') + ')';
-    }
-    var Mod = function(x, y) {
-        return '(' + x + ' % ' + y + ')';
-    }
-    var Pow = function(x, y) {
-        return 'Math.pow(' + x + ', ' + y + ')';
-    }
-    const math_fs = ['abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'cbrt', 'ceil', 'clz32', 'cos', 'cosh', 'exp', 'expm1', 'floor', 'fround', 'log', 'log10', 'log1p', 'log2', 'random', 'round', 'sign', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'trunc'];
-    for(var i = 0; i < math_fs.length; ++i) {
-        // abusing lexical scoping
-        eval('var ' + math_fs[i] + ' = function(x) { return \'Math.' + math_fs[i] + '(\' + x + \')\'; }');
-    }
-    var atan2 = function(x, y) {
-        return 'Math.atan(' + x + ',' + y + ')';;
-    }
-    return eval(expr);
+	var Add = function() {
+		var args = [];
+		for(var i = 0; i < arguments.length; ++i)
+			args.push(arguments[i].toString());
+		return '(' + args.join(' + ') + ')';
+	}
+	var Mul = function() {
+		var args = [];
+		for(var i = 0; i < arguments.length; ++i)
+			args.push(arguments[i].toString());
+		return '(' + args.join(' * ') + ')';
+	}
+	var Mod = function(x, y) {
+		return '(' + x + ' % ' + y + ')';
+	}
+	var Pow = function(x, y) {
+		return 'Math.pow(' + x + ', ' + y + ')';
+	}
+	const math_fs = ['abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'cbrt', 'ceil', 'clz32', 'cos', 'cosh', 'exp', 'expm1', 'floor', 'fround', 'log', 'log10', 'log1p', 'log2', 'random', 'round', 'sign', 'sin', 'sinh', 'sqrt', 'tan', 'tanh', 'trunc'];
+	for(var i = 0; i < math_fs.length; ++i) {
+		// abusing lexical scoping
+		eval('var ' + math_fs[i] + ' = function(x) { return \'Math.' + math_fs[i] + '(\' + x + \')\'; }');
+	}
+	var atan2 = function(x, y) {
+		return 'Math.atan(' + x + ',' + y + ')';;
+	}
+	return eval(expr);
 }
 
 function make_js() {
-    var source = document.getElementById("exprs").value;
-    var lines = source.split('\n');
-    var js = [];
-    try {
-        for(var i = 0; i < lines.length; ++i) {
-            if(lines[i].includes(',') && lines[i].split(',')[0].split('"').length == 1 && lines[i].includes('(') && lines[i].includes('"')) {
-                var expr = lines[i].split('\"')[1];
-                var name = lines[i].split(',')[0].split('(')[1].replace('\'', '');  // var name = expr;
-                js.push('var ' + name + ' = ' + evaluated_sympy(expr) + ';');
-            } else if(lines[i].includes(',') && lines[i].split(',')[0].split('\'').length == 1 && lines[i].includes('(') && lines[i].includes('\'')) {
-                var expr = lines[i].split('\'')[1];
-                var name = lines[i].split(',')[0].split('(')[1].replace('\'', '');  // var name = expr;
-                js.push('var ' + name + ' = ' + evaluated_sympy(expr) + ';');
-            } else if(lines[i].includes('(') && lines[i].includes('\"')){
-                js.push(evaluated_sympy(lines[i].split('\"')[1])); // expression in quotes
-            } else if(lines[i].includes('(')){
-                js.push(evaluated_sympy(lines[i])); // even without quotes
-            } else if(lines[i].trim().length > 0) {
-                document.getElementById("make_js_status").innerHTML = "Sorry, can't do this expression:<br>[" + lines[i] + "]";
-                return;
-            }
-        }
-        js.sort();
-    } catch (error) {
-        document.getElementById("make_js_status").innerHTML = "Sorry, can't do these expressions. " + error.message;
-        return;
-    }
-    document.getElementById("exprs").value = js.join('\n');
-    document.getElementById("make_js_status").innerHTML = "";
+	var source = document.getElementById("exprs").value;
+	var lines = source.split('\n');
+	var js = [];
+	try {
+		for(var i = 0; i < lines.length; ++i) {
+			if(lines[i].includes(',') && lines[i].split(',')[0].split('"').length == 1 && lines[i].includes('(') && lines[i].includes('"')) {
+				var expr = lines[i].split('\"')[1];
+				var name = lines[i].split(',')[0].split('(')[1].replace('\'', '');  // var name = expr;
+				js.push('var ' + name + ' = ' + evaluated_sympy(expr) + ';');
+			} else if(lines[i].includes(',') && lines[i].split(',')[0].split('\'').length == 1 && lines[i].includes('(') && lines[i].includes('\'')) {
+				var expr = lines[i].split('\'')[1];
+				var name = lines[i].split(',')[0].split('(')[1].replace('\'', '');  // var name = expr;
+				js.push('var ' + name + ' = ' + evaluated_sympy(expr) + ';');
+			} else if(lines[i].includes('(') && lines[i].includes('\"')){
+				js.push(evaluated_sympy(lines[i].split('\"')[1])); // expression in quotes
+			} else if(lines[i].includes('(')){
+				js.push(evaluated_sympy(lines[i])); // even without quotes
+			} else if(lines[i].trim().length > 0) {
+				document.getElementById("make_js_status").innerHTML = "Sorry, can't do this expression:<br>[" + lines[i] + "]";
+				return;
+			}
+		}
+		js.sort();
+	} catch (error) {
+		document.getElementById("make_js_status").innerHTML = "Sorry, can't do these expressions. " + error.message;
+		return;
+	}
+	document.getElementById("exprs").value = js.join('\n');
+	document.getElementById("make_js_status").innerHTML = "";
 }
 
 function colorized(text) {
-    const separators = ['def ', ' for ', ' else', ' if ', ' break', 'return', 'class ', ' in ', 'global ',
-        '\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')', '+', '-', '*', '/'];
-    const quotes = ['\'', '"'];
-    const comments = [['#', '\n']];
+	const separators = ['def ', ' for ', ' else', ' if ', ' break', 'return', 'class ', ' in ', 'global ',
+		'\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')', '+', '-', '*', '/'];
+	const quotes = ['\'', '"'];
+	const comments = [['#', '\n']];
 
-    function painted_in(line, color) {
-        return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
-    }
+	function painted_in(line, color) {
+		return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+	}
 
-    function colorized(token) {
-        var code_sum = 0;
-        for(var i = 0; i < token.length; ++i)
-            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
-        var zero_channel = code_sum % 3;
-        var color = '' + (zero_channel == 0 ? '3' : '') + (1 + (code_sum % 5) * 2)
-            + (zero_channel == 1 ? '3' : '') + (4 + (code_sum % 2) * 5)
-            + (zero_channel == 2 ? '3' : '');
-        return painted_in(token, color);
-    }
+	function colorized(token) {
+		var code_sum = 0;
+		for(var i = 0; i < token.length; ++i)
+			code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+		var zero_channel = code_sum % 3;
+		var color = '' + (zero_channel == 0 ? '3' : '') + (1 + (code_sum % 5) * 2)
+			+ (zero_channel == 1 ? '3' : '') + (4 + (code_sum % 2) * 5)
+			+ (zero_channel == 2 ? '3' : '');
+		return painted_in(token, color);
+	}
 
-    function separated(line, i) {
-        if(i == separators.length)
-            return colorized(line);
-        return line.split(separators[i]).map(function(subline) {
-            return separated(subline, i + 1);}).join(separators[i]);
-    }
+	function separated(line, i) {
+		if(i == separators.length)
+			return colorized(line);
+		return line.split(separators[i]).map(function(subline) {
+			return separated(subline, i + 1);}).join(separators[i]);
+	}
 
-    function unquoted(line, i) {
-        if(i == quotes.length)
-            return separated(line, 0);
-        var chunk_no = 0;
-        return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {
-            return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {
-                return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "555");}).join('');
-    }
+	function unquoted(line, i) {
+		if(i == quotes.length)
+			return separated(line, 0);
+		var chunk_no = 0;
+		return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {
+			return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {
+				return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "555");}).join('');
+	}
 
-    function uncommented(line, i) {
-        if(i == comments.length)
-            return unquoted(line, 0);
-        var chunks = line.split(comments[i][0]);
-        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
-            var in_out_comment = chunk.split(comments[i][1]);
-            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555")
-                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
-    }
+	function uncommented(line, i) {
+		if(i == comments.length)
+			return unquoted(line, 0);
+		var chunks = line.split(comments[i][0]);
+		return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+			var in_out_comment = chunk.split(comments[i][1]);
+			return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "555")
+				+ uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+	}
 
-    return uncommented(text, 0);
+	return uncommented(text, 0);
 }
-    </script>
-  </head>
-  <body>
-    <center>
-    <h1>
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
 SymPy makes math fun again
-    </h1>
-    <p>
+	</h1>
+	<p>
 I remember my own struggle with calculus at university. Limits, integrals, differential equations. Lots of practice, lots of homework. Pages and pages of exercises. I loved math, the connection between algebra and geometry, the very pleasure of solving problems by making different concepts work together. But I hated doing the “paperwork”.
-    </p>
-    <p>
+	</p>
+	<p>
 Taking it seriously, I still studied through the semester, studied harder the week before the exam, studied even harder the night before. I got 62/100. That's 1 point above the lowest possible passing grade.
-    </p>
-    <p>
+	</p>
+	<p>
 Well, maybe math is not for everyone. But wait a minute! The next semester I took part in the Math Olympiad, went through the faculty round, then throught the university round, went to the national round and scored quite high there. Which counted as a pass on that semester's exam.
-    </p>
-    <p>
+	</p>
+	<p>
 Professors were proud of me. They thought that the first semester's score was a mistake. The third semester I scored 65/100.
-    </p>
-    <p class="comment" style="font-size: 36pt">
+	</p>
+	<p class="comment" style="font-size: 36pt">
 ¯\_(ツ)_/¯
-    </p>
-    <p>
-Mathematics is a lot of things. It's fun of problem-solving, it's an excitement of discoveries, it's a pride of accomplishments, and it's a ton of tedious computations, too. I never liked the last part. Couldn't make it right. That's why I'm so happy to live in the XXI century since I can give it away to computers and still enjoy the first three.
-    </p>
-    <h2>
+	</p>
+	<p>
+Mathematics is a lot of things. It's the fun of problem-solving, it's the excitement of discoveries, it's the pride of accomplishments, and it's a ton of tedious computations, too. I never liked that last part. I still don't. That's why I'm so happy to live in the XXI century since I can give it away to computers and still enjoy the first three.
+	</p>
+	<h2>
 <Span id="index_sympy">SymPy</Span> it is
-    </h2>
-    <p>
+	</h2>
+	<p>
 According to the <a href="https://www.sympy.org/en/index.html">official site</a>:
-    </p>
-    <p><i>
+	</p>
+	<p><i>
 SymPy is a Python library for <span id="index_symbolic_mathematics">symbolic mathematics</span>. It aims to become a full-featured computer algebra system (CAS) while keeping the code as simple as possible in order to be comprehensible and easily extensible.
-    </i></p>
-    <p>
+	</i></p>
+	<p>
 Symbolic mathematics? Algebra system? Sounds exclusive. Sounds like it's something for practicing mathematicians only. But it isn't. It's for practicing engineers who have just enough math knowledge to state a problem but not enough patience to solve it.
-    </p>
-    <p>
+	</p>
+	<p>
 It does integration and differentiation. It finds limits, and it expands series. It solves equations and systems of equations. It can even do statistics. And it does it all just like you would do on an exam. It doesn't just compute numbers, it computes formulas.
-    </p>
-    <p>
+	</p>
+	<p>
 It's a Python library that does the boring part of math for you. Moreover, it does it fast, accurate, and without angst. In other words, it is everything I'm not.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Let SymPy do some math for you
-    </h2>
-    <p>
+	</h2>
+	<p>
 Let's say you want to model the sine function with a polynomial. Let's pretend you have a reason. Now how do we do that?
-    </p>
-    <p>
+	</p>
+	<p>
 How about, we gather all we know about the sine function in one bowl and let SymPy do the rest? Sounds good?
-    </p>
-    <canvas id="sine" width=640 height=480></canvas>
-    <p class="comment">
-    sin(x)
-    </p>
-    <p>
+	</p>
+	<canvas id="sine" width=640 height=480></canvas>
+	<p class="comment">
+	sin(x)
+	</p>
+	<p>
 We know that <i>sin(0) = 0</i>, right? Everybody knows that. Also, as you might have heard, you can approximate small sine with its own argument: <i>sin(0.001) ≃ 0.001</i>. This means that the derivative of sine in 0 is 1.
-    </p>
-    <p>
+	</p>
+	<p>
 The sine function climbs from 0 to π/2 and then it starts going down. In π/2 it's neither climbing or descending, it's in its peak. This means that the derivative of <i>sin(π/2)' = 0</i>. Also, since the sine only climbs to 1, <i>sin(π/2) = 1</i>.
-    </p>
-    <p>
+	</p>
+	<p>
 The sine is symmetrical relative to π/2. This means that it descends exactly as it climbs, and at the point where it reaches full π, its derivative is <i>sin(π)' = -1</i>, and the function itself <i>sin(π) = 0</i>.
-    </p>
-    <p>
+	</p>
+	<p>
 Also, one less known (but easily computable) fact, the integral of the sine from 0 to π/2 is 1. Let's throw this into the system as well.
-    </p>
-    <p>
+	</p>
+	<p>
 So, we have 7 facts. This implies 7 equations. This implies that our polynomial will have 7 coefficients and the highest degree will be then 6.
-    </p>
-    <p>
+	</p>
+	<p>
 Let's translate it all into Python.
-    </p>
-    <table><tr>
-    <td>
-    <pre id="code_1">
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_1">
 from sympy import *
 
 a, b, c, d, e, f, g, x = symbols('a b c d e f g x')
@@ -562,13 +562,13 @@ res = solve(the_system, (a, b, c, d, e, f, g))
 
 for var, exp in res.items():
     print(var, srepr(exp))
-    </pre>
-    </td>
-    </tr></table>
-    <p>
+</pre>
+	</td>
+	</tr></table>
+	<p>
 You can browse <a href="https://docs.sympy.org/latest/tutorial/index.html">the tutorial</a> if you like but it seems more or less clear as it is. <i>sine</i> is our polynomial model. <i>diff</i> is differentiation. <i>integrate</i> is integration. <i>solve</i> is solve. Simple! The only cryptic thing here is <i>srepr</i>. It turns the solution into a special form of expression that looks like this:
-    </p>
-    <p class="result">
+	</p>
+	<p class="result">
 &nbsp;&nbsp;(f, 'Integer(1)') <br>
 &nbsp;&nbsp;(c, 'Mul(Integer(5), Pow(pi, Integer(-5)), Add(Mul(Integer(-1), Integer(288), pi), Mul(Integer(-1), Integer(19), Pow(pi, Integer(2))), Integer(1092)))') <br>
 &nbsp;&nbsp;(d, 'Mul(Integer(10), Pow(pi, Integer(-4)), Add(Integer(-252), Mul(Integer(5), Pow(pi, Integer(2))), Mul(Integer(64), pi)))') <br>
@@ -576,16 +576,16 @@ You can browse <a href="https://docs.sympy.org/latest/tutorial/index.html">the t
 &nbsp;&nbsp;(e, 'Mul(Integer(12), Pow(pi, Integer(-3)), Add(Mul(Integer(-1), Integer(8), pi), Mul(Integer(-1), Pow(pi, Integer(2))), Integer(35)))') <br>
 &nbsp;&nbsp;(g, 'Integer(0)') <br>
 &nbsp;&nbsp;(b, 'Mul(Integer(84), Pow(pi, Integer(-6)), Add(Integer(-60), Pow(pi, Integer(2)), Mul(Integer(16), pi)))')
-    </p>
-    <p>
+	</p>
+	<p>
 Ok, this is not really helpful. We need the coefficients and SymPy gave us the way to compute these coefficients from <i>π</i>. Well, it's what it does, it computes things symbolically not numerically. Or does it?
-    </p>
-    <p>
+	</p>
+	<p>
 Look! I'll add one more line and SymPy will compute our coefficients as floating point numbers.
-    </p>
-    <table><tr>
-    <td>
-    <pre id="code_2">
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_2">
 from sympy import *
 from math import pi
 
@@ -609,13 +609,13 @@ res = solve(the_system, (a, b, c, d, e, f, g))
 
 for var, exp in res.items():
     print(var, srepr(exp))
-    </pre>
-    </td>
-    </tr></table>
-    <p>
+</pre>
+	</td>
+	</tr></table>
+	<p>
 Have you noticed which line it is? Anyway, the result is now this:
-    </p>
-    <p class="result">
+	</p>
+	<p class="result">
 (f, "Float('1.0', precision=53)") <br>
 (c, "Float('-0.0049207268278655082', precision=53)") <br>
 (d, "Float('-0.16323406244002545', precision=53)") <br>
@@ -623,35 +623,35 @@ Have you noticed which line it is? Anyway, the result is now this:
 (e, "Float('-0.00090780192609864056', precision=53)") <br>
 (g, "Float('0.0', precision=53)") <br>
 (b, "Float('0.011803020246125803', precision=53)")
-    </p>
-    <p>
+	</p>
+	<p>
 The line was <i>from math import pi</i>. This overloads the <i>pi</i> in the scope to be a floating point number, not a symbol. And voilà — SymPy is now numeric. We can take these numbers, put them into our polynomial and it will be our model.
-    </p>
-    <canvas id="sine_model" width=640 height=480></canvas>
-    <p class="comment">
+	</p>
+	<canvas id="sine_model" width=640 height=480></canvas>
+	<p class="comment">
 Polynomial model put over original sin(x)
-    </p>
-    <p>
+	</p>
+	<p>
 The model works wonders in the <i>[0; π]</i> range. Outside this range it diverges from the sine but we never specified that it shouldn't.
-    </p>
-    <p>
+	</p>
+	<p>
 The polynomial bears all the properties we told SymPy about with our equations and nothing more.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Now let SymPy write some code for us
-    </h2>
-    <p>
+	</h2>
+	<p>
 Let's say we want something that looks like the sine but isn't. Something we can tweak interactively. Like the sine but with the movable middle point.
-    </p>
-    <p>
+	</p>
+	<p>
 We can start the same way. Let's retain the point locations. The integral criterion along with the derivatives in the endpoints are better to be lifted. But that's just my opinion, you can try to retain them yourself and see what'll happen.
-    </p>
-    <p>
+	</p>
+	<p>
 The code that states the problem look like this:
-    </p>
-    <table><tr>
-    <td>
-    <pre id="code_3">
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_3">
 from sympy import *
 
 a, b, c, d, x, px, py = symbols('a b c d x px py')
@@ -670,13 +670,13 @@ res = solve(the_system, (a, b, c, d))
 
 for var, exp in res.items():
     print(var, srepr(exp))
-    </pre>
-    </td>
-    </tr></table>
-    <p>
+</pre>
+	</td>
+	</tr></table>
+	<p>
 When run, it prints out that:
-    </p>
-    <p class="result">
+	</p>
+	<p class="result">
 &nbsp;&nbsp;(c, "Mul(pi, Pow(Symbol('px'), Integer(-1)), Symbol('py'), Add(Mul(Integer(-1), Integer(3), Symbol('px')), Mul(Integer(2), pi)), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
 <br>
 &nbsp;&nbsp;(b, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Integer(3), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Pow(pi, Integer(2)))), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
@@ -684,14 +684,14 @@ When run, it prints out that:
 &nbsp;&nbsp;(a, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(pi, Mul(Integer(-1), Integer(2), Symbol('px'))), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
 <br>
 &nbsp;&nbsp;(d, 'Integer(0)')
-    </p>
-    <p>
+	</p>
+	<p>
 And now it's time to get back to that cryptic <i>srepr</i> thing from before. It stands for <i>symbolic expression</i>, and it's basically a ready-made syntax tree. It's like in Lisp only with somewhat more conventional parentheses. And since it's written in conventional C-style function form, it's incredibly easy to write an interpreter for it (see: <a href="https://github.com/akalenuk/wordsandbuttons/blob/cd585775b6b5176426c6a22ccbdb683b71fe62dc/pages/sympy_makes_math_fun_again.html#L336">the code on GitHub</a>).
-    </p>
-    <p>
+	</p>
+	<p>
 Here is a simple tool that turns SymPy s-expressions into runable JavaScript code.
-    </p>
-    <textarea id="exprs" rows=20>
+	</p>
+	<textarea id="exprs" rows=20>
 (c, "Mul(pi, Pow(Symbol('px'), Integer(-1)), Symbol('py'), Add(Mul(Integer(-1), Integer(3), Symbol('px')), Mul(Integer(2), pi)), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
 
 (b, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(Mul(Integer(3), Pow(Symbol('px'), Integer(2))), Mul(Integer(-1), Pow(pi, Integer(2)))), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
@@ -699,43 +699,43 @@ Here is a simple tool that turns SymPy s-expressions into runable JavaScript cod
 (a, "Mul(Pow(Symbol('px'), Integer(-2)), Symbol('py'), Add(pi, Mul(Integer(-1), Integer(2), Symbol('px'))), Pow(Add(Pow(Symbol('px'), Integer(2)), Mul(Integer(-1), Integer(2), pi, Symbol('px')), Pow(pi, Integer(2))), Integer(-1)))")
 
 (d, 'Integer(0)')
-    </textarea>
-    <br>
-    <button type="button" id="make_js" onclick="make_js();">Make JS</button>
-    <p id="make_js_status" class="comment">
-    </p>
-    <p>
+	</textarea>
+	<br>
+	<button type="button" id="make_js" onclick="make_js();">Make JS</button>
+	<p id="make_js_status" class="comment">
+	</p>
+	<p>
 Just press the button — and that's it! Of course, you can prettify the code however you like. But you can also use in raw like this (see: <a href="https://github.com/akalenuk/wordsandbuttons/blob/cd585775b6b5176426c6a22ccbdb683b71fe62dc/pages/sympy_makes_math_fun_again.html#L306">the example from this very page</a>).
-    </p>
-    <canvas id="not_sine" width=640 height=480></canvas>
-    <p class="comment">
+	</p>
+	<canvas id="not_sine" width=640 height=480></canvas>
+	<p class="comment">
 You can drag the point
-    </p>
-    <script language="JavaScript">
-    draw_sine();
-    draw_sine_model();
-    init_not_sine_model();
-    document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
-    document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
-    document.getElementById("code_3").innerHTML = colorized(document.getElementById("code_3").innerHTML);
-    </script>
-    <p>
+	</p>
+	<script language="JavaScript">
+	draw_sine();
+	draw_sine_model();
+	init_not_sine_model();
+	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
+	document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
+	document.getElementById("code_3").innerHTML = colorized(document.getElementById("code_3").innerHTML);
+	</script>
+	<p>
 But the best part of it, unless you're writing in some esoteric languages, you don't even need an interpreter. SymPy can print out JavaScript code from the box with a single <i>jscode</i> function! It can also print in Rust, C++, Fortran, Matematica, and more. It's <a href="https://docs.sympy.org/latest/modules/printing.html">already there</a>.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Conclusion
-    </h2>
-    <p>
+	</h2>
+	<p>
 I disagree with “math is not for everyone”. Math is vast and diverse. Surely there is enough math for everyone. But some parts of it are best left to computers.
-    </p>
-    <p>
+	</p>
+	<p>
 Hope this demonstration shows that computers are happy to help you. It's not that hard to state a problem and it's even easier to interpret results. And it's fun.
-    </p>
-    <p>
+	</p>
+	<p>
 If my humble introduction to SymPy will help you enjoy math long after your final calculus exam, it'll make me happy too.
-    </p>
+	</p>
 
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
 		<a href="all_programming.html">#programming</a> <a href="all_mathematics.html">#mathematics</a> <a href="all_tutorials.html">#tutorials</a>
@@ -750,6 +750,6 @@ If my humble introduction to SymPy will help you enjoy math long after your fina
 	</td>
 	</tr>
 	</table>
-    </center>
-  </body>
+	</center>
+</body>
 </html>
