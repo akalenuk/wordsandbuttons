@@ -1,140 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Vastly outperforming LAPACK with C++ metaprogramming</title>
-    <meta name="description" content="Still not really about LAPACK. It's a second part of “outperforming” series explaining how the C++ metaprogramming can appear useful for efficient code generation.">
-    <meta name="keywords" content="programming, demos">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
-    <style>
+<head>
+	<meta charset="utf-8">
+	<title>Vastly outperforming LAPACK with C++ metaprogramming</title>
+	<meta name="description" content="Still not really about LAPACK. It's a second part of “outperforming” series explaining how the C++ metaprogramming can appear useful for efficient code generation.">
+	<meta name="keywords" content="programming, demos">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
 body{
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a{
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 20pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 table.footer {
-    padding: 64pt 0pt 32pt 0pt;
-    background-color: transparent;
-    width: 505pt;
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
 }
 
 td.footer {
-    font-family: sans-serif;
-    font-size: 16pt;
-    font-style: normal;
-    padding: 0;
-    margin: 0;
-    border: 0;
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
 }
 
 pre {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 12pt;
-    text-align: left;
-    width: 300pt;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 300pt;
 }
 
 table {
-    border-width: 0pt;
+	border-width: 0pt;
 }
 
 td {
-    vertical-align: top;
-    padding: 6pt 12pt 6pt 12pt;
-    font-size: 16pt;
-    border: 1px solid black;
-    width: 505pt;
+	vertical-align: top;
+	padding: 6pt 12pt 6pt 12pt;
+	font-size: 16pt;
+	border: 1px solid black;
+	width: 505pt;
 }
 
 button{
-    width: 248pt;
-    height: 42pt;
-    margin-left:4pt;
-    margin-right:4pt;
-    font-size: 16pt;
+	width: 248pt;
+	height: 42pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 16pt;
 }
 
 li {
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
-    padding-bottom: 6pt;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+	padding-bottom: 6pt;
 }
 
 u {
-    border-bottom: 1px dotted #000;
-    text-decoration: none;
-    cursor: pointer;
+	border-bottom: 1px dotted #000;
+	text-decoration: none;
+	cursor: pointer;
 }
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 function next(slides){
-    // show the next slide
-    var first_slide = document.getElementById(slides + "_" + 1);
-    for(var i = 1; i < 9; ++i)
-    {
-        var this_slide = document.getElementById(slides + "_" + i);
-        var next_slide = document.getElementById(slides + "_" + (i+1));
-        if(this_slide)
-            if(this_slide.style.display == "block")
-                {
-                this_slide.style.display = "none";
-                if(next_slide)
-                    next_slide.style.display = "block";
-                else
-                    first_slide.style.display = "block";
-                break;
-                }
-    }
-    // name the button
-    var button = document.getElementById(slides + "_button")
-    for(var i = 1; i < 9; ++i)
-    {
-        var this_slide = document.getElementById(slides + "_" + i);
-        var next_slide = document.getElementById(slides + "_" + (i+1));
-        if (this_slide && !next_slide && this_slide.style.display == "block") {
-            button.innerHTML = "Back to the 1-st step";
-            break;
-        }
-        else
-            button.innerHTML = "Next step";
-    }
+	// show the next slide
+	var first_slide = document.getElementById(slides + "_" + 1);
+	for(var i = 1; i < 9; ++i)
+	{
+		var this_slide = document.getElementById(slides + "_" + i);
+		var next_slide = document.getElementById(slides + "_" + (i+1));
+		if(this_slide)
+			if(this_slide.style.display == "block")
+				{
+				this_slide.style.display = "none";
+				if(next_slide)
+					next_slide.style.display = "block";
+				else
+					first_slide.style.display = "block";
+				break;
+				}
+	}
+	// name the button
+	var button = document.getElementById(slides + "_button")
+	for(var i = 1; i < 9; ++i)
+	{
+		var this_slide = document.getElementById(slides + "_" + i);
+		var next_slide = document.getElementById(slides + "_" + (i+1));
+		if (this_slide && !next_slide && this_slide.style.display == "block") {
+			button.innerHTML = "Back to the 1-st step";
+			break;
+		}
+		else
+			button.innerHTML = "Next step";
+	}
 }
 
 function draw_results(){
-    var d = document.getElementById("results");
-    var d_context = d.getContext("2d");
-    d_context.font = "16px sans-serif";
-    // background
-    d_context.fillStyle="#eeeeee";
+	var d = document.getElementById("results");
+	var d_context = d.getContext("2d");
+	d_context.font = "16px sans-serif";
+	// background
+	d_context.fillStyle="#eeeeee";
 	d_context.fillRect(0, 0, 700, 500);
 
 	var x = 0.0;
@@ -232,33 +232,33 @@ function draw_results(){
 }
 
 function init_results(){
-    draw_results();
+	draw_results();
 }
-    </script>
-  </head>
-  <body>
-    <center>
-    <h1>
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
 Vastly outperforming LAPACK with C++ metaprogramming
-    </h1>
-    <p>
+	</h1>
+	<p>
 This is kind of a sequel to <a href="https://wordsandbuttons.online/outperforming_lapack_with_c_metaprogramming.html">Outperforming LAPACK with C metaprogramming</a>. The tricks described there were effective but rather ugly, and not quite scalable. What I propose here is the same idea (making compiler produce reducible deterministic code against its best judgment) but implemented in C++ template metaprogramming.
-    </p>
-    <p>
+	</p>
+	<p>
 I will also show a quick win you can gain with this type of code, and point out a thing that may stand in a way. The solution I propose solves a linear system of 5 equations 10 times faster than LAPACK does.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Making the compiler unroll recursion
-    </h2>
-    <p>
+	</h2>
+	<p>
 C++ supports functions with integer templates which work in a remarkably straightforward way. The compiler creates an instance of a function for every template's value it knows the function should be instantiated for. This means that you can't simply make a recursive template function even with the most explicit exit condition, because the compiler does not resolve conditions on early stages. If you make a usual factorial function into an integer template and, for instance, run it as <i>factorial&lt;3&gt;()</i>, the compiler would have to create <i>factorial&lt;3&gt;()</i>, and <i>factorial&lt;2&gt;()</i>, and <i>factorial&lt;1&gt;()</i>, and <i>factorial&lt;0&gt;()</i>, and <i>factorial&lt;-1&gt;()</i>, and so on. I'm not sure if it stops eventually due to integer overflow, and I'm not even willing to know.
-    </p>
-    <p>
+	</p>
+	<p>
 The trick here is to patch a recursive call to do an extra instantiation with the exit condition for the case of that very extra condition. Factorial of 1 should call a factorial of 1 (not 0) in the dead branch, and the compiler will have to stop spawning instantiations, since it already has a factorial of 1. This might seem like a thing that would prevent inlining by creating natural recursion, but the instantiation would be eliminated from the dead branch eventually, so the inlining would remain possible.
-    </p>
-    <table><tr>
-    <td>
-    <pre><span id="slides_recursive_1" style="display:block"><div style="color:#994466"><b>Step 1. C++ source code</b></div>
+	</p>
+	<table><tr>
+	<td>
+	<pre><span id="slides_recursive_1" style="display:block"><div style="color:#994466"><b>Step 1. C++ source code</b></div>
 #include &lt;iostream&gt;
 
 template &lt;int N&gt;
@@ -338,21 +338,22 @@ main:
 
 
 
-    </span></pre>
-    </td>
-    </td></tr></table>
-    <p style="text-align:right">
-    <button type="button" id="slides_recursive_button" onclick="next('slides_recursive')">Next step</button>
-    </p>
-    <p>
+
+</span></pre>
+	</td>
+	</td></tr></table>
+	<p style="text-align:right">
+	<button type="button" id="slides_recursive_button" onclick="next('slides_recursive')">Next step</button>
+	</p>
+	<p>
 The trick is as simple, as it is effective. Static computation is a byproduct here, the important thing is — we can make the compiler unroll any kind of recursion with no limitations on depth and branching. Well, no limitations except for the compilation time, of course.
-    </p>
-    <p>
+	</p>
+	<p>
 Just like before I propose a recursive solution that is expected to unroll and reduce itself in the compile time. The input data is explicitly made volatile to prevent static computation.
-    </p>
-    <table><tr>
-    <td>
-    <pre style="width: 505pt;">
+	</p>
+	<table><tr>
+	<td>
+	<pre style="width: 505pt;">
 #include &lt;array&gt;
 #include &lt;iostream&gt;
 
@@ -461,97 +462,97 @@ int main() {
         &lt;&lt; sum_x[2] &lt;&lt; ' ' &lt;&lt; sum_x[3] &lt;&lt; ' ' &lt;&lt; sum_x[4] &lt;&lt; '\n';
     return 0;
 }
-    </pre>
-    </td></tr></table>
-    <p>
+</pre>
+	</td></tr></table>
+	<p>
 Unlike the C solution, this is completely scalable. It doesn't require macros or <i>case</i> misuse. The downside is, it runs twice as long when being built with inlines off.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Two things to consider
-    </h2>
-    <p>
+	</h2>
+	<p>
 1. In C++ inline specifier doesn't necessary specify inlining. It's up to the compiler and the build parameters to decide. In our case we know we will eventually benefit from it, so it might be a good idea to demand inlining explicitly. GCC has a special attribute <i>__attribute__((always_inline))</i> for it.
-    </p>
-    <p>
+	</p>
+	<p>
 Generally it is ok to let the compiler decide, as excessive inlining may be bad for instruction cache usage, but it all depends on the code and the hardware.
-    </p>
-    <p>
+	</p>
+	<p>
 2. The code we will get after the inlining will mostly consist of arithmetic operations. There will be little memory access, no branching and no stack operations. This type of code may benefit drastically from superscalarization. Modern processors have the capabilities of processing several values as one big superscalar, and the more recent the model, the larger the superscalars are.
-    </p>
-    <p>
+	</p>
+	<p>
 The compiler always has some target platform in mind. Usually, the default one is a little conservative to make sure your binary will run on other machines. This means that unless you select it explicitly, the compiler would only use the benefits of 10 years old processor.
-    </p>
-    <p>
+	</p>
+	<p>
 For GCC you can select the target architecture with <i>-march</i> option. My choice for the evening will be <i>-march=native</i> since the only purpose of the binary it will build is to run on my machine a couple of times.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Measurements
-    </h2>
-    <p>
+	</h2>
+	<p>
 I want to measure several solutions. The one with inlines prohibited by the compiler option, and the same one rebuilt for the native architecture. Then a pair with forced inlines both with default and native architectures. Then the solution with a triangular matrix to make sure we still may benefit from partial constantness with this approach. These numbers then should be compared to the LAPACK and the recursive solutions <a href="https://wordsandbuttons.online/outperforming_lapack_with_c_metaprogramming.html">from the C piece</a>.
-    </p>
-    <p>
+	</p>
+	<p>
 The numbers will seem more precise than before, but let it not deceive you, we still have quite an error in our measurements. It's just that the difference between the most and the least effective solutions is so great, we can't really put the numbers on the same scale. The whole runtime of the most efficient version fits in the error of the least efficient one.
-    </p>
-    <p>
+	</p>
+	<p>
 Anyway, the numbers are as follows.
-    </p>
-    <ol>
-    <li>
+	</p>
+	<ol>
+	<li>
 No inlines, default architecture. Runtime: 4400 ms, assembly size 123 KB.
-    </li>
-    <li>
+	</li>
+	<li>
 No inlines, native architecture. Runtime: 4000 ms, assembly size 123 KB.
-    </li>
-    <li>
+	</li>
+	<li>
 Forced inlines, default architecture. Runtime: 120 ms, assembly size 10.2 KB.
-    </li>
-    <li>
+	</li>
+	<li>
 <b>Forced inlines, native architecture. Runtime: 62 ms, assembly size 9.7 KB.</b>
-    </li>
-    <li>
+	</li>
+	<li>
 Forced inlines, native architecture, triangular matrix. Runtime: 56 ms, assembly size 8.1 KB.
-    </li>
-    <li>
+	</li>
+	<li>
 <b>LAPACK from before: Runtime 650 ms.</b>
-    </li>
-    <li>
+	</li>
+	<li>
 Recursive solution from before: Runtime 2100 ms.
-    </li>
-    </ol>
-    <canvas id="results" width=700 height=500></canvas>
-    <script language="JavaScript">
-    init_results();
-    </script>
-    <p>
+	</li>
+	</ol>
+	<canvas id="results" width=700 height=500></canvas>
+	<script language="JavaScript">
+	init_results();
+	</script>
+	<p>
 I should point out that the whole point of the experiment is not to show that LAPACK is somehow bad or obsolete. It is to show that knowing how the compiler works, you can make it make the most efficient code for you.
-    </p>
-    <p>
+	</p>
+	<p>
 On 5 equations LAPACK's LU decomposition roughly matches the Cramer's rule in complexity, but on higher numbers the complexity of the latter will get overwhelming really fast. You can make the compiler make you an unrolled UV decomposition as well, but then the pivoting will get in a way, so you wouldn't avoid branching. Long story short, if you want linear algebra, you should better stick with well established libraries. Such as LAPACK or <a href="http://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen</a>.
-    </p>
-    <p>
+	</p>
+	<p>
 But if you want performance, you should know your compiler.
-    </p>
+	</p>
 
-    <h2>
+	<h2>
 Summary
-    </h2>
-    <p>
+	</h2>
+	<p>
 The “unroll recursion” trick may be extremely effective in the right context. In the wrong context it may be as well harmful. We can make the compiler produce code 30 times more effective that the original recursive solution, but we may just as easy lose 2 times if the compiler fails to unroll recursive functions.
-    </p>
-    <p>
+	</p>
+	<p>
 Superscalarization does wonders for the unrolled code. Without inlines there is only 10% speedup, but for the fully unrolled code it is a fair 2x. But even with that 10% gain it is still something worth consideration. If your code runs in a cloud or on your own server, or in some other form of predictable environment, you might consider rebuilding it for the native architecture for a cheap speedup.
-    </p>
-    <p>
+	</p>
+	<p>
 The unrolled code is a subject of extremely efficient constant propagation. The computation on triangular matrix was another 10% speedup for no cost at all. You too can benefit from specializing the code to do your specific task without any additional effort.
-    </p>
-    <br>
-    <p style="font-family: sans-serif; font-size: 14pt;">
+	</p>
+	<br>
+	<p style="font-family: sans-serif; font-size: 14pt;">
 All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the code is compiled with g++ 5.4.0 -std=c++11 -O2. The source code for the benchmark is available on <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/static_cpp">Github</a>.
-    </p>
+	</p>
 
 
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
 		<a href="all_programming.html">#programming</a> <a href="all_demos.html">#demos</a>
@@ -566,6 +567,6 @@ All the measurements conducted on Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, the
 	</td>
 	</tr>
 	</table>
-    </center>
-  </body>
+	</center>
+</body>
 </html>
