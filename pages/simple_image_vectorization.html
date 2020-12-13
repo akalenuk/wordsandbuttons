@@ -1,121 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Simple image vectorization</title>
-    <meta name="description" content="This is the example of an image vectorization algorithm. It shows the bilinear interpolation, polynomial approximation, differential analysis, and iterative algorithms working together to solve a practical problem">
-    <meta name="keywords" content="mathematics, algorithms, demos">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
-    <style>
+<head>
+	<meta charset="utf-8">
+	<title>Simple image vectorization</title>
+	<meta name="description" content="This is the example of an image vectorization algorithm. It shows the bilinear interpolation, polynomial approximation, differential analysis, and iterative algorithms working together to solve a practical problem">
+	<meta name="keywords" content="mathematics, algorithms, demos">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
 body{
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a{
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 20pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 pre {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 12pt;
-    text-align: left;
-    width: 300pt;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 300pt;
 }
 
 table {
-    border-width: 0pt;
+	border-width: 0pt;
 }
 
 td {
-    vertical-align: top;
-    padding: 6pt 12pt 6pt 12pt;
-    font-size: 16pt;
-    border: 1px solid black;
-    width: 600pt;
+	vertical-align: top;
+	padding: 6pt 12pt 6pt 12pt;
+	font-size: 16pt;
+	border: 1px solid black;
+	width: 600pt;
 }
 
 form {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 16pt;
-    text-align: left;
-    width: 505pt;
-    background-color: #eeee99;
-    color: #000;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
 }
 
 input[type="text"] {
-    width: 48pt;
-    height: 22pt;
-    font-size: 16pt;
-    text-align: center;
+	width: 48pt;
+	height: 22pt;
+	font-size: 16pt;
+	text-align: center;
 }
 
 input[type="radio"] {
-    height: 16pt;
-    width: 16pt;
-    font-size: 16pt;
+	height: 16pt;
+	width: 16pt;
+	font-size: 16pt;
 }
 
 button {
-    width: 128pt;
-    height: 26pt;
-    font-size: 16pt;
-    text-align: center;
+	width: 128pt;
+	height: 26pt;
+	font-size: 16pt;
+	text-align: center;
 }
 
 textarea {
-    width: 505pt;
-    font-size: 12pt;
-    font-family: monospace;
+	width: 505pt;
+	font-size: 12pt;
+	font-family: monospace;
 }
 
 .comment {
-    font-size: 12pt;
-    text-align:center;
-    font-family: sans-serif;
-    padding-bottom: 24pt;
+	font-size: 12pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
 }
 
 .formula {
-    font-family: sans-serif;
-    font-size: 15pt;
-    font-style: italic;
-    text-align: center;
-    padding-top: 6pt;
-    padding-bottom: 6pt;
+	font-family: sans-serif;
+	font-size: 15pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
 }
 
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 // client
 var w = 640.0;
 var h = 640.0;
@@ -128,13 +128,13 @@ var pixels = [];
 var pixel_size;
 
 function reset_pixels(w, h) {
-    pixels = [];
-    for(var i = 0; i < h; ++i) {
-        pixelsi = []
-        for(var j = 0; j <w; ++j)
-            pixelsi.push(0);
-        pixels.push(pixelsi);
-    }
+	pixels = [];
+	for(var i = 0; i < h; ++i) {
+		pixelsi = []
+		for(var j = 0; j <w; ++j)
+			pixelsi.push(0);
+		pixels.push(pixelsi);
+	}
 }
 
 var points_and_tangents = [];
@@ -148,405 +148,405 @@ function spline_for(p1, p1d, p2, p2d) {
 //         [1, 1, 1, 1],
 //         [0, 1, 2, 3]];
 //     B = [p1, p1d, p2, p2d]
-    return [
-        p1,
-        p1d,
-        3 * p2 - p2d - 3*p1 - 2*p1d,
-        p2d + p1d - 2*p2 + 2*p1
-    ];
+	return [
+		p1,
+		p1d,
+		3 * p2 - p2d - 3*p1 - 2*p1d,
+		p2d + p1d - 2*p2 + 2*p1
+	];
 }
 
 // polynomial
 function polynomial_in_t(A, t){
-    var pt = 0.0;
-    for(var i = 0; i < A.length; ++i){
-        pt += A[i] * Math.pow(t, i);
-    }
-    return pt;
+	var pt = 0.0;
+	for(var i = 0; i < A.length; ++i){
+		pt += A[i] * Math.pow(t, i);
+	}
+	return pt;
 }
 
 // pixel value with out of bounds checks
 function pixel_in(pixels, i, j) {
-    if(i >= pixels.length)
-        return pixel_in(pixels, pixels.length-1, j);
-    if(i < 0)
-        return pixel_in(pixels, 0, j);
-    if(j >= pixels[0].length)
-        return pixel_in(pixels, i, pixels[0].length-1);
-    if(j < 0)
-        return pixel_in(pixels, i, 0);
-    return pixels[i][j];
+	if(i >= pixels.length)
+		return pixel_in(pixels, pixels.length-1, j);
+	if(i < 0)
+		return pixel_in(pixels, 0, j);
+	if(j >= pixels[0].length)
+		return pixel_in(pixels, i, pixels[0].length-1);
+	if(j < 0)
+		return pixel_in(pixels, i, 0);
+	return pixels[i][j];
 }
 
 // linear interpolation
 function value_in(pixels, x, y) {
-    var j = Math.floor(x - 0.5);
-    var tj = x - 0.5 - j;
-    var i = Math.floor(y - 0.5);
-    var ti = y - 0.5 - i;
-    return pixel_in(pixels, i, j) * (1 - ti) * (1 - tj)
-         + pixel_in(pixels, i, j+1) * (1 - ti) * (tj)
-         + pixel_in(pixels, i+1, j+1) * (ti) * (tj)
-         + pixel_in(pixels, i+1, j) * (ti) * (1 - tj);
+	var j = Math.floor(x - 0.5);
+	var tj = x - 0.5 - j;
+	var i = Math.floor(y - 0.5);
+	var ti = y - 0.5 - i;
+	return pixel_in(pixels, i, j) * (1 - ti) * (1 - tj)
+		 + pixel_in(pixels, i, j+1) * (1 - ti) * (tj)
+		 + pixel_in(pixels, i+1, j+1) * (ti) * (tj)
+		 + pixel_in(pixels, i+1, j) * (ti) * (1 - tj);
 }
 
 // gradient
 function gradient(pixels, x, y) {
-    const epsilon = 1e-5;
-    return [(value_in(pixels, x + epsilon, y) - value_in(pixels, x, y)) / epsilon,
-            (value_in(pixels, x, y + epsilon) - value_in(pixels, x, y)) / epsilon];
+	const epsilon = 1e-5;
+	return [(value_in(pixels, x + epsilon, y) - value_in(pixels, x, y)) / epsilon,
+	        (value_in(pixels, x, y + epsilon) - value_in(pixels, x, y)) / epsilon];
 }
 
 // how far should you shift the point to meet the isoline
 // if value_in were a distance function
 function gradient_shift(pixels, threshold, x, y) {
-    var g = gradient(pixels, x, y);
-    var g_norm = Math.sqrt(g[0]*g[0] + g[1]*g[1]);
-    var d = threshold - value_in(pixels, x, y);
-    return [g[0] * d / g_norm / g_norm, g[1] * d / g_norm / g_norm];
+	var g = gradient(pixels, x, y);
+	var g_norm = Math.sqrt(g[0]*g[0] + g[1]*g[1]);
+	var d = threshold - value_in(pixels, x, y);
+	return [g[0] * d / g_norm / g_norm, g[1] * d / g_norm / g_norm];
 }
 
 // brings a point closer to the threshold isoline
 function fit_point_better(pixels, threshold, point) {
-    const small_enough_error = 1/255;
-    if(Math.abs(value_in(pixels, point[0], point[1]) - threshold) < small_enough_error)
-        return point;
-    gs = gradient_shift(pixels, threshold, point[0], point[1])
-    return fit_point_better(pixels, threshold, [point[0] + gs[0], point[1] + gs[1]]);
+	const small_enough_error = 1/255;
+	if(Math.abs(value_in(pixels, point[0], point[1]) - threshold) < small_enough_error)
+		return point;
+	gs = gradient_shift(pixels, threshold, point[0], point[1])
+	return fit_point_better(pixels, threshold, [point[0] + gs[0], point[1] + gs[1]]);
 }
 
 // the algorithm itself
 function turn_pixels_into_points_and_tangents(pixels, threshold) {
-    var points = [];
-    var tangents = [];
+	var points = [];
+	var tangents = [];
 
-    // "horizontal" pieces
-    for(var i = 0; i <= pixels.length; i += 1) {
-        var old_point = [];
-        var old_tangent = [];
-        for(var j = 0; j <= pixels[0].length; j += 1) {
-            // if right, left, top, and bottom pixels have a sign change, there should be a spline there
-            var sign_change_on_the_right  = (pixel_in(pixels, i-1, j+0) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
-            var sign_change_on_the_left   = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i+0, j-1) - threshold) < 0;
-            var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
-            var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
-            if(sign_change_on_the_right || sign_change_on_the_left) {
-                // fits the point on a threshold isoline
-                var point = fit_point_better(pixels, threshold, [j, i]);
-                var g = gradient(pixels, point[0], point[1]);
+	// "horizontal" pieces
+	for(var i = 0; i <= pixels.length; i += 1) {
+		var old_point = [];
+		var old_tangent = [];
+		for(var j = 0; j <= pixels[0].length; j += 1) {
+			// if right, left, top, and bottom pixels have a sign change, there should be a spline there
+			var sign_change_on_the_right  = (pixel_in(pixels, i-1, j+0) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+			var sign_change_on_the_left   = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i+0, j-1) - threshold) < 0;
+			var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+			var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
+			if(sign_change_on_the_right || sign_change_on_the_left) {
+				// fits the point on a threshold isoline
+				var point = fit_point_better(pixels, threshold, [j, i]);
+				var g = gradient(pixels, point[0], point[1]);
 
-                // we want our tangent to be X-positive for horizontal pieces
-                var tangent = g[1] >= 0 ? [g[1], -g[0]] : [-g[1], g[0]];
+				// we want our tangent to be X-positive for horizontal pieces
+				var tangent = g[1] >= 0 ? [g[1], -g[0]] : [-g[1], g[0]];
 
-                // this is an T or X junction, the tangent is ambiguous
-                if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
-                    tangent = [0., 0.];
+				// this is an T or X junction, the tangent is ambiguous
+				if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
+					tangent = [0., 0.];
 
-                // store the point+tangent and the previous point+tangent if there is one
-                if(sign_change_on_the_left && old_point) {
-                    points.push([old_point, point]);
-                    tangents.push([old_tangent, tangent]);
-                }
+				// store the point+tangent and the previous point+tangent if there is one
+				if(sign_change_on_the_left && old_point) {
+					points.push([old_point, point]);
+					tangents.push([old_tangent, tangent]);
+				}
 
-                // save the point+tangent for later
-                if(sign_change_on_the_right) {
-                    old_point = point;
-                    old_tangent = tangent;
-                }
-            }
-        }
-    }
+				// save the point+tangent for later
+				if(sign_change_on_the_right) {
+					old_point = point;
+					old_tangent = tangent;
+				}
+			}
+		}
+	}
 
-    // "vertical" pieces
-    for(var j = 0; j <= pixels[0].length; j += 1) {
-        var old_point = [];
-        var old_tangent = [];
-        for(var i = 0; i <= pixels.length; i += 1) {
-            var sign_change_on_the_right  = (pixel_in(pixels, i-1, j+0) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
-            var sign_change_on_the_left   = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i+0, j-1) - threshold) < 0;
-            var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
-            var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
-            if(sign_change_on_the_bottom || sign_change_on_the_top) {
-                var point = fit_point_better(pixels, threshold, [j, i]);
-                var g = gradient(pixels, point[0], point[1]);
-                var tangent = g[0] < 0 ? [g[1], -g[0]] : [-g[1], g[0]];
-                if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
-                    tangent = [0., 0.];
-                if(sign_change_on_the_top && old_point) {
-                    points.push([old_point, point]);
-                    tangents.push([old_tangent, tangent]);
-                }
-                if(sign_change_on_the_bottom) {
-                    old_point = point;
-                    old_tangent = tangent;
-                }
-            }
-        }
-    }
-    return [points, tangents];
+	// "vertical" pieces
+	for(var j = 0; j <= pixels[0].length; j += 1) {
+		var old_point = [];
+		var old_tangent = [];
+		for(var i = 0; i <= pixels.length; i += 1) {
+			var sign_change_on_the_right  = (pixel_in(pixels, i-1, j+0) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+			var sign_change_on_the_left   = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i+0, j-1) - threshold) < 0;
+			var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+			var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
+			if(sign_change_on_the_bottom || sign_change_on_the_top) {
+				var point = fit_point_better(pixels, threshold, [j, i]);
+				var g = gradient(pixels, point[0], point[1]);
+				var tangent = g[0] < 0 ? [g[1], -g[0]] : [-g[1], g[0]];
+				if(sign_change_on_the_left + sign_change_on_the_right + sign_change_on_the_top + sign_change_on_the_bottom > 2)
+					tangent = [0., 0.];
+				if(sign_change_on_the_top && old_point) {
+					points.push([old_point, point]);
+					tangents.push([old_tangent, tangent]);
+				}
+				if(sign_change_on_the_bottom) {
+					old_point = point;
+					old_tangent = tangent;
+				}
+			}
+		}
+	}
+	return [points, tangents];
 }
 
 function turn_points_and_tangents_into_splines(points_and_tangents)
 {
-    var splines = [];
-    var points = points_and_tangents[0];
-    var tangents = points_and_tangents[1];
-    for(var i = 0; i < points.length; ++i) {
-        var Px = spline_for(points[i][0][0], tangents[i][0][0], points[i][1][0], tangents[i][1][0]);
-        var Py = spline_for(points[i][0][1], tangents[i][0][1], points[i][1][1], tangents[i][1][1]);
-        splines.push([Px, Py]);
-    }
-    return splines
+	var splines = [];
+	var points = points_and_tangents[0];
+	var tangents = points_and_tangents[1];
+	for(var i = 0; i < points.length; ++i) {
+		var Px = spline_for(points[i][0][0], tangents[i][0][0], points[i][1][0], tangents[i][1][0]);
+		var Py = spline_for(points[i][0][1], tangents[i][0][1], points[i][1][1], tangents[i][1][1]);
+		splines.push([Px, Py]);
+	}
+	return splines
 }
 
 function draw_the_splines(context, splines) {
-    context.beginPath();
-    for(var i = 0; i < splines.length; ++i) {
-        for(var k = 0; k < pixel_size; k += 1) {
-            var t1 = (k) / pixel_size;
-            var t2 = (k + 1) / pixel_size;
-            var x1 = polynomial_in_t(splines[i][0], t1) * pixel_size;
-            var y1 = polynomial_in_t(splines[i][1], t1) * pixel_size;
-            var x2 = polynomial_in_t(splines[i][0], t2) * pixel_size;
-            var y2 = polynomial_in_t(splines[i][1], t2) * pixel_size;
-            context.moveTo(x1, y1);
-            context.lineTo(x2, y2);
-        }
-    }
+	context.beginPath();
+	for(var i = 0; i < splines.length; ++i) {
+		for(var k = 0; k < pixel_size; k += 1) {
+			var t1 = (k) / pixel_size;
+			var t2 = (k + 1) / pixel_size;
+			var x1 = polynomial_in_t(splines[i][0], t1) * pixel_size;
+			var y1 = polynomial_in_t(splines[i][1], t1) * pixel_size;
+			var x2 = polynomial_in_t(splines[i][0], t2) * pixel_size;
+			var y2 = polynomial_in_t(splines[i][1], t2) * pixel_size;
+			context.moveTo(x1, y1);
+			context.lineTo(x2, y2);
+		}
+	}
 
-    context.strokeStyle="#AA3366";
-    context.lineWidth = 3;
-    context.stroke();
-    context.closePath();
+	context.strokeStyle="#AA3366";
+	context.lineWidth = 3;
+	context.stroke();
+	context.closePath();
 }
 
 // gray-scale canvas
 function draw_greyscale_canvas() {
-    var canvas = document.getElementById("greyscale_canvas");
-    var context = canvas.getContext("2d");
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	var canvas = document.getElementById("greyscale_canvas");
+	var context = canvas.getContext("2d");
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // pixels
-    var pixel_field = context.createImageData(w, h);
-    for (var i = 0; i < pixel_field.data.length; i += 4) {
-        var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
-        var on_canvas_j = Math.floor(i / 4) % w;
-        var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
-        var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
-        var pixel_value = Math.max(Math.min(pixels[in_pixels_i][in_pixels_j], 1.0), 0.0);
-        pixel_field.data[i + 0] = 0xAA + (0xFF - 0xAA) * pixel_value;
-        pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
-        pixel_field.data[i + 2] = 0xFF;
-        pixel_field.data[i + 3] = 0xFF;
-    }
-    context.putImageData(pixel_field, -0.5, -0.5);
+	// pixels
+	var pixel_field = context.createImageData(w, h);
+	for (var i = 0; i < pixel_field.data.length; i += 4) {
+		var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
+		var on_canvas_j = Math.floor(i / 4) % w;
+		var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
+		var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
+		var pixel_value = Math.max(Math.min(pixels[in_pixels_i][in_pixels_j], 1.0), 0.0);
+		pixel_field.data[i + 0] = 0xAA + (0xFF - 0xAA) * pixel_value;
+		pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
+		pixel_field.data[i + 2] = 0xFF;
+		pixel_field.data[i + 3] = 0xFF;
+	}
+	context.putImageData(pixel_field, -0.5, -0.5);
 
-    // pixel grid
-    context.beginPath();
-    for(var i = pixel_size; i <= h; i += pixel_size) {
-        context.moveTo(0.0, i);
-        context.lineTo(w, i);
-    }
-    for(var j = pixel_size; j <= w; j += pixel_size) {
-        context.moveTo(j, 0.0);
-        context.lineTo(j, h);
-    }
-    context.strokeStyle="#AAAAAA";
-    context.lineWidth=1;
-    context.setLineDash([4, 4]);
-    context.stroke();
-    context.setLineDash([]);
-    context.closePath();
+	// pixel grid
+	context.beginPath();
+	for(var i = pixel_size; i <= h; i += pixel_size) {
+		context.moveTo(0.0, i);
+		context.lineTo(w, i);
+	}
+	for(var j = pixel_size; j <= w; j += pixel_size) {
+		context.moveTo(j, 0.0);
+		context.lineTo(j, h);
+	}
+	context.strokeStyle="#AAAAAA";
+	context.lineWidth=1;
+	context.setLineDash([4, 4]);
+	context.stroke();
+	context.setLineDash([]);
+	context.closePath();
 
-    context.font = "14px Arial";
-    context.fillStyle = "#000000";
-    context.textAlign = "center";
-    context.textBaseline = "middle";
-    for(var i = 0; i < pixels.length; ++i) {
-        for(var j = 0; j< pixels[0].length; ++j) {
-           context.fillText(Math.floor(255 * pixels[i][j]).toString(), (j + 0.5) * pixel_size, (i + 0.5) * pixel_size);
-        }
-    }
+	context.font = "14px Arial";
+	context.fillStyle = "#000000";
+	context.textAlign = "center";
+	context.textBaseline = "middle";
+	for(var i = 0; i < pixels.length; ++i) {
+		for(var j = 0; j< pixels[0].length; ++j) {
+			context.fillText(Math.floor(255 * pixels[i][j]).toString(), (j + 0.5) * pixel_size, (i + 0.5) * pixel_size);
+		}
+	}
 }
 
 // gray-scale canvas contour
 function draw_greyscale_canvas_contour() {
-    var canvas = document.getElementById("greyscale_canvas_contour");
-    var context = canvas.getContext("2d");
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	var canvas = document.getElementById("greyscale_canvas_contour");
+	var context = canvas.getContext("2d");
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // pixels
-    var pixel_field = context.createImageData(w, h);
-    for (var i = 0; i < pixel_field.data.length; i += 4) {
-        var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
-        var on_canvas_j = Math.floor(i / 4) % w;
-        var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
-        var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
-        var pixel_value = Math.max(Math.min(pixels[in_pixels_i][in_pixels_j], 1.0), 0.0);
-        pixel_field.data[i + 0] = 0xAA + (0xFF - 0xAA) * pixel_value;
-        pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
-        pixel_field.data[i + 2] = 0xFF;
-        pixel_field.data[i + 3] = 0xFF;
-        if ( pixel_in(pixels, in_pixels_i, in_pixels_j) < threshold
-          != pixel_in(pixels, Math.floor((on_canvas_i - 1) / pixel_size), in_pixels_j) < threshold
-        ||   pixel_in(pixels, in_pixels_i, in_pixels_j) < threshold
-          != pixel_in(pixels, in_pixels_i, Math.floor((on_canvas_j - 1) / pixel_size)) < threshold) {
-            pixel_field.data[i + 0] = 0x11;
-            pixel_field.data[i + 1] = 0x11;
-            pixel_field.data[i + 2] = 0x11;
-        }
+	// pixels
+	var pixel_field = context.createImageData(w, h);
+	for (var i = 0; i < pixel_field.data.length; i += 4) {
+		var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
+		var on_canvas_j = Math.floor(i / 4) % w;
+		var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
+		var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
+		var pixel_value = Math.max(Math.min(pixels[in_pixels_i][in_pixels_j], 1.0), 0.0);
+		pixel_field.data[i + 0] = 0xAA + (0xFF - 0xAA) * pixel_value;
+		pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
+		pixel_field.data[i + 2] = 0xFF;
+		pixel_field.data[i + 3] = 0xFF;
+		if ( pixel_in(pixels, in_pixels_i, in_pixels_j) < threshold
+		  != pixel_in(pixels, Math.floor((on_canvas_i - 1) / pixel_size), in_pixels_j) < threshold
+		||   pixel_in(pixels, in_pixels_i, in_pixels_j) < threshold
+		  != pixel_in(pixels, in_pixels_i, Math.floor((on_canvas_j - 1) / pixel_size)) < threshold) {
+			pixel_field.data[i + 0] = 0x11;
+			pixel_field.data[i + 1] = 0x11;
+			pixel_field.data[i + 2] = 0x11;
+		}
 
-    }
-    context.putImageData(pixel_field, -0.5, -0.5);
+	}
+	context.putImageData(pixel_field, -0.5, -0.5);
 }
 
 // interpolation canvas
 function draw_interpolation_canvas() {
-    var canvas = document.getElementById("interpolation_canvas");
-    var context = canvas.getContext("2d");
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	var canvas = document.getElementById("interpolation_canvas");
+	var context = canvas.getContext("2d");
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // pixels
-    var interpolated_in = function (pixels, x, y) {
-        return value_in(pixels, x, y);
-    }
-    if(document.getElementById("interpolation_1").checked) {
-        interpolated_in = function (pixels, x, y) {
-            return pixel_in(pixels, Math.floor(y), Math.floor(x));
-        }
-    }
+	// pixels
+	var interpolated_in = function (pixels, x, y) {
+		return value_in(pixels, x, y);
+	}
+	if(document.getElementById("interpolation_1").checked) {
+		interpolated_in = function (pixels, x, y) {
+			return pixel_in(pixels, Math.floor(y), Math.floor(x));
+		}
+	}
 
-    var pixel_field = context.createImageData(w, h);
-    for (var i = 0; i < pixel_field.data.length; i += 4) {
-        var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
-        var on_canvas_j = Math.floor(i / 4) % w;
-        var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
-        var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
-        var x = on_canvas_j / pixel_size;
-        var y = on_canvas_i / pixel_size;
-        var pixel_value = Math.max(Math.min(interpolated_in(pixels, x, y), 1.0), 0.0);
-        pixel_field.data[i + 0] = 0xAA + (0xFF - 0xAA) * pixel_value;
-        pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
-        pixel_field.data[i + 2] = 0xFF;
-        pixel_field.data[i + 3] = 0xFF;
-        if ( interpolated_in(pixels, x, y) < threshold
-          != interpolated_in(pixels, x - 1 / pixel_size, y) < threshold
-        ||   interpolated_in(pixels, x, y) < threshold
-          != interpolated_in(pixels, x, y - 1 / pixel_size) < threshold) {
-            pixel_field.data[i + 0] = 0x11;
-            pixel_field.data[i + 1] = 0x11;
-            pixel_field.data[i + 2] = 0x11;
-        }
+	var pixel_field = context.createImageData(w, h);
+	for (var i = 0; i < pixel_field.data.length; i += 4) {
+		var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
+		var on_canvas_j = Math.floor(i / 4) % w;
+		var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
+		var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
+		var x = on_canvas_j / pixel_size;
+		var y = on_canvas_i / pixel_size;
+		var pixel_value = Math.max(Math.min(interpolated_in(pixels, x, y), 1.0), 0.0);
+		pixel_field.data[i + 0] = 0xAA + (0xFF - 0xAA) * pixel_value;
+		pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
+		pixel_field.data[i + 2] = 0xFF;
+		pixel_field.data[i + 3] = 0xFF;
+		if ( interpolated_in(pixels, x, y) < threshold
+		  != interpolated_in(pixels, x - 1 / pixel_size, y) < threshold
+		||   interpolated_in(pixels, x, y) < threshold
+		  != interpolated_in(pixels, x, y - 1 / pixel_size) < threshold) {
+			pixel_field.data[i + 0] = 0x11;
+			pixel_field.data[i + 1] = 0x11;
+			pixel_field.data[i + 2] = 0x11;
+		}
 
-    }
-    context.putImageData(pixel_field, -0.5, -0.5);
+	}
+	context.putImageData(pixel_field, -0.5, -0.5);
 }
 
 // fitting
 function fit_point_several_times(pixels, threshold, point, n) {
-    const small_enough_error = 1/255;
-    if(n == 0)
-        return point;
-    gs = gradient_shift(pixels, threshold, point[0], point[1])
-    return fit_point_several_times(pixels, threshold, [point[0] + gs[0], point[1] + gs[1]], n-1);
+	const small_enough_error = 1/255;
+	if(n == 0)
+		return point;
+	gs = gradient_shift(pixels, threshold, point[0], point[1])
+	return fit_point_several_times(pixels, threshold, [point[0] + gs[0], point[1] + gs[1]], n-1);
 }
 
 var fit_iterations = 0;
 
 function fit_the_point_iteration() {
-    fit_iterations++;
-    if(fit_iterations > 0 && fit_iterations < 4)
-        document.getElementById("fitting_button").innerHTML = "Fit more";
-    else if (fit_iterations == 4)
-        document.getElementById("fitting_button").innerHTML = "Start over";
-    else if (fit_iterations == 5) {
-        document.getElementById("fitting_button").innerHTML = "Fit the contour";
-        fit_iterations = 0;
-    }
-    draw_fitting_canvas();
+	fit_iterations++;
+	if(fit_iterations > 0 && fit_iterations < 4)
+		document.getElementById("fitting_button").innerHTML = "Fit more";
+	else if (fit_iterations == 4)
+		document.getElementById("fitting_button").innerHTML = "Start over";
+	else if (fit_iterations == 5) {
+		document.getElementById("fitting_button").innerHTML = "Fit the contour";
+		fit_iterations = 0;
+	}
+	draw_fitting_canvas();
 }
 
 function draw_fitting_canvas(){
-    var canvas = document.getElementById("fitting_canvas");
-    var context = canvas.getContext("2d");
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	var canvas = document.getElementById("fitting_canvas");
+	var context = canvas.getContext("2d");
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // pixels
-    var pixel_field = context.createImageData(w, h);
-    for (var i = 0; i < pixel_field.data.length; i += 4) {
-        var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
-        var on_canvas_j = Math.floor(i / 4) % w;
-        var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
-        var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
-        var x = on_canvas_j / pixel_size;
-        var y = on_canvas_i / pixel_size;
-        var pixel_value = Math.max(Math.min(value_in(pixels, x, y), 1.0), 0.0);
-        pixel_field.data[i + 0] = 0xAA + (0xFF - 0xAA) * pixel_value;
-        pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
-        pixel_field.data[i + 2] = 0xFF;
-        pixel_field.data[i + 3] = 0xFF;
-    }
-    context.putImageData(pixel_field, -0.5, -0.5);
+	// pixels
+	var pixel_field = context.createImageData(w, h);
+	for (var i = 0; i < pixel_field.data.length; i += 4) {
+		var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
+		var on_canvas_j = Math.floor(i / 4) % w;
+		var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
+		var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
+		var x = on_canvas_j / pixel_size;
+		var y = on_canvas_i / pixel_size;
+		var pixel_value = Math.max(Math.min(value_in(pixels, x, y), 1.0), 0.0);
+		pixel_field.data[i + 0] = 0xAA + (0xFF - 0xAA) * pixel_value;
+		pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
+		pixel_field.data[i + 2] = 0xFF;
+		pixel_field.data[i + 3] = 0xFF;
+	}
+	context.putImageData(pixel_field, -0.5, -0.5);
 
-    // contour
-    context.beginPath();
-    // "horizontal" pieces
-    for(var i = 0; i <= pixels.length; i += 1) {
-        var old_point = [];
-        for(var j = 0; j <= pixels[0].length; j += 1) {
-            var sign_change_on_the_right  = (pixel_in(pixels, i-1, j+0) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
-            var sign_change_on_the_left   = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i+0, j-1) - threshold) < 0;
-            var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
-            var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
-            if(sign_change_on_the_right || sign_change_on_the_left) {
-                var point = fit_point_several_times(pixels, threshold, [j, i], fit_iterations);
+	// contour
+	context.beginPath();
+	// "horizontal" pieces
+	for(var i = 0; i <= pixels.length; i += 1) {
+		var old_point = [];
+		for(var j = 0; j <= pixels[0].length; j += 1) {
+			var sign_change_on_the_right  = (pixel_in(pixels, i-1, j+0) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+			var sign_change_on_the_left   = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i+0, j-1) - threshold) < 0;
+			var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+			var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
+			if(sign_change_on_the_right || sign_change_on_the_left) {
+				var point = fit_point_several_times(pixels, threshold, [j, i], fit_iterations);
 
-                // draw the line
-                if(sign_change_on_the_left && old_point) {
-                    context.moveTo(old_point[0] * pixel_size, old_point[1] * pixel_size);
-                    context.lineTo(point[0] * pixel_size, point[1] * pixel_size);
-                }
+				// draw the line
+				if(sign_change_on_the_left && old_point) {
+					context.moveTo(old_point[0] * pixel_size, old_point[1] * pixel_size);
+					context.lineTo(point[0] * pixel_size, point[1] * pixel_size);
+				}
 
-                // save the point+tangent for later
-                if(sign_change_on_the_right) {
-                    old_point = point;
-                }
-            }
-        }
-    }
+				// save the point+tangent for later
+				if(sign_change_on_the_right) {
+					old_point = point;
+				}
+			}
+		}
+	}
 
-    // "vertical" pieces
-    for(var j = 0; j <= pixels[0].length; j += 1) {
-        var old_point = [];
-        for(var i = 0; i <= pixels.length; i += 1) {
-            var sign_change_on_the_right  = (pixel_in(pixels, i-1, j+0) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
-            var sign_change_on_the_left   = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i+0, j-1) - threshold) < 0;
-            var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
-            var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
-            if(sign_change_on_the_bottom || sign_change_on_the_top) {
-                var point = fit_point_several_times(pixels, threshold, [j, i], fit_iterations);
-                if(sign_change_on_the_top && old_point) {
-                    context.moveTo(old_point[0] * pixel_size, old_point[1] * pixel_size);
-                    context.lineTo(point[0] * pixel_size, point[1] * pixel_size);
-                }
-                if(sign_change_on_the_bottom) {
-                    old_point = point;
-                }
-            }
-        }
-    }
-    context.strokeStyle="#AA3366";
-    context.lineWidth = 3;
-    context.stroke();
-    context.closePath();
+	// "vertical" pieces
+	for(var j = 0; j <= pixels[0].length; j += 1) {
+		var old_point = [];
+		for(var i = 0; i <= pixels.length; i += 1) {
+			var sign_change_on_the_right  = (pixel_in(pixels, i-1, j+0) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+			var sign_change_on_the_left   = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i+0, j-1) - threshold) < 0;
+			var sign_change_on_the_bottom = (pixel_in(pixels, i+0, j-1) - threshold) * (pixel_in(pixels, i+0, j+0) - threshold) < 0;
+			var sign_change_on_the_top    = (pixel_in(pixels, i-1, j-1) - threshold) * (pixel_in(pixels, i-1, j+0) - threshold) < 0;
+			if(sign_change_on_the_bottom || sign_change_on_the_top) {
+				var point = fit_point_several_times(pixels, threshold, [j, i], fit_iterations);
+				if(sign_change_on_the_top && old_point) {
+					context.moveTo(old_point[0] * pixel_size, old_point[1] * pixel_size);
+					context.lineTo(point[0] * pixel_size, point[1] * pixel_size);
+				}
+				if(sign_change_on_the_bottom) {
+					old_point = point;
+				}
+			}
+		}
+	}
+	context.strokeStyle="#AA3366";
+	context.lineWidth = 3;
+	context.stroke();
+	context.closePath();
 }
 
 // cubic
@@ -557,114 +557,114 @@ var cubic_i = 0;
 
 
 function init_cubic(){
-    cubic = document.getElementById("cubic_canvas");
-    var canvas_rect = cubic.getBoundingClientRect();
-    draw_cubic_canvas(0, 0, false);
+	cubic = document.getElementById("cubic_canvas");
+	var canvas_rect = cubic.getBoundingClientRect();
+	draw_cubic_canvas(0, 0, false);
 
-    cubic.addEventListener('mousemove', function(e){
-        var canvas_rect = cubic.getBoundingClientRect();
-        draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-        if(e.buttons == 1){
-            cubic_xs[cubic_i] = e.clientX - canvas_rect.left;
-            cubic_ys[cubic_i] = e.clientY - canvas_rect.top;
-            draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
-        }
-    }, false);
+	cubic.addEventListener('mousemove', function(e){
+		var canvas_rect = cubic.getBoundingClientRect();
+		draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			cubic_xs[cubic_i] = e.clientX - canvas_rect.left;
+			cubic_ys[cubic_i] = e.clientY - canvas_rect.top;
+			draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+		}
+	}, false);
 
-    cubic.addEventListener('mousedown', function(e){
-        var canvas_rect = cubic.getBoundingClientRect();
-        cubic_xs[cubic_i] = e.clientX - canvas_rect.left;
-        cubic_ys[cubic_i] = e.clientY - canvas_rect.top;
-        draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-    }, false);
+	cubic.addEventListener('mousedown', function(e){
+		var canvas_rect = cubic.getBoundingClientRect();
+		cubic_xs[cubic_i] = e.clientX - canvas_rect.left;
+		cubic_ys[cubic_i] = e.clientY - canvas_rect.top;
+		draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+	}, false);
 
-    cubic.addEventListener('mouseleave', function(e){
-        draw_cubic_canvas(0, 0, false);
-    }, false);
+	cubic.addEventListener('mouseleave', function(e){
+		draw_cubic_canvas(0, 0, false);
+	}, false);
 }
 
 function draw_cubic_canvas(client_x, client_y, do_guides){
-    cubic = document.getElementById("cubic_canvas");
-    var context = cubic.getContext("2d");
-    context.font = "16px sans-serif";
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	cubic = document.getElementById("cubic_canvas");
+	var context = cubic.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    var Px = spline_for(cubic_xs[1], cubic_xs[0] - cubic_xs[1], cubic_xs[2], cubic_xs[3] - cubic_xs[2]);
-    var Py = spline_for(cubic_ys[1], cubic_ys[0] - cubic_ys[1], cubic_ys[2], cubic_ys[3] - cubic_ys[2]);
+	var Px = spline_for(cubic_xs[1], cubic_xs[0] - cubic_xs[1], cubic_xs[2], cubic_xs[3] - cubic_xs[2]);
+	var Py = spline_for(cubic_ys[1], cubic_ys[0] - cubic_ys[1], cubic_ys[2], cubic_ys[3] - cubic_ys[2]);
 
-    context.beginPath();
-    for(var i = 0; i < w; ++i) {
-        var t1 = (i) / w;
-        var t2 = (i + 1) / w;
-        var x1 = polynomial_in_t(Px, t1);
-        var y1 = polynomial_in_t(Py, t1);
-        var x2 = polynomial_in_t(Px, t2);
-        var y2 = polynomial_in_t(Py, t2);
-        context.moveTo(x1, y1);
-        context.lineTo(x2, y2);
-    }
-    context.strokeStyle="#AA3366";
-    context.lineWidth = 3;
-    context.stroke();
-    context.closePath();
-    context.lineWidth = 1;
+	context.beginPath();
+	for(var i = 0; i < w; ++i) {
+		var t1 = (i) / w;
+		var t2 = (i + 1) / w;
+		var x1 = polynomial_in_t(Px, t1);
+		var y1 = polynomial_in_t(Py, t1);
+		var x2 = polynomial_in_t(Px, t2);
+		var y2 = polynomial_in_t(Py, t2);
+		context.moveTo(x1, y1);
+		context.lineTo(x2, y2);
+	}
+	context.strokeStyle="#AA3366";
+	context.lineWidth = 3;
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
 
-    // dots
-    for(var i = 0; i < cubic_n; ++i){
-        context.beginPath();
-        context.arc(cubic_xs[i], cubic_ys[i], 3, 0, 2*Math.PI);
-        context.fillStyle="#6633AA";
-        context.fill();
-        context.closePath();
-    }
+	// dots
+	for(var i = 0; i < cubic_n; ++i){
+		context.beginPath();
+		context.arc(cubic_xs[i], cubic_ys[i], 3, 0, 2*Math.PI);
+		context.fillStyle="#6633AA";
+		context.fill();
+		context.closePath();
+	}
 
-    // tangents
-    context.beginPath();
-    context.setLineDash([4, 4]);
-    context.moveTo(cubic_xs[0], cubic_ys[0]);
-    context.lineTo(cubic_xs[1], cubic_ys[1]);
-    context.moveTo(cubic_xs[cubic_n-2], cubic_ys[cubic_n-2]);
-    context.lineTo(cubic_xs[cubic_n-1], cubic_ys[cubic_n-1]);
-    context.strokeStyle="#6633AA";
-    context.stroke();
-    context.setLineDash([]);
-    context.closePath();
+	// tangents
+	context.beginPath();
+	context.setLineDash([4, 4]);
+	context.moveTo(cubic_xs[0], cubic_ys[0]);
+	context.lineTo(cubic_xs[1], cubic_ys[1]);
+	context.moveTo(cubic_xs[cubic_n-2], cubic_ys[cubic_n-2]);
+	context.lineTo(cubic_xs[cubic_n-1], cubic_ys[cubic_n-1]);
+	context.strokeStyle="#6633AA";
+	context.stroke();
+	context.setLineDash([]);
+	context.closePath();
 
-    // guides
-    if(do_guides){
-        min_d = Math.pow(cubic_xs[0] - client_x, 2) + Math.pow(cubic_ys[0] - client_y, 2);
-        min_i = 0;
-        for(var i = 1; i < cubic_n; ++i){
-            var di = Math.pow(cubic_xs[i] - client_x, 2) + Math.pow(cubic_ys[i] - client_y, 2);
-            if(di < min_d){
-                min_d = di;
-                min_i = i;
-            }
-        }
-        cubic_i = min_i;
-        context.setLineDash([4, 4]);
-        context.beginPath();
-        context.moveTo(cubic_xs[min_i], cubic_ys[min_i]);
-        context.lineTo(client_x, client_y);
-        context.strokeStyle="#6633AA";
-        context.stroke();
-        context.closePath();
-        context.setLineDash([]);
-    }
+	// guides
+	if(do_guides){
+		min_d = Math.pow(cubic_xs[0] - client_x, 2) + Math.pow(cubic_ys[0] - client_y, 2);
+		min_i = 0;
+		for(var i = 1; i < cubic_n; ++i){
+			var di = Math.pow(cubic_xs[i] - client_x, 2) + Math.pow(cubic_ys[i] - client_y, 2);
+			if(di < min_d){
+				min_d = di;
+				min_i = i;
+			}
+		}
+		cubic_i = min_i;
+		context.setLineDash([4, 4]);
+		context.beginPath();
+		context.moveTo(cubic_xs[min_i], cubic_ys[min_i]);
+		context.lineTo(client_x, client_y);
+		context.strokeStyle="#6633AA";
+		context.stroke();
+		context.closePath();
+		context.setLineDash([]);
+	}
 
-    // labels
-    context.font = "14px Arial";
-    context.fillStyle = "#000000";
-    context.textBaseline = "middle";
-    context.textAlign = "right";
-    context.fillText("point 1", cubic_xs[1] - 8, cubic_ys[1]);
-    context.textAlign = "left";
-    context.fillText("point 2", cubic_xs[2] + 8, cubic_ys[2]);
-    context.textAlign = "center";
-    context.fillText("tangent 1", (cubic_xs[0] + cubic_xs[1]) / 2, (cubic_ys[0] + cubic_ys[1]) / 2);
-    context.fillText("tangent 2", (cubic_xs[2] + cubic_xs[3]) / 2, (cubic_ys[2] + cubic_ys[3]) / 2);
+	// labels
+	context.font = "14px Arial";
+	context.fillStyle = "#000000";
+	context.textBaseline = "middle";
+	context.textAlign = "right";
+	context.fillText("point 1", cubic_xs[1] - 8, cubic_ys[1]);
+	context.textAlign = "left";
+	context.fillText("point 2", cubic_xs[2] + 8, cubic_ys[2]);
+	context.textAlign = "center";
+	context.fillText("tangent 1", (cubic_xs[0] + cubic_xs[1]) / 2, (cubic_ys[0] + cubic_ys[1]) / 2);
+	context.fillText("tangent 2", (cubic_xs[2] + cubic_xs[3]) / 2, (cubic_ys[2] + cubic_ys[3]) / 2);
 }
 
 
@@ -674,390 +674,390 @@ var cur_point_in_pair_indexes = [];
 var cur_tangent_index = -1;
 var cur_tangent_in_pair_index = -1;
 function init_canvas(){
-    var canvas = document.getElementById("canvas");
-    canvas.addEventListener('mousedown', function(e){
-        canvas_rect = canvas.getBoundingClientRect();
-        var x = e.clientX - canvas_rect.left;
-        var y = e.clientY - canvas_rect.top;
-        if(document.getElementById("tool_2").checked) { // points
-            cur_point_indexes = [];
-            cur_point_in_pair_indexes = [];
-            var points = points_and_tangents[0];
-            var min_d2 = (w+h)*(w+h);
-            for(var i = 0; i < points.length; ++i) {
-                for(var j = 0; j < 2; ++ j) {
-                    var px = pixel_size * points[i][j][0];
-                    var py = pixel_size * points[i][j][1];
-                    var d2 = (px - x)*(px - x) + (py - y)*(py - y);
-                    if(cur_point_indexes.length == 0 || d2 < min_d2) {
-                        cur_point_indexes = [i];
-                        cur_point_in_pair_indexes = [j];
-                        min_d2 = d2;
-                    }else if(d2 == min_d2) {
-                        cur_point_indexes.push(i);
-                        cur_point_in_pair_indexes.push(j);
-                    }
-                }
-            }
-        } else if(document.getElementById("tool_3").checked) { // tangents
-            cur_tangent_index = -1;
-            cur_tangent_in_pair_index = -1;
-            var points = points_and_tangents[0];
-            var tangents = points_and_tangents[1];
-            var min_d2 = (w+h)*(w+h);
-            for(var i = 0; i < points.length; ++i) {
-                for(var j = 0; j < 2; ++ j) {
-                    var px = pixel_size * (points[i][j][0] + tangents[i][j][0]);
-                    var py = pixel_size * (points[i][j][1] + tangents[i][j][1]);
-                    var d2 = (px - x)*(px - x) + (py - y)*(py - y);
-                    if(cur_tangent_index == -1 || d2 < min_d2) {
-                        cur_tangent_index = i;
-                        cur_tangent_in_pair_index = j;
-                        min_d2 = d2;
-                    }
-                }
-            }
-        }
-    }, false);
+	var canvas = document.getElementById("canvas");
+	canvas.addEventListener('mousedown', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		var x = e.clientX - canvas_rect.left;
+		var y = e.clientY - canvas_rect.top;
+		if(document.getElementById("tool_2").checked) { // points
+			cur_point_indexes = [];
+			cur_point_in_pair_indexes = [];
+			var points = points_and_tangents[0];
+			var min_d2 = (w+h)*(w+h);
+			for(var i = 0; i < points.length; ++i) {
+				for(var j = 0; j < 2; ++ j) {
+					var px = pixel_size * points[i][j][0];
+					var py = pixel_size * points[i][j][1];
+					var d2 = (px - x)*(px - x) + (py - y)*(py - y);
+					if(cur_point_indexes.length == 0 || d2 < min_d2) {
+						cur_point_indexes = [i];
+						cur_point_in_pair_indexes = [j];
+						min_d2 = d2;
+					}else if(d2 == min_d2) {
+						cur_point_indexes.push(i);
+						cur_point_in_pair_indexes.push(j);
+					}
+				}
+			}
+		} else if(document.getElementById("tool_3").checked) { // tangents
+			cur_tangent_index = -1;
+			cur_tangent_in_pair_index = -1;
+			var points = points_and_tangents[0];
+			var tangents = points_and_tangents[1];
+			var min_d2 = (w+h)*(w+h);
+			for(var i = 0; i < points.length; ++i) {
+				for(var j = 0; j < 2; ++ j) {
+					var px = pixel_size * (points[i][j][0] + tangents[i][j][0]);
+					var py = pixel_size * (points[i][j][1] + tangents[i][j][1]);
+					var d2 = (px - x)*(px - x) + (py - y)*(py - y);
+					if(cur_tangent_index == -1 || d2 < min_d2) {
+						cur_tangent_index = i;
+						cur_tangent_in_pair_index = j;
+						min_d2 = d2;
+					}
+				}
+			}
+		}
+	}, false);
 
-    canvas.addEventListener('mousemove', function(e){
-        if(e.buttons == 1){
-            canvas_rect = canvas.getBoundingClientRect();
-            var x = e.clientX - canvas_rect.left;
-            var y = e.clientY - canvas_rect.top;
-            if(document.getElementById("tool_2").checked) { // points
-                var points = points_and_tangents[0];
-                for(var i = 0; i < cur_point_indexes.length; ++i) {
-                    points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][0] = x / pixel_size;
-                    points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][1] = y / pixel_size;
-                }
-            } else if(document.getElementById("tool_3").checked) { // tangents
-                var points = points_and_tangents[0];
-                var tangents = points_and_tangents[1];
-                tangents[cur_tangent_index][cur_tangent_in_pair_index][0] = x / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][0];
-                tangents[cur_tangent_index][cur_tangent_in_pair_index][1] = y / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][1];
-                splines = turn_points_and_tangents_into_splines(points_and_tangents);
-            }
-            splines = turn_points_and_tangents_into_splines(points_and_tangents);
-            draw_canvas();
-        }
-    }, false);
+	canvas.addEventListener('mousemove', function(e){
+		if(e.buttons == 1){
+			canvas_rect = canvas.getBoundingClientRect();
+			var x = e.clientX - canvas_rect.left;
+			var y = e.clientY - canvas_rect.top;
+			if(document.getElementById("tool_2").checked) { // points
+				var points = points_and_tangents[0];
+				for(var i = 0; i < cur_point_indexes.length; ++i) {
+					points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][0] = x / pixel_size;
+					points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][1] = y / pixel_size;
+				}
+			} else if(document.getElementById("tool_3").checked) { // tangents
+				var points = points_and_tangents[0];
+				var tangents = points_and_tangents[1];
+				tangents[cur_tangent_index][cur_tangent_in_pair_index][0] = x / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][0];
+				tangents[cur_tangent_index][cur_tangent_in_pair_index][1] = y / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][1];
+				splines = turn_points_and_tangents_into_splines(points_and_tangents);
+			}
+			splines = turn_points_and_tangents_into_splines(points_and_tangents);
+			draw_canvas();
+		}
+	}, false);
 
-    canvas.addEventListener('mouseup', function(e){
-        canvas_rect = canvas.getBoundingClientRect();
-        var x = e.clientX - canvas_rect.left;
-        var y = e.clientY - canvas_rect.top;
-        if(document.getElementById("tool_1").checked) {
-            var in_pixels_i = Math.floor(y / pixel_size);
-            var in_pixels_j = Math.floor(x / pixel_size);
-            pixels[in_pixels_i][in_pixels_j] *= 7;
-            if(e.shiftKey)
-                pixels[in_pixels_i][in_pixels_j] += 7;
-            else
-                pixels[in_pixels_i][in_pixels_j] += 1;
-            pixels[in_pixels_i][in_pixels_j] = Math.floor(pixels[in_pixels_i][in_pixels_j]) % 8;
-            pixels[in_pixels_i][in_pixels_j] /= 7;
-            points_and_tangents = turn_pixels_into_points_and_tangents(pixels, threshold);
-            splines = turn_points_and_tangents_into_splines(points_and_tangents);
-        } else if(document.getElementById("tool_2").checked) { // points
-            var points = points_and_tangents[0];
-            for(var i = 0; i < cur_point_indexes.length; ++i) {
-                points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][0] = x / pixel_size;
-                points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][1] = y / pixel_size;
-            }
-            splines = turn_points_and_tangents_into_splines(points_and_tangents);
-        } else if(document.getElementById("tool_3").checked) { // tangents
-            var points = points_and_tangents[0];
-            var tangents = points_and_tangents[1];
-            tangents[cur_tangent_index][cur_tangent_in_pair_index][0] = x / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][0];
-            tangents[cur_tangent_index][cur_tangent_in_pair_index][1] = y / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][1];
-            splines = turn_points_and_tangents_into_splines(points_and_tangents);
-        }
-        draw_canvas();
-    }, false);
+	canvas.addEventListener('mouseup', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		var x = e.clientX - canvas_rect.left;
+		var y = e.clientY - canvas_rect.top;
+		if(document.getElementById("tool_1").checked) {
+			var in_pixels_i = Math.floor(y / pixel_size);
+			var in_pixels_j = Math.floor(x / pixel_size);
+			pixels[in_pixels_i][in_pixels_j] *= 7;
+			if(e.shiftKey)
+				pixels[in_pixels_i][in_pixels_j] += 7;
+			else
+				pixels[in_pixels_i][in_pixels_j] += 1;
+			pixels[in_pixels_i][in_pixels_j] = Math.floor(pixels[in_pixels_i][in_pixels_j]) % 8;
+			pixels[in_pixels_i][in_pixels_j] /= 7;
+			points_and_tangents = turn_pixels_into_points_and_tangents(pixels, threshold);
+			splines = turn_points_and_tangents_into_splines(points_and_tangents);
+		} else if(document.getElementById("tool_2").checked) { // points
+			var points = points_and_tangents[0];
+			for(var i = 0; i < cur_point_indexes.length; ++i) {
+				points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][0] = x / pixel_size;
+				points[cur_point_indexes[i]][cur_point_in_pair_indexes[i]][1] = y / pixel_size;
+			}
+			splines = turn_points_and_tangents_into_splines(points_and_tangents);
+		} else if(document.getElementById("tool_3").checked) { // tangents
+			var points = points_and_tangents[0];
+			var tangents = points_and_tangents[1];
+			tangents[cur_tangent_index][cur_tangent_in_pair_index][0] = x / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][0];
+			tangents[cur_tangent_index][cur_tangent_in_pair_index][1] = y / pixel_size - points[cur_tangent_index][cur_tangent_in_pair_index][1];
+			splines = turn_points_and_tangents_into_splines(points_and_tangents);
+		}
+		draw_canvas();
+	}, false);
 
-    draw_canvas();
+	draw_canvas();
 }
 
 
 function draw_canvas(){
-    var canvas = document.getElementById("canvas");
-    var context = canvas.getContext("2d");
-    // background
-    context.fillStyle="#eeeeee";
-    context.fillRect(0, 0, w, h);
+	var canvas = document.getElementById("canvas");
+	var context = canvas.getContext("2d");
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
-    // pixels
-    var pixel_field = context.createImageData(w, h);
-    for (var i = 0; i < pixel_field.data.length; i += 4) {
-        var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
-        var on_canvas_j = Math.floor(i / 4) % w;
-        var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
-        var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
-        var pixel_value = Math.max(Math.min(pixels[in_pixels_i][in_pixels_j], 1.0), 0.0);
-        pixel_field.data[i + 0] = 0xAA + (0xFF - 0xAA) * pixel_value;
-        pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
-        pixel_field.data[i + 2] = 0xFF;
-        pixel_field.data[i + 3] = 0xFF;
-    }
-    context.putImageData(pixel_field, -0.5, -0.5);
+	// pixels
+	var pixel_field = context.createImageData(w, h);
+	for (var i = 0; i < pixel_field.data.length; i += 4) {
+		var on_canvas_i = Math.floor(Math.floor(i / 4) / w);
+		var on_canvas_j = Math.floor(i / 4) % w;
+		var in_pixels_i = Math.floor(on_canvas_i / pixel_size);
+		var in_pixels_j = Math.floor(on_canvas_j / pixel_size);
+		var pixel_value = Math.max(Math.min(pixels[in_pixels_i][in_pixels_j], 1.0), 0.0);
+		pixel_field.data[i + 0] = 0xAA + (0xFF - 0xAA) * pixel_value;
+		pixel_field.data[i + 1] = 0xAA + (0xFF - 0xAA) * pixel_value;
+		pixel_field.data[i + 2] = 0xFF;
+		pixel_field.data[i + 3] = 0xFF;
+	}
+	context.putImageData(pixel_field, -0.5, -0.5);
 
-    // pixel grid
-    context.beginPath();
-    for(var i = pixel_size; i <= h; i += pixel_size) {
-        context.moveTo(0.0, i);
-        context.lineTo(w, i);
-    }
-    for(var j = pixel_size; j <= w; j += pixel_size) {
-        context.moveTo(j, 0.0);
-        context.lineTo(j, h);
-    }
-    context.strokeStyle="#AAAAAA";
-    context.lineWidth=1;
-    context.setLineDash([4, 4]);
-    context.stroke();
-    context.setLineDash([]);
-    context.closePath();
+	// pixel grid
+	context.beginPath();
+	for(var i = pixel_size; i <= h; i += pixel_size) {
+		context.moveTo(0.0, i);
+		context.lineTo(w, i);
+	}
+	for(var j = pixel_size; j <= w; j += pixel_size) {
+		context.moveTo(j, 0.0);
+		context.lineTo(j, h);
+	}
+	context.strokeStyle="#AAAAAA";
+	context.lineWidth=1;
+	context.setLineDash([4, 4]);
+	context.stroke();
+	context.setLineDash([]);
+	context.closePath();
 
-    // contour
-    draw_the_splines(context, splines);
+	// contour
+	draw_the_splines(context, splines);
 
-    // points if needed
-    if(document.getElementById("tool_2").checked) {
-        var points = points_and_tangents[0];
-        for(var i = 0; i < points.length; ++i) {
-            for(var j = 0; j < 2; ++j) {
-                context.beginPath();
-                context.arc(pixel_size * points[i][j][0], pixel_size * points[i][j][1], 3, 0, 2*Math.PI);
-                context.fillStyle="#6633AA";
-                context.fill();
-                context.closePath();
-            }
-        }
-    }
+	// points if needed
+	if(document.getElementById("tool_2").checked) {
+		var points = points_and_tangents[0];
+		for(var i = 0; i < points.length; ++i) {
+			for(var j = 0; j < 2; ++j) {
+				context.beginPath();
+				context.arc(pixel_size * points[i][j][0], pixel_size * points[i][j][1], 3, 0, 2*Math.PI);
+				context.fillStyle="#6633AA";
+				context.fill();
+				context.closePath();
+			}
+		}
+	}
 
-    // tangents if needed
-    if(document.getElementById("tool_3").checked) {
-        var points = points_and_tangents[0];
-        var tangents = points_and_tangents[1];
-        for(var i = 0; i < points.length; ++i) {
-            for(var j = 0; j < 2; ++j) {
-                context.beginPath();
-                context.arc(pixel_size * points[i][j][0], pixel_size * points[i][j][1], 3, 0, 2*Math.PI);
-                context.fillStyle="#AA3366";
-                context.fill();
-                context.closePath();
+	// tangents if needed
+	if(document.getElementById("tool_3").checked) {
+		var points = points_and_tangents[0];
+		var tangents = points_and_tangents[1];
+		for(var i = 0; i < points.length; ++i) {
+			for(var j = 0; j < 2; ++j) {
+				context.beginPath();
+				context.arc(pixel_size * points[i][j][0], pixel_size * points[i][j][1], 3, 0, 2*Math.PI);
+				context.fillStyle="#AA3366";
+				context.fill();
+				context.closePath();
 
-                context.beginPath();
-                context.lineWidth=1;
-                context.moveTo(pixel_size * points[i][j][0], pixel_size * points[i][j][1]);
-                context.lineTo(pixel_size * (points[i][j][0] + tangents[i][j][0]), pixel_size * (points[i][j][1] + tangents[i][j][1]));
-                context.strokeStyle="#6633AA";
-                context.setLineDash([2, 2]);
-                context.stroke();
-                context.setLineDash([]);
-                context.closePath();
+				context.beginPath();
+				context.lineWidth=1;
+				context.moveTo(pixel_size * points[i][j][0], pixel_size * points[i][j][1]);
+				context.lineTo(pixel_size * (points[i][j][0] + tangents[i][j][0]), pixel_size * (points[i][j][1] + tangents[i][j][1]));
+				context.strokeStyle="#6633AA";
+				context.setLineDash([2, 2]);
+				context.stroke();
+				context.setLineDash([]);
+				context.closePath();
 
-                context.beginPath();
-                context.arc(
-                    pixel_size * (points[i][j][0] + tangents[i][j][0]),
-                    pixel_size * (points[i][j][1] + tangents[i][j][1]), 3, 0, 2*Math.PI);
-                context.fillStyle="#6633AA";
-                context.fill();
-                context.closePath();
-            }
-        }
-    }
+				context.beginPath();
+				context.arc(
+					pixel_size * (points[i][j][0] + tangents[i][j][0]),
+					pixel_size * (points[i][j][1] + tangents[i][j][1]), 3, 0, 2*Math.PI);
+				context.fillStyle="#6633AA";
+				context.fill();
+				context.closePath();
+			}
+		}
+	}
 }
 
 // import from PGM
 function reimport_image() {
-    space_divided = function(text) {
-        var new_text = text.replace('\r', ' ');
-        new_text = new_text.replace('\n', ' ');
-        new_text = new_text.replace('\t', ' ');
-        while(true) {
-            new_new_text = new_text.replace('  ', ' ');
-            if(new_new_text.length == new_text.length)
-                return new_text;
-            new_text = new_new_text;
-        }
-    }
-    var text = document.getElementById("import_PGM").value;
-    document.getElementById("import_status").innerHTML = "";
-    var lines = text.split("\n");
-    var no_comments = []
-    for(var i = 0; i < lines.length; ++i) {
-        var new_line = lines[i].trim();
-        if (new_line == "" || new_line[0] == '#')
-            continue;
-        no_comments.push(new_line);
-    }
-    var numbers = space_divided(no_comments.join(' ')).split(' ');
-    if(numbers[0] != "P2") {
-        document.getElementById("import_status").innerHTML = "Sorry, I can only import grayscale Netpbm (*.pgm = 'P2...')";
-        return;
-    }
-    try {
-        var new_w = parseInt(numbers[1]);
-        var new_h = parseInt(numbers[2]);
-        var new_depth = parseInt(numbers[3]);
-        if(numbers.length > new_w * new_h + 4) {
-            document.getElementById("import_status").innerHTML = "Sorry, there's some extra data I couldn't parse.";
-            return;
-        }
-        if(numbers.length < new_w * new_h + 4) {
-            document.getElementById("import_status").innerHTML = "Sorry, not enough data to form an image.";
-            return;
-        }
-        h = w * new_h / new_w;
-        document.getElementById("canvas").height = h;
-        pixel_size = w / new_w;
-        reset_pixels(new_w, new_h);
-        for(var i = 0; i < new_h; ++i)
-            for(var j = 0; j < new_w; ++j)
-                pixels[i][j] = parseInt(numbers[4 + i*new_w + j]) / new_depth;
-        points_and_tangents = turn_pixels_into_points_and_tangents(pixels, threshold);
-        splines = turn_points_and_tangents_into_splines(points_and_tangents);
-    } catch (error) {
-        document.getElementById("import_status").innerHTML = "Sorry, couldn't parse that. " + error.message;
-    }
-    draw_greyscale_canvas();
-    draw_greyscale_canvas_contour();
-    draw_interpolation_canvas();
-    draw_fitting_canvas();
-    draw_canvas();
+	space_divided = function(text) {
+		var new_text = text.replace('\r', ' ');
+		new_text = new_text.replace('\n', ' ');
+		new_text = new_text.replace('\t', ' ');
+		while(true) {
+			new_new_text = new_text.replace('  ', ' ');
+			if(new_new_text.length == new_text.length)
+				return new_text;
+			new_text = new_new_text;
+		}
+	}
+	var text = document.getElementById("import_PGM").value;
+	document.getElementById("import_status").innerHTML = "";
+	var lines = text.split("\n");
+	var no_comments = []
+	for(var i = 0; i < lines.length; ++i) {
+		var new_line = lines[i].trim();
+		if (new_line == "" || new_line[0] == '#')
+			continue;
+		no_comments.push(new_line);
+	}
+	var numbers = space_divided(no_comments.join(' ')).split(' ');
+	if(numbers[0] != "P2") {
+		document.getElementById("import_status").innerHTML = "Sorry, I can only import grayscale Netpbm (*.pgm = 'P2...')";
+		return;
+	}
+	try {
+		var new_w = parseInt(numbers[1]);
+		var new_h = parseInt(numbers[2]);
+		var new_depth = parseInt(numbers[3]);
+		if(numbers.length > new_w * new_h + 4) {
+			document.getElementById("import_status").innerHTML = "Sorry, there's some extra data I couldn't parse.";
+			return;
+		}
+		if(numbers.length < new_w * new_h + 4) {
+			document.getElementById("import_status").innerHTML = "Sorry, not enough data to form an image.";
+			return;
+		}
+		h = w * new_h / new_w;
+		document.getElementById("canvas").height = h;
+		pixel_size = w / new_w;
+		reset_pixels(new_w, new_h);
+		for(var i = 0; i < new_h; ++i)
+			for(var j = 0; j < new_w; ++j)
+				pixels[i][j] = parseInt(numbers[4 + i*new_w + j]) / new_depth;
+		points_and_tangents = turn_pixels_into_points_and_tangents(pixels, threshold);
+		splines = turn_points_and_tangents_into_splines(points_and_tangents);
+	} catch (error) {
+		document.getElementById("import_status").innerHTML = "Sorry, couldn't parse that. " + error.message;
+	}
+	draw_greyscale_canvas();
+	draw_greyscale_canvas_contour();
+	draw_interpolation_canvas();
+	draw_fitting_canvas();
+	draw_canvas();
 }
 
 
 // export to SVG
 function export_splines() {
-    const printable = function(x) {
-        return Math.floor(x * 100);
-    };
-    var svg = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
-    svg += "<svg width=\"" + printable(pixels[0].length) + "\" height=\"" + printable(pixels.length);
-    svg += "\"\n  viewBox=\"0 0 " + printable(pixels[0].length) + " " + printable(pixels.length) + "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
-    for(var i = 0; i < points_and_tangents[0].length; ++i) {
-        var p1 = points_and_tangents[0][i][0];
-        var p2 = points_and_tangents[0][i][1];
-        var p1_n = points_and_tangents[1][i][0];
-        var p2_n = points_and_tangents[1][i][1];
-        svg += "<path fill=\"none\" stroke=\"rgb(0,0,0)\" \n  d=\"M " + printable(p1[0]) + "," + printable(p1[1]) + " ";
-        svg += "C " + printable(p1[0] + p1_n[0] / 3.) + "," + printable(p1[1] + p1_n[1] / 3.);
-        svg += " " +  printable(p2[0] - p2_n[0] / 3.) + "," + printable(p2[1] - p2_n[1] / 3.) + " " + printable(p2[0]) + "," + printable(p2[1]) + "\"/>\n";
-    }
-    svg += "</svg>\n";
-    document.getElementById("export_SVG").value = svg;
+	const printable = function(x) {
+		return Math.floor(x * 100);
+	};
+	var svg = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
+	svg += "<svg width=\"" + printable(pixels[0].length) + "\" height=\"" + printable(pixels.length);
+	svg += "\"\n  viewBox=\"0 0 " + printable(pixels[0].length) + " " + printable(pixels.length) + "\" xmlns=\"http://www.w3.org/2000/svg\">\n";
+	for(var i = 0; i < points_and_tangents[0].length; ++i) {
+		var p1 = points_and_tangents[0][i][0];
+		var p2 = points_and_tangents[0][i][1];
+		var p1_n = points_and_tangents[1][i][0];
+		var p2_n = points_and_tangents[1][i][1];
+		svg += "<path fill=\"none\" stroke=\"rgb(0,0,0)\" \n  d=\"M " + printable(p1[0]) + "," + printable(p1[1]) + " ";
+		svg += "C " + printable(p1[0] + p1_n[0] / 3.) + "," + printable(p1[1] + p1_n[1] / 3.);
+		svg += " " +  printable(p2[0] - p2_n[0] / 3.) + "," + printable(p2[1] - p2_n[1] / 3.) + " " + printable(p2[0]) + "," + printable(p2[1]) + "\"/>\n";
+	}
+	svg += "</svg>\n";
+	document.getElementById("export_SVG").value = svg;
 }
 
 // ui
 function reset_threshold() {
-    threshold = parseFloat(document.getElementById("threshold").value);
+	threshold = parseFloat(document.getElementById("threshold").value);
 }
 
 // lexical highlighting
 function colorized(text) {
-    const separators = ['function ', ' if(', 'return ', 'var ', 'const ', ' for(',
-        '\n', '&lt;', '&gt;', ' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '<', '>', '[', ']', '{', '}'];
-    const brackets = [['//', '\n']];
+	const separators = ['function ', ' if(', 'return ', 'var ', 'const ', ' for(',
+		'\n', '&lt;', '&gt;', ' ', '\t', '.', ',', ':', ';', '+', '-', '/', '*', '(', ')', '<', '>', '[', ']', '{', '}'];
+	const brackets = [['//', '\n']];
 
-    function painted_in(line, color) {
-        return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
-    }
+	function painted_in(line, color) {
+		return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+	}
 
-    function colorized(token) {
-        var code_sum = 0;
-        for(var i = 0; i < token.length; ++i)
-            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
-        var zero_channel = code_sum % 3;
-        var color = '' + (zero_channel == 0 ? '3' : '') + (1 + (code_sum % 5) * 2)
-            + (zero_channel == 1 ? '3' : '') + (4 + (code_sum % 2) * 5)
-            + (zero_channel == 2 ? '3' : '');
-        return painted_in(token, color);
-    }
+	function colorized(token) {
+		var code_sum = 0;
+		for(var i = 0; i < token.length; ++i)
+			code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+		var zero_channel = code_sum % 3;
+		var color = '' + (zero_channel == 0 ? '3' : '') + (1 + (code_sum % 5) * 2)
+			+ (zero_channel == 1 ? '3' : '') + (4 + (code_sum % 2) * 5)
+			+ (zero_channel == 2 ? '3' : '');
+		return painted_in(token, color);
+	}
 
-    function separated(line, i) {
-        if(i == separators.length)
-            return colorized(line);
-        return line.split(separators[i]).map(function(subline) {
-            return separated(subline, i + 1);}).join(separators[i]);
-    }
+	function separated(line, i) {
+		if(i == separators.length)
+			return colorized(line);
+		return line.split(separators[i]).map(function(subline) {
+			return separated(subline, i + 1);}).join(separators[i]);
+	}
 
-    function unbracketed(line, i) {
-        if(i == brackets.length)
-            return separated(line, 0);
-        var chunks = line.split(brackets[i][0]);
-        return unbracketed(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
-            var in_out_bracket = chunk.split(brackets[i][1]);
-            return painted_in(brackets[i][0] + in_out_bracket[0] + (in_out_bracket.length > 1 ? brackets[i][1] : ''), "888")
-                + unbracketed(in_out_bracket.slice(1).join(brackets[i][1]), i + 1);}).join('');
-    }
+	function unbracketed(line, i) {
+		if(i == brackets.length)
+			return separated(line, 0);
+		var chunks = line.split(brackets[i][0]);
+		return unbracketed(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+			var in_out_bracket = chunk.split(brackets[i][1]);
+			return painted_in(brackets[i][0] + in_out_bracket[0] + (in_out_bracket.length > 1 ? brackets[i][1] : ''), "888")
+				+ unbracketed(in_out_bracket.slice(1).join(brackets[i][1]), i + 1);}).join('');
+	}
 
-    return unbracketed(text, 0);
+	return unbracketed(text, 0);
 }
-    </script>
-  </head>
-  <body>
-    <center>
-    <h1>
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
 Simple <span id="index_image_vectorization">image vectorization</span>
-    </h1>
-    <p>
+	</h1>
+	<p>
 Vectorization is when you take some minecraft-style raster image and make a crisp vector picture out of it.
-    </p>
-    <img style="width: 505pt;" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Bitmap_VS_SVG.svg"/>
-    <p class="comment">
+	</p>
+	<img style="width: 505pt;" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Bitmap_VS_SVG.svg"/>
+	<p class="comment">
 Yug, modifications by 3247 [<a href="https://creativecommons.org/licenses/by-sa/2.5">CC BY-SA 2.5</a>]
-    </p>
-    <p>
+	</p>
+	<p>
 It's especially useful when you want to turn a satellite photo into a map. Or if you want to scan some blueprint and turn it into a CAD model. Or if you want to reissue an old game and you don't want to redraw all the artwork from scratch.
-    </p>
-    <p>
+	</p>
+	<p>
 The algorithm I'm going to show you has nothing to do with all these things. It's a basic vectorization technique which, in its original form, has little to none applications in the industry.
-    </p>
-    <p>
+	</p>
+	<p>
 On the plus side, it illustrates the approach rather well. It shows how things like bilinear interpolation, gradient descent, and parametric splines work together to solve a real-world problem. At the very least, it makes learning about all these things a little more compelling.
-    </p>
+	</p>
 
-    <h2>
+	<h2>
 An input image
-    </h2>
-    <p>
+	</h2>
+	<p>
 A raster image is essentially a rectangular table of things. If it's a full-color RGB, then it's a table of color pixels. Color pixels are the triplets of 8-bit integer values where each value represents an amount of red, green, and blue color.
-    </p>
-    <p>
+	</p>
+	<p>
 Medical images, such as obtained from computed tomography, are usually the tables of 12-bit or 16-bit integers. It's not a color really since the values come from invisible X-ray radiation, but they are called gray values nevertheless.
-    </p>
-    <p>
+	</p>
+	<p>
 Satellite images may have a lot of channels. Apart from the colors of the visible specter they may contain ultra-violet and infra-red luminosity. Channels may be represented by integers or floating point values.
-    </p>
-    <p>
+	</p>
+	<p>
 Our image will be a simple gray-scale bitmap.
-    </p>
-    <canvas id="greyscale_canvas" width=640 height=640></canvas>
-    <p>
+	</p>
+	<canvas id="greyscale_canvas" width=640 height=640></canvas>
+	<p>
 Technically, we can already turn it into vectors rather easily. Let's just agree on some threshold, and mark the contour of all the pixels that have the values exceeding this threshold.
-    </p>
-    <canvas id="greyscale_canvas_contour" width=640 height=640></canvas>
-    <p>
+	</p>
+	<canvas id="greyscale_canvas_contour" width=640 height=640></canvas>
+	<p>
 Well, it's simple, but it's not what we wanted. We want curves, not corners. And for that, we have to make our image less cornery.
-    </p>
-    <h2>
+	</p>
+	<h2>
 <span id="index_image_interpolation">Image interpolation</span>
-    </h2>
-    <p>
+	</h2>
+	<p>
 Let's say our image is not a table of values. Let's say we only know the values in the centers of the pixels, and we have to guess the values between them somehow.
-    </p>
-    <p>
+	</p>
+	<p>
 This is called interpolation. The simplest case would be the nearest neighbor interpolation, where for every point on an image, the value is the value from the nearest pixel's center. But this simply turns it back into a table.
-    </p>
-    <p>
+	</p>
+	<p>
 A little more advanced is the <span id="index_bilinear_interpolation">bilinear interpolation</span>. The value is the linear sum of the four neighboring values. It looks like this.
-    </p>
-    <table>
-    <tr><td>
-    <pre id="code_1">
+	</p>
+	<table>
+	<tr><td>
+	<pre id="code_1">
 // pixel value with out of bounds checks
 function pixel_in(pixels, i, j) {
     if(i &gt;= pixels.length)
@@ -1082,47 +1082,47 @@ function value_in(pixels, x, y) {
          + pixel_in(pixels, i+1, j+1) * (ti) * (tj)
          + pixel_in(pixels, i+1, j) * (ti) * (1 - tj);
 }
-    </pre>
-    </td></tr>
-    </table>
-    <p>
+</pre>
+	</td></tr>
+	</table>
+	<p>
 If we darken the pixels where the interpolated value meets the threshold, we'll get some kind of a contour.
-    </p>
-    <canvas id="interpolation_canvas" width=640 height=640></canvas>
-    <form>
-        Interpolation:
-        <input type="radio" name="interpolation" id="interpolation_1" value="neighbor" onclick="draw_interpolation_canvas()"><label for="interpolation_1">nearest neighbor; </label>
-        <input type="radio" name="interpolation" id="interpolation_2" value="linear" checked=true onclick="draw_interpolation_canvas()"><label for="interpolation_2">bilinear. </label>
-        <br>
-    </form>
-    <p>
+	</p>
+	<canvas id="interpolation_canvas" width=640 height=640></canvas>
+	<form>
+		Interpolation:
+		<input type="radio" name="interpolation" id="interpolation_1" value="neighbor" onclick="draw_interpolation_canvas()"><label for="interpolation_1">nearest neighbor; </label>
+		<input type="radio" name="interpolation" id="interpolation_2" value="linear" checked=true onclick="draw_interpolation_canvas()"><label for="interpolation_2">bilinear. </label>
+		<br>
+	</form>
+	<p>
 There are other methods. Plenty of them. But linear interpolation solves the cornery border problem just fine. Although, the border we see is just the borderline of some threshold. It's not a vector representation yet.
-    </p>
+	</p>
 
-    <h2>
+	<h2>
 Turning an interpolated image into a contour
-    </h2>
-    <p>
+	</h2>
+	<p>
 We can borrow an idea from the <a href="https://wordsandbuttons.online/the_simplest_possible_smooth_contouring_algorithm.html">simplest possible smooth contouring</a> algorithm. We'll build an initial border from the source pixels, and then we'll use our linearly interpolated image to find the best place to put each contour point so the image value will meet the threshold value.
-    </p>
-    <p>
+	</p>
+	<p>
 When you have a <span id="index_distance_field">distance field</span>, it's easy. A distance field is when for any point in space you can tell how far it lies from the surface you want. It's basically a function from point in space to distance.
-    </p>
-    <p>
+	</p>
+	<p>
 You take its gradient, take the difference between the value you have and the threshold value. Since it's the distance field, the value difference is exactly the distance you should move your point for. And the gradient is the exact opposite direction. You just inverse, multiply, add — and you're there.
-    </p>
-    <p>
+	</p>
+	<p>
 Unfortunately, we don't have a distance field. We have a continuous image which only resembles one.
-    </p>
-    <p>
+	</p>
+	<p>
 But the principle still works. If you traverse against the gradient, you will get closer to the threshold value. And the more the difference, the further you have to go. It's just you wouldn't always get there in one try.
-    </p>
-    <p>
+	</p>
+	<p>
 So let's try several times then. Let's make an <a href="https://wordsandbuttons.online/interactive_introduction_to_iterative_algorithms.html">iterative algorithm</a> out of it.
-    </p>
-    <table>
-    <tr><td>
-    <pre id="code_2">
+	</p>
+	<table>
+	<tr><td>
+	<pre id="code_2">
 // gradient
 function gradient(pixels, x, y) {
     const eps = 1e-5;
@@ -1142,36 +1142,36 @@ function gradient_shift(pixels, threshold, x, y) {
 // brings a point closer to the threshold isoline
 function fit_point_better(pixels, threshold, point) {
     const ok_error = 1/255;
-    if(Math.abs(value_in(pixels, point[0], point[1]) - threshold) < ok_error)
+    if(Math.abs(value_in(pixels, point[0], point[1]) - threshold) &lt; ok_error)
         return point;
     gs = gradient_shift(pixels, threshold, point[0], point[1])
     var new_point = [point[0] + gs[0], point[1] + gs[1]];
     return fit_point_better(pixels, threshold, new_point);
 }
-    </pre>
-    </td></tr>
-    </table>
-    <p>
+</pre>
+	</td></tr>
+	</table>
+	<p>
 We'll move our contour points against the gradient until we're close enough to the threshold
-    </p>
-    <canvas id="fitting_canvas" width=640 height=640></canvas>
-        <form>
-        <button type="button" id="fitting_button" style="width: 200pt;" onclick="fit_the_point_iteration();">Fit the contour</button>
-    </form>
-    <p>
+	</p>
+	<canvas id="fitting_canvas" width=640 height=640></canvas>
+		<form>
+		<button type="button" id="fitting_button" style="width: 200pt;" onclick="fit_the_point_iteration();">Fit the contour</button>
+	</form>
+	<p>
 That's good but we can do better. Let's make the contour smooth.
-    </p>
+	</p>
 
-    <h2>
+	<h2>
 Cubic splines
-    </h2>
-    <p>
+	</h2>
+	<p>
 All we have to do to make the contour smooth is to turn each line segment into a parametric cubic curve.
-    </p>
-    <p>
+	</p>
+	<p>
 It's probably sounds more complicated than it is. A parametric cubic curve is just a pair of polynomials. If you have the points and partial derivatives in this points, you can get the coefficients for them from this pair of <a href="https://wordsandbuttons.online/programmers_introduction_to_linear_equations.html">linear systems</a>:
-    </p>
-    <p class="formula" style="text-align: left; margin-left: 10em;">
+	</p>
+	<p class="formula" style="text-align: left; margin-left: 10em;">
 Px(t<sub>1</sub>)' = 3a<sub>x</sub>t<sub>1</sub><sup>2</sup> + 2b<sub>x</sub>t<sub>1</sub> + c = dx<sub>1</sub>/dt
 <br>
 Px(t<sub>1</sub>) = a<sub>x</sub>t<sub>1</sub><sup>3</sup> + b<sub>x</sub>t<sub>1</sub><sup>2</sup> + c<sub>x</sub>t<sub>1</sub> + d = x<sub>1</sub>
@@ -1179,8 +1179,8 @@ Px(t<sub>1</sub>) = a<sub>x</sub>t<sub>1</sub><sup>3</sup> + b<sub>x</sub>t<sub>
 Px(t<sub>2</sub>) = a<sub>x</sub>t<sub>2</sub><sup>3</sup> + b<sub>x</sub>t<sub>2</sub><sup>2</sup> + c<sub>x</sub>t<sub>2</sub> + d = x<sub>2</sub>
 <br>
 Px(t<sub>2</sub>)' = 3a<sub>x</sub>t<sub>2</sub><sup>2</sup> + 2b<sub>x</sub>t<sub>2</sub> + c = dx<sub>2</sub>/dt
-    <br>
-    <br>
+	<br>
+	<br>
 Py(t<sub>1</sub>)' = 3a<sub>y</sub>t<sub>1</sub><sup>2</sup> + 2b<sub>y</sub>t<sub>1</sub> + c = dy<sub>1</sub>/dt
 <br>
 Py(t<sub>1</sub>) = a<sub>y</sub>t<sub>1</sub><sup>3</sup> + b<sub>y</sub>t<sub>1</sub><sup>2</sup> + c<sub>y</sub>t<sub>1</sub> + d = y<sub>1</sub>
@@ -1188,20 +1188,20 @@ Py(t<sub>1</sub>) = a<sub>y</sub>t<sub>1</sub><sup>3</sup> + b<sub>y</sub>t<sub>
 Py(t<sub>2</sub>) = a<sub>y</sub>t<sub>2</sub><sup>3</sup> + b<sub>y</sub>t<sub>2</sub><sup>2</sup> + c<sub>y</sub>t<sub>2</sub> + d = y<sub>2</sub>
 <br>
 Py(t<sub>2</sub>)' = 3a<sub>y</sub>t<sub>2</sub><sup>2</sup> + 2b<sub>y</sub>t<sub>2</sub> + c = dy<sub>2</sub>/dt
-    </p>
-    <p>
+	</p>
+	<p>
 The curve itself will then look like this.
-    </p>
-    <canvas id="cubic_canvas" width=640 height=640></canvas>
-    <p>
+	</p>
+	<canvas id="cubic_canvas" width=640 height=640></canvas>
+	<p>
 Even more, since we get to choose the parameter range, we can make it [0..1]. This greatly simplifies our system and makes it really easy to solve.
-    </p>
-    <p>
+	</p>
+	<p>
 Here is the function that makes one array of polynomial coefficients from two pairs of point and tangent values.
-    </p>
-    <table>
-    <tr><td>
-    <pre id="code_3">
+	</p>
+	<table>
+	<tr><td>
+	<pre id="code_3">
 // solver specific to [0..1] parametrized splines
 function spline_for(p1, p1d, p2, p2d) {
 //     A = [
@@ -1217,15 +1217,15 @@ function spline_for(p1, p1d, p2, p2d) {
         p2d + p1d - 2*p2 + 2*p1
     ];
 }
-    </pre>
-    </td></tr>
-    </table>
-    <p>
+</pre>
+	</td></tr>
+	</table>
+	<p>
 The polynomial is then computed in every <i>t</i> with this function.
-    </p>
-    <table>
-    <tr><td>
-    <pre id="code_4">
+	</p>
+	<table>
+	<tr><td>
+	<pre id="code_4">
 // polynomial
 function polynomial_in_t(A, t){
     var pt = 0.0;
@@ -1234,36 +1234,36 @@ function polynomial_in_t(A, t){
     }
     return pt;
 }
-    </pre>
-    </td></tr>
-    </table>
-    <p>
+</pre>
+	</td></tr>
+	</table>
+	<p>
 So for every line segment with tangents, we can make a parametric polynomial. There is one problem though. We don't have tangents.
-    </p>
-    <p>
+	</p>
+	<p>
 We have the gradient, which is orthogonal to the tangent, but there are two possible tangents in every point. The tangent can be oriented left or right from the gradient.
-    </p>
-    <p>
+	</p>
+	<p>
 But this is solvable. Let's just pick the direction we like and keep it consistent.
-    </p>
-    <p>
+	</p>
+	<p>
 Let the curves that originally come from horizontally oriented segments always have both tangents that way that <i>dx > 0</i>. And the ones that come from vertically oriented segments, will have <i>dy > 0</i>.
-    </p>
-    <p>
+	</p>
+	<p>
 It looks like we have enough parts to assemble an algorithm.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Creating splines from the pixels
-    </h2>
-    <p>
+	</h2>
+	<p>
 Let's split our vectorization into two parts. First, we'll get points and tangents for every line segment from the pixels. Then we'll turn it all into polynomial splines.
-    </p>
-    <p>
+	</p>
+	<p>
 The function that does the first part looks like this.
-    </p>
-    <table>
-    <tr><td>
-    <pre id="code_5">
+	</p>
+	<table>
+	<tr><td>
+	<pre id="code_5">
 function turn_pixels_into_points_and_tangents(pixels, threshold) {
     var points = [];
     var tangents = [];
@@ -1357,15 +1357,15 @@ function turn_pixels_into_points_and_tangents(pixels, threshold) {
     }
     return [points, tangents];
 }
-    </pre>
-    </td></tr>
-    </table>
-    <p>
+</pre>
+	</td></tr>
+	</table>
+	<p>
 And the one that does the second part — like this.
-    </p>
-    <table>
-    <tr><td>
-    <pre id="code_6">
+	</p>
+	<table>
+	<tr><td>
+	<pre id="code_6">
 function turn_points_and_tangents_into_splines(points_and_tangents)
 {
     var splines = [];
@@ -1382,22 +1382,22 @@ function turn_points_and_tangents_into_splines(points_and_tangents)
     }
     return splines
 }
-    </pre>
-    </td></tr>
-    </table>
-    <p>
+</pre>
+	</td></tr>
+	</table>
+	<p>
 This split is not essential for the algorithm, but it makes it possible to edit the model in both image and spline representation.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Import, edit, export
-    </h2>
-    <p>
+	</h2>
+	<p>
 Now, when we have the algorithm, let's see how it works in practice. Let's import a gray-scale image from PGM, turn it into splines, edit them, then export them as SVG.
-    </p>
-    <p>
+	</p>
+	<p>
 <Span id="index_pgm">PGM</Span> is a 1-channel ASCII image format. You can make a PGM file in GIMP or any other raster image editor.
-    </p>
-    <textarea id="import_PGM" rows=20>
+	</p>
+	<textarea id="import_PGM" rows=20>
 P2
 16 16
 255
@@ -1417,75 +1417,75 @@ P2
 0   0   0   0   0   211 224 4   0   1   137 240 86  0   0   0
 0   0   0   0   0   73  57  0   0   0   2   20  0   0   0   0
 0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
-    </textarea>
-    <form>
-        Grey value threshold: <input type="text" id="threshold" value="0.5">
-        <button type="button" style="width: 200pt;" onclick="reset_threshold(); reimport_image()">Reimport the PGM</button>
-    </form>
-    <p id="import_status" class="comment">
-    </p>
-    <p>
+</textarea>
+	<form>
+		Grey value threshold: <input type="text" id="threshold" value="0.5">
+		<button type="button" style="width: 200pt;" onclick="reset_threshold(); reimport_image()">Reimport the PGM</button>
+	</form>
+	<p id="import_status" class="comment">
+	</p>
+	<p>
 When the image is imported, we can either edit the source image pixel-by-pixel or move the splines' points and tangents. Click on a canvas to increase a pixel's luminosity. Click holding the Shift key to reduce it. Please note that in this example, image editing overrides vectors.
-    </p>
-    <canvas id="canvas" width=640 height=640></canvas>
-    <form>
-        Click to edit:
-        <input type="radio" name="tool" id="tool_1" value="image" checked=true onclick="draw_canvas()"><label for="tool_1">image; </label>
-        <input type="radio" name="tool" id="tool_2" value="points" onclick="draw_canvas()"><label for="tool_2">points; </label>
-        <input type="radio" name="tool" id="tool_3" value="tangents" onclick="draw_canvas()"><label for="tool_3">tangents; </label>
-        <br>
-    </form>
-    <br>
-    <p>
+	</p>
+	<canvas id="canvas" width=640 height=640></canvas>
+	<form>
+		Click to edit:
+		<input type="radio" name="tool" id="tool_1" value="image" checked=true onclick="draw_canvas()"><label for="tool_1">image; </label>
+		<input type="radio" name="tool" id="tool_2" value="points" onclick="draw_canvas()"><label for="tool_2">points; </label>
+		<input type="radio" name="tool" id="tool_3" value="tangents" onclick="draw_canvas()"><label for="tool_3">tangents; </label>
+		<br>
+	</form>
+	<br>
+	<p>
 When you're happy with the splines, you can export them in <Span id="index_svg">SVG</Span>. In this example, only the outline is supported. No filling, no coloring.
-    </p>
-    <form>
-        <button type="button" onclick="export_splines()">Export to SVG</button>
-    </form>
-    <br>
-    <textarea id="export_SVG" rows=14>
+	</p>
+	<form>
+		<button type="button" onclick="export_splines()">Export to SVG</button>
+	</form>
+	<br>
+	<textarea id="export_SVG" rows=14>
 
-    </textarea>
-    <p>
+	</textarea>
+	<p>
 You don't have to export the polynomials. SVG supports <Span id="index_b_zier_curve">Bézier curve</Span>s, and they are basically the same as cubic polynomials. Only instead of coefficients, you write down the control points.
-    </p>
-    <p>
+	</p>
+	<p>
 The first point is the starting point of the spline. The second is the sum of the first point and one-third of a tangent vector. The third is the subtraction of the finishing point of the spline and the one-third of a second tangent. The fourth is the finishing point of the spline.
-    </p>
-    <p>
+	</p>
+	<p>
 The code for the export function, just as all the code mentioned here including the visuals, is available <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/pages/simple_image_vectorization.html">on Github</a>.
-    </p>
-    <h2>
+	</p>
+	<h2>
 Conclusion
-    </h2>
-    <p>
+	</h2>
+	<p>
 The algorithm shows how bilinear interpolation, polynomial approximation, differential analysis, and iterative algorithms work together to solve a practical problem.
-    </p>
-    <p>
+	</p>
+	<p>
 I hope this page will not only satisfy one's curiosity but help someone retain inspiration while studying these things. I know from my experience that basic calculus while being not more complicated than the traffic code, is particularly hard to learn because you don't see the application right away. You learn about series, limits, derivatives, integrals, and for what reason? How do you turn this knowledge into something useful?
-    </p>
-    <p>
-Well, this is one of the many examples.
-    </p>
+	</p>
+	<p>
+Well, this is one of many examples.
+	</p>
 
 
-    <script language="JavaScript">
-    reimport_image();
-    init_canvas();
-    draw_greyscale_canvas();
-    draw_greyscale_canvas_contour();
-    draw_interpolation_canvas();
-    draw_fitting_canvas();
-    init_cubic();
-    document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
-    document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
-    document.getElementById("code_3").innerHTML = colorized(document.getElementById("code_3").innerHTML);
-    document.getElementById("code_4").innerHTML = colorized(document.getElementById("code_4").innerHTML);
-    document.getElementById("code_5").innerHTML = colorized(document.getElementById("code_5").innerHTML);
-    document.getElementById("code_6").innerHTML = colorized(document.getElementById("code_6").innerHTML);
-    </script>
+	<script language="JavaScript">
+	reimport_image();
+	init_canvas();
+	draw_greyscale_canvas();
+	draw_greyscale_canvas_contour();
+	draw_interpolation_canvas();
+	draw_fitting_canvas();
+	init_cubic();
+	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
+	document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
+	document.getElementById("code_3").innerHTML = colorized(document.getElementById("code_3").innerHTML);
+	document.getElementById("code_4").innerHTML = colorized(document.getElementById("code_4").innerHTML);
+	document.getElementById("code_5").innerHTML = colorized(document.getElementById("code_5").innerHTML);
+	document.getElementById("code_6").innerHTML = colorized(document.getElementById("code_6").innerHTML);
+	</script>
 
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
 		<a href="all_mathematics.html">#mathematics</a> <a href="all_algorithms.html">#algorithms</a> <a href="all_demos.html">#demos</a>
@@ -1500,6 +1500,6 @@ Well, this is one of the many examples.
 	</td>
 	</tr>
 	</table>
-    </center>
-  </body>
+	</center>
+</body>
 </html>
