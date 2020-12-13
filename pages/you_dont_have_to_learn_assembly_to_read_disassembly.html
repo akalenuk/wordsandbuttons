@@ -1,188 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>You don't have to learn assembly to read disassembly</title>
-    <meta name="description" content="This is a very concise introduction to x86 disassembly. It shows that you probably have all the skills to start reading disassembly right now even if you thought it was too complicated for you. It really isn't, see it for yourself.">
-    <meta name="keywords" content="programming, tutorials">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
-    <style>
+<head>
+	<meta charset="utf-8">
+	<title>You don't have to learn assembly to read disassembly</title>
+	<meta name="description" content="This is a very concise introduction to x86 disassembly. It shows that you probably have all the skills to start reading disassembly right now even if you thought it was too complicated for you. It really isn't, see it for yourself.">
+	<meta name="keywords" content="programming, tutorials">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
 body{
-    margin: 0 0 0 0;
+	margin: 0 0 0 0;
 }
 
 a{
-    text-decoration: none;
+	text-decoration: none;
 }
 
 h1 {
-    padding-top: 36pt;
-    font-size: 24pt;
-    width: 600pt;
-    text-align: left;
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
 }
 
 h2 {
-    padding-top: 20pt;
-    font-size: 20pt;
-    width: 555pt;
-    text-align: left;
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
 }
 
 p {
-    line-height: 1.42;
-    font-size: 16pt;
-    width: 505pt;
-    text-align: left;
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
 }
 
 table.footer {
-    padding: 64pt 0pt 32pt 0pt;
-    background-color: transparent;
-    width: 505pt;
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
 }
 
 td.footer {
-    font-family: sans-serif;
-    font-size: 16pt;
-    font-style: normal;
-    padding: 0;
-    margin: 0;
-    border: 0;
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
 }
 
 pre {
-    margin: 0 0 0 0;
-    padding-top: 12pt;
-    padding-left: 12pt;
-    padding-right: 12pt;
-    padding-bottom: 12pt;
-    font-size: 12pt;
-    text-align: left;
-    width: 300pt;
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 300pt;
 }
 
 .code_piece {
-    font-family: monospace;
-    padding-left: 4pt;
-    padding-right: 4pt;
+	font-family: monospace;
+	padding-left: 4pt;
+	padding-right: 4pt;
 }
 
 
 table {
-    border-width: 0pt;
+	border-width: 0pt;
 }
 
 td {
-    vertical-align: top;
-    padding: 6pt 12pt 6pt 12pt;
-    font-size: 16pt;
-    border: 1px solid black;
+	vertical-align: top;
+	padding: 6pt 12pt 6pt 12pt;
+	font-size: 16pt;
+	border: 1px solid black;
 }
 
 button{
-    width: 248pt;
-    height: 42pt;
-    margin-left:4pt;
-    margin-right:4pt;
-    font-size: 16pt;
+	width: 248pt;
+	height: 42pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 16pt;
 }
 
 u {
-    border-bottom: 1px dotted #000;
-    text-decoration: none;
-    cursor: pointer;
+	border-bottom: 1px dotted #000;
+	text-decoration: none;
+	cursor: pointer;
 }
-    </style>
-    <script language="JavaScript">
+	</style>
+	<script language="JavaScript">
 function show(n){
-    document.getElementById("shown_" + n).style.display = "none";
-    document.getElementById("hidden_" + n).style.display = "inline";
+	document.getElementById("shown_" + n).style.display = "none";
+	document.getElementById("hidden_" + n).style.display = "inline";
 }
 
 function colorized(text) {
-    const separators = ['\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')'];
-    const comments = [['/*', '*/'], ['#', '\n']];
+	const separators = ['\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')'];
+	const comments = [['/*', '*/'], ['#', '\n']];
 
-    function painted_in(line, color) {
-        return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
-    }
+	function painted_in(line, color) {
+		return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+	}
 
-    function colorized(token) {
-        var code_sum = 0;
-        for(var i = 0; i < token.length; ++i)
-            code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
-        var zero_channel = code_sum % 3;
-        var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
-            + (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
-            + (zero_channel == 2 ? '0' : '');
-        return painted_in(token, color);
-    }
+	function colorized(token) {
+		var code_sum = 0;
+		for(var i = 0; i < token.length; ++i)
+			code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+		var zero_channel = code_sum % 3;
+		var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
+			+ (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
+			+ (zero_channel == 2 ? '0' : '');
+		return painted_in(token, color);
+	}
 
-    function separated(line, i) {
-        if(i == separators.length)
-            return colorized(line);
-        return line.split(separators[i]).map(function(subline) {
-            return separated(subline, i + 1);}).join(separators[i]);
-    }
+	function separated(line, i) {
+		if(i == separators.length)
+			return colorized(line);
+		return line.split(separators[i]).map(function(subline) {
+			return separated(subline, i + 1);}).join(separators[i]);
+	}
 
-    function uncommented(line, i) {
-        if(i == comments.length)
-            return separated(line, 0);
-        var chunks = line.split(comments[i][0]);
-        return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
-            var in_out_comment = chunk.split(comments[i][1]);
-            return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "777")
-                + uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
-    }
+	function uncommented(line, i) {
+		if(i == comments.length)
+			return separated(line, 0);
+		var chunks = line.split(comments[i][0]);
+		return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+			var in_out_comment = chunk.split(comments[i][1]);
+			return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "777")
+				+ uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+	}
 
-    return uncommented(text, 0);
+	return uncommented(text, 0);
 }
-    </script>
-  </head>
-  <body>
-    <center>
-    <h1>
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
 You don't have to learn assembly to read <span id="index_disassembly">disassembly</span>
-    </h1>
-    <p>
+	</h1>
+	<p>
 Reading disassembly is more like reading tracks than reading a book. To read a book you have to know the language but reading tracks, although it gets better with skills and experience, mostly requires attentiveness and logic thinking.
-    </p>
-    <p>
+	</p>
+	<p>
 Most of the time we read disassembly only to answer one simple question: <i>does compiler do what we expect it to do</i>? In 3 simple exercises, I’ll show you that often enough you too can answer this question even if you have no previous knowledge of assembly. I’ll use C++ as a source language, but what I’m trying to show is more or less universal, so it doesn’t matter if you write in C or Swift, C# or Rust. If you compile to any kind of machine code — you can benefit from understanding your compiler.
-    </p>
-    <h2>
+	</p>
+	<h2>
 1. <span id="index_compile_time_computation">Compile-time computation</span>
-    </h2>
-    <p>
+	</h2>
+	<p>
 Any decent compiler tries to make your binary code not only correct but fast. This means doing as little work in runtime as possible. Sometimes it can even conduct the whole computation in compile time, so your machine code will only contain the precomputed answer.
-    </p>
-    <p>
+	</p>
+	<p>
 This source code defines the number of bits in a byte and returns the size of <span class="code_piece">int</span> in bits.
-    </p>
-    <table><tr>
-    <td style="width: 505pt;">
-    <pre>
+	</p>
+	<table><tr>
+	<td style="width: 505pt;">
+	<pre>
 static int BITS_IN_BYTE = 8;
 
 int main() {
     return sizeof(int)*BITS_IN_BYTE;
 }
-    </pre>
-    </td>
-    </td></tr></table>
-    <p>
+</pre>
+	</td>
+	</td></tr></table>
+	<p>
 The compiler knows the size of an <span class="code_piece">int</span>. Let's say, for the target platform it is 4 bytes. We also set the number of bits in a byte explicitly. Since all we want is a simple multiplication, and both numbers are known during the compilation, a compiler can simply compute the resulting number itself instead of generating the code that computes the same number each time it's being executed.
-    </p>
-    <p>
+	</p>
+	<p>
 Although, this is not something guaranteed by the standard. A compiler may or may not provide this optimization.
-    </p>
-    <p>
+	</p>
+	<p>
 Now look at two possible disassemblies for this source code and decide what variant does compile-time computation and what doesn’t.
-    </p>
-    <table><tr>
-    <td>
-    <pre id="code_1_1">
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_1_1">
 BITS_IN_BYTE:
   .long 8
 main:
@@ -190,41 +190,41 @@ main:
   cdqe
   sal eax, 2
   ret</pre>
-    </td>
-    <td>
-    <pre id="code_1_2">
+	</td>
+	<td>
+	<pre id="code_1_2">
 main:
   mov eax, 32
   ret</pre>
-    </td></tr></table>
-    <div id="shown_1">
-        <button type="button" onclick="show(1)">The left one does</button>
-        <button type="button" onclick="show(1)">The right one does</button>
-    </div>
-    <div id="hidden_1" style="display:none;">
-        <p>
+	</td></tr></table>
+	<div id="shown_1">
+		<button type="button" onclick="show(1)">The left one does</button>
+		<button type="button" onclick="show(1)">The right one does</button>
+	</div>
+	<div id="hidden_1" style="display:none;">
+		<p>
 Of course, the one on the right does.
-        </p>
-        <p>
+		</p>
+		<p>
 On 32-bit platform <span class="code_piece">int</span>'s size is 4 bytes, which is 32 bits, which is exactly the number in the code. You might not know that an integer function conventionally returns output in <span class="code_piece" id="shown_eax" onclick="show('eax')"><u>eax</u></span><span style="display: none;" id="hidden_eax"><span class="code_piece">eax</span> which is a <span id="shown_register" onclick="show('register')"><u>register</u></span><span style="display: none;" id="hidden_register">register. There are quite a few registers but most important for us are the general purpose registers, more specifically <span class="code_piece">eax</span>, <span class="code_piece">ebx</span>, <span class="code_piece">ecx</span>, and <span class="code_piece">edx</span>. Their names respectively are: <b>a</b>ccumulator, <b>b</b>ase, <b>c</b>ounter and <b>d</b>ata. They are not necessarily interchangeable</span>. You can think of them as ultrafast predefined variables of known <span id="shown_size" onclick="show('size')"><u>size</u></span><span id="hidden_size" style="display: none">size. For instance, <span class="code_piece">rax</span> is 64 bits long. The lower 32 bits of it is accessible by the name <span class="code_piece">eax</span>. The lower 16 bit of it as <span class="code_piece">ax</span>, which in its own turn consists of two bytes <span class="code_piece">ah</span> and <span class="code_piece">al</span>. These are all the parts of the same register</span>. Registers do not reside in the RAM, so you can't read and write any register by <span id="shown_address"><u onclick="show('address')">the address</u></span><span id="hidden_address" style="display:none"> the address. The square brackets usually indicate address manipulations. <br><span class="code_piece">mov rax, dword ptr [BITS_IN_BYTE]</span> means put whatever lives by the address of BITS_IN_BYTE in rax register as a double word</span></span>. But the thing is, the code on the right already has an answer in it, so it doesn't even matter.
-        </p>
-    </div>
+		</p>
+	</div>
 
-    <h2>
+	<h2>
 2. <span id="index_function_inlining">Function inlining</span>
-    </h2>
-    <p>
+	</h2>
+	<p>
 Calling a function implies some overhead by preparing input data in the particular order; then starting the execution from another piece of memory; then preparing output data; and then returning back.
-    </p>
-    <p>
+	</p>
+	<p>
 Not that it is all too slow but if you only want to call a function once, you don’t have to <i>actually call</i> the function. It just makes sense to copy or “inline” the function's body to the place it is called from and skip all the formalities. Compilers can often do this for you so you don't even have to bother.
-    </p>
-    <p>
+	</p>
+	<p>
 If the compiler makes such an optimization, this code:
-    </p>
-    <table><tr>
-    <td style="width: 505pt;">
-    <pre>
+	</p>
+	<table><tr>
+	<td style="width: 505pt;">
+	<pre>
 <i>inline</i> int square(int x)  {
     return x * x;
 }
@@ -233,38 +233,38 @@ If the compiler makes such an optimization, this code:
 int main(int argc, char** argv)  {
     return square(argc);
 }
-    </pre>
-    </td>
-    </td></tr></table>
-    <p>
+</pre>
+	</td>
+	</td></tr></table>
+	<p>
 Virtually becomes this:
-    </p>
-    <table><tr>
-    <td style="width: 505pt;">
-    <pre>
+	</p>
+	<table><tr>
+	<td style="width: 505pt;">
+	<pre>
 <i>// not really a source code, just explaining the idea</i>
 int main(int argc, char** argv)  {
     return argc * argc;
 }
-    </pre>
-    </td>
-    </td></tr></table>
-    <p>
+	</pre>
+	</td>
+	</td></tr></table>
+	<p>
 But the standard does not promise that all the functions marked as <span class="code_piece">inline</span> shall get inlined. It's more a suggestion than a directive.
-    </p>
-    <p>
+	</p>
+	<p>
 Now look at these two disassembly variants below and choose the one where the function gets inlined after all.
-    </p>
-    <table><tr>
-    <td>
-    <pre id="code_2_1">
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_2_1">
 main:
   imul edi, edi
   mov eax, edi
   ret</pre>
-    </td>
-    <td>
-    <pre id="code_2_2">
+	</td>
+	<td>
+	<pre id="code_2_2">
 square(int):
   imul edi, edi
   mov eax, edi
@@ -274,50 +274,50 @@ main:
   call square(int)
   add rsp, 8
   ret</pre>
-    </td></tr></table>
-    <div id="shown_2">
-        <button type="button" onclick="show(2)">Inlined in the left one</button>
-        <button type="button" onclick="show(2)">Inlined in the right one</button>
-    </div>
-    <div id="hidden_2" style="display:none;">
-        <p>
+	</td></tr></table>
+	<div id="shown_2">
+		<button type="button" onclick="show(2)">Inlined in the left one</button>
+		<button type="button" onclick="show(2)">Inlined in the right one</button>
+	</div>
+	<div id="hidden_2" style="display:none;">
+		<p>
 Not really a mystery either. It’s the one on the left. You might not know, that the instruction to call a function is really called the <span id="shown_call" onclick="show('call')"><span class="code_piece"><u>call</u></span></span><span id="hidden_call" style="display:none"><span class="code_piece">call</span>. It stores a special register that points to the next instruction after the call in the stack and then sets it to the function's address. A processor hence jumps to run the function. The function then uses <span id="shown_ret"><span class="code_piece" onclick="show('ret')"><u>ret</u></span> to get</span><span id="hidden_ret" style="display:none"><span class="code_piece">ret</span> to get a stored address from the <span id="shown_stack" onclick="show('stack')"><u>stack</u></span><span id="hidden_stack" style="display:none">stack (which is a piece of memory organized in a first in last out fashion so if you, for instance, <span class="code_piece">push</span> rax and rbx there and then <span class="code_piece">pop</span> rax and rbx, these two will get swapped)</span> back to the register, and make processor jump</span> back to from where it has been called</span>. But since the disassembly on the left doesn't even contain any recall of <span class="code_piece">square</span>, the function has to be inlined anyway.
-        </p>
-    </div>
+		</p>
+	</div>
 
-    <h2>
+	<h2>
 3. <span id="index_loop_unrolling">Loop unrolling</span>
-    </h2>
-    <p>
+	</h2>
+	<p>
 Just like calling functions, going in loops implies some overhead. You have to increment the counter; then compare it against some number; then jump back to the loop's beginning.
-    </p>
-    <p>
+	</p>
+	<p>
 Compilers know that in some context it is more effective to unroll the loop. It means that some piece of code will actually be repeated several times in a row instead of messing with the counter comparison and jumping here and there.
-    </p>
-    <p>
+	</p>
+	<p>
 Let's say we have this piece of code:
-    </p>
-    <table><tr>
-    <td style="width: 505pt;">
-    <pre>
+	</p>
+	<table><tr>
+	<td style="width: 505pt;">
+	<pre>
 int main(int argc, char**) {
     int result = 1;
     for(int i = 0; i &lt; 3; ++i)
-         result *= argc;
+        result *= argc;
     return result;
 }
-    </pre>
-    </td>
-    </td></tr></table>
-    <p>
+	</pre>
+	</td>
+	</td></tr></table>
+	<p>
 The compiler has all the reasons to unroll such a simple loop, but it might as well choose not to.
-    </p>
-    <p>
+	</p>
+	<p>
 Which disassembly has the unrolled loop?
-    </p>
-    <table><tr>
-    <td>
-    <pre id="code_3_1">
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_3_1">
 main:
   mov eax, 1
   mov ecx, 3
@@ -326,60 +326,60 @@ main:
   dec ecx
   jne .LBB0_1
   ret</pre>
-    </td>
-    <td>
-    <pre id="code_3_2">
+	</td>
+	<td>
+	<pre id="code_3_2">
 main:
   mov eax, edi
   imul eax, edi
   imul eax, edi
   ret</pre>
-    </td></tr></table>
-    <div id="shown_3">
-        <button type="button" onclick="show(3)">Unrolled loop is on the left</button>
-        <button type="button" onclick="show(3)">Unrolled loop is on the right</button>
-    </div>
-    <div id="hidden_3" style="display:none;">
-        <p>
+	</td></tr></table>
+	<div id="shown_3">
+		<button type="button" onclick="show(3)">Unrolled loop is on the left</button>
+		<button type="button" onclick="show(3)">Unrolled loop is on the right</button>
+	</div>
+	<div id="hidden_3" style="display:none;">
+		<p>
 It's the one on the right.
-        </p>
-        <p>
+		</p>
+		<p>
 You might not know that <span class="code_piece">j&lt;*&gt;</span> is the family of <span id="shown_jump" onclick="show('jump');"><u>jump instructions</u></span><span id="hidden_jump" style="display:none">jump instructions. There is one unconditional jump <span class="code_piece">jmp</span>, and a bunch of conditional jumps like: <span class="code_piece">jz</span> — jump when zero; <span class="code_piece">jg</span> — jump when greater; or, like in our code, <span class="code_piece">jne</span> — jump when not equal. These react on the boolean <span id="shown_flags" onclick="show('flags')"><u>flags</u> previously set by a processor</span><span id="hidden_flags" style="display:none">flags previously set by a processor. These are the bits residing in a special register that get triggered by arithmetic instructions such as <span id="shown_add" class="code_piece" onclick="show('add')"><u>add</u></span><span id="hidden_add" style="display:none"><span class="code_piece">add</span> (there is usually a whole family of instructions for a simple mnemonic, for instance, <span class="code_piece">add</span> has these relatives: <span class="code_piece">fadd</span> — floating point addition; <span class="code_piece">paddb</span> — add packed byte integers; <span class="code_piece">addss</span> — add scalar single precision floating point values; and many more) </span> or <span class="code_piece">sub</span>, or by a special instruction to compare things <span class="code_piece">cmp</span></span></span>. Then again, the code on the right clearly has a repeating pattern, while the one on the left has a number three that is the loop's exit condition, and that should be enough to make a conclusion.
-        </p>
-    </div>
+		</p>
+	</div>
 
-    <h2>
+	<h2>
 Conclusion
-    </h2>
-    <p>
+	</h2>
+	<p>
 You can argue that these examples were deliberately simplified. That these are not some real-life examples. This is true to some degree. I refined them to be more demonstrative. But conceptually they are all taken from my own practice.
-    </p>
-    <p>
+	</p>
+	<p>
 Using static dispatch instead of dynamic made my image processing pipeline up to 5 times faster. Repairing broken inlining helped to win back 50% of the performance for an edge-to-edge distance function. And changing counter type to enable loop unrolling won me about 10% performance gain on matrix transformations, which is not much, but since all it took to achieve was simply changing <span class="code_piece">short int</span> to <span class="code_piece">size_t</span> in one place, I think of is as a good return of investment.
-    </p>
-    <p>
+	</p>
+	<p>
 Apparently, old versions of MSVC fail to unroll loops with counters of non-native type. Who would have thought? Well, even if you know this particular quirk, you can't possibly know every other quirk of every compiler out there, so looking at disassembly once in a while might be good for you.
-    </p>
-    <p>
+	</p>
+	<p>
 And you don't even have to spend years learning every assembly dialect. Reading disassembly is often easier than it looks. <a href="https://godbolt.org/">Try it</a>.
-    </p>
+	</p>
 
-    <h2>
+	<h2>
 P. S.
-    </h2>
-    <p>
+	</h2>
+	<p>
 I would like to thank people of Reddit for <a href="https://www.reddit.com/r/programming/comments/7if9bw/you_dont_have_to_learn_assembly_to_read/">constructive criticism</a>, and especially <a href="https://www.reddit.com/user/IJzerbaard">IJzerbaard</a> for his splendid mini-intro to disassembly. I liked it so much, I had to incorporate some of it into my expandable texts.
-    </p>
+	</p>
 
-    <script language="JavaScript">
-    document.getElementById("code_1_1").innerHTML = colorized(document.getElementById("code_1_1").innerHTML);
-    document.getElementById("code_1_2").innerHTML = colorized(document.getElementById("code_1_2").innerHTML);
-    document.getElementById("code_2_1").innerHTML = colorized(document.getElementById("code_2_1").innerHTML);
-    document.getElementById("code_2_2").innerHTML = colorized(document.getElementById("code_2_2").innerHTML);
-    document.getElementById("code_3_1").innerHTML = colorized(document.getElementById("code_3_1").innerHTML);
-    document.getElementById("code_3_2").innerHTML = colorized(document.getElementById("code_3_2").innerHTML);
-    </script>
-    <table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<script language="JavaScript">
+	document.getElementById("code_1_1").innerHTML = colorized(document.getElementById("code_1_1").innerHTML);
+	document.getElementById("code_1_2").innerHTML = colorized(document.getElementById("code_1_2").innerHTML);
+	document.getElementById("code_2_1").innerHTML = colorized(document.getElementById("code_2_1").innerHTML);
+	document.getElementById("code_2_2").innerHTML = colorized(document.getElementById("code_2_2").innerHTML);
+	document.getElementById("code_3_1").innerHTML = colorized(document.getElementById("code_3_1").innerHTML);
+	document.getElementById("code_3_2").innerHTML = colorized(document.getElementById("code_3_2").innerHTML);
+	</script>
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
 		<a href="all_programming.html">#programming</a> <a href="all_tutorials.html">#tutorials</a>
@@ -396,6 +396,6 @@ I would like to thank people of Reddit for <a href="https://www.reddit.com/r/pro
 	</td>
 	</tr>
 	</table>
-    </center>
-  </body>
+	</center>
+</body>
 </html>
