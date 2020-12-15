@@ -19,6 +19,12 @@ double kahan_sum(const std::vector<double>& xs) {
     return sum;
 }
 
+double sorted_sum(const std::vector<double>& xs) {
+    std::vector<double> sorted_xs(xs);
+    std::sort(sorted_xs.begin(), sorted_xs.end());
+    return std::accumulate(sorted_xs.begin(), sorted_xs.end(), 0.);
+}
+
 int main() {
     constexpr auto TheSize = 1'000'000;
     using TheType = double;
@@ -29,11 +35,14 @@ int main() {
     for (TheType &x : xs) {
         x = distribution(rng);
     }
+    // compare kahan sum with simple sum and sorted sum
     const auto ks = kahan_sum(xs);
     const auto s = sum(xs);
-    const auto error = std::abs(s - ks);
+    const auto ss = sorted_sum(xs);
     std::cout << "Kahan sum: " << ks << "\n";
     std::cout << "accumulated sum: " << s << "\n";
-    std::cout << "error: " << error << "\n";
+    std::cout << "accumulated sorted sum: " << s << "\n";
+    std::cout << "difference between Kahan and accumulated sum: " << std::abs(s - ks) << "\n";
+    std::cout << "difference between Kahan and accumulated sorted sum: " << std::abs(s - ss) << "\n";
 }
 
