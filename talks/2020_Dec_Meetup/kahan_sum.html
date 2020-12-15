@@ -178,6 +178,12 @@ double sum(const std::vector&lt;double&gt;& xs) {
     return std::accumulate(xs.begin(), xs.end(), 0.);
 }
 
+double sorted_sum(const std::vector&lt;double&gt;& xs) {
+    std::vector&lt;double&gt; sorted_xs(xs);
+    std::sort(sorted_xs.begin(), sorted_xs.end());
+    return std::accumulate(sorted_xs.begin(), sorted_xs.end(), 0.);
+}
+
 double kahan_sum(const std::vector&lt;double&gt;& xs) {
     double sum = 0.;
     double c = 0.;
@@ -200,21 +206,28 @@ int main() {
     for (TheType &x : xs) {
         x = distribution(rng);
     }
+    // compare kahan sum with simple sum and sorted sum
     const auto ks = kahan_sum(xs);
     const auto s = sum(xs);
-    const auto error = std::abs(s - ks);
+    const auto ss = sorted_sum(xs);
     std::cout &lt;&lt; "Kahan sum: " &lt;&lt; ks &lt;&lt; "\n";
     std::cout &lt;&lt; "accumulated sum: " &lt;&lt; s &lt;&lt; "\n";
-    std::cout &lt;&lt; "error: " &lt;&lt; error &lt;&lt; "\n";
+    std::cout &lt;&lt; "accumulated sorted sum: " &lt;&lt; s &lt;&lt; "\n\n";
+    std::cout &lt;&lt; "difference between Kahan and sum: " &lt;&lt; std::abs(s - ks) &lt;&lt; "\n";
+    std::cout &lt;&lt; "difference between Kahan and sorted sum: " &lt;&lt; std::abs(ss - ks) &lt;&lt; "\n";
+    std::cout &lt;&lt; "difference between sum and sorted sum: " &lt;&lt; std::abs(s - ss) &lt;&lt; "\n";
 }
+
 	</pre>
 	<br>
 	<pre>
-clang++ -O2 -std=c++14 -march=native kahan_sum.cpp -o kahan_sum
-./kahan_sum
 Kahan sum: 5.0021e+11
 accumulated sum: 5.0021e+11
-error: 0.00915527
+accumulated sorted sum: 5.0021e+11
+
+difference between Kahan and sum: 0.00915527
+difference between Kahan and sorted sum: 0.00671387
+difference between sum and sorted sum: 0.00244141
 	</pre>
 
 	<script language="JavaScript">
