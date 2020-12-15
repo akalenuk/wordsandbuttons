@@ -7,6 +7,12 @@ double sum(const std::vector<double>& xs) {
     return std::accumulate(xs.begin(), xs.end(), 0.);
 }
 
+double sorted_sum(const std::vector<double>& xs) {
+    std::vector<double> sorted_xs(xs);
+    std::sort(sorted_xs.begin(), sorted_xs.end());
+    return std::accumulate(sorted_xs.begin(), sorted_xs.end(), 0.);
+}
+
 double kahan_sum(const std::vector<double>& xs) {
     double sum = 0.;
     double c = 0.;
@@ -17,12 +23,6 @@ double kahan_sum(const std::vector<double>& xs) {
         sum = t;
     }
     return sum;
-}
-
-double sorted_sum(const std::vector<double>& xs) {
-    std::vector<double> sorted_xs(xs);
-    std::sort(sorted_xs.begin(), sorted_xs.end());
-    return std::accumulate(sorted_xs.begin(), sorted_xs.end(), 0.);
 }
 
 int main() {
@@ -41,8 +41,9 @@ int main() {
     const auto ss = sorted_sum(xs);
     std::cout << "Kahan sum: " << ks << "\n";
     std::cout << "accumulated sum: " << s << "\n";
-    std::cout << "accumulated sorted sum: " << s << "\n";
-    std::cout << "difference between Kahan and accumulated sum: " << std::abs(s - ks) << "\n";
-    std::cout << "difference between Kahan and accumulated sorted sum: " << std::abs(s - ss) << "\n";
+    std::cout << "accumulated sorted sum: " << s << "\n\n";
+    std::cout << "difference between Kahan and sum: " << std::abs(s - ks) << "\n";
+    std::cout << "difference between Kahan and sorted sum: " << std::abs(ss - ks) << "\n";
+    std::cout << "difference between sum and sorted sum: " << std::abs(s - ss) << "\n";
 }
 
