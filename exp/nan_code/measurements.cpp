@@ -4,8 +4,8 @@
 #include <chrono>
 #include <iostream>
 #include <tuple>
-
-#include <boost/optional.hpp>
+#include <vector>
+#include <optional>
 
 
 #define MEASURE(CODE_TO_MEASURE) \
@@ -26,7 +26,8 @@ enum class ECode : uint64_t {
     INPUT_IS_NEGATIVE,
 };
 
-union Result_or_code
+// take 1. Apparently, there is undefined behavior accroding to the standard
+/*union Result_or_code
 {
     double result;
     ECode code;
@@ -34,6 +35,16 @@ union Result_or_code
     Result_or_code(const ECode& c) {code = c;}
     operator double() {return result;}
     operator ECode() {return code;}
+};*/
+
+// take 2. This should work
+union Result_or_code
+{
+    double result;
+    Result_or_code(double x) {result = x;}
+    Result_or_code(ECode c) {result = *reinterpret_cast<double*>(&c);}
+    operator double() {return result;}
+    operator ECode() {return *reinterpret_cast<ECode*>(&result);}
 };
 
 Result_or_code sqrt_or_not(double x) {
@@ -46,10 +57,10 @@ Result_or_code sqrt_or_not(double x) {
     return std::sqrt(x);
 }
 
-boost::optional<double> optional_sqrt(double x) {
+std::optional<double> optional_sqrt(double x) {
     if (std::isnan(x) || std::isinf(x) || x < 0)
-        return boost::optional<double>();
-    return boost::optional<double>(std::sqrt(x));
+        return std::optional<double>();
+    return std::optional<double>(std::sqrt(x));
 }
 
 double sqrt_or_throw(double x) {
@@ -135,7 +146,7 @@ void measure_non_less_than_error_storing() {
     size_t errors = 0;
     size_t results = 0;
     double total = 0.;
-    std::cout << "no less than error: ";
+    std::cout << "no less than error storing: ";
     MEASURE(
         std::vector<Result_or_code> results_or_codes;
         for(double x = -1024.; x <= 1024.; x += 1./65536.) {
@@ -175,7 +186,7 @@ void measure_tuple_storing() {
     size_t errors = 0;
     size_t results = 0;
     double total = 0.;
-    std::cout << "tuple: ";
+    std::cout << "tuple storing: ";
     MEASURE(
         std::vector<CodeAndResult> results_and_codes;
         for(double x = -1024.; x <= 1024.; x += 1./65536.) {
@@ -208,7 +219,7 @@ void measure_optional() {
             }
         }
     );
-    std::cout << "\nsize of optional: " << sizeof(boost::optional<double>);
+    std::cout << "\nsize of optional: " << sizeof(std::optional<double>);
     std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
 }
 
@@ -216,9 +227,9 @@ void measure_optional_storing() {
     size_t errors = 0;
     size_t results = 0;
     double total = 0.;
-    std::cout << "optional: ";
+    std::cout << "optional storing: ";
     MEASURE(
-        std::vector<boost::optional<double>> optional_results;
+        std::vector<std::optional<double>> optional_results;
         for(double x = -1024.; x <= 1024.; x += 1./65536.) {
             optional_results.push_back(optional_sqrt(x));
             if(!optional_results.back())
@@ -229,7 +240,7 @@ void measure_optional_storing() {
             }
         }
     );
-    std::cout << "\nsize of optional: " << sizeof(boost::optional<double>);
+    std::cout << "\nsize of optional: " << sizeof(std::optional<double>);
     std::cout << "\nsanity check: " << ((errors == results - 1) == 1. ? "passed" : "not passed!") << "; sum: " << total << "\n" << std::endl;
 }
 
