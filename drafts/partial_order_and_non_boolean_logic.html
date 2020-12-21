@@ -467,17 +467,21 @@ x<sub>2</sub> = x &plus; &epsilon;
 These intervals are very helpful when we want to measure the computational error or to know if an algorithm is stable enough. They aren't comparable though.
 	</p>
 	<p>
-Consider two overlapping intervals. Let's say,  <span class="abc">[3, 6]</span> and <span class="abc">[5, 8]</span>. We know that the fist interval actually means a number in between  <span class="abc">3</span> and  <span class="abc">6</span>. The second — another number between <span class="abc">5</span> and <span class="abc">8</span>. Intuitively, the latter should be greater than the former. But what if it is  <span class="abc">5</span> and the former is  <span class="abc">6</span>? Then it's obviously less. There is a chance they are even equal. So we have some things and there is some kind of order, for instance,  <span class="abc">[6, 8]</span> is definitely greater than  <span class="abc">[3, 5]</span>. But this order doesn't hold for every possible pair of intervals.
+Consider two overlapping intervals. Let's say, <span class="abc">[3, 6]</span> and <span class="abc">[5, 8]</span>. We know that the fist interval actually means a number in between  <span class="abc">3</span> and  <span class="abc">6</span>. The second — another number between <span class="abc">5</span> and <span class="abc">8</span>. Intuitively, the latter should be greater than the former. But what if it is  <span class="abc">5</span> and the former is  <span class="abc">6</span>? Then it's obviously less. There is a chance they are even equal. So we have some things and there is some kind of order, for instance,  <span class="abc">[6, 8]</span> is definitely greater than  <span class="abc">[3, 5]</span>. But this order doesn't hold for every possible pair of intervals.
 	</p>
-
-
-<br>
-<br>
-<br>
-
 	<p>
-There is only partial order.
+This makes things unpleasant. For the very least, we can't now use Boolean logic since the all the comparisons now return three states. E. g. <span class="abc">a &le; b</span> can now be <span class="abc">true</span>, <span class="abc">false</span> or <span class="abc">none of the above</span>.
 	</p>
+	<p>
+Consequently, this means the conventional <span class="abc">if... else</span> statement now has to be redesigned. And all the algorithms that use it.
+	</p>
+	<p>
+Fortunatelly, we woulnd't have to give up boolean logic if we argee to “split” the semantics of the predicates into two. For every predicate on the two intervals, we can still say whether the numbers they represent definitely suffice the predicate, ot whether they possibly do so.
+	</p>
+	<p>
+Now, for instance, <span class="abc">[3, 5]</span> is deffinitely less than <span class="abc">[6, 8]</span>, and <span class="abc">[3, 6]</span> is possibly less than <span class="abc">[5, 8]</span>.
+	</p>
+<br>
 	<table>
 	<tr>
 	<td class="big">a:</td><td><canvas id="interval_1" width=608 height=84></canvas></td>
@@ -486,8 +490,6 @@ There is only partial order.
 	</tr>
 	</table>
 
-<br>
-<br>
 <br>
 
 <table class="comparison">
@@ -499,6 +501,10 @@ There is only partial order.
 <tr><td class="comparison">a &le; b</td>	<td id='dle' class="comparison_result"></td>	<td id='ple' class="comparison_result"></td></tr>
 <tr><td class="comparison">a &ge; b</td>	<td id='dge' class="comparison_result"></td>	<td id='pge' class="comparison_result"></td></tr>
 </table>
+
+	<p>
+Now every <span class="abc">if... else</span> works within its context. Yes, the algorithms still require revision since the algebra behind the logic changes. Now <span class="abc">&not; (a &lt; b) &nequiv; a &ge; b</span>. But at least they may be built using the same building blocks as if the intervals were numbers.
+	</p>
 
 	<script language="JavaScript">
 	init_slider(1, 0, 10, 3, 6, "%x", false, function(lb, ub) {
