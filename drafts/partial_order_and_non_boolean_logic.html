@@ -141,6 +141,13 @@ table.comparison {
 	font-style: italic;
 	white-space: nowrap;
 }
+
+.comment {
+	font-size: 12pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
+}
 	</style>
 	<script language="JavaScript">
 const slider_w = 608;
@@ -441,6 +448,7 @@ These three rules or axioms are enough to install the <b>total order</b>, also k
 	<td class="big">b:</td><td><canvas id="interval_4" width=608 height=84></canvas></td>
 	</tr>
 	</table>
+	<p class="comment">These things are draggable &uarr;</p>
 <br>
 
 <table class="comparison">
@@ -504,6 +512,54 @@ Now, for instance, <span class="abc">[3, 5]</span> is deffinitely less than <spa
 
 	<p>
 Now every <span class="abc">if... else</span> works within its context. Yes, the algorithms still require revision since the algebra behind the logic changes. Now <span class="abc">&not; (a &lt; b) &nequiv; a &ge; b</span>. But at least they may be built using the same building blocks as if the intervals were numbers.
+	</p>
+
+	<p>
+Speaking of building stuff. Let's talk about programming. Programming interval logic in C++ or Python is fairly easy. You have to reimplement every predicate for the interval type — and you're golden!
+	</p>
+	<pre>
+struct Interval {
+	Number lb; // lower bound
+	Number rb; // upper bound
+}
+
+// interval predicates
+bool coincide(const Interval& l, const Interval& r){
+	return l.lb == r.lb && l.ub == r.ub;
+}
+
+bool intersect(const Interval& l, const Interval& r){
+	return (l.ub &gt;= r.lb && l.lb &lt;= r.ub)
+		|| (r.ub &gt;= l.lb && r.lb &lt;= l.ub);
+}
+
+// the relation should keep for every number in l to every in r
+bool operator==(const Interval& l, const Interval& r){
+	return l.lb == l.ub && coincide(l, r);
+}
+
+bool operator&lt;(const Interval& l, const Interval& r){
+	return l.ub &lt; r.lb;
+}
+
+bool operator&gt;(const Interval& l, const Interval& r){
+	return r &lt; l;
+}
+
+bool operator&lt;=(const Interval& l, const Interval& r){
+	return l.lb &lt; r.ub && l.ub == r.lb;
+}
+
+bool operator&gt;=(const Interval& l, const Interval& r){
+	return r &lt;= l;
+}
+
+bool operator!=(const Interval& l, const Interval& r){
+	return r &lt; l || l &lt; r;
+}
+	</pre>
+	<p>
+It gets a little bit more tricky in Rust whcih relies on the notion of order pretty much.
 	</p>
 
 	<script language="JavaScript">
