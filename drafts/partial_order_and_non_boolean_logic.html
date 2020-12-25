@@ -675,22 +675,22 @@ impl std::cmp::PartialOrd for RB32{
 }</pre>
 
 	<p>
-The code is less verbose than in C++ or Python, and it would have been even less so if we were relying on Boolean algebra. With it, you don't even have to write <span class="abc">le</span> or <span class="abc">ge</span> methods explicitly, <span class="abc">cmp</span> is enough. For Boolean relations between predicates, Rust can deduce the rest for you.
+The code is less verbose than in C++ or Python, and it would have been even less so if we were relying on Boolean algebra. With it, you don't even have to write <span class="abc">le</span> or <span class="abc">ge</span> methods explicitly, <span class="abc">cmp</span> is enough. With Boolean algebra, Rust can deduce the rest for you.
 	</p>
 	<p>
 Ok, but that was the “definite” logic. But what about the “possible”?
 	</p>
 	<p>
-I'm afraid, for this particular task, Rust comes short. In the “possible” interval logic the intersecting intervals are such as <span class="abc">a &lt; b</span>, and <span class="abc">a = b</span>, and <span class="abc">a &gt; b</span>, all at the same time. Every predicate is true since everything is possible. You can't program that with Rust <a href="https://doc.rust-lang.org/std/cmp/enum.Ordering.html" class="abc">Ordering</a>. However, this is not a flaw, this is a design choice.
+I'm afraid, for this particular task, Rust comes short. In the “possible” interval logic, the intersecting intervals may be <span class="abc">a &lt; b</span>, and <span class="abc">a = b</span>, and <span class="abc">a &gt; b</span>, all at the same time. Every predicate is true since everything is possible. You can't program that with Rust <a href="https://doc.rust-lang.org/std/cmp/enum.Ordering.html" class="abc">Ordering</a>. However, this is not a flaw, this is a design choice.
 	</p>
 	<p>
-Non-Boolean logics are rare, and relations more general than partial order are almost never useful. If you really really want this kind of logic, you can still implement it using functions and not operators. At the same time, you can expect that if a class implements the <span class="abc">std::cmp::Ord</span> trait, then all the sorting algorithms will work with it correctly. While, in C++, a sorting algorithm will run on anything with the <span class="abc">operator&le;</span> reloaded with no correctness guaranteed or even pinky-promised.
+Non-Boolean logics are rare, and relations more general than partial order are almost never useful. If you really really want this kind of logic, you can still implement it using functions and not operators. At the same time, you can expect that if a class implements the <span class="abc">std::cmp::Ord</span> trait, then all the sorting algorithms will work with it correctly. While in C++, a sorting algorithm will run on anything with the <span class="abc">operator&lt;</span> reloaded with no correctness guaranteed or even pinky-promised.
 	</p>
 	<h2>
 Conclusion
 	</h2>
 	<p>
-Non-Boolean logics are rare but not extinct. Interval logic is one example. Sometimes, you can implement a logic you want within total order relation or partial order but sometimes even that isn't enough. With operator overloading, you have more freedom but you also have less assurance.
+Non-Boolean logics are rare but not extinct. Interval logic is one example. Sometimes, you can implement a logic you want within total order relation or partial order but sometimes even that isn't enough. With operator overloading, you have the freedom to go there but you also have less assurance when working with total order.
 	</p>
 
 	<script language="JavaScript">
