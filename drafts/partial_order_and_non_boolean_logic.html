@@ -529,13 +529,13 @@ These intervals are very helpful when we want to measure the computational error
 Consider two overlapping intervals. Let's say, <span class="abc">[3, 6]</span> and <span class="abc">[5, 8]</span>. We know that the fist interval actually means a number in between  <span class="abc">3</span> and  <span class="abc">6</span>. The second — another number between <span class="abc">5</span> and <span class="abc">8</span>. Intuitively, the latter should be greater than the former. But what if it is  <span class="abc">5</span> and the former is  <span class="abc">6</span>? Then it's obviously less. There is a chance they are even equal. So we have some things and there is some kind of order, for instance,  <span class="abc">[6, 8]</span> is definitely greater than  <span class="abc">[3, 5]</span>. But this order doesn't hold for every possible pair of intervals.
 	</p>
 	<p>
-This makes things unpleasant. For the very least, we can't now use Boolean logic since the all the comparisons now return three states. E. g. <span class="abc">a &le; b</span> can now be <span class="abc">true</span>, <span class="abc">false</span> or <span class="abc">none of the above</span>.
+This makes things unpleasant. For the very least, we can't now use binary logic since the all the comparisons now return three states. E. g. <span class="abc">a &le; b</span> can now be <span class="abc">true</span>, <span class="abc">false</span> or <span class="abc">none of the above</span>.
 	</p>
 	<p>
 Consequently, this means the conventional <span class="abc">if... else</span> statement now has to be redesigned. And all the algorithms that use it.
 	</p>
 	<p>
-Fortunatelly, we woulnd't have to give up boolean logic if we argee to “split” the semantics of the predicates into two. For every predicate on the two intervals, we can still say whether the numbers they represent definitely suffice the predicate, ot whether they possibly do so.
+Fortunatelly, we woulnd't have to give up binary logic if we argee to “split” the semantics of the predicates into two. For every predicate on the two intervals, we can still say whether the numbers they represent definitely suffice the predicate, ot whether they possibly do so.
 	</p>
 	<p>
 Now, for instance, <span class="abc">[3, 5]</span> is deffinitely less than <span class="abc">[6, 8]</span>, and <span class="abc">[3, 6]</span> is possibly less than <span class="abc">[5, 8]</span>.
@@ -562,11 +562,11 @@ Now, for instance, <span class="abc">[3, 5]</span> is deffinitely less than <spa
 </table>
 
 	<p>
-Now every <span class="abc">if... else</span> works within its context. Yes, the algorithms still require revision since the algebra behind the logic changes. Now <span class="abc">&not; (a &lt; b) &nequiv; a &ge; b</span>. But at least they may be built using the same building blocks as if the intervals were numbers.
+Now every <span class="abc">if... else</span> works within its context. However, the algebra behind the logic isn't yet Boolean. Now <span class="abc">&not; (a &lt; b) &nequiv; a &ge; b</span>. Well, at least the computational algorithms may be built using the same building blocks as if the intervals were numbers.
 	</p>
 
 	<p>
-Speaking of building stuff. Let's talk about programming. Programming interval logic in C++ or Python is fairly easy. You have to reimplement every predicate for the interval type — and you're golden!
+Speaking of building stuff. Let's talk about programming. Programming non-Boolean interval logic in C++ or Python is fairly easy. You have to reimplement every predicate for the interval type — and you're golden!
 	</p>
 	<pre id="code_1">
 struct Interval {
@@ -574,7 +574,7 @@ struct Interval {
 	Number ub; // upper bound
 }
 
-// interval predicates
+// Interval-specific predicates.
 bool coincide(const Interval& l, const Interval& r){
 	return l.lb == r.lb && l.ub == r.ub;
 }
@@ -584,7 +584,8 @@ bool intersect(const Interval& l, const Interval& r){
 		|| (r.ub &gt;= l.lb && r.lb &lt;= l.ub);
 }
 
-// the relation should keep for every number in l to every in r
+// The "definite" interval logic.
+// The relation should keep for every number in l and in r.
 bool operator==(const Interval& l, const Interval& r){
 	return l.lb == l.ub && coincide(l, r);
 }
@@ -610,8 +611,23 @@ bool operator!=(const Interval& l, const Interval& r){
 }
 	</pre>
 	<p>
-It gets a little bit more tricky in Rust whcih relies on the notion of order pretty much.
+Nobody cares about the relationship between predicates being Boolean-ish. They are all just some arbitrary functions so with them you can easily define either the “definite” logic or for the “possible” one. You can have both if you define them for different but interchangeable types. It's all a little verbose but doable.
 	</p>
+	<p>
+It gets a little bit more tricky in Rust which relies on the notion of order pretty much.
+	</p>
+	<p>
+The comparison operators for a custom type are usually introduced using an <a href="https://doc.rust-lang.org/std/cmp/trait.Ord.html" class="abc">std::cmp::Ord</a> trait. It requires that:
+	</p>
+	<p class="formula">
+&forall; a, b: (a &lt; b) &oplus; (a = b) &oplus; (a &gt; b)
+<br>
+a &le; b &and; b &le; c &rArr; a &le; c.
+	</p>
+	<p>
+The first read as, for every <span class="abc">a</span> and <span class="abc">b</span>, one and only one is true: either <span class="abc">(a &lt; b)</span> or <span class="abc">(a = b)</span> or <span class="abc">(a &gt; b)</span>. This doesn't work for us. When intervals intersect, in “definite” logic, <span class="abc">&not;(a &lt; b) &and; &not;(a = b) &and; &not;(a &gt; b)</span> so none of that is true. And in the “possible” logic, it's all true so no luck either.
+	</p>
+
 
 	<script language="JavaScript">
 	init_slider(1, 0, 10, 3, 6, "%x", false, function(lb, ub) {
