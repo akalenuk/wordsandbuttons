@@ -397,7 +397,7 @@ function reevaluate() {
 }
 
 function colorized(text) {
-	const separators = [' if(', 'return ', ' for(',
+	const separators = [' if(', 'return ', ' for(', ' if ', ' else', ' fn ', ' for ',
 		'\n', ' ', '\t', ',', ':', ';', '+', '-', '/', '*', '&amp', '(', ')', '<', '>', '[', ']', '{', '}', '.',
 		'==', '!=', '<=', '>=', '=', '-=', '+=', '*=', '/='];
 	const quotes = ['\'', '"'];
@@ -570,46 +570,45 @@ Speaking of building stuff. Let's talk about programming. Programming non-Boolea
 	</p>
 	<pre id="code_1">
 struct Interval {
-	Number lb; // lower bound
-	Number ub; // upper bound
+    Number lb; // lower bound
+    Number ub; // upper bound
 }
 
 // Interval-specific predicates.
 bool coincide(const Interval& l, const Interval& r){
-	return l.lb == r.lb && l.ub == r.ub;
+    return l.lb == r.lb && l.ub == r.ub;
 }
 
 bool intersect(const Interval& l, const Interval& r){
-	return (l.ub &gt;= r.lb && l.lb &lt;= r.ub)
-		|| (r.ub &gt;= l.lb && r.lb &lt;= l.ub);
+    return (l.ub &gt;= r.lb && l.lb &lt;= r.ub)
+        || (r.ub &gt;= l.lb && r.lb &lt;= l.ub);
 }
 
 // The "definite" interval logic.
 // The relation should keep for every number in l and in r.
 bool operator==(const Interval& l, const Interval& r){
-	return l.lb == l.ub && coincide(l, r);
+    return l.lb == l.ub && coincide(l, r);
 }
 
 bool operator&lt;(const Interval& l, const Interval& r){
-	return l.ub &lt; r.lb;
+    return l.ub &lt; r.lb;
 }
 
 bool operator&gt;(const Interval& l, const Interval& r){
-	return r &lt; l;
+    return r &lt; l;
 }
 
 bool operator&lt;=(const Interval& l, const Interval& r){
-	return l.lb &lt; r.ub && l.ub == r.lb;
+    return l.lb &lt; r.ub && l.ub == r.lb;
 }
 
 bool operator&gt;=(const Interval& l, const Interval& r){
-	return r &lt;= l;
+    return r &lt;= l;
 }
 
 bool operator!=(const Interval& l, const Interval& r){
-	return r &lt; l || l &lt; r;
-}
-	</pre>
+    return r &lt; l || l &lt; r;
+}</pre>
 	<p>
 Nobody cares about the relationship between predicates being Boolean-ish. They are all just some arbitrary functions so with them you can easily define either the “definite” logic or for the “possible” one. You can have both if you define them for different but interchangeable types. It's all a little verbose but doable.
 	</p>
@@ -625,9 +624,71 @@ The comparison operators for a custom type are usually introduced using an <a hr
 a &le; b &and; b &le; c &rArr; a &le; c.
 	</p>
 	<p>
-The first read as, for every <span class="abc">a</span> and <span class="abc">b</span>, one and only one is true: either <span class="abc">(a &lt; b)</span> or <span class="abc">(a = b)</span> or <span class="abc">(a &gt; b)</span>. This doesn't work for us. When intervals intersect, in “definite” logic, <span class="abc">&not;(a &lt; b) &and; &not;(a = b) &and; &not;(a &gt; b)</span> so none of that is true. And in the “possible” logic, it's all true so no luck either.
+The first reads as for every <span class="abc">a</span> and <span class="abc">b</span>, one and only one is true: either <span class="abc">(a &lt; b)</span> or <span class="abc">(a = b)</span> or <span class="abc">(a &gt; b)</span>. This doesn't work for us. When intervals intersect, in “definite” logic, <span class="abc">&not;(a &lt; b) &and; &not;(a = b) &and; &not;(a &gt; b)</span> so none of that is true. And in the “possible” logic, it's all true, so this still doesn't work.
 	</p>
+	<p>
+Luckily, there is another more relaxed trait that represents not total order, but partial order: <a href="https://doc.rust-lang.org/std/cmp/trait.PartialOrd.html" class="abc">std::cmp::PartialOrd</a>. Which only requires asymetry (not even antisymetry) and transitivity:
+	</p>
+	<p class="formula">
+a &lt; b &rArr; &not;(a &gt; b)
+<br>
+a &le; b &and; b &le; c &rArr; a &le; c.
+	</p>
+	<p>
+Аor the “definite” logic, this works.
+	</p>
+	<pre id="code_2">
+impl std::cmp::PartialEq for RB32{
+    // the same as operator == in C++ or __eq__(self, other) in Python
+    fn eq(&self, other: &Self) -&gt; bool {
+        self.lb == other.lb && self.ub == other.ub
+    }
+}
 
+impl std::cmp::PartialOrd for RB32{
+    // this is usually enough to replace all the rest
+    fn partial_cmp(&self, other: &Self) -&gt; Option&lt;std::cmp::Ordering&gt; {
+        if self.ub &lt; other.lb {
+            Some(std::cmp::Ordering::Less)
+        } else if self.lb &gt; other.ub {
+            Some(std::cmp::Ordering::Greater)
+        } else if self.lb == other.lb && self.ub == other.ub {
+            Some(std::cmp::Ordering::Equal)
+        } else {
+            None // this is what differentiates Ord and PartialOrd
+        }
+    }
+
+    // but since in out logic, (a &lt; b) &or; (a = b) &nequiv; a &le; b,
+    // we have to define &le; and &ge; explicitly.
+    fn le(&self, other: &Self) -&gt; bool {
+        (self.lb == other.lb && self.lb == self.ub) ||
+        (self.ub == other.ub && other.lb == other.ub)
+    }
+    fn ge(&self, other: &Self) -&gt; bool {
+        (self.ub == other.ub && self.lb == self.ub) ||
+        (self.lb == other.lb && other.lb == other.ub)
+    }
+}</pre>
+
+	<p>
+The code is less verbose than in C++ or Python, and it would have been even less so if we were relying on Boolean algebra. With it, you don't even have to write <span class="abc">le</span> or <span class="abc">ge</span> methods explicitly, <span class="abc">cmp</span> is enough. For Boolean relations between predicates, Rust can deduce the rest for you.
+	</p>
+	<p>
+Ok, but that was the “definite” logic. But what about the “possible”?
+	</p>
+	<p>
+I'm afraid, for this particular task of programming the “possible” interval logic with operators, Rust comes short. In the “possible” interval logic the intersecting intervals are such as <span class="abc">a &lt; b</span>, and <span class="abc">a = b</span>, and <span class="abc">a &gt; b</span> all at the same time. Every predicate is true since every relation is possible. You can't program that with Rust <a href="https://doc.rust-lang.org/std/cmp/enum.Ordering.html" class="abc">Ordering</a>. However, this is not a flaw, this is a design choice.
+	</p>
+	<p>
+Non-Boolean logics are rare, and relations more general than partial order are almost never useful. If you really-really want this kind of logic, you can still implement it using functions and not operators. At the same time, you can expect that if a class implements the <span class="abc">std::cmp::Ord</span> trait, then all the sorting algorithms will work with it correctly. While, in C++, a sorting algortihm will run on anything with the <span class="abc">operator&le;</span> reloaded with no correctness guaranteed or even pinky-promised.
+	</p>
+	<h2>
+Conclusion
+	</h2>
+	<p>
+Non-Boolean logics are rare but not extinct. Interval logic is one example. Sometimes, you can implement a logic you want within total order relation or partial order but sometimes even that isn't enough. With opeartor overloading, you have more freedom but you also have less assurance.
+	</p>
 
 	<script language="JavaScript">
 	init_slider(1, 0, 10, 3, 6, "%x", false, function(lb, ub) {
@@ -646,6 +707,7 @@ The first read as, for every <span class="abc">a</span> and <span class="abc">b<
 
 	reevaluate();
 	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
+	document.getElementById("code_2").innerHTML = colorized(document.getElementById("code_2").innerHTML);
 	</script>
 
 
