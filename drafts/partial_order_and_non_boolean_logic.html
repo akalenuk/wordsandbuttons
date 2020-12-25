@@ -515,7 +515,7 @@ These three rules or axioms are enough to install the <b><span id="total_order">
 The numbers are comparable. That implies that you can sort them. Of course, not only numbers are comparable. Names are comparable and sortable in alphabetical order. Skyscrapers are comparable and sortable by height. A lot of things are comparable and sortable.
 	</p>
 	<p>
-But a few things aren't. Like the <a href="https://wordsandbuttons.online/yet_another_alternative_to_floating_point_numbers.html">intervals we use to represent numbers with errors</a>. We use them when we don't know the exact number <span class="abc">x</span> but we know its error <span class="abc">&epsilon;</span> and therefore have all the reasons to believe that it's jammed somehwere between <span class="abc">x<sub>1</sub></span> and <span class="abc">x<sub>2</sub></span> where
+But a few things aren't. Like the <a href="https://wordsandbuttons.online/yet_another_alternative_to_floating_point_numbers.html">intervals, we use to represent numbers with errors</a>. We use them when we don't know the exact number <span class="abc">x</span> but we know its error <span class="abc">&epsilon;</span> and therefore have all the reasons to believe that it's jammed somewhere between <span class="abc">x<sub>1</sub></span> and <span class="abc">x<sub>2</sub></span> where
 	</p>
 	<p class="formula">
 x<sub>1</sub> = x &minus; &epsilon;
@@ -526,19 +526,19 @@ x<sub>2</sub> = x &plus; &epsilon;
 These intervals are very helpful when we want to measure the computational error or to know if an algorithm is stable enough. They aren't comparable though.
 	</p>
 	<p>
-Consider two overlapping intervals. Let's say, <span class="abc">[3, 6]</span> and <span class="abc">[5, 8]</span>. We know that the fist interval actually means a number in between  <span class="abc">3</span> and  <span class="abc">6</span>. The second — another number between <span class="abc">5</span> and <span class="abc">8</span>. Intuitively, the latter should be greater than the former. But what if it is  <span class="abc">5</span> and the former is  <span class="abc">6</span>? Then it's obviously less. There is a chance they are even equal. So we have some things and there is some kind of order, for instance,  <span class="abc">[6, 8]</span> is definitely greater than  <span class="abc">[3, 5]</span>. But this order doesn't hold for every possible pair of intervals.
+Consider two overlapping intervals. Let's say, <span class="abc">[3, 6]</span> and <span class="abc">[5, 8]</span>. We know that the fist interval actually means a number between  <span class="abc">3</span> and  <span class="abc">6</span>. The second — another number between <span class="abc">5</span> and <span class="abc">8</span>. Intuitively, the latter should be greater than the former. But what if it is  <span class="abc">5</span> and the former is  <span class="abc">6</span>? Then it's obviously less. There is a chance they are even equal. So we have some things and there is some kind of order, for instance,  <span class="abc">[6, 8]</span> is definitely greater than  <span class="abc">[3, 5]</span>. But this order doesn't hold for every possible pair of intervals.
 	</p>
 	<p>
-This makes things unpleasant. For the very least, we can't now use binary logic since the all the comparisons now return three states. E. g. <span class="abc">a &le; b</span> can now be <span class="abc">true</span>, <span class="abc">false</span> or <span class="abc">none of the above</span>.
+This makes things unpleasant. For the very least, we can't now use binary logic since all the comparisons now return three states. E. g. <span class="abc">a &le; b</span> can now be <span class="abc">true</span>, <span class="abc">false</span> or <span class="abc">none of the above</span>.
 	</p>
 	<p>
 Consequently, this means the conventional <span class="abc">if... else</span> statement now has to be redesigned. And all the algorithms that use it.
 	</p>
 	<p>
-Fortunatelly, we woulnd't have to give up binary logic if we argee to “split” the semantics of the predicates into two. For every predicate on the two intervals, we can still say whether the numbers they represent definitely suffice the predicate, ot whether they possibly do so.
+We wouldn't have to give up binary logic completely if we agree to “split” the semantics of the predicates into two. For every predicate on the two intervals, we can still say whether the numbers they represent definitely suffice the predicate, or whether they possibly do so.
 	</p>
 	<p>
-Now, for instance, <span class="abc">[3, 5]</span> is deffinitely less than <span class="abc">[6, 8]</span>, and <span class="abc">[3, 6]</span> is possibly less than <span class="abc">[5, 8]</span>.
+For instance, <span class="abc">[3, 5]</span> is definitely less than <span class="abc">[6, 8]</span>, and <span class="abc">[3, 6]</span> is possibly less than <span class="abc">[5, 8]</span>.
 	</p>
 <br>
 	<table>
@@ -610,7 +610,7 @@ bool operator!=(const Interval& l, const Interval& r){
     return r &lt; l || l &lt; r;
 }</pre>
 	<p>
-Nobody cares about the relationship between predicates being Boolean-ish. They are all just some arbitrary functions so with them you can easily define either the “definite” logic or for the “possible” one. You can have both if you define them for different but interchangeable types. It's all a little verbose but doable.
+Nobody cares about the relationship between predicates being Boolean-ish. They are all just some arbitrary functions so with them, you can easily define either the “definite” logic or the “possible” one. You can have both if you define them for different but interchangeable types. It's all a little verbose but doable.
 	</p>
 	<p>
 It gets a little bit more tricky in Rust which relies on the notion of order pretty much.
@@ -627,7 +627,7 @@ a &le; b &and; b &le; c &rArr; a &le; c.
 The first reads as for every <span class="abc">a</span> and <span class="abc">b</span>, one and only one is true: either <span class="abc">(a &lt; b)</span> or <span class="abc">(a = b)</span> or <span class="abc">(a &gt; b)</span>. This doesn't work for us. When intervals intersect, in “definite” logic, <span class="abc">&not;(a &lt; b) &and; &not;(a = b) &and; &not;(a &gt; b)</span> so none of that is true. And in the “possible” logic, it's all true, so this still doesn't work.
 	</p>
 	<p>
-Luckily, there is another more relaxed trait that represents not total order, but partial order: <a href="https://doc.rust-lang.org/std/cmp/trait.PartialOrd.html" class="abc">std::cmp::PartialOrd</a>. Which only requires <b><span id="index_asymetry">asymetry</sapn></b> (not even antisymetry) and transitivity (we've seen it before):
+Luckily, there is another more relaxed trait that represents not total order, but partial order: <a href="https://doc.rust-lang.org/std/cmp/trait.PartialOrd.html" class="abc">std::cmp::PartialOrd</a>. Which only requires <b><span id="index_asymmetry">asymmetry</sapn></b> (not even antisymmetry) and transitivity (we've seen it before):
 	</p>
 	<p class="formula">
 a &lt; b &rArr; &not;(a &gt; b)
@@ -678,10 +678,10 @@ The code is less verbose than in C++ or Python, and it would have been even less
 Ok, but that was the “definite” logic. But what about the “possible”?
 	</p>
 	<p>
-I'm afraid, for this particular task of programming the “possible” interval logic with operators, Rust comes short. In the “possible” interval logic the intersecting intervals are such as <span class="abc">a &lt; b</span>, and <span class="abc">a = b</span>, and <span class="abc">a &gt; b</span> all at the same time. Every predicate is true since every relation is possible. You can't program that with Rust <a href="https://doc.rust-lang.org/std/cmp/enum.Ordering.html" class="abc">Ordering</a>. However, this is not a flaw, this is a design choice.
+I'm afraid, for this particular task, Rust comes short. In the “possible” interval logic the intersecting intervals are such as <span class="abc">a &lt; b</span>, and <span class="abc">a = b</span>, and <span class="abc">a &gt; b</span>, all at the same time. Every predicate is true since everything is possible. You can't program that with Rust <a href="https://doc.rust-lang.org/std/cmp/enum.Ordering.html" class="abc">Ordering</a>. However, this is not a flaw, this is a design choice.
 	</p>
 	<p>
-Non-Boolean logics are rare, and relations more general than partial order are almost never useful. If you really-really want this kind of logic, you can still implement it using functions and not operators. At the same time, you can expect that if a class implements the <span class="abc">std::cmp::Ord</span> trait, then all the sorting algorithms will work with it correctly. While, in C++, a sorting algortihm will run on anything with the <span class="abc">operator&le;</span> reloaded with no correctness guaranteed or even pinky-promised.
+Non-Boolean logics are rare, and relations more general than partial order are almost never useful. If you really really want this kind of logic, you can still implement it using functions and not operators. At the same time, you can expect that if a class implements the <span class="abc">std::cmp::Ord</span> trait, then all the sorting algorithms will work with it correctly. While, in C++, a sorting algorithm will run on anything with the <span class="abc">operator&le;</span> reloaded with no correctness guaranteed or even pinky-promised.
 	</p>
 	<h2>
 Conclusion
