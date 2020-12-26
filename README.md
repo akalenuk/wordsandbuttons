@@ -7,6 +7,9 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 
 ## Pages
 
+- [Partial order and non-Boolean logic](https://wordsandbuttons.online/partial_order_and_non_boolean_logic.html) Non-Boolean logics are rare but not extinct. Interval logic is one example. Sometimes, you can implement a logic you want within total order relation or partial order but sometimes even that isn't enough. With operator overloading, you have the freedom to go there but you also have less assurance when working with total order. 
+<sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
+
 - [Yet another alternative to floating point numbers](https://wordsandbuttons.online/yet_another_alternative_to_floating_point_numbers.html) This shows how computeable intervals written in rational bounds may not only account for the input error but keep computational error under control as well.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#quizzes](https://wordsandbuttons.online/all_quizzes.html)</sup> 
 
