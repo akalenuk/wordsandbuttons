@@ -97,7 +97,7 @@ var x_max = 2.5;
 var y_max = 2.0;
 
 // colors
-var colors = ["#d64562", "#457fd6", "#62d645"];
+var colors = ["#d64562", "#457fd6", "#339428"];
 
 // points
 const l_points_original = [[0., 0.0], [0., 1.0], [1., 0.0], [1., 1.0]];
@@ -407,7 +407,7 @@ flat_pixels = [];
 var book_points = [
 [
 0.0875,
-0.19347222646077475
+0.19357222646077475
 ],
 [
 0.165625,
@@ -415,7 +415,7 @@ var book_points = [
 ],
 [
 0.2328125,
-0.2038888931274414
+0.2058888931274414
 ],
 [
 0.278125,
@@ -644,14 +644,16 @@ function load_pixels_from(url) {
 }
 
 function flatten() {
+	const w = 640.0;
+	const h = 480.0;
 	flat_pixels = [];
 	for (var i = 0; i < h; ++i) {
 		pixelsi = []
 		for (var j = 0; j < w/2; ++j) {
 			// don't use this as a reference, I messed up the transformation axes.
 			// this only works as an illustration
-			const x = (j + 0.5) / (w/2);
-			const y = 1. - (i + 0.5) / h;
+			const x = (j + 0.5) / ((w-1)/2);
+			const y = 1. - (i + 0.5) / (h-1);
 			const xy_ = cl_transform(book_points, y, x);
 			const j_ = Math.round(Math.max(Math.min(xy_[0] * w, w-1), 0));
 			const i_ = Math.round(Math.max(Math.min((1. - xy_[1]) * h, h-1), 0));
@@ -663,6 +665,8 @@ function flatten() {
 }
 
 function draw_flat() {
+	const w = 640.0;
+	const h = 480.0;
 	plot = document.getElementById("flat");
 	var context = plot.getContext("2d");
 
