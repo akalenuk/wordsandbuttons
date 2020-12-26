@@ -441,6 +441,43 @@ var book_points = [
 
 // e.g. init_book_plot("plot_book", cl_point, cl_transform, 2);
 function init_book_plot(name, points, transform, plot_no){
+	const w = 640.0;
+	const h = 480.0;
+	const x_min = 0;
+	const y_min = 0;
+	const x_max = 1;
+	const y_max = 1;
+
+	var client_x_center = w*(0-x_min)/(x_max-x_min);
+	var client_x_step = (w/(x_max-x_min));
+
+	var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+	var client_y_step = (h/(y_max-y_min));
+
+	function client_to_x(client_x){
+		return (client_x - client_x_center) / client_x_step;
+	}
+
+	function client_to_y(client_y){
+		return (client_y_center - client_y) / client_y_step;
+	}
+
+	function x_to_client(x){
+		return x * client_x_step + client_x_center;
+	}
+
+	function y_to_client(y){
+		return client_y_center - y * client_y_step;
+	}
+
+	function set_points(points, client_x, client_y, plot_no) {
+		const x = client_to_x(Math.max(Math.min(client_x, w - 1), 0));
+		const y = client_to_y(Math.max(Math.min(client_y, h - 1), 0));
+
+		points[nearest_for_plot_no[plot_no]][0] = x;
+		points[nearest_for_plot_no[plot_no]][1] = y;
+	}
+
 	var canvas = document.getElementById(name);
 
 	canvas.addEventListener('mousemove', function(e){
@@ -481,6 +518,32 @@ function init_book_plot(name, points, transform, plot_no){
 function draw_book_plot(name, points, transform, color_scheme_no) {
 	const w = 640.0;
 	const h = 480.0;
+	const x_min = 0;
+	const y_min = 0;
+	const x_max = 1;
+	const y_max = 1;
+
+	var client_x_center = w*(0-x_min)/(x_max-x_min);
+	var client_x_step = (w/(x_max-x_min));
+
+	var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+	var client_y_step = (h/(y_max-y_min));
+
+	function client_to_x(client_x){
+		return (client_x - client_x_center) / client_x_step;
+	}
+
+	function client_to_y(client_y){
+		return (client_y_center - client_y) / client_y_step;
+	}
+
+	function x_to_client(x){
+		return x * client_x_step + client_x_center;
+	}
+
+	function y_to_client(y){
+		return client_y_center - y * client_y_step;
+	}
 
 	plot = document.getElementById(name);
 	var context = plot.getContext("2d");
