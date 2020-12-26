@@ -15,6 +15,8 @@ for filename in os.listdir(PAGES_DIR):
 		continue
 	if filename == 'faq.html':
 		continue
+	if filename[:4] == 'all_':
+		continue
 	if filename.endswith(".html"):
 		date_from_git = subprocess.run(["git", "log", "--reverse", "--date=iso", "--format=%cd", "--", filename], \
 		cwd=PAGES_DIR, \
