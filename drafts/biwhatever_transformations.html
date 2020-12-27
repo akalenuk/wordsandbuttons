@@ -708,7 +708,7 @@ You need tri-linear transformation to transform all the possible hexahedrons int
 With polynomial transformations, you get to pick features that you want to preserve while transforming. You can preserve straightness of lines, or you can guarantee that a parabola will translate into another parabola, or a curvy surface into another surface equally or less curvy than the original. You have options.
 	</p>
 	<p>
-In 2013, I wrote an <a href="https://github.com/akalenuk/unpager">Unpager</a>. It's a tool for unbending the pages from the pictures taken by a phone or a pocket camera. The idea was, if you lack a proper scanner, you can simply take a few pictures of the pages you want. They will, of course, appear all skewed and curvy but that's ok. That's where the Unpages comes in. You unbend the pages, and they look just like if they were scanned.
+In 2013, I wrote the <a href="https://github.com/akalenuk/unpager">Unpager</a>. It's a tool for unbending the pages from the pictures taken by a phone or a pocket camera. The idea was, if you lack a proper scanner, you can simply take a few pictures of the pages you want. They will, of course, appear all skewed and curvy but that's ok. That's where the Unpages comes in. You unpage the pages, and they look just like if they were scanned.
 	</p>
 	</p>
 	<canvas id="plot_book" width=640 height=480></canvas>
@@ -729,19 +729,22 @@ A <b><span id="index_singular_cube">singular cube</span></b> is an n-dimensional
 It doesn't bring much mathematical sense into the whole business of transformations, you can still transform from arbitrary entity to another arbitrary entity, but since the singular cube all consists of ones and zeroes, transforming in and out of this cube requires much simpler equations.
 	</p>
 	<p>
-On this page, all the transformations are translating line segments from a singular square to a particular figure on a plane, and they are all ruled by sets of points. This simplifies the visualizations but, of course, you can translate any geometric data in any-dimensional space and not necessary from singular cubes.
+On this page, all the transformations are translating line segments from a singular square to a particular figure on a plane, and they are all ruled by sets of points. This is only a convention, you can still transform any shapes you want.
 	</p>
 	<h2>
 <span id="index_bilinear_transformation">Bilinear transformation</span>
 	</h2>
 	<p>
-Ok, so you want to translate a piece of space guided by 4 points. Wherever these points go, the neighbors will follow. This implies that for every transformative equation you'd have to have at least 4 coefficients, too. For the polynomial transformation, this means a 4x4 system of linear equations. 4 points, 4 equations, 4 coefficients, it all comes together nicely. So far. It gets messier as you add more points.
+Ok, so you want to translate a thing by moving 4 points around. Wherever these points go, the neighbors shall follow. This implies that for every transformative equation you'd have to have at least 4 coefficients, too. For the polynomial transformation, this means a 4x4 system of linear equations. 
+	</p>
+	<p>
+4 points, 4 equations, 4 coefficients, it all comes together nicely.
 	</p>
 	<p>
 The idea of bilinear transformation, or bi-anything, or even whatever-anything for that matter, is: you can decompose an n-dimensional translation into n 1-dimensional ones.
 	</p>
 	<p>
-For the bilinear transformation, it works in the most obvious way and that's why we're starting with it. Let's say we have a function that linearly interpolates from one value to another as the parameter travels from 0 to 1. Here it is:
+For the bilinear transformation, it works the most transparent. Let's say we have a function that linearly interpolates from one value to another as the parameter travels from 0 to 1. Here it is:
 	</p>
 	<table>
 	<tr><td><pre>
@@ -752,7 +755,7 @@ function lerp(y1, y2, x) {
 	</pre></td></tr>
 	</table>
 	<p>
-Just to reiterate, this is a linear interpolating function. You give it two values and the parameter. When the parameter is 0, it returns the first value, when the parameter is 1, — the second one. When it's something in between, it returns something in between but in such a way that all these inbetweeners form a straight line.
+Just to reiterate, this is a linear interpolating function. You give it two values and a parameter. When the parameter is 0, it returns the first value, when the parameter is 1, — the second one. When it's something in between, it returns something in between but in such a way that all these inbetweeners form a straight line.
 	</p>
 	<p>
 Now you can use two of these to compose a bilinear interpolation. It will also give you back the values you supply it with in the points (0, 0), (1, 0), (1, 1), and (1, 1); and it will also give you the values between these poitns so they will form straight lines along the parametric axes.
@@ -785,7 +788,7 @@ Auxiliary figures:
 <span id="index_biquadratic_transformation">Biquadratic transformation</span>
 	</h2>
 	<p>
-If mapping a straight quadrilateral to another quadrilateral isn't enough for you, if you need curvy shapes to be transformed into other curvy shapes, you can double the bets. Go biquadratic.
+If mapping a straight quadrilateral to another quadrilateral isn't enough for you, if you need curves, you should go biquadratic.
 	</p>
 	<p>
 The main idea remains, we just need another interpolator.
@@ -802,7 +805,7 @@ function qerp(y1, y2, y3, x) {
 	</pre></td></tr>
 	</table>
 	<p>
-This is a quadratic interpolation. You give it points in 0, 0.5, and 1, and it computes all the other points so they a parabola passing through these three points.
+This is a quadratic interpolation. You give it points in 0, 0.5, and 1, and it computes all the other points so they form a parabola passing through these three points.
 	</p>
 	<p>
 And the biquadratic transofrmation looks almost the same as the bilinear one except for the few extra lines and a few extra arguments.
@@ -896,7 +899,7 @@ print(solve([
 Yes, it's that simple. Of course, you can tailor this code to produce a polynomial intrpolant you want.
 	</p>
 	<p>
-And you can combine several polynomials in one transformation.
+And you can combine interpolants to make the transformation you want.
 	</p>
 	<p>
 And you can make it work in 2D, 3D, or kD by adding more interpolants one on top of another.
