@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<title>Bi-whatever transformations</title>
-	<meta name="description" content="An interactive explanation of how polynomial transformations such as trilinear or biquadratic or even linear-cubic work, and how to craft your own that fits your particular task the best.">
+	<meta name="description" content="An interactive explanation of how polynomial transformations such as trilinear or biquadratic or even linear-cubic work, and how to craft your own.">
 	<meta name="keywords" content="mathematics, demos">
 	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
 	<style>
@@ -44,7 +44,7 @@ pre {
 	padding-bottom: 12pt;
 	font-size: 12pt;
 	text-align: left;
-	width: 300pt;
+	width: 505pt;
 }
 
 table {
@@ -55,7 +55,6 @@ td {
 	vertical-align: top;
 	padding: 6pt 12pt 6pt 12pt;
 	font-size: 16pt;
-	border: 1px solid black;
 	width: 505pt;
 }
 
@@ -87,8 +86,8 @@ input[type="checkbox"] {
 	</style>
 	<script language="JavaScript">
 // client
-var w = 640.0;
-var h = 512.0;
+const w = 640.0;
+const h = 512.0;
 
 // visible region
 var x_min = -0.5;
@@ -97,7 +96,7 @@ var x_max = 2.5;
 var y_max = 2.0;
 
 // colors
-var colors = ["#d64562", "#457fd6", "#62d645"];
+var colors = ["#d64562", "#457fd6", "#339428"];
 
 // points
 const l_points_original = [[0., 0.0], [0., 1.0], [1., 0.0], [1., 1.0]];
@@ -395,6 +394,299 @@ function draw_all_plots() {
 	draw_plot("plot_q", q_points, q_points_original, q_transform, 1);
 	draw_plot("plot_cl", cl_points, cl_points_original, cl_transform, 2);
 }
+
+
+// unpager example
+
+// image
+pixels = [];
+flat_pixels = [];
+
+// points
+var book_points = [
+[
+0.0875,
+0.19357222646077475
+],
+[
+0.165625,
+0.8872222264607748
+],
+[
+0.2328125,
+0.2058888931274414
+],
+[
+0.278125,
+0.9122222264607748
+],
+[
+0.384375,
+0.21847222646077474
+],
+[
+0.396875,
+0.9288888931274414
+],
+[
+0.5078125,
+0.20597222646077473
+],
+[
+0.4875,
+0.8913888931274414
+]
+];
+
+// e.g. init_book_plot("plot_book", cl_point, cl_transform, 2);
+function init_book_plot(name, points, transform, plot_no){
+	const w = 640.0;
+	const h = 480.0;
+	const x_min = 0;
+	const y_min = 0;
+	const x_max = 1;
+	const y_max = 1;
+
+	var client_x_center = w*(0-x_min)/(x_max-x_min);
+	var client_x_step = (w/(x_max-x_min));
+
+	var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+	var client_y_step = (h/(y_max-y_min));
+
+	function client_to_x(client_x){
+		return (client_x - client_x_center) / client_x_step;
+	}
+
+	function client_to_y(client_y){
+		return (client_y_center - client_y) / client_y_step;
+	}
+
+	function x_to_client(x){
+		return x * client_x_step + client_x_center;
+	}
+
+	function y_to_client(y){
+		return client_y_center - y * client_y_step;
+	}
+
+	function set_points(points, client_x, client_y, plot_no) {
+		const x = client_to_x(Math.max(Math.min(client_x, w - 1), 0));
+		const y = client_to_y(Math.max(Math.min(client_y, h - 1), 0));
+
+		points[nearest_for_plot_no[plot_no]][0] = x;
+		points[nearest_for_plot_no[plot_no]][1] = y;
+	}
+
+	var canvas = document.getElementById(name);
+
+	canvas.addEventListener('mousemove', function(e){
+		const canvas_rect = canvas.getBoundingClientRect();
+		if(e.buttons == 1){
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_points(points, x, y, plot_no);
+			draw_book_plot(name, points, transform, plot_no);
+		}
+	}, false);
+
+	canvas.addEventListener('mousedown', function(e){
+		const canvas_rect = canvas.getBoundingClientRect();
+		const client_x = e.clientX - canvas_rect.left;
+		const client_y = e.clientY - canvas_rect.top;
+		const x = client_to_x(Math.max(Math.min(client_x, w - 1), 0));
+		const y = client_to_y(Math.max(Math.min(client_y, h - 1), 0));
+		find_and_remember_nearest_point([x, y], points, plot_no);
+		set_points(points, client_x, client_y, plot_no);
+		draw_book_plot(name, points, transform, plot_no);
+	}, false);
+
+	canvas.addEventListener('mouseleave', function(e){
+		if(e.buttons == 1){
+			const canvas_rect = canvas.getBoundingClientRect();
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_points(points, x, y, plot_no);
+		}
+		draw_book_plot(name, points, transform, plot_no);
+	}, false);
+
+	draw_book_plot(name, points, transform, plot_no);
+}
+
+// e.g. draw_book_plot("plot_book", book_points, cl_transform, 2);
+function draw_book_plot(name, points, transform, color_scheme_no) {
+	const w = 640.0;
+	const h = 480.0;
+	const x_min = 0;
+	const y_min = 0;
+	const x_max = 1;
+	const y_max = 1;
+
+	var client_x_center = w*(0-x_min)/(x_max-x_min);
+	var client_x_step = (w/(x_max-x_min));
+
+	var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+	var client_y_step = (h/(y_max-y_min));
+
+	function client_to_x(client_x){
+		return (client_x - client_x_center) / client_x_step;
+	}
+
+	function client_to_y(client_y){
+		return (client_y_center - client_y) / client_y_step;
+	}
+
+	function x_to_client(x){
+		return x * client_x_step + client_x_center;
+	}
+
+	function y_to_client(y){
+		return client_y_center - y * client_y_step;
+	}
+
+	plot = document.getElementById(name);
+	var context = plot.getContext("2d");
+
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// pixels
+	if(pixels.length > 0) {
+		var pixel_field = context.createImageData(w, h);
+		for (var i = 0; i < h; ++i) {
+			for (var j = 0; j < w; ++j) {
+				pixel_field.data[(i*w + j)*4 + 0] = pixels[i][j][0];
+				pixel_field.data[(i*w + j)*4 + 1] = pixels[i][j][1];
+				pixel_field.data[(i*w + j)*4 + 2] = pixels[i][j][2];
+				pixel_field.data[(i*w + j)*4 + 3] = 0xFF;
+			}
+		}
+		context.putImageData(pixel_field, -0.5, -0.5);
+	}
+
+	// transformed cube
+	context.lineWidth = 2;
+	context.strokeStyle = colors[color_scheme_no];
+	for(var i = 0; i <= 1.; i += 0.125) {
+		// horizontal
+		context.beginPath();
+		for(var j = 0; j <= 1.; j+=1./128.) {
+			const xy = transform(points, i, j);
+			const x_client = x_to_client(xy[0]);
+			const y_client = y_to_client(xy[1]);
+			if(j == 0)
+				context.moveTo(x_client, y_client);
+			else
+				context.lineTo(x_client, y_client);
+		}
+		context.stroke();
+		context.closePath();
+		// vertical
+		context.beginPath();
+		for(var j = 0; j <= 1.; j+=1./128.) {
+			const xy = transform(points, j, i);
+			const x_client = x_to_client(xy[0]);
+			const y_client = y_to_client(xy[1]);
+			if(j == 0)
+				context.moveTo(x_client, y_client);
+			else
+				context.lineTo(x_client, y_client);
+		}
+		context.stroke();
+		context.closePath();
+	}
+
+	// points
+	context.strokeStyle = colors[color_scheme_no];
+	context.fillStyle = colors[color_scheme_no];
+	for(var i = 0; i < points.length; ++i) {
+		const x = x_to_client(points[i][0]);
+		const y = y_to_client(points[i][1]);
+		context.beginPath();
+		context.arc(x, y, 4, 0, 2*Math.PI);
+		context.stroke();
+		context.fill();
+		context.closePath();
+	}
+}
+
+function load_pixels_from(url) {
+	fetch(url).then(function(response) {
+		response.blob().then(function(blob) {
+			createImageBitmap(blob).then(function(img) {
+				const w = img.width;
+				const h = img.height;
+				var canvas = document.getElementById("plot_book");
+				var context = canvas.getContext('2d');
+				canvas.width = w;
+				canvas.height = h;
+				context.drawImage(img, 0, 0 );
+				var image_data = context.getImageData(0, 0, w, h);
+				pixels = [];
+				for (var i = 0; i < h; ++i) {
+					pixelsi = []
+					for (var j = 0; j < w; ++j) {
+						pixel = [
+							image_data.data[(i*w + j)*4 + 0],
+							image_data.data[(i*w + j)*4 + 1],
+							image_data.data[(i*w + j)*4 + 2]];
+						pixelsi.push(pixel);
+					}
+					pixels.push(pixelsi);
+				}
+				draw_book_plot("plot_book", book_points, cl_transform, 2)
+				draw_flat();
+			});
+		});
+	});
+}
+
+function flatten() {
+	const w = 640.0;
+	const h = 480.0;
+	flat_pixels = [];
+	for (var i = 0; i < h; ++i) {
+		pixelsi = []
+		for (var j = 0; j < w/2; ++j) {
+			// don't use this as a reference, I messed up the transformation axes.
+			// this only works as an illustration
+			const x = (j + 0.5) / ((w-1)/2);
+			const y = 1. - (i + 0.5) / (h-1);
+			const xy_ = cl_transform(book_points, y, x);
+			const j_ = Math.round(Math.max(Math.min(xy_[0] * w, w-1), 0));
+			const i_ = Math.round(Math.max(Math.min((1. - xy_[1]) * h, h-1), 0));
+			pixelsi.push(pixels[i_][j_]);
+		}
+		flat_pixels.push(pixelsi);
+	}
+	draw_flat();
+}
+
+function draw_flat() {
+	const w = 640.0;
+	const h = 480.0;
+	plot = document.getElementById("flat");
+	var context = plot.getContext("2d");
+
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// flat pixels
+	if(flat_pixels.length > 0) {
+		var pixel_field = context.createImageData(w, h);
+		for (var i = 0; i < h; ++i) {
+			for (var j = 0; j < w/2; ++j) {
+				pixel_field.data[(i*w + j)*4 + 0] = flat_pixels[i][j][0];
+				pixel_field.data[(i*w + j)*4 + 1] = flat_pixels[i][j][1];
+				pixel_field.data[(i*w + j)*4 + 2] = flat_pixels[i][j][2];
+				pixel_field.data[(i*w + j)*4 + 3] = 0xFF;
+			}
+		}
+		context.putImageData(pixel_field, -0.5, -0.5);
+	}
+}
 	</script>
 </head>
 <body>
@@ -412,7 +704,19 @@ You see, projective transformations not only translate a straight line into a st
 You need tri-linear transformation to transform all the possible hexahedrons into each other. Or tri-quadratic if you want curvy hexahedrons. Or tri-cubic. Tri-polynomial. On 2D, of course, the corresponding transformations will be bi-polynomial, and in other dimensions, well, let's just omit the prefix and call them polynomial.
 	</p>
 	<p>
-With polynomial transformations, you get to pick features that you want to preserve while transforming. You can preserve straightness of lines, or you can guarantee that a parabola will translate into another parabola, or a curvy surface into another surface equally or less curvy than the original. You have options. And this page is meant to show you how to use them.
+With polynomial transformations, you get to pick features that you want to preserve while transforming. You can preserve the straightness of lines, or you can guarantee that a parabola will translate into another parabola, or a curvy surface into another surface equally or less curvy than the original. You have options.
+	</p>
+	<p>
+In 2013, I wrote the <a href="https://github.com/akalenuk/unpager">Unpager</a>. It's a tool for unbending the pages from the pictures taken by a phone or a pocket camera. The idea was, if you lack a proper scanner, you can simply take a few pictures of the pages you want. They will, of course, appear all skewed and curvy but that's ok. That's where the Unpages comes in. You unpage the pages, and they look just like if they were scanned.
+	</p>
+	</p>
+	<canvas id="plot_book" width=640 height=480></canvas>
+	<form>
+	<button type="button" onclick="flatten();">Unpage</button> &darr;
+	</form>
+	<canvas id="flat" width=320 height=480></canvas>
+	<p>
+I wrote it knowing how to make a polynomial transformation do what I want. And this page is meant to show you how to use polynomials to get what you want.
 	</p>
 	<h2>
 But first! Meet the singular cube
@@ -421,22 +725,25 @@ But first! Meet the singular cube
 A <b><span id="index_singular_cube">singular cube</span></b> is an n-dimensional generalization of the <i>[0..1]</i> range. On a plane, it's an axis-aligned square that has four corners in (0, 0), (1, 0), (1, 1), and (0, 0).
 	</p>
 	<p>
-It doesn't bring much mathematical sense into the whole business of transformations, you can still transform from arbitrary entity to another arbitrary entity, but since the singular cube all consists of ones and zeroes, transforming in and out of this cube requires much simpler equations.
+It doesn't bring much mathematical sense into the whole business of transformations, you can still transform from an arbitrary entity to another arbitrary entity, but since the singular cube all consists of ones and zeroes, transforming in and out of this cube requires much simpler equations.
 	</p>
 	<p>
-On this page, all the transformations are translating line segments from a singular square to a particular figure on a plane, and they are all ruled by sets of points. This simplifies the visualizations but, of course, you can translate any geometric data in any-dimensional space and not necessary from singular cubes.
+On this page, all the transformations are translating line segments from a singular square to a particular figure on a plane, and they are all ruled by sets of points. This is only a convention, you can still transform any shapes you want.
 	</p>
 	<h2>
 <span id="index_bilinear_transformation">Bilinear transformation</span>
 	</h2>
 	<p>
-Ok, so you want to translate a piece of space guided by 4 points. Wherever these points go, the neighbors will follow. This implies that for every transformative equation you'd have to have at least 4 coefficients, too. For the polynomial transformation, this means a 4x4 system of linear equations. 4 points, 4 equations, 4 coefficients, it all comes together nicely. So far. It gets messier as you add more points.
+Ok, so you want to translate a thing by moving 4 points around. Wherever these points go, the neighbors shall follow. This implies that for every transformative equation you'd have to have at least 4 coefficients, too. For the polynomial transformation, this means a 4x4 system of linear equations. 
+	</p>
+	<p>
+4 points, 4 equations, 4 coefficients, it all comes together nicely.
 	</p>
 	<p>
 The idea of bilinear transformation, or bi-anything, or even whatever-anything for that matter, is: you can decompose an n-dimensional translation into n 1-dimensional ones.
 	</p>
 	<p>
-For the bilinear transformation, it works in the most obvious way and that's why we're starting with it. Let's say we have a function that linearly interpolates from one value to another as the parameter travels from 0 to 1. Here it is:
+For the bilinear transformation, it works the most transparent. Let's say we have a function that linearly interpolates from one value to another as the parameter travels from 0 to 1. Here it is:
 	</p>
 	<table>
 	<tr><td><pre>
@@ -447,7 +754,7 @@ function lerp(y1, y2, x) {
 	</pre></td></tr>
 	</table>
 	<p>
-Just to reiterate, this is a linear interpolating function. You give it two values and the parameter. When the parameter is 0, it returns the first value, when the parameter is 1, — the second one. When it's something in between, it returns something in between but in such a way that all these inbetweeners form a straight line.
+Just to reiterate, this is a linear interpolating function. You give it two values and a parameter. When the parameter is 0, it returns the first value, when the parameter is 1, — the second one. When it's something in between, it returns something in between but in such a way that all these inbetweeners form a straight line.
 	</p>
 	<p>
 Now you can use two of these to compose a bilinear interpolation. It will also give you back the values you supply it with in the points (0, 0), (1, 0), (1, 1), and (1, 1); and it will also give you the values between these poitns so they will form straight lines along the parametric axes.
@@ -480,7 +787,7 @@ Auxiliary figures:
 <span id="index_biquadratic_transformation">Biquadratic transformation</span>
 	</h2>
 	<p>
-If mapping a straight quadrilateral to another quadrilateral isn't enough for you, if you need curvy shapes to be transformed into other curvy shapes, you can double the bets. Go biquadratic.
+If mapping a straight quadrilateral to another quadrilateral isn't enough for you, if you need curves, you should go biquadratic.
 	</p>
 	<p>
 The main idea remains, we just need another interpolator.
@@ -497,7 +804,7 @@ function qerp(y1, y2, y3, x) {
 	</pre></td></tr>
 	</table>
 	<p>
-This is a quadratic interpolation. You give it points in 0, 0.5, and 1, and it computes all the other points so they a parabola passing through these three points.
+This is a quadratic interpolation. You give it points in 0, 0.5, and 1, and it computes all the other points so they form a parabola passing through these three points.
 	</p>
 	<p>
 And the biquadratic transofrmation looks almost the same as the bilinear one except for the few extra lines and a few extra arguments.
@@ -526,13 +833,7 @@ And it behaves like this:
 <span id="index_linear_cubic_transformation">Linear-cubic transformation</span>
 	</h2>
 	<p>
-A polynomial transformation in 2D doesn't have to be just bi-something. For instance, it can be linear along one axis and cubic along the other. That's how I modeled pages in the <a href="https://github.com/akalenuk/unpager">Unpager</a>.
-	</p>
-	<p>
-The Unpager is a tool for unbending the pages from the pictures taken by a phone or a pocket camera. The idea was, if you lack a proper scanner, or if you can't take a book close enough to the scanner without dragging too much attention, you can simply take a few pictures of the pages you want. They will, of course, appear all skewed and curvy but that's ok. That's where the Unpages comes in. You unbend the pages with both projective and linear-cubic transformation, and they look then just like if they were scanned.
-	</p>
-	<p>
-Well, the tool can do a few things more than just transformations but these are the main ingredient.
+And, of course, a 2D polynomial transformation doesn't have to be just bi-something. For instance, it can be linear along one axis and cubic along the other. That's how I modeled pages in the Unpager.
 	</p>
 	<p>
 The cubic-linear transformation code looks like this:
@@ -594,22 +895,25 @@ print(solve([
 	</pre></td></tr>
 	</table>
 	<p>
-With a little imagination and a valid business need, you can easily make yourself the exact polynomial that fits your task perfectly.
+Yes, it's that simple. Of course, you can tailor this code to produce a polynomial interpolant you want.
 	</p>
 	<p>
-And you can combine several polynomials in one transformation.
+And you can combine interpolants to make the transformation you want.
 	</p>
 	<p>
-And you can make it work for any multi-dimensional space.
+And you can make it work in 2D, 3D, or kD by adding more interpolants one on top of another.
 	</p>
 	<p>
-This is what makes polynomial transformations both pragmatic and fascinating.
+Have fun!
 	</p>
 
 	<script language="JavaScript">
 init_plot("plot_l", l_points, l_points_original, l_transform, 0);
 init_plot("plot_q", q_points, q_points_original, q_transform, 1);
 init_plot("plot_cl", cl_points, cl_points_original, cl_transform, 2);
+
+init_book_plot("plot_book", book_points, cl_transform, 2);
+load_pixels_from("https://raw.githubusercontent.com/akalenuk/wordsandbuttons/master/talks/2020_KAC/book_640.png");
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
