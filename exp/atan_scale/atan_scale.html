@@ -457,16 +457,16 @@ function snap_focus_to_nearest(function_source) {
 	const y2s = functions[3];
 	const x0 = s2x(w / 2);
 	const y0 = s2y(h / 2);
-	var y = 0.0;
+	var y = null;
 	// function
-	const f_text = document.getElementById("f").value;
+	const f_text = document.getElementById(function_source).value;
 	const f_lines = f_text.split('\n');
 	for(var line_i = 0; line_i < f_lines.length; ++line_i) {
 		const f_line = f_lines[line_i];
 		try {
 			eval("var f = function(x) { return " + f_line + ";}");
 			document.getElementById("error").innerHTML = "";
-			if(abs(f(x0) - y0) < abs(y - y0))
+			if(!y || abs(f(x0) - y0) < abs(y - y0))
 				y = f(x0);
 		} catch (error) {
 			var f = function(x) {return 0;}
