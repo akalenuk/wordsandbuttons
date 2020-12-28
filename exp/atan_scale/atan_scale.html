@@ -84,10 +84,6 @@ button {
 
 	</style>
 	<script language="JavaScript">
-const w = 640;
-const h = 640;
-
-
 // Math. aliases
 const E = Math.E;			const LN2 = Math.LN2;		const LN10 = Math.LN10;
 const LOG10E = Math.LOG10E;	const PI = Math.PI;			const SQRT1_2 = Math.SQRT1_2;
@@ -154,11 +150,13 @@ function s2x_x2s_s2y_y2s_from_UI() {
 }
 
 // todo: this could be enclosed in canvas along with the draw
+const w = 640;
+const h = 640;
 var mousedown_sx;
 var mousedown_sy;
 var mousemove_sx;
 var mousemove_sy;
-function init_canvas() {
+function init_canvas(function_source) {
 	canvas = document.getElementById("canvas");
 	canvas.width = w;
 	canvas.height = h;
@@ -173,7 +171,7 @@ function init_canvas() {
 			const s2y = functions[2];
 			document.getElementById("center_x").value = s2x(sx).toFixed(5);
 			document.getElementById("center_y").value = s2y(sy).toFixed(5);
-			draw_canvas();
+			draw_canvas(function_source);
 		}
 	}, false);
 
@@ -191,7 +189,7 @@ function init_canvas() {
 			document.getElementById("center_y").value = s2y(cy).toFixed(5);
 			mousemove_sx = sx;
 			mousemove_sy = sy;
-			draw_canvas();
+			draw_canvas(function_source);
 		}
 	}, false);
 
@@ -212,11 +210,11 @@ function init_canvas() {
 				document.getElementById("scale").value = scale / 2;
 			else
 				document.getElementById("scale").value = scale * 2;
-			draw_canvas();
+			draw_canvas(function_source);
 		}
 	}, false);
 
-	draw_canvas();
+	draw_canvas(function_source);
 }
 
 function draw_arrow(context, x1, y1, x2, y2, color) {
@@ -233,7 +231,7 @@ function draw_arrow(context, x1, y1, x2, y2, color) {
 	context.closePath();
 }
 
-function draw_canvas() {
+function draw_canvas(function_source) {
 	canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
 
@@ -301,7 +299,7 @@ function draw_canvas() {
 
 
 	// function
-	const f_text = document.getElementById("f").value;
+	const f_text = document.getElementById(function_source).value;
 	const f_lines = f_text.split('\n');
 	for(var line_i = 0; line_i < f_lines.length; ++line_i) {
 		const f_line = f_lines[line_i];
@@ -450,7 +448,7 @@ function draw_canvas() {
 	}
 }
 
-function snap_focus_to_nearest() {
+function snap_focus_to_nearest(function_source) {
 	// translation
 	const functions = s2x_x2s_s2y_y2s_from_UI();
 	const s2x = functions[0];
@@ -476,28 +474,28 @@ function snap_focus_to_nearest() {
 		}
 	}
 	document.getElementById("center_y").value = y.toFixed(5);
-	draw_canvas();
+	draw_canvas(function_source);
 }
 
-function reset_focus() {
+function reset_focus(function_source) {
 	document.getElementById("center_x").value = 0;
 	document.getElementById("center_y").value = 0;
-	draw_canvas();
+	draw_canvas(function_source);
 }
 
-function divide_scale() {
+function divide_scale(function_source) {
 	document.getElementById("scale").value = Number(document.getElementById("scale").value / 2);
-	draw_canvas();
+	draw_canvas(function_source);
 }
 
-function multiply_scale() {
+function multiply_scale(function_source) {
 	document.getElementById("scale").value = Number(document.getElementById("scale").value * 2);
-	draw_canvas();
+	draw_canvas(function_source);
 }
 
-function reset_scale() {
+function reset_scale(function_source) {
 	document.getElementById("scale").value = 4;
-	draw_canvas();
+	draw_canvas(function_source);
 }
 
 	</script>
@@ -517,12 +515,12 @@ Feel free to try your own functions. The plotter accepts lines of JavaScript cod
 	<form>
 	<div style="margin-bottom: 12pt;">
 	The scale:<br>
-	<input type="radio" name="scale" id="scale_1" value="A" onInput="draw_canvas()"checked="true"><label for="scale_1">Linear</label><br>
-	<input type="radio" name="scale" id="scale_2" value="B" onInput="draw_canvas()"><label for="scale_2">Arctagent</label><br>
+	<input type="radio" name="scale" id="scale_1" value="A" onInput="draw_canvas('f')"checked="true"><label for="scale_1">Linear</label><br>
+	<input type="radio" name="scale" id="scale_2" value="B" onInput="draw_canvas('f')"><label for="scale_2">Arctagent</label><br>
 	</div>
 	<div style="margin-bottom: 12pt;">
 	Functions to plot:<br>
-	<textarea id="f" onInput="draw_canvas()" rows=3>exp(x - 1) - 4
+	<textarea id="f" onInput="draw_canvas('f')" rows=3>exp(x - 1) - 4
 x*x*x - sqrt(2.)*x
 -exp(-x - 1) + 4
 </textarea>
@@ -533,23 +531,23 @@ x*x*x - sqrt(2.)*x
 	<canvas id="canvas"></canvas>
 	</div>
 	<div style="text-align: center; margin-bottom: 12pt;">
-	Focus <i>x</i> at:<input type="text" id="center_x" value="0" onInput="draw_canvas()"/>
-	, <i>y</i> at:<input type="text" id="center_y" value="0" onInput="draw_canvas()"/>
+	Focus <i>x</i> at:<input type="text" id="center_x" value="0" onInput="draw_canvas('f')"/>
+	, <i>y</i> at:<input type="text" id="center_y" value="0" onInput="draw_canvas('f')"/>
 	;&nbsp;&nbsp;&nbsp;scale:
-		<button type="button" onclick="divide_scale();" style="width:28pt;">/2</button>
-		<input type="text" id="scale" value="4" onInput="draw_canvas()"/>
-		<button type="button" onclick="multiply_scale();" style="width:28pt;">*2</button>
+		<button type="button" onclick="divide_scale('f');" style="width:28pt;">/2</button>
+		<input type="text" id="scale" value="4" onInput="draw_canvas('f')"/>
+		<button type="button" onclick="multiply_scale('f');" style="width:28pt;">*2</button>
 	<br>
-	<button type="button" onclick="snap_focus_to_nearest();">Snap to <i>f(x)</i></button>
-	<button type="button" onclick="reset_focus();">Reset focus</button>
-	<button type="button" onclick="reset_scale();">Reset scale</button>
+	<button type="button" onclick="snap_focus_to_nearest('f');">Snap to <i>f(x)</i></button>
+	<button type="button" onclick="reset_focus('f');">Reset focus</button>
+	<button type="button" onclick="reset_scale('f');">Reset scale</button>
 	</div>
 	</form>
 
 	<script language="JavaScript">
-		reset_focus();
-		reset_scale();
-		init_canvas();
+		reset_focus('f');
+		reset_scale('f');
+		init_canvas('f');
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
