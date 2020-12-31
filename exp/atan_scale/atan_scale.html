@@ -150,21 +150,24 @@ function s2x_x2s_s2y_y2s_from_UI() {
 }
 
 // todo: this could be enclosed in canvas along with the draw
-const w = 640;
-const h = 640;
+const w = 512;
+const h = 512;
+const panel_w = 128;
 var mousedown_sx;
 var mousedown_sy;
 var mousemove_sx;
 var mousemove_sy;
 function init_canvas(function_source) {
 	canvas = document.getElementById("canvas");
-	canvas.width = w;
+	canvas.width = w + panel_w;
 	canvas.height = h;
 
 	canvas.addEventListener('click', function(e) {
 		const canvas_rect = canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		const sy = e.clientY - canvas_rect.top;
+		if(sx >= w)
+			return;
 		if(mousedown_sx == mousemove_sx && mousedown_sy == mousemove_sy) {
 			const functions = s2x_x2s_s2y_y2s_from_UI();
 			const s2x = functions[0];
@@ -180,6 +183,8 @@ function init_canvas(function_source) {
 			const canvas_rect = canvas.getBoundingClientRect();
 			const sx = e.clientX - canvas_rect.left;
 			const sy = e.clientY - canvas_rect.top;
+			if(sx >= w)
+				return;
 			const cx = w/2 - (sx - mousemove_sx);
 			const cy = h/2 - (sy - mousemove_sy);
 			const functions = s2x_x2s_s2y_y2s_from_UI();
@@ -197,6 +202,8 @@ function init_canvas(function_source) {
 		const canvas_rect = canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		const sy = e.clientY - canvas_rect.top;
+		if(sx >= w)
+			return;
 		mousedown_sx = sx;
 		mousedown_sy = sy;
 		mousemove_sx = mousedown_sx;
@@ -204,6 +211,10 @@ function init_canvas(function_source) {
 	}, false);
 
 	canvas.addEventListener('wheel', function(e) {
+		const canvas_rect = canvas.getBoundingClientRect();
+		const sx = e.clientX - canvas_rect.left;
+		if(sx >= w)
+			return;
 		if(e.shiftKey) {
 			const scale = Number(document.getElementById("scale").value);
 			if(e.deltaY < 0)
@@ -236,6 +247,8 @@ function draw_canvas(function_source) {
 	var context = canvas.getContext("2d");
 
 	// background
+	context.fillStyle="#aaaaaa";
+	context.fillRect(w, 0, panel_w, h);
 	context.fillStyle="#eeeeee";
 	context.fillRect(0, 0, w, h);
 
