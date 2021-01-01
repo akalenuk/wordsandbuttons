@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Arctangent scale. It's like the logarithmic scale but infinite</title>
-	<meta name="description" content="Arctangent scale">
-	<meta name="keywords" content="mathematics, demos">
+	<title>Arctangent scale</title>
+	<meta name="description" content="">
+	<meta name="keywords" content="">
 	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
 	<style>
 body {
@@ -157,6 +157,8 @@ var mousedown_sx;
 var mousedown_sy;
 var mousemove_sx;
 var mousemove_sy;
+var cross_x = 0.;
+var cross_y = 0.;
 function init_canvas(function_source) {
 	canvas = document.getElementById("canvas");
 	canvas.width = w + panel_w;
@@ -172,8 +174,10 @@ function init_canvas(function_source) {
 			const functions = s2x_x2s_s2y_y2s_from_UI();
 			const s2x = functions[0];
 			const s2y = functions[2];
-			document.getElementById("center_x").value = s2x(sx).toFixed(5);
-			document.getElementById("center_y").value = s2y(sy).toFixed(5);
+			cross_x = s2x(sx);
+			cross_y = s2y(sy);
+			document.getElementById("center_x").value = cross_x.toFixed(5);
+			document.getElementById("center_y").value = cross_y.toFixed(5);
 			draw_canvas(function_source);
 		}
 	}, false);
@@ -190,8 +194,10 @@ function init_canvas(function_source) {
 			const functions = s2x_x2s_s2y_y2s_from_UI();
 			const s2x = functions[0];
 			const s2y = functions[2];
-			document.getElementById("center_x").value = s2x(cx).toFixed(5);
-			document.getElementById("center_y").value = s2y(cy).toFixed(5);
+			cross_x = s2x(cx);
+			cross_y = s2y(cy);			
+			document.getElementById("center_x").value = cross_x.toFixed(5);
+			document.getElementById("center_y").value = cross_y.toFixed(5);
 			mousemove_sx = sx;
 			mousemove_sy = sy;
 			draw_canvas(function_source);
@@ -459,6 +465,16 @@ function draw_canvas(function_source) {
 		context.stroke();
 		context.closePath();
 	}
+	
+	// side panel
+	context.font = "14px monospace";
+	context.fillStyle = "#444444";
+	context.textAlign = "left";
+	context.textBaseline = "top";
+	context.strokeStyle = "#000000";
+	context.lineWidth = 1;
+	context.fillText("x: " + (cross_x >= 0 ? '+' : '') + cross_x.toFixed(5), w + 12, 12);
+	context.fillText("y: " + (cross_y >= 0 ? '+' : '') + cross_y.toFixed(5), w + 12, 30);
 }
 
 function snap_focus_to_nearest(function_source) {
