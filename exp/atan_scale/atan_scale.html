@@ -159,20 +159,58 @@ var mousemove_sx;
 var mousemove_sy;
 var cross_x = 0.;
 var cross_y = 0.;
+
+const button_color = "#444";
+const button_high_color = "#777";
+
 const buttons_x = 524;
+const buttons_h = 16;
 const x_y = 12;
 const y_y = 30;
 const radio_1_y = 62;
+var radio_1_over = false;
+var radio_1_down = false;
+var radio_1_checked = true;
 const radio_2_y = 80;
+var radio_2_over = false;
+var radio_2_down = false;
+var radio_2_checked = false;
 const scale_dec_y = 112;
+var scale_dec_over = false;
+var scale_dec_down = false;
 const scale_y = 130;
 const scale_inc_y = 148;
+var scale_inc_over = false;
+var scale_inc_down = false;
 const reset_xy_y = 180;
+var reset_xy_over = false;
+var reset_xy_down = false;
 const reset_scale_y = 198;
+var reset_scale_over = false;
+var reset_scale_down = false;
 const snap_to_f_y = 216;
+var snap_to_f_over = false;
+var snap_to_f_down = false;
 
+function all_not_over() {
+	radio_1_over = false;
+	radio_2_over = false;
+	scale_dec_over = false;
+	scale_inc_over = false;
+	reset_xy_over = false;
+	reset_scale_over = false;
+	snap_to_f_over = false;
+}
 
-
+function all_not_down() {
+	radio_1_down = false;
+	radio_2_down = false;
+	scale_dec_down = false;
+	scale_inc_down = false;
+	reset_xy_down = false;
+	reset_scale_down = false;
+	snap_to_f_down = false;
+}
 
 function init_canvas(function_source) {
 	canvas = document.getElementById("canvas");
@@ -198,12 +236,27 @@ function init_canvas(function_source) {
 	}, false);
 
 	canvas.addEventListener('mousemove', function(e) {
-		if(e.buttons == 1) {
-			const canvas_rect = canvas.getBoundingClientRect();
-			const sx = e.clientX - canvas_rect.left;
-			const sy = e.clientY - canvas_rect.top;
-			if(sx >= w)
-				return;
+		const canvas_rect = canvas.getBoundingClientRect();
+		const sx = e.clientX - canvas_rect.left;
+		const sy = e.clientY - canvas_rect.top;
+		if(sx >= w) {
+			all_not_over();
+			if(sy >= radio_1_y && sy < radio_1_y + buttons_h)
+				radio_1_over = true;
+			if(sy >= radio_2_y && sy < radio_2_y + buttons_h)
+				radio_2_over = true;
+			if(sy >= scale_dec_y && sy < scale_dec_y + buttons_h)
+				scale_dec_over = true;
+			if(sy >= scale_inc_y && sy < scale_inc_y + buttons_h)
+				scale_inc_over = true;
+			if(sy >= reset_xy_y && sy < reset_xy_y + buttons_h)
+				reset_xy_over = true;
+			if(sy >= reset_scale_y && sy < reset_scale_y + buttons_h)
+				reset_scale_over = true;
+			if(sy >= snap_to_f_y && sy < snap_to_f_y + buttons_h)
+				snap_to_f_over = true;
+			draw_canvas(function_source);
+		} else if(e.buttons == 1) {
 			const cx = w/2 - (sx - mousemove_sx);
 			const cy = h/2 - (sy - mousemove_sy);
 			const functions = s2x_x2s_s2y_y2s_from_UI();
@@ -483,24 +536,32 @@ function draw_canvas(function_source) {
 	context.fillRect(w, 0, panel_w, h);
 
 	context.font = "14px monospace";
-	context.fillStyle = "#444444";
 	context.textAlign = "left";
 	context.textBaseline = "top";
 	context.strokeStyle = "#000000";
 	context.lineWidth = 1;
-	
+
+	context.fillStyle = button_color;
 	context.fillText("x: " + (cross_x >= 0 ? '+' : '') + cross_x.toFixed(5), buttons_x, x_y);
 	context.fillText("y: " + (cross_y >= 0 ? '+' : '') + cross_y.toFixed(5), buttons_x, y_y);
 	
+	context.fillStyle = radio_1_over ? button_high_color :button_color;
 	context.fillText("(v) linear", buttons_x, radio_1_y);
+	context.fillStyle = radio_2_over ? button_high_color : button_color;
 	context.fillText("( ) atan", buttons_x, radio_2_y);
 	
+	context.fillStyle = scale_dec_over ? button_high_color : button_color;
 	context.fillText("[ scale / 2 ]", buttons_x, scale_dec_y);
+	context.fillStyle = "#444444";
 	context.fillText("scale: " + scale.toFixed(3), buttons_x, scale_y);
+	context.fillStyle = scale_inc_over ? button_high_color : button_color;
 	context.fillText("[ scale * 2 ]", buttons_x, scale_inc_y);
 	
+	context.fillStyle = reset_xy_over ? button_high_color : button_color;
 	context.fillText("[  reset xy ]", buttons_x, reset_xy_y);
+	context.fillStyle = reset_scale_over ? button_high_color : button_color;
 	context.fillText("[reset scale]", buttons_x, reset_scale_y);
+	context.fillStyle = snap_to_f_over ? button_high_color : button_color;
 	context.fillText("[ snap to f ]", buttons_x, snap_to_f_y);
 }
 
