@@ -140,9 +140,9 @@ function s2x_x2s_s2y_y2s(type, center_x, center_y, scale) {
 }
 
 function s2x_x2s_s2y_y2s_from_UI() {
-	const center_x = Number(document.getElementById("center_x").value);
-	const center_y = Number(document.getElementById("center_y").value);
-	const scale = Number(document.getElementById("scale").value);
+	const center_x = x_value;
+	const center_y = y_value;
+	const scale = scale_value;
 	const type = linear_scale_checked
 		? LINEAR
 		: ATAN;
@@ -167,6 +167,8 @@ const buttons_x = 524;
 const buttons_h = 16;
 const x_y = 12;
 const y_y = 30;
+var x_value = 0.;
+var y_value = 0.;
 const linear_scale_y = 62;
 var linear_scale_over = false;
 var linear_scale_down = false;
@@ -179,6 +181,7 @@ const scale_dec_y = 112;
 var scale_dec_over = false;
 var scale_dec_down = false;
 const scale_y = 130;
+var scale_value = 4.;
 const scale_inc_y = 148;
 var scale_inc_over = false;
 var scale_inc_down = false;
@@ -230,11 +233,11 @@ function init_canvas(function_source) {
 				linear_scale_checked = false;
 				atan_scale_checked = true;
 			}
-			// not wired yet 
 			if(sy >= scale_dec_y && sy < scale_dec_y + buttons_h)
-				scale_dec_down = true;
+				scale_value /= 4.;
 			if(sy >= scale_inc_y && sy < scale_inc_y + buttons_h)
-				scale_inc_down = true;
+				scale_value *= 4.;
+			// not wired yet
 			if(sy >= reset_xy_y && sy < reset_xy_y + buttons_h)
 				reset_xy_down = true;
 			if(sy >= reset_scale_y && sy < reset_scale_y + buttons_h)
@@ -248,8 +251,8 @@ function init_canvas(function_source) {
 			const s2y = functions[2];
 			cross_x = s2x(sx);
 			cross_y = s2y(sy);
-			document.getElementById("center_x").value = cross_x.toFixed(5);
-			document.getElementById("center_y").value = cross_y.toFixed(5);
+			x_value = cross_x;
+			y_value = cross_y;
 			draw_canvas(function_source);
 		}
 	}, false);
@@ -284,9 +287,9 @@ function init_canvas(function_source) {
 			const s2x = functions[0];
 			const s2y = functions[2];
 			cross_x = s2x(cx);
-			cross_y = s2y(cy);			
-			document.getElementById("center_x").value = cross_x.toFixed(5);
-			document.getElementById("center_y").value = cross_y.toFixed(5);
+			cross_y = s2y(cy);
+			x_value = cross_x;
+			y_value = cross_y;
 			mousemove_sx = sx;
 			mousemove_sy = sy;
 			draw_canvas(function_source);
@@ -338,11 +341,10 @@ function init_canvas(function_source) {
 		if(sx >= w)
 			return;
 		if(e.shiftKey) {
-			const scale = Number(document.getElementById("scale").value);
 			if(e.deltaY < 0)
-				document.getElementById("scale").value = scale / 2;
+				scale_value /= 2;
 			else
-				document.getElementById("scale").value = scale * 2;
+				scale_value *= 2;
 			draw_canvas(function_source);
 		}
 	}, false);
@@ -380,7 +382,7 @@ function draw_canvas(function_source) {
 	const y2s = functions[3];
 
 	// the grid
-	const scale = Number(document.getElementById("scale").value);
+	const scale = scale_value;
 	const step = scale < 16 ? 1 : floor(scale / 8);
 	const stepped = function(x) {return floor(x / step) * step;}
 
@@ -643,23 +645,13 @@ function snap_focus_to_nearest(function_source) {
 }
 
 function reset_focus(function_source) {
-	document.getElementById("center_x").value = 0;
-	document.getElementById("center_y").value = 0;
-	draw_canvas(function_source);
-}
-
-function divide_scale(function_source) {
-	document.getElementById("scale").value = Number(document.getElementById("scale").value / 2);
-	draw_canvas(function_source);
-}
-
-function multiply_scale(function_source) {
-	document.getElementById("scale").value = Number(document.getElementById("scale").value * 2);
+	x_value = 0.;
+	y_value = 0.;
 	draw_canvas(function_source);
 }
 
 function reset_scale(function_source) {
-	document.getElementById("scale").value = 4;
+	scale_value = 4;
 	draw_canvas(function_source);
 }
 
@@ -691,13 +683,6 @@ x*x*x - sqrt(2.)*x
 	<canvas id="canvas"></canvas>
 	</div>
 	<div style="text-align: center; margin-bottom: 12pt;">
-	Focus <i>x</i> at:<input type="text" id="center_x" value="0" onInput="draw_canvas('f')"/>
-	, <i>y</i> at:<input type="text" id="center_y" value="0" onInput="draw_canvas('f')"/>
-	;&nbsp;&nbsp;&nbsp;scale:
-		<button type="button" onclick="divide_scale('f');" style="width:28pt;">/2</button>
-		<input type="text" id="scale" value="4" onInput="draw_canvas('f')"/>
-		<button type="button" onclick="multiply_scale('f');" style="width:28pt;">*2</button>
-	<br>
 	<button type="button" onclick="snap_focus_to_nearest('f');">Snap to <i>f(x)</i></button>
 	<button type="button" onclick="reset_focus('f');">Reset focus</button>
 	<button type="button" onclick="reset_scale('f');">Reset scale</button>
