@@ -143,7 +143,7 @@ function s2x_x2s_s2y_y2s_from_UI() {
 	const center_x = Number(document.getElementById("center_x").value);
 	const center_y = Number(document.getElementById("center_y").value);
 	const scale = Number(document.getElementById("scale").value);
-	const type = document.getElementById("scale_1").checked
+	const type = linear_scale_checked
 		? LINEAR
 		: ATAN;
 	return s2x_x2s_s2y_y2s(type, center_x, center_y, scale);
@@ -167,14 +167,14 @@ const buttons_x = 524;
 const buttons_h = 16;
 const x_y = 12;
 const y_y = 30;
-const radio_1_y = 62;
-var radio_1_over = false;
-var radio_1_down = false;
-var radio_1_checked = true;
-const radio_2_y = 80;
-var radio_2_over = false;
-var radio_2_down = false;
-var radio_2_checked = false;
+const linear_scale_y = 62;
+var linear_scale_over = false;
+var linear_scale_down = false;
+var linear_scale_checked = true;
+const atan_scale_y = 80;
+var atan_scale_over = false;
+var atan_scale_down = false;
+var atan_scale_checked = false;
 const scale_dec_y = 112;
 var scale_dec_over = false;
 var scale_dec_down = false;
@@ -193,8 +193,8 @@ var snap_to_f_over = false;
 var snap_to_f_down = false;
 
 function all_not_over() {
-	radio_1_over = false;
-	radio_2_over = false;
+	linear_scale_over = false;
+	atan_scale_over = false;
 	scale_dec_over = false;
 	scale_inc_over = false;
 	reset_xy_over = false;
@@ -203,8 +203,8 @@ function all_not_over() {
 }
 
 function all_not_down() {
-	radio_1_down = false;
-	radio_2_down = false;
+	linear_scale_down = false;
+	atan_scale_down = false;
 	scale_dec_down = false;
 	scale_inc_down = false;
 	reset_xy_down = false;
@@ -221,9 +221,28 @@ function init_canvas(function_source) {
 		const canvas_rect = canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		const sy = e.clientY - canvas_rect.top;
-		if(sx >= w)
-			return;
-		if(mousedown_sx == mousemove_sx && mousedown_sy == mousemove_sy) {
+		if(sx >= w) {
+			if(sy >= linear_scale_y && sy < linear_scale_y + buttons_h) {
+				linear_scale_checked = true;
+				atan_scale_checked = false;
+			}
+			if(sy >= atan_scale_y && sy < atan_scale_y + buttons_h) {
+				linear_scale_checked = false;
+				atan_scale_checked = true;
+			}
+			// not wired yet 
+			if(sy >= scale_dec_y && sy < scale_dec_y + buttons_h)
+				scale_dec_down = true;
+			if(sy >= scale_inc_y && sy < scale_inc_y + buttons_h)
+				scale_inc_down = true;
+			if(sy >= reset_xy_y && sy < reset_xy_y + buttons_h)
+				reset_xy_down = true;
+			if(sy >= reset_scale_y && sy < reset_scale_y + buttons_h)
+				reset_scale_down = true;
+			if(sy >= snap_to_f_y && sy < snap_to_f_y + buttons_h)
+				snap_to_f_down = true;
+			draw_canvas(function_source);
+		} else if(mousedown_sx == mousemove_sx && mousedown_sy == mousemove_sy) {
 			const functions = s2x_x2s_s2y_y2s_from_UI();
 			const s2x = functions[0];
 			const s2y = functions[2];
@@ -241,10 +260,10 @@ function init_canvas(function_source) {
 		const sy = e.clientY - canvas_rect.top;
 		if(sx >= w) {
 			all_not_over();
-			if(sy >= radio_1_y && sy < radio_1_y + buttons_h)
-				radio_1_over = true;
-			if(sy >= radio_2_y && sy < radio_2_y + buttons_h)
-				radio_2_over = true;
+			if(sy >= linear_scale_y && sy < linear_scale_y + buttons_h)
+				linear_scale_over = true;
+			if(sy >= atan_scale_y && sy < atan_scale_y + buttons_h)
+				atan_scale_over = true;
 			if(sy >= scale_dec_y && sy < scale_dec_y + buttons_h)
 				scale_dec_over = true;
 			if(sy >= scale_inc_y && sy < scale_inc_y + buttons_h)
@@ -280,10 +299,10 @@ function init_canvas(function_source) {
 		const sy = e.clientY - canvas_rect.top;
 		if(sx >= w) {
 			all_not_down();
-			if(sy >= radio_1_y && sy < radio_1_y + buttons_h)
-				radio_1_down = true;
-			if(sy >= radio_2_y && sy < radio_2_y + buttons_h)
-				radio_2_down = true;
+			if(sy >= linear_scale_y && sy < linear_scale_y + buttons_h)
+				linear_scale_down = true;
+			if(sy >= atan_scale_y && sy < atan_scale_y + buttons_h)
+				atan_scale_down = true;
 			if(sy >= scale_dec_y && sy < scale_dec_y + buttons_h)
 				scale_dec_down = true;
 			if(sy >= scale_inc_y && sy < scale_inc_y + buttons_h)
@@ -367,7 +386,7 @@ function draw_canvas(function_source) {
 
 	context.beginPath();
 	context.setLineDash([2, 3]);
-	if(document.getElementById("scale_1").checked) {
+	if(linear_scale_checked) {
 		// horizontal
 		for(var j = stepped(s2x(0)); j <= stepped(s2x(w)); j += step) {
 			if(j != 0) {
@@ -382,7 +401,7 @@ function draw_canvas(function_source) {
 				context.lineTo(w, sharp(y2s(i)));
 			}
 		}
-	} else if(document.getElementById("scale_2").checked) {
+	} else if(atan_scale_checked) {
 		// horizontal
 		const x_from = s2x(20);
 		const x_to = s2x(w-20);
@@ -438,7 +457,7 @@ function draw_canvas(function_source) {
 		context.beginPath();
 		var the_gap = true;
 		var old_i;
-		for(var j = -0.5; j < w + 0.5; j += 0.5) {
+		for(var j = -0.5 + atan_scale_checked; j < w + 0.5 - atan_scale_checked; j += 0.5) {
 			const x = s2x(j);
 			const y = f(x);
 			const i = y2s(y);
@@ -468,7 +487,7 @@ function draw_canvas(function_source) {
 	context.strokeStyle = "#000000";
 	context.lineWidth = 1;
 	context.beginPath();
-	if(document.getElementById("scale_1").checked) {
+	if(linear_scale_checked) {
 		draw_arrow(context, 0, sharp(y2s(0)), w, sharp(y2s(0)), "#000000");
 		draw_arrow(context, sharp(x2s(0)), h, sharp(x2s(0)), 0, "#000000");
 		// horizontal
@@ -487,7 +506,7 @@ function draw_canvas(function_source) {
 				context.fillText(i, sharp(x2s(0)) + 12, sharp(y2s(i)) - 12);
 			}
 		}
-	} else if(document.getElementById("scale_2").checked) {
+	} else if(atan_scale_checked) {
 		context.moveTo(20.5, sharp(y2s(0)));
 		context.lineTo(w - 20.5, sharp(y2s(0)));
 		context.moveTo(sharp(x2s(0)), h - 20.5);
@@ -574,10 +593,10 @@ function draw_canvas(function_source) {
 	context.fillText("x: " + (cross_x >= 0 ? '+' : '') + cross_x.toFixed(5), buttons_x, x_y);
 	context.fillText("y: " + (cross_y >= 0 ? '+' : '') + cross_y.toFixed(5), buttons_x, y_y);
 	
-	context.fillStyle = radio_1_over ? button_high_color :button_color;
-	context.fillText("(v) linear", buttons_x + radio_1_down, radio_1_y + radio_1_down);
-	context.fillStyle = radio_2_over ? button_high_color : button_color;
-	context.fillText("( ) atan", buttons_x + radio_2_down, radio_2_y + radio_2_down);
+	context.fillStyle = linear_scale_over ? button_high_color :button_color;
+	context.fillText(linear_scale_checked ? "(v) linear" : "( ) linear", buttons_x + linear_scale_down, linear_scale_y + linear_scale_down);
+	context.fillStyle = atan_scale_over ? button_high_color : button_color;
+	context.fillText(atan_scale_checked ? "(v) atan" : "( ) atan", buttons_x + atan_scale_down, atan_scale_y + atan_scale_down);
 	
 	context.fillStyle = scale_dec_over ? button_high_color : button_color;
 	context.fillText("[ scale / 2 ]", buttons_x + scale_dec_down, scale_dec_y + scale_dec_down);
@@ -659,11 +678,6 @@ This is a function plotter that can do both linear and arctangent scales. Everyt
 Feel free to try your own functions. The plotter accepts lines of JavaScript code each evaluated to <i>f(x)</i>.
 	</p>
 	<form>
-	<div style="margin-bottom: 12pt;">
-	The scale:<br>
-	<input type="radio" name="scale" id="scale_1" value="A" onInput="draw_canvas('f')"checked="true"><label for="scale_1">Linear</label><br>
-	<input type="radio" name="scale" id="scale_2" value="B" onInput="draw_canvas('f')"><label for="scale_2">Arctagent</label><br>
-	</div>
 	<div style="margin-bottom: 12pt;">
 	Functions to plot:<br>
 	<textarea id="f" onInput="draw_canvas('f')" rows=3>exp(x - 1) - 4
