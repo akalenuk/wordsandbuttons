@@ -157,8 +157,6 @@ var mousedown_sx;
 var mousedown_sy;
 var mousemove_sx;
 var mousemove_sy;
-var cross_x = 0.;
-var cross_y = 0.;
 
 const button_color = "#444";
 const button_high_color = "#777";
@@ -237,22 +235,21 @@ function init_canvas(function_source) {
 				scale_value /= 4.;
 			if(sy >= scale_inc_y && sy < scale_inc_y + buttons_h)
 				scale_value *= 4.;
-			// not wired yet
-			if(sy >= reset_xy_y && sy < reset_xy_y + buttons_h)
-				reset_xy_down = true;
+			if(sy >= reset_xy_y && sy < reset_xy_y + buttons_h) {
+				x_value = 0.;
+				y_value = 0.;
+			}
 			if(sy >= reset_scale_y && sy < reset_scale_y + buttons_h)
-				reset_scale_down = true;
+				scale_value = 4.;
 			if(sy >= snap_to_f_y && sy < snap_to_f_y + buttons_h)
-				snap_to_f_down = true;
+				snap_focus_to_nearest(function_source);
 			draw_canvas(function_source);
 		} else if(mousedown_sx == mousemove_sx && mousedown_sy == mousemove_sy) {
 			const functions = s2x_x2s_s2y_y2s_from_UI();
 			const s2x = functions[0];
 			const s2y = functions[2];
-			cross_x = s2x(sx);
-			cross_y = s2y(sy);
-			x_value = cross_x;
-			y_value = cross_y;
+			x_value = s2x(sx);
+			y_value = s2y(sy);
 			draw_canvas(function_source);
 		}
 	}, false);
@@ -286,10 +283,8 @@ function init_canvas(function_source) {
 			const functions = s2x_x2s_s2y_y2s_from_UI();
 			const s2x = functions[0];
 			const s2y = functions[2];
-			cross_x = s2x(cx);
-			cross_y = s2y(cy);
-			x_value = cross_x;
-			y_value = cross_y;
+			x_value = s2x(cx);
+			y_value = s2y(cy);
 			mousemove_sx = sx;
 			mousemove_sy = sy;
 			draw_canvas(function_source);
@@ -592,8 +587,8 @@ function draw_canvas(function_source) {
 	context.lineWidth = 1;
 
 	context.fillStyle = button_color;
-	context.fillText("x: " + (cross_x >= 0 ? '+' : '') + cross_x.toFixed(5), buttons_x, x_y);
-	context.fillText("y: " + (cross_y >= 0 ? '+' : '') + cross_y.toFixed(5), buttons_x, y_y);
+	context.fillText("x: " + (x_value >= 0 ? '+' : '') + x_value.toFixed(5), buttons_x, x_y);
+	context.fillText("y: " + (y_value >= 0 ? '+' : '') + y_value.toFixed(5), buttons_x, y_y);
 	
 	context.fillStyle = linear_scale_over ? button_high_color :button_color;
 	context.fillText(linear_scale_checked ? "(v) linear" : "( ) linear", buttons_x + linear_scale_down, linear_scale_y + linear_scale_down);
@@ -640,7 +635,7 @@ function snap_focus_to_nearest(function_source) {
 			document.getElementById("error").innerHTML = "<b>Error:</b> " + error.message;
 		}
 	}
-	document.getElementById("center_y").value = y.toFixed(5);
+	y_value = y;
 	draw_canvas(function_source);
 }
 
@@ -681,11 +676,6 @@ x*x*x - sqrt(2.)*x
 	</div>
 	<div style="text-align: center; margin-bottom: 12pt;">
 	<canvas id="canvas"></canvas>
-	</div>
-	<div style="text-align: center; margin-bottom: 12pt;">
-	<button type="button" onclick="snap_focus_to_nearest('f');">Snap to <i>f(x)</i></button>
-	<button type="button" onclick="reset_focus('f');">Reset focus</button>
-	<button type="button" onclick="reset_scale('f');">Reset scale</button>
 	</div>
 	</form>
 
