@@ -213,10 +213,275 @@ function all_not_down() {
 	snap_to_f_down = false;
 }
 
-function init_canvas(function_source) {
-	canvas = document.getElementById("canvas");
+function init_canvas(canvas, fs, colors) {
 	canvas.width = w + panel_w;
 	canvas.height = h;
+	
+	function draw_canvas() {
+		function draw_arrow(context, x1, y1, x2, y2, color) {
+			const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+			context.beginPath();
+			context.moveTo(x1, y1);
+			context.lineTo(x2, y2);
+			context.moveTo(x2 - (y2 - y1) * 4.3 / d - (x2 - x1) * 16.7 / d, y2 - (y2 - y1) * 16.7 / d + (x2 - x1) * 4.3 / d);
+			context.lineTo(x2, y2);
+			context.moveTo(x2 + (y2 - y1) * 4.3 / d - (x2 - x1) * 16.7 / d, y2 - (y2 - y1) * 16.7 / d - (x2 - x1) * 4.3 / d);
+			context.lineTo(x2, y2);
+			context.strokeStyle = color;
+			context.stroke();
+			context.closePath();
+		}
+		var context = canvas.getContext("2d");
+
+		// background
+		context.fillStyle="#eeeeee";
+		context.fillRect(0, 0, w, h);
+
+		// translation functions
+		const functions = s2x_x2s_s2y_y2s_from_UI();
+		const s2x = functions[0];
+		const x2s = functions[1];
+		const s2y = functions[2];
+		const y2s = functions[3];
+
+		// the grid
+		const scale = scale_value;
+		const step = scale < 16 ? 1 : floor(scale / 8);
+		const stepped = function(x) {return floor(x / step) * step;}
+
+		context.beginPath();
+		context.setLineDash([2, 3]);
+		if(linear_scale_checked) {
+			// horizontal
+			for(var j = stepped(s2x(0)); j <= stepped(s2x(w)); j += step) {
+				if(j != 0) {
+					context.moveTo(sharp(x2s(j)), 0);
+					context.lineTo(sharp(x2s(j)), h);
+				}
+			}
+			// vertical
+			for(var i = stepped(s2y(h)); i <= stepped(s2y(0)); i += step) {
+				if(i != 0) {
+					context.moveTo(0, sharp(y2s(i)));
+					context.lineTo(w, sharp(y2s(i)));
+				}
+			}
+		} else if(atan_scale_checked) {
+			// horizontal
+			const x_from = s2x(20);
+			const x_to = s2x(w-20);
+			for(var i = sign(x_from) * floor(log2(abs(x_from))) - 1; i <= sign(x_to) * ceil(log2(abs(x_to))); ++i) {
+				if(i == 0)
+					continue;
+				const x_i = sign(i) * pow(2, abs(i) - 1);
+				context.moveTo(sharp(x2s(x_i)), 0);
+				context.lineTo(sharp(x2s(x_i)), h);
+			}
+			// vertical
+			const y_from = s2y(20);
+			const y_to = s2y(h-20);
+			for(var i = sign(y_from) * floor(log2(abs(y_from))) - 1; i <= sign(y_to) * ceil(log2(abs(y_to))); ++i) {
+				if(i == 0)
+					continue;
+				const y_i = sign(i) * pow(2, abs(i) - 1);
+				context.moveTo(0, sharp(y2s(y_i)));
+				context.lineTo(w, sharp(y2s(y_i)));
+			}
+		}
+		context.strokeStyle = "#AAA";
+		context.lineWidth = 1;
+		context.stroke();
+		context.setLineDash([]);
+		context.closePath();
+
+
+		// functions
+		for(var i = 0; i < fs.length; ++i) {
+			const f = fs[i];
+			const color = colors[i];
+			// draw
+			context.beginPath();
+			var the_gap = true;
+			var old_i;
+			for(var j = -0.5 + atan_scale_checked; j < w + 0.5 - atan_scale_checked; j += 0.5) {
+				const x = s2x(j);
+				const y = f(x);
+				const i = y2s(y);
+				if(the_gap) {
+					context.moveTo(j, i)
+					the_gap = false;
+				} else {
+					if(abs(i - old_i) >= h)
+						the_gap = true;
+					else
+						context.lineTo(j, i);
+				}
+				old_i = i;
+			}
+			context.strokeStyle = color;
+			context.lineWidth = 1.5;
+			context.stroke();
+			context.closePath();
+		}
+
+
+		// the axes
+		function sharp(x) {return floor(x) + 0.5;}
+		context.font = "14px Arial";
+		context.fillStyle = "#444444";
+		context.textAlign = "center";
+		context.textBaseline = "middle";
+		context.strokeStyle = "#000000";
+		context.lineWidth = 1;
+		context.beginPath();
+		if(linear_scale_checked) {
+			draw_arrow(context, 0, sharp(y2s(0)), w, sharp(y2s(0)), "#000000");
+			draw_arrow(context, sharp(x2s(0)), h, sharp(x2s(0)), 0, "#000000");
+			// horizontal
+			for(var j = stepped(s2x(0)); j <= stepped(s2x(w)); j += step) {
+				if(j != 0) {
+					context.moveTo(sharp(x2s(j)), sharp(y2s(0)) + 2);
+					context.lineTo(sharp(x2s(j)), sharp(y2s(0)) - 2);
+				}
+				context.fillText(j, sharp(x2s(j)) + 12, sharp(y2s(0)) - 12);
+			}
+			// vertical
+			for(var i = stepped(s2y(h)); i <= stepped(s2y(0)); i += step) {
+				if(i != 0) {
+					context.moveTo(sharp(x2s(0)) - 2, sharp(y2s(i)));
+					context.lineTo(sharp(x2s(0)) + 2, sharp(y2s(i)));
+					context.fillText(i, sharp(x2s(0)) + 12, sharp(y2s(i)) - 12);
+				}
+			}
+		} else if(atan_scale_checked) {
+			context.moveTo(20.5, sharp(y2s(0)));
+			context.lineTo(w - 20.5, sharp(y2s(0)));
+			context.moveTo(sharp(x2s(0)), h - 20.5);
+			context.lineTo(sharp(x2s(0)), 20.5);
+			context.stroke();
+			context.closePath();
+
+			context.beginPath();
+			context.setLineDash([3, 2]);
+			context.moveTo(20.5, sharp(y2s(0)));
+			context.lineTo(-0.5, sharp(y2s(0)));
+			context.moveTo(w - 20.5, sharp(y2s(0)));
+			context.lineTo(w + 0.5, sharp(y2s(0)));
+			context.moveTo(sharp(x2s(0)), h - 20.5);
+			context.lineTo(sharp(x2s(0)), h + 0.5);
+			context.moveTo(sharp(x2s(0)), 20.5);
+			context.lineTo(sharp(x2s(0)), -0.5);
+			context.stroke();
+			context.closePath();
+			context.setLineDash([]);
+
+			context.beginPath();
+
+			// the grid
+			// horizontal
+			const x_from = s2x(20);
+			const x_to = s2x(w-20);
+			for(var i = sign(x_from) * floor(log2(abs(x_from))) - 1; i <= sign(x_to) * ceil(log2(abs(x_to))); ++i) {
+				if(i == 0)
+					continue;
+				const x_i = sign(i) * pow(2, abs(i) - 1);
+				context.moveTo(sharp(x2s(x_i)), sharp(y2s(0)) + 2);
+				context.lineTo(sharp(x2s(x_i)), sharp(y2s(0)) - 2);
+				const to_print = (i < 0) ? "-" + String(pow(2, abs(i+1))) : String(pow(2, i-1));
+				if(i % 2 == 0)
+					context.fillText(to_print, sharp(x2s(x_i)), sharp(y2s(0)) - 12);
+				else
+					context.fillText(to_print, sharp(x2s(x_i)), sharp(y2s(0)) + 12);
+			}
+			// vertical
+			const y_from = s2y(h-20);
+			const y_to = s2y(20);
+			for(var i = sign(y_from) * floor(log2(abs(y_from))) - 1; i <= sign(y_to) * ceil(log2(abs(y_to))); ++i) {
+				if(i == 0)
+					continue;
+				const y_i = sign(i) * pow(2, abs(i) - 1);
+				context.moveTo(sharp(x2s(0)) + 2, sharp(y2s(y_i)));
+				context.lineTo(sharp(x2s(0)) - 2, sharp(y2s(y_i)));
+				const to_print = (i < 0) ? "-" + String(pow(2, abs(i+1))) : String(pow(2, i-1));
+				if(i % 2 == 0)
+					context.fillText(to_print, sharp(x2s(0)) - 12, sharp(y2s(y_i)) - 12);
+				else
+					context.fillText(to_print, sharp(x2s(0)) + 12, sharp(y2s(y_i)) + 12);
+			}
+		}
+
+		context.stroke();
+		context.closePath();
+
+		// cross
+		if(x2s(0) != w/2 || y2s(0) != h/2) {
+			context.beginPath();
+			context.moveTo(sharp(w/2) - 14.5, sharp(h/2));
+			context.lineTo(sharp(w/2) + 14.5, sharp(h/2));
+			context.moveTo(sharp(w/2), sharp(h/2) - 14.5);
+			context.lineTo(sharp(w/2), sharp(h/2) + 14.5);
+			context.strokeStyle = "#222222";
+			context.lineWidth = 1;
+			context.stroke();
+			context.closePath();
+		}
+		
+		// side panel
+		context.fillStyle="#aaaaaa";
+		context.fillRect(w, 0, panel_w, h);
+
+		context.font = "14px monospace";
+		context.textAlign = "left";
+		context.textBaseline = "top";
+		context.strokeStyle = "#000000";
+		context.lineWidth = 1;
+
+		context.fillStyle = button_color;
+		context.fillText("x: " + (x_value >= 0 ? '+' : '') + x_value.toFixed(5), buttons_x, x_y);
+		context.fillText("y: " + (y_value >= 0 ? '+' : '') + y_value.toFixed(5), buttons_x, y_y);
+		
+		context.fillStyle = linear_scale_over ? button_high_color :button_color;
+		context.fillText(linear_scale_checked ? "(v) linear" : "( ) linear", buttons_x + linear_scale_down, linear_scale_y + linear_scale_down);
+		context.fillStyle = atan_scale_over ? button_high_color : button_color;
+		context.fillText(atan_scale_checked ? "(v) atan" : "( ) atan", buttons_x + atan_scale_down, atan_scale_y + atan_scale_down);
+		
+		context.fillStyle = scale_dec_over ? button_high_color : button_color;
+		context.fillText("[ scale / 2 ]", buttons_x + scale_dec_down, scale_dec_y + scale_dec_down);
+		context.fillStyle = "#444444";
+		context.fillText("scale: " + scale.toFixed(3), buttons_x, scale_y);
+		context.fillStyle = scale_inc_over ? button_high_color : button_color;
+		context.fillText("[ scale * 2 ]", buttons_x + scale_inc_down, scale_inc_y + scale_inc_down);
+		
+		context.fillStyle = reset_xy_over ? button_high_color : button_color;
+		context.fillText("[ reset x,y ]", buttons_x + reset_xy_down, reset_xy_y + reset_xy_down);
+		context.fillStyle = reset_scale_over ? button_high_color : button_color;
+		context.fillText("[reset scale]", buttons_x + reset_scale_down, reset_scale_y + reset_scale_down);
+		context.fillStyle = snap_to_f_over ? button_high_color : button_color;
+		context.fillText("[ snap to f ]", buttons_x + snap_to_f_down, snap_to_f_y + snap_to_f_down);
+	}
+
+	function snap_focus_to_nearest() {
+		// translation
+		const functions = s2x_x2s_s2y_y2s_from_UI();
+		const s2x = functions[0];
+		const x2s = functions[1];
+		const s2y = functions[2];
+		const y2s = functions[3];
+		const x0 = s2x(w / 2);
+		const y0 = s2y(h / 2);
+		var y = null;
+		// function
+		for(var i = 0; i < fs.length; ++i) {
+			try {
+				if(!y || abs(fs[i](x0) - y0) < abs(y - y0))
+					y = fs[i](x0);
+			} catch (error) {
+				y = 0;
+			}
+		}
+		y_value = y;
+		draw_canvas();
+	}
 
 	canvas.addEventListener('click', function(e) {
 		const canvas_rect = canvas.getBoundingClientRect();
@@ -242,15 +507,15 @@ function init_canvas(function_source) {
 			if(sy >= reset_scale_y && sy < reset_scale_y + buttons_h)
 				scale_value = 4.;
 			if(sy >= snap_to_f_y && sy < snap_to_f_y + buttons_h)
-				snap_focus_to_nearest(function_source);
-			draw_canvas(function_source);
+				snap_focus_to_nearest();
+			draw_canvas();
 		} else if(mousedown_sx == mousemove_sx && mousedown_sy == mousemove_sy) {
 			const functions = s2x_x2s_s2y_y2s_from_UI();
 			const s2x = functions[0];
 			const s2y = functions[2];
 			x_value = s2x(sx);
 			y_value = s2y(sy);
-			draw_canvas(function_source);
+			draw_canvas();
 		}
 	}, false);
 
@@ -274,7 +539,7 @@ function init_canvas(function_source) {
 				reset_scale_over = true;
 			if(sy >= snap_to_f_y && sy < snap_to_f_y + buttons_h)
 				snap_to_f_over = true;
-			draw_canvas(function_source);
+			draw_canvas();
 		} else if(e.buttons == 1) {
 			all_not_over();
 			all_not_down();
@@ -287,7 +552,7 @@ function init_canvas(function_source) {
 			y_value = s2y(cy);
 			mousemove_sx = sx;
 			mousemove_sy = sy;
-			draw_canvas(function_source);
+			draw_canvas();
 		}
 	}, false);
 
@@ -311,7 +576,7 @@ function init_canvas(function_source) {
 				reset_scale_down = true;
 			if(sy >= snap_to_f_y && sy < snap_to_f_y + buttons_h)
 				snap_to_f_down = true;
-			draw_canvas(function_source);
+			draw_canvas();
 		}
 		mousedown_sx = sx;
 		mousedown_sy = sy;
@@ -321,13 +586,13 @@ function init_canvas(function_source) {
 
 	canvas.addEventListener('mouseup', function(e) {
 		all_not_down();
-		draw_canvas(function_source);
+		draw_canvas();
 	}, false);
 
 	canvas.addEventListener('mouseleave', function(e) {
 		all_not_over();
 		all_not_down();
-		draw_canvas(function_source);
+		draw_canvas();
 	}, false);
 	
 	canvas.addEventListener('wheel', function(e) {
@@ -340,303 +605,11 @@ function init_canvas(function_source) {
 				scale_value /= 2;
 			else
 				scale_value *= 2;
-			draw_canvas(function_source);
+			draw_canvas();
 		}
 	}, false);
 
-	draw_canvas(function_source);
-}
-
-function draw_arrow(context, x1, y1, x2, y2, color) {
-	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
-	context.beginPath();
-	context.moveTo(x1, y1);
-	context.lineTo(x2, y2);
-	context.moveTo(x2 - (y2 - y1) * 4.3 / d - (x2 - x1) * 16.7 / d, y2 - (y2 - y1) * 16.7 / d + (x2 - x1) * 4.3 / d);
-	context.lineTo(x2, y2);
-	context.moveTo(x2 + (y2 - y1) * 4.3 / d - (x2 - x1) * 16.7 / d, y2 - (y2 - y1) * 16.7 / d - (x2 - x1) * 4.3 / d);
-	context.lineTo(x2, y2);
-	context.strokeStyle = color;
-	context.stroke();
-	context.closePath();
-}
-
-function draw_canvas(function_source) {
-	canvas = document.getElementById("canvas");
-	var context = canvas.getContext("2d");
-
-	// background
-	context.fillStyle="#eeeeee";
-	context.fillRect(0, 0, w, h);
-
-	// translation functions
-	const functions = s2x_x2s_s2y_y2s_from_UI();
-	const s2x = functions[0];
-	const x2s = functions[1];
-	const s2y = functions[2];
-	const y2s = functions[3];
-
-	// the grid
-	const scale = scale_value;
-	const step = scale < 16 ? 1 : floor(scale / 8);
-	const stepped = function(x) {return floor(x / step) * step;}
-
-	context.beginPath();
-	context.setLineDash([2, 3]);
-	if(linear_scale_checked) {
-		// horizontal
-		for(var j = stepped(s2x(0)); j <= stepped(s2x(w)); j += step) {
-			if(j != 0) {
-				context.moveTo(sharp(x2s(j)), 0);
-				context.lineTo(sharp(x2s(j)), h);
-			}
-		}
-		// vertical
-		for(var i = stepped(s2y(h)); i <= stepped(s2y(0)); i += step) {
-			if(i != 0) {
-				context.moveTo(0, sharp(y2s(i)));
-				context.lineTo(w, sharp(y2s(i)));
-			}
-		}
-	} else if(atan_scale_checked) {
-		// horizontal
-		const x_from = s2x(20);
-		const x_to = s2x(w-20);
-		for(var i = sign(x_from) * floor(log2(abs(x_from))) - 1; i <= sign(x_to) * ceil(log2(abs(x_to))); ++i) {
-			if(i == 0)
-				continue;
-			const x_i = sign(i) * pow(2, abs(i) - 1);
-			context.moveTo(sharp(x2s(x_i)), 0);
-			context.lineTo(sharp(x2s(x_i)), h);
-		}
-		// vertical
-		const y_from = s2y(20);
-		const y_to = s2y(h-20);
-		for(var i = sign(y_from) * floor(log2(abs(y_from))) - 1; i <= sign(y_to) * ceil(log2(abs(y_to))); ++i) {
-			if(i == 0)
-				continue;
-			const y_i = sign(i) * pow(2, abs(i) - 1);
-			context.moveTo(0, sharp(y2s(y_i)));
-			context.lineTo(w, sharp(y2s(y_i)));
-		}
-	}
-	context.strokeStyle = "#AAA";
-	context.lineWidth = 1;
-	context.stroke();
-	context.setLineDash([]);
-	context.closePath();
-
-
-	// function
-	const f_text = document.getElementById(function_source).value;
-	const f_lines = f_text.split('\n');
-	for(var line_i = 0; line_i < f_lines.length; ++line_i) {
-		const f_line = f_lines[line_i];
-		try {
-			eval("var f = function(x) { return " + f_line + ";}");
-			document.getElementById("error").innerHTML = "";
-		} catch (error) {
-			var f = function(x) {return 0;}
-			document.getElementById("error").innerHTML = "<b>Error:</b> " + error.message;
-		}
-		// helper for coloring
-		function color_by_hash_of(string) {
-			var code_sum = 0;
-			for(var i = 0; i < string.length; ++i)
-				code_sum += ([1, 7, 11, 13][i % 4] * string.charCodeAt(i));
-			const zero_channel = code_sum % 3;
-			const color = '#' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
-				+ (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
-				+ (zero_channel == 2 ? '0' : '');
-			return color;
-		}
-		// draw
-		context.beginPath();
-		var the_gap = true;
-		var old_i;
-		for(var j = -0.5 + atan_scale_checked; j < w + 0.5 - atan_scale_checked; j += 0.5) {
-			const x = s2x(j);
-			const y = f(x);
-			const i = y2s(y);
-			if(the_gap) {
-				context.moveTo(j, i)
-				the_gap = false;
-			} else {
-				if(abs(i - old_i) >= h)
-					the_gap = true;
-				else
-					context.lineTo(j, i);
-			}
-			old_i = i;
-		}
-		context.strokeStyle = color_by_hash_of(f_line);
-		context.lineWidth = 1.5;
-		context.stroke();
-		context.closePath();
-	}
-
-	// the axes
-	function sharp(x) {return floor(x) + 0.5;}
-	context.font = "14px Arial";
-	context.fillStyle = "#444444";
-	context.textAlign = "center";
-	context.textBaseline = "middle";
-	context.strokeStyle = "#000000";
-	context.lineWidth = 1;
-	context.beginPath();
-	if(linear_scale_checked) {
-		draw_arrow(context, 0, sharp(y2s(0)), w, sharp(y2s(0)), "#000000");
-		draw_arrow(context, sharp(x2s(0)), h, sharp(x2s(0)), 0, "#000000");
-		// horizontal
-		for(var j = stepped(s2x(0)); j <= stepped(s2x(w)); j += step) {
-			if(j != 0) {
-				context.moveTo(sharp(x2s(j)), sharp(y2s(0)) + 2);
-				context.lineTo(sharp(x2s(j)), sharp(y2s(0)) - 2);
-			}
-			context.fillText(j, sharp(x2s(j)) + 12, sharp(y2s(0)) - 12);
-		}
-		// vertical
-		for(var i = stepped(s2y(h)); i <= stepped(s2y(0)); i += step) {
-			if(i != 0) {
-				context.moveTo(sharp(x2s(0)) - 2, sharp(y2s(i)));
-				context.lineTo(sharp(x2s(0)) + 2, sharp(y2s(i)));
-				context.fillText(i, sharp(x2s(0)) + 12, sharp(y2s(i)) - 12);
-			}
-		}
-	} else if(atan_scale_checked) {
-		context.moveTo(20.5, sharp(y2s(0)));
-		context.lineTo(w - 20.5, sharp(y2s(0)));
-		context.moveTo(sharp(x2s(0)), h - 20.5);
-		context.lineTo(sharp(x2s(0)), 20.5);
-		context.stroke();
-		context.closePath();
-
-		context.beginPath();
-		context.setLineDash([3, 2]);
-		context.moveTo(20.5, sharp(y2s(0)));
-		context.lineTo(-0.5, sharp(y2s(0)));
-		context.moveTo(w - 20.5, sharp(y2s(0)));
-		context.lineTo(w + 0.5, sharp(y2s(0)));
-		context.moveTo(sharp(x2s(0)), h - 20.5);
-		context.lineTo(sharp(x2s(0)), h + 0.5);
-		context.moveTo(sharp(x2s(0)), 20.5);
-		context.lineTo(sharp(x2s(0)), -0.5);
-		context.stroke();
-		context.closePath();
-		context.setLineDash([]);
-
-		context.beginPath();
-
-		// the grid
-		// horizontal
-		const x_from = s2x(20);
-		const x_to = s2x(w-20);
-		for(var i = sign(x_from) * floor(log2(abs(x_from))) - 1; i <= sign(x_to) * ceil(log2(abs(x_to))); ++i) {
-			if(i == 0)
-				continue;
-			const x_i = sign(i) * pow(2, abs(i) - 1);
-			context.moveTo(sharp(x2s(x_i)), sharp(y2s(0)) + 2);
-			context.lineTo(sharp(x2s(x_i)), sharp(y2s(0)) - 2);
-			const to_print = (i < 0) ? "-" + String(pow(2, abs(i+1))) : String(pow(2, i-1));
-			if(i % 2 == 0)
-				context.fillText(to_print, sharp(x2s(x_i)), sharp(y2s(0)) - 12);
-			else
-				context.fillText(to_print, sharp(x2s(x_i)), sharp(y2s(0)) + 12);
-		}
-		// vertical
-		const y_from = s2y(h-20);
-		const y_to = s2y(20);
-		for(var i = sign(y_from) * floor(log2(abs(y_from))) - 1; i <= sign(y_to) * ceil(log2(abs(y_to))); ++i) {
-			if(i == 0)
-				continue;
-			const y_i = sign(i) * pow(2, abs(i) - 1);
-			context.moveTo(sharp(x2s(0)) + 2, sharp(y2s(y_i)));
-			context.lineTo(sharp(x2s(0)) - 2, sharp(y2s(y_i)));
-			const to_print = (i < 0) ? "-" + String(pow(2, abs(i+1))) : String(pow(2, i-1));
-			if(i % 2 == 0)
-				context.fillText(to_print, sharp(x2s(0)) - 12, sharp(y2s(y_i)) - 12);
-			else
-				context.fillText(to_print, sharp(x2s(0)) + 12, sharp(y2s(y_i)) + 12);
-		}
-	}
-
-	context.stroke();
-	context.closePath();
-
-	// cross
-	if(x2s(0) != w/2 || y2s(0) != h/2) {
-		context.beginPath();
-		context.moveTo(sharp(w/2) - 14.5, sharp(h/2));
-		context.lineTo(sharp(w/2) + 14.5, sharp(h/2));
-		context.moveTo(sharp(w/2), sharp(h/2) - 14.5);
-		context.lineTo(sharp(w/2), sharp(h/2) + 14.5);
-		context.strokeStyle = "#222222";
-		context.lineWidth = 1;
-		context.stroke();
-		context.closePath();
-	}
-	
-	// side panel
-	context.fillStyle="#aaaaaa";
-	context.fillRect(w, 0, panel_w, h);
-
-	context.font = "14px monospace";
-	context.textAlign = "left";
-	context.textBaseline = "top";
-	context.strokeStyle = "#000000";
-	context.lineWidth = 1;
-
-	context.fillStyle = button_color;
-	context.fillText("x: " + (x_value >= 0 ? '+' : '') + x_value.toFixed(5), buttons_x, x_y);
-	context.fillText("y: " + (y_value >= 0 ? '+' : '') + y_value.toFixed(5), buttons_x, y_y);
-	
-	context.fillStyle = linear_scale_over ? button_high_color :button_color;
-	context.fillText(linear_scale_checked ? "(v) linear" : "( ) linear", buttons_x + linear_scale_down, linear_scale_y + linear_scale_down);
-	context.fillStyle = atan_scale_over ? button_high_color : button_color;
-	context.fillText(atan_scale_checked ? "(v) atan" : "( ) atan", buttons_x + atan_scale_down, atan_scale_y + atan_scale_down);
-	
-	context.fillStyle = scale_dec_over ? button_high_color : button_color;
-	context.fillText("[ scale / 2 ]", buttons_x + scale_dec_down, scale_dec_y + scale_dec_down);
-	context.fillStyle = "#444444";
-	context.fillText("scale: " + scale.toFixed(3), buttons_x, scale_y);
-	context.fillStyle = scale_inc_over ? button_high_color : button_color;
-	context.fillText("[ scale * 2 ]", buttons_x + scale_inc_down, scale_inc_y + scale_inc_down);
-	
-	context.fillStyle = reset_xy_over ? button_high_color : button_color;
-	context.fillText("[ reset x,y ]", buttons_x + reset_xy_down, reset_xy_y + reset_xy_down);
-	context.fillStyle = reset_scale_over ? button_high_color : button_color;
-	context.fillText("[reset scale]", buttons_x + reset_scale_down, reset_scale_y + reset_scale_down);
-	context.fillStyle = snap_to_f_over ? button_high_color : button_color;
-	context.fillText("[ snap to f ]", buttons_x + snap_to_f_down, snap_to_f_y + snap_to_f_down);
-}
-
-function snap_focus_to_nearest(function_source) {
-	// translation
-	const functions = s2x_x2s_s2y_y2s_from_UI();
-	const s2x = functions[0];
-	const x2s = functions[1];
-	const s2y = functions[2];
-	const y2s = functions[3];
-	const x0 = s2x(w / 2);
-	const y0 = s2y(h / 2);
-	var y = null;
-	// function
-	const f_text = document.getElementById(function_source).value;
-	const f_lines = f_text.split('\n');
-	for(var line_i = 0; line_i < f_lines.length; ++line_i) {
-		const f_line = f_lines[line_i];
-		try {
-			eval("var f = function(x) { return " + f_line + ";}");
-			document.getElementById("error").innerHTML = "";
-			if(!y || abs(f(x0) - y0) < abs(y - y0))
-				y = f(x0);
-		} catch (error) {
-			var f = function(x) {return 0;}
-			document.getElementById("error").innerHTML = "<b>Error:</b> " + error.message;
-		}
-	}
-	y_value = y;
-	draw_canvas(function_source);
+	draw_canvas();
 }
 
 function fs_from(f_text) {
@@ -716,7 +689,10 @@ x*x*x - sqrt(2.)*x
 	</form>
 
 	<script language="JavaScript">
-		init_canvas('f');
+		const f_text = document.getElementById("f").value;
+		const fs = fs_from(f_text);
+		const colors = colors_from(f_text);
+		init_canvas(document.getElementById("canvas"), fs, colors);
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
