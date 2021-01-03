@@ -639,17 +639,53 @@ function snap_focus_to_nearest(function_source) {
 	draw_canvas(function_source);
 }
 
-function reset_focus(function_source) {
-	x_value = 0.;
-	y_value = 0.;
-	draw_canvas(function_source);
+function fs_from(f_text) {
+	var fs = [];
+
+	function color_by_hash_of(string) {
+		var code_sum = 0;
+		for(var i = 0; i < string.length; ++i)
+			code_sum += ([1, 7, 11, 13][i % 4] * string.charCodeAt(i));
+		const zero_channel = code_sum % 3;
+		const color = '#' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
+			+ (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
+			+ (zero_channel == 2 ? '0' : '');
+		return color;
+	}
+
+	const f_lines = f_text.split('\n');
+	for(var line_i = 0; line_i < f_lines.length; ++line_i) {
+		const f_line = f_lines[line_i];
+		try {
+			eval("var f = function(x) { return " + f_line + ";}");
+		} catch (error) {
+			var f = function(x) {return 0;}
+		}
+		fs.push(f);
+	}
+	return fs;
 }
 
-function reset_scale(function_source) {
-	scale_value = 4;
-	draw_canvas(function_source);
-}
+function colors_from(f_text) {
+	var colors = [];
 
+	function color_by_hash_of(string) {
+		var code_sum = 0;
+		for(var i = 0; i < string.length; ++i)
+			code_sum += ([1, 7, 11, 13][i % 4] * string.charCodeAt(i));
+		const zero_channel = code_sum % 3;
+		const color = '#' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
+			+ (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
+			+ (zero_channel == 2 ? '0' : '');
+		return color;
+	}
+
+	const f_lines = f_text.split('\n');
+	for(var line_i = 0; line_i < f_lines.length; ++line_i) {
+		colors.push(color_by_hash_of(f_lines[line_i]));
+	}
+	return colors;
+}
 	</script>
 </head>
 <body>
@@ -680,8 +716,6 @@ x*x*x - sqrt(2.)*x
 	</form>
 
 	<script language="JavaScript">
-		reset_focus('f');
-		reset_scale('f');
 		init_canvas('f');
 	</script>
 
