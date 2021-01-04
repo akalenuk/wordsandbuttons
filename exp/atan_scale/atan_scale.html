@@ -101,121 +101,120 @@ const cos = Math.cos;
 const sqrt = function(x) {return Math.pow(x, 0.5);}
 
 
-function linear_real_to_screen (x, dx, scale, w) {
-	return (w / 2) + ((x - dx) / scale) * (w / 2);
-}
+function init_canvas(i_canvas, i_fs, i_colors, i_x, i_y, i_scale) {
+	const w = 512;
+	const h = 512;
+	const panel_w = 128;
+	var mousedown_sx;
+	var mousedown_sy;
+	var mousemove_sx;
+	var mousemove_sy;
 
-function linear_screen_to_real (x, dx, scale, w) {
-	return ((x - (w / 2)) / (w / 2) * scale + dx);
-}
+	const button_color = "#444";
+	const button_high_color = "#777";
 
-function atan_real_to_screen (x, dx, scale, w) {
-	return atan((x - dx) / scale) / PI * (w - 1.) + (w / 2);
-}
+	const buttons_x = 524;
+	const buttons_h = 16;
+	const x_y = 12;
+	const y_y = 30;
+	var x_value = i_x;
+	var y_value = i_y;
+	const linear_scale_y = 62;
+	var linear_scale_over = false;
+	var linear_scale_down = false;
+	var linear_scale_checked = true;
+	const atan_scale_y = 80;
+	var atan_scale_over = false;
+	var atan_scale_down = false;
+	var atan_scale_checked = false;
+	const scale_dec_y = 112;
+	var scale_dec_over = false;
+	var scale_dec_down = false;
+	const scale_y = 130;
+	var scale_value = i_scale;
+	const scale_inc_y = 148;
+	var scale_inc_over = false;
+	var scale_inc_down = false;
+	const reset_xy_y = 180;
+	var reset_xy_over = false;
+	var reset_xy_down = false;
+	const reset_scale_y = 198;
+	var reset_scale_over = false;
+	var reset_scale_down = false;
+	const snap_to_f_y = 216;
+	var snap_to_f_over = false;
+	var snap_to_f_down = false;
 
-function atan_screen_to_real (x, dx, scale, w) {
-	return scale * tan((x - (w / 2)) * PI / (w - 1.)) + dx;
-}
-
-// returns 4 translation functions from/to screen and real coordinates
-// types: LINEAR, ATAN
-const LINEAR = 0;
-const ATAN = 1;
-function s2x_x2s_s2y_y2s(type, center_x, center_y, scale) {
-	if(type == LINEAR) {
-		return [
-			function(i) {return linear_screen_to_real(i, center_x, scale, w);},
-			function(x) {return linear_real_to_screen(x, center_x, scale, w);},
-			function(i) {return linear_screen_to_real(h - i, center_y, scale, h);},
-			function(y) {return h - linear_real_to_screen(y, center_y, scale, h);}
-		];
-	} else if(type == ATAN) {
-		return [
-			function(i) {return atan_screen_to_real(i, center_x, scale, w);},
-			function(x) {return atan_real_to_screen(x, center_x, scale, w);},
-			function(i) {return atan_screen_to_real(h - i, center_y, scale, h);},
-			function(y) {return h - atan_real_to_screen(y, center_y, scale, h);}
-		];
+	function all_not_over() {
+		linear_scale_over = false;
+		atan_scale_over = false;
+		scale_dec_over = false;
+		scale_inc_over = false;
+		reset_xy_over = false;
+		reset_scale_over = false;
+		snap_to_f_over = false;
 	}
-}
 
-function s2x_x2s_s2y_y2s_from_UI() {
-	const center_x = x_value;
-	const center_y = y_value;
-	const scale = scale_value;
-	const type = linear_scale_checked
-		? LINEAR
-		: ATAN;
-	return s2x_x2s_s2y_y2s(type, center_x, center_y, scale);
-}
+	function all_not_down() {
+		linear_scale_down = false;
+		atan_scale_down = false;
+		scale_dec_down = false;
+		scale_inc_down = false;
+		reset_xy_down = false;
+		reset_scale_down = false;
+		snap_to_f_down = false;
+	}
 
-// todo: this could be enclosed in canvas along with the draw
-const w = 512;
-const h = 512;
-const panel_w = 128;
-var mousedown_sx;
-var mousedown_sy;
-var mousemove_sx;
-var mousemove_sy;
+	function linear_real_to_screen (x, dx, scale, w) {
+		return (w / 2) + ((x - dx) / scale) * (w / 2);
+	}
 
-const button_color = "#444";
-const button_high_color = "#777";
+	function linear_screen_to_real (x, dx, scale, w) {
+		return ((x - (w / 2)) / (w / 2) * scale + dx);
+	}
 
-const buttons_x = 524;
-const buttons_h = 16;
-const x_y = 12;
-const y_y = 30;
-var x_value = 0.;
-var y_value = 0.;
-const linear_scale_y = 62;
-var linear_scale_over = false;
-var linear_scale_down = false;
-var linear_scale_checked = true;
-const atan_scale_y = 80;
-var atan_scale_over = false;
-var atan_scale_down = false;
-var atan_scale_checked = false;
-const scale_dec_y = 112;
-var scale_dec_over = false;
-var scale_dec_down = false;
-const scale_y = 130;
-var scale_value = 4.;
-const scale_inc_y = 148;
-var scale_inc_over = false;
-var scale_inc_down = false;
-const reset_xy_y = 180;
-var reset_xy_over = false;
-var reset_xy_down = false;
-const reset_scale_y = 198;
-var reset_scale_over = false;
-var reset_scale_down = false;
-const snap_to_f_y = 216;
-var snap_to_f_over = false;
-var snap_to_f_down = false;
+	function atan_real_to_screen (x, dx, scale, w) {
+		return atan((x - dx) / scale) / PI * (w - 1.) + (w / 2);
+	}
 
-function all_not_over() {
-	linear_scale_over = false;
-	atan_scale_over = false;
-	scale_dec_over = false;
-	scale_inc_over = false;
-	reset_xy_over = false;
-	reset_scale_over = false;
-	snap_to_f_over = false;
-}
+	function atan_screen_to_real (x, dx, scale, w) {
+		return scale * tan((x - (w / 2)) * PI / (w - 1.)) + dx;
+	}
 
-function all_not_down() {
-	linear_scale_down = false;
-	atan_scale_down = false;
-	scale_dec_down = false;
-	scale_inc_down = false;
-	reset_xy_down = false;
-	reset_scale_down = false;
-	snap_to_f_down = false;
-}
+	// returns 4 translation functions from/to screen and real coordinates
+	// types: LINEAR, ATAN
+	const LINEAR = 0;
+	const ATAN = 1;
+	function s2x_x2s_s2y_y2s(type, center_x, center_y, scale) {
+		if(type == LINEAR) {
+			return [
+				function(i) {return linear_screen_to_real(i, center_x, scale, w);},
+				function(x) {return linear_real_to_screen(x, center_x, scale, w);},
+				function(i) {return linear_screen_to_real(h - i, center_y, scale, h);},
+				function(y) {return h - linear_real_to_screen(y, center_y, scale, h);}
+			];
+		} else if(type == ATAN) {
+			return [
+				function(i) {return atan_screen_to_real(i, center_x, scale, w);},
+				function(x) {return atan_real_to_screen(x, center_x, scale, w);},
+				function(i) {return atan_screen_to_real(h - i, center_y, scale, h);},
+				function(y) {return h - atan_real_to_screen(y, center_y, scale, h);}
+			];
+		}
+	}
 
-function init_canvas(canvas, fs, colors) {
-	canvas.width = w + panel_w;
-	canvas.height = h;
+	function s2x_x2s_s2y_y2s_from_UI() {
+		const center_x = x_value;
+		const center_y = y_value;
+		const scale = scale_value;
+		const type = linear_scale_checked
+			? LINEAR
+			: ATAN;
+		return s2x_x2s_s2y_y2s(type, center_x, center_y, scale);
+	}
+
+	i_canvas.width = w + panel_w;
+	i_canvas.height = h;
 	
 	function draw_canvas() {
 		function draw_arrow(context, x1, y1, x2, y2, color) {
@@ -231,7 +230,7 @@ function init_canvas(canvas, fs, colors) {
 			context.stroke();
 			context.closePath();
 		}
-		var context = canvas.getContext("2d");
+		var context = i_canvas.getContext("2d");
 
 		// background
 		context.fillStyle="#eeeeee";
@@ -296,9 +295,9 @@ function init_canvas(canvas, fs, colors) {
 
 
 		// functions
-		for(var i = 0; i < fs.length; ++i) {
-			const f = fs[i];
-			const color = colors[i];
+		for(var i = 0; i < i_fs.length; ++i) {
+			const f = i_fs[i];
+			const color = i_colors[i];
 			// draw
 			context.beginPath();
 			var the_gap = true;
@@ -471,10 +470,10 @@ function init_canvas(canvas, fs, colors) {
 		const y0 = s2y(h / 2);
 		var y = null;
 		// function
-		for(var i = 0; i < fs.length; ++i) {
+		for(var i = 0; i < i_fs.length; ++i) {
 			try {
-				if(!y || abs(fs[i](x0) - y0) < abs(y - y0))
-					y = fs[i](x0);
+				if(!y || abs(i_fs[i](x0) - y0) < abs(y - y0))
+					y = i_fs[i](x0);
 			} catch (error) {
 				y = 0;
 			}
@@ -483,8 +482,8 @@ function init_canvas(canvas, fs, colors) {
 		draw_canvas();
 	}
 
-	canvas.addEventListener('click', function(e) {
-		const canvas_rect = canvas.getBoundingClientRect();
+	i_canvas.addEventListener('click', function(e) {
+		const canvas_rect = i_canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		const sy = e.clientY - canvas_rect.top;
 		if(sx >= w) {
@@ -501,11 +500,11 @@ function init_canvas(canvas, fs, colors) {
 			if(sy >= scale_inc_y && sy < scale_inc_y + buttons_h)
 				scale_value *= 4.;
 			if(sy >= reset_xy_y && sy < reset_xy_y + buttons_h) {
-				x_value = 0.;
-				y_value = 0.;
+				x_value = i_x;
+				y_value = i_y;
 			}
 			if(sy >= reset_scale_y && sy < reset_scale_y + buttons_h)
-				scale_value = 4.;
+				scale_value = i_scale;
 			if(sy >= snap_to_f_y && sy < snap_to_f_y + buttons_h)
 				snap_focus_to_nearest();
 			draw_canvas();
@@ -519,12 +518,12 @@ function init_canvas(canvas, fs, colors) {
 		}
 	}, false);
 
-	canvas.addEventListener('mousemove', function(e) {
-		const canvas_rect = canvas.getBoundingClientRect();
+	i_canvas.addEventListener('mousemove', function(e) {
+		const canvas_rect = i_canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		const sy = e.clientY - canvas_rect.top;
+		all_not_over();
 		if(sx >= w) {
-			all_not_over();
 			if(sy >= linear_scale_y && sy < linear_scale_y + buttons_h)
 				linear_scale_over = true;
 			if(sy >= atan_scale_y && sy < atan_scale_y + buttons_h)
@@ -539,7 +538,6 @@ function init_canvas(canvas, fs, colors) {
 				reset_scale_over = true;
 			if(sy >= snap_to_f_y && sy < snap_to_f_y + buttons_h)
 				snap_to_f_over = true;
-			draw_canvas();
 		} else if(e.buttons == 1) {
 			all_not_over();
 			all_not_down();
@@ -552,12 +550,12 @@ function init_canvas(canvas, fs, colors) {
 			y_value = s2y(cy);
 			mousemove_sx = sx;
 			mousemove_sy = sy;
-			draw_canvas();
 		}
+		draw_canvas();
 	}, false);
 
-	canvas.addEventListener('mousedown', function(e) {
-		const canvas_rect = canvas.getBoundingClientRect();
+	i_canvas.addEventListener('mousedown', function(e) {
+		const canvas_rect = i_canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		const sy = e.clientY - canvas_rect.top;
 		if(sx >= w) {
@@ -584,19 +582,19 @@ function init_canvas(canvas, fs, colors) {
 		mousemove_sy = mousedown_sy;
 	}, false);
 
-	canvas.addEventListener('mouseup', function(e) {
+	i_canvas.addEventListener('mouseup', function(e) {
 		all_not_down();
 		draw_canvas();
 	}, false);
 
-	canvas.addEventListener('mouseleave', function(e) {
+	i_canvas.addEventListener('mouseleave', function(e) {
 		all_not_over();
 		all_not_down();
 		draw_canvas();
 	}, false);
 	
-	canvas.addEventListener('wheel', function(e) {
-		const canvas_rect = canvas.getBoundingClientRect();
+	i_canvas.addEventListener('wheel', function(e) {
+		const canvas_rect = i_canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		if(sx >= w)
 			return;
@@ -611,6 +609,7 @@ function init_canvas(canvas, fs, colors) {
 
 	draw_canvas();
 }
+
 
 function fs_from(f_text) {
 	var fs = [];
@@ -692,7 +691,7 @@ x*x*x - sqrt(2.)*x
 		const f_text = document.getElementById("f").value;
 		const fs = fs_from(f_text);
 		const colors = colors_from(f_text);
-		init_canvas(document.getElementById("canvas"), fs, colors);
+		init_canvas(document.getElementById("canvas"), fs, colors, 1., 2., 4.);
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
