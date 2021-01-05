@@ -597,7 +597,11 @@ function init_canvas(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale, i
 		}
 	}, false);
 
-	draw_canvas();
+	function redraw() {
+		draw_canvas();
+		setTimeout(redraw, 20);
+	}
+	redraw();
 }
 
 
@@ -679,7 +683,16 @@ x*x*x - sqrt(2.)*x
 		const fs = fs_from(f_text);
 		const colors = colors_from(f_text);
 		init_canvas(document.getElementById("canvas"), fs, colors, [1., 2., 3.], 1., 2., 4., 512, 512, true);
-		init_canvas(document.getElementById("canvas_2"), fs, colors, [], 0., 0., 4., 640, 640, false);
+
+		var t = 0;
+		function tick() {
+			t += 0.02;
+			setTimeout(tick, 20);
+		}
+		tick();
+
+		const parabola = function(x) {return x * x + sin(t / 1.);}
+		init_canvas(document.getElementById("canvas_2"), [parabola], colors, [], 0., 0., 4., 640, 640, false);
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
