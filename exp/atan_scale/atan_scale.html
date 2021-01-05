@@ -101,10 +101,10 @@ const cos = Math.cos;
 const sqrt = function(x) {return Math.pow(x, 0.5);}
 
 
-function init_canvas(i_canvas, i_fs, i_colors, i_x, i_y, i_scale) {
-	const w = 512;
-	const h = 512;
-	const panel_w = 158;
+function init_canvas(i_canvas, i_fs, i_colors, i_x, i_y, i_scale, i_w, i_h, i_do_side_panel) {
+	const w = i_w;
+	const h = i_h;
+	const panel_w = i_do_side_panel ? 158 : 0;
 	var mousedown_sx;
 	var mousedown_sy;
 	var mousemove_sx;
@@ -395,37 +395,39 @@ function init_canvas(i_canvas, i_fs, i_colors, i_x, i_y, i_scale) {
 		}
 		
 		// side panel
-		context.fillStyle = button_bg_color;
-		context.fillRect(w, 0, panel_w, h);
+		if(i_do_side_panel) {
+			context.fillStyle = button_bg_color;
+			context.fillRect(w, 0, panel_w, h);
 
-		context.font = "14px monospace";
-		context.textAlign = "left";
-		context.textBaseline = "top";
-		context.strokeStyle = "#000000";
-		context.lineWidth = 1;
+			context.font = "14px monospace";
+			context.textAlign = "left";
+			context.textBaseline = "top";
+			context.strokeStyle = "#000000";
+			context.lineWidth = 1;
 
-		context.fillStyle = button_color;
-		context.fillText("x: " + (x_value >= 0 ? '+' : '') + x_value.toFixed(5), buttons_x, x_y);
-		context.fillText("y: " + (y_value >= 0 ? '+' : '') + y_value.toFixed(5), buttons_x, y_y);
+			context.fillStyle = button_color;
+			context.fillText("x: " + (x_value >= 0 ? '+' : '') + x_value.toFixed(5), buttons_x, x_y);
+			context.fillText("y: " + (y_value >= 0 ? '+' : '') + y_value.toFixed(5), buttons_x, y_y);
 		
-		context.fillStyle = linear_scale_over ? button_high_color :button_color;
-		context.fillText(linear_scale_checked ? "(*) linear" : "( ) linear", buttons_x + linear_scale_down, linear_scale_y + linear_scale_down);
-		context.fillStyle = atan_scale_over ? button_high_color : button_color;
-		context.fillText(atan_scale_checked ? "(*) atan" : "( ) atan", buttons_x + atan_scale_down, atan_scale_y + atan_scale_down);
+			context.fillStyle = linear_scale_over ? button_high_color :button_color;
+			context.fillText(linear_scale_checked ? "(*) linear" : "( ) linear", buttons_x + linear_scale_down, linear_scale_y + linear_scale_down);
+			context.fillStyle = atan_scale_over ? button_high_color : button_color;
+			context.fillText(atan_scale_checked ? "(*) atan" : "( ) atan", buttons_x + atan_scale_down, atan_scale_y + atan_scale_down);
 		
-		context.fillStyle = scale_dec_over ? button_high_color : button_color;
-		context.fillText("[ scale / 2 ]", buttons_x + scale_dec_down, scale_dec_y + scale_dec_down);
-		context.fillStyle = "#444444";
-		context.fillText("scale: " + scale.toFixed(3), buttons_x, scale_y);
-		context.fillStyle = scale_inc_over ? button_high_color : button_color;
-		context.fillText("[ scale * 2 ]", buttons_x + scale_inc_down, scale_inc_y + scale_inc_down);
+			context.fillStyle = scale_dec_over ? button_high_color : button_color;
+			context.fillText("[ scale / 2 ]", buttons_x + scale_dec_down, scale_dec_y + scale_dec_down);
+			context.fillStyle = "#444444";
+			context.fillText("scale: " + scale.toFixed(3), buttons_x, scale_y);
+			context.fillStyle = scale_inc_over ? button_high_color : button_color;
+			context.fillText("[ scale * 2 ]", buttons_x + scale_inc_down, scale_inc_y + scale_inc_down);
 		
-		context.fillStyle = reset_xy_over ? button_high_color : button_color;
-		context.fillText("[ reset x,y ]", buttons_x + reset_xy_down, reset_xy_y + reset_xy_down);
-		context.fillStyle = reset_scale_over ? button_high_color : button_color;
-		context.fillText("[reset scale]", buttons_x + reset_scale_down, reset_scale_y + reset_scale_down);
-		context.fillStyle = snap_to_f_over ? button_high_color : button_color;
-		context.fillText("[ snap to f ]", buttons_x + snap_to_f_down, snap_to_f_y + snap_to_f_down);
+			context.fillStyle = reset_xy_over ? button_high_color : button_color;
+			context.fillText("[ reset x,y ]", buttons_x + reset_xy_down, reset_xy_y + reset_xy_down);
+			context.fillStyle = reset_scale_over ? button_high_color : button_color;
+			context.fillText("[reset scale]", buttons_x + reset_scale_down, reset_scale_y + reset_scale_down);
+			context.fillStyle = snap_to_f_over ? button_high_color : button_color;
+			context.fillText("[ snap to f ]", buttons_x + snap_to_f_down, snap_to_f_y + snap_to_f_down);
+		}
 	}
 
 	function snap_focus_to_nearest() {
@@ -650,12 +652,15 @@ x*x*x - sqrt(2.)*x
 </textarea>
 	<br><br>
 	<canvas id="canvas"></canvas>
+	<br><br>
+	<canvas id="canvas_2"></canvas>
 
 	<script language="JavaScript">
 		const f_text = document.getElementById("f").value;
 		const fs = fs_from(f_text);
 		const colors = colors_from(f_text);
-		init_canvas(document.getElementById("canvas"), fs, colors, 1., 2., 4.);
+		init_canvas(document.getElementById("canvas"), fs, colors, 1., 2., 4., 512, 512, true);
+		init_canvas(document.getElementById("canvas_2"), fs, colors, 1., 2., 4., 640, 640, false);
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
