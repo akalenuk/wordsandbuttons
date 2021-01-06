@@ -74,7 +74,7 @@ u {
 }
 	</style>
 	<script language="JavaScript">
-function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale, i_w, i_h, i_do_side_panel) {
+function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale, i_do_atan, i_w, i_h, i_do_side_panel) {
 	const w = i_w;
 	const h = i_h;
 	const panel_w = i_do_side_panel ? 158 : 0;
@@ -87,7 +87,7 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 	const button_color = "#161712";
 	const button_high_color = "#838769";
 
-	const buttons_x = 526;
+	const buttons_x = w + 16;
 	const buttons_h = 16;
 
 	const x_y = 14;	var x_value = i_x;
@@ -95,8 +95,8 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 	const reset_xy_y = 54;	var reset_xy_over = false;	var reset_xy_down = false;
 
 	const scale_y = 94;	var scale_value = i_scale;
-	const linear_scale_y = 114;	var linear_scale_over = false;	var linear_scale_down = false;	var linear_scale_checked = true;
-	const atan_scale_y = 134;	var atan_scale_over = false;	var atan_scale_down = false;	var atan_scale_checked = false;
+	const linear_scale_y = 114;	var linear_scale_over = false;	var linear_scale_down = false;	var linear_scale_checked = !i_do_atan;
+	const atan_scale_y = 134;	var atan_scale_over = false;	var atan_scale_down = false;	var atan_scale_checked = i_do_atan;
 	const scale_dec_y = 154;	var scale_dec_over = false;	var scale_dec_down = false;
 	const scale_inc_y = 174;	var scale_inc_over = false;	var scale_inc_down = false;
 	const reset_scale_y = 194;	var reset_scale_over = false;	var reset_scale_down = false;
@@ -132,11 +132,11 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 	}
 
 	function atan_real_to_screen (x, dx, scale, w) {
-		return atan((x - dx) / scale) / PI * (w - 1.) + (w / 2);
+		return Math.atan((x - dx) / scale) / Math.PI * (w - 1.) + (w / 2);
 	}
 
 	function atan_screen_to_real (x, dx, scale, w) {
-		return scale * tan((x - (w / 2)) * PI / (w - 1.)) + dx;
+		return scale * Math.tan((x - (w / 2)) * Math.PI / (w - 1.)) + dx;
 	}
 
 	// returns 4 translation functions from/to screen and real coordinates
@@ -213,20 +213,20 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 			// horizontal
 			const x_from = s2x(20);
 			const x_to = s2x(w-20);
-			for(var i = sign(x_from) * Math.floor(log2(Math.abs(x_from))) - 1; i <= sign(x_to) * ceil(log2(Math.abs(x_to))); ++i) {
+			for(var i = Math.sign(x_from) * Math.floor(Math.log2(Math.abs(x_from))) - 1; i <= Math.sign(x_to) * Math.ceil(Math.log2(Math.abs(x_to))); ++i) {
 				if(i == 0)
 					continue;
-				const x_i = sign(i) * pow(2, Math.abs(i) - 1);
+				const x_i = Math.sign(i) * Math.pow(2, Math.abs(i) - 1);
 				context.moveTo(sharp(x2s(x_i)), 0);
 				context.lineTo(sharp(x2s(x_i)), h);
 			}
 			// vertical
 			const y_from = s2y(20);
 			const y_to = s2y(h-20);
-			for(var i = sign(y_from) * Math.floor(log2(Math.abs(y_from))) - 1; i <= sign(y_to) * ceil(log2(Math.abs(y_to))); ++i) {
+			for(var i = Math.sign(y_from) * Math.floor(Math.log2(Math.abs(y_from))) - 1; i <= Math.sign(y_to) * Math.ceil(Math.log2(Math.abs(y_to))); ++i) {
 				if(i == 0)
 					continue;
-				const y_i = sign(i) * pow(2, Math.abs(i) - 1);
+				const y_i = Math.sign(i) * Math.pow(2, Math.abs(i) - 1);
 				context.moveTo(0, sharp(y2s(y_i)));
 				context.lineTo(w, sharp(y2s(y_i)));
 			}
@@ -335,13 +335,13 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 			// horizontal
 			const x_from = s2x(20);
 			const x_to = s2x(w-20);
-			for(var i = sign(x_from) * Math.floor(log2(Math.abs(x_from))) - 1; i <= sign(x_to) * ceil(log2(Math.abs(x_to))); ++i) {
+			for(var i = Math.sign(x_from) * Math.floor(Math.log2(Math.abs(x_from))) - 1; i <= Math.sign(x_to) * Math.ceil(Math.log2(Math.abs(x_to))); ++i) {
 				if(i == 0)
 					continue;
-				const x_i = sign(i) * pow(2, Math.abs(i) - 1);
+				const x_i = Math.sign(i) * Math.pow(2, Math.abs(i) - 1);
 				context.moveTo(sharp(x2s(x_i)), sharp(y2s(0)) + 2);
 				context.lineTo(sharp(x2s(x_i)), sharp(y2s(0)) - 2);
-				const to_print = (i < 0) ? "-" + String(pow(2, Math.abs(i+1))) : String(pow(2, i-1));
+				const to_print = (i < 0) ? "-" + String(Math.pow(2, Math.abs(i+1))) : String(Math.pow(2, i-1));
 				if(i % 2 == 0)
 					context.fillText(to_print, sharp(x2s(x_i)), sharp(y2s(0)) - 12);
 				else
@@ -350,13 +350,13 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 			// vertical
 			const y_from = s2y(h-20);
 			const y_to = s2y(20);
-			for(var i = sign(y_from) * Math.floor(log2(Math.abs(y_from))) - 1; i <= sign(y_to) * ceil(log2(Math.abs(y_to))); ++i) {
+			for(var i = Math.sign(y_from) * Math.floor(Math.log2(Math.abs(y_from))) - 1; i <= Math.sign(y_to) * Math.ceil(Math.log2(Math.abs(y_to))); ++i) {
 				if(i == 0)
 					continue;
-				const y_i = sign(i) * pow(2, Math.abs(i) - 1);
+				const y_i = Math.sign(i) * Math.pow(2, Math.abs(i) - 1);
 				context.moveTo(sharp(x2s(0)) + 2, sharp(y2s(y_i)));
 				context.lineTo(sharp(x2s(0)) - 2, sharp(y2s(y_i)));
-				const to_print = (i < 0) ? "-" + String(pow(2, Math.abs(i+1))) : String(pow(2, i-1));
+				const to_print = (i < 0) ? "-" + String(Math.pow(2, Math.abs(i+1))) : String(Math.pow(2, i-1));
 				if(i % 2 == 0)
 					context.fillText(to_print, sharp(x2s(0)) - 12, sharp(y2s(y_i)) - 12);
 				else
@@ -602,7 +602,7 @@ Trippy polynomials in arctangent scale
 	</p>
 
 	<script language="JavaScript">
-	init_atan_plot(document.getElementById("canvas"), [function(x){return x*x;}], ["#789"], [], 0., 0., 1., 640, 640, false);
+	init_atan_plot(document.getElementById("canvas"), [function(x){return x*x;}], ["#789"], [], 0., 0., 1., true, 640, 640, true);
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
