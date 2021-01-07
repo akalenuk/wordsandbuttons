@@ -618,6 +618,26 @@ function pretty_print_abcd(a, b, c, d) {
 	text += Math.abs(d).toFixed(2);
 	return text;
 }
+
+function pretty_print_abc(a, b, c) {
+	var text = '';
+	if(a < 0)
+		text += '-';
+	text += Math.abs(a).toFixed(2);
+	text += 'x<sup>2</sup>';
+	if(b < 0)
+		text += ' - ';
+	else
+		text += ' + ';
+	text += Math.abs(b).toFixed(2);
+	text += 'x';
+	if(c < 0)
+		text += ' - ';
+	else
+		text += ' + ';
+	text += Math.abs(c).toFixed(2);
+	return text;
+}
 	</script>
 </head>
 <body>
@@ -692,6 +712,12 @@ d &in; (-1, 1)
 	</p>
 	<canvas id="bouncy_cubic_atan"></canvas>
 	<p class="comment" id="bouncy_comment"></p>
+	<p>
+...
+	</p>
+
+	<canvas id="bouncy_cubic_dx_atan"></canvas>
+	<p class="comment" id="bouncy_dx_comment"></p>
 
 	<script language="JavaScript">
 	init_atan_plot(document.getElementById("cubic_on_linear"), [function(x){return x*x*x + x*x - 4*x + 1;}], ["#d64562"], [], 0.5, 0.5, 2.0, false, 640, 640, false, false);
@@ -708,12 +734,22 @@ d &in; (-1, 1)
 	init_atan_plot(document.getElementById("up_down_cubic_atan"), [up_down_cubic], ["#d64562"], [], 0.0, 0.0, 2.0, true, 640, 640, false, false);
 
 	function comment_the_bouncy_cubic() {
-		document.getElementById("bouncy_comment").innerHTML = pretty_print_abcd(Math.sin(t*0.25), Math.sin(t*0.5+0.6), Math.sin(t+1.2), Math.sin(t+1.8));
+		document.getElementById("bouncy_comment").innerHTML = "P(x) = " + pretty_print_abcd(Math.sin(t*0.25), Math.sin(t*0.5+0.6), Math.sin(t+1.2), Math.sin(t+1.8));
 		setTimeout(comment_the_bouncy_cubic, 50);
 	}
 	comment_the_bouncy_cubic();
 	bouncy_cubic = function(x) {return Math.sin(t*0.25)*x*x*x + Math.sin(t*0.5+0.6)*x*x + Math.sin(t+1.2)*x + Math.sin(t+1.8);}
 	init_atan_plot(document.getElementById("bouncy_cubic_atan"), [bouncy_cubic], ["#457fd6"], [], 0.0, 0.0, 2.0, true, 640, 640, false, false);
+
+	bouncy_dx_cubic = function(x) {return 3*Math.sin(t*0.25)*x*x + 2*Math.sin(t*0.5+0.6)*x + Math.sin(t+1.2);}
+	function comment_the_bouncy_dx_cubic() {
+		document.getElementById("bouncy_dx_comment").innerHTML = "P(x) = " + pretty_print_abcd(Math.sin(t*0.25), Math.sin(t*0.5+0.6), Math.sin(t+1.2), Math.sin(t+1.8));
+		document.getElementById("bouncy_dx_comment").innerHTML += "<br>";
+		document.getElementById("bouncy_dx_comment").innerHTML += "P'(x) = " + pretty_print_abc(3*Math.sin(t*0.25), 2*Math.sin(t*0.5+0.6), Math.sin(t+1.2));
+		setTimeout(comment_the_bouncy_dx_cubic, 50);
+	}
+	comment_the_bouncy_dx_cubic();
+	init_atan_plot(document.getElementById("bouncy_cubic_dx_atan"), [bouncy_cubic, bouncy_dx_cubic], ["#457fd6", "#34b07a"], [], 0.0, 0.0, 2.0, true, 640, 640, false, false);
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
