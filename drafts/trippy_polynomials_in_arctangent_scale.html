@@ -593,6 +593,31 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 	redraw();
 }
 
+function pretty_print_abcd(a, b, c, d) {
+	var text = '';
+	if(a < 0)
+		text += '-';
+	text += Math.abs(a).toFixed(2);
+	text += 'x<sup>3</sup>';
+	if(b < 0)
+		text += ' - ';
+	else
+		text += ' + ';
+	text += Math.abs(b).toFixed(2);
+	text += 'x<sup>2</sup>';
+	if(c < 0)
+		text += ' - ';
+	else
+		text += ' + ';
+	text += Math.abs(c).toFixed(2);
+	text += 'x';
+	if(d < 0)
+		text += ' - ';
+	else
+		text += ' + ';
+	text += Math.abs(d).toFixed(2);
+	return text;
+}
 	</script>
 </head>
 <body>
@@ -618,24 +643,77 @@ Now let's change the plot scale. Instead of a linear scale, we'll use the <a hre
 Try dragging, double click, and shift+mouse wheel if you're browsing from a PC.
 	</p>
 	<p>
-Yes, it looks a little unconventional but you can clearly see that it's domain and ragne are both the whole &#8477;. You can see that is has tree roots, one local minimum and one local maximum. Arctangent scale leaves no mystery behind, it shows all there is about this function.
+Yes, it looks a little unconventional but you can clearly see that it's domain and range are both the whole &#8477;. You can see that is has tree roots, one local minimum and one local maximum. Arctangent scale leaves no mystery behind, it shows all there is about this function.
 	</p>
 	<p>
-So let's look at the polynomials using these arctangent scale plots and see what we can learn.
+So let's look at the polynomials using arctangent scale plots.
 	</p>
 	<h2>
 X-axis intersections and roots
 	</h2>
-	<p class="formula">
-x<sup>3</sup> + x<sup>2</sup> - 4x + a
-<br>
-a &in; (0, 4)
+	<p>
+When a function plot intersets the x-axis, this is the same as.
 	</p>
-
+	<p class="formula">
+ax<sup>3</sup> + bx<sup>2</sup> + bx + d = 0
+	</p>
+	<p>
+Another words, each intersection is a root of the equation with the right side being 0.
+	</p>
+	<p>
+Now let's make our cubic parabola bounce up and down by alerating its last coefficient.
+	</p>
+	<p class="formula">
+x<sup>3</sup> + x<sup>2</sup> - 4x + d
+<br>
+d &in; (0, 4)
+	</p>
+	<canvas id="up_down_cubic_linear"></canvas>
+	<p>
+The same plot in arctangent scale looks like this.
+	</p>
+	<canvas id="up_down_cubic_atan"></canvas>
+	<p>
+...
+	</p>
+	<p>
+Now let's alterate all the coefficiens.
+	</p>
+	<p class="formula">
+ax<sup>3</sup> + bx<sup>2</sup> + cx + d
+<br>
+a &in; (-1, 1)
+<br>
+b &in; (-1, 1)
+<br>
+c &in; (-1, 1)
+<br>
+d &in; (-1, 1)
+	</p>
+	<canvas id="bouncy_cubic_atan"></canvas>
+	<p class="comment" id="bouncy_comment"></p>
 
 	<script language="JavaScript">
 	init_atan_plot(document.getElementById("cubic_on_linear"), [function(x){return x*x*x + x*x - 4*x + 1;}], ["#d64562"], [], 0.5, 0.5, 2.0, false, 640, 640, false, false);
 	init_atan_plot(document.getElementById("cubic_on_atan"), [function(x){return x*x*x + x*x - 4*x + 1;}], ["#d64562"], [], 0.0, 0.0, 2.0, true, 640, 640, false, false);
+
+	var t = 0;
+	function tick() {
+		t += 0.02;
+		setTimeout(tick, 20);
+	}
+	tick();
+	up_down_cubic = function(x) {return x*x*x + x*x - 4*x + 2*Math.sin(t) + 2.;}
+	init_atan_plot(document.getElementById("up_down_cubic_linear"), [up_down_cubic], ["#d64562"], [], 1.0, 1.0, 8.0, false, 640, 640, false, false);
+	init_atan_plot(document.getElementById("up_down_cubic_atan"), [up_down_cubic], ["#d64562"], [], 0.0, 0.0, 2.0, true, 640, 640, false, false);
+
+	function comment_the_bouncy_cubic() {
+		document.getElementById("bouncy_comment").innerHTML = pretty_print_abcd(Math.sin(t*0.25), Math.sin(t*0.5+0.6), Math.sin(t+1.2), Math.sin(t+1.8));
+		setTimeout(comment_the_bouncy_cubic, 50);
+	}
+	comment_the_bouncy_cubic();
+	bouncy_cubic = function(x) {return Math.sin(t*0.25)*x*x*x + Math.sin(t*0.5+0.6)*x*x + Math.sin(t+1.2)*x + Math.sin(t+1.8);}
+	init_atan_plot(document.getElementById("bouncy_cubic_atan"), [bouncy_cubic], ["#457fd6"], [], 0.0, 0.0, 2.0, true, 640, 640, false, false);
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
