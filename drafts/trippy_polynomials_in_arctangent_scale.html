@@ -266,35 +266,6 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		}
 		context.setLineDash([]);
 
-		// functions
-		for(var i = 0; i < i_fs.length; ++i) {
-			const f = i_fs[i];
-			const color = i_colors[i];
-			// draw
-			context.beginPath();
-			var the_gap = true;
-			var old_i;
-			for(var j = -0.5 + atan_scale_checked; j < w + 0.5 - atan_scale_checked; j += 0.5) {
-				const x = s2x(j);
-				const y = f(x);
-				const i = y2s(y);
-				if(the_gap) {
-					context.moveTo(j, i)
-					the_gap = false;
-				} else {
-					if(Math.abs(i - old_i) >= h)
-						the_gap = true;
-					else
-						context.lineTo(j, i);
-				}
-				old_i = i;
-			}
-			context.strokeStyle = color;
-			context.lineWidth = 1.5;
-			context.stroke();
-			context.closePath();
-		}
-
 
 		// the axes
 		function sharp(x) {return Math.floor(x) + 0.5;}
@@ -381,6 +352,37 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		}
 		context.stroke();
 		context.closePath();
+
+
+		// functions
+		for(var i = 0; i < i_fs.length; ++i) {
+			const f = i_fs[i];
+			const color = i_colors[i];
+			// draw
+			context.beginPath();
+			var the_gap = true;
+			var old_i;
+			for(var j = -0.5 + atan_scale_checked; j < w + 0.5 - atan_scale_checked; j += 2.) {
+				const x = s2x(j);
+				const y = f(x);
+				const i = y2s(y);
+				if(the_gap) {
+					context.moveTo(j, i)
+					the_gap = false;
+				} else {
+					if(Math.abs(i - old_i) >= h)
+						the_gap = true;
+					else
+						context.lineTo(j, i);
+				}
+				old_i = i;
+			}
+			context.strokeStyle = color;
+			context.lineWidth = 1.5;
+			context.stroke();
+			context.closePath();
+		}
+
 
 		// cross
 		if(i_do_cross && (x2s(0) != w/2 || y2s(0) != h/2)) {
