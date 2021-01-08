@@ -90,7 +90,7 @@ u {
 }
 	</style>
 	<script language="JavaScript">
-function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale, i_do_atan, i_w, i_h, i_do_side_panel, i_do_cross) {
+function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale, i_do_atan, i_w, i_h, i_do_side_panel, i_do_cross, i_do_animations) {
 	const w = i_w;
 	const h = i_h;
 	const panel_w = i_do_side_panel ? 158 : 0;
@@ -592,7 +592,10 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		draw_canvas();
 		setTimeout(redraw, 20);
 	}
-	redraw();
+	if(i_do_animations)
+		redraw();
+	else
+		draw_canvas();
 }
 
 function pretty_print_abcd(a, b, c, d) {
@@ -757,8 +760,10 @@ d &in; (-1, 1)
 	</p>
 
 	<script language="JavaScript">
-	init_atan_plot(document.getElementById("cubic_on_linear"), [function(x){return x*x*x + x*x - 4*x + 1;}], ["#d64562"], [], 0.5, 0.5, 2.0, false, 640, 640, false, false);
-	init_atan_plot(document.getElementById("cubic_on_atan"), [function(x){return x*x*x + x*x - 4*x + 1;}], ["#d64562"], [], 0.0, 0.0, 2.0, true, 640, 640, false, false);
+	init_atan_plot(document.getElementById("cubic_on_linear"), [function(x){return x*x*x + x*x - 4*x + 1;}], ["#d64562"], [],
+		0.5, 0.5, 2.0, false, 640, 640, false, false, false);
+	init_atan_plot(document.getElementById("cubic_on_atan"), [function(x){return x*x*x + x*x - 4*x + 1;}], ["#d64562"], [], 
+		0.0, 0.0, 2.0, true, 640, 640, false, false, false);
 
 	var t = 0;
 	function tick() {
@@ -767,8 +772,10 @@ d &in; (-1, 1)
 	}
 	tick();
 	up_down_cubic = function(x) {return x*x*x + x*x - 4*x + 2*Math.sin(t) + 2.;}
-	init_atan_plot(document.getElementById("up_down_cubic_linear"), [up_down_cubic], ["#d64562"], [], 1.0, 1.0, 8.0, false, 640, 640, false, false);
-	init_atan_plot(document.getElementById("up_down_cubic_atan"), [up_down_cubic], ["#d64562"], [], 0.0, 0.0, 2.0, true, 640, 640, false, false);
+	init_atan_plot(document.getElementById("up_down_cubic_linear"), [up_down_cubic], ["#d64562"], [],
+		1.0, 1.0, 8.0, false, 640, 640, false, false, true);
+	init_atan_plot(document.getElementById("up_down_cubic_atan"), [up_down_cubic], ["#d64562"], [],
+		0.0, 0.0, 2.0, true, 640, 640, false, false, true);
 
 	function comment_the_bouncy_cubic() {
 		document.getElementById("bouncy_comment").innerHTML = "P(x) = " + pretty_print_abcd(Math.sin(t*0.25), Math.sin(t*0.5+0.6), Math.sin(t+1.2), Math.sin(t+1.8));
@@ -776,7 +783,8 @@ d &in; (-1, 1)
 	}
 	comment_the_bouncy_cubic();
 	bouncy_cubic = function(x) {return Math.sin(t*0.25)*x*x*x + Math.sin(t*0.5+0.6)*x*x + Math.sin(t+1.2)*x + Math.sin(t+1.8);}
-	init_atan_plot(document.getElementById("bouncy_cubic_atan"), [bouncy_cubic], ["#457fd6"], [], 0.0, 0.0, 2.0, true, 640, 640, false, false);
+	init_atan_plot(document.getElementById("bouncy_cubic_atan"), [bouncy_cubic], ["#457fd6"], [],
+		0.0, 0.0, 2.0, true, 640, 640, false, false, true);
 
 	bouncy_dx_cubic = function(x) {return 3*Math.sin(t*0.25)*x*x + 2*Math.sin(t*0.5+0.6)*x + Math.sin(t+1.2);}
 	function comment_the_bouncy_dx_cubic() {
@@ -786,7 +794,8 @@ d &in; (-1, 1)
 		setTimeout(comment_the_bouncy_dx_cubic, 50);
 	}
 	comment_the_bouncy_dx_cubic();
-	init_atan_plot(document.getElementById("bouncy_cubic_dx_atan"), [bouncy_cubic, bouncy_dx_cubic], ["#457fd6", "#34b07a"], [], 0.0, 0.0, 2.0, true, 640, 640, false, false);
+	init_atan_plot(document.getElementById("bouncy_cubic_dx_atan"), [bouncy_cubic, bouncy_dx_cubic], ["#457fd6", "#34b07a"], [],
+		0.0, 0.0, 2.0, true, 640, 640, false, false, true);
 
 	bouncy_ddx_cubic = function(x) {return 6*Math.sin(t*0.25)*x + 2*Math.sin(t*0.5+0.6);}
 	bouncy_dddx_cubic = function(x) {return 6*Math.sin(t*0.25);}
@@ -804,7 +813,10 @@ d &in; (-1, 1)
 		setTimeout(comment_the_bouncy_dddx_cubic, 50);
 	}
 	comment_the_bouncy_dddx_cubic();
-	init_atan_plot(document.getElementById("bouncy_cubic_dddx_atan"), [bouncy_cubic, bouncy_dx_cubic, bouncy_ddx_cubic, bouncy_dddx_cubic, bouncy_ddddx_cubic], ["#457fd6", "#34b07a", "#55a828", "#8a8829", "#b06d2e"], [], 0.0, 0.0, 2.0, true, 640, 640, false, false);
+	init_atan_plot(document.getElementById("bouncy_cubic_dddx_atan"),
+		[bouncy_cubic, bouncy_dx_cubic, bouncy_ddx_cubic, bouncy_dddx_cubic, bouncy_ddddx_cubic],
+		["#457fd6", "#34b07a", "#55a828", "#8a8829", "#b06d2e"], [],
+		0.0, 0.0, 2.0, true, 640, 640, false, false, true);
 
 	symmetric_cubic = function(x) {return 0 + Math.sin(t*0.5+0.6)*x*x + 0 + Math.sin(t+1.8);}
 	function comment_the_symmetric_cubic() {
@@ -812,7 +824,8 @@ d &in; (-1, 1)
 		setTimeout(comment_the_symmetric_cubic, 50);
 	}
 	comment_the_symmetric_cubic();
-	init_atan_plot(document.getElementById("bouncy_cubic_symmetric_atan"), [symmetric_cubic], ["#8947d9"], [], 0.0, 0.0, 2.0, true, 640, 640, false, false);
+	init_atan_plot(document.getElementById("bouncy_cubic_symmetric_atan"), [symmetric_cubic], ["#8947d9"], [],
+		0.0, 0.0, 2.0, true, 640, 640, false, false, true);
 
 	antisymmetric_cubic = function(x) {return Math.sin(t*0.25)*x*x*x + 0 + Math.sin(t+1.2)*x + 0;}
 	function comment_the_antisymmetric_cubic() {
@@ -820,7 +833,8 @@ d &in; (-1, 1)
 		setTimeout(comment_the_antisymmetric_cubic, 50);
 	}
 	comment_the_antisymmetric_cubic();
-	init_atan_plot(document.getElementById("bouncy_cubic_antisymmetric_atan"), [antisymmetric_cubic], ["#4dcbde"], [], 0.0, 0.0, 2.0, true, 640, 640, false, false);
+	init_atan_plot(document.getElementById("bouncy_cubic_antisymmetric_atan"), [antisymmetric_cubic], ["#4dcbde"], [],
+		0.0, 0.0, 2.0, true, 640, 640, false, false, true);
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
