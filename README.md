@@ -7,7 +7,10 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 
 ## Pages
 
-- [Partial order and non-Boolean logic](https://wordsandbuttons.online/partial_order_and_non_boolean_logic.html) Non-Boolean logics are rare but not extinct. Interval logic is one example. Sometimes, you can implement a logic you want within total order relation or partial order but sometimes even that isn't enough. With operator overloading, you have the freedom to go there but you also have less assurance when working with total order. 
+- [Trippy polynomials in arctangent scale](https://wordsandbuttons.online/trippy_polynomials_in_arctangent_scale.html) This shows the global properties of polynomials, their derivatives, and explains how the Maclaurine and Taylor series work all with animated plots in arctangent scale.
+<sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
+
+- [Partial order and non-Boolean logic](https://wordsandbuttons.online/partial_order_and_non_boolean_logic.html) Non-Boolean logics are rare but not extinct. Interval logic is one example. Sometimes, you can implement a logic you want within total order or partial order but sometimes even that isn't enough and you need an even more general relation. With operator overloading, you have the freedom to go there but you also have less assurance when working within the total order.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
 - [Yet another alternative to floating point numbers](https://wordsandbuttons.online/yet_another_alternative_to_floating_point_numbers.html) This shows how computeable intervals written in rational bounds may not only account for the input error but keep computational error under control as well.
@@ -19,7 +22,7 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 - [Can we use lemniscates for ultra-cheap vector graphics?](https://wordsandbuttons.online/can_we_use_lemniscates_for_ultra_cheap_vector_gaphics.html) This depicts an old idea of using multifocal lemniscates to draw arbitrary shapes. In some applications, this may be indeed an economical alternative to splines.
 <sup>[#demos](https://wordsandbuttons.online/all_demos.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> 
 
-- [Bi-whatever transformations](https://wordsandbuttons.online/biwhatever_transformations.html) An interactive explanation of how polynomial transformations such as trilinear or biquadratic or even linear-cubic work, and how to craft your own that fits your particular task the best.
+- [Bi-whatever transformations](https://wordsandbuttons.online/biwhatever_transformations.html) An interactive explanation of how polynomial transformations such as trilinear or biquadratic or even linear-cubic work, and how to craft your own.
 <sup>[#demos](https://wordsandbuttons.online/all_demos.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> 
 
 - [Arctangent scale. It's like the logarithmic scale but infinite](https://wordsandbuttons.online/arctangent_scale_its_like_the_logarithmic_scale_but_infinite.html) An interactive demo of how, with arctangent used as a scale, we can show any function on a screen. And not just a fragment of it but the whole function.
