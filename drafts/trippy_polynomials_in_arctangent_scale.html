@@ -1319,36 +1319,38 @@ If you think that the whole thing could be improved, please write me a note at <
 	init_atan_plot(document.getElementById("bouncy_cubic_atan"), [bouncy_cubic], ["#457fd6"], [],
 		0.0, 0.0, 2.0, true, 640, 640, false, false, true);
 
-	bouncy_dx_cubic = function(x) {return 3*Math.sin(t*0.25)*x*x + 2*Math.sin(t*0.5+0.6)*x + Math.sin(t+1.2);}
+	var slower = 0.36;
+	slower_bouncy_cubic = function(x) {return Math.sin(slower*t*0.25)*x*x*x + Math.sin(slower*t*0.5+0.6)*x*x + Math.sin(slower*t+1.2)*x + Math.sin(slower*t+1.8);}
+	slower_bouncy_dx_cubic = function(x) {return 3*Math.sin(slower*t*0.25)*x*x + 2*Math.sin(slower*t*0.5+0.6)*x + Math.sin(slower*t+1.2);}
 	function comment_the_bouncy_dx_cubic() {
-		document.getElementById("bouncy_dx_comment").innerHTML = "P(x) = " + pretty_print_abcd(Math.sin(t*0.25), Math.sin(t*0.5+0.6), Math.sin(t+1.2), Math.sin(t+1.8));
+		document.getElementById("bouncy_dx_comment").innerHTML = "<span style='color:#457fd6; font-weight: bold;'>P(x)</span> = " + pretty_print_abcd(Math.sin(slower*t*0.25), Math.sin(slower*t*0.5+0.6), Math.sin(slower*t+1.2), Math.sin(slower*t+1.8));
 		document.getElementById("bouncy_dx_comment").innerHTML += "<br>";
-		document.getElementById("bouncy_dx_comment").innerHTML += "P'(x) = " + pretty_print_abc(3*Math.sin(t*0.25), 2*Math.sin(t*0.5+0.6), Math.sin(t+1.2));
+		document.getElementById("bouncy_dx_comment").innerHTML += "<span style='color:#b06d2e; font-weight: bold;'>P'(x)</span> = " + pretty_print_abc(3*Math.sin(slower*t*0.25), 2*Math.sin(slower*t*0.5+0.6), Math.sin(slower*t+1.2));
 		setTimeout(comment_the_bouncy_dx_cubic, 50);
 	}
 	comment_the_bouncy_dx_cubic();
-	init_atan_plot(document.getElementById("bouncy_cubic_dx_atan"), [bouncy_cubic, bouncy_dx_cubic], ["#457fd6", "#34b07a"], [],
+	init_atan_plot(document.getElementById("bouncy_cubic_dx_atan"), [slower_bouncy_cubic, slower_bouncy_dx_cubic], ["#457fd6", "#b06d2e"], [],
 		0.0, 0.0, 2.0, true, 640, 640, false, false, true);
 
-	bouncy_ddx_cubic = function(x) {return 6*Math.sin(t*0.25)*x + 2*Math.sin(t*0.5+0.6);}
-	bouncy_dddx_cubic = function(x) {return 6*Math.sin(t*0.25);}
-	bouncy_ddddx_cubic = function(x) {return 0;}
+	slower_bouncy_ddx_cubic = function(x) {return 6*Math.sin(slower*t*0.25)*x + 2*Math.sin(slower*t*0.5+0.6);}
+	slower_bouncy_dddx_cubic = function(x) {return 6*Math.sin(slower*t*0.25);}
+	slower_bouncy_ddddx_cubic = function(x) {return 0;}
 	function comment_the_bouncy_dddx_cubic() {
-		document.getElementById("bouncy_dddx_comment").innerHTML = "P(x) = " + pretty_print_abcd(Math.sin(t*0.25), Math.sin(t*0.5+0.6), Math.sin(t+1.2), Math.sin(t+1.8));
+		document.getElementById("bouncy_dddx_comment").innerHTML = "<span style='color:#457fd6; font-weight: bold;'>P(x)</span> = " + pretty_print_abcd(Math.sin(slower*t*0.25), Math.sin(slower*t*0.5+0.6), Math.sin(slower*t+1.2), Math.sin(slower*t+1.8));
 		document.getElementById("bouncy_dddx_comment").innerHTML += "<br>";
-		document.getElementById("bouncy_dddx_comment").innerHTML += "P'(x) = " + pretty_print_abc(3*Math.sin(t*0.25), 2*Math.sin(t*0.5+0.6), Math.sin(t+1.2));
+		document.getElementById("bouncy_dddx_comment").innerHTML += "<span style='color:#b06d2e; font-weight: bold;'>P'(x)</span> = " + pretty_print_abc(3*Math.sin(slower*t*0.25), 2*Math.sin(slower*t*0.5+0.6), Math.sin(slower*t+1.2));
 		document.getElementById("bouncy_dddx_comment").innerHTML += "<br>";
-		document.getElementById("bouncy_dddx_comment").innerHTML += "P''(x) = " + pretty_print_ab(6*Math.sin(t*0.25), 2*Math.sin(t*0.5+0.6));
+		document.getElementById("bouncy_dddx_comment").innerHTML += "<span style='color:#8a8829; font-weight: bold;'>P''(x)</span> = " + pretty_print_ab(6*Math.sin(slower*t*0.25), 2*Math.sin(slower*t*0.5+0.6));
 		document.getElementById("bouncy_dddx_comment").innerHTML += "<br>";
-		document.getElementById("bouncy_dddx_comment").innerHTML += "P'''(x) = " + (6*Math.sin(t*0.25)).toFixed(2);
+		document.getElementById("bouncy_dddx_comment").innerHTML += "<span style='color:#55a828; font-weight: bold;'>P'''(x)</span> = " + (6*Math.sin(slower*t*0.25)).toFixed(2);
 		document.getElementById("bouncy_dddx_comment").innerHTML += "<br>";
-		document.getElementById("bouncy_dddx_comment").innerHTML += "P''''(x) = 0";
+		document.getElementById("bouncy_dddx_comment").innerHTML += "<span style='color:#14602a; font-weight: bold;'>P''''(x)</span> = 0";
 		setTimeout(comment_the_bouncy_dddx_cubic, 50);
 	}
 	comment_the_bouncy_dddx_cubic();
 	init_atan_plot(document.getElementById("bouncy_cubic_dddx_atan"),
-		[bouncy_cubic, bouncy_dx_cubic, bouncy_ddx_cubic, bouncy_dddx_cubic, bouncy_ddddx_cubic],
-		["#457fd6", "#34b07a", "#55a828", "#8a8829", "#b06d2e"], [],
+		[slower_bouncy_cubic, slower_bouncy_dx_cubic, slower_bouncy_ddx_cubic, slower_bouncy_dddx_cubic, slower_bouncy_ddddx_cubic],
+		["#457fd6", "#b06d2e", "#8a8829", "#55a828", "#14602a"], [],
 		0.0, 0.0, 2.0, true, 640, 640, false, false, true);
 
 
