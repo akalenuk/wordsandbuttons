@@ -269,8 +269,7 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		context.setLineDash([]);
 
 
-		// the axes
-		function sharp(x) {return Math.floor(x) + 0.5;}
+		// axis lines (come before functions for better readability)
 		context.font = "14px Arial";
 		context.fillStyle = "#444444";
 		context.textAlign = "center";
@@ -281,23 +280,7 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		if(linear_scale_checked) {
 			draw_arrow(context, 0, sharp(y2s(0)), w, sharp(y2s(0)), "#000000");
 			draw_arrow(context, sharp(x2s(0)), h, sharp(x2s(0)), 0, "#000000");
-			// horizontal
-			for(var j = stepped(s2x(0)); j <= stepped(s2x(w)); j += step) {
-				if(j != 0) {
-					context.moveTo(sharp(x2s(j)), sharp(y2s(0)) + 2);
-					context.lineTo(sharp(x2s(j)), sharp(y2s(0)) - 2);
-				}
-				context.fillText(j, sharp(x2s(j)) + 12, sharp(y2s(0)) - 12);
-			}
-			// vertical
-			for(var i = stepped(s2y(h)); i <= stepped(s2y(0)); i += step) {
-				if(i != 0) {
-					context.moveTo(sharp(x2s(0)) - 2, sharp(y2s(i)));
-					context.lineTo(sharp(x2s(0)) + 2, sharp(y2s(i)));
-					context.fillText(i, sharp(x2s(0)) + 12, sharp(y2s(i)) - 12);
-				}
-			}
-		} else if(atan_scale_checked) {
+		} else {
 			context.moveTo(20.5, sharp(y2s(0)));
 			context.lineTo(w - 20.5, sharp(y2s(0)));
 			context.moveTo(sharp(x2s(0)), h - 20.5);
@@ -318,9 +301,65 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 			context.stroke();
 			context.closePath();
 			context.setLineDash([]);
+		}
 
-			// the grid
+		// functions
+		for(var i = 0; i < i_fs.length; ++i) {
+			const f = i_fs[i];
+			const color = i_colors[i];
+			// draw
 			context.beginPath();
+			var the_gap = true;
+			var old_i;
+			for(var j = -0.5 + atan_scale_checked; j < w + 0.5 - atan_scale_checked; j += 2.) {
+				const x = s2x(j);
+				const y = f(x);
+				const i = y2s(y);
+				if(the_gap) {
+					context.moveTo(j, i)
+					the_gap = false;
+				} else {
+					if(Math.abs(i - old_i) >= h)
+						the_gap = true;
+					else
+						context.lineTo(j, i);
+				}
+				old_i = i;
+			}
+			context.strokeStyle = color;
+			context.lineWidth = 1.5;
+			context.stroke();
+			context.closePath();
+		}
+
+
+		// the grid
+		function sharp(x) {return Math.floor(x) + 0.5;}
+		context.font = "14px Arial";
+		context.fillStyle = "#444444";
+		context.textAlign = "center";
+		context.textBaseline = "middle";
+		context.strokeStyle = "#000000";
+		context.lineWidth = 1;
+		context.beginPath();
+		if(linear_scale_checked) {
+			// horizontal
+			for(var j = stepped(s2x(0)); j <= stepped(s2x(w)); j += step) {
+				if(j != 0) {
+					context.moveTo(sharp(x2s(j)), sharp(y2s(0)) + 2);
+					context.lineTo(sharp(x2s(j)), sharp(y2s(0)) - 2);
+				}
+				context.fillText(j, sharp(x2s(j)) + 12, sharp(y2s(0)) - 12);
+			}
+			// vertical
+			for(var i = stepped(s2y(h)); i <= stepped(s2y(0)); i += step) {
+				if(i != 0) {
+					context.moveTo(sharp(x2s(0)) - 2, sharp(y2s(i)));
+					context.lineTo(sharp(x2s(0)) + 2, sharp(y2s(i)));
+					context.fillText(i, sharp(x2s(0)) + 12, sharp(y2s(i)) - 12);
+				}
+			}
+		} else if(atan_scale_checked) {
 			// horizontal
 			const x_from = s2x(20);
 			const x_to = s2x(w-20);
@@ -354,36 +393,6 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		}
 		context.stroke();
 		context.closePath();
-
-
-		// functions
-		for(var i = 0; i < i_fs.length; ++i) {
-			const f = i_fs[i];
-			const color = i_colors[i];
-			// draw
-			context.beginPath();
-			var the_gap = true;
-			var old_i;
-			for(var j = -0.5 + atan_scale_checked; j < w + 0.5 - atan_scale_checked; j += 2.) {
-				const x = s2x(j);
-				const y = f(x);
-				const i = y2s(y);
-				if(the_gap) {
-					context.moveTo(j, i)
-					the_gap = false;
-				} else {
-					if(Math.abs(i - old_i) >= h)
-						the_gap = true;
-					else
-						context.lineTo(j, i);
-				}
-				old_i = i;
-			}
-			context.strokeStyle = color;
-			context.lineWidth = 1.5;
-			context.stroke();
-			context.closePath();
-		}
 
 
 		// cross
@@ -1344,13 +1353,13 @@ If you think that the whole thing could be improved, please write me a note at <
 		document.getElementById("bouncy_dddx_comment").innerHTML += "<br>";
 		document.getElementById("bouncy_dddx_comment").innerHTML += "<span style='color:#55a828; font-weight: bold;'>P'''(x)</span> = " + (6*Math.sin(slower*t*0.25)).toFixed(2);
 		document.getElementById("bouncy_dddx_comment").innerHTML += "<br>";
-		document.getElementById("bouncy_dddx_comment").innerHTML += "<span style='color:#14602a; font-weight: bold;'>P''''(x)</span> = 0";
+		document.getElementById("bouncy_dddx_comment").innerHTML += "<span style='color:#ab7416; font-weight: bold;'>P''''(x)</span> = 0";
 		setTimeout(comment_the_bouncy_dddx_cubic, 50);
 	}
 	comment_the_bouncy_dddx_cubic();
 	init_atan_plot(document.getElementById("bouncy_cubic_dddx_atan"),
 		[slower_bouncy_cubic, slower_bouncy_dx_cubic, slower_bouncy_ddx_cubic, slower_bouncy_dddx_cubic, slower_bouncy_ddddx_cubic],
-		["#457fd6", "#b06d2e", "#8a8829", "#55a828", "#14602a"], [],
+		["#457fd6", "#b06d2e", "#8a8829", "#55a828", "#ab7416"], [],
 		0.0, 0.0, 2.0, true, 640, 640, false, false, true);
 
 
