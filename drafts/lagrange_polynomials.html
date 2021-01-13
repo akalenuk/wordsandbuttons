@@ -98,6 +98,7 @@ button {
 	</style>
 	<script language="JavaScript">
 var points = [[0., 2.], [1., 1.], [2., 0.]];
+var points_i = 0;
 
 function nearest_i(xy, points) {
 	var best_i = 0;
@@ -502,47 +503,29 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		const canvas_rect = i_canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		const sy = e.clientY - canvas_rect.top;
-		if(sx >= w) {
-			if(sy >= linear_scale_y && sy < linear_scale_y + buttons_h) {
-				linear_scale_checked = true;
-				atan_scale_checked = false;
-			}
-			if(sy >= atan_scale_y && sy < atan_scale_y + buttons_h) {
-				linear_scale_checked = false;
-				atan_scale_checked = true;
-			}
-			if(sy >= scale_dec_y && sy < scale_dec_y + buttons_h)
-				scale_value /= 4.;
-			if(sy >= scale_inc_y && sy < scale_inc_y + buttons_h)
-				scale_value *= 4.;
-			if(sy >= reset_xy_y && sy < reset_xy_y + buttons_h) {
-				x_value = i_x;
-				y_value = i_y;
-			}
-			if(sy >= reset_scale_y && sy < reset_scale_y + buttons_h)
-				scale_value = i_scale;
-			if(sy >= snap_to_f_y && sy < snap_to_f_y + buttons_h)
-				snap_focus_to_nearest();
-			draw_canvas();
-		} else if(mousedown_sx == mousemove_sx && mousedown_sy == mousemove_sy) {
-			const functions = s2x_x2s_s2y_y2s();
-			const s2x = functions[0];
-			const s2y = functions[2];
-			x_value = s2x(sx);
-			y_value = s2y(sy);
-			draw_canvas();
+		const functions = s2x_x2s_s2y_y2s();
+		const s2x = functions[0];
+		const s2y = functions[2];
+		const xy = [s2x(sx), s2y(sy)];
+		if(document.getElementById("a_1").checked) { // add
+			points.push(xy);
+			points_i = points.length-1;
+		} else { // move
+			points_i = nearest_i(xy, points);
+			points[points_i] = xy;
 		}
+		draw_canvas();
 	}, false);
 
 	i_canvas.addEventListener('dblclick', function(e) {
-		x_value = i_x;
+/*		x_value = i_x;
 		y_value = i_y;
-		scale_value = i_scale;
+		scale_value = i_scale;*/
 		draw_canvas();
 	}, false);
 
 	i_canvas.addEventListener('mousemove', function(e) {
-		const canvas_rect = i_canvas.getBoundingClientRect();
+/*		const canvas_rect = i_canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		const sy = e.clientY - canvas_rect.top;
 		all_not_over();
@@ -573,12 +556,12 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 			y_value = s2y(cy);
 			mousemove_sx = sx;
 			mousemove_sy = sy;
-		}
+		}*/
 		draw_canvas();
 	}, false);
 
 	i_canvas.addEventListener('mousedown', function(e) {
-		const canvas_rect = i_canvas.getBoundingClientRect();
+/*		const canvas_rect = i_canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		const sy = e.clientY - canvas_rect.top;
 		if(sx >= w) {
@@ -602,22 +585,22 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		mousedown_sx = sx;
 		mousedown_sy = sy;
 		mousemove_sx = mousedown_sx;
-		mousemove_sy = mousedown_sy;
+		mousemove_sy = mousedown_sy;*/
 	}, false);
 
 	i_canvas.addEventListener('mouseup', function(e) {
-		all_not_down();
+/*		all_not_down();*/
 		draw_canvas();
 	}, false);
 
 	i_canvas.addEventListener('mouseleave', function(e) {
-		all_not_over();
-		all_not_down();
+/*		all_not_over();
+		all_not_down();*/
 		draw_canvas();
 	}, false);
 
 	i_canvas.addEventListener('wheel', function(e) {
-		const canvas_rect = i_canvas.getBoundingClientRect();
+/*		const canvas_rect = i_canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		if(sx >= w)
 			return;
@@ -627,7 +610,7 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 			else
 				scale_value *= 2;
 			draw_canvas();
-		}
+		}*/
 	}, false);
 
 	function redraw() {
