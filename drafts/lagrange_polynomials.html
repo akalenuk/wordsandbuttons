@@ -97,8 +97,20 @@ button {
 }
 	</style>
 	<script language="JavaScript">
-var xs = [0., 1., 2.];
-var ys = [2., 1., 0.];
+var points = [[0., 2.], [1., 1.], [2., 0.]];
+
+function nearest_i(xy, points) {
+	var best_i = 0;
+	var best_d = Math.pow((xy[0]-points[0][0]), 2) + Math.pow((xy[1]-points[0][1]), 2);
+	for(var i = 1; i < points.length; ++i) {
+		const d = Math.pow((xy[0]-points[i][0]), 2) + Math.pow((xy[1]-points[i][1]), 2);
+		if(d < best_d) {
+			best_d = d;
+			best_i = i;
+		}
+	}
+	return best_i;
+}
 
 function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale, i_do_atan, i_w, i_h, i_do_side_panel, i_do_cross, i_do_animations) {
 	const w = i_w;
@@ -337,6 +349,17 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 			context.strokeStyle = color;
 			context.lineWidth = 1.5;
 			context.stroke();
+			context.closePath();
+		}
+
+		// points
+		context.fillStyle = i_colors[0];
+		for (var i = 0; i < points.length; ++i) {
+			context.beginPath();
+			const x = x2s(points[i][0]);
+			const y = y2s(points[i][1]);
+			context.arc(x, y, 4, 0, 2*Math.PI);
+			context.fill();
 			context.closePath();
 		}
 
