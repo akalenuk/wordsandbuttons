@@ -116,59 +116,10 @@ function nearest_i(xy, points) {
 function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale, i_do_atan, i_w, i_h, i_do_side_panel, i_do_cross, i_do_animations) {
 	const w = i_w;
 	const h = i_h;
-	const panel_w = i_do_side_panel ? 158 : 0;
-	var mousedown_sx;
-	var mousedown_sy;
-	var mousemove_sx;
-	var mousemove_sy;
+	const x_value = 0.;
+	const y_value = 0.;
+	const scale_value = 4.;
 
-	const button_bg_color = "#e0e8b5";
-	const button_color = "#161712";
-	const button_high_color = "#838769";
-
-	const buttons_x = w + 16;
-	const buttons_h = 16;
-
-	const x_y = 14;	var x_value = i_x;
-	const y_y = 34;	var y_value = i_y;
-	const reset_xy_y = 54;	var reset_xy_over = false;	var reset_xy_down = false;
-
-	const scale_y = 94;	var scale_value = i_scale;
-	const linear_scale_y = 114;	var linear_scale_over = false;	var linear_scale_down = false;	var linear_scale_checked = !i_do_atan;
-	const atan_scale_y = 134;	var atan_scale_over = false;	var atan_scale_down = false;	var atan_scale_checked = i_do_atan;
-	const scale_dec_y = 154;	var scale_dec_over = false;	var scale_dec_down = false;
-	const scale_inc_y = 174;	var scale_inc_over = false;	var scale_inc_down = false;
-	const reset_scale_y = 194;	var reset_scale_over = false;	var reset_scale_down = false;
-
-	const snap_to_f_y = 234;	var snap_to_f_over = false;	var snap_to_f_down = false;
-
-	function all_not_over() {
-		linear_scale_over = false;
-		atan_scale_over = false;
-		scale_dec_over = false;
-		scale_inc_over = false;
-		reset_xy_over = false;
-		reset_scale_over = false;
-		snap_to_f_over = false;
-	}
-
-	function all_not_down() {
-		linear_scale_down = false;
-		atan_scale_down = false;
-		scale_dec_down = false;
-		scale_inc_down = false;
-		reset_xy_down = false;
-		reset_scale_down = false;
-		snap_to_f_down = false;
-	}
-
-	function linear_real_to_screen (x, dx, scale, w) {
-		return (w / 2) + ((x - dx) / scale) * (w / 2);
-	}
-
-	function linear_screen_to_real (x, dx, scale, w) {
-		return ((x - (w / 2)) / (w / 2) * scale + dx);
-	}
 
 	function atan_real_to_screen (x, dx, scale, w) {
 		return Math.atan((x - dx) / scale) / Math.PI * (w - 1.) + (w / 2);
@@ -180,23 +131,15 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 
 	// returns 4 translation functions from/to screen and real coordinates
 	function s2x_x2s_s2y_y2s(center_x, center_y, scale) {
-		if(linear_scale_checked)
-			return [
-				function(i) {return linear_screen_to_real(i, x_value, scale_value, w);},
-				function(x) {return linear_real_to_screen(x, x_value, scale_value, w);},
-				function(i) {return linear_screen_to_real(h - i, y_value, scale_value, h);},
-				function(y) {return h - linear_real_to_screen(y, y_value, scale_value, h);}
-			];
-		else
-			return [
-				function(i) {return atan_screen_to_real(i, x_value, scale_value, w);},
-				function(x) {return atan_real_to_screen(x, x_value, scale_value, w);},
-				function(i) {return atan_screen_to_real(h - i, y_value, scale_value, h);},
-				function(y) {return h - atan_real_to_screen(y, y_value, scale_value, h);}
-			];
+		return [
+			function(i) {return atan_screen_to_real(i, x_value, scale_value, w);},
+			function(x) {return atan_real_to_screen(x, x_value, scale_value, w);},
+			function(i) {return atan_screen_to_real(h - i, y_value, scale_value, h);},
+			function(y) {return h - atan_real_to_screen(y, y_value, scale_value, h);}
+		];
 	}
 
-	i_canvas.width = w + panel_w;
+	i_canvas.width = w;
 	i_canvas.height = h;
 	
 	function draw_canvas() {
@@ -233,23 +176,9 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 
 		context.beginPath();
 		context.setLineDash([2, 3]);
-		if(linear_scale_checked) {
-			// horizontal
-			for(var j = stepped(s2x(0)); j <= stepped(s2x(w)); j += step) {
-				if(j != 0) {
-					context.moveTo(sharp(x2s(j)), 0);
-					context.lineTo(sharp(x2s(j)), h);
-				}
-			}
-			// vertical
-			for(var i = stepped(s2y(h)); i <= stepped(s2y(0)); i += step) {
-				if(i != 0) {
-					context.moveTo(0, sharp(y2s(i)));
-					context.lineTo(w, sharp(y2s(i)));
-				}
-			}
-		} else if(atan_scale_checked) {
-			// horizontal
+
+		// horizontal
+		{
 			const x_from = s2x(20);
 			const x_to = s2x(w-20);
 			for(var i = Math.sign(x_from) * Math.floor(Math.log2(Math.abs(x_from))) - 1; i <= Math.sign(x_to) * Math.ceil(Math.log2(Math.abs(x_to))); ++i) {
@@ -270,6 +199,7 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 				context.lineTo(w, sharp(y2s(y_i)));
 			}
 		}
+
 		context.strokeStyle = "#AAA";
 		context.lineWidth = 1;
 		context.stroke();
@@ -298,31 +228,27 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		context.strokeStyle = "#000000";
 		context.lineWidth = 1;
 		context.beginPath();
-		if(linear_scale_checked) {
-			draw_arrow(context, 0, sharp(y2s(0)), w, sharp(y2s(0)), "#000000");
-			draw_arrow(context, sharp(x2s(0)), h, sharp(x2s(0)), 0, "#000000");
-		} else {
-			context.moveTo(20.5, sharp(y2s(0)));
-			context.lineTo(w - 20.5, sharp(y2s(0)));
-			context.moveTo(sharp(x2s(0)), h - 20.5);
-			context.lineTo(sharp(x2s(0)), 20.5);
-			context.stroke();
-			context.closePath();
 
-			context.beginPath();
-			context.setLineDash([3, 2]);
-			context.moveTo(20.5, sharp(y2s(0)));
-			context.lineTo(-0.5, sharp(y2s(0)));
-			context.moveTo(w - 20.5, sharp(y2s(0)));
-			context.lineTo(w + 0.5, sharp(y2s(0)));
-			context.moveTo(sharp(x2s(0)), h - 20.5);
-			context.lineTo(sharp(x2s(0)), h + 0.5);
-			context.moveTo(sharp(x2s(0)), 20.5);
-			context.lineTo(sharp(x2s(0)), -0.5);
-			context.stroke();
-			context.closePath();
-			context.setLineDash([]);
-		}
+		context.moveTo(20.5, sharp(y2s(0)));
+		context.lineTo(w - 20.5, sharp(y2s(0)));
+		context.moveTo(sharp(x2s(0)), h - 20.5);
+		context.lineTo(sharp(x2s(0)), 20.5);
+		context.stroke();
+		context.closePath();
+
+		context.beginPath();
+		context.setLineDash([3, 2]);
+		context.moveTo(20.5, sharp(y2s(0)));
+		context.lineTo(-0.5, sharp(y2s(0)));
+		context.moveTo(w - 20.5, sharp(y2s(0)));
+		context.lineTo(w + 0.5, sharp(y2s(0)));
+		context.moveTo(sharp(x2s(0)), h - 20.5);
+		context.lineTo(sharp(x2s(0)), h + 0.5);
+		context.moveTo(sharp(x2s(0)), 20.5);
+		context.lineTo(sharp(x2s(0)), -0.5);
+		context.stroke();
+		context.closePath();
+		context.setLineDash([]);
 
 		// functions
 		for(var i = 0; i < i_fs.length; ++i) {
@@ -332,7 +258,7 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 			context.beginPath();
 			var the_gap = true;
 			var old_i;
-			for(var j = -0.5 + atan_scale_checked; j < w + 0.5 - atan_scale_checked; j += 2.) {
+			for(var j = +0.5; j < w - 0.5; j += 2.) {
 				const x = s2x(j);
 				const y = f(x);
 				const i = y2s(y);
@@ -374,25 +300,9 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		context.strokeStyle = "#000000";
 		context.lineWidth = 1;
 		context.beginPath();
-		if(linear_scale_checked) {
-			// horizontal
-			for(var j = stepped(s2x(0)); j <= stepped(s2x(w)); j += step) {
-				if(j != 0) {
-					context.moveTo(sharp(x2s(j)), sharp(y2s(0)) + 2);
-					context.lineTo(sharp(x2s(j)), sharp(y2s(0)) - 2);
-				}
-				context.fillText(j, sharp(x2s(j)) + 12, sharp(y2s(0)) - 12);
-			}
-			// vertical
-			for(var i = stepped(s2y(h)); i <= stepped(s2y(0)); i += step) {
-				if(i != 0) {
-					context.moveTo(sharp(x2s(0)) - 2, sharp(y2s(i)));
-					context.lineTo(sharp(x2s(0)) + 2, sharp(y2s(i)));
-					context.fillText(i, sharp(x2s(0)) + 12, sharp(y2s(i)) - 12);
-				}
-			}
-		} else if(atan_scale_checked) {
-			// horizontal
+
+		// horizontal
+		{
 			const x_from = s2x(20);
 			const x_to = s2x(w-20);
 			for(var i = Math.sign(x_from) * Math.floor(Math.log2(Math.abs(x_from))) - 1; i <= Math.sign(x_to) * Math.ceil(Math.log2(Math.abs(x_to))); ++i) {
@@ -426,7 +336,6 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		context.stroke();
 		context.closePath();
 
-
 		// cross
 		if(i_do_cross && (x2s(0) != w/2 || y2s(0) != h/2)) {
 			context.beginPath();
@@ -438,41 +347,6 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 			context.lineWidth = 1;
 			context.stroke();
 			context.closePath();
-		}
-
-		// side panel
-		if(i_do_side_panel) {
-			context.fillStyle = button_bg_color;
-			context.fillRect(w, 0, panel_w, h);
-
-			context.font = "14px monospace";
-			context.textAlign = "left";
-			context.textBaseline = "top";
-			context.strokeStyle = "#000000";
-			context.lineWidth = 1;
-
-			context.fillStyle = button_color;
-			context.fillText("x: " + (x_value >= 0 ? '+' : '') + x_value.toFixed(5), buttons_x, x_y);
-			context.fillText("y: " + (y_value >= 0 ? '+' : '') + y_value.toFixed(5), buttons_x, y_y);
-		
-			context.fillStyle = linear_scale_over ? button_high_color :button_color;
-			context.fillText(linear_scale_checked ? "(*) linear" : "( ) linear", buttons_x + linear_scale_down, linear_scale_y + linear_scale_down);
-			context.fillStyle = atan_scale_over ? button_high_color : button_color;
-			context.fillText(atan_scale_checked ? "(*) atan" : "( ) atan", buttons_x + atan_scale_down, atan_scale_y + atan_scale_down);
-		
-			context.fillStyle = scale_dec_over ? button_high_color : button_color;
-			context.fillText("[ scale / 2 ]", buttons_x + scale_dec_down, scale_dec_y + scale_dec_down);
-			context.fillStyle = "#444444";
-			context.fillText("scale: " + scale.toFixed(3), buttons_x, scale_y);
-			context.fillStyle = scale_inc_over ? button_high_color : button_color;
-			context.fillText("[ scale * 2 ]", buttons_x + scale_inc_down, scale_inc_y + scale_inc_down);
-		
-			context.fillStyle = reset_xy_over ? button_high_color : button_color;
-			context.fillText("[ reset x,y ]", buttons_x + reset_xy_down, reset_xy_y + reset_xy_down);
-			context.fillStyle = reset_scale_over ? button_high_color : button_color;
-			context.fillText("[reset scale]", buttons_x + reset_scale_down, reset_scale_y + reset_scale_down);
-			context.fillStyle = snap_to_f_over ? button_high_color : button_color;
-			context.fillText("[ snap to f ]", buttons_x + snap_to_f_down, snap_to_f_y + snap_to_f_down);
 		}
 	}
 
