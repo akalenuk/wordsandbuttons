@@ -113,13 +113,14 @@ function nearest_i(xy, points) {
 	return best_i;
 }
 
-function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale, i_do_atan, i_w, i_h, i_do_side_panel, i_do_cross, i_do_animations) {
+function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale, i_w, i_h, i_do_side_panel, i_do_cross, i_do_animations) {
 	const w = i_w;
 	const h = i_h;
-	const x_value = 0.;
-	const y_value = 0.;
-	const scale_value = 4.;
-
+	const x_value = i_x;
+	const y_value = i_y;
+	const scale_value = i_scale;
+	i_canvas.width = w;
+	i_canvas.height = h;
 
 	function atan_real_to_screen (x, dx, scale, w) {
 		return Math.atan((x - dx) / scale) / Math.PI * (w - 1.) + (w / 2);
@@ -139,23 +140,7 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		];
 	}
 
-	i_canvas.width = w;
-	i_canvas.height = h;
-	
 	function draw_canvas() {
-		function draw_arrow(context, x1, y1, x2, y2, color) {
-			const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
-			context.beginPath();
-			context.moveTo(x1, y1);
-			context.lineTo(x2, y2);
-			context.moveTo(x2 - (y2 - y1) * 4.3 / d - (x2 - x1) * 16.7 / d, y2 - (y2 - y1) * 16.7 / d + (x2 - x1) * 4.3 / d);
-			context.lineTo(x2, y2);
-			context.moveTo(x2 + (y2 - y1) * 4.3 / d - (x2 - x1) * 16.7 / d, y2 - (y2 - y1) * 16.7 / d - (x2 - x1) * 4.3 / d);
-			context.lineTo(x2, y2);
-			context.strokeStyle = color;
-			context.stroke();
-			context.closePath();
-		}
 		var context = i_canvas.getContext("2d");
 
 		// background
@@ -218,7 +203,6 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 			context.closePath();
 		}
 		context.setLineDash([]);
-
 
 		// axis lines (come before functions for better readability)
 		context.font = "14px Arial";
@@ -519,7 +503,7 @@ reset_all_points();
 	}
 	tick();
 	const parabola = function(x) {return x * x + Math.sin(t / 1.);}
-	init_atan_plot(document.getElementById("approximation_canvas"), [parabola], ["#005500"], [], 0., 0., 4, true, 640, 640, false, false, true);
+	init_atan_plot(document.getElementById("approximation_canvas"), [parabola], ["#005500"], [], 0., 0., 4, 640, 640, false, false, true);
 	</script>
 
 
