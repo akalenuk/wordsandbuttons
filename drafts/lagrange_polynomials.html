@@ -487,7 +487,7 @@ reset_all_points();
 	<h1>
 ...?
 	</h1>
-	<canvas id="approximation_canvas" width=640 height=640></canvas>
+	<canvas id="lagrange_canvas" width=640 height=640></canvas>
 	<div style="text-align:center; padding-bottom:12pt;">
 		<input type="radio" name="approx" id="a_1" value="Add" /><label for="a_1">Add a point;</label> &nbsp;
 		<input type="radio" name="approx" id="a_2" checked value="Move"><label for="a_2">move a point.</label> &nbsp;
@@ -495,13 +495,9 @@ reset_all_points();
 		<button type="button" style="width: 120pt;" onclick="reset_all_points()">Reset all</button>
 	</div>
 
+	<canvas id="sumpiece_canvas" width=640 height=640></canvas>
+
 	<script language="JavaScript">
-	var t = 0;
-	function tick() {
-		t += 0.02;
-		setTimeout(tick, 20);
-	}
-	tick();
 	const lagrange = function(x) {
 		var y = 0.;
 		for(var i = 0; i < points.length; ++i) {
@@ -514,7 +510,18 @@ reset_all_points();
 		}
 		return y;
 	}
-	init_atan_plot(document.getElementById("approximation_canvas"), [lagrange], ["#005500"], [], 0., 0., 4, 640, 640, false, false, true);
+	init_atan_plot(document.getElementById("lagrange_canvas"), [lagrange], ["#005500"], [], 0., 0., 4, 640, 640, false, false, true);
+
+	const sumpiece = function(x) {
+		var i = points.length-1
+		var yi = points[i][1];
+		for(var j = 0; j < points.length; ++j) {
+			if(i != j)
+				yi *= (x - points[j][0]) / (points[i][0] - points[j][0]);
+		}
+		return yi;
+	}
+	init_atan_plot(document.getElementById("sumpiece_canvas"), [sumpiece], ["#005500"], [], 0., 0., 4, 640, 640, false, false, true);
 	</script>
 
 
