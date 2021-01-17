@@ -476,7 +476,7 @@ function undo_last_point() {
 }
 
 function reset_all_points() {
-	points = [[0., 2.], [1., 1.], [2., 0.]];
+	points = [[-4., 1.], [1., 4.], [4., -1.]];
 }
 reset_all_points();
 
@@ -502,8 +502,19 @@ reset_all_points();
 		setTimeout(tick, 20);
 	}
 	tick();
-	const parabola = function(x) {return x * x + Math.sin(t / 1.);}
-	init_atan_plot(document.getElementById("approximation_canvas"), [parabola], ["#005500"], [], 0., 0., 4, 640, 640, false, false, true);
+	const lagrange = function(x) {
+		var y = 0.;
+		for(var i = 0; i < points.length; ++i) {
+			var yi = points[i][1];
+			for(var j = 0; j < points.length; ++j) {
+				if(i != j)
+					yi *= (x - points[j][0]) / (points[i][0] - points[j][0]);
+			}
+			y += yi;
+		}
+		return y;
+	}
+	init_atan_plot(document.getElementById("approximation_canvas"), [lagrange], ["#005500"], [], 0., 0., 4, 640, 640, false, false, true);
 	</script>
 
 
