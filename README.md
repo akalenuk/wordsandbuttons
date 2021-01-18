@@ -7,6 +7,9 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 
 ## Pages
 
+- [Lagrange polynomial as a gateway drug to basis splines](https://wordsandbuttons.online/lagrange_polynomial_as_a_gateway_drug_to_basis_splines.html) This explains Lagrange polynomial: why does it run through all the points, what is the basis polynomial, and how come it's a polynomial in the first place.
+<sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
+
 - [Trippy polynomials in arctangent scale](https://wordsandbuttons.online/trippy_polynomials_in_arctangent_scale.html) This shows the global properties of polynomials, their derivatives, and explains how the Maclaurine and Taylor series work all with animated plots in arctangent scale.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
