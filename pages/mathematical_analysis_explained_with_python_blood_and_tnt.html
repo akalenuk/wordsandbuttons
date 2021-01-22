@@ -146,6 +146,8 @@ li {
 	text-align: left;
 	padding-bottom: 6pt;
 }
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 
@@ -218,7 +220,7 @@ function init_derivative(){
 	var canvas_rect = d.getBoundingClientRect();
 	draw_derivative();
 
-	d.addEventListener('mousemove', function(e){
+	d.addEventListener('pointermove', function(e){
 		if(e.buttons == 1) {
 			var canvas_rect = d.getBoundingClientRect();
 			derivative_x = client_to_x(e.clientX - canvas_rect.left);
@@ -226,13 +228,14 @@ function init_derivative(){
 		  }
 	}, false);
 
-	d.addEventListener('mousedown', function(e){
+	d.addEventListener('pointerdown', function(e){
 		var canvas_rect = d.getBoundingClientRect();
 		derivative_x = client_to_x(e.clientX - canvas_rect.left);
 		draw_derivative();
+		d.releasePointerCapture(e.pointerId);
 	}, false);
 
-	d.addEventListener('mouseleave', function(e){
+	d.addEventListener('pointerleave', function(e){
 		draw_derivative();
 	}, false);
 }
@@ -303,17 +306,18 @@ function init_plot(){
 	var canvas_rect = plot.getBoundingClientRect();
 	plot_draw(0, 0, false, false);
 
-	plot.addEventListener('mousemove', function(e){
+	plot.addEventListener('pointermove', function(e){
 		var canvas_rect = plot.getBoundingClientRect();
 		plot_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true, e.buttons == 1);
 	}, false);
 
-	plot.addEventListener('mousedown', function(e){
+	plot.addEventListener('pointerdown', function(e){
 		var canvas_rect = plot.getBoundingClientRect();
 		plot_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true, true);
+		plot.releasePointerCapture(e.pointerId);
 	}, false);
 
-	plot.addEventListener('mouseleave', function(e){
+	plot.addEventListener('pointerleave', function(e){
 		plot_draw(0, 0, false, false);
 	}, false);
 }

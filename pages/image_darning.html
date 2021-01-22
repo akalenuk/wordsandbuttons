@@ -99,6 +99,8 @@ form {
 	background-color: #eeee99;
 	color: #000;
 }
+
+canvas { touch-action: none; }
 	</style>
 
 	<script language="JavaScript">
@@ -191,7 +193,7 @@ function init_canvas(){
 	canvas.height = pixels.length;
 	const canvas_rect = canvas.getBoundingClientRect();
 
-	canvas.addEventListener('mousemove', function(e){
+	canvas.addEventListener('pointermove', function(e){
 		var canvas_rect = canvas.getBoundingClientRect();
 		if(e.buttons == 1){
 			const x = e.clientX - canvas_rect.left;
@@ -201,15 +203,16 @@ function init_canvas(){
 		}
 	}, false);
 
-	canvas.addEventListener('mousedown', function(e){
+	canvas.addEventListener('pointerdown', function(e){
 		var canvas_rect = canvas.getBoundingClientRect();
 		const x = e.clientX - canvas_rect.left;
 		const y = e.clientY - canvas_rect.top;
 		set_points([x, y]);
 		draw_canvas();
+		canvas.releasePointerCapture(e.pointerId);
 	}, false);
 
-	canvas.addEventListener('mouseleave', function(e){
+	canvas.addEventListener('pointerleave', function(e){
 		if(e.buttons == 1){
 			var canvas_rect = canvas.getBoundingClientRect();
 			const x = e.clientX - canvas_rect.left;

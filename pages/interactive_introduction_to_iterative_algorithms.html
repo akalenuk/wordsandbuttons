@@ -103,6 +103,8 @@ button {
 	margin-right:4pt;
 	font-size: 16pt;
 }
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 
@@ -324,7 +326,7 @@ function init_solver_1(){
 	var canvas_rect = solver.getBoundingClientRect();
 	draw_solver_1(0, 0, false);
 
-	solver.addEventListener('mousemove', function(e){
+	solver.addEventListener('pointermove', function(e){
 		var canvas_rect = solver.getBoundingClientRect();
 		draw_solver_1(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1) {
@@ -334,17 +336,18 @@ function init_solver_1(){
 		}
 	}, false);
 
-	solver.addEventListener('mousedown', function(e){
+	solver.addEventListener('pointerdown', function(e){
 		invalidate_solver_1(e.clientX, e.clientY);
 		var canvas_rect = solver.getBoundingClientRect();
 		solver_1_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+		solver.releasePointerCapture(e.pointerId);
 	}, false);
 
-	solver.addEventListener('mouseup', function(e){
+	solver.addEventListener('pointerup', function(e){
 		invalidate_solver_1(e.clientX, e.clientY);
 	}, false);
 
-	solver.addEventListener('mouseleave', function(e){
+	solver.addEventListener('pointerleave', function(e){
 		draw_solver_1(0, 0, false);
 	}, false);
 }

@@ -88,6 +88,8 @@ button{
 	font-size: 18pt;
 }
 
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 var slider_set = [false, false, false, false,  false, false, false, false,  false, false];
@@ -181,21 +183,22 @@ function init_slider(no){
 	draw_slider(no);
 	var slider = document.getElementById("slider_" + (no + 1));
 
-	slider.addEventListener('mouseleave', function(e){
+	slider.addEventListener('pointerleave', function(e){
 		slider_down = false;
 	}, false);
 
-	slider.addEventListener('mouseup', function(e){
+	slider.addEventListener('pointerup', function(e){
 		slider_down = false;
 	}, false);
 
-	slider.addEventListener('mousedown', function(e){
+	slider.addEventListener('pointerdown', function(e){
 		slider_down = true;
 		position_slider(no, e.clientX);
 		draw_slider(no);
+		slider.releasePointerCapture(e.pointerId);
 	}, false);
 
-	slider.addEventListener('mousemove', function(e){
+	slider.addEventListener('pointermove', function(e){
 		if(slider_down){
 			position_slider(no, e.clientX);
 			draw_slider(no);

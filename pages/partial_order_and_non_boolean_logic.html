@@ -148,6 +148,8 @@ table.comparison {
 	font-family: sans-serif;
 	padding-bottom: 24pt;
 }
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 const slider_w = 608;
@@ -206,7 +208,7 @@ function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template, lb_is
 	slider_lb_is_ub[no] = lb_is_ub;
 	draw_slider(no);
 
-	slider.addEventListener('mouseleave', function(e){
+	slider.addEventListener('pointerleave', function(e){
 		slider_lb[no] = Math.round(slider_lb[no] * 10) / 10;
 		slider_ub[no] = Math.round(slider_ub[no] * 10) / 10;
 		slider_down[no] = false;
@@ -214,7 +216,7 @@ function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template, lb_is
 		draw_slider(no);
 	}, false);
 
-	slider.addEventListener('mouseup', function(e){
+	slider.addEventListener('pointerup', function(e){
 		slider_lb[no] = Math.round(slider_lb[no] * 10) / 10;
 		slider_ub[no] = Math.round(slider_ub[no] * 10) / 10;
 		slider_down[no] = false;
@@ -222,15 +224,16 @@ function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template, lb_is
 		draw_slider(no);
 	}, false);
 
-	slider.addEventListener('mousedown', function(e){
+	slider.addEventListener('pointerdown', function(e){
 		slider_down[no] = true;
 		var canvas_rect = slider.getBoundingClientRect();
 		position_slider(no, e.clientX - canvas_rect.left, slider_lb_is_ub[no]);
 		on_slide(slider_lb[no], slider_ub[no]);
 		draw_slider(no);
+		slider.releasePointerCapture(e.pointerId);
 	}, false);
 
-	slider.addEventListener('mousemove', function(e){
+	slider.addEventListener('pointermove', function(e){
 		if(slider_down[no] == true){
 			var canvas_rect = slider.getBoundingClientRect();
 			position_slider(no, e.clientX - canvas_rect.left, slider_lb_is_ub[no]);

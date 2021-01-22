@@ -150,6 +150,8 @@ button {
 input[type="radio"]{
 	margin: 4pt 4pt 4pt 4pt;
 }
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 var w = 640;
@@ -254,7 +256,7 @@ function init_pick_a_point(){
 	client_y = canvas_rect.top + 256 - point_y * 64;
 	pick_a_point_draw(0, 0, false);
 
-	pick_a_point.addEventListener('mousemove', function(e){
+	pick_a_point.addEventListener('pointermove', function(e){
 		var canvas_rect = pick_a_point.getBoundingClientRect();
 		if(e.buttons == 1){ // drag
 			point_x = round00(client_to_x(e.clientX - canvas_rect.left));
@@ -268,7 +270,7 @@ function init_pick_a_point(){
 		}
 	}, false);
 
-	pick_a_point.addEventListener('mousedown', function(e){
+	pick_a_point.addEventListener('pointerdown', function(e){
 		var canvas_rect = pick_a_point.getBoundingClientRect();
 		point_x = round00(client_to_x(e.clientX - canvas_rect.left));
 		point_y = round00(client_to_y(e.clientY - canvas_rect.top));
@@ -276,9 +278,10 @@ function init_pick_a_point(){
 		write_the_point_value();
 		transform();
 		slide_a_w_draw(e.clientX);
+		pick_a_point.releasePointerCapture(e.pointerId);
 	}, false);
 
-	pick_a_point.addEventListener('mouseleave', function(e){
+	pick_a_point.addEventListener('pointerleave', function(e){
 		pick_a_point_draw(0, 0, false);
 	}, false);
 }
@@ -341,7 +344,7 @@ function init_slide_a_w(){
 	var canvas_rect = slide_a_w.getBoundingClientRect();
 	slide_a_w_draw(0, 0, false);
 
-	slide_a_w.addEventListener('mousemove', function(e){
+	slide_a_w.addEventListener('pointermove', function(e){
 		var canvas_rect = slide_a_w.getBoundingClientRect();
 		slide_a_w_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
@@ -353,13 +356,14 @@ function init_slide_a_w(){
 		}
 	}, false);
 
-	slide_a_w.addEventListener('mousedown', function(e){
+	slide_a_w.addEventListener('pointerdown', function(e){
 		var canvas_rect = slide_a_w.getBoundingClientRect();
 		slide_w = point_x / client_to_x(e.clientX - canvas_rect.left);
 		slide_a_w_draw(0, 0, false);
+		slide_a_w.releasePointerCapture(e.pointerId);
 	}, false);
 
-	slide_a_w.addEventListener('mouseleave', function(e){
+	slide_a_w.addEventListener('pointerleave', function(e){
 		slide_a_w_draw(0, 0, false);
 	}, false);
 }
@@ -430,14 +434,15 @@ function init_translation(){
 	translation = document.getElementById("translation");
 	translation_draw(0, 0, false);
 
-	translation.addEventListener('mousedown', function(e){
+	translation.addEventListener('pointerdown', function(e){
 		var canvas_rect = translation.getBoundingClientRect();
 		drag_x = client_to_x(e.clientX - canvas_rect.left);
 		drag_y = client_to_y(e.clientY - canvas_rect.top);
 		translation_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		translation.releasePointerCapture(e.pointerId);
 	}, false);
 
-	translation.addEventListener('mousemove', function(e){
+	translation.addEventListener('pointermove', function(e){
 		var canvas_rect = translation.getBoundingClientRect();
 		if(e.buttons == 1){
 			x = client_to_x(e.clientX - canvas_rect.left);
@@ -450,11 +455,11 @@ function init_translation(){
 		}
 	}, false);
 
-	translation.addEventListener('mouseup', function(e){
+	translation.addEventListener('pointerup', function(e){
 		translation_draw(0, 0, false);
 	}, false);
 
-	translation.addEventListener('mouseleave', function(e){
+	translation.addEventListener('pointerleave', function(e){
 		translation_draw(0, 0, false);
 	}, false);
 }
@@ -540,7 +545,7 @@ function init_rotation(){
 
 	var rotation = document.getElementById("rotation");
 
-	rotation.addEventListener('mousemove', function(e){
+	rotation.addEventListener('pointermove', function(e){
 		if(e.buttons == 1) {
 			var canvas_rect = rotation.getBoundingClientRect();
 			var client_x = e.clientX - canvas_rect.left;
@@ -550,19 +555,20 @@ function init_rotation(){
 		}
 	}, false);
 
-	rotation.addEventListener('mousedown', function(e){
+	rotation.addEventListener('pointerdown', function(e){
 		var canvas_rect = rotation.getBoundingClientRect();
 		var client_x = e.clientX - canvas_rect.left;
 		var client_y = e.clientY - canvas_rect.top;
 		rotation_a = rotation_for(client_to_x(client_x), client_to_y(client_y));
 		rotation_draw(rotation_a, true);
+		rotation.releasePointerCapture(e.pointerId);
 	}, false);
 
-	rotation.addEventListener('mouseup', function(e){
+	rotation.addEventListener('pointerup', function(e){
 		rotation_draw(rotation_a, false);
 	}, false);
 
-	rotation.addEventListener('mouseleave', function(e){
+	rotation.addEventListener('pointerleave', function(e){
 		rotation_draw(rotation_a, false);
 	}, false);
 }
@@ -634,7 +640,7 @@ function init_scale(){
 	scale = document.getElementById("scale");
 	scale_draw(scale_x, scale_y, false);
 
-	scale.addEventListener('mousemove', function(e){
+	scale.addEventListener('pointermove', function(e){
 		if(e.buttons == 1){
 			var canvas_rect = scale.getBoundingClientRect();
 			var new_scale_x = client_to_x(e.clientX - canvas_rect.left);
@@ -645,18 +651,19 @@ function init_scale(){
 		}
 	}, false);
 
-	scale.addEventListener('mousedown', function(e){
+	scale.addEventListener('pointerdown', function(e){
 		var canvas_rect = scale.getBoundingClientRect();
 		scale_x = client_to_x(e.clientX - canvas_rect.left);
 		scale_y = client_to_y(e.clientY - canvas_rect.top);
 		scale_draw(scale_x, scale_y, true);
+		scale.releasePointerCapture(e.pointerId);
 	}, false);
 
-	scale.addEventListener('mouseup', function(e){
+	scale.addEventListener('pointerup', function(e){
 		scale_draw(scale_x, scale_y, false);
 	}, false);
 
-	scale.addEventListener('mouseleave', function(e){
+	scale.addEventListener('pointerleave', function(e){
 		scale_draw(scale_x, scale_y, false);
 	}, false);
 }
@@ -749,7 +756,7 @@ function init_affine(){
 	const affine = document.getElementById("affine");
 	affine_draw(0, 0, false);
 
-	affine.addEventListener('mousedown', function(e){
+	affine.addEventListener('pointerdown', function(e){
 		const canvas_rect = affine.getBoundingClientRect();
 		const x = client_to_x( e.clientX - canvas_rect.left );
 		const y = client_to_y( e.clientY - canvas_rect.top );
@@ -759,9 +766,10 @@ function init_affine(){
 		affine_xs[(affine_i + 3) % 4] = affine_xs[(affine_i + 2) % 4] + affine_xs[(affine_i + 0) % 4] - affine_xs[(affine_i + 1) % 4];
 		affine_ys[(affine_i + 3) % 4] = affine_ys[(affine_i + 2) % 4] + affine_ys[(affine_i + 0) % 4] - affine_ys[(affine_i + 1) % 4];
 		affine_draw(e.clientX, e.clientY, true);
+		affine.releasePointerCapture(e.pointerId);
 	}, false);
 
-	affine.addEventListener('mousemove', function(e){
+	affine.addEventListener('pointermove', function(e){
 		const canvas_rect = affine.getBoundingClientRect();
 		const x = client_to_x( e.clientX - canvas_rect.left );
 		const y = client_to_y( e.clientY - canvas_rect.top );
@@ -777,7 +785,7 @@ function init_affine(){
 		}
 	}, false);
 
-	affine.addEventListener('mouseup', function(e){
+	affine.addEventListener('pointerup', function(e){
 		var canvas_rect = affine.getBoundingClientRect();
 		const x = client_to_x( e.clientX - canvas_rect.left );
 		const y = client_to_y( e.clientY - canvas_rect.top );
@@ -788,7 +796,7 @@ function init_affine(){
 		affine_draw(e.clientX, e.clientY, true);
 	}, false);
 
-	affine.addEventListener('mouseleave', function(e){
+	affine.addEventListener('pointerleave', function(e){
 		affine_draw(0, 0, false);
 	}, false);
 }
@@ -841,7 +849,7 @@ function init_projective(){
 	const projective = document.getElementById("projective");
 	projective_draw(0, 0, false);
 
-	projective.addEventListener('mousedown', function(e){
+	projective.addEventListener('pointerdown', function(e){
 		const canvas_rect = projective.getBoundingClientRect();
 		const x = client_to_x( e.clientX - canvas_rect.left );
 		const y = client_to_y( e.clientY - canvas_rect.top );
@@ -859,9 +867,10 @@ function init_projective(){
 			}
 		}
 		projective_draw(e.clientX, e.clientY, true);
+		projective.releasePointerCapture(e.pointerId);
 	}, false);
 
-	projective.addEventListener('mousemove', function(e){
+	projective.addEventListener('pointermove', function(e){
 		const canvas_rect = projective.getBoundingClientRect();
 		const x = client_to_x( e.clientX - canvas_rect.left );
 		const y = client_to_y( e.clientY - canvas_rect.top );
@@ -885,7 +894,7 @@ function init_projective(){
 		}
 	}, false);
 
-	projective.addEventListener('mouseup', function(e){
+	projective.addEventListener('pointerup', function(e){
 		var canvas_rect = projective.getBoundingClientRect();
 		const x = client_to_x( e.clientX - canvas_rect.left );
 		const y = client_to_y( e.clientY - canvas_rect.top );
@@ -904,7 +913,7 @@ function init_projective(){
 		projective_draw(e.clientX, e.clientY, true);
 	}, false);
 
-	projective.addEventListener('mouseleave', function(e){
+	projective.addEventListener('pointerleave', function(e){
 		projective_draw(0, 0, false);
 	}, false);
 }
@@ -1051,7 +1060,7 @@ function init_composable(){
 	composable = document.getElementById("composable");
 	composable_draw(0, 0, false);
 
-	composable.addEventListener('mousedown', function(e){
+	composable.addEventListener('pointerdown', function(e){
 		const canvas_rect = composable.getBoundingClientRect();
 		composable_mousedown_x = e.clientX - canvas_rect.left;
 		composable_mousedown_y = e.clientY - canvas_rect.top;
@@ -1060,9 +1069,10 @@ function init_composable(){
 		composable_i = nearest_i(x, y, composable_xs, composable_ys);
 		recalculate_composable(composable_mousedown_x, composable_mousedown_y);
 		composable_draw(0, 0, false);
+		composable.releasePointerCapture(e.pointerId);
 	}, false);
 
-	composable.addEventListener('mousemove', function(e){
+	composable.addEventListener('pointermove', function(e){
 		var canvas_rect = composable.getBoundingClientRect();
 		const client_x = e.clientX - canvas_rect.left;
 		const client_y = e.clientY - canvas_rect.top;
@@ -1081,7 +1091,7 @@ function init_composable(){
 		}
 	}, false);
 
-	composable.addEventListener('mouseup', function(e){
+	composable.addEventListener('pointerup', function(e){
 		var canvas_rect = composable.getBoundingClientRect();
 		client_x = e.clientX - canvas_rect.left;
 		client_y = e.clientY - canvas_rect.top;
@@ -1089,7 +1099,7 @@ function init_composable(){
 		composable_draw(client_x, client_y, false);
 	}, false);
 
-	composable.addEventListener('mouseleave', function(e){
+	composable.addEventListener('pointerleave', function(e){
 		composable_draw(0, 0, false);
 	}, false);
 }

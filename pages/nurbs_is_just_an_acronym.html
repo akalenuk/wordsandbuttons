@@ -124,6 +124,8 @@ i {
 	font-size: 15pt;
 	font-style: italic;
 }
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 
@@ -339,7 +341,7 @@ function init_nurbs_bs(){
 	var canvas_rect = nurbs.getBoundingClientRect();
 	all_nurbs_draw(0, 0, false);
 
-	nurbs.addEventListener('mousemove', function(e){
+	nurbs.addEventListener('pointermove', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
 		all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
@@ -349,14 +351,15 @@ function init_nurbs_bs(){
 		}
 	}, false);
 
-	nurbs.addEventListener('mousedown', function(e){
+	nurbs.addEventListener('pointerdown', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
 		nurbs_control_xs[nurbs_bs_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[nurbs_bs_i];
 		nurbs_control_ys[nurbs_bs_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[nurbs_bs_i];
 		all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		nurbs.releasePointerCapture(e.pointerId);
 	}, false);
 
-	nurbs.addEventListener('mouseleave', function(e){
+	nurbs.addEventListener('pointerleave', function(e){
 		all_nurbs_draw(0, 0, false);
 	}, false);
 }
@@ -401,7 +404,7 @@ function init_nurbs_nu(){
 	var canvas_rect = nurbs.getBoundingClientRect();
 	all_nurbs_draw(0, 0, false);
 
-	nurbs.addEventListener('mousemove', function(e){
+	nurbs.addEventListener('pointermove', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
 		all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
@@ -411,14 +414,15 @@ function init_nurbs_nu(){
 		}
 	}, false);
 
-	nurbs.addEventListener('mousedown', function(e){
+	nurbs.addEventListener('pointerdown', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
 		nurbs_control_xs[nurbs_nu_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[nurbs_nu_i];
 		nurbs_control_ys[nurbs_nu_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[nurbs_nu_i];
 		all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		nurbs.releasePointerCapture(e.pointerId);
 	}, false);
 
-	nurbs.addEventListener('mouseleave', function(e){
+	nurbs.addEventListener('pointerleave', function(e){
 		all_nurbs_draw(0, 0, false);
 	}, false);
 }
@@ -449,7 +453,7 @@ function init_nurbs_nu_knots(){
 	var canvas_rect = nurbs.getBoundingClientRect();
 	nurbs_nu_knots_draw(0, 0, false);
 
-	nurbs.addEventListener('mousemove', function(e){
+	nurbs.addEventListener('pointermove', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
 
 		// closest knot
@@ -471,14 +475,15 @@ function init_nurbs_nu_knots(){
 		}
 	}, false);
 
-	nurbs.addEventListener('mousedown', function(e){
+	nurbs.addEventListener('pointerdown', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
 		nurbs_knot[nurbs_nu_knots_i] = client_to_x(e.clientX - canvas_rect.left);
 		nurbs_nu_knots_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
 		all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		nurbs.releasePointerCapture(e.pointerId);
 	}, false);
 
-	nurbs.addEventListener('mouseleave', function(e){
+	nurbs.addEventListener('pointerleave', function(e){
 		nurbs_nu_knots_draw(0, 0, false);
 	}, false);
 }
@@ -504,7 +509,7 @@ function init_nurbs_r(){
 	var canvas_rect = nurbs.getBoundingClientRect();
 	all_nurbs_draw(0, 0, false);
 
-	nurbs.addEventListener('mousemove', function(e){
+	nurbs.addEventListener('pointermove', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
 		all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
@@ -514,14 +519,15 @@ function init_nurbs_r(){
 		}
 	}, false);
 
-	nurbs.addEventListener('mousedown', function(e){
+	nurbs.addEventListener('pointerdown', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
 		nurbs_control_xs[nurbs_r_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[nurbs_r_i];
 		nurbs_control_ys[nurbs_r_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[nurbs_r_i];
 		all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		nurbs.releasePointerCapture(e.pointerId);
 	}, false);
 
-	nurbs.addEventListener('mouseleave', function(e){
+	nurbs.addEventListener('pointerleave', function(e){
 		all_nurbs_draw(0, 0, false);
 	}, false);
 }
@@ -551,7 +557,7 @@ function init_nurbs_r_weights(){
 	var nurbs = document.getElementById("nurbs_r_weights");
 	nurbs_draw_r_weights();
 
-	nurbs.addEventListener('mousemove', function(e){
+	nurbs.addEventListener('pointermove', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
 		if(e.buttons == 1){
 			var i = Math.floor((e.clientX - canvas_rect.left) / 128);
@@ -565,7 +571,7 @@ function init_nurbs_r_weights(){
 		all_nurbs_draw(0, 0, false);
 	}, false);
 
-	nurbs.addEventListener('mousedown', function(e){
+	nurbs.addEventListener('pointerdown', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
 		var i = Math.floor((e.clientX - canvas_rect.left) / 128);
 		affine_x =  nurbs_control_xs[i] / nurbs_control_ws[i];
@@ -575,6 +581,7 @@ function init_nurbs_r_weights(){
 		nurbs_control_ys[i] = affine_y * nurbs_control_ws[i];
 		nurbs_draw_r_weights();
 		all_nurbs_draw(0, 0, false);
+		nurbs.releasePointerCapture(e.pointerId);
 	}, false);
 }
 
@@ -624,7 +631,7 @@ function init_circle(){
 	var canvas_rect = nurbs.getBoundingClientRect();
 	circle_draw(0, 0, false);
 
-	nurbs.addEventListener('mousemove', function(e){
+	nurbs.addEventListener('pointermove', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
 		circle_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
@@ -634,14 +641,15 @@ function init_circle(){
 		}
 	}, false);
 
-	nurbs.addEventListener('mousedown', function(e){
+	nurbs.addEventListener('pointerdown', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
 		circle_control_xs[circle_i] = client_to_x(e.clientX - canvas_rect.left) * circle_control_ws[circle_i];
 		circle_control_ys[circle_i] = client_to_y(e.clientY - canvas_rect.top) * circle_control_ws[circle_i];
 		circle_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		nurbs.releasePointerCapture(e.pointerId);
 	}, false);
 
-	nurbs.addEventListener('mouseleave', function(e){
+	nurbs.addEventListener('pointerleave', function(e){
 		circle_draw(0, 0, false);
 	}, false);
 }

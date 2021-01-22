@@ -90,6 +90,8 @@ button {
 	font-style: italic;
 	white-space: nowrap;
 }
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale, i_do_atan, i_w, i_h, i_do_side_panel, i_do_cross, i_do_animations) {
@@ -510,7 +512,7 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		draw_canvas();
 	}, false);
 
-	i_canvas.addEventListener('mousemove', function(e) {
+	i_canvas.addEventListener('pointermove', function(e) {
 		const canvas_rect = i_canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		const sy = e.clientY - canvas_rect.top;
@@ -546,7 +548,7 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		draw_canvas();
 	}, false);
 
-	i_canvas.addEventListener('mousedown', function(e) {
+	i_canvas.addEventListener('pointerdown', function(e) {
 		const canvas_rect = i_canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		const sy = e.clientY - canvas_rect.top;
@@ -572,14 +574,15 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		mousedown_sy = sy;
 		mousemove_sx = mousedown_sx;
 		mousemove_sy = mousedown_sy;
+		i_canvas.releasePointerCapture(e.pointerId);
 	}, false);
 
-	i_canvas.addEventListener('mouseup', function(e) {
+	i_canvas.addEventListener('pointerup', function(e) {
 		all_not_down();
 		draw_canvas();
 	}, false);
 
-	i_canvas.addEventListener('mouseleave', function(e) {
+	i_canvas.addEventListener('pointerleave', function(e) {
 		all_not_over();
 		all_not_down();
 		draw_canvas();

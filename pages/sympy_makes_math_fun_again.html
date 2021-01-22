@@ -87,6 +87,8 @@ textarea {
 	font-family: monospace;
 }
 
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 // client
@@ -268,7 +270,7 @@ var py = 1;
 function init_not_sine_model() {
 	plot = document.getElementById("not_sine");
 
-	plot.addEventListener('mousemove', function(e){
+	plot.addEventListener('pointermove', function(e){
 		if(e.buttons == 1){
 			var canvas_rect = plot.getBoundingClientRect();
 			px = client_to_x(e.clientX - canvas_rect.left);
@@ -277,18 +279,19 @@ function init_not_sine_model() {
 		}
 	}, false);
 
-	plot.addEventListener('mousedown', function(e){
+	plot.addEventListener('pointerdown', function(e){
 		var canvas_rect = plot.getBoundingClientRect();
 		px = client_to_x(e.clientX - canvas_rect.left);
 		py = client_to_y(e.clientY - canvas_rect.top);
 		draw_not_sine_model()
+		plot.releasePointerCapture(e.pointerId);
 	}, false);
 
-	plot.addEventListener('mouseup', function(e){
+	plot.addEventListener('pointerup', function(e){
 		draw_not_sine_model();
 	}, false);
 
-	plot.addEventListener('mouseleave', function(e){
+	plot.addEventListener('pointerleave', function(e){
 		draw_not_sine_model();
 	}, false);
 

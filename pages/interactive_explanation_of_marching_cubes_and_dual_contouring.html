@@ -95,6 +95,8 @@ u {
 	text-decoration: none;
 	cursor: pointer;
 }
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 const w = 640;
@@ -400,7 +402,7 @@ function init_marching_cube_no_interpolation() {
 	var marching_cube = document.getElementById("marching_cube_no_interpolation");
 	draw_marching_cube("marching_cube_no_interpolation", false, 0, 0, false);
 
-	marching_cube.addEventListener('mousemove', function(e) {
+	marching_cube.addEventListener('pointermove', function(e) {
 		var canvas_rect = marching_cube.getBoundingClientRect();
 		var client_x = e.clientX - canvas_rect.left;
 		var client_y = e.clientY - canvas_rect.top;
@@ -408,7 +410,7 @@ function init_marching_cube_no_interpolation() {
 		draw_marching_cube("marching_cube_interpolation", true, client_x, client_y, true);
 	}, false);
 
-	marching_cube.addEventListener('mouseup', function(e) {
+	marching_cube.addEventListener('pointerup', function(e) {
 		var canvas_rect = marching_cube.getBoundingClientRect();
 		var client_x = e.clientX - canvas_rect.left;
 		var client_y = e.clientY - canvas_rect.top;
@@ -429,7 +431,7 @@ function init_marching_cube_interpolation() {
 	var marching_cube = document.getElementById("marching_cube_interpolation");
 	draw_marching_cube("marching_cube_interpolation", true, 0, 0, false);
 
-	marching_cube.addEventListener('mousemove', function(e) {
+	marching_cube.addEventListener('pointermove', function(e) {
 		var canvas_rect = marching_cube.getBoundingClientRect();
 		var client_x = e.clientX - canvas_rect.left;
 		var client_y = e.clientY - canvas_rect.top;
@@ -437,7 +439,7 @@ function init_marching_cube_interpolation() {
 		draw_marching_cube("marching_cube_no_interpolation", false, client_x, client_y, true);
 	}, false);
 
-	marching_cube.addEventListener('mouseup', function(e) {
+	marching_cube.addEventListener('pointerup', function(e) {
 		var canvas_rect = marching_cube.getBoundingClientRect();
 		var client_x = e.clientX - canvas_rect.left;
 		var client_y = e.clientY - canvas_rect.top;
@@ -605,12 +607,13 @@ function d_metaballs(x, y) {
 
 function init_interactive_marching_cubes(){
 	var canvas = document.getElementById("interactive_marching_cubes");
-	canvas.addEventListener('mousedown', function(e){
+	canvas.addEventListener('pointerdown', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
 		metaballs.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
+		canvas.releasePointerCapture(e.pointerId);
 	}, false);
 
-	canvas.addEventListener('mousemove', function(e){
+	canvas.addEventListener('pointermove', function(e){
 		if(e.buttons == 1){
 			canvas_rect = canvas.getBoundingClientRect();
 			metaballs[metaballs.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
@@ -618,7 +621,7 @@ function init_interactive_marching_cubes(){
 		}
 	}, false);
 
-	canvas.addEventListener('mouseup', function(e){
+	canvas.addEventListener('pointerup', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
 		metaballs[metaballs.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
 		draw_interactive_marching_cubes();
@@ -781,14 +784,14 @@ function init_dual_cube() {
 	var dual_cube = document.getElementById("dual_cube");
 	draw_dual_cube(0, 0, false);
 
-	dual_cube.addEventListener('mousemove', function(e) {
+	dual_cube.addEventListener('pointermove', function(e) {
 		var canvas_rect = dual_cube.getBoundingClientRect();
 		var client_x = e.clientX - canvas_rect.left;
 		var client_y = e.clientY - canvas_rect.top;
 		draw_dual_cube(client_x, client_y, true);
 	}, false);
 
-	dual_cube.addEventListener('mouseup', function(e) {
+	dual_cube.addEventListener('pointerup', function(e) {
 		var canvas_rect = dual_cube.getBoundingClientRect();
 		var client_x = e.clientX - canvas_rect.left;
 		var client_y = e.clientY - canvas_rect.top;
@@ -1025,12 +1028,13 @@ function d_lines(x, y) {
 
 function init_interactive_dual_contouring(){
 	var canvas = document.getElementById("interactive_dual_contouring");
-	canvas.addEventListener('mousedown', function(e){
+	canvas.addEventListener('pointerdown', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
 		lines.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
+		canvas.releasePointerCapture(e.pointerId);
 	}, false);
 
-	canvas.addEventListener('mousemove', function(e){
+	canvas.addEventListener('pointermove', function(e){
 		if(e.buttons == 1){
 			canvas_rect = canvas.getBoundingClientRect();
 			lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
@@ -1038,7 +1042,7 @@ function init_interactive_dual_contouring(){
 		}
 	}, false);
 
-	canvas.addEventListener('mouseup', function(e){
+	canvas.addEventListener('pointerup', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
 		lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
 		draw_interactive_dual_contouring();

@@ -117,6 +117,8 @@ textarea {
 	font-family: sans-serif;
 	padding-bottom: 24pt;
 }
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 // canvas
@@ -288,12 +290,13 @@ function tick() {
 // the 3-ver (+0) canvases (they share the data and utility functions with the main canvas)
 function init_canvas_ver(ver_no){
 	var canvas = document.getElementById("canvas_ver_" + ver_no);
-	canvas.addEventListener('mousedown', function(e){
+	canvas.addEventListener('pointerdown', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
 		lines.push([[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top],[e.clientX - canvas_rect.left, e.clientY - canvas_rect.top]]);
+		canvas.releasePointerCapture(e.pointerId);
 	}, false);
 
-	canvas.addEventListener('mousemove', function(e){
+	canvas.addEventListener('pointermove', function(e){
 		if(e.buttons == 1){
 			canvas_rect = canvas.getBoundingClientRect();
 			lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
@@ -301,7 +304,7 @@ function init_canvas_ver(ver_no){
 		}
 	}, false);
 
-	canvas.addEventListener('mouseup', function(e){
+	canvas.addEventListener('pointerup', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
 		lines[lines.length-1][1] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
 		draw_canvas();

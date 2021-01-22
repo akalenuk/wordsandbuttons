@@ -57,6 +57,8 @@ form {
 	padding-top: 6pt;
 	padding-bottom: 6pt;
 }
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 var values = [];
@@ -120,7 +122,7 @@ path_int = search_path_int(0, 639);
 
 function init(canvas_name) {
 	var canvas = document.getElementById(canvas_name);
-	canvas.addEventListener('mousedown', function(e){
+	canvas.addEventListener('pointerdown', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
 		const x = e.clientX - canvas_rect.left;
 		const y = e.clientY - canvas_rect.top;
@@ -128,9 +130,10 @@ function init(canvas_name) {
 		path = search_path(0, 639, proportion);
 		path_int = search_path_int(0, 639);
 		draw(canvas_name);
+		canvas.releasePointerCapture(e.pointerId);
 	}, false);
 
-	canvas.addEventListener('mousemove', function(e){
+	canvas.addEventListener('pointermove', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
 		const x = e.clientX - canvas_rect.left;
 		const y = e.clientY - canvas_rect.top;
@@ -142,12 +145,12 @@ function init(canvas_name) {
 		draw(canvas_name);
 	}, false);
 
-	canvas.addEventListener('mouseup', function(e){
+	canvas.addEventListener('pointerup', function(e){
 		draw("search");
 		draw("search_int");
 	}, false);
 
-	canvas.addEventListener('mouseleave', function(e){
+	canvas.addEventListener('pointerleave', function(e){
 		draw("search");
 		draw("search_int");
 	}, false);
@@ -244,12 +247,13 @@ function init_slider(no){
 	draw_slider(no);
 	var slider = document.getElementById("slider_" + (no + 1));
 
-	slider.addEventListener('mousedown', function(e){
+	slider.addEventListener('pointerdown', function(e){
 		position_slider(no, e.clientX);
 		draw_slider(no);
+		slider.releasePointerCapture(e.pointerId);
 	}, false);
 
-	slider.addEventListener('mousemove', function(e){
+	slider.addEventListener('pointermove', function(e){
 		if(e.buttons == 1){
 			position_slider(no, e.clientX);
 			draw_slider(no);

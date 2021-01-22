@@ -83,6 +83,8 @@ input[type="checkbox"] {
 	margin-right: 6pt;
 	margin-left: 6pt;
 }
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 // client
@@ -268,7 +270,7 @@ function draw_arrow(context, x1, y1, x2, y2, color) {
 function init_plot(name, points, points_original, transform, plot_no){
 	var canvas = document.getElementById(name);
 
-	canvas.addEventListener('mousemove', function(e){
+	canvas.addEventListener('pointermove', function(e){
 		const canvas_rect = canvas.getBoundingClientRect();
 		if(e.buttons == 1){
 			const x = e.clientX - canvas_rect.left;
@@ -278,7 +280,7 @@ function init_plot(name, points, points_original, transform, plot_no){
 		}
 	}, false);
 
-	canvas.addEventListener('mousedown', function(e){
+	canvas.addEventListener('pointerdown', function(e){
 		const canvas_rect = canvas.getBoundingClientRect();
 		const client_x = e.clientX - canvas_rect.left;
 		const client_y = e.clientY - canvas_rect.top;
@@ -287,9 +289,10 @@ function init_plot(name, points, points_original, transform, plot_no){
 		find_and_remember_nearest_point([x, y], points, plot_no);
 		set_points(points, client_x, client_y, plot_no);
 		draw_plot(name, points, points_original, transform, plot_no);
+		canvas.releasePointerCapture(e.pointerId);
 	}, false);
 
-	canvas.addEventListener('mouseleave', function(e){
+	canvas.addEventListener('pointerleave', function(e){
 		if(e.buttons == 1){
 			const canvas_rect = canvas.getBoundingClientRect();
 			const x = e.clientX - canvas_rect.left;
@@ -480,7 +483,7 @@ function init_book_plot(name, points, transform, plot_no){
 
 	var canvas = document.getElementById(name);
 
-	canvas.addEventListener('mousemove', function(e){
+	canvas.addEventListener('pointermove', function(e){
 		const canvas_rect = canvas.getBoundingClientRect();
 		if(e.buttons == 1){
 			const x = e.clientX - canvas_rect.left;
@@ -490,7 +493,7 @@ function init_book_plot(name, points, transform, plot_no){
 		}
 	}, false);
 
-	canvas.addEventListener('mousedown', function(e){
+	canvas.addEventListener('pointerdown', function(e){
 		const canvas_rect = canvas.getBoundingClientRect();
 		const client_x = e.clientX - canvas_rect.left;
 		const client_y = e.clientY - canvas_rect.top;
@@ -499,9 +502,10 @@ function init_book_plot(name, points, transform, plot_no){
 		find_and_remember_nearest_point([x, y], points, plot_no);
 		set_points(points, client_x, client_y, plot_no);
 		draw_book_plot(name, points, transform, plot_no);
+		canvas.releasePointerCapture(e.pointerId);
 	}, false);
 
-	canvas.addEventListener('mouseleave', function(e){
+	canvas.addEventListener('pointerleave', function(e){
 		if(e.buttons == 1){
 			const canvas_rect = canvas.getBoundingClientRect();
 			const x = e.clientX - canvas_rect.left;

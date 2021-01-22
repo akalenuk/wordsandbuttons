@@ -121,6 +121,8 @@ u {
 	text-decoration: none;
 	cursor: pointer;
 }
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 
@@ -265,7 +267,7 @@ function init_polynomial(){
 	var canvas_rect = polynomial.getBoundingClientRect();
 	polynomial_draw(0, 0, false);
 
-	polynomial.addEventListener('mousemove', function(e){
+	polynomial.addEventListener('pointermove', function(e){
 		var canvas_rect = polynomial.getBoundingClientRect();
 		polynomial_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
@@ -275,14 +277,15 @@ function init_polynomial(){
 		}
 	}, false);
 
-	polynomial.addEventListener('mousedown', function(e){
+	polynomial.addEventListener('pointerdown', function(e){
 		var canvas_rect = polynomial.getBoundingClientRect();
 		polynomial_xs[polynomial_i] = client_to_x(e.clientX - canvas_rect.left);
 		polynomial_ys[polynomial_i] = client_to_y(e.clientY - canvas_rect.top);
 		polynomial_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		polynomial.releasePointerCapture(e.pointerId);
 	}, false);
 
-	polynomial.addEventListener('mouseleave', function(e){
+	polynomial.addEventListener('pointerleave', function(e){
 		polynomial_draw(0, 0, false);
 	}, false);
 }
@@ -385,7 +388,7 @@ function init_synthesis(){
 	var canvas_rect = synthesis.getBoundingClientRect();
 	synthesis_draw(0, 0, false);
 
-	synthesis.addEventListener('mousemove', function(e){
+	synthesis.addEventListener('pointermove', function(e){
 		var canvas_rect = synthesis.getBoundingClientRect();
 		synthesis_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
@@ -395,14 +398,15 @@ function init_synthesis(){
 		}
 	}, false);
 
-	synthesis.addEventListener('mousedown', function(e){
+	synthesis.addEventListener('pointerdown', function(e){
 		var canvas_rect = synthesis.getBoundingClientRect();
 		synthesis_xs[synthesis_i] = client_to_x(e.clientX - canvas_rect.left);
 		synthesis_ys[synthesis_i] = client_to_y(e.clientY - canvas_rect.top);
 		synthesis_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		synthesis.releasePointerCapture(e.pointerId);
 	}, false);
 
-	synthesis.addEventListener('mouseleave', function(e){
+	synthesis.addEventListener('pointerleave', function(e){
 		synthesis_draw(0, 0, false);
 	}, false);
 }
@@ -556,7 +560,7 @@ function init_runge(){
 	var canvas_rect = runge.getBoundingClientRect();
 	runge_draw(0, 0, false);
 
-	runge.addEventListener('mousemove', function(e){
+	runge.addEventListener('pointermove', function(e){
 		var canvas_rect = runge.getBoundingClientRect();
 		runge_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
@@ -566,14 +570,15 @@ function init_runge(){
 		}
 	}, false);
 
-	runge.addEventListener('mousedown', function(e){
+	runge.addEventListener('pointerdown', function(e){
 		var canvas_rect = runge.getBoundingClientRect();
 		runge_xs[runge_i] = client_to_x(e.clientX - canvas_rect.left);
 		runge_ys[runge_i] = client_to_y(e.clientY - canvas_rect.top);
 		runge_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		runge.releasePointerCapture(e.pointerId);
 	}, false);
 
-	runge.addEventListener('mouseleave', function(e){
+	runge.addEventListener('pointerleave', function(e){
 		runge_draw(0, 0, false);
 	}, false);
 }
@@ -703,7 +708,7 @@ function init_chebyshev(){
 	var canvas_rect = chebyshev.getBoundingClientRect();
 	chebyshev_draw(0, 0, false);
 
-	chebyshev.addEventListener('mousemove', function(e){
+	chebyshev.addEventListener('pointermove', function(e){
 		var canvas_rect = chebyshev.getBoundingClientRect();
 		chebyshev_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
@@ -712,9 +717,8 @@ function init_chebyshev(){
 		}
 	}, false);
 
-	chebyshev.addEventListener('mousedown', function(e){
+	chebyshev.addEventListener('pointerdown', function(e){
 		var canvas_rect = chebyshev.getBoundingClientRect();
-
 		const client_x = e.clientX - canvas_rect.left;
 		const client_y = e.clientY - canvas_rect.top;
 		min_d = Math.abs(chebyshev_xs[0] - chebyshev_client_to_x(client_x));
@@ -727,14 +731,12 @@ function init_chebyshev(){
 			}
 		}
 		chebyshev_i = min_i;
-
 		chebyshev_ys[chebyshev_i] = chebyshev_client_to_y(client_y);
 		chebyshev_draw(client_x, client_y, false);
-
-
+		chebyshev.releasePointerCapture(e.pointerId);
 	}, false);
 
-	chebyshev.addEventListener('mouseleave', function(e){
+	chebyshev.addEventListener('pointerleave', function(e){
 		chebyshev_draw(0, 0, false);
 	}, false);
 }
@@ -845,7 +847,7 @@ function init_spline(){
 	var canvas_rect = spline.getBoundingClientRect();
 	spline_draw(0, 0, false);
 
-	spline.addEventListener('mousemove', function(e){
+	spline.addEventListener('pointermove', function(e){
 		var canvas_rect = spline.getBoundingClientRect();
 		spline_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
@@ -855,14 +857,15 @@ function init_spline(){
 		}
 	}, false);
 
-	spline.addEventListener('mousedown', function(e){
+	spline.addEventListener('pointerdown', function(e){
 		var canvas_rect = spline.getBoundingClientRect();
 		spline_xs[spline_i] = client_to_x(e.clientX - canvas_rect.left);
 		spline_ys[spline_i] = client_to_y(e.clientY - canvas_rect.top);
 		spline_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		spline.releasePointerCapture(e.pointerId);
 	}, false);
 
-	spline.addEventListener('mouseleave', function(e){
+	spline.addEventListener('pointerleave', function(e){
 		spline_draw(0, 0, false);
 	}, false);
 }

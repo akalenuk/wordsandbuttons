@@ -149,6 +149,8 @@ button {
 	margin-right: 1pt;
 	font-size: 14pt;
 }
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 // quest count
@@ -347,7 +349,7 @@ function init_plot_named(name) {
 	var canvas_rect = plot.getBoundingClientRect();
 	invalidate_plot_named(name);
 
-	plot.addEventListener('mousemove', function(e){
+	plot.addEventListener('pointermove', function(e){
 		var canvas_rect = plot.getBoundingClientRect();
 		draw_plot_named(name, e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
@@ -358,18 +360,19 @@ function init_plot_named(name) {
 		}
 	}, false);
 
-	plot.addEventListener('mousedown', function(e){
+	plot.addEventListener('pointerdown', function(e){
 		invalidate_plot_named(name);
 		var canvas_rect = plot.getBoundingClientRect();
 		nearest_eq_id = find_nearest_eqution_id(name, e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
 		eval(name + "_eq_temp_id = nearest_eq_id;");
+		plot.releasePointerCapture(e.pointerId);
 	}, false);
 
-	plot.addEventListener('mouseup', function(e){
+	plot.addEventListener('pointerup', function(e){
 		invalidate_plot_named(name);
 	}, false);
 
-	plot.addEventListener('mouseleave', function(e){
+	plot.addEventListener('pointerleave', function(e){
 		draw_plot_named(name, 0, 0, false);
 	}, false);
 }
@@ -628,7 +631,7 @@ function init_solver_1(){
 	var canvas_rect = solver.getBoundingClientRect();
 	draw_solver_1(0, 0, false);
 
-	solver.addEventListener('mousemove', function(e){
+	solver.addEventListener('pointermove', function(e){
 		var canvas_rect = solver.getBoundingClientRect();
 		draw_solver_1(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1) {
@@ -638,17 +641,18 @@ function init_solver_1(){
 		}
 	}, false);
 
-	solver.addEventListener('mousedown', function(e){
+	solver.addEventListener('pointerdown', function(e){
 		invalidate_solver_1(e.clientX, e.clientY);
 		var canvas_rect = solver.getBoundingClientRect();
 		solver_1_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+		solver.releasePointerCapture(e.pointerId);
 	}, false);
 
-	solver.addEventListener('mouseup', function(e){
+	solver.addEventListener('pointerup', function(e){
 		invalidate_solver_1(e.clientX, e.clientY);
 	}, false);
 
-	solver.addEventListener('mouseleave', function(e){
+	solver.addEventListener('pointerleave', function(e){
 		draw_solver_1(0, 0, false);
 	}, false);
 }
@@ -857,7 +861,7 @@ function init_solver_2(){
 	var canvas_rect = solver.getBoundingClientRect();
 	draw_solver_2(0, 0, false);
 
-	solver.addEventListener('mousemove', function(e){
+	solver.addEventListener('pointermove', function(e){
 		var canvas_rect = solver.getBoundingClientRect();
 		draw_solver_2(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1) {
@@ -867,17 +871,18 @@ function init_solver_2(){
 		}
 	}, false);
 
-	solver.addEventListener('mousedown', function(e){
+	solver.addEventListener('pointerdown', function(e){
 		invalidate_solver_2(e.clientX, e.clientY);
 		var canvas_rect = solver.getBoundingClientRect();
 		solver_1_eq_temp_id = find_nearest_eqution_id("solver_1", e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
+		solver.releasePointerCapture(e.pointerId);
 	}, false);
 
-	solver.addEventListener('mouseup', function(e){
+	solver.addEventListener('pointerup', function(e){
 		invalidate_solver_2(e.clientX, e.clientY);
 	}, false);
 
-	solver.addEventListener('mouseleave', function(e){
+	solver.addEventListener('pointerleave', function(e){
 		draw_solver_2(0, 0, false);
 	}, false);
 }

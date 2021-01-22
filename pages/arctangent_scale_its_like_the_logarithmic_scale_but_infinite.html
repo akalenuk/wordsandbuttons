@@ -82,6 +82,8 @@ button {
 	padding-bottom: 12pt;
 }
 
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 const w = 640;
@@ -175,7 +177,7 @@ function init_canvas() {
 		}
 	}, false);
 
-	canvas.addEventListener('mousemove', function(e) {
+	canvas.addEventListener('pointermove', function(e) {
 		if(e.buttons == 1) {
 			const canvas_rect = canvas.getBoundingClientRect();
 			const sx = e.clientX - canvas_rect.left;
@@ -193,7 +195,7 @@ function init_canvas() {
 		}
 	}, false);
 
-	canvas.addEventListener('mousedown', function(e) {
+	canvas.addEventListener('pointerdown', function(e) {
 		const canvas_rect = canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
 		const sy = e.clientY - canvas_rect.top;
@@ -201,6 +203,7 @@ function init_canvas() {
 		mousedown_sy = sy;
 		mousemove_sx = mousedown_sx;
 		mousemove_sy = mousedown_sy;
+		canvas.releasePointerCapture(e.pointerId);
 	}, false);
 
 	canvas.addEventListener('wheel', function(e) {

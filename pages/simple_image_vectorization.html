@@ -114,6 +114,8 @@ textarea {
 	padding-bottom: 6pt;
 }
 
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 // client
@@ -561,7 +563,7 @@ function init_cubic(){
 	var canvas_rect = cubic.getBoundingClientRect();
 	draw_cubic_canvas(0, 0, false);
 
-	cubic.addEventListener('mousemove', function(e){
+	cubic.addEventListener('pointermove', function(e){
 		var canvas_rect = cubic.getBoundingClientRect();
 		draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
@@ -571,14 +573,15 @@ function init_cubic(){
 		}
 	}, false);
 
-	cubic.addEventListener('mousedown', function(e){
+	cubic.addEventListener('pointerdown', function(e){
 		var canvas_rect = cubic.getBoundingClientRect();
 		cubic_xs[cubic_i] = e.clientX - canvas_rect.left;
 		cubic_ys[cubic_i] = e.clientY - canvas_rect.top;
 		draw_cubic_canvas(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		cubic.releasePointerCapture(e.pointerId);
 	}, false);
 
-	cubic.addEventListener('mouseleave', function(e){
+	cubic.addEventListener('pointerleave', function(e){
 		draw_cubic_canvas(0, 0, false);
 	}, false);
 }
@@ -675,7 +678,7 @@ var cur_tangent_index = -1;
 var cur_tangent_in_pair_index = -1;
 function init_canvas(){
 	var canvas = document.getElementById("canvas");
-	canvas.addEventListener('mousedown', function(e){
+	canvas.addEventListener('pointerdown', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
 		var x = e.clientX - canvas_rect.left;
 		var y = e.clientY - canvas_rect.top;
@@ -718,9 +721,10 @@ function init_canvas(){
 				}
 			}
 		}
+		canvas.releasePointerCapture(e.pointerId);
 	}, false);
 
-	canvas.addEventListener('mousemove', function(e){
+	canvas.addEventListener('pointermove', function(e){
 		if(e.buttons == 1){
 			canvas_rect = canvas.getBoundingClientRect();
 			var x = e.clientX - canvas_rect.left;
@@ -743,7 +747,7 @@ function init_canvas(){
 		}
 	}, false);
 
-	canvas.addEventListener('mouseup', function(e){
+	canvas.addEventListener('pointerup', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
 		var x = e.clientX - canvas_rect.left;
 		var y = e.clientY - canvas_rect.top;

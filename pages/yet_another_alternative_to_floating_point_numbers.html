@@ -101,6 +101,8 @@ input[type="text"] {
 	margin: 2pt 6pt 2pt 6pt;
 	width: 48pt;
 }
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 function show(n){
@@ -155,23 +157,24 @@ function init_slider(no, min_x, max_x, initial_lb, initial_ub, x_template, on_sl
 	slider_value[no] = min_x - 1.0; // anything below min is "none"
 	draw_slider(no);
 
-	slider.addEventListener('mouseleave', function(e){
+	slider.addEventListener('pointerleave', function(e){
 		slider_down[no] = false;
 	}, false);
 
-	slider.addEventListener('mouseup', function(e){
+	slider.addEventListener('pointerup', function(e){
 		slider_down[no] = false;
 	}, false);
 
-	slider.addEventListener('mousedown', function(e){
+	slider.addEventListener('pointerdown', function(e){
 		slider_down[no] = true;
 		var canvas_rect = slider.getBoundingClientRect();
 		position_slider(no, e.clientX - canvas_rect.left);
 		on_slide(slider_lb[no], slider_ub[no]);
 		draw_slider(no);
+		slider.releasePointerCapture(e.pointerId);
 	}, false);
 
-	slider.addEventListener('mousemove', function(e){
+	slider.addEventListener('pointermove', function(e){
 		if(slider_down[no] == true){
 			var canvas_rect = slider.getBoundingClientRect();
 			position_slider(no, e.clientX - canvas_rect.left);

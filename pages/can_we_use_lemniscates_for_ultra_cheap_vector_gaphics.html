@@ -115,6 +115,8 @@ textarea {
 	font-size: 12pt;
 	font-family: monospace;
 }
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 // client
@@ -162,7 +164,7 @@ function draw_arrow(context, x1, y1, x2, y2, color) {
 var point_i = 0;
 function init_canvas(){
 	var canvas = document.getElementById("canvas");
-	canvas.addEventListener('mousedown', function(e){
+	canvas.addEventListener('pointerdown', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
 		const x = e.clientX - canvas_rect.left;
 		const y = e.clientY - canvas_rect.top;
@@ -170,9 +172,10 @@ function init_canvas(){
 		xs[point_i] = x;
 		ys[point_i] = y;
 		draw_canvas(0, 0, false);
+		canvas.releasePointerCapture(e.pointerId);
 	}, false);
 
-	canvas.addEventListener('mousemove', function(e){
+	canvas.addEventListener('pointermove', function(e){
 		canvas_rect = canvas.getBoundingClientRect();
 		const x = e.clientX - canvas_rect.left;
 		const y = e.clientY - canvas_rect.top;
@@ -185,11 +188,11 @@ function init_canvas(){
 		}
 	}, false);
 
-	canvas.addEventListener('mouseup', function(e){
+	canvas.addEventListener('pointerup', function(e){
 		draw_all();
 	}, false);
 
-	canvas.addEventListener('mouseleave', function(e){
+	canvas.addEventListener('pointerleave', function(e){
 		draw_all();
 	}, false);
 
