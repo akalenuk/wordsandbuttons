@@ -532,10 +532,10 @@ x<sub>2</sub> = x &plus; &epsilon;
 These intervals are helpful when we want to measure a computational error of some calculation or to see if some algorithm is stable enough. They aren't comparable or truly sortable though.
 	</p>
 	<p>
-Consider two overlapping intervals. Let's say, <span class="abc">[3, 6]</span> and <span class="abc">[5, 8]</span>. We know that the fist interval actually means a number between  <span class="abc">3</span> and  <span class="abc">6</span>. The second — another number between <span class="abc">5</span> and <span class="abc">8</span>. Intuitively, the latter should be greater than the former. But what if it is  <span class="abc">5</span> and the former is  <span class="abc">6</span>? Then it's obviously less. There is a chance they are even equal. 
+Consider two overlapping intervals. Let's say, <span class="abc">[3, 6]</span> and <span class="abc">[5, 8]</span>. We know that the fist interval actually means a number between  <span class="abc">3</span> and  <span class="abc">6</span>. The second — another number between <span class="abc">5</span> and <span class="abc">8</span>. Intuitively, the latter should be greater than the former. But what if it is  <span class="abc">5</span> and the former is  <span class="abc">6</span>? Then it's obviously less. There is a chance they are equal even.
 	</p>
 	<p>
-So there is some kind of order, for instance, <span class="abc">[6, 8]</span> is definitely greater than  <span class="abc">[3, 5]</span>. But this order doesn't hold for every possible pair of intervals.
+There is some kind of order, for instance, <span class="abc">[6, 8]</span> is definitely greater than  <span class="abc">[3, 5]</span>. But this order doesn't hold for every possible pair of intervals.
 	</p>
 	<p>
 This makes things unpleasant. For the very least, we can't now use binary logic since all the comparisons now return three states. E. g. <span class="abc">a &le; b</span> can now be <span class="abc">true</span>, <span class="abc">false</span> or <span class="abc">none of the above</span>.
@@ -571,7 +571,7 @@ For instance, <span class="abc">[3, 5]</span> is definitely less than <span clas
 </table>
 
 	<p>
-Still, every <span class="abc">if... else</span> works. Within its semantics that is. However, the algebra behind the logic isn't yet Boolean. Now <span class="abc">&not; (a &lt; b) &nequiv; a &ge; b</span>. Computational algorithms may be technically built using the same building blocks as if the intervals were numbers but that's it.
+Still, every <span class="abc">if... else</span> works. Within its semantics that is. However, the algebra behind the logic isn't yet Boolean. Now <span class="abc">&not; (a &lt; b) &nequiv; a &ge; b</span>. Computational algorithms may be technically built using the same building blocks as if the intervals were numbers, but that's it.
 	</p>
 
 	<p>
@@ -619,10 +619,10 @@ bool operator!=(const Interval& l, const Interval& r){
     return r &lt; l || l &lt; r;
 }</pre>
 	<p>
-Nobody cares about the relationship between predicates being Boolean-ish. They are all just some arbitrary functions so with them, you can easily define either the “definite” logic or the “possible” one. You can have both if you define them for different but interchangeable types. It's all a little verbose but doable.
+Nobody cares if the relationships between predicates are Boolean enough. They are all just some arbitrary functions, so with them, you can easily define both the “definite” and the “possible” logic. It's all a little verbose but doable.
 	</p>
 	<p>
-It gets a little bit more tricky in Rust which relies on the notion of order pretty much.
+It gets a little bit trickier in Rust which relies on the notion of order pretty much.
 	</p>
 	<p>
 The comparison operators for a custom type are usually introduced using an <a href="https://doc.rust-lang.org/std/cmp/trait.Ord.html" class="abc">std::cmp::Ord</a> trait. It requires that:
@@ -633,7 +633,7 @@ The comparison operators for a custom type are usually introduced using an <a hr
 a &le; b &and; b &le; c &rArr; a &le; c.
 	</p>
 	<p>
-The first reads as for every <span class="abc">a</span> and <span class="abc">b</span>, one and only one is true: either <span class="abc">(a &lt; b)</span> or <span class="abc">(a = b)</span> or <span class="abc">(a &gt; b)</span>. This doesn't work for us. When intervals intersect, in “definite” logic none of the predicates are true. And in the “possible” logic, they all are.
+The first reads as <i>for every <span class="abc">a</span> and <span class="abc">b</span>, one and only one is true: either <span class="abc">(a &lt; b)</span> or <span class="abc">(a = b)</span> or <span class="abc">(a &gt; b)</span></i>. This doesn't work for us. When intervals intersect, in the “definite” logic none of the predicates are true. And in the “possible” logic, they all are.
 	</p>
 	<p>
 Luckily, there is another more relaxed trait that represents not total order, but <span id="index_partial_order">partial order</span>: <a href="https://doc.rust-lang.org/std/cmp/trait.PartialOrd.html" class="abc">std::cmp::PartialOrd</a>. Which only requires <b><span id="index_asymmetry">asymmetry</sapn></b> (not even antisymmetry) and transitivity (we've seen it before):
@@ -644,7 +644,7 @@ a &lt; b &rArr; &not;(a &gt; b)
 a &le; b &and; b &le; c &rArr; a &le; c.
 	</p>
 	<p>
-Аnd for the “definite” logic, this works.
+The first now reads as <i><span class="abc">a</span> could not be both less and greater than <span class="abc">b</span> at the same time.</i> Аnd for the “definite” logic, this works.
 	</p>
 	<pre id="code_2">
 impl std::cmp::PartialEq for RB32{
@@ -696,7 +696,7 @@ Non-Boolean logics are rare, and relations more general than partial order are a
 Conclusion
 	</h2>
 	<p>
-Non-Boolean logics are rare but not extinct. Interval logic is one example. Sometimes, you can implement a logic you want within total order or partial order but sometimes even that isn't enough and you need an even more general relation. With operator overloading, you have the freedom to go there but you also have less assurance when working within the total order.
+Non-Boolean logics are rare but not extinct. Interval logic is one example. Sometimes, you can implement a logic you want within total order or partial order but sometimes even that isn't enough and you need an even more general relation. With operator overloading, you have the freedom to go there but you also have less assurance when working within the known realms of the total order.
 	</p>
 
 	<script language="JavaScript">
