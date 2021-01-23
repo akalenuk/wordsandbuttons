@@ -808,30 +808,36 @@ function prognosed_error_draw(client_x, client_y, do_guides) {
 Estimating floating point error the easy way
 	</h1>
 	<p>
-Floating point numbers are not real numbers. You can't squeeze an infinity into a finite number of bits. You have to accept that real numbers are represented with some error.
+Floating point numbers are not real numbers. You can't squeeze the whole infinity into a finite number of bits. You have to accept that in computation, real numbers are always represented with some error.
 	</p>
 	<p>
-The common misconception is ”in practice, we have enough bits to make this error negligible.” The problem with this point of view is that quite often it's true, so it perpetuates itself until something goes horribly wrong. But is it enough or not depends on these three things:
+The common misconception is ”in practice, we have enough bits to make this error negligible.” The problem with this point of view is: quite often it's true, so it perpetuates and enpowers itself until something goes horribly wrong. 
+	</p>
+	<p>
+Is there enough bits or not depends on these three things:
 	<ol>
 	<li>The stability of the operation.</li>
 	<li>The ranges of variables involved.</li>
-	<li>How much error can we tolerate?</li>
+	<li>How much error we can tolerate.</li>
 	</ol>
 	<p>
-It just cant be enough all the time for all the computations.
+So yes, even if it is enough usually, it just cant be enough all the time for all the computations.
 	</p>
 	<p>
 Unforeseen <span id="index_floating_point_error">floating point error</span> is the source of the most unpleasant bugs. The bugs that come and go unpredictably. The bugs that don't reproduce on unit-tests and lay low through the integration phase only to be seen by your most important customer.
 	</p>
 	<p>
-How to protect yourself from this threat? Engineering has one ultimate answer for this kind of questions and it's: ”measurement!”
+How to protect yourself from this threat? Engineering has one ultimate answer for this kind of questions and it is:
+	</p>
+	<p style="font-size: 28pt; text-align: center;">
+Measurement!
 	</p>
 
 	<h2>
 Measuring the floating point error using an inverse operation
 	</h2>
 	<p>
-Here's a <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/floating_point_surrealismmeter/double_interval/cubic_solver.hpp">cubic equation solver</a>. It is surprisingly computationally rich for such a primitive operation. It has multiple multiplications, trigonometry, and square roots.
+Here's a <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp/floating_point_surrealismmeter/double_interval/cubic_solver.hpp">cubic equation solver</a>. It is surprisingly computationally rich for such a primitive operation. It has multiple multiplications, trigonometry, and even square roots.
 	</p>
 	<p>
 Fortunately, the inverse operation for solving a cubic equation, getting the coefficients from the given roots, is simple.
@@ -859,7 +865,7 @@ Let's do an <a href="https://github.com/akalenuk/wordsandbuttons/blob/master/exp
 	</p>
 	<table>
 	<tr><td>
-x<sub>1</sub> = 1*10<sup>&hairsp;i<sub>1</sub></sup>, x<sub>2</sub> = 2*10<sup>&hairsp;i<sub>2</sub></sup>, x<sub>3</sub> = 3*10<sup>&hairsp;i<sub>3</sub></sup>,
+x<sub>1</sub> = 1&times;10<sup>&hairsp;i<sub>1</sub></sup>, x<sub>2</sub> = 2&times;10<sup>&hairsp;i<sub>2</sub></sup>, x<sub>3</sub> = 3&times;10<sup>&hairsp;i<sub>3</sub></sup>,
 	</td></tr><tr><td>
 i<sub>1</sub> = -10, -8,... 10,
 	</td></tr><tr><td>
@@ -891,16 +897,19 @@ So here is a trivial advice: when in doubt — measure. When not in doubt 
 Estimating the floating point error using intervals
 	</h2>
 	<p>
-What if we don't have a reverse operation at all? Or what if it introduces the greater error than the operation itself? It's problematic to calculate computational error when we don't have a reliable way to obtain the ground truth. Can we know the error without the actual measurements?
+But what if we don't have a reverse operation at all? Or what if it introduces the greater error than the operation itself? It's problematic to calculate computational error when we don't have a reliable way to obtain the ground truth. Can we know the error without the actual measurements?
 	</p>
 	<p>
-Well, no. But we can do some estimate instead.
+Well, no.
 	</p>
 	<p>
-We can consider a real number representation to be not a floating point number, but an interval between two adjacent floating point numbers. An operation on intervals widens the resulting interval depending on the values involved.
+But we can guess.
 	</p>
 	<p>
-This is a simplification since we don't account for proper rounding. But since we're estimating an error and not doing an actual computation, it's fine.
+Let's consider a real number representation to be not a single floating point number, but an interval between two adjacent floating point numbers. An operation on intervals widens the resulting interval depending on the values involved.
+	</p>
+	<p>
+This is a simplification since we don't account for proper rounding. But since we're only estimating the error and not doing the actual computation, it's fine.
 	</p>
 	<p>
 This way we can measure how the difference between the real numbers and their floating point representation accumulates through the calculation. We measure not the actual error, but the width of the interval that definitely holds our value.
@@ -933,7 +942,7 @@ First of all, it's simple. You do <a href="https://github.com/akalenuk/wordsandb
 And all your doubles acquire <i>from</i> and <i>to</i> fields automatically. You just run your tests then and check the intervals. Simple!
 	</p>
 	<p>
-Second, it enables you to do what almost no one does but almost everyone should. It enables you to debug computational errors. You can see them, you can trace the execution to find their sources, you can make the code better.
+Second, it enables you to do what almost no one does but almost everyone should. It enables you to debug computational errors. You can see them, you can trace the execution to find their sources, you can find a computational issue before it finds you.
 	</p>
 	<h2>
 Conclusion
