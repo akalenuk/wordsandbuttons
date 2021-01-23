@@ -351,7 +351,7 @@ The latter appeared to be the most demanded feature. I called it darning because
 How it works
 	</h2>
 	<p>
-The selected rectangle is filled using only the pixel values on its border. The whole magic is in <span id="index_inverse_weights_intepolation">inverse-weights interpolation</span>. In the general case, a point <i>(x, y)</i> in the rectangular selection of bitmap <i>B</i> bound by <i>(x<sub>0</sub>, y<sub>0</sub>); (x<sub>1</sub>, y<sub>1</sub>)</i> should have each of its channels computed by this formula.
+The selected rectangle is filled using only the pixel values on its border. The whole magic is in <span id="index_inverse_weights_intepolation">inverse-weights interpolation</span>. In the general case, a pixel <i>(x, y)</i> in the rectangular selection of bitmap <i>B</i> bound by <i>(x<sub>0</sub>, y<sub>0</sub>); (x<sub>1</sub>, y<sub>1</sub>)</i> should have all its channels computed by this formula.
 	</p>
 	<table class="formula">
 	<tr>
@@ -388,13 +388,13 @@ k(x - x<sub>0</sub>) + k(x<sub>1</sub> - x) + k(y - y<sub>0</sub>) + k(y<sub>1</
 To fill the rectangle, you compute every pixel inside one by one. Since only the border contributes, the noise on the border gets dragged inside the rectangle and, if you look very closely, you'll see that the noise inside now consists of vertical and horizontal lines. It looks a bit like the image was darned by a thread and a needle.
 	</p>
 	<p>
-This is, of course, in general case meaning that the rectangle has all the border inside the bitmap. But what if we have a stain somewhere in the corner? Then only the two sides of the rectangle should contribute.
+The formula works for a rectangle with all four sides inside a bitmap. But what if we have a stain somewhere in the corner? Then only the two sides of the rectangle from inside the bitmap should contribute.
 	</p>
 	<p>
 Luckily, with weight interpolation, it's trivial. If you don't want some particular <i>B(x<sub>j</sub>, y<sub>i</sub>)</i> to influence your result, assign its coefficient <i>k(z)</i> to <i>0</i>. You don't want it — you throw it away, and that's it.
 	</p>
 	<p>
-For instance, for the top left corner, the formula will reduce to:
+For instance, for the top left corner, the formula will automatically reduce itself to:
 	</p>
 	<table class="formula">
 	<tr>
@@ -402,7 +402,7 @@ For instance, for the top left corner, the formula will reduce to:
 	B(x, y) = &nbsp;
 	</td>
 	<td style="border-bottom: 1px solid black">
-B(x<sub>1</sub>, y) k(x<sub>1</sub>-x) + B(x, y<sub>1</sub>) k(y<sub>1</sub>-y)
+B(x<sub>1</sub>, y) k(x<sub>1</sub> - x) + B(x, y<sub>1</sub>) k(y<sub>1</sub> - y)
 	</td>
 	</tr>
 	<tr>
