@@ -485,10 +485,10 @@ Can we use lemniscates for ultra-cheap vector graphics?
 TL&DR: Yes, but you get what you pay for.
 	</p>
 	<p>
-I stole this idea from an old Russian book named Notable Curves by Alekséi Markushévich. The book was published in 1952 and, as you can imagine, it was not dedicated to computer graphics.
+I stole this idea from an old Russian book named Notable Curves by Alekséi Markushévich. The book was published in 1952 and, as you can imagine, it has nothing to do with computer graphics at all.
 	</p>
 	<p>
-In that book, there was a casual mention that it is mathematically proven that the multifocal <a href="https://en.wikipedia.org/wiki/Lemniscate">lemniscate</a> can approximate any possible curve with some given error. There were also some promising but frankly unrealistic pictures of a man's face and a bird, both produced by lemniscates with a handful of foci.
+In that book, however, was a casual mention of a mathematical proof that the multifocal <a href="https://en.wikipedia.org/wiki/Lemniscate">lemniscate</a> can approximate any possible curve with some given error. There were also some promising but frankly unrealistic pictures of a man's face and a bird, both produced by lemniscates with a handful of foci.
 	</p>
 	<p>
 Which got me thinking. SVG is relatively cheap memory-wise but this looks even cheaper. For instance, to approximate just a piece of a curve with the <a href="https://en.wikipedia.org/wiki/B%C3%A9zier_curve">Bézier cubic</a>, you already have to store 4 points somewhere. With the lemniscate, you can approximate a whole face or a bird with only 6 or 7 points. Isn't it wonderful?! Almost too good to be true, right?
@@ -498,13 +498,13 @@ Which got me thinking. SVG is relatively cheap memory-wise but this looks even c
 <span id="index_multifocal_lemniscate">Multifocal lemniscate</span>
 	</h2>
 	<p>
-A <span id="index_lemniscate">lemniscate</span> is an isoline of a product of distances to the foci. First, you set some <span class="formula">n</span> points <span class="formula">x<sub>i</sub></span> you call foci, then you build a function that for any point <span class="formula">x</span>, computes all the distances to the foci, and multiply them together. Where your function meets some number — there is your curve.
+A <span id="index_lemniscate">lemniscate</span> is an isoline of the product of distances to the foci. First, you set some <span class="formula">n</span> points <span class="formula">x<sub>i</sub></span> you call foci, then you build a function that for any point <span class="formula">x</span>, computes all the distances to the foci, and multiply them together. Where your function meets some number — there is your curve.
 	</p>
 	<p class="formula">
 |<b>x</b> - <b>x</b><sub>1</sub>| &times; |<b>x</b> - <b>x</b><sub>2</sub>| &times; ... &times; |<b>x</b> - <b>x</b><sub>n</sub>| = &rho;
 	</p>
 	<p>
-As it turns out, this is not too handy to play with since you have to adjust the <span class="formula">&rho;</span> every time you add or remove a point. It is a little irritating so I changed a formula just a bit to make it more practical.
+As it turns out, this is not too handy to play with since you have to adjust the <span class="formula">&rho;</span> every time you add or remove a point. It is a little irritating so I changed the formula just a bit to make it more practical.
 	</p>
 	<p class="formula">
 |<b>x</b> - <b>x</b><sub>1</sub>| &times; |<b>x</b> - <b>x</b><sub>2</sub>| &times; ... &times; |<b>x</b> - <b>x</b><sub>n</sub>| = r<sup>&thinsp;n</sup>
@@ -546,19 +546,19 @@ You can export your image into a set of points, and reimport it back.
 	<textarea id="radius_and_points" rows=3>
 	</textarea>
 	<p>
-Ok, so it's not that easy to make it draw exactly what you want it to. It is mathematically possible to draw everything, sure, but pragmatically it only makes sense to draw some simple curvy shapes with this tool. With a limited set of points, it's not very powerful, and with adding more and more points, it gets less and less user-friendly.
+Ok, so it's not that easy to make it draw exactly what you want it to. It is mathematically possible to draw everything, sure, but pragmatically, it only makes sense to draw the simplest shapes with this tool. With a limited set of points, it's not very powerful, and with adding more and more points, it gets less and less user-friendly.
 	</p>
 	<p>
 But what about image tracing? Shouldn't it automagically turn poorly pixelated pictures into nice and smooth vector images?
 	</p>
 	<p>
-Well, yes and no. With lemniscate approximating a pixel image, the error function is not very friendly to the <a href="https://en.wikipedia.org/wiki/Gradient_descent">gradient descent</a> method either. There are some seemingly random platoes and points masquerading as local minimums that make the minimizer stall every now and then. I tried a few approaches but apparently, a simple random crawler works the best.
+Well, yes and no. With lemniscate approximating a pixel image, the error function is not very friendly to the <a href="https://en.wikipedia.org/wiki/Gradient_descent">gradient descent</a> method. There are some seemingly random platoes and points masquerading as local minimums that make the minimizer stall every now and then. I tried a few approaches but, apparently, a simple random crawler works the best.
 	</p>
 	<p>
 And this “the best” is still not very good.
 	</p>
 	<p>
-Here's my tracer. It minimizes the error function one small step at a time, making a vector image closer to the pixelated original. If you're not afraid of putting your browser into a coma, you can ask for drastically more iterations or raise the step size.
+Here's my tracer. It minimizes the error function one small step at a time, making the vector image closer to the pixelated original. If you're not afraid to put your browser into a coma, you can ask for drastically more iterations or raise the step size.
 	</p>
 	<form>
 	<span id="target"></span>
@@ -570,7 +570,7 @@ Here's my tracer. It minimizes the error function one small step at a time, maki
 	<button type="button" id="fit1" onclick="random_fit_from_ui();">Random Fit</button><br>
 	</form>
 	<p>
-Of course, you're more than welcome to explore it further! You can start from the <a href="https://github.com/akalenuk/wordsandbuttons/blob/cffd7409f920d73f5e20e9b968d64b66e2c53244/pages/can_we_use_lemniscates_for_ultra_cheap_vector_gaphics.html#L199">code for this page available on GitHub</a>. Besides, multifocal lemniscate is a very simple concept, it all revolves around one simple formula. You can easily reimplement it in your exploration environment of choice.
+Of course, you're more than welcome to explore it further! You can start from the <a href="https://github.com/akalenuk/wordsandbuttons/blob/cffd7409f920d73f5e20e9b968d64b66e2c53244/pages/can_we_use_lemniscates_for_ultra_cheap_vector_gaphics.html#L199">code for this very page available on GitHub</a>. Besides, multifocal lemniscate is a very simple concept, it all revolves around one simple formula. You can easily reimplement it in your exploration environment of choice.
 	</p>
 	<h2>
 Conclusion
@@ -579,7 +579,7 @@ Conclusion
 The practicality of this approach is limited. For real-world vector graphics, its application is doubtful. It's way easier to approximate curves with splines of all kinds both automatically and manually.
 	</p>
 	<p>
-But when you're really constrained by memory so a badly drawn cat of 19 bytes is a wanted alternative for a nice cat of a few kilobytes, then yes — multifocal lemniscate is your friend. For instance, it might give you an advantage in the <a href="https://js13kgames.com/">js13kGames</a> or the <a href="https://js1024.fun">js1024</a> competition.
+But when you're really constrained by memory, and a badly drawn cat of 19 bytes is a wanted alternative for a nice cat of a few kilobytes, then yes — multifocal lemniscate is your friend. For instance, it might give you an advantage in the <a href="https://js13kgames.com/">js13kGames</a> or the <a href="https://js1024.fun">js1024</a> competition.
 	</p>
 
 	<script language="JavaScript">
