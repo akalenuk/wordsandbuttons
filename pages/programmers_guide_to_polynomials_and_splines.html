@@ -780,6 +780,23 @@ function chebyshev_draw(client_x, client_y, do_guides){
 	chebyshev_context.stroke();
 	chebyshev_context.closePath();
 
+
+	// guides
+	function sharp(x) {return Math.floor(x) + 0.5;}
+	chebyshev_context.setLineDash([4, 4]);
+	chebyshev_context.beginPath();
+	for(var i = 0; i < chebyshev_n; ++i){
+		if(i == 5) // 0
+			continue;
+		chebyshev_context.moveTo(sharp(chebyshev_x_to_client(chebyshev_xs[i])), h);
+		chebyshev_context.lineTo(sharp(chebyshev_x_to_client(chebyshev_xs[i])), 0);
+	}
+	chebyshev_context.strokeStyle="#999999";
+	chebyshev_context.stroke();
+	chebyshev_context.closePath();
+	chebyshev_context.setLineDash([]);
+
+
 	// polynomial
 	var A = [];
 	var B = [];
@@ -821,18 +838,6 @@ function chebyshev_draw(client_x, client_y, do_guides){
 		chebyshev_context.fill();
 		chebyshev_context.closePath();
 	}
-
-	// guides
-	chebyshev_context.setLineDash([4, 4]);
-	chebyshev_context.beginPath();
-	for(var i = 0; i < chebyshev_n; ++i){
-		chebyshev_context.moveTo(chebyshev_x_to_client(chebyshev_xs[i]), h);
-		chebyshev_context.lineTo(chebyshev_x_to_client(chebyshev_xs[i]), 0);
-	}
-	chebyshev_context.strokeStyle="#d64562";
-	chebyshev_context.stroke();
-	chebyshev_context.closePath();
-	chebyshev_context.setLineDash([]);
 }
 
 
