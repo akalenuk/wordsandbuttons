@@ -353,6 +353,7 @@ function init_nurbs_bs(){
 
 	nurbs.addEventListener('pointerdown', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
+		nurbs_draw_bs(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		nurbs_control_xs[nurbs_bs_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[nurbs_bs_i];
 		nurbs_control_ys[nurbs_bs_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[nurbs_bs_i];
 		all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
@@ -406,7 +407,7 @@ function init_nurbs_nu(){
 
 	nurbs.addEventListener('pointermove', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
-		all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		nurbs_draw_nu(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
 			nurbs_control_xs[nurbs_nu_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[nurbs_nu_i];
 			nurbs_control_ys[nurbs_nu_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[nurbs_nu_i];
@@ -416,6 +417,7 @@ function init_nurbs_nu(){
 
 	nurbs.addEventListener('pointerdown', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
+		nurbs_draw_nu(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		nurbs_control_xs[nurbs_nu_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[nurbs_nu_i];
 		nurbs_control_ys[nurbs_nu_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[nurbs_nu_i];
 		all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
@@ -477,6 +479,18 @@ function init_nurbs_nu_knots(){
 
 	nurbs.addEventListener('pointerdown', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
+
+		// closest knot
+		nurbs_nu_knots_i = 0;
+		min_d = Math.abs(nurbs_knot[0] - client_to_x(e.clientX - canvas_rect.left));
+		for(var i = 1; i < nurbs_knot.length; ++i){
+			var di = Math.abs(nurbs_knot[i] - client_to_x(e.clientX - canvas_rect.left));
+			if(di < min_d){
+				min_d = di;
+				nurbs_nu_knots_i = i;
+			}
+		}
+
 		nurbs_knot[nurbs_nu_knots_i] = client_to_x(e.clientX - canvas_rect.left);
 		nurbs_nu_knots_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
 		all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
@@ -511,7 +525,7 @@ function init_nurbs_r(){
 
 	nurbs.addEventListener('pointermove', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
-		all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		nurbs_draw_r(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
 			nurbs_control_xs[nurbs_r_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[nurbs_r_i];
 			nurbs_control_ys[nurbs_r_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[nurbs_r_i];
@@ -521,6 +535,7 @@ function init_nurbs_r(){
 
 	nurbs.addEventListener('pointerdown', function(e){
 		var canvas_rect = nurbs.getBoundingClientRect();
+		nurbs_draw_r(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		nurbs_control_xs[nurbs_r_i] = client_to_x(e.clientX - canvas_rect.left) * nurbs_control_ws[nurbs_r_i];
 		nurbs_control_ys[nurbs_r_i] = client_to_y(e.clientY - canvas_rect.top) * nurbs_control_ws[nurbs_r_i];
 		all_nurbs_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
