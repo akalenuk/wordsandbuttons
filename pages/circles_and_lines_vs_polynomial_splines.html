@@ -1126,27 +1126,36 @@ function animation_tick() {
 Circles and lines vs. polynomial splines
 	</h1>
 	<p>
-Usually, when you want to make a parametric curve, you should go for a polynomial spline. It can be a Bézier curve, which is very obviously a bunch of polynomials stacked on top of each other under a trench coat. Or it can be a NURBS which is essentially the same as Bézier but in slightly different space. It can also be a <a href="https://wordsandbuttons.online/quadratic_splines_are_useful_too.html">hand-crafted spline</a> tailored for your specific task. A polynomial spline is a decent choice. But it's not the only one possible.
+Usually, when you want a parametric curve, you should go for some kind of a spline. It can be a Bézier curve, which is very obviously a bunch of polynomials stacked on top of each other under a trench coat. Or it can be a <a href="https://wordsandbuttons.online/nurbs_is_just_an_acronym.html">NURBS</a> which is always a rational choice. It can even be a <a href="https://wordsandbuttons.online/quadratic_splines_are_useful_too.html">hand-crafted spline</a> tailored for your specific task. Using splines for parametric curves is good. But it's not the only possible way.
 	</p>
 	<p>
-Sometimes, for the reasons mentioned only in the second half of this page to keep you intrigued, you are not satisfied with polynomials. You have to look elsewhere. This page shows you one possible option apart from polynomials and it is an old-school parametric curve made from arcs and line segments stitched together. Yes, it's that simple. Euclid would have been proud.
+For instance, sometimes, for the reasons mentioned only in the second half of this page to keep you intrigued, you are not satisfied with just some splines. You want some specific property, splines from the box just don't have. You have to look elsewhere.
 	</p>
-	<h2>Cubic polynomial</h2>
+	<p>
+This page shows you one possible option apart from splines and it is an old-school parametric curve made from arcs and line segments stitched together. Yes, it's that simple, it's all rulers and compasses. Euclid would have been proud.
+	</p>
+	<h2>Cubic polynomial as an ideal building block</h2>
 	<p>
 To build a smooth parametric curve we need appropriate building blocks. Smoothness means that the function has tangent vector continuity, so a decent building block for it would be something that gives you full control over its tangents in points. A cubic polynomial is a fine example.
 	</p>
 	<canvas id="cubic_canvas" width=640 height=640></canvas>
-	<p class="comment">Points and tangents are clickable/dragable.</p>
+	<p class="comment">Points and tangents are clickable/draggable.</p>
 	<p>
 Two points imply two linear equations. Two tangents are two more. Four equations, four polynomial coefficients — nice little linear system. Solve it and you have your building block.
+	</p>
+	<p>
+Now stack them together, make sure that the tangents of two neighboring pieces coincide — and here you go!
 	</p>
 
 	<h2><span id="index_biarcs">Biarcs</span></h2>
 	<p>
-We can construct an alternative building block by making two circles go through the points so the tangents will be orthogonal to the radius vector, and then touch. The point where the circles touch is the point where they share the tangent. Then we'll cut two arcs out of them, and that's it. The pair of arcs will be our building block.
+We can construct an alternative building block by making two circles go through the points so the tangents will be orthogonal to the radius vector, and then touch. The point where the circles touch is the point where they share the tangent. Then we cut two arcs out of them, and that's it. The pair of arcs will be our new building block.
 	</p>
 	<p>
-In SymPy equations, these conditions look like this:
+Two points, two tangents. This should replace the cubic polynomial just fine.
+	</p>
+	<p>
+In SymPy equations, the conditions to build a biarc look like this:
 	</p>
 	<pre id="code_1">
 # input: point and tangent
@@ -1183,17 +1192,20 @@ We only want one though, so let's just pick the one with the least sum of radius
 		</center>
 	</form>
 	<p>
-We have our building block. The problem is, it only works ok when tangents are contradirected-ish. As tangents become codirected, it tends to “bubble”. And when they are also codirected with the points vector, the radiuses become too big and it introduces computational and performance problems. It's a building block for very particular kind of buildings.
+We have our building block. The problem is, it only works ok when tangents are contradirected-ish. As tangents become codirected, it tends to “bubble”.
 	</p>
 	<p>
-But that's easy to fix. Let's complement it with something else.
+And when they are also codirected with the points' vector, the radiuses become too big and it introduces computational and performance problems. So it is a building block, but for very particular kinds of buildings.
+	</p>
+	<p>
+Let's complement it with something else.
 	</p>
 	<h2>Arc and line segment</h2>
 	<p>
 And something else is an arc and a line segment. This should work with codirected tangents making nice cane-like curves where the biarc takes a giant detour.
 	</p>
 	<p>
-An arc and a segment is again a radius vector orthogonal to the tangent of the first point, plus a segment from the second point to the point where the circle touches the second tangent ray emited from the second point. Ok, the verbal description is a little messy, let's try SymPy equations.
+An arc and a segment is again a radius vector orthogonal to the tangent of the first point, plus a segment from the second point to the point where the circle touches the second tangent ray emited from the second point. Ok, the verbal description is a mess, let's try SymPy equations instead.
 	</p>
 	<pre id="code_2">
 # input
@@ -1218,13 +1230,13 @@ solutions = solve(
 ], (ax1, ay1, t2, ix, iy))
     </pre>
 	<p>
-Ah, that's not it! You can add an equation so the SymPy will get the arc radius for you too but it will take more time to compute. Not sure how much, let's just say after 25 hours on my machine I had to stop the process.
+Ah, but that's not the whole thing! You should add another equation so the SymPy could get the arc radius for you. Unfortunately, then it will take much more time to compute. Not sure how much, let's just say after 25 hours on my machine, I had to stop the process.
 	</p>
 	<p>
-It's faster to compute in numerically.
+It's faster to compute it numerically.
 	</p>
 	<p>
-To do that, you need to find an intersection point of the tangent rays. Then you compute the angle between the rays. Then the shortest distance from one of starting points to the point of tangent intersection multiplied by the tangent function of the found angle is the radius. Also, the shortest distance determines which of the points will touch an arc and which will get the line segment. Again, I'm not sure that the words are helping, the <a href="https://github.com/akalenuk/wordsandbuttons/blob/28e430f1d7eeef560d1e4af44676ecea3f8f1e4b/pages/circles_and_lines_vs_polynomial_splines.html#L308">code for this is on Github</a>.
+To do that, you need to find an intersection point of the tangent rays. Then you compute the angle between the rays. Then the shortest distance from one of starting points to the point of tangent intersection multiplied by the tangent function of the found angle is the radius. Also, the shortest distance determines which of the points will touch an arc and which will get the line segment. I'm not sure if the words are helping, so here's a link to <a href="https://github.com/akalenuk/wordsandbuttons/blob/28e430f1d7eeef560d1e4af44676ecea3f8f1e4b/pages/circles_and_lines_vs_polynomial_splines.html#L308">the code on Github</a>.
 	</p>
 	<canvas id="arcline_canvas" width=640 height=640></canvas>
 	<form onsubmit="return false;">
@@ -1255,7 +1267,7 @@ Just a reminder, this is a live plot. Points and tangents are movable.
 	</p>
 	<h2><span id="index_parameterization">Parameterization</span></h2>
 	<p>
-And now for the “why bother” part. Let's say you want something to go along the curve with constant speed. With polynomials, this is possible but complicated. You'd have to measure polynomials' derivatives, compute the curve own “speed” and then compensate for it doing small steps of different parameter increment. It's doable but cumbersome.
+And now for the “why bother” part. Let's say you want something to go along the curve with constant speed. With splines, this is possible but complicated. You'd have to measure spline derivatives, compute the curve's own “speed” and then find the right parameter increment to match it with what you want. It's doable but cumbersome.
 	</p>
 	<p>
 With arcs and segments, this task is trivial. Line segments are linear by definition and circles are linearly parametrized by their radial coordinates, so as a motorcycle goes with the constant speed with constant revs, the object will go along the curve with the constant speed if the parameterization changes constantly.
@@ -1269,7 +1281,7 @@ With arcs and segments, this task is trivial. Line segments are linear by defini
 		</center>
 	</form>
 	<p>
-Also, since it's trivial to compute arcs length, it's easy to parametrize these curves not only linearly but in their natural scale. For instance, I can make a small circle run around the track with the speed of exactly 200 pixels per second.
+Also, since it's trivial to compute arcs length, it's easy to parametrize these curves not only linearly but in their natural scale. For instance, I can make a small circle run around the track with a speed of exactly 200 pixels per second.
 	</p>
 	<canvas id="curve_canvas" width=640 height=640></canvas>
 	<form onsubmit="return false;">
@@ -1279,18 +1291,15 @@ Also, since it's trivial to compute arcs length, it's easy to parametrize these 
 	<button type="button" onclick="more_speed();" style="width: 32pt;">+</button>
 	</form>
 	<p>
-Of course, this approach has its flaws. It still doesn't work for when tangents and points all lie on the same line. It requires classification to chose among 4 possible solutions and this contributes to the algorithm size and performance. Polynomials are simpler.
+Of course, this approach has its flaws. It still doesn't work when tangents and points all lie on the same line. It requires classification to chose among 4 possible solutions and this contributes to the algorithm size and performance. Splines are simpler.
 	</p>
 	<p>
-But it's only one possible approach of an infinite number of possible approaches. This exercise shows that you can build your own parametric curves with desired properties and not rely on some particular mathematical apparatus. The options are limitless.
-	</p>
-	<p>
-By the way, if you know a better option for regularly parametrized parametric curves (which are not NURBS), please <a href="mailto:ok@wordsandbuttons.online">let me know</a>.
+But it's only one possible approach of an infinite number of possible approaches. This exercise shows you not how you should build parametric curves with desired properties, but that you can. You don't have to rely on what a library provides you with, you can craft your own curves however you like. The options are limitless.
 	</p>
 
 	<h2>P. S.</h2>
 	<p>
-<a href="https://twitter.com/JohnSelstad">Johnathon Selstad</a> came up with this awesome idea: what if we <a href="https://twitter.com/JohnSelstad/status/1165097629929230336">put a line segment between arcs</a>? Now the radii become adjustable and we can cover both my cases, too.
+And a case in point! <a href="https://twitter.com/JohnSelstad">Johnathon Selstad</a> came up with this awesome idea: what if we <a href="https://twitter.com/JohnSelstad/status/1165097629929230336">put a line segment between arcs</a>? Now the radii become adjustable and we can cover both my cases, too.
 	</p>
 	<p>
 How cool is that!
