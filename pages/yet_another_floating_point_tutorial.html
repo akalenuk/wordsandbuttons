@@ -339,6 +339,8 @@ function fixed_draw(mouse_state, x, y) {
 	context.fillStyle = "#000000"
 	context.fillText("which is " + sign * (n / 4.0).toFixed(2) + " in real numbers.", 20, 170);
 	cur_fixed = sign * (n / 4.0).toFixed(2);
+
+	document.getElementById("fp_15").innerHTML = cur_fixed;
 }
 
 // floating-point
@@ -670,7 +672,7 @@ function check_puzzle_1() {
 		else
 			document.getElementById("reply_puzzle_1").innerHTML = "Almost! The result is unsigned so it can't be negative.";
 	} else {
-		document.getElementById("reply_puzzle_1").innerHTML = "Yes! This particular quirk is actually standardized in C++ language. If all the arguments of an expression can be stored in the native signed integer type without losses, the expression shall be promoted to the <i>native signed integer</i> type. And only then converted to the resulting type. This means implicit conversion to a 32-bit integer where the overflow occurs, and then an explicit one to uint64_t with an underflow. Integer overflows are messy!";
+		document.getElementById("reply_puzzle_1").innerHTML = "Yes! This particular quirk is actually standardized in the C++ language. If all the arguments of an expression can be stored in the native signed integer type without losses, the expression shall be promoted to the <i>native signed integer</i> type. And only then converted to the resulting type. This means implicit conversion to a 32-bit integer where the overflow occurs, and then an explicit one to uint64_t with an underflow. Integer overflows are messy!";
 		document.getElementById("buttons_puzzle_1").style.display = 'none';
 		puzzle[1] = 1;
 	}
@@ -722,7 +724,7 @@ function check_puzzle_2() {
 		if(guess == "0")
 			document.getElementById("reply_puzzle_2").innerHTML = "It might be. But the point is, it might be not.";
 		if(guess == "-0")
-			document.getElementById("reply_puzzle_2").innerHTML = "I'm not sure myself if this is possible. Please try again.";
+			document.getElementById("reply_puzzle_2").innerHTML = "I'm not sure if this is even possible. Please try again.";
 		if(guess == "1.4013e-45")
 			document.getElementById("reply_puzzle_2").innerHTML = "Sorry but no. Please try again.";
 		if(guess == "-1.4013e-45")
@@ -852,20 +854,20 @@ Bruce Dawson's <a href="https://randomascii.wordpress.com/category/floating-poin
 	</li>
 	</ul>
 	<p>
-But I think, reexplaining some obscure concepts with different words (and buttons) might still help someone understand them better. And in the end, make fewer mistakes, write faster code, and create better software in general.
+But I think that reexplaining some obscure concepts with different words (and buttons) might still help someone understand them better. And in the end, make fewer mistakes, write faster code, and create better software in general.
 	</p>
 	<p>
-So I wrote this tutorial. It has C++ code samples, clickable models, and even some quests and puzzles. Please don't take them too seriously though, they are only here to make reading a little less boring. I hope that even if you learn nothing new from this particular experience, you'll at least have some fun.
+So I wrote this tutorial. It has C++ code samples, clickable models, and even quests and puzzles. I used everything, every trick I know to explain things in the clearest way possible. If you think your understanding of floating-point computations still could be improved after reading all the other tutorials, this page should help you.
 	</p>
 	<p>
-So let's get started.
+Let's get started, shall we?
 	</p>
 
 	<h2>
 But first! Meet the 6-bit <span id="index_integer_number">integer number</span>
 	</h2>
 	<p>
-Floating-point numbers were invented to represent real numbers. Like <span class="abc">0.5</span> or <span class="abc">3.1415926</span>. The ones that can't be represented by integers like <span class="abc">1</span> or <span class="abc">3</span>. But in fact, they are still made from integers so to understand how floating-point numbers work, you should first understand integers.
+Floating-point numbers were invented to represent real numbers. Like <span class="abc">0.5</span> or <span class="abc">3.1415926</span>. The ones that can't be represented by integers like <span class="abc">1</span> or <span class="abc">3</span>. But in fact, floating-point numbers are made of integers, so you should probably learn them first.
 	</p>
 	<p>
 At the very low-level, all computers do is crunch integers. And only some finite subset of them. Computers operate with bit tuples, and there are only as many different combinations of bits as <span class="abc">2<sup>n</sup></span> where <span class="abc">n</span> is the length of a tuple, and these combinations are your numbers.
@@ -924,7 +926,7 @@ It looks a little odd when you meet this jump, but it all makes perfect sense wh
 The first half of the range is shared between signed and unsigned types. Then there's a leap back for the signed ones. After that, they diverge by exactly half a range.
 	</p>
 	<p>
-If you take overflows into consideration, it seems natural. Yes, signed numbers overflow at half-range, but unsigned numbers overflow too, only half a range later. It's like two continuous rolls of numbers going along each other.
+If you take overflows into consideration, it starts to seem natural. Yes, signed numbers overflow at half-range, but unsigned numbers overflow too, only half a range later. It's like two continuous rolls of numbers going along each other.
 	</p>
 	<table>
 	<tr><td><b>Unsigned 1-digit decimal</b></td><td><b>Signed 1-digit decimal<b></td></tr>
@@ -950,7 +952,7 @@ If you take overflows into consideration, it seems natural. Yes, signed numbers 
 	</table>
 
 	<p>
-Please don't write your code expecting this behavior though. Integer overflows are not universally standardized. And even if in your case they work as expected, exploiting overflows makes code obscure, error-prone, and often non-portable.
+Please don't write your code expecting this behavior, though. Integer overflows are not universally standardized. And even if they work properly for your case, exploiting overflows makes code obscure, error-prone, and often non-portable.
 	</p>
 
 	<form>
@@ -983,7 +985,7 @@ This puzzle requires significant C++ knowledge. If you're not familiar with the 
 	</form>
 
 	<p>
-Integer numbers may be used to represent some non-integer values, too. For instance, <span class="abc">0.45</span> of a meter is <span class="abc">45</span> centimeters. <span class="abc">45.6</span> centimeters is <span class="abc">456</span> millimeters, and so on.
+With proper convention, integer numbers may represent some non-integer values. For instance, <span class="abc">0.45</span> of a meter is <span class="abc">45</span> centimeters. <span class="abc">45.6</span> centimeters is <span class="abc">456</span> millimeters.
 	</p>
 	<p class="formula">
 	<br>
@@ -1008,7 +1010,7 @@ With things like price tags or body temperature, we know where the decimal point
 	<br><br>
 	</p>
 	<p>
-Just as that, we can turn an integer number into a fixed-point number by assigning a place to put the binary point. In this model, the binary point is put after two bits, so it's still an integer, but now it measures quarters, so it can now represent some real numbers such as <span class="abc">1.5</span>.
+Just as that, we can turn an integer number into a fixed-point number by assigning a place to put the binary point. In this model, the binary point is put after two bits, so it's still an integer, but now it measures quarters, so it can now represent some subset of real numbers such as <span class="abc" id="fp_15">1.5</span>.
 	</p>
 	<canvas id="fixed" width=640 height=200></canvas>
 	<script language="JavaScript">
@@ -1029,23 +1031,23 @@ Fixed-point numbers are still integers, but they are integer numbers of fraction
 You can add and subtract them like the regular numbers, but you have to introduce more elaborate rules for division and multiplication. And you have to watch for overflows and underflows accordingly.
 	</p>
 	<p>
-Sometimes fixed-points are fine, but they can get cumbersome with a lot of calculations. To fit all the data you want into your bits, you have to carefully design your fixed-points for every particular task. With fixed bit tuple size, you have to choose where to put a point to lose as little precision as possible on every arithmetic operation. Wouldn't it be great if something did that for you?
+Sometimes fixed-points are fine, but they can get cumbersome with a lot of calculations. With fixed bit tuple size, you have to choose where to put the binary point to lose as little precision as possible on any arithmetic operation. Wouldn't it be great if something did that for you?
 	</p>
 
 	<h2>
 And finally, meet the 6-bit <span id="index_floating_point_number">floating-point number</span>
 	</h2>
 	<p>
-Floating-point numbers are that popular because they work even if you don't know where the decimal point should be or where it will appear after the computation.
+Floating-point numbers are that popular because they work fine even if you don't think about where the decimal point is where it shall appear after the computation.
 	</p>
 	<p>
-They come from scientific (AKA exponential) notation. With this notation, you can write down both astronomical and subatomic values.
+They come from <i>scientific</i> (also known as <i>exponential</i>) notation. With this notation, you can compactly write both astronomical and subatomic values.
 	</p>
 	<p class="formula">
 	<br>
-	m<sub>Sun</sub>: <b>1.989e+30</b> kg<br><nobr style="font-size:9pt;">Mass of the Sun AKA 1989000000000000000000000000000 kg</nobr>
+	m<sub>Sun</sub>: <b>1.989e+30</b> kg<br><nobr style="font-size:9pt;">Mass of the Sun, which is 1989000000000000000000000000000 kg</nobr>
 	<br><br>
-	m<sub>e</sub>: <b>9.1093897e-31</b> kg<br><nobr style="font-size:9pt;">Mass of an electron AKA 0.0000000000000000000000000000091093897 kg</nobr>
+	m<sub>e</sub>: <b>9.1093897e-31</b> kg<br><nobr style="font-size:9pt;">Mass of an electron, which is 0.0000000000000000000000000000091093897 kg</nobr>
 	<br><br>
 	</p>
 	<p>
@@ -1108,7 +1110,7 @@ Unlike integer numbers, floating-point numbers are <a href="https://en.wikipedia
 		fill_all_numbers_table();
 	</script>
 	<p>
-To understand why do you need special values for infinite numbers, you need to understand floating-point zeros first. 
+To understand what are the special infinite values for, you should probably understand floating-point zeros first.
 	</p>
 	<p>
 They are not actual zeros. Instead, they model anything that is absolutely smaller than the smallest representable number. Of course, they may occasionally represent an actual zero, but there is no way to tell if they are. So they should be treated as small numbers and not <span class="abc">0</span>. And as such, they deserve to retain their signs.
@@ -1165,7 +1167,7 @@ Speaking of performance, some of the compiler optimizations are algebraic. This 
 		</div>
 	</form>
 	<p>
-When you divide a non-zero number by zero, you get infinity. And just like floating-point zeros are not zero, these are not infinity. These are just numbers that are too big to be represented.
+When you divide a non-zero number by zero, you get infinity. And just like floating-point zeros are not zero, these are not infinite. These are just numbers that are too big to be represented.
 	</p>
 	<p>
 There are also numbers that can't possibly be represented in this model at all, like square roots of negative numbers. Technically, they are still numbers, but being complex numbers and not real, they don't have the representation. Operations that take numbers as input and can't provide numbers as output return special “<span id="index_not_a_number">not a number</span>” values then.
@@ -1239,7 +1241,7 @@ The common misconception is: since our smallest representable numbers are small,
 <span id="index_computational_error">Computational error</span>
 	</h2>
 	<p>
-Representational error is not our worst enemy. Any real-world number we collect from a sensor, or from some UI, has its own error anyway. And it usually dwarfs the representation error of floating-point numbers.
+Still, the representation error is not our worst enemy. Any real-world number we collect from a sensor, or a user interface, has its own error anyway. And it usually dwarfs the representation error of floating-point numbers. 
 	</p>
 	<p>
 However, as we process the data, we introduce computational error, too.
@@ -1300,7 +1302,7 @@ There is a common belief that comparing two floats exactly is unsafe because of 
 	</tr>
 	</table>
 	<p>
-It might get needlessly tricky to recognize safe from unsafe. For instance, this one isn't safe since <span class="abc">0.1</span> is only represented in the floating-point model with an error.
+But it might be hard to recognize safe from unsafe. For instance, this one isn't safe since <span class="abc">0.1</span> is only represented in the floating-point model with an error.
 	</p>
 	<table>
 	<tr>
@@ -1314,20 +1316,20 @@ It might get needlessly tricky to recognize safe from unsafe. For instance, this
 	</tr>
 	</table>
 	<p>
-What's worse, this error tends to accumulate as the computation goes. Of course, it depends on the algorithm, some are more prone to accumulate error than others.
+The computational error tends to accumulate as the computation goes. Of course, it depends on the algorithm. Some are more prone to accumulate errors than others.
 	</p>
 	<p>
-What's even worse, this error is hard to spot. Unless you deliberately put some effort into error analysis, you can never be sure how much of your computation is real data, and how much is an error.
+What's worse, this error is hard to tell. Unless you deliberately put some effort into error analysis, you can never be sure how much of your computation is real data, and how much is an error.
 	</p>
 <h2>Ok, I think we have the basics covered</h2>
 	<p>
-This was just a brief introduction. I hope it was fun and educational. Now for the hard bits, I prepared a few more explanations that are more specific.
+I hope that the tutorial was fun and educational. I tried to keep it short, though, so it only covers the essentials. For the specific parts, I prepared a few more explanations.
 	</p>
 	<p>
 If you want to learn more about how to estimate the computational error, please see <a href="https://wordsandbuttons.online/estimating_floating_point_error_the_easy_way.html">Estimating floating-point error the easy way</a>.
 	</p>
 	<p>
-If you want to learn how to encode your error messages in “not a number”, and also why, and why not, please visit <a href="https://wordsandbuttons.online/error_codes_are_not_numbers_but_they_are_can_we_exploit_that.html">Error codes are not numbers. But they are. Can we exploit that?</a>.
+If you want to learn how to encode your error messages in “not a number”, and also why, and why not, please visit <a href="https://wordsandbuttons.online/error_codes_are_not_numbers_but_they_are_can_we_exploit_that.html">Error codes are not numbers. But they are. Can we exploit that?</a>
 	</p>
 	<p>
 And if you want to see what else you could use to represent real numbers, here's <a href="https://wordsandbuttons.online/yet_another_alternative_to_floating_point_numbers.html">Yet another alternative to floating-point numbers</a>.
