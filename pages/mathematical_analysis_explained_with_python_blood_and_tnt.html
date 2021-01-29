@@ -258,7 +258,8 @@ function draw_derivative(){
 		context.moveTo(x_to_client(x1), y_to_client(y1));
 		context.lineTo(x_to_client(x2), y_to_client(y2));
 	}
-	context.strokeStyle="#660000";
+	context.strokeStyle="#d64562";
+	context.lineWidth = 2;
 	context.stroke();
 	context.closePath();
 
@@ -267,29 +268,32 @@ function draw_derivative(){
 
 	var x2 = derivative_x;
 	var y2 = demo_f(x2);
-	context.beginPath();
-	context.setLineDash([10, 10]);
-	context.moveTo(x_to_client(x1), y_to_client(y1));
-	context.lineTo(x_to_client(x2), y_to_client(y2));
-	context.lineTo(x_to_client(x2), y_to_client(y1));
-	context.lineTo(x_to_client(x1), y_to_client(y1));
-	context.strokeStyle="#44aa44";
-	context.stroke();
-	context.setLineDash([]);
-	context.closePath();
+
 	var x3 = -1;
 	var y3 = y1 + (y2-y1) * (x3-x1) / (x2-x1);
 
 	context.beginPath();
+	context.setLineDash([6, 6]);
+	context.moveTo(x_to_client(x3), y_to_client(y3));
+	context.lineTo(x_to_client(x2), y_to_client(y2));
+	context.lineTo(x_to_client(x2), y_to_client(y1));
+	context.lineTo(x_to_client(x1), y_to_client(y1));
+	context.strokeStyle="#3c7033";
+	context.lineWidth = 1;
+	context.stroke();
+	context.closePath();
+
+	context.beginPath();
 	context.moveTo(x_to_client(x1), y_to_client(y1));
 	context.lineTo(x_to_client(x3), y_to_client(y3));
-	context.strokeStyle="#44aa44";
+	context.strokeStyle="#3c7033";
+	context.setLineDash([]);
 	context.stroke();
 	context.closePath();
 
 	// common font things
 	context.textAlign = "left";
-	context.fillStyle="#003300";
+	context.fillStyle="#162414";
 
 	context.fillText("dx", x_to_client((x1+x2)/2), y_to_client(y1) - 10);
 	if(x_to_client(x2) < 0.84 * w) {
@@ -306,10 +310,9 @@ function draw_derivative(){
 	context.beginPath();
 	context.moveTo(x_to_client(x1), y_to_client(y1));
 	context.lineTo(x_to_client(x3), y_to_client(y3));
-	context.setLineDash([2, 2]);
-	context.strokeStyle="#44aa44";
+	context.setLineDash([]);
+	context.strokeStyle="#3c7033";
 	context.stroke();
-	context.setLineDash([2, 2]);
 	context.closePath();
 }
 
@@ -359,11 +362,13 @@ function plot_draw(client_x, client_y, do_guides, add_points){
 		context.moveTo(x_to_client(x1), y_to_client(y1));
 		context.lineTo(x_to_client(x2), y_to_client(y2));
 	}
-	context.strokeStyle="#660000";
+	context.strokeStyle="#d64562";
+	context.lineWidth = 2;
 	context.stroke();
 	context.closePath();
 
 	// derivative
+	context.lineWidth = 1;
 	if(do_guides) {
 		var x1 = client_to_x(client_x);
 		var y1 = the_function(n, x1);
@@ -376,7 +381,7 @@ function plot_draw(client_x, client_y, do_guides, add_points){
 		context.lineTo(x_to_client(x2), y_to_client(y2));
 		context.moveTo(x_to_client(x2), y_to_client(y1));
 		context.lineTo(x_to_client(x1), y_to_client(y1));
-		context.strokeStyle="#223322";
+		context.strokeStyle="#162414";
 		context.stroke();
 		context.setLineDash([]);
 		context.closePath();
@@ -390,7 +395,7 @@ function plot_draw(client_x, client_y, do_guides, add_points){
 		var y5 = d(n, x1);
 		context.moveTo(x_to_client(x4), y_to_client(y4));
 		context.lineTo(x_to_client(x5), y_to_client(y5));
-		context.strokeStyle="#008800";
+		context.strokeStyle="#3c7033";
 		context.stroke();
 		context.closePath();
 		if(add_points) {
@@ -402,12 +407,11 @@ function plot_draw(client_x, client_y, do_guides, add_points){
 	}
 
 	// points
-
-	context.fillStyle="#008800";
+	context.fillStyle="#3c7033";
 	points_to_show = (pt_n > MAX_PTS) ? MAX_PTS : pt_n;
 	for(var i = 0; i < points_to_show; i++){
 		context.beginPath();
-		context.arc(x_to_client(pt_x[i]), y_to_client(pt_y[i]), 2, 0, 2*Math.PI);
+		context.arc(x_to_client(pt_x[i]), y_to_client(pt_y[i]), 2.5, 0, 2*Math.PI);
 		context.fill();
 		context.closePath();
 	}
@@ -486,7 +490,8 @@ function draw_series(){
 		context.moveTo(x_to_client(x1), y_to_client(y1));
 		context.lineTo(x_to_client(x2), y_to_client(y2));
 	}
-	context.strokeStyle="#AA7777";
+	context.strokeStyle="#d64562";
+	context.lineWidth = 2;
 	context.stroke();
 	context.closePath();
 
@@ -510,7 +515,8 @@ function draw_series(){
 		context.moveTo(x_to_client(x1), y_to_client(y1));
 		context.lineTo(x_to_client(x2), y_to_client(y2));
 	}
-	context.strokeStyle="#660000";
+	context.strokeStyle="#162414";
+	context.lineWidth = 1;
 	context.stroke();
 	context.closePath();
 
@@ -585,8 +591,8 @@ function dec(counter_name) {
 	draw_series();
 }
 	</script>
-  </head>
-  <body>
+</head>
+<body>
 	<center>
 	<h1>
 Mathematical analysis explained with <br>Python, blood, and TNT
@@ -659,7 +665,7 @@ The smaller <i>d<sub>x</sub></i> is, the more accurate your measurements will be
 	<p>
 At any particular point, the derivative of a function is a number. If the function doesn't change its velocity, the number stays constant. But if it does, and of course all the most interesting functions do, it changes from point to point while forming some pattern. Here's the interactive plot that shows how it works with several popular functions.
 	</p>
-	<form onsubmit="return false;">
+	<form id="form1" onsubmit="return false;">
 		<div id="buttons">
 		<center>
 			<button type="button" id="button_1" onclick="radio(1)" disabled="true">y = x</sup></button>
@@ -682,6 +688,7 @@ Select a function and drag anywhere to leave marks.
 	</p>
 	<script language="JavaScript">
 	init_plot();
+	document.getElementById("button_1").disabled = true;
 	</script>
 	<p>
 You should have noticed that the patterns, the derivatives make, do look like functions on their own. That's because they are. The derivative of a function is a function. It is not always continuous, it is not even always defined, but in the general case it is true: the derivative of a function is a function.
@@ -864,7 +871,7 @@ And there is always the more serious problem of representability. Remember (almo
 Here is a plot with some most known serializable functions. Feel free to explore.
 	</p>
 	<canvas id="series" width=640 height=640></canvas>
-	<form onsubmit="return false;">
+	<form id="form2" onsubmit="return false;">
 		<center>
 Derivatives to count:
 			<button type="button" class="incdec" onclick="dec('derivatives_n')">-</button>
