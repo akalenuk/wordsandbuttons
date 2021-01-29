@@ -243,63 +243,74 @@ function init_derivative(){
 
 function draw_derivative(){
 	var d = document.getElementById("derivative");
-	var d_context = d.getContext("2d");
-	d_context.font = "16px sans-serif";
+	var context = d.getContext("2d");
+	context.font = "16px sans-serif";
 	// background
-	d_context.fillStyle="#eeeeee";
-	d_context.fillRect(0, 0, 640, 448);
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, 640, 448);
 	// function
-	d_context.beginPath();
+	context.beginPath();
 	for(var wi = 0; wi < 640 - 1; ++wi){
 		x1 = client_to_x(wi);
 		x2 = client_to_x(wi + 1);
 		y1 = demo_f(x1);
 		y2 = demo_f(x2);
-		d_context.moveTo(x_to_client(x1), y_to_client(y1));
-		d_context.lineTo(x_to_client(x2), y_to_client(y2));
+		context.moveTo(x_to_client(x1), y_to_client(y1));
+		context.lineTo(x_to_client(x2), y_to_client(y2));
 	}
-	d_context.strokeStyle="#660000";
-	d_context.stroke();
-	d_context.closePath();
+	context.strokeStyle="#660000";
+	context.stroke();
+	context.closePath();
 
 	var x1 = client_to_x(0);
 	var y1 = demo_f(x1);
 
 	var x2 = derivative_x;
 	var y2 = demo_f(x2);
-	d_context.beginPath();
-	d_context.setLineDash([10, 10]);
-	d_context.moveTo(x_to_client(x1), y_to_client(y1));
-	d_context.lineTo(x_to_client(x2), y_to_client(y2));
-	d_context.lineTo(x_to_client(x2), y_to_client(y1));
-	d_context.lineTo(x_to_client(x1), y_to_client(y1));
-	d_context.strokeStyle="#44aa44";
-	d_context.stroke();
-	d_context.setLineDash([]);
-	d_context.closePath();
+	context.beginPath();
+	context.setLineDash([10, 10]);
+	context.moveTo(x_to_client(x1), y_to_client(y1));
+	context.lineTo(x_to_client(x2), y_to_client(y2));
+	context.lineTo(x_to_client(x2), y_to_client(y1));
+	context.lineTo(x_to_client(x1), y_to_client(y1));
+	context.strokeStyle="#44aa44";
+	context.stroke();
+	context.setLineDash([]);
+	context.closePath();
 	var x3 = -1;
 	var y3 = y1 + (y2-y1) * (x3-x1) / (x2-x1);
-	d_context.beginPath();
-	d_context.moveTo(x_to_client(x1), y_to_client(y1));
-	d_context.lineTo(x_to_client(x3), y_to_client(y3));
-	d_context.strokeStyle="#44aa44";
-	d_context.stroke();
-	d_context.closePath();
-	d_context.fillStyle="#003300";
-	d_context.fillText("dx", x_to_client((x1+x2)/2), y_to_client(y1) - 10);
-	d_context.fillText("f(x+dx)-f(x)", x_to_client(x2) + 10, y_to_client((y1+y2)/2) + 10);
+
+	context.beginPath();
+	context.moveTo(x_to_client(x1), y_to_client(y1));
+	context.lineTo(x_to_client(x3), y_to_client(y3));
+	context.strokeStyle="#44aa44";
+	context.stroke();
+	context.closePath();
+
+	// common font things
+	context.textAlign = "left";
+	context.fillStyle="#003300";
+
+	context.fillText("dx", x_to_client((x1+x2)/2), y_to_client(y1) - 10);
+	if(x_to_client(x2) < 0.84 * w) {
+		context.textAlign = "left";
+		context.fillText("f(x+dx)-f(x)", x_to_client(x2) + 10, y_to_client((y1+y2)/2) + 10);
+	} else {
+		context.textAlign = "right";
+		context.fillText("f(x+dx)-f(x)", x_to_client(x2) - 10, y_to_client((y1+y2)/2) + 10);
+	}
 
 	var d = (demo_f(x1+0.0001) - demo_f(x1))/0.0001;
 	var x3 = -1;
 	var y3 = y1 + d*2;
-	d_context.beginPath();
-	d_context.moveTo(x_to_client(x1), y_to_client(y1));
-	d_context.lineTo(x_to_client(x3), y_to_client(y3));
-	d_context.setLineDash([2, 2]);
-	d_context.strokeStyle="#44aa44";
-	d_context.stroke();
-	d_context.setLineDash([2, 2]);
-	d_context.closePath();
+	context.beginPath();
+	context.moveTo(x_to_client(x1), y_to_client(y1));
+	context.lineTo(x_to_client(x3), y_to_client(y3));
+	context.setLineDash([2, 2]);
+	context.strokeStyle="#44aa44";
+	context.stroke();
+	context.setLineDash([2, 2]);
+	context.closePath();
 }
 
 function init_plot(){
@@ -331,26 +342,26 @@ var pt_n = 0;
 
 function plot_draw(client_x, client_y, do_guides, add_points){
 	plot = document.getElementById("plot");
-	var plot_context = plot.getContext("2d");
-	plot_context.font = "16px sans-serif";
+	var context = plot.getContext("2d");
+	context.font = "16px sans-serif";
 	// background
-	plot_context.fillStyle="#eeeeee";
-	plot_context.fillRect(0, 0, w, h);
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
 	// function
-	plot_context.beginPath();
+	context.beginPath();
 	n = button_n();
 	for(var wi = 0; wi < w - 1; ++wi){
 		x1 = client_to_x(wi);
 		x2 = client_to_x(wi + 1);
 		y1 = the_function(n, x1);
 		y2 = the_function(n, x2);
-		plot_context.moveTo(x_to_client(x1), y_to_client(y1));
-		plot_context.lineTo(x_to_client(x2), y_to_client(y2));
+		context.moveTo(x_to_client(x1), y_to_client(y1));
+		context.lineTo(x_to_client(x2), y_to_client(y2));
 	}
-	plot_context.strokeStyle="#660000";
-	plot_context.stroke();
-	plot_context.closePath();
+	context.strokeStyle="#660000";
+	context.stroke();
+	context.closePath();
 
 	// derivative
 	if(do_guides) {
@@ -359,29 +370,29 @@ function plot_draw(client_x, client_y, do_guides, add_points){
 		var x2 = x1 + 1.0;
 		var y2 = y1 + d(n, x1);
 
-		plot_context.beginPath();
-		plot_context.setLineDash([4, 4]);
-		plot_context.moveTo(x_to_client(x1), y_to_client(y1));
-		plot_context.lineTo(x_to_client(x2), y_to_client(y2));
-		plot_context.moveTo(x_to_client(x2), y_to_client(y1));
-		plot_context.lineTo(x_to_client(x1), y_to_client(y1));
-		plot_context.strokeStyle="#223322";
-		plot_context.stroke();
-		plot_context.setLineDash([]);
-		plot_context.closePath();
+		context.beginPath();
+		context.setLineDash([4, 4]);
+		context.moveTo(x_to_client(x1), y_to_client(y1));
+		context.lineTo(x_to_client(x2), y_to_client(y2));
+		context.moveTo(x_to_client(x2), y_to_client(y1));
+		context.lineTo(x_to_client(x1), y_to_client(y1));
+		context.strokeStyle="#223322";
+		context.stroke();
+		context.setLineDash([]);
+		context.closePath();
 
-		plot_context.beginPath();
-		plot_context.moveTo(x_to_client(x2), y_to_client(y2));
-		plot_context.lineTo(x_to_client(x2), y_to_client(y1));
+		context.beginPath();
+		context.moveTo(x_to_client(x2), y_to_client(y2));
+		context.lineTo(x_to_client(x2), y_to_client(y1));
 		var x4 = x1;
 		var y4 = 0.0;
 		var x5 = x4;
 		var y5 = d(n, x1);
-		plot_context.moveTo(x_to_client(x4), y_to_client(y4));
-		plot_context.lineTo(x_to_client(x5), y_to_client(y5));
-		plot_context.strokeStyle="#008800";
-		plot_context.stroke();
-		plot_context.closePath();
+		context.moveTo(x_to_client(x4), y_to_client(y4));
+		context.lineTo(x_to_client(x5), y_to_client(y5));
+		context.strokeStyle="#008800";
+		context.stroke();
+		context.closePath();
 		if(add_points) {
 			// add point
 			pt_x[pt_n % MAX_PTS] = x1;
@@ -392,17 +403,17 @@ function plot_draw(client_x, client_y, do_guides, add_points){
 
 	// points
 
-	plot_context.fillStyle="#008800";
+	context.fillStyle="#008800";
 	points_to_show = (pt_n > MAX_PTS) ? MAX_PTS : pt_n;
 	for(var i = 0; i < points_to_show; i++){
-		plot_context.beginPath();
-		plot_context.arc(x_to_client(pt_x[i]), y_to_client(pt_y[i]), 2, 0, 2*Math.PI);
-		plot_context.fill();
-		plot_context.closePath();
+		context.beginPath();
+		context.arc(x_to_client(pt_x[i]), y_to_client(pt_y[i]), 2, 0, 2*Math.PI);
+		context.fill();
+		context.closePath();
 	}
 
 	// grid
-	draw_grid_on(plot_context);
+	draw_grid_on(context);
 }
 
 function radio(n){
@@ -458,30 +469,30 @@ function init_series(){
 
 function draw_series(){
 	series = document.getElementById("series");
-	var series_context = series.getContext("2d");
-	series_context.font = "16px sans-serif";
+	var context = series.getContext("2d");
+	context.font = "16px sans-serif";
 	// background
-	series_context.fillStyle="#eeeeee";
-	series_context.fillRect(0, 0, w, h);
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
 
 	// original function
-	series_context.beginPath();
+	context.beginPath();
 	var n = button2_n();
 	for(var wi = 0; wi < w - 1; ++wi){
 		x1 = client_to_x(wi);
 		x2 = client_to_x(wi + 1);
 		y1 = the_function(n, x1);
 		y2 = the_function(n, x2);
-		series_context.moveTo(x_to_client(x1), y_to_client(y1));
-		series_context.lineTo(x_to_client(x2), y_to_client(y2));
+		context.moveTo(x_to_client(x1), y_to_client(y1));
+		context.lineTo(x_to_client(x2), y_to_client(y2));
 	}
-	series_context.strokeStyle="#AA7777";
-	series_context.stroke();
-	series_context.closePath();
+	context.strokeStyle="#AA7777";
+	context.stroke();
+	context.closePath();
 
 	// series
 	// original function
-	series_context.beginPath();
+	context.beginPath();
 	var dn = document.getElementById("derivatives_n").value;
 	if(dn < 0){
 		dn = 0;
@@ -496,15 +507,15 @@ function draw_series(){
 		x2 = client_to_x(wi + 1);
 		y1 = the_series(n, x1, dn);
 		y2 = the_series(n, x2, dn);
-		series_context.moveTo(x_to_client(x1), y_to_client(y1));
-		series_context.lineTo(x_to_client(x2), y_to_client(y2));
+		context.moveTo(x_to_client(x1), y_to_client(y1));
+		context.lineTo(x_to_client(x2), y_to_client(y2));
 	}
-	series_context.strokeStyle="#660000";
-	series_context.stroke();
-	series_context.closePath();
+	context.strokeStyle="#660000";
+	context.stroke();
+	context.closePath();
 
 	// grid
-	draw_grid_on(series_context);
+	draw_grid_on(context);
 }
 
 function radio2(n){
@@ -676,10 +687,10 @@ Select a function and drag anywhere to leave marks.
 You should have noticed that the patterns, the derivatives make, do look like functions on their own. That's because they are. The derivative of a function is a function. It is not always continuous, it is not even always defined, but in the general case it is true: the derivative of a function is a function.
 	</p>
 	<p>
-And some of them are quite fascinating. The derivative of sine is cosine. The derivative of a logarithm is the inverse function. The derivative of an exponent is the exponent itself. And most importantly, the derivative of a polynomial is also a polynomial, only of decremented degree.
+And some of them are quite fascinating. The derivative of sine is cosine. The derivative of the logarithm is the inverse function. The derivative of the exponent is the exponent itself. And most importantly, the derivative of a polynomial is also a polynomial, only of decremented degree.
 	</p>
 	<p>
-There are some quite elaborate rules to find the derivatives as functions. It usually takes about a semester to get moderately good in simple functional computations. It is a fascinating experience on its own, but you don't really have to master calculus if you only want to calculate a few derivatives every now and then.
+There are some quite elaborate rules to find the derivatives as functions. It usually takes about a semester to get moderately good in simple functional computations. It may be a fascinating experience on its own, but you don't really have to master calculus if you only want to calculate a few derivatives every now and then.
 	</p>
 	<h2>
 Getting derivatives as functions with SymPy
