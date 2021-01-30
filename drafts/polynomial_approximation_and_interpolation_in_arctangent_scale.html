@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.84">
+	<title>Polynomial approximation and interpolation</title>
+	<meta name="description" content="This explains approximation and interpolation, how to use polynomials for that, and how to make both concepts work together.">
+	<meta name="keywords" content="mathematics, tutorials">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body{
+	margin: 0 0 0 0;
+}
+
+a{
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: italic;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+.open_matrix {
+	width: 2pt;
+	border-bottom: 2px solid black;
+	border-top: 2px solid black;
+	border-left: 2px solid black;
+}
+
+.close_matrix {
+	width:2pt;
+	border-bottom: 2px solid black;
+	border-top: 2px solid black;
+	border-right: 2px solid black;
+}
+
+table.footer {
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
+}
+
+td.footer {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+li {
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+	padding-bottom: 6pt;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
+}
+
+input[type="text"] {
+	width: 32pt;
+	height: 22pt;
+	font-size: 16pt;
+	text-align: center;
+}
+
+input[type="radio"] {
+	height: 16pt;
+	width: 16pt;
+	margin-top: 12pt;
+}
+
+label {
+	font-size: 16pt;
+}
+
+button {
+	width: 32pt;
+	height: 26pt;
+	font-size: 16pt;
+	text-align: center;
+}
+
+canvas { touch-action: none; }
+	</style>
+	<script language="JavaScript">
+// client
+var w = 640.0;
+var h = 640.0;
+
+var points_for_approximation = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315], [587, 172]];
+var points_for_interpolation = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315], [587, 172]];
+var points_for_both = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315], [587, 172]];
+
+
+function nearest_i(xy, points) {
+	var best_i = 0;
+	var best_d = Math.pow((xy[0]-points[0][0]), 2) + Math.pow((xy[1]-points[0][1]), 2);
+	for(var i = 1; i < points.length; ++i) {
+		const d = Math.pow((xy[0]-points[i][0]), 2) + Math.pow((xy[1]-points[i][1]), 2);
+		if(d < best_d) {
+			best_d = d;
+			best_i = i;
+		}
+	}
+	return best_i;
+}
+
+// above
+var app_degree = 2;
+function change_app_degree() {
+	app_degree = Number(document.getElementById("app_degree_input").value);
+	if(isNaN(app_degree) || app_degree < 0) {
+		app_degree = 0;
+	}
+	document.getElementById("app_degree_input").value = app_degree;
+	draw_canvas("approximation_canvas");
+}
+
+var both_degree = 3;
+function change_both_degree() {
+	both_degree = Number(document.getElementById("both_degree_input").value);
+	if(isNaN(both_degree) || both_degree < 0) {
+		both_degree = 0;
+	}
+	document.getElementById("both_degree_input").value = both_degree;
+	draw_canvas("both_canvas");
+}
+
+var ips = 1;
+function change_ips() {
+	ips = Number(document.getElementById("ips_input").value);
+	if(isNaN(ips)) {
+		ips = 1;
+	}
+	document.getElementById("ips_input").value = ips;
+	draw_canvas("both_canvas");
+}
+
+function inc(counter_name) {
+	var counter = document.getElementById(counter_name+"_input");
+	counter.value = Number(counter.value) + 1;
+	eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+	var counter = document.getElementById(counter_name+"_input");
+	counter.value = Number(counter.value) - 1;
+	eval('change_' + counter_name + '()');
+}
+
+function reset_values() {
+	document.getElementById("app_degree_input").value = app_degree;
+	document.getElementById("both_degree_input").value = both_degree;
+	document.getElementById("ips_input").value = ips;
+}
+
+// alrorithms
+function sign_0_positive(x){ // Math.sign like with no 0 option
+	if(x >= 0)
+		return 1.0;
+	return -1.0;
+}
+
+function underflow_padded(x){
+	if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
+		return 1.e-5 * sign_0_positive(x);
+	return x;
+}
+
+function solved_linear(A, B, n){
+	var X = [];
+	for (var i = 0; i < n; ++i)
+		X.push(0.0);
+
+	// triangulize
+	for (var i = 0; i < n-1; ++i)
+		for (var j = 0; j < i+1; ++j) {
+			r = A[i+1][j] / underflow_padded(A[j][j]);
+			A[i+1][j] = 0.;
+			for (var b_j = j+1; b_j < n; ++b_j){
+				A[i+1][b_j] -= A[j][b_j]*r;
+			}
+			B[i+1] -= B[j]*r;
+		}
+
+	// calculate xs
+	X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
+	for (var i = n-2; i >= 0; --i){
+		var s = 0.0;
+		for (var j = i; j < n; ++j){
+			s = s + A[i][j]*X[j];
+		}
+		X[i] = (B[i] - s) / underflow_padded(A[i][i]);
+	}
+	return X;
+}
+
+function approximation_of(points, n) {
+	const N = points.length;
+	var A = [];
+	var B = [];
+
+	for (var i = 0; i < n; ++i){
+		var Ai = []
+		for (var j = 0; j < n; ++j){
+			Ai.push(0);
+			for(var k = 0; k < N; ++k){
+				Ai[j] += Math.pow(points[k][0], i + j);
+			}
+		}
+		A.push(Ai);
+		B.push(0);
+		for(var k = 0; k < N; ++k){
+			B[i] += points[k][1] * Math.pow(points[k][0], i);
+		}
+	}
+	var P = solved_linear(A, B,n);
+	return function(x) {
+		var Px = 0;
+		for(var i = 0; i < n; ++i) {
+			Px += P[i] * Math.pow(x, i);
+		}
+		return Px;
+	};
+}
+
+function interpolation_of(points) {
+	const N = points.length;
+	var A = [];
+	var B = [];
+
+	for (var i = 0; i < N; ++i){
+		var Ai = []
+		for (var j = 0; j < N; ++j){
+			Ai.push(Math.pow(points[i][0], j));
+		}
+		A.push(Ai);
+		B.push(points[i][1]);
+	}
+	var P = solved_linear(A, B, N);
+	return function(x) {
+		var Px = 0;
+		for(var i = 0; i < N; ++i) {
+			Px += P[i] * Math.pow(x, i);
+		}
+		return Px;
+	};
+}
+
+function approximation_with_weighted_interpolating_n(points, n, interpolating_n, weight) {
+	const N = points.length;
+	var A = [];
+	var B = [];
+
+	for (var i = 0; i < n; ++i){
+		var Ai = []
+		for (var j = 0; j < n; ++j){
+			Ai.push(0);
+			for(var k = 0; k < N; ++k){
+				Ai[j] += Math.pow(points[k][0], i + j) * ((k < interpolating_n) ? weight : 1.0);
+			}
+		}
+		A.push(Ai);
+		B.push(0);
+		for(var k = 0; k < N; ++k){
+			B[i] += points[k][1] * Math.pow(points[k][0], i) * ((k < interpolating_n) ? weight : 1.0);
+		}
+	}
+	var P = solved_linear(A, B,n);
+	return function(x) {
+		var Px = 0;
+		for(var i = 0; i < n; ++i) {
+			Px += P[i] * Math.pow(x, i);
+		}
+		return Px;
+	};
+}
+
+function evaluate_by_interpolating_n_squared_error(f, points, interpolating_n) {
+	var error2 = 0.0;
+	for(var i = 0; i < interpolating_n; ++i) {
+		error2 += Math.pow(points[i][1] - f(points[i][0]), 2);
+	}
+	return error2;
+}
+
+function approximation_with_autoweighted_interpolating_n(points, n, interpolating_n) {
+	var weight = 1.0;
+	var error2 = 1.0;
+	while (error2 >= 1.0) {
+		var f = approximation_with_weighted_interpolating_n(points, n, interpolating_n, weight);
+		error2 = evaluate_by_interpolating_n_squared_error(f, points, interpolating_n);
+		weight *= 2;
+	}
+	return f;
+}
+
+// the canvases
+var approximation_i = 0;
+function init_approximation_canvas(){
+	var canvas = document.getElementById("approximation_canvas");
+	canvas.addEventListener('pointerdown', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		const xy = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		if(document.getElementById("a_1").checked) { // add
+			points_for_approximation.push(xy);
+			approximation_i = points_for_approximation.length-1;
+		} else { // move
+			approximation_i = nearest_i(xy, points_for_approximation);
+			points_for_approximation[approximation_i] = xy;
+		}
+		draw_canvas("approximation_canvas");
+		canvas.releasePointerCapture(e.pointerId);
+	}, false);
+
+	canvas.addEventListener('pointermove', function(e){
+		if(e.buttons == 1){
+			canvas_rect = canvas.getBoundingClientRect();
+			points_for_approximation[approximation_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+			draw_canvas("approximation_canvas");
+		}
+	}, false);
+
+	canvas.addEventListener('pointerup', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		points_for_approximation[approximation_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		draw_canvas("approximation_canvas");
+	}, false);
+
+	draw_canvas("approximation_canvas");
+}
+
+var interpolation_i = 0;
+function init_interpolation_canvas(){
+	var canvas = document.getElementById("interpolation_canvas");
+	canvas.addEventListener('pointerdown', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		const xy = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		if(document.getElementById("i_1").checked) { // add
+			points_for_interpolation.push(xy);
+			interpolation_i = points_for_interpolation.length-1;
+		} else { // move
+			interpolation_i = nearest_i(xy, points_for_interpolation);
+			points_for_interpolation[interpolation_i] = xy;
+		}
+		draw_canvas("interpolation_canvas");
+		canvas.releasePointerCapture(e.pointerId);
+	}, false);
+
+	canvas.addEventListener('pointermove', function(e){
+		if(e.buttons == 1){
+			canvas_rect = canvas.getBoundingClientRect();
+			points_for_interpolation[interpolation_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+			draw_canvas("interpolation_canvas");
+		}
+	}, false);
+
+	canvas.addEventListener('pointerup', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		points_for_interpolation[interpolation_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		draw_canvas("interpolation_canvas");
+	}, false);
+
+	draw_canvas("interpolation_canvas");
+}
+
+var both_i = 0;
+function init_both_canvas(){
+	var canvas = document.getElementById("both_canvas");
+	canvas.addEventListener('pointerdown', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		const xy = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		if(document.getElementById("b_1").checked) { // add
+			points_for_both.push(xy);
+			both_i = points_for_both.length-1;
+		} else { // move
+			both_i = nearest_i(xy, points_for_both);
+			points_for_both[both_i] = xy;
+		}
+		draw_canvas("both_canvas");
+		canvas.releasePointerCapture(e.pointerId);
+	}, false);
+
+	canvas.addEventListener('pointermove', function(e){
+		if(e.buttons == 1){
+			canvas_rect = canvas.getBoundingClientRect();
+			points_for_both[both_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+			draw_canvas("both_canvas");
+		}
+	}, false);
+
+	canvas.addEventListener('pointerup', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		points_for_both[both_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		draw_canvas("both_canvas");
+	}, false);
+
+	draw_canvas("both_canvas");
+}
+
+function write_approximation_formula() {
+	var approximation_formula = document.getElementById("approximation_formula");
+
+	if(app_degree < 0) {
+		approximation_formula.innerHTML = "This method only works for polynomials.";
+		return;
+	}
+
+	formula_html = "<table><tr>";   // A x = B
+	formula_html += "<td class=\"open_matrix\"></td>";
+	formula_html += "<td>";
+	formula_html += "<table>"; // A
+	for(var i = 0; i < app_degree + 1; ++i) {
+		formula_html += "<tr>";
+		for(var j = 0; j < app_degree + 1; ++j) {
+			formula_html += "<td style=\"padding:4pt 4pt 4pt 4pt;\">";
+			if(i + j == 0) {
+				formula_html += "n";
+			} else {
+				formula_html += "<table style=\"font-family: sans-serif; font-size: 16pt;\">";
+				formula_html += "<tr><td align=\"center\" style=\"font-size: 10pt;\">";
+				formula_html += "n";
+				formula_html += "</td><td rowspan=3>";
+				if(i + j == 1)
+					formula_html += "<table><tr><td rowspan=2>x</td><td style=\"font-size: 10pt;\">&nbsp;</td></tr><tr><td style=\"font-size: 10pt;\">k</td></tr></table>"
+				else
+					formula_html += "<table><tr><td rowspan=2>x</td><td style=\"font-size: 10pt;\">" + String(i + j) + "</td></tr><tr><td style=\"font-size: 10pt;\">k</td></tr></table>"
+				formula_html += "</td>";
+				formula_html += "</tr><tr><td style=\"font-size:20pt;\">";
+				formula_html += "&Sigma;";
+				formula_html += "</td></tr><tr><td align=\"center\" style=\"font-size: 10pt;\">";
+				formula_html += "k=1";
+				formula_html += "</td></tr>";
+				formula_html += "</table>";
+			}
+			formula_html += "</td>";
+		}
+		formula_html += "</tr>";
+	}
+	formula_html += "</table>"; // A
+	formula_html += "</td>";
+	formula_html += "<td class=\"close_matrix\"></td>";
+	formula_html += "<td style=\"font-size: 24pt;\">&nbsp; &nbsp;</td>";
+	formula_html += "<td class=\"open_matrix\"></td>";
+	formula_html += "<td>";
+	formula_html += "<table>"; // x
+	for(var i = 0; i < app_degree + 1; ++i) {
+		formula_html += "<tr>";
+		formula_html += "<td style=\"padding:4pt 4pt 4pt 4pt;\">";
+		formula_html += "<table><tr><td rowspan=2>a</td><td style=\"font-size: 10pt;\">&nbsp;</td></tr><tr><td style=\"font-size: 10pt;\">" + String(i) + "</td></tr></table>"
+		formula_html += "</td>";
+		formula_html += "</tr>";
+	}
+	formula_html += "</table>"; // x
+	formula_html += "</td>";
+	formula_html += "<td class=\"close_matrix\"></td>";
+
+	formula_html += "<td style=\"font-size: 24pt;\">&nbsp; = &nbsp;</td>";
+
+	formula_html += "<td class=\"open_matrix\"></td>";
+	formula_html += "<td>";
+	formula_html += "<table>"; // B
+	for(var i = 0; i < app_degree + 1; ++i) {
+		formula_html += "<tr>";
+		formula_html += "<td style=\"padding:4pt 4pt 4pt 4pt;\">";
+		formula_html += "<table style=\"font-family: sans-serif; font-size: 16pt;\">";
+		formula_html += "<tr><td align=\"center\" style=\"font-size: 10pt;\">";
+		formula_html += "n";
+		formula_html += "</td><td rowspan=3>";
+		if(i == 0)
+			formula_html += "<table><tr><td rowspan=2>y</td><td style=\"font-size: 10pt;\">&nbsp;</td></tr><tr><td style=\"font-size: 10pt;\">k</td></tr></table>"
+		else if(i == 1) {
+			formula_html += "<table><tr><td rowspan=2>y</td><td style=\"font-size: 10pt;\">&nbsp;</td><td rowspan=2>x</td><td style=\"font-size: 10pt;\">&nbsp;</td></tr>"
+			formula_html += "<tr><td style=\"font-size: 10pt;\">k</td><td style=\"font-size: 10pt;\">k</td></tr></table>"
+		} else {
+			formula_html += "<table><tr><td rowspan=2>y</td><td style=\"font-size: 10pt;\">&nbsp;</td><td rowspan=2>x</td><td style=\"font-size: 10pt;\">" + String(i) + "</td></tr>"
+			formula_html += "<tr><td style=\"font-size: 10pt;\">k</td><td style=\"font-size: 10pt;\">k</td></tr></table>"
+		}
+		formula_html += "</td>";
+		formula_html += "</tr><tr><td style=\"font-size:20pt;\">";
+		formula_html += "&Sigma;";
+		formula_html += "</td></tr><tr><td align=\"center\" style=\"font-size: 10pt;\">";
+		formula_html += "k=1";
+		formula_html += "</td></tr>";
+		formula_html += "</table>";
+		formula_html += "</td>";
+		formula_html += "</tr>";
+	}
+	formula_html += "</table>"; // B
+	formula_html += "</td>";
+	formula_html += "<td class=\"close_matrix\"></td>";
+
+	formula_html += "</tr></table>";  // A x = B
+
+	formula_html += "</tr></table>";  // A x = B
+	formula_html += "<br>P(x) = ";
+	for(var i = 0; i < app_degree + 1; ++i) {
+		formula_html += "a<sub>" + String(app_degree - i) + "</sub>";
+		if(i == app_degree) {
+		} else if(i == app_degree - 1) {
+			formula_html += "x + ";
+		} else {
+			formula_html += "x<sup>" + String(app_degree - i) + "</sup> + ";
+		}
+	}
+	approximation_formula.innerHTML = formula_html;
+}
+
+function write_interpolation_formula() {
+	var interpolation_formula = document.getElementById("interpolation_formula");
+
+	if(points_for_interpolation.length == 0) {
+		interpolation_formula.innerHTML = "No data &ndash; no interpoaltion.";
+		return;
+	}
+
+
+	formula_html = "<table><tr>";   // A x = B
+	formula_html += "<td class=\"open_matrix\"></td>";
+	formula_html += "<td>";
+	formula_html += "<table>"; // A
+	for(var i = 0; i < points_for_interpolation.length; ++i) {
+		formula_html += "<tr>";
+		for(var j = 0; j < points_for_interpolation.length; ++j) {
+			formula_html += "<td style=\"padding:2pt 6pt 2pt 6pt;\">";
+			if(j == 0)
+				formula_html += "<table><tr><td rowspan=2>1</td><td style=\"font-size: 10pt;\">&nbsp;</td></tr><tr><td style=\"font-size: 10pt;\">&nbsp;</td></tr></table>";
+			else if(j == 1)
+				formula_html += "<table><tr><td rowspan=2>x</td><td style=\"font-size: 10pt;\">&nbsp;</td></tr><tr><td style=\"font-size: 10pt;\">" + String(i + 1) + "</td></tr></table>";
+			else
+				formula_html += "<table><tr><td rowspan=2>x</td><td style=\"font-size: 10pt;\">" + String(j) + "</td></tr><tr><td style=\"font-size: 10pt;\">" + String(i + 1) + "</td></tr></table>";
+			formula_html += "</td>";
+		}
+		formula_html += "</tr>";
+	}
+	formula_html += "</table>"; // A
+	formula_html += "</td>";
+	formula_html += "<td class=\"close_matrix\"></td>";
+	formula_html += "<td style=\"font-size: 24pt;\">&nbsp; &nbsp;</td>";
+	formula_html += "<td class=\"open_matrix\"></td>";
+	formula_html += "<td>";
+	formula_html += "<table>"; // x
+	for(var i = 0; i < points_for_interpolation.length; ++i) {
+		formula_html += "<tr>";
+		formula_html += "<td style=\"padding:2pt 6pt 2pt 6pt;\">";
+		formula_html += "<table><tr><td rowspan=2>a</td><td style=\"font-size: 10pt;\">&nbsp;</td></tr><tr><td style=\"font-size: 10pt;\">" + String(i) + "</td></tr></table>";
+		formula_html += "</td>";
+		formula_html += "</tr>";
+	}
+	formula_html += "</table>"; // x
+	formula_html += "</td>";
+	formula_html += "<td class=\"close_matrix\"></td>";
+
+	formula_html += "<td style=\"font-size: 24pt;\">&nbsp; = &nbsp;</td>";
+
+	formula_html += "<td class=\"open_matrix\"></td>";
+	formula_html += "<td>";
+	formula_html += "<table>"; // B
+	for(var i = 0; i < points_for_interpolation.length; ++i) {
+		formula_html += "<tr>";
+		formula_html += "<td style=\"padding:2pt 6pt 2pt 6pt;\">";
+		formula_html += "<table><tr><td rowspan=2>y</td><td style=\"font-size: 10pt;\">&nbsp;</td></tr><tr><td style=\"font-size: 10pt;\">" + String(i + 1) + "</td></tr></table>";
+		formula_html += "</td>";
+		formula_html += "</tr>";
+	}
+	formula_html += "</table>"; // B
+	formula_html += "</td>";
+	formula_html += "<td class=\"close_matrix\"></td>";
+
+	formula_html += "</tr></table>";  // A x = B
+	formula_html += "<br>P(x) = ";
+	for(var i = 0; i < points_for_interpolation.length; ++i) {
+		formula_html += "a<sub>" + String(points_for_interpolation.length - i - 1) + "</sub>";
+		if(i == points_for_interpolation.length - 1) {
+		} else if(i == points_for_interpolation.length - 2) {
+			formula_html += "x + ";
+		} else {
+			formula_html += "x<sup>" + String(points_for_interpolation.length - i - 1) + "</sup> + ";
+		}
+	}
+	interpolation_formula.innerHTML = formula_html;
+}
+
+function draw_canvas(canvas_name){
+	var canvas = document.getElementById(canvas_name);
+	var context = canvas.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+
+	var points = [];
+	if(canvas_name == "approximation_canvas") {
+		points = points_for_approximation;
+	} else if(canvas_name == "interpolation_canvas") {
+		points = points_for_interpolation;
+	} else if(canvas_name == "both_canvas") {
+		points = points_for_both;
+	}
+
+	context.lineWidth = 2;
+
+	// draw approximation
+	if(canvas_name == "approximation_canvas") {
+		if(points.length > 0 && app_degree >= 0) {
+			var polynomial = approximation_of(points, app_degree + 1);
+
+			context.beginPath();
+			for(var j = 0; j < w; ++j){
+				x = j;
+				y = polynomial(x);
+				if(j == 0)
+					context.moveTo(x, y);
+				else
+					context.lineTo(x, y);
+			}
+			context.strokeStyle="#d64562";
+			context.stroke();
+			context.closePath();
+		}
+		write_approximation_formula();
+		check_approximation_facts();
+		context.fillStyle="#222222";
+		if(is_shown("fact_1"))
+			context.fillText("Fact 1. Interpolation is a special case of approximation.", 32, 564);
+		if(is_shown("fact_2"))
+			context.fillText("Fact 2. Approximation works even for constants.", 32, 588);
+		if(is_shown("fact_3"))
+			context.fillText("Fact 3. You can do weighted approximation by multiplying points.", 32, 612);
+	}
+
+	// draw interpolation
+	if(canvas_name == "interpolation_canvas") {
+		if(points.length > 0) {
+			var polynomial = interpolation_of(points);
+
+			context.beginPath();
+			for(var j = 0; j < w; ++j){
+				x = j;
+				y = polynomial(x);
+				if(j == 0)
+					context.moveTo(x, y);
+				else
+					context.lineTo(x, y);
+			}
+			context.strokeStyle="#457fd6";
+			context.stroke();
+			context.closePath();
+		}
+		write_interpolation_formula();
+	}
+
+	// draw approximation + interpolation
+	if(canvas_name == "both_canvas") {
+		if(points.length > 0) {
+			var polynomial = approximation_with_autoweighted_interpolating_n(points, both_degree + 1, ips);
+
+			context.beginPath();
+			for(var j = 1; j < w; ++j){
+				x = j;
+				y = polynomial(x);
+				if(j == 0)
+					context.moveTo(x, y);
+				else
+					context.lineTo(x, y);
+			}
+			context.strokeStyle="#62d645";
+			context.stroke();
+			context.closePath();
+		}
+	}
+
+	context.lineWidth = 1;
+
+	// points
+	for (var i = 0; i < points.length; ++i) {
+		if(canvas_name == "approximation_canvas") {
+			context.fillStyle="#d64562";
+		} else if(canvas_name == "interpolation_canvas") {
+			context.fillStyle="#457fd6";
+		} else if(canvas_name == "both_canvas") {
+			if(i < ips)
+				context.fillStyle="#457fd6";
+			else
+				context.fillStyle="#d64562";
+		}
+		context.beginPath();
+		context.arc(points[i][0], points[i][1], 4, 0, 2*Math.PI);
+		context.fill();
+		context.closePath();
+	}
+}
+
+// under
+function reset_all_for_approximation() {
+	points_for_approximation = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315], [587, 172]];
+	approximation_i = 0;
+	draw_canvas("approximation_canvas");
+}
+
+function undo_last_for_approximation() {
+	points_for_approximation.splice(-1,1);
+	draw_canvas("approximation_canvas");
+}
+
+function reset_all_for_interpolation() {
+	points_for_interpolation = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315], [587, 172]];
+	interpolation_i = 0;
+	draw_canvas("interpolation_canvas");
+}
+
+function undo_last_for_interpolation() {
+	points_for_interpolation.splice(-1,1);
+	draw_canvas("interpolation_canvas");
+}
+
+function reset_all_for_both() {
+	points_for_both = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315], [587, 172]];
+	both_i = 0;
+	draw_canvas("both_canvas");
+}
+
+function undo_last_for_both() {
+	points_for_both.splice(-1,1);
+	draw_canvas("both_canvas");
+}
+
+// facts
+function show(n){
+	document.getElementById("hidden_" + n).style.display = "inline";
+}
+
+function is_shown(n){
+	return document.getElementById("hidden_" + n).style.display == "inline";
+}
+
+function show_approximation_facts() {
+	document.getElementById("approximation_facts_button").style.display = "none";
+	document.getElementById("approximation_facts_note").style.display = "none";
+	show("fact_1");
+	show("fact_2");
+	show("fact_3");
+}
+
+function check_approximation_facts() {
+	if(points_for_approximation.length == app_degree + 1)
+		show("fact_1");
+
+	if(app_degree == 0)
+		show("fact_2");
+
+	for(var i = 0; i < points_for_approximation.length; ++i) {
+		for(var j = 0; j < i; ++j)
+			if(Math.abs(points_for_approximation[i][0] - points_for_approximation[j][0]) < 2.0
+			&& Math.abs(points_for_approximation[i][1] - points_for_approximation[j][1]) < 2.0)
+				show("fact_3");
+	}
+	if(is_shown("fact_1") && is_shown("fact_2") && is_shown("fact_3"))
+		show_approximation_facts();
+}
+</script>
+</head>
+<body>
+	<center>
+	<h1>
+Polynomial approximation and interpolation
+	</h1>
+	<h2>
+Approximation
+	</h2>
+	<p>
+The word <i><span id="index_approximation">approximation</span></i> comes from Latin and means approximately “bringing something close enough”. We use this word when we want to substitute something complex with something simple. It is a broad term, you can technically approximate apples with oranges. But since it's usually used by boring people, it usually concerns numbers, functions, points, and vector fields.
+	</p>
+	<p>
+The <span id="index_polynomial_approximation">polynomial approximation</span> is about composing a polynomial that could substitute another function or a set of points good enough. With a set of points, there is a nice matrix equation that does all the work for us. Here, try it out.
+	</p>
+	<form onsubmit="return false;">
+	Polynomial degree:
+	<button type="button" onclick="dec('app_degree')">-</button>
+	<input type="text" id="app_degree_input" value="2" onchange="change_app_degree();">
+	<button type="button" onclick="inc('app_degree')">+</button>
+	<br>
+	</form>
+	<canvas id="approximation_canvas" width=640 height=640></canvas>
+	<div style="text-align:center; padding-bottom:12pt;">
+		<input type="radio" name="approx" id="a_1" value="Add" /><label for="a_1">Add a point;</label> &nbsp;
+		<input type="radio" name="approx" id="a_2" checked value="Move"><label for="a_2">move a point.</label> &nbsp;
+		<button type="button" style="width: 120pt;" onclick="undo_last_for_approximation()">Remove last</button>
+		<button type="button" style="width: 120pt;" onclick="reset_all_for_approximation()">Reset all</button>
+	</div>
+	<div id="approximation_formula" class="formula">
+	</div>
+	<p>
+The matrix comes from the <a href="https://en.wikipedia.org/wiki/Polynomial_least_squares#Polynomial_least_squares_and_the_orthogonality_principle">orthogonality principle</a>. In brief, we want the squared difference between the polynomial and the points to be as little as possible, so this is a minimization problem. But according to the orthogonality principle, the minimum for the sum of squared residuals is the same point where all the residuals, put in a single vector, are orthogonal to the vector of polynomial values.
+	</p>
+	<p>
+There is a single solution, and there is no need to run numeric methods to find it. That makes the polynomial approximation so appealing.
+	</p>
+	<p>
+You might have heard term <i><span id="index_linear_regression">linear regression</span></i>. It is a special case of polynomial approximation: an approximation of some data with a line, plane or hyperplane. So now you know how that works too.
+	</p>
+	<div id="approximation_facts_note">
+	<p>
+There are three more facts I want to share, but I think it would be more fun if you reveal them yourself with a living plot from above. Every time you find something interesting, a new fact will appear below. If you don't feel like playing games, just press the “show everything” button.
+	</p>
+	</div>
+	<button id="approximation_facts_button" type="button" style="width: 216pt;" onclick="show_approximation_facts()">Show everything</button>
+	<div id="hidden_fact_1" style="display: none;">
+	<p>
+<b>Fact 1.</b> When the number of points equals the degree of polynomial plus one, the approximation fits all the points perfectly. Another words, approximation becomes interpolation.
+	</p>
+	</div>
+	<div id="hidden_fact_2" style="display: none;">
+	<p>
+<b>Fact 2.</b> When polynomial degree is 0, the function is technically not a polynomial anymore, but a constant. Still, approximation method works even for a constant.
+	</p>
+	</div>
+	<div id="hidden_fact_3" style="display: none;">
+	<p>
+<b>Fact 3.</b> When you put several points in one place, that place attracts polynomial more than other points. This makes sense, since the polynomial minimizes the squared residuals sum. If some point occurs more than once, then it influences the sum more. That's how you do weighted approximation. You can add weights to your points by multiplying them.
+	</p>
+	</div>
+
+	<h2>
+Interpolation
+	</h2>
+	<p>
+The word <i><span id="index_interpolation">interpolation</span></i> also comes from Latin and it roughly translates as “smoothing things in between”. When you have a set of points, you use interpolation to find values between these points.
+	</p>
+	<p>
+With <span id="index_polynomial_interpolation">polynomial interpolation</span>, it is about finding a polynomial that runs exactly through the points we want. Here, try it out. You can add and remove points, but you can't select a polynomial degree now since it depends on the number of points.
+	</p>
+	<canvas id="interpolation_canvas" width=640 height=640></canvas>
+	<div style="text-align:center; padding-bottom:12pt;">
+		<input type="radio" name="ipol" id="i_1" value="Add" /><label for="i_1">Add a point;</label> &nbsp;
+		<input type="radio" name="ipol" id="i_2" checked value="Move"><label for="i_2">move a point.</label> &nbsp;
+		<button type="button" style="width: 120pt;" onclick="undo_last_for_interpolation()">Undo last</button>
+		<button type="button" style="width: 120pt;" onclick="reset_all_for_interpolation()">Reset all</button>
+	</div>
+	<div id="interpolation_formula" class="formula">
+	</div>
+	<p>
+The matrix is called <a href="https://en.wikipedia.org/wiki/Vandermonde_matrix"><Span id="index_vandermonde_matrix">Vandermonde matrix</Span></a> and it comes from the simple fact that if a polynomial runs through a point <i>(x<sub>i</sub>, y<sub>i</sub>)</i> then <i>P(x<sub>i</sub>) = y<sub>i</sub></i>. Just write this down for every point, put it into the matrix form and here you go.
+	</p>
+	<p>
+One widely known fact is you can't have your polynomial degree less than the number of points minus one. Another less known fact is that you can have it greater. It's very easy to see. Just imagine adding an extra point to the data set, the one you don't really need. The polynomial is still interpolating regarding the initial set, but by moving that extra point you now gain extra control over that polynomial.
+	</p>
+	<h2>
+Why not have both?
+	</h2>
+	<p>
+One of the frequently asked questions is “can we have a polynomial that runs through some chosen points and approximates the rest of the data set as well?”
+	</p>
+	<p>
+The answer is: yes, but... We don't have a nice simple formula to do that so we have to either go numeric or use a hack.
+	</p>
+	<p>
+The numeric approach is not so hard. Remember that the interpolating polynomial degree may be higher than the number of points in a set? We can exploit that. We can compose a Vandermonde matrix out of all interpolating points we got, and add a few fake ones to make the matrix square. Then we can use the fake ones as variables for any numeric optimizer and it will find the best fit for us.
+	</p>
+	<p>
+When the optimizer finishes, we will have our polynomial both interpolating and approximating.
+	</p>
+	<p>
+The downside of this approach is that the optimizer may finish its work anytime between 10 nanoseconds and 6 billion years. This depends on the number of variables and the polynomial degree.
+	</p>
+	<p>
+The other approach is a hack. The thing is, in practice, we never get our polynomial exactly interpolating due to the computational error. If we're ok with this, we can choose some tolerable interpolation error beforehand and use the same orthogonal principle matrix. This will approximate our points. Then we'll duplicate our interpolating points and recalculate the approximating polynomial. The error for these points will go down. We'll keep duplicating them until the approximating polynomial fits them within the tolerable interpolation error.
+	</p>
+	<p>
+This works because what the approximation does, it minimizes the sum of squared residuals. If you put a point twice, its residual will be twice as important to the optimizer as any other point. If you add it 128 times, it will attract the polynomial 128 times stronger than its neighbors.
+	</p>
+	<p>
+The brutal simplicity of this approach is also its strength. You only have one variable to alter, so the optimization process is trivial.
+	</p>
+	<p>
+You can try it out with an interactive plot.
+	</p>
+	<form onsubmit="return false;">
+	Polynomial degree:
+	<button type="button" onclick="dec('both_degree')">-</button>
+	<input type="text" id="both_degree_input" value="3" onchange="change_both_degree();">
+	<button type="button" onclick="inc('both_degree')">+</button>
+	<br>
+	Interpolation points for the hack:
+	<button type="button" onclick="dec('ips')">-</button>
+	<input type="text" id="ips_input" value="1" onchange="change_ips();">
+	<button type="button" onclick="inc('ips')">+</button>
+	</form>
+	<canvas id="both_canvas" width=640 height=640></canvas>
+	<div style="text-align:center; padding-bottom:12pt;">
+		<input type="radio" name="both" id="b_1" value="Add" /><label for="b_1">Add a point;</label> &nbsp;
+		<input type="radio" name="both" id="b_2" checked value="Move"><label for="b_2">move a point.</label> &nbsp;
+		<button type="button" style="width: 108pt;" onclick="undo_last_for_both()">Undo last</button>
+		<button type="button" style="width: 108pt;" onclick="reset_all_for_both()">Reset all</button>
+	</div>
+
+	<script language="JavaScript">
+	init_approximation_canvas();
+	init_interpolation_canvas();
+	init_both_canvas();
+	reset_values();
+	</script>
+
+	<h2>
+Conclusion
+	</h2>
+	<p>
+Both polynomial approximation and interpolation are widely known and widely implemented. It's most unlikely that you will have to reimplement them at some point in your career. However, knowing how they work may help you come with a cunning plan when what you need is not exactly what the library provides.
+	</p>
+
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="all_mathematics.html">#mathematics</a> <a href="all_tutorials.html">#tutorials</a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+		+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+</body>
+</html>
