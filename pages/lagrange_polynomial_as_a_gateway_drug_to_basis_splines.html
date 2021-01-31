@@ -337,29 +337,6 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		}
 	}
 
-	function snap_focus_to_nearest() {
-		// translation
-		const functions = s2x_x2s_s2y_y2s();
-		const s2x = functions[0];
-		const x2s = functions[1];
-		const s2y = functions[2];
-		const y2s = functions[3];
-		const x0 = s2x(w / 2);
-		const y0 = s2y(h / 2);
-		var y = null;
-		// function
-		for(var i = 0; i < i_fs.length; ++i) {
-			try {
-				if(!y || Math.abs(i_fs[i](x0) - y0) < Math.abs(y - y0))
-					y = i_fs[i](x0);
-			} catch (error) {
-				y = 0;
-			}
-		}
-		y_value = y;
-		draw_canvas();
-	}
-
 	i_canvas.addEventListener('pointermove', function(e) {
 		const canvas_rect = i_canvas.getBoundingClientRect();
 		const sx = e.clientX - canvas_rect.left;
@@ -405,73 +382,6 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 		redraw();
 	else
 		draw_canvas();
-}
-
-function pretty_print_abcd(a, b, c, d) {
-	var text = '';
-	if(a < 0)
-		text += '-';
-	text += Math.abs(a).toFixed(2);
-	text += 'x<sup>3</sup>';
-	if(b < 0)
-		text += ' - ';
-	else
-		text += ' + ';
-	text += Math.abs(b).toFixed(2);
-	text += 'x<sup>2</sup>';
-	if(c < 0)
-		text += ' - ';
-	else
-		text += ' + ';
-	text += Math.abs(c).toFixed(2);
-	text += 'x';
-	if(d < 0)
-		text += ' - ';
-	else
-		text += ' + ';
-	text += Math.abs(d).toFixed(2);
-	return text;
-}
-
-function pretty_print_abc(a, b, c) {
-	var text = '';
-	if(a < 0)
-		text += '-';
-	text += Math.abs(a).toFixed(2);
-	text += 'x<sup>2</sup>';
-	if(b < 0)
-		text += ' - ';
-	else
-		text += ' + ';
-	text += Math.abs(b).toFixed(2);
-	text += 'x';
-	if(c < 0)
-		text += ' - ';
-	else
-		text += ' + ';
-	text += Math.abs(c).toFixed(2);
-	return text;
-}
-
-function pretty_print_ab(a, b) {
-	var text = '';
-	if(a < 0)
-		text += '-';
-	text += Math.abs(a).toFixed(2);
-	text += 'x';
-	if(b < 0)
-		text += ' - ';
-	else
-		text += ' + ';
-	text += Math.abs(b).toFixed(2);
-	return text;
-}
-
-function show(n) {
-	document.getElementById("shown_" + n).style.display = "none";
-	document.getElementById("hidden_" + n).style.display = "inline";
-	console.log(n);
-
 }
 
 function undo_last_point() {
