@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.84">
+	<title>Lagrange polynomial as a gateway drug to basis splines</title>
+	<meta name="description" content="This explains Lagrange polynomial: why does it run through all the points, what is the basis polynomial, and how come it's a polynomial in the first place.">
+	<meta name="keywords" content="mathematics, tutorials">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body {
+	margin: 0 0 0 0;
+}
+
+a {
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 15pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+.comment {
+	font-size: 12pt;
+	text-align: center;
+	font-family: sans-serif;
+	padding-bottom: 12pt;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
+}
+
+input[type="checkbox"] {
+	height: 16pt;
+	width: 16pt;
+	font-size: 16pt;
+	margin-bottom: 16pt;
+}
+
+input[type="radio"] {
+	height: 16pt;
+	width: 16pt;
+	margin-top: 12pt;
+}
+
+label {
+	font-size: 16pt;
+}
+
+button {
+	width: 32pt;
+	height: 26pt;
+	font-size: 16pt;
+	text-align: center;
+}
+
+.abc {
+	font-family: sans-serif;
+	font-size: 15pt;
+	font-style: italic;
+	white-space: nowrap;
+}
+
+canvas { touch-action: none; }
+	</style>
+	<script language="JavaScript">
+var points = [];
+var points_i = 0;
+
+function nearest_i(xy, points) {
+	var best_i = 0;
+	var best_d = Math.pow((xy[0]-points[0][0]), 2) + Math.pow((xy[1]-points[0][1]), 2);
+	for(var i = 1; i < points.length; ++i) {
+		const d = Math.pow((xy[0]-points[i][0]), 2) + Math.pow((xy[1]-points[i][1]), 2);
+		if(d < best_d) {
+			best_d = d;
+			best_i = i;
+		}
+	}
+	return best_i;
+}
+
+function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale, i_w, i_h, i_do_side_panel, i_do_cross, i_do_timed_sync) {
+	const w = i_w;
+	const h = i_h;
+	const x_value = i_x;
+	const y_value = i_y;
+	const scale_value = i_scale;
+	i_canvas.width = w;
+	i_canvas.height = h;
+
+	function atan_real_to_screen (x, dx, scale, w) {
+		return Math.atan((x - dx) / scale) / Math.PI * (w - 1.) + (w / 2);
+	}
+
+	function atan_screen_to_real (x, dx, scale, w) {
+		return scale * Math.tan((x - (w / 2)) * Math.PI / (w - 1.)) + dx;
+	}
+
+	// returns 4 translation functions from/to screen and real coordinates
+	function s2x_x2s_s2y_y2s(center_x, center_y, scale) {
+		return [
+			function(i) {return atan_screen_to_real(i, x_value, scale_value, w);},
+			function(x) {return atan_real_to_screen(x, x_value, scale_value, w);},
+			function(i) {return atan_screen_to_real(h - i, y_value, scale_value, h);},
+			function(y) {return h - atan_real_to_screen(y, y_value, scale_value, h);}
+		];
+	}
+
+	function draw_canvas() {
+		var context = i_canvas.getContext("2d");
+
+		// background
+		context.fillStyle="#eeeeee";
+		context.fillRect(0, 0, w, h);
+
+		// translation functions
+		const functions = s2x_x2s_s2y_y2s();
+		const s2x = functions[0];
+		const x2s = functions[1];
+		const s2y = functions[2];
+		const y2s = functions[3];
+
+		// the grid
+		const scale = scale_value;
+		const step = scale < 16 ? 1 : Math.floor(scale / 8);
+		const stepped = function(x) {return Math.floor(x / step) * step;}
+
+		context.beginPath();
+		context.setLineDash([2, 3]);
+
+		// horizontal
+		{
+			const x_from = s2x(20);
+			const x_to = s2x(w-20);
+			for(var i = Math.sign(x_from) * Math.floor(Math.log2(Math.abs(x_from))) - 1; i <= Math.sign(x_to) * Math.ceil(Math.log2(Math.abs(x_to))); ++i) {
+				if(i == 0)
+					continue;
+				const x_i = Math.sign(i) * Math.pow(2, Math.abs(i) - 1);
+				context.moveTo(sharp(x2s(x_i)), 0);
+				context.lineTo(sharp(x2s(x_i)), h);
+			}
+			// vertical
+			const y_from = s2y(20);
+			const y_to = s2y(h-20);
+			for(var i = Math.sign(y_from) * Math.floor(Math.log2(Math.abs(y_from))) - 1; i <= Math.sign(y_to) * Math.ceil(Math.log2(Math.abs(y_to))); ++i) {
+				if(i == 0)
+					continue;
+				const y_i = Math.sign(i) * Math.pow(2, Math.abs(i) - 1);
+				context.moveTo(0, sharp(y2s(y_i)));
+				context.lineTo(w, sharp(y2s(y_i)));
+			}
+		}
+
+		context.strokeStyle = "#AAA";
+		context.lineWidth = 1;
+		context.stroke();
+		context.setLineDash([]);
+		context.closePath();
+
+		// verticals
+		context.strokeStyle = "#333";
+		context.lineWidth = 1;
+		context.setLineDash([4, 4]);
+		for(var i = 0; i < i_verticals.length; ++i) {
+			context.beginPath();
+			context.moveTo(sharp(x2s(i_verticals[i])), 0);
+			context.lineTo(sharp(x2s(i_verticals[i])), h+1);
+			context.stroke();
+			context.closePath();
+		}
+		context.setLineDash([]);
+
+		// axis lines (come before functions for better readability)
+		context.font = "14px Arial";
+		context.fillStyle = "#444444";
+		context.textAlign = "center";
+		context.textBaseline = "middle";
+		context.strokeStyle = "#000000";
+		context.lineWidth = 1;
+		context.beginPath();
+
+		context.moveTo(20.5, sharp(y2s(0)));
+		context.lineTo(w - 20.5, sharp(y2s(0)));
+		context.moveTo(sharp(x2s(0)), h - 20.5);
+		context.lineTo(sharp(x2s(0)), 20.5);
+		context.stroke();
+		context.closePath();
+
+		context.beginPath();
+		context.setLineDash([3, 2]);
+		context.moveTo(20.5, sharp(y2s(0)));
+		context.lineTo(-0.5, sharp(y2s(0)));
+		context.moveTo(w - 20.5, sharp(y2s(0)));
+		context.lineTo(w + 0.5, sharp(y2s(0)));
+		context.moveTo(sharp(x2s(0)), h - 20.5);
+		context.lineTo(sharp(x2s(0)), h + 0.5);
+		context.moveTo(sharp(x2s(0)), 20.5);
+		context.lineTo(sharp(x2s(0)), -0.5);
+		context.stroke();
+		context.closePath();
+		context.setLineDash([]);
+
+		// functions
+		for(var i = 0; i < i_fs.length; ++i) {
+			const f = i_fs[i];
+			const color = i_colors[i];
+			// draw
+			context.beginPath();
+			var the_gap = true;
+			var old_i;
+			for(var j = +0.5; j < w - 0.5; j += 2.) {
+				const x = s2x(j);
+				const y = f(x);
+				const i = y2s(y);
+				if(the_gap) {
+					context.moveTo(j, i)
+					the_gap = false;
+				} else {
+					if(Math.abs(i - old_i) >= h)
+						the_gap = true;
+					else
+						context.lineTo(j, i);
+				}
+				old_i = i;
+			}
+			context.strokeStyle = color;
+			context.lineWidth = 1.5;
+			context.stroke();
+			context.closePath();
+		}
+
+		// points
+		context.fillStyle = i_colors[0];
+		for (var i = 0; i < points.length; ++i) {
+			context.beginPath();
+			const x = x2s(points[i][0]);
+			const y = y2s(points[i][1]);
+			context.arc(x, y, 4, 0, 2*Math.PI);
+			context.fill();
+			context.closePath();
+		}
+
+
+		// the grid
+		function sharp(x) {return Math.floor(x) + 0.5;}
+		context.font = "14px Arial";
+		context.fillStyle = "#444444";
+		context.textAlign = "center";
+		context.textBaseline = "middle";
+		context.strokeStyle = "#000000";
+		context.lineWidth = 1;
+		context.beginPath();
+
+		// horizontal
+		{
+			const x_from = s2x(20);
+			const x_to = s2x(w-20);
+			for(var i = Math.sign(x_from) * Math.floor(Math.log2(Math.abs(x_from))) - 1; i <= Math.sign(x_to) * Math.ceil(Math.log2(Math.abs(x_to))); ++i) {
+				if(i == 0)
+					continue;
+				const x_i = Math.sign(i) * Math.pow(2, Math.abs(i) - 1);
+				context.moveTo(sharp(x2s(x_i)), sharp(y2s(0)) + 2);
+				context.lineTo(sharp(x2s(x_i)), sharp(y2s(0)) - 2);
+				const to_print = (i < 0) ? "-" + String(Math.pow(2, Math.abs(i+1))) : String(Math.pow(2, i-1));
+				if(i % 2 == 0)
+					context.fillText(to_print, sharp(x2s(x_i)), sharp(y2s(0)) - 12);
+				else
+					context.fillText(to_print, sharp(x2s(x_i)), sharp(y2s(0)) + 12);
+			}
+			// vertical
+			const y_from = s2y(h-20);
+			const y_to = s2y(20);
+			for(var i = Math.sign(y_from) * Math.floor(Math.log2(Math.abs(y_from))) - 1; i <= Math.sign(y_to) * Math.ceil(Math.log2(Math.abs(y_to))); ++i) {
+				if(i == 0)
+					continue;
+				const y_i = Math.sign(i) * Math.pow(2, Math.abs(i) - 1);
+				context.moveTo(sharp(x2s(0)) + 2, sharp(y2s(y_i)));
+				context.lineTo(sharp(x2s(0)) - 2, sharp(y2s(y_i)));
+				const to_print = (i < 0) ? "-" + String(Math.pow(2, Math.abs(i+1))) : String(Math.pow(2, i-1));
+				if(i % 2 == 0)
+					context.fillText(to_print, sharp(x2s(0)) - 12, sharp(y2s(y_i)) - 12);
+				else
+					context.fillText(to_print, sharp(x2s(0)) + 12, sharp(y2s(y_i)) + 12);
+			}
+		}
+		context.stroke();
+		context.closePath();
+
+		// cross
+		if(i_do_cross && (x2s(0) != w/2 || y2s(0) != h/2)) {
+			context.beginPath();
+			context.moveTo(sharp(w/2) - 14.5, sharp(h/2));
+			context.lineTo(sharp(w/2) + 14.5, sharp(h/2));
+			context.moveTo(sharp(w/2), sharp(h/2) - 14.5);
+			context.lineTo(sharp(w/2), sharp(h/2) + 14.5);
+			context.strokeStyle = "#222222";
+			context.lineWidth = 1;
+			context.stroke();
+			context.closePath();
+		}
+	}
+
+	function snap_focus_to_nearest() {
+		// translation
+		const functions = s2x_x2s_s2y_y2s();
+		const s2x = functions[0];
+		const x2s = functions[1];
+		const s2y = functions[2];
+		const y2s = functions[3];
+		const x0 = s2x(w / 2);
+		const y0 = s2y(h / 2);
+		var y = null;
+		// function
+		for(var i = 0; i < i_fs.length; ++i) {
+			try {
+				if(!y || Math.abs(i_fs[i](x0) - y0) < Math.abs(y - y0))
+					y = i_fs[i](x0);
+			} catch (error) {
+				y = 0;
+			}
+		}
+		y_value = y;
+		draw_canvas();
+	}
+
+	i_canvas.addEventListener('pointermove', function(e) {
+		const canvas_rect = i_canvas.getBoundingClientRect();
+		const sx = e.clientX - canvas_rect.left;
+		const sy = e.clientY - canvas_rect.top;
+		const functions = s2x_x2s_s2y_y2s();
+		const s2x = functions[0];
+		const s2y = functions[2];
+		const xy = [s2x(sx), s2y(sy)];
+		if(e.buttons == 1) {
+			points[points_i] = xy;
+		}
+		draw_canvas();
+	}, false);
+
+	i_canvas.addEventListener('pointerdown', function(e) {
+		const canvas_rect = i_canvas.getBoundingClientRect();
+		const sx = e.clientX - canvas_rect.left;
+		const sy = e.clientY - canvas_rect.top;
+		const functions = s2x_x2s_s2y_y2s();
+		const s2x = functions[0];
+		const s2y = functions[2];
+		const xy = [s2x(sx), s2y(sy)];
+		if(document.getElementById("a_1").checked) { // add
+			points.push(xy);
+			points_i = points.length-1;
+		} else { // move
+			points_i = nearest_i(xy, points);
+			points[points_i] = xy;
+		}
+		draw_canvas();
+		i_canvas.releasePointerCapture(e.pointerId);
+	}, false);
+
+	i_canvas.addEventListener('pointerleave', function(e) {
+		draw_canvas();
+	}, false);
+
+	function redraw() {
+		draw_canvas();
+		setTimeout(redraw, 200);
+	}
+	if(i_do_timed_sync)
+		redraw();
+	else
+		draw_canvas();
+}
+
+function pretty_print_abcd(a, b, c, d) {
+	var text = '';
+	if(a < 0)
+		text += '-';
+	text += Math.abs(a).toFixed(2);
+	text += 'x<sup>3</sup>';
+	if(b < 0)
+		text += ' - ';
+	else
+		text += ' + ';
+	text += Math.abs(b).toFixed(2);
+	text += 'x<sup>2</sup>';
+	if(c < 0)
+		text += ' - ';
+	else
+		text += ' + ';
+	text += Math.abs(c).toFixed(2);
+	text += 'x';
+	if(d < 0)
+		text += ' - ';
+	else
+		text += ' + ';
+	text += Math.abs(d).toFixed(2);
+	return text;
+}
+
+function pretty_print_abc(a, b, c) {
+	var text = '';
+	if(a < 0)
+		text += '-';
+	text += Math.abs(a).toFixed(2);
+	text += 'x<sup>2</sup>';
+	if(b < 0)
+		text += ' - ';
+	else
+		text += ' + ';
+	text += Math.abs(b).toFixed(2);
+	text += 'x';
+	if(c < 0)
+		text += ' - ';
+	else
+		text += ' + ';
+	text += Math.abs(c).toFixed(2);
+	return text;
+}
+
+function pretty_print_ab(a, b) {
+	var text = '';
+	if(a < 0)
+		text += '-';
+	text += Math.abs(a).toFixed(2);
+	text += 'x';
+	if(b < 0)
+		text += ' - ';
+	else
+		text += ' + ';
+	text += Math.abs(b).toFixed(2);
+	return text;
+}
+
+function show(n) {
+	document.getElementById("shown_" + n).style.display = "none";
+	document.getElementById("hidden_" + n).style.display = "inline";
+	console.log(n);
+
+}
+
+function undo_last_point() {
+	if(points.length > 1)
+		points.pop();
+}
+
+function reset_all_points() {
+	points = [[-4., 1.], [1., 4.], [4., -1.]];
+}
+reset_all_points();
+
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
+<Span id="index_lagrange_polynomial">Lagrange polynomial</span> as a gateway drug to basis splines
+	</h1>
+	<p>
+This is a minimal interpolating polynomial (in <a href="https://wordsandbuttons.online/trippy_polynomials_in_arctangent_scale.html">arctangent scale</a>, yes). For <span class="abc">k</span> points, if has <span class="abc">k-1</span> degree, and it, of course, runs through all the points by definition of interpolation.
+	</p>
+
+	<canvas id="lagrange_canvas" width=640 height=640></canvas>
+	<p class="comment">&uarr; This plot is interactive</p>
+	<div style="text-align:center; padding-bottom:12pt;">
+		<input type="radio" name="approx" id="a_1" value="Add" /><label for="a_1">Add a point;</label> &nbsp;
+		<input type="radio" name="approx" id="a_2" checked value="Move"><label for="a_2">move a point.</label> &nbsp;
+		<button type="button" style="width: 120pt;" onclick="undo_last_point()">Remove last</button>
+		<button type="button" style="width: 120pt;" onclick="reset_all_points()">Reset all</button>
+	</div>
+
+	<p>
+This polynomial can be obtained by several ways, and Lagrange polynomial is one of them. Lagrange polynomial is not a polynomial with some specific “Lagrangian” properties, it's only the way the interpolating function is calculated.
+	</p>
+	<p>
+And this is the way.
+	</p>
+	<table class="formula">
+	<tr>
+	<td rowspan=3>
+L(x) = 
+	</td>
+	<td>
+<sub>k</sub>
+	</td>
+	<td rowspan=3>
+y<sub>i</sub>&hairsp;g<sub>i</sub>(x)
+	</td>
+	</tr>
+	<tr>
+	<td style="font-size: 24pt;">
+&Sigma;
+	</td>
+	</tr>
+	<tr>
+	<td>
+<sup>i = 1</sup>
+	</td>
+	</tr>
+	</table>
+
+	<p>
+The functions <span class="abc">g(x)</span> are the <span id="index_basis_polynomial">basis polynomial</span>s. They are defined for every <span class="abc">i &in; 1..k</span>. Here they are.
+</p>
+
+	<table class="formula">
+	<tr>
+	<td rowspan=3>
+g<sub>i</sub>(x) = 
+	</td>
+	<td>
+<sub>k</sub>
+	</td>
+	<td rowspan=3>
+
+		<table class="formula">
+		<tr>
+		<td style="border-bottom:1px solid black">
+x - x<sub>j</sub>
+		</td>
+		</tr>
+		<tr>
+		<td>
+x<sub>i</sub> - x<sub>j</sub>
+		</td>
+		</tr>
+		</table>
+
+	</td>
+	</tr>
+	<tr>
+	<td style="font-size: 24pt;">
+&Pi;
+	</td>
+	</tr>
+	<tr>
+	<td>
+<sup>j = 1, j &ne; i</sup>
+	</td>
+	</tr>
+	</table>
+
+	<p>
+Ok, but this thing doesn't even look like a polynomial. And how come it's interpolating?
+	</p>
+	<p>
+The interpolant is a sum of products of linear functions. Each function is:
+	</p>
+
+	<table class="formula">
+	<tr>
+	<td style="border-bottom:1px solid black">
+x - x<sub>j</sub>
+	</td>
+	</tr>
+	<tr>
+	<td>
+x<sub>i</sub> - x<sub>j</sub>
+	</td>
+	</tr>
+	</table>
+
+	<p>
+At first, it might look like a rational function but <span class="abc">x<sub>i</sub> - x<sub>j</sub></span> is not a function of <span class="abc">x</span>, it's just a number. In other words:
+	</p>
+
+	<table class="formula">
+	<tr>
+	<td style="border-bottom:1px solid black">
+x - x<sub>j</sub>
+	</td>
+	<td rowspan=2>
+ = 
+	</td>
+	<td style="border-bottom:1px solid black">
+x
+	</td>
+	<td rowspan=2>
+ - 
+	</td>
+	<td style="border-bottom:1px solid black">
+x<sub>j</sub>
+	</td>
+	<td rowspan=2>
+, where c<sub>ij</sub> = x<sub>i</sub> - x<sub>j</sub>
+	</td>
+	</tr>
+	<tr>
+	<td>
+x<sub>i</sub> - x<sub>j</sub>
+	</td>
+	<td>
+c<sub>ij</sub>
+	</td>
+	<td>
+c<sub>ij</sub>
+	</td>
+	</tr>
+	</table>
+	<p>
+And this one is definitely linear.
+	</p>
+
+	<p>
+When <span class="abc">x = x<sub>j</sub></span> this linear function is <span class="abc">0</span> because <span class="abc">x<sub>j</sub> - x<sub>j</sub> = 0</span>.
+	</p>
+	<p>
+And when <span class="abc">x = x<sub>i</sub></span>, the function is <span class="abc">1</span> for every <span class="abc">x<sub>j</sub></span> apart from when <span class="abc">x<sub>j</sub> = x<sub>i</sub></span> since <span class="abc">x<sub>i</sub> - x<sub>j</sub> = x<sub>i</sub> - x<sub>j</sub></span>.
+	</p>
+	<p>
+The product of these linear functions is the basis polynomial. It is defined for every <span class="abc">i</span>, and for every <span class="abc">i</span>, it multiplies all the linear functions defined for every <span class="abc">j</span> except for when <span class="abc">x<sub>j</sub> = x<sub>i</sub></span>.
+	</p>
+	<p>
+So when we compute a basis polynomial determined for <span class="abc">i</span> in <span class="abc">x<sub>i</sub></span> we get <span class="abc">1</span>, since all the linear functions result in <span class="abc">1</span>.
+	</p>
+	<p>
+And when we compute the very same basis polynomial for every other <span class="abc">x<sub>j</sub></span> we get <span class="abc">0</span> since one of the linear functions results in <span class="abc">0</span>.
+	</p>
+	<p>
+E. g., the basis polynomial for the last point from the plot looks like this.
+	</p>
+	<canvas id="basis_canvas" width=640 height=640></canvas>
+	<p>
+We should only multiply it by <span class="abc">y<sub>i</sub></span> to make it go through the point <span class="abc">(x<sub>i</sub>, y<sub>i</sub>)</span>.
+	</p>
+	<canvas id="sumpiece_canvas" width=640 height=640></canvas>
+	<p>
+Now adding these basis polynomials together make them go through all the points since they don't mess up with each other. Every basis polynomial is <span class="abc">0</span> in all the <span class="abc">x<sub>j</sub></span> except for <span class="abc">x<sub>i</sub></span> so when you sum them up, there is no interference.
+	</p>
+	<canvas id="lagrange_canvas_again" width=640 height=640></canvas>
+	<p>
+Ok but why is it a polynomial? Well, the linear function is a first-degree polynomial. You multiply <span class="abc">k - 1</span> of them, you get <span class="abc">k - 1</span> degree basis polynomial. And, of course, summing up a few basis polynomials of <span class="abc">k - 1</span> degree can only result in a polynomial too.
+	</p>
+	<h2>
+Conclusion
+	</h2>
+	<p>
+Personally, I never used a Lagrange polynomial in practice. When I need an interpolating polynomial, I get one by solving a <a href="https://wordsandbuttons.online/polynomial_approximation_and_interpolation.html#index_vandermonde_matrix">Vandermonde equation</a>.
+	</p>
+	<p>
+But Lagrange polynomial introduces a very important idea of a basis function. You can analyze your source function into basis functions, and you can synthesize a new function, with the properties you want, from that. Basis splines are built upon this idea.
+	</p>
+	<p>
+With Lagrange polynomial, this idea is almost obscenely simple. It's all sums and products, ones and zeroes.
+	</p>
+
+	<script language="JavaScript">
+	const lagrange = function(x) {
+		var y = 0.;
+		for(var i = 0; i < points.length; ++i) {
+			var yi = points[i][1];
+			for(var j = 0; j < points.length; ++j) {
+				if(i != j)
+					yi *= (x - points[j][0]) / (points[i][0] - points[j][0]);
+			}
+			y += yi;
+		}
+		return y;
+	}
+	init_atan_plot(document.getElementById("lagrange_canvas"), [lagrange], ["#005500"], [], 0., 0., 4, 640, 640, false, false, true);
+
+	const basis = function(x) {
+		var i = points.length-1
+		var yi = 1.;
+		for(var j = 0; j < points.length; ++j) {
+			if(i != j)
+				yi *= (x - points[j][0]) / (points[i][0] - points[j][0]);
+		}
+		return yi;
+	}
+	init_atan_plot(document.getElementById("basis_canvas"), [basis, function(x) {return 1;}], ["#005500", "#999999"], [], 0., 0., 4, 640, 640, false, false, true);
+
+	const sumpiece = function(x) {
+		var i = points.length-1
+		var yi = points[i][1];
+		for(var j = 0; j < points.length; ++j) {
+			if(i != j)
+				yi *= (x - points[j][0]) / (points[i][0] - points[j][0]);
+		}
+		return yi;
+	}
+	init_atan_plot(document.getElementById("sumpiece_canvas"), [sumpiece], ["#005500"], [], 0., 0., 4, 640, 640, false, false, true);
+	init_atan_plot(document.getElementById("lagrange_canvas_again"), [lagrange], ["#005500"], [], 0., 0., 4, 640, 640, false, false, true);
+	</script>
+
+
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="all_mathematics.html">#mathematics</a> <a href="all_tutorials.html">#tutorials</a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+		+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+</body>
+</html>
