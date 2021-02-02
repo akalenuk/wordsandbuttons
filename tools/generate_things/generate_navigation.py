@@ -15,7 +15,9 @@ keyword_note = {
 index_title = 'Hello, world!'
 index_description = 'This is <i>Words and Buttons Online</i> — a growing collection of&nbsp;interactive tutorials, demos, and quizzes about maths, algorithms, and programming.'
 
+all_span_ids = []
 def read_index_spans(path):
+	global all_span_ids
 	index_spans = []
 	for file_name in os.listdir(path):
 		if os.path.isfile(path + '/' + file_name):
@@ -35,6 +37,10 @@ def read_index_spans(path):
 				span_titles += [s.split('>')[1].split('<')[0] for s in Spans]
 				for i in range(0, len(span_ids)):
 					index_spans += [ (file_name, span_ids[i], span_titles[i]) ]
+				for span_id in span_ids:
+					if span_id in all_span_ids:
+						print('Duplicated index span id: ' + span_id + " in " + file_name)
+					all_span_ids += [span_id]
 	return index_spans
 
 date_link_title_description_keywords = []
