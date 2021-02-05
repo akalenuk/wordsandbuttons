@@ -7,7 +7,7 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 
 ## Pages
 
-- [Lagrange polynomial as a gateway drug to basis splines](https://wordsandbuttons.online/lagrange_polynomial_as_a_gateway_drug_to_basis_splines.html) This explains Lagrange polynomial: why does it run through all the points, what is the basis polynomial, and how come it's a polynomial in the first place.
+- [Lagrange polynomial as a gateway drug to basis splines](https://wordsandbuttons.online/lagrange_polynomial_as_a_gateway_drug_to_basis_splines.html) This explains Lagrange interpolation: what is the Lagrange polynomial, why does it run through all the points, what is the basis polynomial, and how come it's a polynomial in the first place.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
 - [Trippy polynomials in arctangent scale](https://wordsandbuttons.online/trippy_polynomials_in_arctangent_scale.html) This shows the global properties of polynomials, their derivatives, and explains how the Maclaurine and Taylor series work all with animated plots in arctangent scale.
@@ -16,10 +16,10 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 - [Partial order and non-Boolean logic](https://wordsandbuttons.online/partial_order_and_non_boolean_logic.html) Non-Boolean logics are rare but not extinct. Interval logic is one example. Sometimes, you can implement a logic you want within total order or partial order but sometimes even that isn't enough and you need an even more general relation. With operator overloading, you have the freedom to go there but you also have less assurance when working within the total order.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
-- [Yet another alternative to floating point numbers](https://wordsandbuttons.online/yet_another_alternative_to_floating_point_numbers.html) This shows how computeable intervals written in rational bounds may not only account for the input error but keep computational error under control as well.
+- [Yet another alternative to floating-point numbers](https://wordsandbuttons.online/yet_another_alternative_to_floating_point_numbers.html) This shows how computable intervals written in rational bounds may not only account for the input error but keep computational error under control as well.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#quizzes](https://wordsandbuttons.online/all_quizzes.html)</sup> 
 
-- [Why is it ok to divide by 0.0?](https://wordsandbuttons.online/why_is_it_ok_to_divide_by_0_0.html) This explains why the division by zero in floating point numbers is ok.
+- [Why is it ok to divide by 0.0?](https://wordsandbuttons.online/why_is_it_ok_to_divide_by_0_0.html) This explains why dividing by zero in floating-point numbers is ok.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> 
 
 - [Can we use lemniscates for ultra-cheap vector graphics?](https://wordsandbuttons.online/can_we_use_lemniscates_for_ultra_cheap_vector_gaphics.html) This depicts an old idea of using multifocal lemniscates to draw arbitrary shapes. In some applications, this may be indeed an economical alternative to splines.
@@ -62,7 +62,7 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
 - [Yet another floating-point tutorial](https://wordsandbuttons.online/yet_another_floating_point_tutorial.html) Most of what you should know about floating-point numbers put together in an interactive tutorial with quests and puzzles.
-<sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
+<sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
 - [Lexical differential highlighting instead of syntax highlighting](https://wordsandbuttons.online/lexical_differential_highlighting_instead_of_syntax_highlighting.html) This type of highlighting is ideal for assembly. With it, the things that shouldn't seem similar usually don't.
 <sup>[#demos](https://wordsandbuttons.online/all_demos.html)</sup> <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> 
@@ -70,7 +70,7 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 - [Interactive mnemonics for dot and cross vector products](https://wordsandbuttons.online/interactive_mnemonics_for_dot_and_cross_vector_products.html) Just a pair of mnemonics for dot and cross vector products. They present the functions, show how they work, and why one is dot and the other is cross.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
-- [Simple image vectorization](https://wordsandbuttons.online/simple_image_vectorization.html) This is the example of an image vectorization algorithm. It shows the bilinear interpolation, polynomial approximation, differential analysis, and iterative algorithms working together to solve a practical problem
+- [Simple image vectorization](https://wordsandbuttons.online/simple_image_vectorization.html) This is an example of an image vectorization algorithm. It shows the bilinear interpolation, polynomial approximation, differential analysis, and iterative algorithms working together to solve a practical problem
 <sup>[#algorithms](https://wordsandbuttons.online/all_algorithms.html)</sup> <sup>[#demos](https://wordsandbuttons.online/all_demos.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> 
 
 - [The simplest possible smooth contouring algorithm](https://wordsandbuttons.online/the_simplest_possible_smooth_contouring_algorithm.html) A 3-part smooth contouring algorithm that shows partial derivatives, gradients, and parametric polynomials working together.
@@ -91,7 +91,7 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 - [If I were to invent a programming language for the 21st century](https://wordsandbuttons.online/if_i_were_to_invent_a_programming_language_for_the_21st_century.html) A short essay about the evolution of programming languages.
 <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> 
 
-- [Cheap trick to speed up recursion in C++](https://wordsandbuttons.online/cheap_trick_to_speed_up_recursion_in_cpp.html) More often than not, recursion is not your performance problem, to begin with. But even if it is, you can often avoid recursion altogether. When for some reason you can't, this trick helps.
+- [A cheap trick to speed up recursion in C++](https://wordsandbuttons.online/cheap_trick_to_speed_up_recursion_in_cpp.html) More often than not, recursion is not your performance problem, to begin with. But even if it is, you can often avoid recursion altogether. When for some reason you can't, this trick helps.
 <sup>[#demos](https://wordsandbuttons.online/all_demos.html)</sup> <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> 
 
 - [Polynomial approximation and interpolation](https://wordsandbuttons.online/polynomial_approximation_and_interpolation.html) This explains approximation and interpolation, how to use polynomials for that, and how to make both concepts work together.
@@ -106,10 +106,10 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 - [Tries as the evolution of nothing](https://wordsandbuttons.online/tries_as_the_evolution_of_nothing.html) Trie is a data structure. Like “tree” but different. This tutorial explains the concept behind the trie, what makes it efficient, and when.
 <sup>[#algorithms](https://wordsandbuttons.online/all_algorithms.html)</sup> <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
-- [Programmer's introduction to linear equations](https://wordsandbuttons.online/programmers_introduction_to_linear_equations.html) This is an introduction into linear equation systems. This tutorial should give you enough knowledge to use a proper equation solver for your task but not enough to implement one efficiently yourself.
+- [Programmer's introduction to linear equations](https://wordsandbuttons.online/programmers_introduction_to_linear_equations.html) This is an introduction to linear equation systems. This tutorial should give you enough knowledge to use a proper equation solver for your task but not enough to implement one efficiently yourself.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
-- [Estimating floating point error the easy way](https://wordsandbuttons.online/estimating_floating_point_error_the_easy_way.html) An interactive explanation of how to measure computational error while working with floating point numbers and why.
+- [Estimating floating-point error the easy way](https://wordsandbuttons.online/estimating_floating_point_error_the_easy_way.html) An explanation of how to measure computational error while working with floating-point numbers, and why.
 <sup>[#demos](https://wordsandbuttons.online/all_demos.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> 
 
 - [APL deserves its renaissance too](https://wordsandbuttons.online/apl_deserves_its_renaissance_too.html) APL tutorial explaining the meaning of life←{↑1 ⍵∨.∧3 4=+/,¯1 0 1∘.⊖¯1 0 1∘.⌽⊂⍵}
@@ -130,28 +130,28 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 - [Programmer's guide to polynomials and splines](https://wordsandbuttons.online/programmers_guide_to_polynomials_and_splines.html) This is a brief introduction into polynomials. From how to make a polynomial run through your set of points to how to make it into a spline.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
-- [Vastly outperforming LAPACK with C++ metaprogramming](https://wordsandbuttons.online/vastly_outperforming_lapack_with_cpp_metaprogramming.html) Still not really about LAPACK. It's a second part of “outperforming” series explaining how the C++ metaprogramming can appear useful for efficient code generation.
+- [Vastly outperforming LAPACK with C++ metaprogramming](https://wordsandbuttons.online/vastly_outperforming_lapack_with_cpp_metaprogramming.html) Still not really about LAPACK. It's a second part of the “outperforming” series explaining how the C++ metaprogramming can appear useful for efficient code generation.
 <sup>[#demos](https://wordsandbuttons.online/all_demos.html)</sup> <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> 
 
-- [Outperforming LAPACK with C metaprogramming](https://wordsandbuttons.online/outperforming_lapack_with_c_metaprogramming.html) Ok, it's not really about LAPACK. You can consider it a clickbait if you wish. It's about how to tell a compiler to write the code you want with a limited arsenal of tools the C language provides.
+- [Outperforming LAPACK with C metaprogramming](https://wordsandbuttons.online/outperforming_lapack_with_c_metaprogramming.html) Ok, it's not really about LAPACK. You can consider it clickbait if you wish. It's about how to tell a compiler to write the code you want with a limited arsenal of tools the C language provides.
 <sup>[#demos](https://wordsandbuttons.online/all_demos.html)</sup> <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> 
 
-- [Can you tell an assembly language when you see one?](https://wordsandbuttons.online/can_you_tell_an_assembly_language_when_you_see_one.html) Interactive quiz featuring several obscure high-level languages and assembly variants.
+- [Can you tell an assembly language when you see one?](https://wordsandbuttons.online/can_you_tell_an_assembly_language_when_you_see_one.html) An interactive quiz featuring several obscure high-level languages and assembly variants.
 <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#quizzes](https://wordsandbuttons.online/all_quizzes.html)</sup> 
 
-- [Mathematical analysis explained with Python, blood, and TNT](https://wordsandbuttons.online/mathematical_analysis_explained_with_python_blood_and_tnt.html) A brief introduction into the differential analysis with a little SymPy on the side.
+- [Mathematical analysis explained with Python, blood, and TNT](https://wordsandbuttons.online/mathematical_analysis_explained_with_python_blood_and_tnt.html) A brief introduction to mathematical analysis with a little SymPy on the side. The page explains how to disassemble a function, and how to assemble it back from the derivatives.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
 - [You don't have to learn assembly to read disassembly](https://wordsandbuttons.online/you_dont_have_to_learn_assembly_to_read_disassembly.html) This is a very concise introduction to x86 disassembly. It shows that you probably have all the skills to start reading disassembly right now even if you thought it was too complicated for you. It really isn't, see it for yourself.
 <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
-- [Interactive introduction to iterative algorithms](https://wordsandbuttons.online/interactive_introduction_to_iterative_algorithms.html) An interactive explanation of how iterative algorithms work. This explains convergence and the exit condition problem on an oversimplified linear system solver.
+- [An interactive introduction to iterative algorithms](https://wordsandbuttons.online/interactive_introduction_to_iterative_algorithms.html) An interactive explanation of how iterative algorithms work. This explains convergence and the exit condition problem on an oversimplified linear system solver.
 <sup>[#algorithms](https://wordsandbuttons.online/all_algorithms.html)</sup> <sup>[#demos](https://wordsandbuttons.online/all_demos.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> 
 
-- [Challenge your performance intuition with C++ magic squares](https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_magic_squares.html) Interactive quiz where you get to estimate the performance difference between several variants of the same code.
+- [Challenge your performance intuition with C++ magic squares](https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_magic_squares.html) An interactive quiz where you get to estimate the performance difference between several variants of the same code.
 <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#quizzes](https://wordsandbuttons.online/all_quizzes.html)</sup> 
 
-- [Interactive guide to homogeneous coordinates](https://wordsandbuttons.online/interactive_guide_to_homogeneous_coordinates.html) This interactive guide shows how homogeneous coordinates actually make geometry simpler and not more complicated. It explains the extra coordinate, the matrices, the generalized transformations. Most of what you need to know about projective geometry as a practicing programmer is here.
+- [An interactive guide to homogeneous coordinates](https://wordsandbuttons.online/interactive_guide_to_homogeneous_coordinates.html) This interactive guide shows how homogeneous coordinates actually make geometry simpler and not more complicated. It explains the extra coordinate, the matrices, the generalized transformations. Most of what you need to know about projective geometry as a practicing programmer is here.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
 - [So you think you know C?](https://wordsandbuttons.online/so_you_think_you_know_c.html) It's a C test. If you think you know C, take this test. It only has 5 questions.
