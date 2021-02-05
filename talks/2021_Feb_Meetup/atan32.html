@@ -488,55 +488,12 @@ reset_all_points();
 </head>
 <body>
 	<center>
-	<h1>
-<Span id="index_lagrange_polynomial">Lagrange polynomial</span> as a gateway drug to basis splines
-	</h1>
-	<p>
-This is a minimal interpolating polynomial (in <a href="https://wordsandbuttons.online/trippy_polynomials_in_arctangent_scale.html">arctangent scale</a>, yes). For <span class="abc">k</span> points, if has <span class="abc">k-1</span> degree, and it, of course, runs through all the points by definition of interpolation.
-	</p>
 
-	<canvas id="lagrange_canvas" width=640 height=640></canvas>
-	<p class="comment">&uarr; This plot is interactive</p>
-	<div style="text-align:center; padding-bottom:12pt;">
-		<input type="radio" name="approx" id="a_1" value="Add" /><label for="a_1">Add a point;</label> &nbsp;
-		<input type="radio" name="approx" id="a_2" checked value="Move"><label for="a_2">move a point.</label> &nbsp;
-		<button type="button" style="width: 120pt;" onclick="undo_last_point()">Remove last</button>
-		<button type="button" style="width: 120pt;" onclick="reset_all_points()">Reset all</button>
-	</div>
 
-	<p>
-This polynomial can be obtained by several ways, and Lagrange polynomial is one of them. Lagrange polynomial is not a polynomial with some specific “Lagrangian” properties, it's only the way the interpolating function is calculated.
-	</p>
-	<p>
-And this is the way.
-	</p>
-	<table class="formula">
-	<tr>
-	<td rowspan=3>
-L(x) = 
-	</td>
-	<td>
-<sub>k</sub>
-	</td>
-	<td rowspan=3>
-y<sub>i</sub>&hairsp;g<sub>i</sub>(x)
-	</td>
-	</tr>
-	<tr>
-	<td style="font-size: 24pt;">
-&Sigma;
-	</td>
-	</tr>
-	<tr>
-	<td>
-<sup>i = 1</sup>
-	</td>
-	</tr>
-	</table>
+	<h2>
+Basis polynomial
+	</h2>
 
-	<p>
-The functions <span class="abc">g(x)</span> are the <span id="index_basis_polynomial">basis polynomial</span>s. They are defined for every <span class="abc">i &in; 1..k</span>. Here they are.
-</p>
 
 	<table class="formula">
 	<tr>
@@ -576,10 +533,7 @@ x<sub>i</sub> - x<sub>j</sub>
 	</table>
 
 	<p>
-Ok, but this thing doesn't even look like a polynomial. And how come it's interpolating?
-	</p>
-	<p>
-The interpolant is a sum of products of linear functions. Each function is:
+
 	</p>
 
 	<table class="formula">
@@ -594,106 +548,18 @@ x<sub>i</sub> - x<sub>j</sub>
 	</td>
 	</tr>
 	</table>
-
-	<p>
-At first, it might look like a rational function but <span class="abc">x<sub>i</sub> - x<sub>j</sub></span> is not a function of <span class="abc">x</span>, it's just a number. In other words:
-	</p>
-
-	<table class="formula">
-	<tr>
-	<td style="border-bottom:1px solid black">
-x - x<sub>j</sub>
-	</td>
-	<td rowspan=2>
- = 
-	</td>
-	<td style="border-bottom:1px solid black">
-x
-	</td>
-	<td rowspan=2>
- - 
-	</td>
-	<td style="border-bottom:1px solid black">
-x<sub>j</sub>
-	</td>
-	<td rowspan=2>
-, where c<sub>ij</sub> = x<sub>i</sub> - x<sub>j</sub>
-	</td>
-	</tr>
-	<tr>
-	<td>
-x<sub>i</sub> - x<sub>j</sub>
-	</td>
-	<td>
-c<sub>ij</sub>
-	</td>
-	<td>
-c<sub>ij</sub>
-	</td>
-	</tr>
-	</table>
-	<p>
-And this one is definitely linear.
-	</p>
-
-	<p>
-When <span class="abc">x = x<sub>j</sub></span> this linear function is <span class="abc">0</span> because <span class="abc">x<sub>j</sub> - x<sub>j</sub> = 0</span>.
-	</p>
-	<p>
-And when <span class="abc">x = x<sub>i</sub></span>, the function is <span class="abc">1</span> for every <span class="abc">x<sub>j</sub></span> apart from when <span class="abc">x<sub>j</sub> = x<sub>i</sub></span> since <span class="abc">x<sub>i</sub> - x<sub>j</sub> = x<sub>i</sub> - x<sub>j</sub></span>.
-	</p>
-	<p>
-The product of these linear functions is the basis polynomial. It is defined for every <span class="abc">i</span>, and for every <span class="abc">i</span>, it multiplies all the linear functions defined for every <span class="abc">j</span> except for when <span class="abc">x<sub>j</sub> = x<sub>i</sub></span>.
-	</p>
-	<p>
-So when we compute a basis polynomial determined for <span class="abc">i</span> in <span class="abc">x<sub>i</sub></span> we get <span class="abc">1</span>, since all the linear functions result in <span class="abc">1</span>.
-	</p>
-	<p>
-And when we compute the very same basis polynomial for every other <span class="abc">x<sub>j</sub></span> we get <span class="abc">0</span> since one of the linear functions results in <span class="abc">0</span>.
-	</p>
-	<p>
-E. g., the basis polynomial for the last point from the plot looks like this.
-	</p>
 	<canvas id="basis_canvas" width=640 height=640></canvas>
-	<p>
-We should only multiply it by <span class="abc">y<sub>i</sub></span> to make it go through the point <span class="abc">(x<sub>i</sub>, y<sub>i</sub>)</span>.
-	</p>
+	<div style="text-align:center; padding-bottom:12pt;">
+		<input type="radio" name="approx" id="a_1" value="Add" /><label for="a_1">Add a point;</label> &nbsp;
+		<input type="radio" name="approx" id="a_2" checked value="Move"><label for="a_2">move a point.</label> &nbsp;
+		<button type="button" style="width: 120pt;" onclick="undo_last_point()">Remove last</button>
+		<button type="button" style="width: 120pt;" onclick="reset_all_points()">Reset all</button>
+	</div>
+	<br><br>
 	<canvas id="sumpiece_canvas" width=640 height=640></canvas>
-	<p>
-Now adding these basis polynomials together make them go through all the points since they don't mess up with each other. Every basis polynomial is <span class="abc">0</span> in all the <span class="abc">x<sub>j</sub></span> except for <span class="abc">x<sub>i</sub></span> so when you sum them up, there is no interference.
-	</p>
-	<canvas id="lagrange_canvas_again" width=640 height=640></canvas>
-	<p>
-Ok but why is it a polynomial? Well, the linear function is a first-degree polynomial. You multiply <span class="abc">k - 1</span> of them, you get <span class="abc">k - 1</span> degree basis polynomial. And, of course, summing up a few basis polynomials of <span class="abc">k - 1</span> degree can only result in a polynomial too.
-	</p>
-	<h2>
-Conclusion
-	</h2>
-	<p>
-Personally, I never used a Lagrange polynomial in practice. When I need an interpolating polynomial, I get one by solving a <a href="https://wordsandbuttons.online/polynomial_approximation_and_interpolation.html#index_vandermonde_matrix">Vandermonde equation</a>.
-	</p>
-	<p>
-But Lagrange polynomial introduces a very important idea of a basis function. You can analyze your source function into basis functions, and you can synthesize a new function, with the properties you want, from that. Basis splines are built upon this idea.
-	</p>
-	<p>
-With Lagrange polynomial, this idea is almost obscenely simple. It's all sums and products, ones and zeroes.
-	</p>
+
 
 	<script language="JavaScript">
-	const lagrange = function(x) {
-		var y = 0.;
-		for(var i = 0; i < points.length; ++i) {
-			var yi = points[i][1];
-			for(var j = 0; j < points.length; ++j) {
-				if(i != j)
-					yi *= (x - points[j][0]) / (points[i][0] - points[j][0]);
-			}
-			y += yi;
-		}
-		return y;
-	}
-	init_atan_plot(document.getElementById("lagrange_canvas"), [lagrange], ["#005500"], [], 0., 0., 4, 640, 640, false, false, true);
-
 	const basis = function(x) {
 		var i = points.length-1
 		var yi = 1.;
@@ -715,7 +581,6 @@ With Lagrange polynomial, this idea is almost obscenely simple. It's all sums an
 		return yi;
 	}
 	init_atan_plot(document.getElementById("sumpiece_canvas"), [sumpiece], ["#005500"], [], 0., 0., 4, 640, 640, false, false, true);
-	init_atan_plot(document.getElementById("lagrange_canvas_again"), [lagrange], ["#005500"], [], 0., 0., 4, 640, 640, false, false, true);
 	</script>
 
 
