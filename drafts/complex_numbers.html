@@ -77,29 +77,68 @@ u {
 // simple interpreter
 // it only works on numbers for testing, todo: switch to complexs
 function add(a, b) {
-	return Number(a) + Number(b);
-}
-
-function minus(a) {
-	return -Number(a);
+	return a+b;
 }
 
 function sub(a, b) {
-	return Number(a) - Number(b);
+	return a-b;
 }
 
 function mul(a, b) {
-	return Number(a) * Number(b);
+	return a*b;
 }
 
 function div(a, b) {
-	return Number(a) / Number(b);
+	return a/b;
+}
+
+function divs(x) {
+	const xs = x.split('/');
+	if(xs.length == 1)
+		return Number(x);
+	else {
+		const ys = xs.map(Number);
+		return ys.reduce(function(a, v) {return div(a, v);})
+	}
+}
+
+function muls(x) {
+	const xs = x.split('*');
+	if(xs.length == 1)
+		return divs(x);
+	else {
+		const ys = xs.map(divs);
+		return ys.reduce(function(a, v) {return mul(a, v);})
+	}
+}
+
+function subs(x) {
+	var xs = x.split('-');
+	if(xs.length == 1)
+		return muls(x);
+	else {
+		if(xs[0] == '') 
+			xs[0] = '0';
+		const ys = xs.map(muls);
+		return ys.reduce(function(a, v) {return sub(a, v);})
+	}
+}
+
+function adds(x) {
+	const xs = x.split('+');
+	if(xs.length == 1)
+		return subs(x);
+	else {
+		const ys = xs.map(subs);
+		return ys.reduce(function(a, v) {return add(a, v);})
+	}
 }
 
 function calc(x) {
+	console.log(x);
 	if(x.lastIndexOf(')') == -1 && x.indexOf('(') == -1) {
 		// compute with no brackets
-		return String(x);
+		return adds(x);
 	} else {
 		if(x.indexOf('(') == -1 || x.lastIndexOf(')') < x.indexOf('(')) {
 			// todo: report error
@@ -108,10 +147,7 @@ function calc(x) {
 			const prefix = x.substring(0, x.indexOf('('));
 			const sub_expr = x.substring(x.indexOf('(') + 1, x.lastIndexOf(')'));
 			const suffix = x.substring(x.lastIndexOf(')') + 1);
-			console.log(prefix);
-			console.log(sub_expr);
-			console.log(suffix);
-			calc(prefix + calc(sub_expr) + suffix);
+			return calc(prefix + String(calc(sub_expr)) + suffix);
 		}
 	}
 }
@@ -127,14 +163,8 @@ function calc(x) {
 ...
 	</p>
 
-
-	<p id="test2">
-...
-	</p>
-
 	<script language="JavaScript"> // tests
-document.getElementById("test1").innerHTML = calc('2+2');
-document.getElementById("test2").innerHTML = calc('232+(23+(2-1)+23)*232');
+document.getElementById("test1").innerHTML = String(calc('-1+((2-1*3/4)-1)')) + ' ' + String(-1+((2-1*3/4)-1));
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
