@@ -74,10 +74,48 @@ u {
 }
 	</style>
 	<script language="JavaScript">
-function show(n){
-	document.getElementById("shown_" + n).style.display = "none";
-	document.getElementById("hidden_" + n).style.display = "inline";
+// simple interpreter
+// it only works on numbers for testing, todo: switch to complexs
+function add(a, b) {
+	return Number(a) + Number(b);
 }
+
+function minus(a) {
+	return -Number(a);
+}
+
+function sub(a, b) {
+	return Number(a) - Number(b);
+}
+
+function mul(a, b) {
+	return Number(a) * Number(b);
+}
+
+function div(a, b) {
+	return Number(a) / Number(b);
+}
+
+function calc(x) {
+	if(x.lastIndexOf(')') == -1 && x.indexOf('(') == -1) {
+		// compute with no brackets
+		return String(x);
+	} else {
+		if(x.indexOf('(') == -1 || x.lastIndexOf(')') < x.indexOf('(')) {
+			// todo: report error
+			return 'error';
+		} else {
+			const prefix = x.substring(0, x.indexOf('('));
+			const sub_expr = x.substring(x.indexOf('(') + 1, x.lastIndexOf(')'));
+			const suffix = x.substring(x.lastIndexOf(')') + 1);
+			console.log(prefix);
+			console.log(sub_expr);
+			console.log(suffix);
+			calc(prefix + calc(sub_expr) + suffix);
+		}
+	}
+}
+
 	</script>
 </head>
 <body>
@@ -85,31 +123,19 @@ function show(n){
 	<h1>
 ...
 	</h1>
-	<p>
+	<p id="test1">
 ...
 	</p>
 
-	<table><tr>
-	<td>
-	<pre>
-...
-	</pre>
-	</td></tr></table>
-	<p>
-	<div id="shown_1">
-		<button type="button" onclick="show(1)">Yes</button>
-		<button type="button" onclick="show(1)">No</button>
-	</div>
-	<div id="hidden_1" style="display:none;">
-		<p>
-...
-		</p>
-	</div>
 
-	<p>
+	<p id="test2">
 ...
 	</p>
 
+	<script language="JavaScript"> // tests
+document.getElementById("test1").innerHTML = calc('2+2');
+document.getElementById("test2").innerHTML = calc('232+(23+(2-1)+23)*232');
+	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
