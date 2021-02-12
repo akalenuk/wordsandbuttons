@@ -617,12 +617,12 @@ set_solver_1();
 function invalidate_solver_1(client_x, client_y){
 	var solver = document.getElementById("solver_1");
 	var canvas_rect = solver.getBoundingClientRect();
-	if(document.getElementById("button_1").disabled) {
-		   eval("solver_1_eq_" + solver_1_eq_temp_id + " = " + name + "solver_1_eq_" + solver_1_eq_temp_id + "_temp;");
-	} else if(document.getElementById("button_2").disabled) {
+	if(document.getElementById("button_1").checked) {
+		eval("solver_1_eq_" + solver_1_eq_temp_id + " = " + name + "solver_1_eq_" + solver_1_eq_temp_id + "_temp;");
+	} else if(document.getElementById("button_2").checked) {
 		start_x = client_to_x(client_x - canvas_rect.left);
 		start_y = client_to_y(client_y - canvas_rect.top);
-	} else if(document.getElementById("button_3").disabled) {
+	} else if(document.getElementById("button_3").checked) {
 		end_step_length = temp_end_step_length;
 	}
 	draw_solver_1(0, 0, false);
@@ -734,7 +734,7 @@ function draw_solver_1(client_x, client_y, do_guides){
 
 	// mouse move
 	if(do_guides){
-		if(document.getElementById("button_1").disabled){
+		if(document.getElementById("button_1").checked){
 			var eq = eval("solver_1_eq_" + solver_1_eq_temp_id);
 			var x = client_to_x(client_x);
 			var y = client_to_y(client_y);
@@ -751,7 +751,7 @@ function draw_solver_1(client_x, client_y, do_guides){
 			context.setLineDash([]);
 			context.closePath();
 
-		}else if(document.getElementById("button_2").disabled){
+		}else if(document.getElementById("button_2").checked){
 			context.beginPath();
 			context.setLineDash([4, 4]);
 			context.moveTo(x_to_client(start_x), y_to_client(start_y));
@@ -760,7 +760,7 @@ function draw_solver_1(client_x, client_y, do_guides){
 			context.stroke();
 			context.setLineDash([]);
 			context.closePath();
-		}else if(document.getElementById("button_3").disabled){
+		}else if(document.getElementById("button_3").checked){
 			var a11 = solver_1_eq_1[0];
 			var a12 = solver_1_eq_1[1];
 			var b1 = solver_1_eq_1[2];
@@ -835,10 +835,8 @@ function reset_solver() {
 function radio(n) {
 	for(var i = 1; i <= 3; i++){
 		radio_i = document.getElementById("button_" + i);
-		radio_i.disabled = false;
 	}
 	radio_n = document.getElementById("button_" + n);
-	radio_n.disabled = true;
 }
 
 ///////
@@ -1409,11 +1407,12 @@ And we can leave the question “where to start” unanswered. Of course, it wou
 Here is the interactive illustration of it.
 	</p>
 	<div id="solver_buttons">
-	<center>
-		<button type="button" id="button_1" style="width: 180px;" onclick="radio(1)" disabled="true">Lines</button>
-		<button type="button" id="button_2" style="width: 180px;" onclick="radio(2)">Start point</button>
-		<button type="button" id="button_3" style="width: 180px;" onclick="radio(3)">Stop distance</button>
-	</center>
+	<p style="margin-bottom: 0pt; text-align: center; font-family: sans-serif;">
+		Change: &nbsp;
+		<input type="radio" name="radio_iter" id="button_1" onclick="radio(1)" checked /><label for="button_1">lines</label> &nbsp;
+		<input type="radio" name="radio_iter" id="button_2" onclick="radio(2)" /><label for="button_2">start point</label> &nbsp;
+		<input type="radio" name="radio_iter" id="button_3" onclick="radio(3)" /><label for="button_3">stop distance</label>
+	</p>
 	</div>
 	<canvas id="solver_1" width=640 height=512></canvas>
 	<div style="text-align:right; width:640px; padding-bottom:12pt;">
