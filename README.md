@@ -106,7 +106,7 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 - [Tries as the evolution of nothing](https://wordsandbuttons.online/tries_as_the_evolution_of_nothing.html) Trie is a data structure. Like “tree” but different. This tutorial explains the concept behind the trie, what makes it efficient, and when.
 <sup>[#algorithms](https://wordsandbuttons.online/all_algorithms.html)</sup> <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
-- [Programmer's introduction to linear equations](https://wordsandbuttons.online/programmers_introduction_to_linear_equations.html) This is an introduction to linear equation systems. This tutorial should give you enough knowledge to use a proper equation solver for your task but not enough to implement one efficiently yourself.
+- [Programmer's guide to linear equations](https://wordsandbuttons.online/programmers_introduction_to_linear_equations.html) This is an introduction to linear equation systems. It explains linear dependency, under- and over-specification, direct and iterative solvers. The guide should give you enough knowledge to find a proper solution for your task but not enough to implement one efficiently yourself.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
 - [Estimating floating-point error the easy way](https://wordsandbuttons.online/estimating_floating_point_error_the_easy_way.html) An explanation of how to measure computational error while working with floating-point numbers, and why.
