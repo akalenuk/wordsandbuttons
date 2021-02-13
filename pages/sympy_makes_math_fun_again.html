@@ -319,19 +319,20 @@ function draw_not_sine_model() {
 		return a*x*x*x + b*x*x + c*x + d;
 	}
 
-	context.lineWidth = 1;
+	context.lineWidth = 2;
 	context.beginPath();
 	context.strokeStyle = colors[2];
-	for(var j = 1; j < w; j += 1) {
+	for(var j = 1; j < w; j += 2) {
 		var x = client_to_x(j);
-		var x_ = client_to_x(j-1);
 		var y = not_sin_model(x);
-		var y_ = not_sin_model(x_);
-		context.moveTo(j-1, y_to_client(y_));
-		context.lineTo(j, y_to_client(y));
-		context.stroke();
+		if(j == 1)
+			context.moveTo(j, y_to_client(y));
+		else
+			context.lineTo(j, y_to_client(y));
 	}
+	context.stroke();
 	context.closePath();
+	context.lineWidth = 1;
 
 	context.beginPath();
 	context.arc(x_to_client(px), y_to_client(py), 5, 0, 2*Math.PI);
