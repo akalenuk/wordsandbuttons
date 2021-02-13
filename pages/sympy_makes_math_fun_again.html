@@ -104,7 +104,6 @@ var y_max = 2.0;
 
 // colors
 var colors = ["#d64562", "#457fd6", "#62d645"];
-var lighter_colors = ["#d97e8f", "#8dd67c", "#7c9dd6"];
 
 var client_x_center = w*(0-x_min)/(x_max-x_min);
 var client_x_step = (w/(x_max-x_min));
@@ -178,18 +177,18 @@ function draw_sine() {
 	draw_grid_on(context);
 
 	// sine
-	context.lineWidth = 1;
+	context.lineWidth = 1.5;
 	context.beginPath();
 	context.strokeStyle = colors[0];
-	for(var j = 1; j < w; j += 1) {
+	for(var j = 1; j < w; j += 2) {
 		var x = client_to_x(j);
-		var x_ = client_to_x(j-1);
 		var y = Math.sin(x);
-		var y_ = Math.sin(x_);
-		context.moveTo(j-1, y_to_client(y_));
-		context.lineTo(j, y_to_client(y));
-		context.stroke();
+		if(j == 1)
+			context.moveTo(j, y_to_client(y));
+		else
+			context.lineTo(j, y_to_client(y));
 	}
+	context.stroke();
 	context.closePath();
 
 	context.lineWidth = 1;
@@ -225,18 +224,18 @@ function draw_sine_model() {
 	draw_grid_on(context);
 
 	// sine
-	context.lineWidth = 3;
+	context.lineWidth = 3.5;
 	context.beginPath();
-	context.strokeStyle = "#bbbbbb";
+	context.strokeStyle = "#d97e8f";
 	for(var j = 1; j < w; j += 1) {
 		var x = client_to_x(j);
-		var x_ = client_to_x(j-1);
 		var y = Math.sin(x);
-		var y_ = Math.sin(x_);
-		context.moveTo(j-1, y_to_client(y_));
-		context.lineTo(j, y_to_client(y));
-		context.stroke();
+		if(j == 1)
+			context.moveTo(j, y_to_client(y));
+		else
+			context.lineTo(j, y_to_client(y));
 	}
+	context.stroke();
 	context.closePath();
 
 	// model
@@ -250,18 +249,18 @@ function draw_sine_model() {
 		var g = 0;
 		return a*x*x*x*x*x*x + b*x*x*x*x*x + c*x*x*x*x + d*x*x*x + e*x*x + f*x + g;
 	}
-	context.lineWidth = 1;
+	context.lineWidth = 1.5;
 	context.beginPath();
 	context.strokeStyle = colors[1];
 	for(var j = 1; j < w; j += 1) {
 		var x = client_to_x(j);
-		var x_ = client_to_x(j-1);
 		var y = sin_model(x);
-		var y_ = sin_model(x_);
-		context.moveTo(j-1, y_to_client(y_));
-		context.lineTo(j, y_to_client(y));
-		context.stroke();
+		if(j == 1)
+			context.moveTo(j, y_to_client(y));
+		else
+			context.lineTo(j, y_to_client(y));
 	}
+	context.stroke();
 	context.closePath();
 }
 
