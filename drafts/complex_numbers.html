@@ -68,11 +68,14 @@ button {
 	font-size: 16pt;
 }
 
-u {
-	border-bottom: 1px dotted #000;
-	text-decoration: none;
-	cursor: pointer;
+.comment {
+	font-size: 12pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
 }
+
+canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
 // client
@@ -212,19 +215,34 @@ function draw_sum(client_x, client_y, do_guides){
 	context.fillStyle="#eeeeee";
 	context.fillRect(0, 0, w, h);
 
+	const x = sum_x[0] + sum_x[1];
+	const y = sum_y[0] + sum_y[1];
+
 	context.lineWidth = 3;
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[0]), y_to_client(sum_y[0]), colors[0]);
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[1]), y_to_client(sum_y[1]), colors[1]);
-	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[0] + sum_x[1]), y_to_client(sum_y[0] + sum_y[1]), colors[2]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(x), y_to_client(y), colors[2]);
 	context.lineWidth = 1;
 
 	// formula
-/*	var sum_formula = document.getElementById("sum_formula");
-	sum_formula.innerHTML = "<span style='color:#8c851d'>" + (to_sun_x / to_sun_d).toFixed(2) + "</span> * ";
-	sum_formula.innerHTML += "<span style='color:#2751b3'>" + (normal_x).toFixed(2) + "</span> + ";
-	sum_formula.innerHTML += "<span style='color:#8c851d'>" + (to_sun_y / to_sun_d).toFixed(2) + "</span> * ";
-	sum_formula.innerHTML += "<span style='color:#2751b3'>" + (normal_y).toFixed(2) + "</span> = ";
-	sum_formula.innerHTML += "<span style='color:#4d1119'>" + (sum_product).toFixed(2) + "</span>"*/
+	function a(a) {
+		if(a > 0)
+			return a.toFixed(2);
+		else
+			return '&minus;' + (-a).toFixed(2);
+	}
+	function plus_i(i) {
+		if(i > 0)
+			return ' + ' + i.toFixed(2);
+		else
+			return ' &minus; ' + (-i).toFixed(2);
+	}
+
+	var sum_formula = document.getElementById("sum_formula");
+	sum_formula.innerHTML = "(<span style='color:"+colors[0]+"'>" + a(sum_x[0]) + plus_i(sum_y[0]) + "i</span>) + ";
+	sum_formula.innerHTML += "(<span style='color:"+colors[1]+"'>" + a(sum_x[1]) + plus_i(sum_y[1]) + "i</span>) = ";
+	sum_formula.innerHTML += "(<span style='color:"+colors[2]+"'>" + a(x) + plus_i(y) + "i</span>)";
+
 	// grid
 	draw_grid_on(context);
 }
@@ -318,6 +336,8 @@ function calc(x) {
 ...
 	</p>
 	<canvas id="sum" width=640 height=640></canvas>
+	<p class="comment" id="sum_formula">
+	</p>
 
 	<script language="JavaScript"> // init
 init_sum();
