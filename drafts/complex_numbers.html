@@ -75,6 +75,161 @@ u {
 }
 	</style>
 	<script language="JavaScript">
+// client
+var w = 640.0;
+var h = 640.0;
+
+// colors
+var colors = ["#d64562", "#457fd6", "#339428"];
+
+// visible region for dot
+var x_min = -3;
+var y_min = -3;
+var x_max = 3;
+var y_max = 3;
+
+var client_x_center = w*(0-x_min)/(x_max-x_min);
+var client_x_step = (w/(x_max-x_min));
+
+var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+var client_y_step = (h/(y_max-y_min));
+
+
+function client_to_x(client_x){
+	return (client_x - client_x_center) / client_x_step;
+}
+
+function client_to_y(client_y){
+	return (client_y_center - client_y) / client_y_step;
+}
+
+function x_to_client(x){
+	return x * client_x_step + client_x_center;
+}
+
+function y_to_client(y){
+	return client_y_center - y * client_y_step;
+}
+
+function draw_grid_on(context){
+	// grid
+	context.beginPath();
+	context.moveTo(0, client_y_center);
+	context.lineTo(w, client_y_center);
+	context.lineTo(w - 12, client_y_center - 5);
+	context.moveTo(w, client_y_center);
+	context.lineTo(w - 12, client_y_center + 5);
+	context.moveTo(client_x_center, h);
+	context.lineTo(client_x_center, 0);
+	context.lineTo(client_x_center - 5, 12);
+	context.moveTo(client_x_center, 0);
+	context.lineTo(client_x_center + 5, 12);
+	context.fillStyle="#000000";
+	for(var i = x_min + 1; i <= x_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x_center + i*client_x_step, client_y_center);
+			context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+			context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+		}
+	}
+	for(var i = y_min + 1; i <= y_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x_center, client_y_center - i*client_y_step);
+			context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+		}
+		context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+	}
+	context.strokeStyle = "#000000";
+	context.stroke();
+	context.closePath();
+}
+
+function draw_arrow(context, x1, y1, x2, y2, color) {
+	var d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d + (x2 - x1) * 6 / d);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d - (x2 - x1) * 6 / d);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
+}
+
+function nearest_in(xs, ys, x, y) {
+	var nearest_i = 0;
+	for(var i = 1; i < xs.length; ++i)
+		if((Math.pow(x - xs[i], 2) + Math.pow(y - ys[i], 2)) < (Math.pow(x - xs[nearest_i], 2) + Math.pow(y - ys[nearest_i], 2)))
+			nearest_i = i;
+	return nearest_i;
+}
+
+// sum
+var sum_x = [1, -1.5];
+var sum_y = [1.5, 0.5];
+
+function init_sum(){
+	var sum = document.getElementById("sum");
+	var canvas_rect = sum.getBoundingClientRect();
+	draw_sum(0, 0, false);
+
+	sum.addEventListener('pointermove', function(e){
+		var canvas_rect = sum.getBoundingClientRect();
+		draw_sum(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			var x = client_to_x(e.clientX - canvas_rect.left);
+			var y = client_to_y(e.clientY - canvas_rect.top);
+			var i = nearest_in(sum_x, sum_y, x, y);
+			sum_x[i] = x;
+			sum_y[i] = y;
+			draw_sum(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		}
+	}, false);
+
+	sum.addEventListener('pointerdown', function(e){
+		var canvas_rect = sum.getBoundingClientRect();
+		var x = client_to_x(e.clientX - canvas_rect.left);
+		var y = client_to_y(e.clientY - canvas_rect.top);
+		var i = nearest_in(sum_x, sum_y, x, y);
+		sum_x[i] = x;
+		sum_y[i] = y;
+		draw_sum(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		sum.releasePointerCapture(e.pointerId);
+	}, false);
+
+	sum.addEventListener('pointerleave', function(e){
+		draw_sum(0, 0, false);
+	}, false);
+}
+
+function draw_sum(client_x, client_y, do_guides){
+	var sum = document.getElementById("sum");
+	var context = sum.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	context.lineWidth = 3;
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[0]), y_to_client(sum_y[0]), colors[0]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[1]), y_to_client(sum_y[1]), colors[1]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[0] + sum_x[1]), y_to_client(sum_y[0] + sum_y[1]), colors[2]);
+	context.lineWidth = 1;
+
+	// formula
+/*	var sum_formula = document.getElementById("sum_formula");
+	sum_formula.innerHTML = "<span style='color:#8c851d'>" + (to_sun_x / to_sun_d).toFixed(2) + "</span> * ";
+	sum_formula.innerHTML += "<span style='color:#2751b3'>" + (normal_x).toFixed(2) + "</span> + ";
+	sum_formula.innerHTML += "<span style='color:#8c851d'>" + (to_sun_y / to_sun_d).toFixed(2) + "</span> * ";
+	sum_formula.innerHTML += "<span style='color:#2751b3'>" + (normal_y).toFixed(2) + "</span> = ";
+	sum_formula.innerHTML += "<span style='color:#4d1119'>" + (sum_product).toFixed(2) + "</span>"*/
+	// grid
+	draw_grid_on(context);
+}
+
+
 // simple interpreter
 // it only works on numbers for testing, todo: switch to complexs
 function add(a, b) {
@@ -136,7 +291,6 @@ function adds(x) {
 }
 
 function calc(x) {
-	console.log(x);
 	if(x.lastIndexOf(')') == -1 && x.indexOf('(') == -1) {
 		// compute with no brackets
 		return adds(x);
@@ -160,12 +314,18 @@ function calc(x) {
 	<h1>
 ...
 	</h1>
-	<p id="test1">
+	<p>
 ...
 	</p>
+	<canvas id="sum" width=640 height=640></canvas>
 
-	<script language="JavaScript"> // tests
-document.getElementById("test1").innerHTML = String(calc('-1+((2-1*3/4)-1)')) + ' ' + String(-1+((2-1*3/4)-1));
+	<script language="JavaScript"> // init
+init_sum();
+	</script>
+
+
+	<script language="JavaScript"> // test
+console.assert(String(calc('-1+((2-1*3/4)-1)')) == String(-1+((2-1*3/4)-1)));
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
