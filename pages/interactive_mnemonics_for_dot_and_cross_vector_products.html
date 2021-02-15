@@ -205,8 +205,6 @@ function draw_arrow(context, x1, y1, x2, y2, color) {
 	context.lineTo(x2, y2);
 	context.moveTo(x2 + (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d - (x2 - x1) * 6 / d);
 	context.lineTo(x2, y2);
-
-
 	context.strokeStyle = color;
 	context.stroke();
 	context.closePath();
@@ -224,7 +222,7 @@ var cross_y = [0.0, Math.sqrt(2)/2, 0.5];
 
 function nearest_in(xs, ys, x, y) {
 	var nearest_i = 0;
-	for(var i = 1; i < dot_x.length; ++i)
+	for(var i = 1; i < xs.length; ++i)
 		if((Math.pow(x - xs[i], 2) + Math.pow(y - ys[i], 2)) < (Math.pow(x - xs[nearest_i], 2) + Math.pow(y - ys[nearest_i], 2)))
 			nearest_i = i;
 	return nearest_i;
@@ -234,11 +232,11 @@ function nearest_in(xs, ys, x, y) {
 function init_dot(){
 	var dot = document.getElementById("dot");
 	var canvas_rect = dot.getBoundingClientRect();
-	draw_dot(0, 0, false);
+	draw_dot(0, 0);
 
 	dot.addEventListener('pointermove', function(e){
 		var canvas_rect = dot.getBoundingClientRect();
-		draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
 		if(e.buttons == 1){
 			var x = dot_client_to_x(e.clientX - canvas_rect.left);
 			var y = dot_client_to_y(e.clientY - canvas_rect.top);
@@ -256,7 +254,7 @@ function init_dot(){
 				dot_y[dot_i] = dot_y[0] + 2 * dy / dn;
 			}
 
-			draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+			draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
 		}
 	}, false);
 
@@ -277,16 +275,16 @@ function init_dot(){
 			dot_x[dot_i] = dot_x[0] + 2 * dx / dn;
 			dot_y[dot_i] = dot_y[0] + 2 * dy / dn;
 		}
-		draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		draw_dot(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
 		dot.releasePointerCapture(e.pointerId);
 	}, false);
 
 	dot.addEventListener('pointerleave', function(e){
-		draw_dot(0, 0, false);
+		draw_dot(0, 0);
 	}, false);
 }
 
-function draw_dot(client_x, client_y, do_guides){
+function draw_dot(client_x, client_y){
 	var dot = document.getElementById("dot");
 	var context = dot.getContext("2d");
 	context.font = "16px sans-serif";
@@ -392,17 +390,17 @@ function draw_dot(client_x, client_y, do_guides){
 function init_cross(){
 	var cross = document.getElementById("cross");
 	var canvas_rect = cross.getBoundingClientRect();
-	draw_cross(0, 0, false);
+	draw_cross(0, 0);
 
 	cross.addEventListener('pointermove', function(e){
 		var canvas_rect = cross.getBoundingClientRect();
-		draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
 		if(e.buttons == 1){
 			var x = cross_client_to_x(e.clientX - canvas_rect.left);
 			var y = cross_client_to_y(e.clientY - canvas_rect.top);
 			cross_x[2] = x;
 			cross_y[2] = y;
-			draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+			draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
 		}
 	}, false);
 
@@ -412,12 +410,12 @@ function init_cross(){
 		var y = cross_client_to_y(e.clientY - canvas_rect.top);
 		cross_x[2] = x;
 		cross_y[2] = y;
-		draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		draw_cross(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top);
 		cross.releasePointerCapture(e.pointerId);
 	}, false);
 
 	cross.addEventListener('pointerleave', function(e){
-		draw_cross(0, 0, false);
+		draw_cross(0, 0);
 	}, false);
 }
 
@@ -454,7 +452,7 @@ function draw_the_stick_man(context, x, y, right) {
 
 }
 
-function draw_cross(client_x, client_y, do_guides){
+function draw_cross(client_x, client_y){
 	var cross = document.getElementById("cross");
 	var context = cross.getContext("2d");
 	context.font = "16px sans-serif";
