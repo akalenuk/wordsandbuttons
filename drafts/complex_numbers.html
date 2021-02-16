@@ -248,6 +248,238 @@ function draw_sum(client_x, client_y, do_guides){
 }
 
 
+// mul
+var mul_x = [1, -1.5];
+var mul_y = [1.5, 0.5];
+
+function init_mul(){
+	var mul = document.getElementById("mul");
+	var canvas_rect = mul.getBoundingClientRect();
+	draw_mul(0, 0, false);
+
+	mul.addEventListener('pointermove', function(e){
+		var canvas_rect = mul.getBoundingClientRect();
+		draw_mul(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			var x = client_to_x(e.clientX - canvas_rect.left);
+			var y = client_to_y(e.clientY - canvas_rect.top);
+			var i = nearest_in(mul_x, mul_y, x, y);
+			mul_x[i] = x;
+			mul_y[i] = y;
+			draw_mul(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		}
+	}, false);
+
+	mul.addEventListener('pointerdown', function(e){
+		var canvas_rect = mul.getBoundingClientRect();
+		var x = client_to_x(e.clientX - canvas_rect.left);
+		var y = client_to_y(e.clientY - canvas_rect.top);
+		var i = nearest_in(mul_x, mul_y, x, y);
+		mul_x[i] = x;
+		mul_y[i] = y;
+		draw_mul(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		mul.releasePointerCapture(e.pointerId);
+	}, false);
+
+	mul.addEventListener('pointerleave', function(e){
+		draw_mul(0, 0, false);
+	}, false);
+}
+
+function draw_mul(client_x, client_y, do_guides){
+	var mul = document.getElementById("mul");
+	var context = mul.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	const x = mul_x[0] + mul_x[1];
+	const y = mul_y[0] + mul_y[1];
+
+	context.lineWidth = 3;
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(mul_x[0]), y_to_client(mul_y[0]), colors[0]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(mul_x[1]), y_to_client(mul_y[1]), colors[1]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(x), y_to_client(y), colors[2]);
+	context.lineWidth = 1;
+
+	// formula
+	function a(a) {
+		if(a > 0)
+			return a.toFixed(2);
+		else
+			return '&minus;' + (-a).toFixed(2);
+	}
+	function plus_i(i) {
+		if(i > 0)
+			return ' + ' + i.toFixed(2);
+		else
+			return ' &minus; ' + (-i).toFixed(2);
+	}
+
+	var mul_formula = document.getElementById("mul_formula");
+	mul_formula.innerHTML = "(<span style='color:"+colors[0]+"'>" + a(mul_x[0]) + plus_i(mul_y[0]) + "i</span>) + ";
+	mul_formula.innerHTML += "(<span style='color:"+colors[1]+"'>" + a(mul_x[1]) + plus_i(mul_y[1]) + "i</span>) = ";
+	mul_formula.innerHTML += "(<span style='color:"+colors[2]+"'>" + a(x) + plus_i(y) + "i</span>)";
+
+	// grid
+	draw_grid_on(context);
+}
+
+
+// scale
+var scale_x = [1, -1.5];
+var scale_y = [1.5, 0.5];
+
+function init_scale(){
+	var scale = document.getElementById("scale");
+	var canvas_rect = scale.getBoundingClientRect();
+	draw_scale(0, 0, false);
+
+	scale.addEventListener('pointermove', function(e){
+		var canvas_rect = scale.getBoundingClientRect();
+		draw_scale(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			var x = client_to_x(e.clientX - canvas_rect.left);
+			var y = client_to_y(e.clientY - canvas_rect.top);
+			var i = nearest_in(scale_x, scale_y, x, y);
+			scale_x[i] = x;
+			scale_y[i] = y;
+			draw_scale(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		}
+	}, false);
+
+	scale.addEventListener('pointerdown', function(e){
+		var canvas_rect = scale.getBoundingClientRect();
+		var x = client_to_x(e.clientX - canvas_rect.left);
+		var y = client_to_y(e.clientY - canvas_rect.top);
+		var i = nearest_in(scale_x, scale_y, x, y);
+		scale_x[i] = x;
+		scale_y[i] = y;
+		draw_scale(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		scale.releasePointerCapture(e.pointerId);
+	}, false);
+
+	scale.addEventListener('pointerleave', function(e){
+		draw_scale(0, 0, false);
+	}, false);
+}
+
+function draw_scale(client_x, client_y, do_guides){
+	var scale = document.getElementById("scale");
+	var context = scale.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	const x = scale_x[0] + scale_x[1];
+	const y = scale_y[0] + scale_y[1];
+
+	context.lineWidth = 3;
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(scale_x[0]), y_to_client(scale_y[0]), colors[0]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(scale_x[1]), y_to_client(scale_y[1]), colors[1]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(x), y_to_client(y), colors[2]);
+	context.lineWidth = 1;
+
+	// formula
+	function a(a) {
+		if(a > 0)
+			return a.toFixed(2);
+		else
+			return '&minus;' + (-a).toFixed(2);
+	}
+	function plus_i(i) {
+		if(i > 0)
+			return ' + ' + i.toFixed(2);
+		else
+			return ' &minus; ' + (-i).toFixed(2);
+	}
+
+	var scale_formula = document.getElementById("scale_formula");
+	scale_formula.innerHTML = "(<span style='color:"+colors[0]+"'>" + a(scale_x[0]) + plus_i(scale_y[0]) + "i</span>) + ";
+	scale_formula.innerHTML += "(<span style='color:"+colors[1]+"'>" + a(scale_x[1]) + plus_i(scale_y[1]) + "i</span>) = ";
+	scale_formula.innerHTML += "(<span style='color:"+colors[2]+"'>" + a(x) + plus_i(y) + "i</span>)";
+
+	// grid
+	draw_grid_on(context);
+}
+
+
+// conformal
+var conformal_x = [1, -1.5];
+var conformal_y = [1.5, 0.5];
+
+function init_conformal(){
+	var conformal = document.getElementById("conformal");
+	var canvas_rect = conformal.getBoundingClientRect();
+	draw_conformal(0, 0, false);
+
+	conformal.addEventListener('pointermove', function(e){
+		var canvas_rect = conformal.getBoundingClientRect();
+		draw_conformal(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			var x = client_to_x(e.clientX - canvas_rect.left);
+			var y = client_to_y(e.clientY - canvas_rect.top);
+			var i = nearest_in(conformal_x, conformal_y, x, y);
+			conformal_x[i] = x;
+			conformal_y[i] = y;
+			draw_conformal(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		}
+	}, false);
+
+	conformal.addEventListener('pointerdown', function(e){
+		var canvas_rect = conformal.getBoundingClientRect();
+		var x = client_to_x(e.clientX - canvas_rect.left);
+		var y = client_to_y(e.clientY - canvas_rect.top);
+		var i = nearest_in(conformal_x, conformal_y, x, y);
+		conformal_x[i] = x;
+		conformal_y[i] = y;
+		draw_conformal(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		conformal.releasePointerCapture(e.pointerId);
+	}, false);
+
+	conformal.addEventListener('pointerleave', function(e){
+		draw_conformal(0, 0, false);
+	}, false);
+}
+
+function draw_conformal(client_x, client_y, do_guides){
+	var conformal = document.getElementById("conformal");
+	var context = conformal.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	const x = conformal_x[0] + conformal_x[1];
+	const y = conformal_y[0] + conformal_y[1];
+
+	context.lineWidth = 3;
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(conformal_x[0]), y_to_client(conformal_y[0]), colors[0]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(conformal_x[1]), y_to_client(conformal_y[1]), colors[1]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(x), y_to_client(y), colors[2]);
+	context.lineWidth = 1;
+
+	// formula
+	function a(a) {
+		if(a > 0)
+			return a.toFixed(2);
+		else
+			return '&minus;' + (-a).toFixed(2);
+	}
+	function plus_i(i) {
+		if(i > 0)
+			return ' + ' + i.toFixed(2);
+		else
+			return ' &minus; ' + (-i).toFixed(2);
+	}
+
+	// grid
+	draw_grid_on(context);
+}
+
+
 // simple interpreter
 // it only works on numbers for testing, todo: switch to complexs
 function add(a, b) {
@@ -337,12 +569,32 @@ function calc(x) {
 	</p>
 	<canvas id="sum" width=640 height=640></canvas>
 	<p class="comment" id="sum_formula">
-	</p>
-
 	<script language="JavaScript"> // init
 init_sum();
 	</script>
-
+	<p>
+...
+	</p>
+	<canvas id="mul" width=640 height=640></canvas>
+	<p class="comment" id="mul_formula">
+	<script language="JavaScript"> // init
+init_mul();
+	</script>
+	<p>
+...
+	</p>
+	<canvas id="scale" width=640 height=640></canvas>
+	<p class="comment" id="scale_formula">
+	<script language="JavaScript"> // init
+init_scale();
+	</script>
+	<p>
+...
+	</p>
+	<canvas id="conformal" width=640 height=640></canvas>
+	<script language="JavaScript"> // init
+init_conformal();
+	</script>
 
 	<script language="JavaScript"> // test
 console.assert(String(calc('-1+((2-1*3/4)-1)')) == String(-1+((2-1*3/4)-1)));
