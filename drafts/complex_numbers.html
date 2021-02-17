@@ -143,9 +143,11 @@ var sum_x = [1, -1.5];
 var sum_y = [1.5, 0.5];
 
 function init_sum(){
-	var sum = document.getElementById("sum");
-	var canvas_rect = sum.getBoundingClientRect();
+	const sum = document.getElementById("sum");
+	const canvas_rect = sum.getBoundingClientRect();
 	draw_sum(0, 0, false);
+
+	var i = 0; // select point
 
 	sum.addEventListener('pointermove', function(e){
 		var canvas_rect = sum.getBoundingClientRect();
@@ -153,7 +155,6 @@ function init_sum(){
 		if(e.buttons == 1){
 			var x = client_to_x(e.clientX - canvas_rect.left);
 			var y = client_to_y(e.clientY - canvas_rect.top);
-			var i = nearest_in(sum_x, sum_y, x, y);
 			sum_x[i] = x;
 			sum_y[i] = y;
 			draw_sum(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
@@ -164,7 +165,7 @@ function init_sum(){
 		var canvas_rect = sum.getBoundingClientRect();
 		var x = client_to_x(e.clientX - canvas_rect.left);
 		var y = client_to_y(e.clientY - canvas_rect.top);
-		var i = nearest_in(sum_x, sum_y, x, y);
+		i = nearest_in(sum_x, sum_y, x, y);
 		sum_x[i] = x;
 		sum_y[i] = y;
 		draw_sum(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
@@ -219,22 +220,24 @@ function draw_sum(client_x, client_y, do_guides){
 
 // mul
 var mul_x = [1, -1.5];
-var mul_y = [1.5, 0.5];
+var mul_y = [0, 0.5];
 
 function init_mul(){
-	var mul = document.getElementById("mul");
-	var canvas_rect = mul.getBoundingClientRect();
+	const mul = document.getElementById("mul");
+	const canvas_rect = mul.getBoundingClientRect();
 	draw_mul(0, 0, false);
+
+	var i = 0; // select point
 
 	mul.addEventListener('pointermove', function(e){
 		var canvas_rect = mul.getBoundingClientRect();
 		draw_mul(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
-			var x = client_to_x(e.clientX - canvas_rect.left);
-			var y = client_to_y(e.clientY - canvas_rect.top);
-			var i = nearest_in(mul_x, mul_y, x, y);
-			mul_x[i] = x;
-			mul_y[i] = y;
+			const x = client_to_x(e.clientX - canvas_rect.left);
+			const y = client_to_y(e.clientY - canvas_rect.top);
+			const d = (i == 0) ? Math.sqrt(x*x + y*y) : 1.;
+			mul_x[i] = x / d;
+			mul_y[i] = y / d;
 			draw_mul(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
 		}
 	}, false);
@@ -243,9 +246,10 @@ function init_mul(){
 		var canvas_rect = mul.getBoundingClientRect();
 		var x = client_to_x(e.clientX - canvas_rect.left);
 		var y = client_to_y(e.clientY - canvas_rect.top);
-		var i = nearest_in(mul_x, mul_y, x, y);
-		mul_x[i] = x;
-		mul_y[i] = y;
+		i = nearest_in(mul_x, mul_y, x, y);
+		const d = (i == 0) ? Math.sqrt(x*x + y*y) : 1.;
+		mul_x[i] = x / d;
+		mul_y[i] = y / d;
 		draw_mul(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
 		mul.releasePointerCapture(e.pointerId);
 	}, false);
@@ -265,6 +269,12 @@ function draw_mul(client_x, client_y, do_guides){
 
 	const x = mul_x[0] + mul_x[1];
 	const y = mul_y[0] + mul_y[1];
+
+	context.beginPath();
+	context.arc(x_to_client(0), y_to_client(0), x_to_client(1) - x_to_client(0), 0, 2*Math.PI);
+	context.strokeStyle = colors[0];
+	context.stroke();
+	context.closePath();
 
 	context.lineWidth = 3;
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(mul_x[0]), y_to_client(mul_y[0]), colors[0]);
@@ -305,13 +315,14 @@ function init_scale(){
 	var canvas_rect = scale.getBoundingClientRect();
 	draw_scale(0, 0, false);
 
+	var i = 0; // select point
+
 	scale.addEventListener('pointermove', function(e){
 		var canvas_rect = scale.getBoundingClientRect();
 		draw_scale(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
 			var x = client_to_x(e.clientX - canvas_rect.left);
 			var y = client_to_y(e.clientY - canvas_rect.top);
-			var i = nearest_in(scale_x, scale_y, x, y);
 			scale_x[i] = x;
 			scale_y[i] = y;
 			draw_scale(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
@@ -322,7 +333,7 @@ function init_scale(){
 		var canvas_rect = scale.getBoundingClientRect();
 		var x = client_to_x(e.clientX - canvas_rect.left);
 		var y = client_to_y(e.clientY - canvas_rect.top);
-		var i = nearest_in(scale_x, scale_y, x, y);
+		i = nearest_in(scale_x, scale_y, x, y);
 		scale_x[i] = x;
 		scale_y[i] = y;
 		draw_scale(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
@@ -384,13 +395,14 @@ function init_conformal(){
 	var canvas_rect = conformal.getBoundingClientRect();
 	draw_conformal(0, 0, false);
 
+	var i = 0; // select point
+
 	conformal.addEventListener('pointermove', function(e){
 		var canvas_rect = conformal.getBoundingClientRect();
 		draw_conformal(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
 			var x = client_to_x(e.clientX - canvas_rect.left);
 			var y = client_to_y(e.clientY - canvas_rect.top);
-			var i = nearest_in(conformal_x, conformal_y, x, y);
 			conformal_x[i] = x;
 			conformal_y[i] = y;
 			draw_conformal(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
@@ -401,7 +413,7 @@ function init_conformal(){
 		var canvas_rect = conformal.getBoundingClientRect();
 		var x = client_to_x(e.clientX - canvas_rect.left);
 		var y = client_to_y(e.clientY - canvas_rect.top);
-		var i = nearest_in(conformal_x, conformal_y, x, y);
+		i = nearest_in(conformal_x, conformal_y, x, y);
 		conformal_x[i] = x;
 		conformal_y[i] = y;
 		draw_conformal(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
