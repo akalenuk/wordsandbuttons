@@ -143,8 +143,8 @@ function nearest_in(xs, ys, x, y) {
 }
 
 // sum
-var sum_x = [1, -1.5];
-var sum_y = [1.5, 0.5];
+var sum_x = [1, -1.5, 0];
+var sum_y = [1.5, 0.5, 0];
 
 function init_sum(){
 	const sum = document.getElementById("sum");
@@ -157,6 +157,8 @@ function init_sum(){
 		var canvas_rect = sum.getBoundingClientRect();
 		draw_sum(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		if(e.buttons == 1){
+			if(i == 2)
+				return;
 			var x = client_to_x(e.clientX - canvas_rect.left);
 			var y = client_to_y(e.clientY - canvas_rect.top);
 			sum_x[i] = x;
@@ -170,6 +172,8 @@ function init_sum(){
 		var x = client_to_x(e.clientX - canvas_rect.left);
 		var y = client_to_y(e.clientY - canvas_rect.top);
 		i = nearest_in(sum_x, sum_y, x, y);
+		if(i == 2)
+			return;
 		sum_x[i] = x;
 		sum_y[i] = y;
 		draw_sum(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
@@ -189,13 +193,13 @@ function draw_sum(client_x, client_y, do_guides){
 	context.fillStyle="#eeeeee";
 	context.fillRect(0, 0, w, h);
 
-	const x = sum_x[0] + sum_x[1];
-	const y = sum_y[0] + sum_y[1];
+	sum_x[2] = sum_x[0] + sum_x[1];
+	sum_y[2] = sum_y[0] + sum_y[1];
 
 	context.lineWidth = 3;
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[0]), y_to_client(sum_y[0]), colors[0]);
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[1]), y_to_client(sum_y[1]), colors[1]);
-	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(x), y_to_client(y), colors[2]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[2]), y_to_client(sum_y[2]), colors[2]);
 	context.lineWidth = 1;
 
 	// formula
@@ -215,7 +219,7 @@ function draw_sum(client_x, client_y, do_guides){
 	var sum_formula = document.getElementById("sum_formula");
 	sum_formula.innerHTML = "(<span style='color:"+colors[0]+"'>" + a(sum_x[0]) + plus_i(sum_y[0]) + "i</span>) + ";
 	sum_formula.innerHTML += "(<span style='color:"+colors[1]+"'>" + a(sum_x[1]) + plus_i(sum_y[1]) + "i</span>) = ";
-	sum_formula.innerHTML += "(<span style='color:"+colors[2]+"'>" + a(x) + plus_i(y) + "i</span>)";
+	sum_formula.innerHTML += "(<span style='color:"+colors[2]+"'>" + a(sum_x[2]) + plus_i(sum_y[2]) + "i</span>)";
 
 	// grid
 	draw_grid_on(context);
