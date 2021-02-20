@@ -142,6 +142,23 @@ function nearest_in(xs, ys, x, y) {
 	return nearest_i;
 }
 
+function pp_bicolor(x) {
+	function decodeHtml(html) {
+		var txt = document.createElement("textarea");
+		txt.innerHTML = html;
+		return txt.value;
+	}
+	var spans = "";
+	const s = decodeHtml(x);
+	var counter = 0;
+	for (var i = 0; i < s.length; ++i) {
+		spans += "<span style='color:"+colors[counter%2]+"'>" + s[i] + "</span>";
+		if(s[i] != '.' && s[i] != ' ')
+			++counter;
+	}
+	return spans;
+}
+
 // sum
 var sum_x = [1, -1.5, 0];
 var sum_y = [1.5, 0.5, 0];
@@ -199,7 +216,14 @@ function draw_sum(client_x, client_y, do_guides){
 	context.lineWidth = 3;
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[0]), y_to_client(sum_y[0]), colors[0]);
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[1]), y_to_client(sum_y[1]), colors[1]);
-	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[2]), y_to_client(sum_y[2]), colors[2]);
+
+	context.lineDashOffset = 10;
+	context.setLineDash([10, 10]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[2]), y_to_client(sum_y[2]), colors[0]);
+	context.lineDashOffset = 0;
+	context.setLineDash([10, 10]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[2]), y_to_client(sum_y[2]), colors[1]);
+	context.setLineDash([0, 0]);
 	context.lineWidth = 1;
 
 	// formula
@@ -219,7 +243,7 @@ function draw_sum(client_x, client_y, do_guides){
 	var sum_formula = document.getElementById("sum_formula");
 	sum_formula.innerHTML = "(<span style='color:"+colors[0]+"'>" + a(sum_x[0]) + plus_i(sum_y[0]) + "i</span>) + ";
 	sum_formula.innerHTML += "(<span style='color:"+colors[1]+"'>" + a(sum_x[1]) + plus_i(sum_y[1]) + "i</span>) = ";
-	sum_formula.innerHTML += "(<span style='color:"+colors[2]+"'>" + a(sum_x[2]) + plus_i(sum_y[2]) + "i</span>)";
+	sum_formula.innerHTML += "(" + pp_bicolor(a(sum_x[2]) + plus_i(sum_y[2]) + "i") + ")";
 
 	// grid
 	draw_grid_on(context);
