@@ -116,8 +116,220 @@ td.footer {
 canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
+// client
+var w = 640.0;
+var h = 640.0;
+
+// colors
+var colors = ["#d64562", "#457fd6", "#339428"];
+
+// visible region for dot
+var x_min = -3;
+var y_min = -3;
+var x_max = 3;
+var y_max = 3;
+
+var client_x_center = w*(0-x_min)/(x_max-x_min);
+var client_x_step = (w/(x_max-x_min));
+
+var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+var client_y_step = (h/(y_max-y_min));
 
 
+function client_to_x(client_x){
+	return (client_x - client_x_center) / client_x_step;
+}
+
+function client_to_y(client_y){
+	return (client_y_center - client_y) / client_y_step;
+}
+
+function x_to_client(x){
+	return x * client_x_step + client_x_center;
+}
+
+function y_to_client(y){
+	return client_y_center - y * client_y_step;
+}
+
+function draw_grid_on(context, scale_exception){
+	// grid
+	context.beginPath();
+	context.strokeStyle = colors[0];
+	context.moveTo(0, client_y_center);
+	context.lineTo(w, client_y_center);
+	context.moveTo(w, client_y_center);
+	context.lineTo(w - 12, client_y_center - 5);
+	context.moveTo(w, client_y_center);
+	context.lineTo(w - 12, client_y_center + 5);
+	context.stroke();
+	context.closePath();
+	context.beginPath();
+	context.strokeStyle = colors[1];
+	context.moveTo(client_x_center, h);
+	context.lineTo(client_x_center, 0);
+	context.moveTo(client_x_center, 0);
+	context.lineTo(client_x_center - 5, 12);
+	context.moveTo(client_x_center, 0);
+	context.lineTo(client_x_center + 5, 12);
+	context.stroke();
+	context.closePath();
+	context.beginPath();
+	
+	context.fillStyle="#000000";
+	for(var i = x_min + 1; i <= x_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x_center + i*client_x_step, client_y_center);
+			context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+			context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+		}
+	}
+	for(var i = y_min + 1; i <= y_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x_center, client_y_center - i*client_y_step);
+			context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+		}
+		context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+	}
+	context.strokeStyle = "#000000";
+	context.stroke();
+	context.closePath();
+}
+
+function draw_arrow(context, x1, y1, x2, y2, color) {
+	var d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d + (x2 - x1) * 6 / d);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d - (x2 - x1) * 6 / d);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
+}
+
+function nearest_in(xs, ys, x, y) {
+	var nearest_i = 0;
+	for(var i = 1; i < xs.length; ++i)
+		if((Math.pow(x - xs[i], 2) + Math.pow(y - ys[i], 2)) < (Math.pow(x - xs[nearest_i], 2) + Math.pow(y - ys[nearest_i], 2)))
+			nearest_i = i;
+	return nearest_i;
+}
+
+function pp_bicolor(x) {
+	function decodeHtml(html) {
+		var txt = document.createElement("textarea");
+		txt.innerHTML = html;
+		return txt.value;
+	}
+	var spans = "";
+	const s = decodeHtml(x);
+	var counter = 0;
+	for (var i = 0; i < s.length; ++i) {
+		spans += "<span style='color:"+colors[counter%2]+"'>" + s[i] + "</span>";
+		if(s[i] != '.' && s[i] != ' ')
+			++counter;
+	}
+	return spans;
+}
+
+// sum
+var sum_x = [1, 0, 0];
+var sum_y = [0, 1, 0];
+
+function init_sum(){
+	const sum = document.getElementById("sum");
+	const canvas_rect = sum.getBoundingClientRect();
+	draw_sum(0, 0, false);
+
+	var i = 0; // select point
+
+	sum.addEventListener('pointermove', function(e){
+		var canvas_rect = sum.getBoundingClientRect();
+		draw_sum(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			var x = client_to_x(e.clientX - canvas_rect.left);
+			var y = client_to_y(e.clientY - canvas_rect.top);
+			if(i == 0 || i == 2)
+				sum_x[0] = x;
+				sum_x[2] = x;
+			if(i == 1 || i == 2)
+				sum_y[1] = y;
+				sum_y[2] = y;
+			draw_sum(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		}
+	}, false);
+
+	sum.addEventListener('pointerdown', function(e){
+		var canvas_rect = sum.getBoundingClientRect();
+		var x = client_to_x(e.clientX - canvas_rect.left);
+		var y = client_to_y(e.clientY - canvas_rect.top);
+		i = nearest_in(sum_x, sum_y, x, y);
+		if(i == 2)
+			return;
+		if(i == 0 || i == 2)
+			sum_x[0] = x;
+			sum_x[2] = x;
+		if(i == 1 || i == 2)
+			sum_y[1] = y;
+			sum_y[2] = y;
+		draw_sum(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		sum.releasePointerCapture(e.pointerId);
+	}, false);
+
+	sum.addEventListener('pointerleave', function(e){
+		draw_sum(0, 0, false);
+	}, false);
+}
+
+function draw_sum(client_x, client_y, do_guides){
+	var sum = document.getElementById("sum");
+	var context = sum.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	sum_x[2] = sum_x[0] + sum_x[1];
+	sum_y[2] = sum_y[0] + sum_y[1];
+
+	context.lineWidth = 3;
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[0]), y_to_client(sum_y[0]), colors[0]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[1]), y_to_client(sum_y[1]), colors[1]);
+
+	context.lineDashOffset = 10;
+	context.setLineDash([10, 10]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[2]), y_to_client(sum_y[2]), colors[0]);
+	context.lineDashOffset = 0;
+	context.setLineDash([10, 10]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[2]), y_to_client(sum_y[2]), colors[1]);
+	context.setLineDash([0, 0]);
+	context.lineWidth = 1;
+
+	// formula
+	function a(a) {
+		if(a >= 0)
+			return a.toFixed(2);
+		else
+			return '&minus;' + (-a).toFixed(2);
+	}
+	function plus_i(i) {
+		if(i >= 0)
+			return ' + ' + i.toFixed(2);
+		else
+			return ' &minus; ' + (-i).toFixed(2);
+	}
+
+	var sum_formula = document.getElementById("sum_formula");
+	sum_formula.innerHTML = "(<span style='color:"+colors[0]+"'>" + a(sum_x[0]) + plus_i(sum_y[0]) + "</span>) + ";
+	sum_formula.innerHTML += "(<span style='color:"+colors[1]+"'>" + a(sum_x[1]) + plus_i(sum_y[1]) + "</span>) = ";
+	sum_formula.innerHTML += "(" + pp_bicolor(a(sum_x[2]) + plus_i(sum_y[2])) + ")";
+
+	// grid
+	draw_grid_on(context);
+}
 	</script>
 </head>
 <body>
@@ -134,7 +346,12 @@ canvas { touch-action: none; }
 	<h2>
 The idea of basis decomposition
 	</h2>
-
+	<canvas id="sum" width=640 height=640></canvas>
+	<p class="comment" id="sum_formula">
+	
+	<script language="JavaScript"> // init
+init_sum();
+	</script>
 	<table style="width: 505pt;" class="footer">
 	<tr>
 	<td class="footer" style="text-align: left;"><a href="atan32.html">&larr; </a></td>
