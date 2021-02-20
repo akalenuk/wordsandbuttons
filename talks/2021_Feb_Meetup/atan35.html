@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=0.84">
-	<title>Basis polynomial</title>
+	<title>Lagrange polynomial</title>
 	<meta name="description" content="This explains Lagrange polynomial: why does it run through all the points, what is the basis polynomial, and how come it's a polynomial in the first place.">
 	<meta name="keywords" content="mathematics, tutorials">
 	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
@@ -505,18 +505,17 @@ reset_all_points();
 <body>
 	<center>
 
-
 	<table style="width: 505pt;" class="footer">
 	<tr>
-	<td class="footer" style="text-align: left;"><a href="atan31.html">&larr; </a></td>
+	<td class="footer" style="text-align: left;"><a href="atan34.html">&larr; </a></td>
 	<td class="footer" style="text-align: center"><a href="index.html">- Contents -</a></td>
-	<td class="footer" style="text-align: right"><a href="atan33.html">&rarr;</a></td>
+	<td class="footer" style="text-align: right"><a href="links.html">&rarr;</a></td>
 	</tr>
 	</table>
 	<h2>
-Basis polynomial
+Lagrange polynomial
 	</h2>
-	<canvas id="basis_canvas" width=640 height=640></canvas>
+	<canvas id="lagrange_canvas" width=640 height=640></canvas>
 	<div style="text-align:center; padding-bottom:12pt;">
 		<input type="radio" name="approx" id="a_1" value="Add" /><label for="a_1">Add a point;</label> &nbsp;
 		<input type="radio" name="approx" id="a_2" checked value="Move"><label for="a_2">move a point.</label> &nbsp;
@@ -526,74 +525,46 @@ Basis polynomial
 	<table class="formula">
 	<tr>
 	<td rowspan=3>
-g<sub>i</sub>(x) = 
+L(x) = 
 	</td>
 	<td>
 <sub>k</sub>
 	</td>
 	<td rowspan=3>
-
-		<table class="formula">
-		<tr>
-		<td style="border-bottom:1px solid black">
-x - x<sub>j</sub>
-		</td>
-		</tr>
-		<tr>
-		<td>
-x<sub>i</sub> - x<sub>j</sub>
-		</td>
-		</tr>
-		</table>
-
+y<sub>i</sub>&hairsp;g<sub>i</sub>(x)
 	</td>
 	</tr>
 	<tr>
 	<td style="font-size: 24pt;">
-&Pi;
+&Sigma;
 	</td>
 	</tr>
 	<tr>
 	<td>
-<sup>j = 1, j &ne; i</sup>
+<sup>i = 1</sup>
 	</td>
 	</tr>
 	</table>
-
-	<p>
-
-	</p>
-
-	<table class="formula">
-	<tr>
-	<td style="border-bottom:1px solid black">
-x - x<sub>j</sub>
-	</td>
-	</tr>
-	<tr>
-	<td>
-x<sub>i</sub> - x<sub>j</sub>
-	</td>
-	</tr>
-	</table>
-
 	<script language="JavaScript">
-	const basis = function(x) {
-		var i = points.length-1
-		var yi = 1.;
-		for(var j = 0; j < points.length; ++j) {
-			if(i != j)
-				yi *= (x - points[j][0]) / (points[i][0] - points[j][0]);
+	const lagrange = function(x) {
+		var y = 0.;
+		for(var i = 0; i < points.length; ++i) {
+			var yi = points[i][1];
+			for(var j = 0; j < points.length; ++j) {
+				if(i != j)
+					yi *= (x - points[j][0]) / (points[i][0] - points[j][0]);
+			}
+			y += yi;
 		}
-		return yi;
+		return y;
 	}
-	init_atan_plot(document.getElementById("basis_canvas"), [basis, function(x) {return 1;}], ["#005500", "#999999"], [], 0., 0., 4, 640, 640, false, false, true);
+	init_atan_plot(document.getElementById("lagrange_canvas"), [lagrange], ["#005500"], [], 0., 0., 4, 640, 640, false, false, true);
 	</script>
 	<table style="width: 505pt;" class="footer">
 	<tr>
-	<td class="footer" style="text-align: left;"><a href="atan31.html">&larr; </a></td>
+	<td class="footer" style="text-align: left;"><a href="atan34.html">&larr; </a></td>
 	<td class="footer" style="text-align: center"><a href="index.html">- Contents -</a></td>
-	<td class="footer" style="text-align: right"><a href="atan33.html">&rarr;</a></td>
+	<td class="footer" style="text-align: right"><a href="links.html">&rarr;</a></td>
 	</tr>
 	</table>
 
