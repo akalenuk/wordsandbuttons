@@ -251,8 +251,8 @@ function draw_sum(client_x, client_y, do_guides){
 
 
 // mul
-var mul_x = [1, -1.5];
-var mul_y = [0, 0.5];
+var mul_x = [0, -1.5];
+var mul_y = [1, 0.5];
 
 function init_mul(){
 	const mul = document.getElementById("mul");
@@ -299,8 +299,8 @@ function draw_mul(client_x, client_y, do_guides){
 	context.fillStyle="#eeeeee";
 	context.fillRect(0, 0, w, h);
 
-	const x = mul_x[0] * mul_x[1] - mul_y[0] * mul_y[1];
-	const y = mul_x[0] * mul_y[1] + mul_x[1] * mul_y[0];
+	mul_x[2] = mul_x[0] * mul_x[1] - mul_y[0] * mul_y[1];
+	mul_y[2] = mul_x[0] * mul_y[1] + mul_x[1] * mul_y[0];
 
 	context.beginPath();
 	context.arc(x_to_client(0), y_to_client(0), x_to_client(1) - x_to_client(0), 0, 2*Math.PI);
@@ -311,7 +311,13 @@ function draw_mul(client_x, client_y, do_guides){
 	context.lineWidth = 3;
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(mul_x[0]), y_to_client(mul_y[0]), colors[0]);
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(mul_x[1]), y_to_client(mul_y[1]), colors[1]);
-	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(x), y_to_client(y), colors[2]);
+	context.lineDashOffset = 10;
+	context.setLineDash([10, 10]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(mul_x[2]), y_to_client(mul_y[2]), colors[0]);
+	context.lineDashOffset = 0;
+	context.setLineDash([10, 10]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(mul_x[2]), y_to_client(mul_y[2]), colors[1]);
+	context.setLineDash([0, 0]);
 	context.lineWidth = 1;
 
 	// formula
@@ -331,7 +337,7 @@ function draw_mul(client_x, client_y, do_guides){
 	var mul_formula = document.getElementById("mul_formula");
 	mul_formula.innerHTML = "(<span style='color:"+colors[0]+"'>" + a(mul_x[0]) + plus_i(mul_y[0]) + "i</span>) + ";
 	mul_formula.innerHTML += "(<span style='color:"+colors[1]+"'>" + a(mul_x[1]) + plus_i(mul_y[1]) + "i</span>) = ";
-	mul_formula.innerHTML += "(<span style='color:"+colors[2]+"'>" + a(x) + plus_i(y) + "i</span>)";
+	mul_formula.innerHTML += "(" + pp_bicolor( a(mul_x[2]) + plus_i(mul_y[2]) + "i") + ")";
 
 	// grid
 	draw_grid_on(context);
