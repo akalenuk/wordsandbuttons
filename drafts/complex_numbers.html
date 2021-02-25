@@ -44,6 +44,13 @@ p {
 	padding-bottom: 24pt;
 }
 
+input[type="text"] {
+	height: 16pt;
+	width: 505pt;
+	font-size: 16pt;
+	margin-bottom: 16pt;
+}
+
 canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
@@ -442,44 +449,6 @@ function draw_scale(client_x, client_y, do_guides){
 
 
 // conformal
-var conformal_x = [1, -1.5];
-var conformal_y = [1.5, 0.5];
-
-function init_conformal(){
-	var conformal = document.getElementById("conformal");
-	var canvas_rect = conformal.getBoundingClientRect();
-	draw_conformal(0, 0, false);
-
-	var i = 0; // select point
-
-	conformal.addEventListener('pointermove', function(e){
-		var canvas_rect = conformal.getBoundingClientRect();
-		draw_conformal(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
-		if(e.buttons == 1){
-			var x = client_to_x(e.clientX - canvas_rect.left);
-			var y = client_to_y(e.clientY - canvas_rect.top);
-			conformal_x[i] = x;
-			conformal_y[i] = y;
-			draw_conformal(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-		}
-	}, false);
-
-	conformal.addEventListener('pointerdown', function(e){
-		var canvas_rect = conformal.getBoundingClientRect();
-		var x = client_to_x(e.clientX - canvas_rect.left);
-		var y = client_to_y(e.clientY - canvas_rect.top);
-		i = nearest_in(conformal_x, conformal_y, x, y);
-		conformal_x[i] = x;
-		conformal_y[i] = y;
-		draw_conformal(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
-		conformal.releasePointerCapture(e.pointerId);
-	}, false);
-
-	conformal.addEventListener('pointerleave', function(e){
-		draw_conformal(0, 0, false);
-	}, false);
-}
-
 function draw_conformal(client_x, client_y, do_guides){
 	var conformal = document.getElementById("conformal");
 	var context = conformal.getContext("2d");
@@ -487,29 +456,6 @@ function draw_conformal(client_x, client_y, do_guides){
 	// background
 	context.fillStyle="#eeeeee";
 	context.fillRect(0, 0, w, h);
-
-	const x = conformal_x[0] + conformal_x[1];
-	const y = conformal_y[0] + conformal_y[1];
-
-	context.lineWidth = 3;
-	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(conformal_x[0]), y_to_client(conformal_y[0]), colors[0]);
-	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(conformal_x[1]), y_to_client(conformal_y[1]), colors[1]);
-	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(x), y_to_client(y), colors[2]);
-	context.lineWidth = 1;
-
-	// formula
-	function a(a) {
-		if(a >= 0)
-			return a.toFixed(2);
-		else
-			return '&minus;' + (-a).toFixed(2);
-	}
-	function plus_i(i) {
-		if(i >= 0)
-			return ' + ' + i.toFixed(2);
-		else
-			return ' &minus; ' + (-i).toFixed(2);
-	}
 
 	// grid
 	draw_grid_on(context, false);
@@ -627,9 +573,11 @@ init_scale();
 	<p>
 ...
 	</p>
+
+	<input type="text" id="transforamtion" value="0.5*x^2 - 2*x + 1"><br>
 	<canvas id="conformal" width=640 height=640></canvas>
 	<script language="JavaScript"> // init
-init_conformal();
+draw_conformal();
 	</script>
 
 	<script language="JavaScript"> // test
