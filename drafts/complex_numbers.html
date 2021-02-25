@@ -393,8 +393,8 @@ function draw_scale(client_x, client_y, do_guides){
 	context.fillStyle="#eeeeee";
 	context.fillRect(0, 0, w, h);
 
-	const x = scale_x[0] * scale_x[1];
-	const y = scale_x[0] * scale_y[1];
+	scale_x[2] = scale_x[0] * scale_x[1];
+	scale_y[2] = scale_x[0] * scale_y[1];
 
 	context.beginPath();
 	context.moveTo(0, y_to_client(0));
@@ -406,7 +406,13 @@ function draw_scale(client_x, client_y, do_guides){
 	context.lineWidth = 3;
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(scale_x[0]), y_to_client(scale_y[0]), colors[0]);
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(scale_x[1]), y_to_client(scale_y[1]), colors[1]);
-	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(x), y_to_client(y), colors[2]);
+	context.lineDashOffset = 10;
+	context.setLineDash([10, 10]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(scale_x[2]), y_to_client(scale_y[2]), colors[0]);
+	context.lineDashOffset = 0;
+	context.setLineDash([10, 10]);
+	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(scale_x[2]), y_to_client(scale_y[2]), colors[1]);
+	context.setLineDash([0, 0]);
 	context.lineWidth = 1;
 
 	// formula
@@ -426,7 +432,7 @@ function draw_scale(client_x, client_y, do_guides){
 	var scale_formula = document.getElementById("scale_formula");
 	scale_formula.innerHTML = "(<span style='color:"+colors[0]+"'>" + a(scale_x[0]) + plus_i(scale_y[0]) + "i</span>) + ";
 	scale_formula.innerHTML += "(<span style='color:"+colors[1]+"'>" + a(scale_x[1]) + plus_i(scale_y[1]) + "i</span>) = ";
-	scale_formula.innerHTML += "(<span style='color:"+colors[2]+"'>" + a(x) + plus_i(y) + "i</span>)";
+	scale_formula.innerHTML += "("+pp_bicolor( a(scale_x[2]) + plus_i(scale_y[2]) + "i") + ")";
 
 	// grid
 	draw_grid_on(context, true);
