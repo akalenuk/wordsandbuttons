@@ -67,10 +67,10 @@ var y_min = -3;
 var x_max = 3;
 var y_max = 3;
 
-var client_x_center = w*(0-x_min)/(x_max-x_min);
+var client_x_center = w*(0-x_min)/(x_max-x_min) - 0.5;
 var client_x_step = (w/(x_max-x_min));
 
-var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+var client_y_center = h - h*(0-y_min)/(y_max-y_min) - 0.5;
 var client_y_step = (h/(y_max-y_min));
 
 
@@ -220,7 +220,7 @@ function draw_sum(client_x, client_y, do_guides){
 	sum_x[2] = sum_x[0] + sum_x[1];
 	sum_y[2] = sum_y[0] + sum_y[1];
 
-	context.lineWidth = 4;
+	context.lineWidth = 3;
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[0]), y_to_client(sum_y[0]), colors[0]);
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(sum_x[1]), y_to_client(sum_y[1]), colors[1]);
 	context.lineWidth = 2;
@@ -315,7 +315,7 @@ function draw_mul(client_x, client_y, do_guides){
 	context.stroke();
 	context.closePath();
 
-	context.lineWidth = 4;
+	context.lineWidth = 3;
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(mul_x[0]), y_to_client(mul_y[0]), colors[0]);
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(mul_x[1]), y_to_client(mul_y[1]), colors[1]);
 	context.lineWidth = 2;
@@ -404,14 +404,28 @@ function draw_scale(client_x, client_y, do_guides){
 	scale_x[2] = scale_x[0] * scale_x[1];
 	scale_y[2] = scale_x[0] * scale_y[1];
 
+	// red line
 	context.beginPath();
+	context.lineDashOffset = 10;
+	context.setLineDash([10, 10]);
+	context.moveTo(0, y_to_client(0));
+	context.lineTo(x_to_client(3), y_to_client(0));
+	context.strokeStyle = "#000000";
+	context.stroke();
+	context.closePath();
+
+	context.beginPath();
+	context.lineDashOffset = 0;
+	context.setLineDash([10, 10]);
 	context.moveTo(0, y_to_client(0));
 	context.lineTo(x_to_client(3), y_to_client(0));
 	context.strokeStyle = colors[0];
 	context.stroke();
 	context.closePath();
 
-	context.lineWidth = 4;
+	// arrows
+	context.setLineDash([]);
+	context.lineWidth = 3;
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(scale_x[0]), y_to_client(scale_y[0]), colors[0]);
 	draw_arrow(context, x_to_client(0), y_to_client(0), x_to_client(scale_x[1]), y_to_client(scale_y[1]), colors[1]);
 	context.lineWidth = 2;
