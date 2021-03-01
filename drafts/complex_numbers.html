@@ -471,6 +471,44 @@ function draw_conformal(client_x, client_y, do_guides){
 	context.fillStyle="#eeeeee";
 	context.fillRect(0, 0, w, h);
 
+	var f = document.getElementById("transforamtion").value;
+	context.beginPath();
+	for(var i = -1; i <= 1; i+=1/8) {
+		for(var j = -1; j <= 1; j+=1/8) {
+			if(i < 1.) {
+				context.moveTo(x_to_client(j), y_to_client(i));
+				context.lineTo(x_to_client(j), y_to_client(i + 1/8));
+			}
+			if(j < 1.) {
+				context.moveTo(x_to_client(j), y_to_client(i));
+				context.lineTo(x_to_client(j + 1/8), y_to_client(i));
+			}
+		}
+	}
+	context.strokeStyle = colors[2];
+	context.stroke();
+	context.closePath();
+
+	context.beginPath();
+	for(var i = -1; i <= 1; i+=1/8) {
+		for(var j = -1; j <= 1; j+=1/8) {
+			const transformed = calc(f, [j, i]);
+			if(i < 1.) {
+				const transformed2 = calc(f, [j, i + 1/8]);
+				context.moveTo(x_to_client(transformed[0]), y_to_client(transformed[1]));
+				context.lineTo(x_to_client(transformed2[0]), y_to_client(transformed2[1]));
+			}
+			if(j < 1.) {
+				const transformed2 = calc(f, [j + 1/8, i]);
+				context.moveTo(x_to_client(transformed[0]), y_to_client(transformed[1]));
+				context.lineTo(x_to_client(transformed2[0]), y_to_client(transformed2[1]));
+			}
+		}
+	}
+	context.strokeStyle = colors[1];
+	context.stroke();
+	context.closePath();
+
 	// grid
 	draw_grid_on(context, false);
 }
