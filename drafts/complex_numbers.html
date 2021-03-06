@@ -501,14 +501,20 @@ function draw_conformal(client_x, client_y, do_guides){
 		for(var j = -1; j <= 1; j+=1/8) {
 			const transformed = calc(f, [j, i]);
 			if(i < 1.) {
-				const transformed2 = calc(f, [j, i + 1/8]);
-				context.moveTo(x_to_client(transformed[0]), y_to_client(transformed[1]));
-				context.lineTo(x_to_client(transformed2[0]), y_to_client(transformed2[1]));
+				for(var k = 0; k < 8; ++k) {
+					const transformed1 = calc(f, [j, i + 1/8 * (k / 8)]);
+					const transformed2 = calc(f, [j, i + 1/8 * ((k + 1) / 8)]);
+					context.moveTo(x_to_client(transformed1[0]), y_to_client(transformed1[1]));
+					context.lineTo(x_to_client(transformed2[0]), y_to_client(transformed2[1]));
+				}
 			}
 			if(j < 1.) {
-				const transformed2 = calc(f, [j + 1/8, i]);
-				context.moveTo(x_to_client(transformed[0]), y_to_client(transformed[1]));
-				context.lineTo(x_to_client(transformed2[0]), y_to_client(transformed2[1]));
+				for(var k = 0; k < 8; ++k) {
+					const transformed1 = calc(f, [j + 1/8 * (k / 8), i]);
+					const transformed2 = calc(f, [j + 1/8 * ((k + 1) / 8), i]);
+					context.moveTo(x_to_client(transformed1[0]), y_to_client(transformed1[1]));
+					context.lineTo(x_to_client(transformed2[0]), y_to_client(transformed2[1]));
+				}
 			}
 		}
 	}
