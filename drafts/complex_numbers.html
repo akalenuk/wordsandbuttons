@@ -497,21 +497,23 @@ function draw_conformal(client_x, client_y, do_guides){
 	context.closePath();
 
 	context.beginPath();
+	
+	const grid_detail = 16.;
 	for(var i = -1; i <= 1; i+=1/8) {
 		for(var j = -1; j <= 1; j+=1/8) {
 			const transformed = calc(f, [j, i]);
 			if(i < 1.) {
-				for(var k = 0; k < 8; ++k) {
-					const transformed1 = calc(f, [j, i + 1/8 * (k / 8)]);
-					const transformed2 = calc(f, [j, i + 1/8 * ((k + 1) / 8)]);
+				for(var k = 0; k < grid_detail; ++k) {
+					const transformed1 = calc(f, [j, i + 1/8 * (k / grid_detail)]);
+					const transformed2 = calc(f, [j, i + 1/8 * ((k + 1) / grid_detail)]);
 					context.moveTo(x_to_client(transformed1[0]), y_to_client(transformed1[1]));
 					context.lineTo(x_to_client(transformed2[0]), y_to_client(transformed2[1]));
 				}
 			}
 			if(j < 1.) {
-				for(var k = 0; k < 8; ++k) {
-					const transformed1 = calc(f, [j + 1/8 * (k / 8), i]);
-					const transformed2 = calc(f, [j + 1/8 * ((k + 1) / 8), i]);
+				for(var k = 0; k < grid_detail; ++k) {
+					const transformed1 = calc(f, [j + 1/8 * (k / grid_detail), i]);
+					const transformed2 = calc(f, [j + 1/8 * ((k + 1) / grid_detail), i]);
 					context.moveTo(x_to_client(transformed1[0]), y_to_client(transformed1[1]));
 					context.lineTo(x_to_client(transformed2[0]), y_to_client(transformed2[1]));
 				}
