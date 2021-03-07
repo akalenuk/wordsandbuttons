@@ -556,6 +556,12 @@ function mul(a, b) {
 	return [a[0]*b[0] - a[1]*b[1], a[0]*b[1] + a[1]*b[0]];
 }
 
+function div(a, b) {
+	const conj = [b[0], -b[1]];
+	const divisor = mul(conj, conj)[0];
+	return mul(mul(a, conj), [1./divisor, 0.]);
+}
+
 function pow(a, b) {
 	var c = [1, 0];
 	for(var i = 0; i < Math.floor(b[0]); ++i)
@@ -573,12 +579,22 @@ function pows(expr, x) {
 	}
 }
 
-function muls(expr, x) {
-	const exprs = expr.split('*');
+function divs(expr, x) {
+	const exprs = expr.split('/');
 	if(exprs.length == 1)
 		return pows(expr, x);
 	else {
 		const ys = exprs.map(function(n) {return pows(n, x);});
+		return ys.reduce(function(a, v) {return div(a, v);})
+	}
+}
+
+function muls(expr, x) {
+	const exprs = expr.split('*');
+	if(exprs.length == 1)
+		return divs(expr, x);
+	else {
+		const ys = exprs.map(function(n) {return divs(n, x);});
 		return ys.reduce(function(a, v) {return mul(a, v);})
 	}
 }
@@ -675,7 +691,7 @@ init_scale();
 	</p>
 
 	<table style="width:505pt"><tr><td>
-		<input type="text" id="transforamtion" value="0.5*x^2 - 2*x + 1" onchange="draw_conformal();">
+		<input type="text" id="transforamtion" value="1/3i*x^2 - 1.7*x + 0.2i" onchange="draw_conformal();">
 	</td><td>
 		<button type="button" onclick="draw_conformal();" id="button_1"><nobr>Show &darr;</nobr></button>
 	</td></tr></table>
@@ -697,6 +713,7 @@ console.assert(String(calc('x^4', [2, 0])) == '16,0');
 console.assert(String(calc('2*(5-2)', [0, 0])) == '6,0');
 console.assert(String(calc('-1+((2-1*3^2)-1)', [1, 1])) == '-9,0');
 console.assert(String(calc('(1) + (1)'), [0, 0]) == '2,0');
+console.assert(String(calc('2/4'), [0, 0]) == '0.5,0');
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
