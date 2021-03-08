@@ -7,6 +7,9 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 
 ## Pages
 
+- [Complex numbers and conformal mapping](https://wordsandbuttons.online/complex_numbers_and_conformal_mapping.html) This explains the geometry of complex numbers. Explains conformal transformations, introduces analytic functions, and shows that analytic complex functions are conformal. And using the connection between the geometry and the analysis explains it all in just some five minutes.
+<sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
+
 - [Lagrange polynomial as a gateway drug to basis splines](https://wordsandbuttons.online/lagrange_polynomial_as_a_gateway_drug_to_basis_splines.html) This explains Lagrange interpolation: what is the Lagrange polynomial, why does it run through all the points, what is the basis polynomial, and how come it's a polynomial in the first place.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
