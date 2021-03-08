@@ -37,6 +37,14 @@ p {
 	text-align: left;
 }
 
+.formula {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: italic;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
 .comment {
 	font-size: 12pt;
 	text-align:center;
@@ -664,7 +672,28 @@ function calc(expr, x) {
 Complex numbers and conformal mapping
 	</h1>
 	<p>
-...
+What if I told you that every analytic function in complex numbers is a conformal mapping?
+	</p>
+	<p>
+This wouldn't be very helpful since you either know this already or have no idea what am I talking about. If you want, I can explain it in a very simple but probably not entirely correct manner.
+	</p>
+	<p>
+So complex numbers are numbers with irrational parts. Numbers like this.
+	</p>
+	<p class="formula">
+4 + 2i
+	</p>
+	<p>
+Let's pretend they are something else. Let's pretend they are vectors. The real part then shall go as the usual x-axis, and the irrational part — as the y-axis.
+	</p>
+	<p>
+Summing them up works from the box, they sum just like vectors: real parts sum up separately from the imaginary parts, just like x-parts separately from y-parts in vectors.
+	</p>
+	<p class="formula">
+(a + bi) + (c + di) = (a + c) + (b + d)i
+	</p>
+	<p>
+Here is an interactive plot. Feel free to move red and blue arrows around. The barber-shop arrow is the product, it's made unmoveable by itself.
 	</p>
 	<canvas id="sum" width=640 height=640></canvas>
 	<p class="comment" id="sum_formula">
@@ -672,7 +701,13 @@ Complex numbers and conformal mapping
 init_sum();
 	</script>
 	<p>
-...
+Now multiplication is somewhat different from what happens with vectors yet even more interesting. The formula doesn't look too inspiring.
+	</p>
+	<p class="formula">
+(a + bi) * (c + di) = (a<sup>2</sup>-d<sup>2</sup>) + (bc + ad)i
+	</p>
+	<p>
+However, geometrically, multiplying a complex number to a normalized complex number is a rotation.
 	</p>
 	<canvas id="mul" width=640 height=640></canvas>
 	<p class="comment" id="mul_formula">
@@ -680,7 +715,13 @@ init_sum();
 init_mul();
 	</script>
 	<p>
-...
+Ok, but what if the complex multiplier isn't normalized?
+	</p>
+	<p>
+We can normalize it by dividing by its length and then multiply the result by this length. Multiplying a complex muber by a scalar is just like scaling a vector.
+	</p>
+	<p class="formula">
+c*(a + bi) = ca + cbi
 	</p>
 	<canvas id="scale" width=640 height=640></canvas>
 	<p class="comment" id="scale_formula">
@@ -688,9 +729,26 @@ init_mul();
 init_scale();
 	</script>
 	<p>
-...
+So, addictions and multiplications are all translations, rotations, and scale. There is no shear. These three transforamtions preserve the angles locally. And preserving angles locally is what constitutes a conformal transformation in geometry. In analysis, transformations are usually called maps. It's just a convention. Conformap mapping and conformal transformation is the same thing.
 	</p>
-
+	<p>
+And now for analytical functions. Their <a href="https://en.wikipedia.org/wiki/Analytic_function">definition</a> might not be too clear for our case, but they have a property that is.
+	</p>
+	<p>
+The property is: <i>a function is analytic if and only if its Taylor series about x<sub>0</sub> converges to the function in some neighborhood for every x<sub>0</sub> in its domain</i>.
+	</p>
+	<p>
+The <a href="https://wordsandbuttons.online/trippy_polynomials_in_arctangent_scale.html#index_taylor_series">Taylor series</a> is a polynomial series, and polynomes consist only of additions, multiplications, and scales.
+	</p>
+	<p>
+So if a function acts as a polynomial locally, it can only move, rotate, and scale complex-numbers made vectors, preserving the angles locally therefore forming a comformal transformation or, which is the same, a conformal map.
+	</p>
+	<p>
+Here is the living example. It tranforms a grid from [-1, 1]&times;[-1, 1] to &#8450;. Please note that all the grid sections always intersect by the right angle no matter how twisted the transformation are.
+	</p>
+	<p>
+Feel free to propose your own transformation. The formula box from below accepts + - * / and ^ as “power”.
+	</p>
 	<table style="width:505pt"><tr><td>
 		<input type="text" id="transforamtion" value="1/3i*x^2 - 1.7*x + 0.2i" onchange="draw_conformal();">
 	</td><td>
@@ -701,6 +759,9 @@ init_scale();
 	<script language="JavaScript"> // init
 draw_conformal();
 	</script>
+	<p>
+I hope you now have a good understanding of conformal mapping and geometry of complex numbers in general.
+	</p>
 
 	<script language="JavaScript"> // tests
 console.assert(String(calc('2', [0, 0])) == '2,0');
