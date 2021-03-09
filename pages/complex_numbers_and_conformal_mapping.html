@@ -366,7 +366,6 @@ function draw_mul(client_x, client_y, do_guides){
 // scale
 var scale_x = [2, -1.0];
 var scale_y = [0, 0.75];
-
 function init_scale(){
 	var scale = document.getElementById("scale");
 	var canvas_rect = scale.getBoundingClientRect();
@@ -476,6 +475,9 @@ function sharp(x) {
 }
 
 // conformal
+var formula = 'x';
+var t = 0;
+var st = 0;
 function draw_conformal(client_x, client_y, do_guides){
 	var conformal = document.getElementById("conformal");
 	var context = conformal.getContext("2d");
@@ -484,7 +486,7 @@ function draw_conformal(client_x, client_y, do_guides){
 	context.fillStyle="#eeeeee";
 	context.fillRect(0, 0, w, h);
 
-	var f = document.getElementById("transforamtion").value;
+	const f = formula;
 	context.beginPath();
 	for(var i = -1; i <= 1; i+=1/8) {
 		for(var j = -1; j <= 1; j+=1/8) {
@@ -503,7 +505,6 @@ function draw_conformal(client_x, client_y, do_guides){
 	context.closePath();
 
 	context.beginPath();
-	
 	const grid_detail = 16.;
 	for(var i = -1; i <= 1; i+=1/8) {
 		for(var j = -1; j <= 1; j+=1/8) {
@@ -540,7 +541,11 @@ function draw_conformal(client_x, client_y, do_guides){
 // simple interpreter
 // it only works on numbers for testing, todo: switch to complexs
 function number_or_x(n, x) {
-	if(n.trim() == 'x') {
+	if(n.trim() == 't') {
+		return [st, 0];
+	} else if(n.trim() == 'ti') {
+		return [0, st];
+	} else if(n.trim() == 'x') {
 		return x;
 	} else if(n.trim() == '') {
 		return [0., 0.]
@@ -666,6 +671,9 @@ function calc(expr, x) {
 	}
 }
 
+function reset_formula() {
+	formula = document.getElementById("transforamtion").value;
+}
 	</script>
 </head>
 <body>
@@ -752,14 +760,22 @@ Here is the living example. It transforms a grid from <nobr>[-1, 1]&times;[-1, 1
 Feel free to propose your own transformation. The formula box from below accepts + - * / and ^ as “power”.
 	</p>
 	<table style="width:505pt"><tr><td>
-		<input type="text" id="transforamtion" value="1/3i*x^2 - 1.7*x + 0.2i" onchange="draw_conformal();">
+		<input type="text" id="transforamtion" value="ti*x^2 - 1.7*x + 0.2i" onchange="reset_formula();">
 	</td><td>
-		<button type="button" onclick="draw_conformal();" id="button_1"><nobr>Show &darr;</nobr></button>
+		<button type="button" onclick="reset_formula();" id="button_1"><nobr>Show &darr;</nobr></button>
 	</td></tr></table>
 	<br>
 	<canvas id="conformal" width=640 height=640></canvas>
 	<script language="JavaScript"> // init
-draw_conformal();
+reset_formula();
+function redraw() {
+	draw_conformal();
+	const lag = 50;
+	setTimeout(redraw, 50);
+	t += 1 / 50;
+	st = Math.sin(t);
+}
+redraw();
 	</script>
 	<p>
 I hope you now have a good understanding of conformal mapping and the geometry of complex numbers in general. Did it take the full 5 minutes?
