@@ -488,15 +488,16 @@ function draw_conformal(client_x, client_y, do_guides){
 
 	const f = formula;
 	context.beginPath();
-	for(var i = -1; i <= 1; i+=1/8) {
-		for(var j = -1; j <= 1; j+=1/8) {
+	const grid_n = 4;
+	for(var i = -1; i <= 1; i+=1/grid_n) {
+		for(var j = -1; j <= 1; j+=1/grid_n) {
 			if(i < 1.) {
 				context.moveTo(sharp(x_to_client(j)), sharp(y_to_client(i)));
-				context.lineTo(sharp(x_to_client(j)), sharp(y_to_client(i + 1/8)));
+				context.lineTo(sharp(x_to_client(j)), sharp(y_to_client(i + 1/grid_n)));
 			}
 			if(j < 1.) {
 				context.moveTo(sharp(x_to_client(j)), sharp(y_to_client(i)));
-				context.lineTo(sharp(x_to_client(j + 1/8)), sharp(y_to_client(i)));
+				context.lineTo(sharp(x_to_client(j + 1/grid_n)), sharp(y_to_client(i)));
 			}
 		}
 	}
@@ -505,13 +506,13 @@ function draw_conformal(client_x, client_y, do_guides){
 	context.closePath();
 
 	context.beginPath();
-	const grid_detail = 16.;
-	for(var i = -1; i <= 1; i+=1/8) {
-		for(var j = -1; j <= 1; j+=1/8) {
+	const grid_detail = 4.;
+	for(var i = -1; i <= 1; i+=1/grid_n) {
+		for(var j = -1; j <= 1; j+=1/grid_n) {
 			const transformed = calc(f, [j, i]);
 			if(i < 1.) {
 				for(var k = 0; k <= grid_detail; ++k) {
-					const transformed = calc(f, [j, i + 1/8 * (k / grid_detail)]);
+					const transformed = calc(f, [j, i + 1/grid_n * (k / grid_detail)]);
 					if(k == 0)
 						context.moveTo(x_to_client(transformed[0]), y_to_client(transformed[1]));
 					else
@@ -520,7 +521,7 @@ function draw_conformal(client_x, client_y, do_guides){
 			}
 			if(j < 1.) {
 				for(var k = 0; k <= grid_detail; ++k) {
-					const transformed = calc(f, [j + 1/8 * (k / grid_detail), i]);
+					const transformed = calc(f, [j + 1/grid_n * (k / grid_detail), i]);
 					if(k == 0)
 						context.moveTo(x_to_client(transformed[0]), y_to_client(transformed[1]));
 					else
@@ -541,14 +542,15 @@ function draw_conformal(client_x, client_y, do_guides){
 // simple interpreter
 // it only works on numbers for testing, todo: switch to complexs
 function number_or_x(n, x) {
-	if(n.trim() == 't') {
+	const n_trim = n.trim();
+	if(n_trim == 't') {
 		return [st, 0];
-	} else if(n.trim() == 'ti') {
+	} else if(n_trim == 'ti') {
 		return [0, st];
-	} else if(n.trim() == 'x') {
+	} else if(n_trim == 'x') {
 		return x;
-	} else if(n.trim() == '') {
-		return [0., 0.]
+	} else if(n_trim == '') {
+		return [0., 0.];
 	} else if(n.indexOf('i') != -1) {
 		const x_i = n.split('i');
 		return [0., Number(x_i[0])];
@@ -757,10 +759,13 @@ So if a function acts as a polynomial locally, it can only move, rotate, and sca
 Here is the living example. It transforms a grid from <nobr>[-1, 1]&times;[-1, 1]</nobr> to &#8450;. Please note that all the grid sections always intersect by the right angle no matter how twisted the transformation is.
 	</p>
 	<p>
-Feel free to propose your own transformation. The formula box from below accepts <nobr>+ &minus; * /</nobr> and <nobr>^ as “power”</nobr>. There is also a <i>t</i> variable that oscilates in <nobr>[-1, 1]</nobr>.
+Feel free to propose your own transformation. The formula box from below accepts <nobr>+ &minus; * /</nobr> and <nobr>^ as “power”</nobr>.
+	</p>
+	<p>
+There is also a <i>t</i> variable that oscilates in <nobr>[-1, 1]</nobr>.
 	</p>
 	<table style="width:505pt"><tr><td>
-		<input type="text" id="transforamtion" value="ti/1.5*x^2 - 1.5*x + 0.2i" onchange="reset_formula();">
+		<input type="text" id="transforamtion" value="0.5*ti*x^2 - 2*x + 0.4i" onchange="reset_formula();">
 	</td><td>
 		<button type="button" onclick="reset_formula();" id="button_1"><nobr>Show &darr;</nobr></button>
 	</td></tr></table>
@@ -770,9 +775,9 @@ Feel free to propose your own transformation. The formula box from below accepts
 reset_formula();
 function redraw() {
 	draw_conformal();
-	const lag = 50;
-	setTimeout(redraw, 50);
-	t += 1 / 50;
+	const lag = 1000/24;
+	setTimeout(redraw, lag);
+	t += 1 / lag;
 	st = Math.sin(t);
 }
 redraw();
