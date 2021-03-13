@@ -528,12 +528,13 @@ function draw_canvas() {
 
 	// function
 	const f_text = document.getElementById("f").value;
+	const link = 'https://wordsandbuttons.online/arctangent_scale_its_like_the_logarithmic_scale_but_infinite.html?f='+f_text.replaceAll(' ', '').replaceAll('\n', ';')+'#plot';
+	document.getElementById("error").innerHTML = 'Plot link: <a href="'+link+'">'+link+'</a>';
 	const f_lines = f_text.split('\n');
 	for(var line_i = 0; line_i < f_lines.length; ++line_i) {
 		const f_line = f_lines[line_i];
 		try {
 			eval("var f = function(x) { return " + f_line + ";}")
-			document.getElementById("error").innerHTML = "";
 		} catch (error) {
 			var f = function(x) {return 0;}
 			document.getElementById("error").innerHTML = "<b>Error:</b> " + error.message;
@@ -686,12 +687,13 @@ function snap_focus_to_nearest() {
 	var y = 0.0;
 	// function
 	const f_text = document.getElementById("f").value;
+	const link = 'https://wordsandbuttons.online/arctangent_scale_its_like_the_logarithmic_scale_but_infinite.html?f='+f_text.replaceAll(' ', '').replaceAll('\n', ';')+'#plot';
+	document.getElementById("error").innerHTML = 'Plot link: <a href="'+link+'">'+link+'</a>';
 	const f_lines = f_text.split('\n');
 	for(var line_i = 0; line_i < f_lines.length; ++line_i) {
 		const f_line = f_lines[line_i];
 		try {
 			eval("var f = function(x) { return " + f_line + ";}")
-			document.getElementById("error").innerHTML = "";
 			if(!y || abs(f(x0) - y0) < abs(y - y0))
 				y = f(x0);
 		} catch (error) {
@@ -794,12 +796,12 @@ Feel free to try your own functions. The plotter accepts lines of JavaScript cod
 	<input type="radio" name="scale" id="scale_2" value="B" onInput="draw_canvas()"><label for="scale_2">Arctagent</label><br>
 	</div>
 	<div style="margin-bottom: 12pt;">
+	<span id="plot"></span>
 	<i>F(x)</i>:<br>
 	<textarea id="f" onInput="draw_canvas()" rows=3>exp(x - 1) - 4
 x*x*x - sqrt(2.)*x
 -exp(-x - 1) + 4
 </textarea>
-	<br>
 	<p id="error" class="comment"></p>
 	</div>
 	<div style="text-align: center; margin-bottom: 12pt;">
@@ -834,6 +836,16 @@ The code for this page, plotter included, is <a href="https://github.com/akalenu
 	</p>
 
 	<script language="JavaScript">
+		// read formulas if any
+		const href_and_vars = window.location.href.split('?');
+		if(href_and_vars.length == 2) {
+			if(href_and_vars[1].length > 2 && href_and_vars[1][0] == 'f' && href_and_vars[1][1] == '=') {
+				document.getElementById("scale_2").checked = true;
+				document.getElementById("scale_1").checked = false;
+				document.getElementById("f").value = href_and_vars[1].split('=')[1].split('#')[0].replaceAll(';', '\n');
+			}
+		}
+
 		draw_tan();
 		draw_atan();
 		reset_focus();
