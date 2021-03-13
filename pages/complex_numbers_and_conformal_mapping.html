@@ -59,7 +59,7 @@ input[type="text"] {
 }
 
 button{
-	width: 72pt;
+	width: 108pt;
 	font-size: 14pt;
 }
 
@@ -677,6 +677,12 @@ function calc(expr, x) {
 function reset_formula() {
 	formula = document.getElementById("transforamtion").value;
 }
+
+function make_link() {
+	const link = 'https://wordsandbuttons.online/complex_numbers_and_conformal_mapping.html?f=' + formula + '#plot';
+	const no_spaces = link.replaceAll(' ', '');
+	document.getElementById("plot_url").innerHTML = 'Your link to share: <a href="'+no_spaces+'">'+no_spaces+'</a>';
+}
 	</script>
 </head>
 <body>
@@ -767,12 +773,13 @@ There is also a <i>t</i> variable that oscilates in <nobr>[-1, 1]</nobr>.
 	</p>
 	<span id="plot"></span>
 	<table style="width:505pt"><tr><td>
-		<input type="text" id="transforamtion" value="ti/2*x^2 - 2*(x - 0.2i)" onchange="reset_formula();">
+		<input type="text" id="transforamtion" value="ti/2*x^2 - 2*(x - 0.2i)" oninput="document.getElementById('button_1').disabled = false;" onchange="reset_formula();make_link();">
 	</td><td>
-		<button type="button" onclick="reset_formula();" id="button_1"><nobr>Show &darr;</nobr></button>
+		<button type="button" onclick="reset_formula();make_link();" id="button_1" disabled><nobr>&darr; reload</nobr></button>
 	</td></tr></table>
-	<br>
+	<br />
 	<canvas id="conformal" width=640 height=640></canvas>
+	<p class="comment" id="plot_url"></p>
 	<script language="JavaScript"> // init
 // read formula if any
 const href_and_vars = window.location.href.split('?');
