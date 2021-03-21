@@ -2,7 +2,7 @@
 #include <iostream>
 
 int main() {
-	const int n = 100000000;
+	const int n = 10000000;
 	volatile double a = 2.;
 	volatile double b = 0.5;
 
