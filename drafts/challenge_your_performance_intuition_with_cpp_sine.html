@@ -331,6 +331,30 @@ Challenge your performance intuition with C++ sine
 	<td>
 	<pre style="width: 505pt;">
 #include &lt;chrono&gt;
+#include &lt;iostream&gt;
+#include &lt;random&gt;
+#include &lt;array&gt;
+
+int main() {
+    constexpr auto n = 10000000;
+    std::mt19937 rng(0);
+    std::uniform_real_distribution&lt;double&gt; distribution(0, 2);
+    std::vector&lt;double&gt; xs(n);
+    for (auto &x : xs) {
+        x = distribution(rng);
+    }
+
+    auto start = std::chrono::system_clock::now();
+
+    auto side_effect = 0;
+    for (auto i = 0u; i &lt; n; ++i)
+        <b>... affect the side effect ...</b>
+
+    auto end = std::chrono::system_clock::now();
+
+    std::cout &lt;&lt; "time: " &lt;&lt; (end-start).count() * 1e-9 
+              &lt;&lt; "  se: " &lt;&lt; side_effect &lt;&lt; "\n";
+}
 </pre>
 	</td></tr></table>
 	<p>
