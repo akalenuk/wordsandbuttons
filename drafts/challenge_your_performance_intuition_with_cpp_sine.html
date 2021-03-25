@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=0.84">
 	<title>Challenge your performance intuition with C++ sine</title>
-	<meta name="description" content="One more interactive quiz where you get to estimate the performance difference between several variants of the same code. This time, it's all about the sine function.">
+	<meta name="description" content="One more interactive quiz. This time, it's all about the sine function. Which one is faster and when?">
 	<meta name="keywords" content="programming, quizzes">
 	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
 	<style>
@@ -95,18 +95,17 @@ canvas { touch-action: none; }
 	<script language="JavaScript">
 var slider_set = [false, false, false, false,  false, false, false, false,  false, false];
 var slider_true_xs = [
-	7.6 / (7.6 + 7.6) * 512,
-	7.6 / (7.6 + 8.2) * 512,
-	7.6 / (7.6 + 3.1) * 512,
-	3.1 / (3.1 + 4.2) * 512,
+	0.0723318 / (0.0723318 + 0.0098595) * 512,
+	0.0754377 / (0.0754377 + 0.0296685) * 512,
+	0.072668 / (0.072668 + 0.0453003) * 512,
+	0.0457249 / (0.0457249 + 0.083724) * 512,
 
-	7.6 / (7.6 + 7.7) * 512,
-	3.1 / (3.1 + 4.2) * 512,
-	7.7 / (7.6 + 7.6) * 512,
-	7.6 / (7.6 + 7.6) * 512
+	0.0723615 / (0.0723615 + 0.0194681) * 512,
+	0.0191127 / (0.0191127 + 0.0634028) * 512,
+	0.0340617 / (0.0340617 + 0.0351423) * 512
 	];
-var slider_user_xs = [256, 256, 256, 256,  256, 256, 256, 256];
-var slider_xs = [256, 256, 256, 256,  256, 256, 256, 256];
+var slider_user_xs = [256, 256, 256, 256,  256, 256, 256];
+var slider_xs = [256, 256, 256, 256,  256, 256, 256];
 
 var slider_down = false;
 
@@ -335,99 +334,47 @@ Challenge your performance intuition with C++ sine
 </pre>
 	</td></tr></table>
 	<p>
+
 	</p>
 
 	<h2>
-Round 1. && vs &
+Round 1. Sine vs. a small lookup table
 	</h2>
 	<p>
 	</p>
 	<table><tr>
 	<td id="left_1">
 	<pre>
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1
-    && xs[i+1] == 1
-    && xs[i+2] == 1
-    && xs[i+3] == 1)
-      ++four_1_in_a_row;
-    </pre>
-    </td>
-    <td id="right_1">
-    <pre>
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1
-     & xs[i+1] == 1
-     & xs[i+2] == 1
-     & xs[i+3] == 1)
-      ++four_1_in_a_row;
-    </pre>
+
+	</pre>
+	</td>
+	<td id="right_1">
+	<pre>
+
+	</pre>
 	</td></tr></table>
 	<canvas id="slider_1" width=608 height=128></canvas>
 	<p class="comment" id="comment_1">
-They are almost the same.
+
 	</p>
 	<button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
 	<div id="the_truth_1" style="display:none;">
 	<p>
-They are almost the same. In fact, they generate almost the same code.
+
 	</p>
 	<table><tr>
 	<td>
 	<pre id="code_1_1">
-  movq  %rax, %r14
-  .align  16, 0x90
-.LBB0_6:
-  # =>This Inner Loop Header: Depth=1
-  cmpl  $1, -12(%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#7:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, -8(%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#8:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, -4(%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#9:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, (%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#10:   #   in Loop: Header=BB0_6 Depth=1
-  incl  4(%rsp)
-  .align  16, 0x90
-.LBB0_11:  # %._crit_edge
-           #   in Loop: Header=BB0_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB0_6
+
     </pre>
 	</td>
 	<td>
 	<pre id="code_1_2">
-  movq  %rax, %r14
-  .align  16, 0x90
-.LBB0_6:
-  # =>This Inner Loop Header: Depth=1
-  cmpl  $1, -12(%r12,%rbx,4)
-  jne  .LBB0_10
-# BB#7:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, -8(%r12,%rbx,4)
-  jne  .LBB0_10
-# BB#8:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, -4(%r12,%rbx,4)
-  jne  .LBB0_10
-# BB#9:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, (%r12,%rbx,4)
-  jne  .LBB0_10
-# BB#20:   #   in Loop: Header=BB0_6 Depth=1
-  incl  4(%rsp)
-.LBB0_10:  # %.backedge
-           #   in Loop: Header=BB0_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB0_6
+
     </pre>
 	</td></tr></table>
 	<p>
-The trick is in the context. Since == generates only 0 or 1, the short-circuiting for 0 and & is still possible. 0 & anything is still 0. Although, the same trick <a href="https://godbolt.org/z/0eEz_G">doesn't work with |</a> anymore.
+
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -435,106 +382,44 @@ The trick is in the context. Since == generates only 0 or 1, the short-circuitin
 	</script>
 
 	<h2>
-Round 2. & vs *
+Round 2. Sine vs. a large lookup table
 	</h2>
 	<p>
-“Logical and” can also be substituted with a multiplication operator. It has the same truth table on 0 and 1.
+
 	</p>
 	<table><tr>
 	<td id="left_2">
 	<pre>
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1
-     & xs[i+1] == 1
-     & xs[i+2] == 1
-     & xs[i+3] == 1)
-      ++four_1_in_a_row;
-    </pre>
-    </td>
-    <td id="right_2">
-    <pre>
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if((xs[i] == 1)
-     * (xs[i+1] == 1)
-     * (xs[i+2] == 1)
-     * (xs[i+3] == 1))
-      ++four_1_in_a_row;
-    </pre>
-    </td></tr></table>
+
+	</pre>
+	</td>
+	<td id="right_2">
+	<pre>
+
+	</pre>
+	</td></tr></table>
 	<canvas id="slider_2" width=608 height=128></canvas>
 	<p class="comment" id="comment_2">
-They are almost the same.
+
 	</p>
 	<button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
 	<div id="the_truth_2" style="display:none;">
 	<p>
-Surprisingly, they perform almost the same while their code is completely different.
+
 	</p>
 	<table><tr>
 	<td>
 	<pre id="code_2_1">
-  movq  %rax, %r14
-  .align  16, 0x90
-.LBB0_6:
-  # =>This Inner Loop Header: Depth=1
-  cmpl  $1, -12(%r12,%rbx,4)
-  jne  .LBB0_10
-# BB#7:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, -8(%r12,%rbx,4)
-  jne  .LBB0_10
-# BB#8:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, -4(%r12,%rbx,4)
-  jne  .LBB0_10
-# BB#9:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, (%r12,%rbx,4)
-  jne  .LBB0_10
-# BB#20:   #   in Loop: Header=BB0_6 Depth=1
-  incl  4(%rsp)
-.LBB0_10:  # %.backedge
-           #   in Loop: Header=BB0_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB0_6
+
     </pre>
 	</td>
 	<td>
 	<pre id="code_2_2">
-  movq  %rax, %r14
-  movl  $-1, %eax
-  .align  16, 0x90
-.LBB0_6:
-  # =>This Inner Loop Header: Depth=1
-  cmpl  $1, -4(%r12,%rbx,4)
-  sete  %cl
-  cmpl  $1, -8(%r12,%rbx,4)
-  movl  $0, %edx
-  cmovel  %eax, %edx
-  cmpl  $1, -12(%r12,%rbx,4)
-  movzbl  %cl, %ecx
-  je  .LBB0_8
-# BB#7:    # %select.false
-           #   in Loop: Header=BB0_6 Depth=1
-  xorl  %edx, %edx
-.LBB0_8:   # %select.end
-           #   in Loop: Header=BB0_6 Depth=1
-  andl  %edx, %ecx
-  cmpl  $1, (%r12,%rbx,4)
-  sete  %dl
-  movzbl  %dl, %edx
-  negl  %ecx
-  testl  %ecx, %edx
-  je  .LBB0_9
-# BB#19:   #   in Loop: Header=BB0_6 Depth=1
-  incl  4(%rsp)
-.LBB0_9:   # %.backedge
-           #   in Loop: Header=BB0_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB0_6
+
     </pre>
 	</td></tr></table>
 	<p>
-There are 4 comparisons and the rest is just about turning flags into registers. I think we can get rid of that.
+
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -542,105 +427,40 @@ There are 4 comparisons and the rest is just about turning flags into registers.
 	</script>
 
 	<h2>
-Round 3. ==, && vs *, +, -
+Round 3. Double precision sine vs. single precision sine
 	</h2>
 	<p>
-In this simple example, we can substitute almost all the logic with computation. Instead of comparing each value separately we can calculate the squared error for the whole 4-tuple.
+
 	</p>
 	<table><tr>
 	<td id="left_3">
 	<pre>
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1
-    && xs[i+1] == 1
-    && xs[i+2] == 1
-    && xs[i+3] == 1)
-      ++four_1_in_a_row;
-    </pre>
-    </td>
-    <td id="right_3">
-    <pre>
-...
-inline int sq(int x) {
-  return x*x;
-}
-...
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(sq(xs[i] - 1)
-     + sq(xs[i+1] - 1)
-     + sq(xs[i+2] - 1)
-     + sq(xs[i+3] - 1) == 0)
-      ++four_1_in_a_row;
+
+	</pre>
+	</td>
+	<td id="right_3">
+	<pre>
+
     </pre>
 	</td></tr></table>
 	<canvas id="slider_3" width=608 height=128></canvas>
 	<p class="comment" id="comment_3">
-They are almost the same.
+
 	</p>
 	<button type="button" onclick="reveal(2)" id="button_3">Reveal the truth</button>
 	<div id="the_truth_3" style="display:none;">
 	<p>
-And this works perfectly. The code is a few lines longer, but there are no comparisons until the very end. Everything is blunt number crunching. Computers love this kind of code.
+
 	</p>
 	<table><tr>
 	<td>
 	<pre id="code_3_1">
-  movq  %rax, %r14
-  .align  16, 0x90
-.LBB0_6:
-  # =>This Inner Loop Header: Depth=1
-  cmpl  $1, -12(%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#7:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, -8(%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#8:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, -4(%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#9:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, (%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#10:   #   in Loop: Header=BB0_6 Depth=1
-  incl  4(%rsp)
-  .align  16, 0x90
-.LBB0_11:  # %._crit_edge
-           #   in Loop: Header=BB0_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB0_6
+
     </pre>
 	</td>
 	<td>
 	<pre id="code_3_2">
-  movq  %rax, %r14
-  .align  16, 0x90
-.LBB0_6:
-  # =>This Inner Loop Header: Depth=1
-  movl  -12(%r12,%rbx,4), %eax
-  addl  $-1, %eax
-  imull  %eax, %eax
-  movl  -8(%r12,%rbx,4), %ecx
-  addl  $-1, %ecx
-  imull  %ecx, %ecx
-  addl  %eax, %ecx
-  movl  -4(%r12,%rbx,4), %eax
-  addl  $-1, %eax
-  imull  %eax, %eax
-  addl  %ecx, %eax
-  movl  (%r12,%rbx,4), %ecx
-  movl  $1, %edx
-  subl  %ecx, %edx
-  addl  $-1, %ecx
-  imull  %edx, %ecx
-  cmpl  %ecx, %eax
-  jne  .LBB0_7
-# BB#17:   #   in Loop: Header=BB0_6 Depth=1
-  incl  4(%rsp)
-.LBB0_7:   # %.backedge
-           #   in Loop: Header=BB0_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB0_6
+
     </pre>
 	</td></tr></table>
 	</div>
@@ -649,125 +469,44 @@ And this works perfectly. The code is a few lines longer, but there are no compa
 	</script>
 
 	<h2>
-Round 4. * vs abs
+Round 4. sin() vs. std::sin()
 	</h2>
 	<p>
-We don't really need multiplications. We don't really need squared error. Why don't we calculate an absolute error instead?
+
 	</p>
 	<table><tr>
 	<td id="left_4">
 	<pre>
-...
-inline int sq(int x) {
-  return x*x;
-}
-...
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(sq(xs[i] - 1)
-     + sq(xs[i+1] - 1)
-     + sq(xs[i+2] - 1)
-     + sq(xs[i+3] - 1) == 0)
-      ++four_1_in_a_row;
+
     </pre>
 	</td>
 	<td id="right_4">
 	<pre>
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(std::abs(xs[i] - 1)
-     + std::abs(xs[i+1] - 1)
-     + std::abs(xs[i+2] - 1)
-     + std::abs(xs[i+3] - 1) == 0)
-      ++four_1_in_a_row;
+
     </pre>
 	</td></tr></table>
 	<canvas id="slider_4" width=608 height=128></canvas>
 	<p class="comment" id="comment_4">
-They are almost the same.
+
 	</p>
 	<button type="button" onclick="reveal(3)" id="button_4">Reveal the truth</button>
 	<div id="the_truth_4" style="display:none;">
 	<p>
-That's why. Getting an absolute value of an int is not a trivial job. It's not about clipping a bit off; it is a fair comparison and a conditional move. This pair is heavier than a simple multiplication.
+
 	</p>
 	<table><tr>
 	<td>
 	<pre id="code_4_1">
-  movq  %rax, %r14
-  .align  16, 0x90
-.LBB0_6:
-  # =>This Inner Loop Header: Depth=1
-  movl  -12(%r12,%rbx,4), %eax
-  addl  $-1, %eax
-  imull  %eax, %eax
-  movl  -8(%r12,%rbx,4), %ecx
-  addl  $-1, %ecx
-  imull  %ecx, %ecx
-  addl  %eax, %ecx
-  movl  -4(%r12,%rbx,4), %eax
-  addl  $-1, %eax
-  imull  %eax, %eax
-  addl  %ecx, %eax
-  movl  (%r12,%rbx,4), %ecx
-  movl  $1, %edx
-  subl  %ecx, %edx
-  addl  $-1, %ecx
-  imull  %edx, %ecx
-  cmpl  %ecx, %eax
-  jne  .LBB0_7
-# BB#17:   #   in Loop: Header=BB0_6 Depth=1
-  incl  4(%rsp)
-.LBB0_7:   # %.backedge
-           #   in Loop: Header=BB0_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB0_6
+
     </pre>
 	</td>
 	<td>
 	<pre id="code_4_2">
-  movq  %rax, %r14
-  .align  16, 0x90
-.LBB0_6:
-  # =>This Inner Loop Header: Depth=1
-  movl  -12(%r12,%rbx,4), %eax
-  leal  -1(%rax), %ecx
-  movl  $1, %edx
-  subl  %eax, %edx
-  testl  %eax, %eax
-  cmovgl  %ecx, %edx
-  movl  -8(%r12,%rbx,4), %eax
-  leal  -1(%rax), %ecx
-  movl  $1, %esi
-  subl  %eax, %esi
-  testl  %eax, %eax
-  cmovgl  %ecx, %esi
-  addl  %edx, %esi
-  movl  -4(%r12,%rbx,4), %eax
-  leal  -1(%rax), %ecx
-  movl  $1, %edx
-  subl  %eax, %edx
-  testl  %eax, %eax
-  cmovgl  %ecx, %edx
-  addl  %esi, %edx
-  movl  (%r12,%rbx,4), %eax
-  leal  -1(%rax), %ecx
-  movl  $1, %esi
-  subl  %eax, %esi
-  testl  %eax, %eax
-  cmovgl  %ecx, %esi
-  addl  %edx, %esi
-  jne  .LBB0_7
-# BB#17:   #   in Loop: Header=BB0_6 Depth=1
-  incl  4(%rsp)
-.LBB0_7:   # %.backedge
-           #   in Loop: Header=BB0_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB0_6
+
     </pre>
 	</td></tr></table>
 	<p>
-What's interesting, in floating-point numbers, when getting an absolute value <i>is</i> about clipping a bit off, <a href="https://godbolt.org/z/ZoFInw">there are no tests or conditions</a>.
+
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -775,108 +514,40 @@ What's interesting, in floating-point numbers, when getting an absolute value <i
 	</script>
 
 	<h2>
-Round 5. int vs double
+Round 5. Sine vs. a polynomial model
 	</h2>
 	<p>
-The question is, will there be any gain if we simply translate our code to work with doubles?
+
 	</p>
 	<table><tr>
 	<td id="left_5">
 	<pre>
-...
-  using TheType = int;
-...
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1
-    && xs[i+1] == 1
-    && xs[i+2] == 1
-    && xs[i+3] == 1)
-      ++four_1_in_a_row;
+
     </pre>
 	</td>
 	<td id="right_5">
 	<pre>
-...
-  using TheType = double;
-...
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1
-    && xs[i+1] == 1
-    && xs[i+2] == 1
-    && xs[i+3] == 1)
-      ++four_1_in_a_row;
+
     </pre>
 	</td></tr></table>
 	<canvas id="slider_5" width=608 height=128></canvas>
 	<p class="comment" id="comment_5">
-They are almost the same.
+
 	</p>
 	<button type="button" onclick="reveal(4)" id="button_5">Reveal the truth</button>
 	<div id="the_truth_5" style="display:none;">
 	<p>
-Not really, no. The operations are different, but essentially the code is the same. It's still about comparing and jumping.
+
 	</p>
 	<table><tr>
 	<td>
 	<pre id="code_5_1">
-  movq  %rax, %r14
-  .align  16, 0x90
-.LBB0_6:
-  # =>This Inner Loop Header: Depth=1
-  cmpl  $1, -12(%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#7:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, -8(%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#8:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, -4(%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#9:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, (%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#10:   #   in Loop: Header=BB0_6 Depth=1
-  incl  4(%rsp)
-  .align  16, 0x90
-.LBB0_11:  # %._crit_edge
-           #   in Loop: Header=BB0_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB0_6
+
     </pre>
 	</td>
 	<td>
 	<pre id="code_5_2">
-  movq  %rax, %r14
-  .align  16, 0x90
-.LBB0_6:
-  # =>This Inner Loop Header: Depth=1
-  vmovsd  -24(%r15,%rbx,8), %xmm0
-  vucomisd  .LCPI0_0(%rip), %xmm0
-  jne  .LBB0_11
-  jp  .LBB0_11
-# BB#7:    #   in Loop: Header=BB0_6 Depth=1
-  vmovsd  -16(%r15,%rbx,8), %xmm0
-  vucomisd  .LCPI0_0(%rip), %xmm0
-  jne  .LBB0_11
-  jp  .LBB0_11
-# BB#8:    #   in Loop: Header=BB0_6 Depth=1
-  vmovsd  -8(%r15,%rbx,8), %xmm0
-  vucomisd  .LCPI0_0(%rip), %xmm0
-  jne  .LBB0_11
-  jp  .LBB0_11
-# BB#9:    #   in Loop: Header=BB0_6 Depth=1
-  vmovsd  (%r15,%rbx,8), %xmm0
-  vucomisd  .LCPI0_0(%rip), %xmm0
-  jne  .LBB0_11
-  jp  .LBB0_11
-# BB#10:   #   in Loop: Header=BB0_6 Depth=1
-  incl  4(%rsp)
-  .align  16, 0x90
-.LBB0_11:  # %._crit_edge
-           #   in Loop: Header=BB0_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB0_6
+
     </pre>
 	</td></tr></table>
 	</div>
@@ -885,119 +556,40 @@ Not really, no. The operations are different, but essentially the code is the sa
 	</script>
 
 	<h2>
-Round 6. *, +, - int vs double
+Round 6. Multiplication vs. division in pure computation
 	</h2>
 	<p>
-But if we change the code to avoid logic, will there be any gain?
+
 	</p>
 	<table><tr>
 	<td id="left_6">
 	<pre>
-...
-inline int sq(int x) {
-  return x*x;
-}
-...
-  using TheType = int;
-...
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(sq(xs[i] - 1)
-     + sq(xs[i+1] - 1)
-     + sq(xs[i+2] - 1)
-     + sq(xs[i+3] - 1) == 0)
-      ++four_1_in_a_row;
-    </pre>
-    </td>
-    <td id="right_6">
-    <pre>
-...
-inline double sq(int x) {
-  return x*x;
-}
-...
-  using TheType = double;
-...
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(sq(xs[i] - 1)
-     + sq(xs[i+1] - 1)
-     + sq(xs[i+2] - 1)
-     + sq(xs[i+3] - 1) == 0)
-      ++four_1_in_a_row;
-    </pre>
+
+	</pre>
+	</td>
+	<td id="right_6">
+	<pre>
+
+	</pre>
 	</td></tr></table>
 	<canvas id="slider_6" width=608 height=128></canvas>
 	<p class="comment" id="comment_6">
-They are almost the same.
+
 	</p>
 	<button type="button" onclick="reveal(5)" id="button_6">Reveal the truth</button>
 	<div id="the_truth_6" style="display:none;">
 	<p>
-No. The code is conceptually the same though, so the loss is also not that drastic.
+
 	</p>
 	<table><tr>
 	<td>
 	<pre id="code_6_1">
-  movq  %rax, %r14
-  .align  16, 0x90
-.LBB0_6:
-  # =>This Inner Loop Header: Depth=1
-  movl  -12(%r12,%rbx,4), %eax
-  addl  $-1, %eax
-  imull  %eax, %eax
-  movl  -8(%r12,%rbx,4), %ecx
-  addl  $-1, %ecx
-  imull  %ecx, %ecx
-  addl  %eax, %ecx
-  movl  -4(%r12,%rbx,4), %eax
-  addl  $-1, %eax
-  imull  %eax, %eax
-  addl  %ecx, %eax
-  movl  (%r12,%rbx,4), %ecx
-  movl  $1, %edx
-  subl  %ecx, %edx
-  addl  $-1, %ecx
-  imull  %edx, %ecx
-  cmpl  %ecx, %eax
-  jne  .LBB0_7
-# BB#17:   #   in Loop: Header=BB0_6 Depth=1
-  incl  4(%rsp)
-.LBB0_7:   # %.backedge
-           #   in Loop: Header=BB0_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB0_6
+
     </pre>
 	</td>
 	<td>
 	<pre id="code_6_2">
-  movq  %rax, %r14
-  vmovsd  .LCPI1_0(%rip), %xmm0
-  vxorps  %xmm1, %xmm1, %xmm1
-  .align  16, 0x90
-.LBB1_6:
-  # =>This Inner Loop Header: Depth=1
-  vaddsd  -24(%r12,%rbx,8), %xmm0, %xmm2
-  vmulsd  %xmm2, %xmm2, %xmm2
-  vaddsd  -16(%r12,%rbx,8), %xmm0, %xmm3
-  vmulsd  %xmm3, %xmm3, %xmm3
-  vaddsd  %xmm3, %xmm2, %xmm2
-  vaddsd  -8(%r12,%rbx,8), %xmm0, %xmm3
-  vmulsd  %xmm3, %xmm3, %xmm3
-  vaddsd  %xmm3, %xmm2, %xmm2
-  vaddsd  (%r12,%rbx,8), %xmm0, %xmm3
-  vmulsd  %xmm3, %xmm3, %xmm3
-  vaddsd  %xmm3, %xmm2, %xmm2
-  vucomisd  %xmm1, %xmm2
-  jne  .LBB1_9
-  jnp  .LBB1_8
-  jmp  .LBB1_9
-.LBB1_8:   #   in Loop: Header=BB1_6 Depth=1
-  incl  4(%rsp)
-.LBB1_9:   # %.backedge
-           #   in Loop: Header=BB1_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB1_6
+
     </pre>
 	</td></tr></table>
 	</div>
@@ -1006,221 +598,50 @@ No. The code is conceptually the same though, so the loss is also not that drast
 	</script>
 
 	<h2>
-Round 7. double vs float
+Round 7. Division vs. multiplication in array
 	</h2>
 	<p>
-That sound a bit like cheating because with single precision types we would have to read two times less from the memory but let's give it a go.
+
 	</p>
 	<table><tr>
 	<td id="left_7">
 	<pre>
-...
-  using TheType = double;
-...
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1
-    && xs[i+1] == 1
-    && xs[i+2] == 1
-    && xs[i+3] == 1)
-      ++four_1_in_a_row;
+
     </pre>
 	</td>
 	<td id="right_7">
 	<pre>
-...
-  using TheType = float;
-...
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1
-    && xs[i+1] == 1
-    && xs[i+2] == 1
-    && xs[i+3] == 1)
-      ++four_1_in_a_row;
+
     </pre>
 	</td></tr></table>
 	<canvas id="slider_7" width=608 height=128></canvas>
 	<p class="comment" id="comment_7">
-They are almost the same.
+
 	</p>
 	<button type="button" onclick="reveal(6)" id="button_7">Reveal the truth</button>
 	<div id="the_truth_7" style="display:none;">
 	<p>
-And that's the most peculiar thing. Although the code now reads much less from the memory, performance wise it's almost identical to its original form.
+
 	</p>
 	<table><tr>
 	<td>
 	<pre id="code_7_1">
-  movq  %rax, %r14
-  .align  16, 0x90
-.LBB0_6:
-  # =>This Inner Loop Header: Depth=1
-  vmovsd  -24(%r15,%rbx,8), %xmm0
-  vucomisd  .LCPI0_0(%rip), %xmm0
-  jne  .LBB0_11
-  jp  .LBB0_11
-# BB#7:    #   in Loop: Header=BB0_6 Depth=1
-  vmovsd  -16(%r15,%rbx,8), %xmm0
-  vucomisd  .LCPI0_0(%rip), %xmm0
-  jne  .LBB0_11
-  jp  .LBB0_11
-# BB#8:    #   in Loop: Header=BB0_6 Depth=1
-  vmovsd  -8(%r15,%rbx,8), %xmm0
-  vucomisd  .LCPI0_0(%rip), %xmm0
-  jne  .LBB0_11
-  jp  .LBB0_11
-# BB#9:    #   in Loop: Header=BB0_6 Depth=1
-  vmovsd  (%r15,%rbx,8), %xmm0
-  vucomisd  .LCPI0_0(%rip), %xmm0
-  jne  .LBB0_11
-  jp  .LBB0_11
-# BB#10:   #   in Loop: Header=BB0_6 Depth=1
-  incl  4(%rsp)
-  .align  16, 0x90
-.LBB0_11:  # %._crit_edge
-           #   in Loop: Header=BB0_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB0_6
+
     </pre>
 	</td>
 	<td>
 	<pre id="code_7_2">
-  movq  %rax, %r14
-  .align  16, 0x90
-.LBB0_6:
-  # =>This Inner Loop Header: Depth=1
-  vmovss  -12(%r15,%rbx,4), %xmm0
-  vucomiss  .LCPI0_0(%rip), %xmm0
-  jne  .LBB0_11
-  jp  .LBB0_11
-# BB#7:    #   in Loop: Header=BB0_6 Depth=1
-  vmovss  -8(%r15,%rbx,4), %xmm0
-  vucomiss  .LCPI0_0(%rip), %xmm0
-  jne  .LBB0_11
-  jp  .LBB0_11
-# BB#8:    #   in Loop: Header=BB0_6 Depth=1
-  vmovss  -4(%r15,%rbx,4), %xmm0
-  vucomiss  .LCPI0_0(%rip), %xmm0
-  jne  .LBB0_11
-  jp  .LBB0_11
-# BB#9:    #   in Loop: Header=BB0_6 Depth=1
-  vmovss  (%r15,%rbx,4), %xmm0
-  vucomiss  .LCPI0_0(%rip), %xmm0
-  jne  .LBB0_11
-  jp  .LBB0_11
-# BB#10:   #   in Loop: Header=BB0_6 Depth=1
-  incl  4(%rsp)
-  .align  16, 0x90
-.LBB0_11:  # %._crit_edge
-           #   in Loop: Header=BB0_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB0_6
+
     </pre>
 	</td></tr></table>
 	<p>
-This has probably something to do with the bus and the CPU working asynchronously. If the CPU is busy enough, the bus load doesn't matter.
+
 	</p>
 	</div>
 	<script language="JavaScript">
 	init_slider(6);
 	</script>
 
-	<h2>
-Round 8. 1 vs 0
-	</h2>
-	<p>
-This is the bonus round. There is a notion, right along with the short-circuiting being good for performance, that the comparison with zero is cheaper than any other comparison. Let's try it out.
-	</p>
-	<table><tr>
-	<td id="left_8">
-	<pre>
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 1
-    && xs[i+1] == 1
-    && xs[i+2] == 1
-    && xs[i+3] == 1)
-      ++four_1_in_a_row;
-    </pre>
-	</td>
-	<td id="right_8">
-	<pre>
-  for (auto i = 0u; i &lt; TheSize - 3; ++i)
-    if(xs[i] == 0
-    && xs[i+1] == 0
-    && xs[i+2] == 0
-    && xs[i+3] == 0)
-      four_0_in_a_row++;
-    </pre>
-	</td></tr></table>
-	<canvas id="slider_8" width=608 height=128></canvas>
-	<p class="comment" id="comment_8">
-They are almost the same.
-	</p>
-	<button type="button" onclick="reveal(7)" id="button_8">Reveal the truth</button>
-	<div id="the_truth_8" style="display:none;">
-	<p>
-Of course, it isn't. It may be contextually beneficial to check against zero because with Intel architecture there is a dedicated zero flag, and most of the time you can read it from the previous operation skipping the comparison part altogether. But in our example, there is no operation to load the zero flag so the code on both sides is almost identical.
-	</p>
-	<table><tr>
-	<td>
-	<pre id="code_8_1">
-  movq  %rax, %r14
-  .align  16, 0x90
-.LBB0_6:
-  # =>This Inner Loop Header: Depth=1
-  cmpl  $1, -12(%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#7:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, -8(%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#8:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, -4(%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#9:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $1, (%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#10:   #   in Loop: Header=BB0_6 Depth=1
-  incl  4(%rsp)
-  .align  16, 0x90
-.LBB0_11:  # %._crit_edge
-           #   in Loop: Header=BB0_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB0_6
-    </pre>
-	</td>
-	<td>
-	<pre id="code_8_2">
-  movq  %rax, %r14
-  .align  16, 0x90
-.LBB0_6:
-  # =>This Inner Loop Header: Depth=1
-  cmpl  $0, -12(%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#7:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $0, -8(%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#8:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $0, -4(%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#9:    #   in Loop: Header=BB0_6 Depth=1
-  cmpl  $0, (%r12,%rbx,4)
-  jne  .LBB0_11
-# BB#10:   #   in Loop: Header=BB0_6 Depth=1
-  incl  4(%rsp)
-  .align  16, 0x90
-.LBB0_11:  # %._crit_edge
-           #   in Loop: Header=BB0_6 Depth=1
-  addq  $1, %rbx
-  cmpq  $160000000, %rbx
-  jne  .LBB0_6
-    </pre>
-	</td></tr></table>
-	</div>
-	<script language="JavaScript">
-	init_slider(7);
-	</script>
 
 	<div id="show_in_the_end" style="display:none;">
 	<h2>
@@ -1234,7 +655,6 @@ You scored <span id="score"></span> pixels of error. As a reference, if you leav
 Conclusion
 	</h2>
 	<p>
-Truisms don't help performance. That's my conclusion. We all know that logical operations perform short-circuiting; that floats are shorter than doubles; that throwing away a sign from a number is easier than computing its square. It's all true. It's all irrelevant without a proper context.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -1252,8 +672,6 @@ Truisms don't help performance. That's my conclusion. We all know that logical o
 	document.getElementById("code_6_2").innerHTML = colorized(document.getElementById("code_6_2").innerHTML);
 	document.getElementById("code_7_1").innerHTML = colorized(document.getElementById("code_7_1").innerHTML);
 	document.getElementById("code_7_2").innerHTML = colorized(document.getElementById("code_7_2").innerHTML);
-	document.getElementById("code_8_1").innerHTML = colorized(document.getElementById("code_8_1").innerHTML);
-	document.getElementById("code_8_2").innerHTML = colorized(document.getElementById("code_8_2").innerHTML);
 	</script>
 
 	<h2>
