@@ -369,12 +369,24 @@ Round 1. Sine vs. a small lookup table
 	<table><tr>
 	<td id="left_1">
 	<pre>
-
+double sum  = 0.;
+for (auto i = 0u; i &lt; n; ++i)
+    sum += std::sin(xs[i]);
 	</pre>
 	</td>
 	<td id="right_1">
 	<pre>
+constexpr auto ln = 100;
+std::array&lt;double, ln&gt; lookup;
+for(auto i = 0u; i &lt; ln; ++i)
+    lookup[i] = sin(static_cast&lt;double&gt;(i) 
+        / static_cast&lt;double&gt;(ln));
 
+<b>...</b>
+
+double sum  = 0.;
+for (auto i = 0u; i &lt; n; ++i)
+    sum += lookup[static_cast&lt;size_t&gt;(xs[i] * ln)];
 	</pre>
 	</td></tr></table>
 	<canvas id="slider_1" width=608 height=128></canvas>
