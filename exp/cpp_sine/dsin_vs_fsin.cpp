@@ -16,20 +16,20 @@ int main() {
         fs[i] = static_cast<float>(x);
     }
 
-	if(true) {
-	    auto start = std::chrono::system_clock::now();
-	    double sum  = 0.;
-	    for (auto i = 0u; i < n; ++i)
-	        sum += std::sin(ds[i]);
-	    auto end = std::chrono::system_clock::now();
-	    std::cout << "double sin time: " << (end-start).count() * 1e-9  << "  sum: " << sum << "\n";
-	}
-	if(true) {
-	    auto start = std::chrono::system_clock::now();
-	    float sum  = 0.;
-	    for (auto i = 0u; i < n; ++i)
-	        sum += std::sin(fs[i]);
-	    auto end = std::chrono::system_clock::now();
-	    std::cout << "float sin time: " << (end-start).count() * 1e-9  << "  sum: " << sum << "\n";
-	}
+    if(true) {
+        auto start = std::chrono::system_clock::now();
+        double sum  = 0.;
+        for (auto i = 0u; i < n; ++i)
+            sum += std::sin(ds[i]);
+        auto end = std::chrono::system_clock::now();
+        std::cout << "double sin time: " << (end-start).count() * 1e-9  << "  sum: " << sum << "\n";
+    }
+    if(true) {
+        auto start = std::chrono::system_clock::now();
+        float sum  = 0.;
+        for (auto i = 0u; i < n; ++i)
+            sum += std::sin(fs[i]);
+        auto end = std::chrono::system_clock::now();
+        std::cout << "float sin time: " << (end-start).count() * 1e-9  << "  sum: " << sum << "\n";
+    }
 }

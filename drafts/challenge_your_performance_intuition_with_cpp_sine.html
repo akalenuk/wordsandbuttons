@@ -417,24 +417,12 @@ for (auto i = 0u; i &lt; n; ++i)
 	<table><tr>
 	<td>
 	<pre id="code_1_1">
-double sum  = 0.;
-for (auto i = 0u; i &lt; n; ++i)
-    sum += std::sin(xs[i]);
+
 </pre>
 	</td>
 	<td>
 	<pre id="code_1_2">
-constexpr auto ln = 10000000;
-std::array&lt;double, ln&gt; lookup;
-for(auto i = 0u; i &lt; ln; ++i)
-    lookup[i] = sin(static_cast&lt;double&gt;(i) 
-        / static_cast&lt;double&gt;(ln));
 
-<b>...</b>
-
-double sum  = 0.;
-for (auto i = 0u; i &lt; n; ++i)
-    sum += lookup[static_cast&lt;size_t&gt;(xs[i] * ln)];
 </pre>
 	</td></tr></table>
 	<p>
@@ -454,12 +442,24 @@ Round 2. Sine vs. a large lookup table
 	<table><tr>
 	<td id="left_2">
 	<pre>
-
+double sum  = 0.;
+for (auto i = 0u; i &lt; n; ++i)
+    sum += std::sin(xs[i]);
 </pre>
 	</td>
 	<td id="right_2">
 	<pre>
+constexpr auto ln = 10000000;
+std::array&lt;double, ln&gt; lookup;
+for(auto i = 0u; i &lt; ln; ++i)
+    lookup[i] = sin(static_cast&lt;double&gt;(i) 
+        / static_cast&lt;double&gt;(ln));
 
+<b>...</b>
+
+double sum  = 0.;
+for (auto i = 0u; i &lt; n; ++i)
+    sum += lookup[static_cast&lt;size_t&gt;(xs[i] * ln)];
 </pre>
 	</td></tr></table>
 	<canvas id="slider_2" width=608 height=128></canvas>
@@ -499,12 +499,36 @@ Round 3. Double precision sine vs. single precision sine
 	<table><tr>
 	<td id="left_3">
 	<pre>
+std::vector&lt;double&gt; ds(n);
+std::vector&lt;float&gt; fs(n);
+for (auto i = 0u; i &tl; n; ++i) {
+    const auto x = distribution(rng);
+    ds[i] = x;
+    fs[i] = static_cast&lt;float&gt;(x);
+}
 
+<b>...</b>
+
+double sum  = 0.;
+for (auto i = 0u; i &lt; n; ++i)
+    sum += std::sin(ds[i]);
 </pre>
 	</td>
 	<td id="right_3">
 	<pre>
+std::vector&lt;double&gt; ds(n);
+std::vector&lt;float&gt; fs(n);
+for (auto i = 0u; i &tl; n; ++i) {
+    const auto x = distribution(rng);
+    ds[i] = x;
+    fs[i] = static_cast&lt;float&gt;(x);
+}
 
+<b>...</b>
+
+double sum  = 0.;
+for (auto i = 0u; i &lt; n; ++i)
+    sum += std::sin(fs[i]);
 </pre>
 	</td></tr></table>
 	<canvas id="slider_3" width=608 height=128></canvas>
