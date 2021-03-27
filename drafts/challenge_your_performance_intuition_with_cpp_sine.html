@@ -329,7 +329,7 @@ Challenge your performance intuition with C++ sine
 It's fascinating how the smallest detail always provokes the most of discussion. I've been writing and talking about polynomial synthesis a lot, and I always use the sine function as an example. And there's always someone who approaches me with questions like: does it make sense performance-wise? Couldn't I use a lookup table instead? Does it have to be a polynomial?
 	</p>
 	<p>
-And I always have a pair of answers per each of these questions. The first one is "it's just an example." And the second one — "Yes, but..."
+And I always have a two-part response for them. The first one is "it's just an example." And the second one — "Yes, but..."
 	</p>
 	<p>
 The idea of <a href="https://wordsandbuttons.online/mathematical_analysis_explained_with_python_blood_and_tnt.html#index_mathematical_synthesis">polynomial synthesis</a>, also known as polynomial modelling, is simple: if it's hard to compute some function, or even formulate it in a direct form — don't do that. Use a polynomial that behaves like it instead.
@@ -338,7 +338,10 @@ The idea of <a href="https://wordsandbuttons.online/mathematical_analysis_explai
 The sine function is a perfect specimen for polynomial modelling. It has a lot of interesting differential and integral properties. It has a lot of practical applications. And yes, quite often, you want to exchange a bit of precision for a bit of performance, and polynomial modelling is starting to make practical sense.
 	</p>
 	<p>
-But you can't talk about performance without measurements, right? So I did a series of experiements. I wrote a small benchmark, here it is:
+It doesn't have to be the sine specifically, but since it's the sine that provokes questions, I should probably answer them properly.
+	</p>
+	<p>
+I did a series of experiements. I wrote a small benchmark to measure performance of different varians of sine, here it is:
 	</p>
 	<table><tr>
 	<td>
@@ -433,7 +436,7 @@ We don't compute things in a vacuum, more often than not our computation is a pa
 Round 2. Sine vs. a large lookup table
 	</h2>
 	<p>
-Let's emulate a larger application by making the lookup table itself compete for cache storate with itself. Let's make the table unreasonably large.
+Let's emulate a larger application by forcing the lookup table compete for cache storate with itself. Let's make the table unreasonably large.
 	</p>
 	<table><tr>
 	<td id="left_2">
@@ -465,10 +468,10 @@ They are almost the same.
 	<button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
 	<div id="the_truth_2" style="display:none;">
 	<p>
-Now the picture is entirely different. It still works but the gain is now much smaller.
+Now the picture is different. It still works but the gain is now much smaller.
 	</p>
 	<p>
-It's ok to use lookup tables, just bear at mind that it's hard to measure their impact on perfromance adequately. A “pure” experiment will only give you unreasonable expectations of how it should behave in the real world.
+It's ok to use lookup tables, just bear in mind that it's hard to measure their impact on perfromance adequately. A “pure” experiment will only give you unreasonable expectations of how it should behave in the real world.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -529,7 +532,7 @@ They are almost the same.
 	<button type="button" onclick="reveal(2)" id="button_3">Reveal the truth</button>
 	<div id="the_truth_3" style="display:none;">
 	<p>
-Yes, there is a significant difference. But please note that it only shows itself in a context. You will benefit from a smaller carrier type if there are a lot of memory operations, and the computation could be superscalarized effectively.
+Yes, there is a difference. But please note that it only shows itself in a context. You will benefit from a smaller carrier type if there are a lot of memory operations, and the computation could be superscalarized effectively.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -598,7 +601,7 @@ the_system = [
     sine_d.subs(x, 0) - 1,
     sine_d.subs(x, pi / 2),
     sine.subs(x, pi / 2) - 1,
-	# implicitly: sine.subs(x, 0) - 0
+    # implicitly: sine.subs(x, 0) - 0
 ]
 
 res = solve(the_system, (a, b, c, d))
@@ -696,7 +699,7 @@ They are almost the same.
 	<button type="button" onclick="reveal(5)" id="button_6">Reveal the truth</button>
 	<div id="the_truth_6" style="display:none;">
 	<p>
-Well, yes. Division is slightly costlier than the multiplication. And without the division, you can only compute polynomials.
+Well, yes. Division is significanlty costlier than the multiplication. And without the division, you can only compute polynomials.
 	</p>
 	</div>
 	<script language="JavaScript">
