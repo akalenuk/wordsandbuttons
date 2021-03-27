@@ -326,22 +326,22 @@ function colorized(text) {
 Challenge your performance intuition with C++ sine
 	</h1>
 	<p>
-It's fascinating how the smallest detail always provokes the most of discussion. I've been writing and talking about polynomial synthesis a lot, and I always use the sine function as an example. And there's always someone who approaches me with questions like: does it make sense performance-wise? Couldn't I use a lookup table instead? Does it have to be a polynomial?
+It's fascinating how the smallest detail always provokes the most of the discussion. I've been writing and talking about polynomial synthesis a lot, and I always use the sine function as an example. And there's always someone who approaches me with questions like: does modeling the sine make sense performance-wise? Couldn't I use a lookup table instead? Does it have to be a polynomial?
 	</p>
 	<p>
 And I always have a two-part response for them. The first one is "it's just an example." And the second one — "Yes, but..."
 	</p>
 	<p>
-The idea of <a href="https://wordsandbuttons.online/mathematical_analysis_explained_with_python_blood_and_tnt.html#index_mathematical_synthesis">polynomial synthesis</a>, also known as polynomial modelling, is simple: if it's hard to compute some function, or even formulate it in a direct form — don't do that. Use a polynomial that behaves like it instead.
+The idea of <a href="https://wordsandbuttons.online/mathematical_analysis_explained_with_python_blood_and_tnt.html#index_mathematical_synthesis">polynomial synthesis</a>, also known as polynomial modeling, is simple: if it's hard to compute some function, or even formulate it in a direct form — don't do that. Use a polynomial that behaves like it instead.
 	</p>
 	<p>
-The sine function is a perfect specimen for polynomial modelling. It has a lot of interesting differential and integral properties. It has a lot of practical applications. And yes, quite often, you want to exchange a bit of precision for a bit of performance, and polynomial modelling is starting to make practical sense.
+The sine function is a perfect specimen for polynomial modeling. It has a lot of interesting differential and integral properties. It has a lot of practical applications. And yes, quite often, you want to exchange a bit of precision for a bit of performance, and polynomial modeling is starting to make practical sense.
 	</p>
 	<p>
 It doesn't have to be the sine specifically, but since it's the sine that provokes questions, I should probably answer them properly.
 	</p>
 	<p>
-I did a series of experiements. I wrote a small benchmark to measure performance of different varians of sine, here it is:
+I wrote a small benchmark to measure performance of different varians of sine, and did a series of experiments with it.
 	</p>
 	<table><tr>
 	<td>
@@ -380,17 +380,17 @@ int main() {
 All the measurements are performed on <i>Intel(R) Core(TM) i7-9700F CPU @ 3.00GHz</i>; code compiled with <i>clang version 11.0.0-2~ubuntu20.04.1</i>, and with compiler flags <i>-O2 -std=c++14 -march=native</i>
 	</p>
 	<p>
-Simply laying down my numbers would be boring. So, as usual, I propose a game. Given your best judgement, please estimate the relative speed of two pieces of code. The goal is to minimize your error in slider pixels so whomever is closest to 0, wins.
+Simply laying down my numbers would be boring. So, as usual, I propose a game. Given your best judgment, please estimate the relative speed of two pieces of code. The goal is to minimize your error in slider pixels so whoever is closest to zero, wins.
 	</p>
 
 	<h2>
 Round 1. Sine vs. a small lookup table
 	</h2>
 	<p>
-Ok, so why don't we try a lookup table first. The idea of a lookup table is simple: instead of computing a function, we look up for its value in some precalculated table. Yes, there will be some error since we can't store all the possible values for a continuous function, but we can select the margin of error we want by using either smaller but inacurate or more precise but larger tables.
+Ok, so why don't we try a lookup table first? The idea of the lookup table is simple: instead of computing a function, we look up its value in some precalculated table. Yes, there will be some quantity of error, but we can manipulate it by using either smaller but inaccurate or more precise but larger tables.
 	</p>
 	<p>
-It's a nice way to balance speed and precision, and it kind of works. Let's try it on a very small table of a 100 elements.
+It's a nice way to balance speed and precision. Let's try it on a very small table of a 100 elements.
 	</p>
 	<table><tr>
 	<td id="left_1">
@@ -422,10 +422,10 @@ They are almost the same.
 	<button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
 	<div id="the_truth_1" style="display:none;">
 	<p>
-Yes, the lookup table is a valid strategy to exchange precision for speed. But this experiment wasn't entirely dicrete to be honest. Of course, a small table fits entirely in our first level cache, and in this experiment, the other parts of our program don't have to compete for the cache space since there are no other parts.
+Yes, the lookup table is a valid strategy to exchange precision for speed. But this experiment wasn't entirely truthful, to be honest. Of course, a small table fits entirely in our first-level cache, and in this experiment, the other parts of our program don't have to compete for the cache space since there are no other parts.
 	</p>
 	<p>
-We don't compute things in a vacuum, more often than not our computation is a part of something larger, some system, some application. And then we can not expect our lookup always be waiting for us in the cahce. And even if it gets there, it pushes away some other data making some other code slower.
+We don't compute things in a vacuum, more often than not our computation is a part of something larger, some system, some application. And then we can not expect our lookup to always be waiting for us in the cache. And even if it gets there, it pushes away some other data making some other code slower.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -471,7 +471,7 @@ They are almost the same.
 Now the picture is different. It still works but the gain is now much smaller.
 	</p>
 	<p>
-It's ok to use lookup tables, just bear in mind that it's hard to measure their impact on perfromance adequately. A “pure” experiment will only give you unreasonable expectations of how it should behave in the real world.
+It's ok to use lookup tables, just bear in mind that it's hard to measure their impact on performance adequately. A “pure” experiment will only give you unreasonable expectations of how it should behave in the real world.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -479,13 +479,13 @@ It's ok to use lookup tables, just bear in mind that it's hard to measure their 
 	</script>
 
 	<h2>
-Round 3. Double precision sine vs. single precision sine
+Round 3. Double-precision sine vs. single-precision sine
 	</h2>
 	<p>
-The other option to exchange precision for speed would be to choose a smaller carrier type for the compuatation. Or would it?
+The other option to exchange precision for speed would be to choose a smaller carrier type for the computation. Or would it?
 	</p>
 	<p>
-In the early days of floating point coprocessors, there was indeed performance difference between computations in single and double precision. Then, on x87, it vanished. All the computation was done in 80-bit numbers regardless of the input and output types. Then, with superscalarization, the difference went back, since you can store more smaller numbers in one large register. Also, you can fit more numbers in your cache, and read more numbers with a single line.
+In the early days of floating-point coprocessors, there was indeed a performance difference between computations in single and double precision. Then, on x87, it vanished. All the computation was done in 80-bit numbers regardless of the input and output types. Then, with superscalarization, the difference went back, since you can store more floats than doubles in a single large register. Also, you can fit more numbers in your cache, and read more numbers with a single line.
 	</p>
 	<p>
 So what is the difference these days?
@@ -578,10 +578,10 @@ The std::sin() is defined for both float and double types, while the good old C-
 Round 5. Sine vs. a polynomial model
 	</h2>
 	<p>
-Ok, now for the polynomial model. There is no single best way to model a sine. You can use <a href="https://wordsandbuttons.online/trippy_polynomials_in_arctangent_scale.html#index_taylor_series">taylor series</a> or you can <a href="https://wordsandbuttons.online/sympy_makes_math_fun_again.html">write down the properties of the function you want to model, make them into a linear system, and then solve the system and collect the coefficients for your polynomial</a>.
+Ok, now for the polynomial model. There is no single best way to model a sine. You can use the <a href="https://wordsandbuttons.online/trippy_polynomials_in_arctangent_scale.html#index_taylor_series">Taylor series</a> or you can <a href="https://wordsandbuttons.online/sympy_makes_math_fun_again.html">write down the properties of the function you want to model, make them into a linear system, and then solve the system and collect the coefficients for your polynomial</a>.
 	</p>
 	<p>
-Let's make a model out of two values of sine, two derivatives, and the fact that it's symmetrycal. Here's the Python code that computes the model for us.
+Let's make a model out of two values of sine, two derivatives, and the fact that it's anti-symmetrical. Here's the Python code that computes the model for us.
 	</p>
 	<table><tr>
 	<td>
@@ -611,7 +611,7 @@ for var, exp in res.items():
 </pre>
 	</td></tr></table>
 	<p>
-This model isn't very accurate, but it still <a href="https://wordsandbuttons.online/arctangent_scale_its_like_the_logarithmic_scale_but_infinite.html?f=-0.000182690409228785*x*x*x*x*x*x*x+0.00830460224186793*x*x*x*x*x-0.166651012143690*x*x*x+x;sin(x);#plot">looks a lot like the real sine</a> on its most important interval, and when you turn it into the periodic function, it will remain continuous and smooth on the whole range of real numbers. Lookup tables don't have continuity, and Taylor series wouldn't grant you smoothness.
+This model isn't very accurate, but it still <a href="https://wordsandbuttons.online/arctangent_scale_its_like_the_logarithmic_scale_but_infinite.html?f=-0.000182690409228785*x*x*x*x*x*x*x+0.00830460224186793*x*x*x*x*x-0.166651012143690*x*x*x+x;sin(x);#plot">looks a lot like the real sine</a> on its most important interval, and when you turn it into the periodic function, it will remain continuous and smooth on the whole range of real numbers. Lookup tables don't have continuity, and the Taylor series wouldn't grant you smoothness.
 	</p>
 	<p>
 It's also fast.
@@ -646,7 +646,7 @@ They are almost the same.
 	<button type="button" onclick="reveal(4)" id="button_5">Reveal the truth</button>
 	<div id="the_truth_5" style="display:none;">
 	<p>
-So it's fast, and it doesn't use up your cahce resource.
+So it's fast, and it doesn't use up your cache resource.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -699,7 +699,7 @@ They are almost the same.
 	<button type="button" onclick="reveal(5)" id="button_6">Reveal the truth</button>
 	<div id="the_truth_6" style="display:none;">
 	<p>
-Well, yes. Division is significanlty costlier than the multiplication. And without the division, you can only compute polynomials.
+Well, yes. The division is significantly costlier than the multiplication. And without the division, you can only compute polynomials.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -760,10 +760,10 @@ They are almost the same.
 	<button type="button" onclick="reveal(6)" id="button_7">Reveal the truth</button>
 	<div id="the_truth_7" style="display:none;">
 	<p>
-It's like when you're waiting for a real bus on a bus stop. It doesn't matter if you smoke a sigarette or do a sudoku. If a bus is late, you will be late too.
+It's like when you're waiting for a real bus at a bus stop. It doesn't matter if you smoke a cigarette or do sudoku. If a bus is late, you will be late too.
 	</p>
 	<p>
-So yes, generally polynomial models are the fastest. But they are also limited in their capabilities and to expand these limits you might want to go beyond polynomial.
+So yes, generally, polynomial models are the fastest. But they are also limited in their capabilities and to expand these limits you might want to go beyond polynomial.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -783,13 +783,13 @@ You scored <span id="score"></span> pixels of error. As a reference, if you leav
 Conclusion
 	</h2>
 	<p>
-Yes, polynomial modelling of the sine makes sense performance-wise. But it's not the whole point. With polynomial synthesis, you can not only substitute some other function, but create the one with the properties you want from scratch.
+Yes, polynomial modeling of the sine makes sense performance-wise. But it's not the whole point. With polynomial synthesis, you can not only substitute some other function but create the one with the properties you want from scratch.
 	</p>
 	<p>
-Yes, you can use a lookup table instead. But it might not be the best solution because of its price in cache. 
+Yes, you can use a lookup table instead. But it might not be the best solution because of its price in cache space.
 	</p>
 	<p>
-Yes, polynomial modelling is the most computational friendly. But you don't have to stick to polynomials if you have a reason to go beyond. It's just most of the time, polynomials would be enough, and since composing them is as simple as writing a few lines of Python, it should probably be your fist choice anyway.
+Yes, polynomial models are the most computational friendly. But you don't have to stick to polynomials if you have a reason to go beyond. It's just most of the time, polynomials would be enough, and since composing them is as simple as writing a few lines of Python, it should probably be your first choice anyway.
 	</p>
 	</div>
 	<h2>
