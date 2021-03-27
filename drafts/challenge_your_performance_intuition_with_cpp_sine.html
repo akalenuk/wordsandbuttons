@@ -384,6 +384,10 @@ Simply laying down my numbers would be boring. So, as usual, I propose a game. G
 Round 1. Sine vs. a small lookup table
 	</h2>
 	<p>
+Ok, so why don't we try a lookup table first. The idea of a lookup table is simple: instead of computing a function, we look up for its value in some precalculated table. Yes, there will be some error since we can't store all the possible values for a continuous function, but we can select the margin of error we want by using either smaller but inacurate or more precise but larger tables.
+	</p>
+	<p>
+It's a nice way to balance speed and precision, and it kind of works. Let's try it on a very small table of a 100 elements.
 	</p>
 	<table><tr>
 	<td id="left_1">
@@ -415,10 +419,10 @@ They are almost the same.
 	<button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
 	<div id="the_truth_1" style="display:none;">
 	<p>
-
+Yes, the lookup table is a valid strategy to exchange precision for speed. But this experiment wasn't entirely dicrete to be honest. Of course, a small table fits entirely in our first level cache, and in this experiment, the other parts of our program don't have to compete for the cache space since there are no other parts.
 	</p>
 	<p>
-
+We don't compute things in a vacuum, more often than not our computation is a part of something larger, some system, some application. And then we can not expect our lookup always be waiting for us in the cahce. And even if it gets there, it pushes away some other data making some other code slower.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -429,7 +433,7 @@ They are almost the same.
 Round 2. Sine vs. a large lookup table
 	</h2>
 	<p>
-
+Let's emulate a larger application by making the lookup table itself compete for cache storate with itself. Let's make the table unreasonably large.
 	</p>
 	<table><tr>
 	<td id="left_2">
@@ -461,11 +465,10 @@ They are almost the same.
 	<button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
 	<div id="the_truth_2" style="display:none;">
 	<p>
-
+Now the picture is entirely different. It still works but the gain is now much smaller.
 	</p>
-
 	<p>
-
+It's ok to use lookup tables, just bear at mind that it's hard to measure their impact on perfromance adequately. A “pure” experiment will only give you unreasonable expectations of how it should behave in the real world.
 	</p>
 	</div>
 	<script language="JavaScript">
