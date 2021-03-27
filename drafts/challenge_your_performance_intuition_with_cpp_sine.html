@@ -479,7 +479,13 @@ It's ok to use lookup tables, just bear at mind that it's hard to measure their 
 Round 3. Double precision sine vs. single precision sine
 	</h2>
 	<p>
-
+The other option to exchange precision for speed would be to choose a smaller carrier type for the compuatation. Or would it?
+	</p>
+	<p>
+In the early days of floating point coprocessors, there was indeed performance difference between computations in single and double precision. Then, on x87, it vanished. All the computation was done in 80-bit numbers regardless of the input and output types. Then, with superscalarization, the difference went back, since you can store more smaller numbers in one large register. Also, you can fit more numbers in your cache, and read more numbers with a single line.
+	</p>
+	<p>
+So what is the difference these days?
 	</p>
 	<table><tr>
 	<td id="left_3">
@@ -523,9 +529,8 @@ They are almost the same.
 	<button type="button" onclick="reveal(2)" id="button_3">Reveal the truth</button>
 	<div id="the_truth_3" style="display:none;">
 	<p>
-
+Yes, there is a significant difference. But please note that it only shows itself in a context. You will benefit from a smaller carrier type if there are a lot of memory operations, and the computation could be superscalarized effectively.
 	</p>
-
 	</div>
 	<script language="JavaScript">
 	init_slider(2);
@@ -535,7 +540,7 @@ They are almost the same.
 Round 4. sin() vs. std::sin()
 	</h2>
 	<p>
-
+While doing the previous experiment, I notices one interesting thing. The sin() and std::sin() in C++ are completely different numbers. Now, without googling it up, can you guess what is their performance difference on single precision floating points?
 	</p>
 	<table><tr>
 	<td id="left_4">
@@ -559,11 +564,7 @@ They are almost the same.
 	<button type="button" onclick="reveal(3)" id="button_4">Reveal the truth</button>
 	<div id="the_truth_4" style="display:none;">
 	<p>
-
-	</p>
-
-	<p>
-
+The std::sin() is defined for both float and double types, while the good old C-style sin() — only for double. So when you use it with floats, you may still gain a little from having more numbers in a cache line, but the superscalarization opportunity is lost.
 	</p>
 	</div>
 	<script language="JavaScript">
