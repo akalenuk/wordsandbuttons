@@ -332,10 +332,10 @@ It's fascinating how the smallest detail always drags the most of discussion. I'
 And I always have a pair of answers per each of these questions. The first one is "it's just an example." And the second one — "it depends."
 	</p>
 	<p>
-The idea of <a href="https://wordsandbuttons.online/sympy_makes_math_fun_again.html">polynomial synthesis</a>, also known as polynomial modelling, is simple: you write down the properties of the function you want to model, make them into a linear system, and then you solve the system and collect your coefficients.
+The idea of <a href="https://wordsandbuttons.online/mathematical_analysis_explained_with_python_blood_and_tnt.html#index_mathematical_synthesis">polynomial synthesis</a>, also known as polynomial modelling, is simple: if it's hard to compute some function, or even formulate it in a direct form — don't do that. Use a polynomial that behaves like it instead.
 	</p>
 	<p>
-The sine function has a lot of interesting differential and integral properties. It has a lot of practical applications. And yes, quite often, you want to exchange a bit of precision for a bit of performance, and polynomial modelling is starting to make practical sense.
+The sine function is a perfect specimen for polynomial modelling. It has a lot of interesting differential and integral properties. It has a lot of practical applications. And yes, quite often, you want to exchange a bit of precision for a bit of performance, and polynomial modelling is starting to make practical sense.
 	</p>
 	<p>
 But you can't talk about performance without measurements, right? So I did a series of experiements. I wrote a small benchmark, here it is:
@@ -575,7 +575,43 @@ The std::sin() is defined for both float and double types, while the good old C-
 Round 5. Sine vs. a polynomial model
 	</h2>
 	<p>
+Ok, now for the polynomial model. There is no single best way to model a sine. You can use <a href="https://wordsandbuttons.online/trippy_polynomials_in_arctangent_scale.html#index_taylor_series">taylor series</a> or you can <a href="https://wordsandbuttons.online/sympy_makes_math_fun_again.html">write down the properties of the function you want to model, make them into a linear system, and then solve the system and collect the coefficients for your polynomial</a>.
+	</p>
+	<p>
+Let's make a model out of two values of sine, two derivatives, and the fact that it's symmetrycal. Here's the Python code that computes the model for us.
+	</p>
+	<table><tr>
+	<td>
+	<pre style="width: 505pt;">
+from sympy import *
+from sympy.printing import print_ccode
+from math import pi
 
+a, b, c, d, x = symbols('a b c d x')
+
+sine = a*x**7 + b*x**5 + c*x**3 + d*x
+sine_d = diff(sine, x)
+sine_i = integrate(sine, x)
+
+the_system = [
+    sine_i.subs(x, pi / 2) - sine_i.subs(x, 0) - 1,
+    sine_d.subs(x, 0) - 1,
+    sine_d.subs(x, pi / 2),
+    sine.subs(x, pi / 2) - 1,
+	# implicitly: sine.subs(x, 0) - 0
+]
+
+res = solve(the_system, (a, b, c, d))
+
+for var, exp in res.items():
+    print(var, exp)
+</pre>
+	</td></tr></table>
+	<p>
+This model isn't very accurate, but it still <a href="https://wordsandbuttons.online/arctangent_scale_its_like_the_logarithmic_scale_but_infinite.html?f=-0.000182690409228785*x*x*x*x*x*x*x+0.00830460224186793*x*x*x*x*x-0.166651012143690*x*x*x+x;sin(x);#plot">looks a lot like the real sine</a> on its most important interval, and when you turn it into the periodic function, it will remain continuous and smooth on the whole range of real numbers. Lookup tables don't have continuity, and Taylor series wouldn't grant you smoothness.
+	</p>
+	<p>
+It's also fast.
 	</p>
 	<table><tr>
 	<td id="left_5">
@@ -607,9 +643,8 @@ They are almost the same.
 	<button type="button" onclick="reveal(4)" id="button_5">Reveal the truth</button>
 	<div id="the_truth_5" style="display:none;">
 	<p>
-
+So it's fast, and it doesn't use up your cahce resource.
 	</p>
-
 	</div>
 	<script language="JavaScript">
 	init_slider(4);
