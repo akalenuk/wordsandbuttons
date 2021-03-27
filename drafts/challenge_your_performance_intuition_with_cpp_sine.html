@@ -326,6 +326,19 @@ function colorized(text) {
 Challenge your performance intuition with C++ sine
 	</h1>
 	<p>
+It's fascinating how the smallest detail always drags the most of discussion. I've been writing and talking about polynomial synthesis a lot, and I always use the sine function as an example. And there's always someone who approaches me with questions like: does it make sense performance-wise? Couldn't you use a lookup table instead? Does it have to be a polynomial?
+	</p>
+	<p>
+And I always have a pair of answers per each of these questions. The first one is "it's just an example." And the second one — "it depends."
+	</p>
+	<p>
+The idea of <a href="https://wordsandbuttons.online/sympy_makes_math_fun_again.html">polynomial synthesis</a>, also known as polynomial modelling, is simple: you write down the properties of the function you want to model, make them into a linear system, and then you solve the system and collect your coefficients.
+	</p>
+	<p>
+The sine function has a lot of interesting differential and integral properties. It has a lot of practical applications. And yes, quite often, you want to exchange a bit of precision for a bit of performance, and polynomial modelling is starting to make practical sense.
+	</p>
+	<p>
+But you can't talk about performance without measurements, right? So I did a series of experiements. I wrote a small benchmark, here it is:
 	</p>
 	<table><tr>
 	<td>
@@ -347,8 +360,11 @@ int main() {
     auto start = std::chrono::system_clock::now();
 
     auto side_effect = 0;
-    for (auto i = 0u; i &lt; n; ++i)
-        <b>... affect the side effect ...</b>
+    for (auto i = 0u; i &lt; n; ++i) {
+        <b>The run time of the code here will be measured.
+        <b>It has to affect the side effect so the compiler</p>
+        <b>wouldn't optimize it out.</b>
+    }
 
     auto end = std::chrono::system_clock::now();
 
@@ -358,7 +374,7 @@ int main() {
 </pre>
 	</td></tr></table>
 	<p>
-
+Simply laying down my numbers would be boring. So, as usual, I propose a game. Given your best judgement, please estimate the relative speed of two pieces of code. The goal is to minimize your error in slider pixels so whomever is closest to 0, wins.
 	</p>
 
 	<h2>
