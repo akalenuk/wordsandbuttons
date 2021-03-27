@@ -7,6 +7,9 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 
 ## Pages
 
+- [Challenge your performance intuition with C++ sine](https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_sine.html) One more interactive quiz. This time, it's all about the sine function. Which one is faster and when?
+<sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#quizzes](https://wordsandbuttons.online/all_quizzes.html)</sup> 
+
 - [Complex numbers and conformal mapping](https://wordsandbuttons.online/complex_numbers_and_conformal_mapping.html) This explains the geometry of complex numbers. Explains conformal transformations, introduces analytic functions, and shows that analytic complex functions are conformal. And using the connection between the geometry and the analysis explains it all in just some five minutes.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
