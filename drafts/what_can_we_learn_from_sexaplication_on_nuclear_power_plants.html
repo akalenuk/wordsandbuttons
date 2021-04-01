@@ -77,41 +77,101 @@ u {
 canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
-function show(n){
-	document.getElementById("shown_" + n).style.display = "none";
-	document.getElementById("hidden_" + n).style.display = "inline";
-}
+
 	</script>
 </head>
 <body>
 	<center>
 	<h1>
-...
+What can we&nbsp;learn from sexaplication on&nbsp;nuclear power plants
 	</h1>
+
+	<h2>
+Historical anecdote
+	</h2>
 	<p>
-...
+Let’s say you want to keep your core temperature under control. You put a thermal sensor there, wire it out to some kind of <a href="https://en.wikipedia.org/wiki/SCADA">SCADA</a>, and here you go. Except, since it’s very important, you can’t rely on just one wire. What if for whatever reason it snaps?
+	</p>
+	<p>
+So you add another scanner and another wire. It’s now more reliable. But what if one of the scanners shows 300 degrees Celsius, and the other 1234? Should you shut down the reactor or replace the broken scanner?
+	</p>
+	<p>
+Well, you add another scanner and another wire. Now it’s either 300, 300, 1234, or 1234, 1234, 300. You can now make a decision.
+	</p>
+	<p>
+In Ukraine, up until the early 90s, components like these were triplicated on all the nuclear power plants. But then the collaboration with <a href="https://en.wikipedia.org/wiki/International_Atomic_Energy_Agency">IAEA</a> started and they brought in the new question: let’s say you know that you need to replace the broken sensor. Now how can you be sure, you’re getting adequate data <i>while you’re replacing it</i>?
+	</p>
+	<p>
+The rest of the world was already quadruplicating their components, but Ukrainian NPP industry didn’t yet have a reliable and proven quadruplicator — a special block to bring four signals together. Developing and producing this block, considering the strictest reliability requirements, would be too cumbersome at that point, so they decided to duplicate a triplicator instead.
+	</p>
+	<p>
+Let that sink in. Multiplicating the proven multiplicator was considered better option than engineering, producing, validating and verifying a completely new device.
+	</p>
+	<p>
+Now, what can we, as software engineers, learn from that?
+	</p>
+	<p>
+Well, nothing. Because we somehow presume that software components are flawless. They are, of course, not, but this is the model we chose to believe in. A diode can fail, a resistor can burn, a capacitor can leak, but a hello-world is a hello-world forever and ever.
 	</p>
 
-	<table><tr>
-	<td>
-	<pre>
-...
-	</pre>
-	</td></tr></table>
+	<h2>
+Theoretical ground
+	</h2>
 	<p>
-	<div id="shown_1">
-		<button type="button" onclick="show(1)">Yes</button>
-		<button type="button" onclick="show(1)">No</button>
-	</div>
-	<div id="hidden_1" style="display:none;">
-		<p>
-...
-		</p>
-	</div>
-
-	<p>
-...
+In the world of inherently unreliable components, a. k. a. the real world, multiplication is the only realistic way to improve your system reliability. It’s simple math.
 	</p>
+	<p>
+Let’s say you have 3 components. Each has a 10% chance of failure and a 90% chance to work. If you wire them consequently, the reliability of this subsystem would be:
+	</p>
+	<canvas id="consequent" width=640 height=480></canvas>
+	<p align="center">
+0.9*0.9*0.9 = 0.729
+	</p>
+	<p>
+Now if you have the same low-reliability components but you wire them in parallel, so the working ones could substitute the failed, then the reliability of such subsystem would be:
+	</p>
+	<canvas id="parallel" width=640 height=480></canvas>
+	<p align="center">
+1.0 - (0.1*0.1*0.1) = 0.999
+	</p>
+	<p>
+Hardware guys, especially those who burned enough resistors, realize that. That’s why they duplicate and triplicate anything worth triplicating. We don’t.
+	</p>
+
+	<h2>
+Practical example
+	</h2>
+	<p>
+Last weekend I had to build a very cool thing I can’t tell much about for legal reasons. I can tell about its build process though. It was supposed to be a CUDA thing wired into a C++ code built with CMake and running on Linux. The build instruction, actually a Docker file, was explicit about versions but only to the point at which it works in Docker. I wanted to build the thing on WSL, and this brought enough uncertainty to make the build system crumble.
+	</p>
+	<p>
+What I found out that weekend. For some reason, CMake versions 16 and higher don’t bootstrap on GCC 5 to 7. But only on WSL2. On WSL, they do, but CUDA doesn’t see your GPU. The CMake files I had were built for CMake 16, meaning that any later version wouldn’t recognize CUDA. And although the clang-tools could be of any version starting from 6, there was a special Linux patch somewhere that expected clanglib-10.so to be available.
+	</p>
+	<p>
+There were also troubles with different C++ standards and dialects. The most annoying, the most trivial and the most unnecessary ones. Like on MSVC, you can get away with messages in plain std::exceptions, on GCC, you can not. In C++17, there are messageless static_asserts, but in C++14, all the static asserts should be supplied with a message string.
+	</p>
+	<p>
+I spent my time trying different versions of things until finally, it all worked.
+	</p>
+	<p>
+The build process was too consecutive, a failure in any subsystem caused all the build to fail. And if you even tried CMake, CUDA, and even cross-platform C++, you know how fragile these things are. You can’t build a reliable consecutive system out of unreliable subsystems. It’s simple math.
+	</p>
+	<p>
+But in fact, the build process had plenty of multiplication within. It’s just <b>I was a quadruplicator for this process</b>.
+	</p>
+	<p>
+When CMake 17 didn’t work, I tried 16. When clang 10 wasn’t enough, I installed clang 11. When CUDA 11 requested an std=c++17 option, I added this option. This variability made the build possible both mathematically and practically.
+	</p>
+	<p>
+Come to think about it, this is just insane. You don’t need a person to switch connectors in a nuclear core. In fact, you don’t want this person there. And the person doesn’t want to be there. So electrical engineers found a way to automate this. But we, software engineers, who should be ahead in any possible automation, are still switching subsystems manually.
+	</p>
+	<p>
+Programs are just as faulty as resistors and capacitors. It’s just a matter of scale. Sure, <pre>prnit “hello world”</pre> is reliable enough. But <a href="https://scan.coverity.com/projects/294">one defect per every two thousand lines of code</a> is the industry norm these days. Software subsystems are evidently fault prone.
+	</p>
+	<p>
+So why we keep building our systems like they aren’t?
+	</p>
+
 
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
