@@ -77,7 +77,39 @@ u {
 canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
+function draw_arrow(context, x1, y1, x2, y2, color) {
+	var d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d + (x2 - x1) * 6 / d);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + (y2 - y1) * 6 / d - (x2 - x1) * 16 / d, y2 - (y2 - y1) * 16 / d - (x2 - x1) * 6 / d);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
+}
 
+function draw_consequent(){
+	var context = document.getElementById("consequent").getContext("2d");
+	const w = document.getElementById("consequent").width;
+	const h = document.getElementById("consequent").height;
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+}
+
+function draw_parallel(){
+	var context = document.getElementById("parallel").getContext("2d");
+	const w = document.getElementById("parallel").width;
+	const h = document.getElementById("parallel").height;
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+}
 	</script>
 </head>
 <body>
@@ -123,15 +155,15 @@ In the world of inherently unreliable components, a. k. a. the real world, multi
 	<p>
 Let’s say you have 3 components. Each has a 10% chance of failure and a 90% chance to work. If you wire them consequently, the reliability of this subsystem would be:
 	</p>
-	<canvas id="consequent" width=640 height=480></canvas>
-	<p align="center">
+	<canvas id="consequent" width=640 height=360></canvas>
+	<p align="center" style="text-align: center; font-size: 32pt;">
 0.9*0.9*0.9 = 0.729
 	</p>
 	<p>
 Now if you have the same low-reliability components but you wire them in parallel, so the working ones could substitute the failed, then the reliability of such subsystem would be:
 	</p>
-	<canvas id="parallel" width=640 height=480></canvas>
-	<p align="center">
+	<canvas id="parallel" width=640 height=360></canvas>
+	<p align="center" style="text-align: center; font-size: 32pt;">
 1.0 - (0.1*0.1*0.1) = 0.999
 	</p>
 	<p>
@@ -166,12 +198,16 @@ When CMake 17 didn’t work, I tried 16. When clang 10 wasn’t enough, I instal
 Come to think about it, this is just insane. You don’t need a person to switch connectors in a nuclear core. In fact, you don’t want this person there. And the person doesn’t want to be there. So electrical engineers found a way to automate this. But we, software engineers, who should be ahead in any possible automation, are still switching subsystems manually.
 	</p>
 	<p>
-Programs are just as faulty as resistors and capacitors. It’s just a matter of scale. Sure, <pre>prnit “hello world”</pre> is reliable enough. But <a href="https://scan.coverity.com/projects/294">one defect per every two thousand lines of code</a> is the industry norm these days. Software subsystems are evidently fault prone.
+Programs are just as faulty as resistors and capacitors. It’s just a matter of scale. Sure, <span style="font-family: monospace;">prnit "hello world"</span> is reliable enough. But <a href="https://scan.coverity.com/projects/294">one defect per every two thousand lines of code</a> is the industry norm these days. Software subsystems are evidently fault prone.
 	</p>
 	<p>
 So why we keep building our systems like they aren’t?
 	</p>
 
+	<script language="JavaScript">
+draw_consequent();
+draw_parallel();
+	</script>
 
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
