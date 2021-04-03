@@ -437,7 +437,30 @@ else if(year == 1)
 else
 	document.getElementById("when").innerHTML = "A few years back";
 
+const href_and_vars = window.location.href.split('?');
+if(href_and_vars.length == 2) {
+	const w = document.getElementById("menu").width;
+	const h = document.getElementById("menu").height;
+	if(href_and_vars[1].length > 2 && href_and_vars[1].indexOf('story=') == 0) {
+		const story = href_and_vars[1].split('=')[1].split('#')[0];
+		console.log(story);
+		for(var i = 0; i < 5; ++i) {
+			xs[i] = 3*w / 4;
+			ys[i] = 100 + (h - 100) / ys.length * i;
+		}
+		for(var i = 0; i < story.length; ++i) {
+			const j = Number(story[i]) - 1;
+			xs[j] = w / 4;
+			ys[j] = 100 + (h - 100) / ys.length * i;
+		}
+	}
+}
+
 recalculate_ys_to_be();
+for(var i = 0; i < 5; ++i)
+	ys[i] = ys_to_be[i];
+
+
 init_menu();
 function redraw() {
 	move_ys_to_ys_to_be();
