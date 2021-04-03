@@ -154,6 +154,54 @@ var xs = [160, 160, 160, 160, 160];
 var ys = [100, 150, 200, 250, 300];
 var ys_to_be = [100, 150, 200, 250, 300];
 var selected_i = -1;
+
+function recalculate_ys_to_be() {
+	const w = document.getElementById("menu").width;
+	const h = document.getElementById("menu").height;
+	var ys_in = [];
+	for(var i = 0; i < 5; ++i) {
+		if(xs[i] < w/2) {
+			ys_in.push([ys[i], i]);
+		}
+	}
+	ys_in.sort(function(a, b) {return Number(a[0]) - Number(b[0]);});
+	var s = '';
+	for(var i = 0; i < ys_in.length; ++i) {
+		s += String(ys_in[i][0]) + ' ';
+	}
+
+	for(var i = 0; i < ys_in.length; ++i) {
+		ys_to_be[ys_in[i][1]] = 100 + (h - 100) / ys_in.length * i;
+	}
+}
+
+function move_ys_to_ys_to_be() {
+	if(selected_i == -1) {
+		const w = document.getElementById("menu").width;
+		const h = document.getElementById("menu").height;
+		var ys_in = [];
+		for(var i = 0; i < 5; ++i) {
+			if(xs[i] < w/2) {
+				const dx = w/4 - xs[i];
+				if(Math.abs(dx) > 1) {
+					step_x = (0.4 + 2*Math.log(Math.abs(dx))) * (dx < 0 ? -1 : 1);
+					xs[i] += step_x;
+				} else {
+					xs[i] = w/4;
+				}
+				
+				const dy = ys_to_be[i] - ys[i];
+				if(Math.abs(dy) > 1) {
+					step_y = (0.4 + 2*Math.log(Math.abs(dy))) * (dy < 0 ? -1 : 1);
+					ys[i] += step_y;
+				} else {
+					ys[i] = ys_to_be[i];
+				}
+			}
+		}
+	}
+}
+
 function init_menu(){
 	const menu = document.getElementById("menu");
 	const canvas_rect = menu.getBoundingClientRect();
@@ -172,6 +220,7 @@ function init_menu(){
 	}, false);
 
 	menu.addEventListener('pointerup', function(e){
+		recalculate_ys_to_be();
 		selected_i = -1;
 		draw_menu();
 	}, false);
@@ -188,6 +237,7 @@ function init_menu(){
 	}, false);
 
 	menu.addEventListener('pointerleave', function(e){
+		recalculate_ys_to_be();
 		selected_i = -1;
 		draw_menu();
 	}, false);
@@ -221,7 +271,7 @@ function draw_menu(){
 			ys_in.push(ys[i]);
 		}
 	}
-	ys_in.sort();
+	ys_in.sort(function(a, b) {return Number(a) - Number(b);});
 
 	const dh = 15;
 	const bh = 12;
@@ -364,7 +414,15 @@ Conclusion
 
 
 	<script language="JavaScript">
+recalculate_ys_to_be();
 init_menu();
+function redraw() {
+	move_ys_to_ys_to_be();
+	draw_menu();
+	const lag = 1000/24;
+	setTimeout(redraw, lag);
+}
+redraw();
 draw_consequent();
 draw_parallel();
 	</script>
