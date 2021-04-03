@@ -97,7 +97,6 @@ function draw_consequent(){
 	const h = document.getElementById("consequent").height;
 	const dh = 36;
 	const dw = 56;
-	context.font = "16px sans-serif";
 	// background
 	context.fillStyle="#eeeeee";
 	context.fillRect(0, 0, w, h);
@@ -122,7 +121,6 @@ function draw_parallel(){
 	const h = document.getElementById("parallel").height;
 	const dh = 36;
 	const dw = 56;
-	context.font = "16px sans-serif";
 	// background
 	context.fillStyle="#eeeeee";
 	context.fillRect(0, 0, w, h);
@@ -142,6 +140,106 @@ function draw_parallel(){
 	draw_arrow(context, 3*w/6, h/2+dh, w/2, h-12, "#000000")
 	draw_arrow(context, 5*w/6, h/2+dh, w/2+4, h-12, "#000000")
 }
+
+function nearest_in(xs, ys, x, y) {
+	var nearest_i = 0;
+	for(var i = 1; i < xs.length; ++i)
+		if((Math.pow(x - xs[i], 2) + Math.pow(y - ys[i], 2)) < (Math.pow(x - xs[nearest_i], 2) + Math.pow(y - ys[nearest_i], 2)))
+			nearest_i = i;
+	return nearest_i;
+}
+
+
+var xs = [160, 160, 160, 160, 160];
+var ys = [100, 150, 200, 250, 300];
+var ys_to_be = [100, 150, 200, 250, 300];
+var selected_i = -1;
+function init_menu(){
+	const menu = document.getElementById("menu");
+	const canvas_rect = menu.getBoundingClientRect();
+	draw_menu();
+
+	menu.addEventListener('pointermove', function(e){
+		var canvas_rect = menu.getBoundingClientRect();
+		draw_menu();
+		if(e.buttons == 1){
+			var x = (e.clientX - canvas_rect.left);
+			var y = (e.clientY - canvas_rect.top);
+			xs[selected_i] = x;
+			ys[selected_i] = y;
+			draw_menu();
+		}
+	}, false);
+
+	menu.addEventListener('pointerup', function(e){
+		selected_i = -1;
+		draw_menu();
+	}, false);
+
+	menu.addEventListener('pointerdown', function(e){
+		var canvas_rect = menu.getBoundingClientRect();
+		var x = (e.clientX - canvas_rect.left);
+		var y = (e.clientY - canvas_rect.top);
+		selected_i = nearest_in(xs, ys, x, y);
+		xs[selected_i] = x;
+		ys[selected_i] = y;
+		draw_menu();
+		menu.releasePointerCapture(e.pointerId);
+	}, false);
+
+	menu.addEventListener('pointerleave', function(e){
+		selected_i = -1;
+		draw_menu();
+	}, false);
+}
+
+function draw_menu(){
+	var context = document.getElementById("menu").getContext("2d");
+	const w = document.getElementById("menu").width;
+	const h = document.getElementById("menu").height;
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	context.textAlign = "center";
+	context.textBaseline = "middle";
+	context.font = "24px sans-serif";
+	context.fillStyle = "#228822";
+	context.fillText('In', w/4, 36);
+	context.fillStyle = "#882222";
+	context.fillText('Out', 3*w/4, 36);
+	context.fillStyle = "#222222";
+	context.fillText('Introduction', xs[0], ys[0]);
+	context.fillText('Historical anecdote', xs[1], ys[1]);
+	context.fillText('Theoretical grounds', xs[2], ys[2]);
+	context.fillText('Practical example', xs[3], ys[3]);
+	context.fillText('Conclusion', xs[4], ys[4]);
+
+	var ys_in = [];
+	for(var i = 0; i < 5; ++i) {
+		if(xs[i] < w/2) {
+			ys_in.push(ys[i]);
+		}
+	}
+	ys_in.sort();
+
+	const dh = 15;
+	const bh = 12;
+	context.lineWidth = 3;
+	context.beginPath();
+	context.strokeStyle = "#228822";
+	for(var i = 0; i < ys_in.length; ++i) {
+		if(i == 0)
+			context.moveTo(w/4, 56);
+		else
+			context.moveTo(w/4, ys_in[i-1] + dh);
+		context.lineTo(w/4, ys_in[i] - dh);
+	}
+	context.stroke();
+	context.closePath();
+	draw_arrow(context, w/4, ys_in[ys_in.length-1] + dh, w/4, h-bh, "#228822");
+}
+
 	</script>
 </head>
 <body>
@@ -149,6 +247,11 @@ function draw_parallel(){
 	<h1>
 What can we&nbsp;learn from sexaplication on&nbsp;nuclear power plants
 	</h1>
+	<p>
+<i>This is a buffet-story. The idea is, I provide several pieces and you choose which of them to read and share, and in which order. Every piece contais the same though only put differently so don't be afraid to miss anything. Experiment and enjoy!</i>
+	</p>
+	<canvas id="menu" width=640 height=360></canvas>
+	<p class="comment" id="link"></p>
 
 <span id="p1">
 	<h2>
@@ -261,6 +364,7 @@ Conclusion
 
 
 	<script language="JavaScript">
+init_menu();
 draw_consequent();
 draw_parallel();
 	</script>
