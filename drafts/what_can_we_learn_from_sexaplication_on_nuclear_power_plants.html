@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=0.84">
 	<title>What can we learn from sexaplication on nuclear power plants</title>
-	<meta name="description" content="Component multiplication (as in duplication or triplication) is a reliability improvement technique used heavily in safety-critical and mission-critical systems. But apart from that, it's surprisingly little known in the world of software. Which is a shame since a simple principle behind it is something everyone should be aware of. Besides, you can't avoid it anyway. It's always there on some level.">
+	<meta name="description" content="Component redundancy is used heavily in safety-critical and mission-critical systems for reliability improvement. But apart from that, it's surprisingly little known in the world of software. Which is a shame since it's a simple principle that only require a slight change of perspective on how software components behave. Besides, you can't avoid redundancy anyway. It's always there on some level.">
 	<meta name="keywords" content="programming">
 	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
 	<style>
@@ -330,10 +330,10 @@ What can we&nbsp;learn from sexaplication on&nbsp;nuclear power plants
 Introduction
 	</h2>
 	<p>
-Component multiplication (as in duplication or triplication) is a reliability improvement technique used heavily in safety-critical and mission-critical systems. But apart from that, it's surprisingly little known in the world of software. Which is a shame since a simple principle behind it is something everyone should be aware of. Besides, you can't avoid it anyway. It's always there on some level.
+Component redundancy is used heavily in safety-critical and mission-critical systems for reliability improvement. But apart from that, it's surprisingly little known in the world of software. Which is a shame since it's a simple principle that only require a slight change of perspective on how software components behave. Besides, you can't avoid redundancy anyway. It's always there on some level.
 	</p>
 	<p>
-This piece is meant to explain the idea behind the multiplication and expose its benefits.
+This piece is meant to explain the idea behind the redundancy in software and showcase its benefits.
 	</p>
 </span>
 
@@ -357,13 +357,16 @@ In Ukraine, up until the early 90s, components like these were triplicated on al
 The rest of the world was already quadruplicating their components, but Ukrainian NPP industry didn’t yet have a reliable and proven quadruplicator — a special block to bring four signals together. Developing and producing this block, considering the strictest reliability requirements, would be too cumbersome at that point, so they decided to duplicate a triplicator instead.
 	</p>
 	<p>
-Let that sink in. Multiplicating the proven multiplicator, nevertheless all the redundancy, was considered better option than introducting a completely new component to the system.
+Let that sink in. Multiplicating the proven multiplicator was considered better option than introducting a completely new component to the system.
 	</p>
 	<p>
 Now, what can we, as software engineers, learn from that?
 	</p>
 	<p>
 Well, nothing. Because we somehow presume that software components are flawless. They are, of course, not, but this is the model we chose to believe in. A diode can fail, a resistor can burn, a capacitor can leak, but a hello-world is a hello-world forever and ever.
+	</p>
+	<p>
+If software is flawless, then redundancy brings no value. But it does. To understand why is it so appreciated in the world of safety-critical development, we first have to abandon the notion of software infallibility.
 	</p>
 </span>
 
@@ -391,10 +394,16 @@ Now if you have the same low-reliability components but you wire them in paralle
 1.0 - (0.1&times;0.1&times;0.1) = 0.999
 	</p>
 	<p>
-Wiring unreliable components in a row reduces your system's reliability little by little. But duplicating unreliable components improves your system's reliability drastically.
+Wiring unreliable components in a row reduces your system's reliability little by little. But duplicating unreliable components improves your system's reliability drastically. That's how redundancy works.
 	</p>
 	<p>
 Hardware guys, especially those who burned enough resistors, realize that. That’s why they duplicate and triplicate anything worth triplicating. We don’t.
+	</p>
+	<p>
+Because in software, we assume that the code is always correct or at least deterministic. There are studies to disproove the former and a lot of anecdotal evidence to contradict the latter, but the general notion is: programs are not susceptible to wear and decay, and that along makes them ultimately reliable.
+	</p>
+	<p>
+Of course, if your reliability is 1, then you can multiply it however you like, you'll still get 1. Redundancy is then pointless. It only makes sense if we admit that the software is inherently fault prone.
 	</p>
 </span>
 
@@ -418,13 +427,16 @@ I spent my time trying different versions of things until finally, it all worked
 The build process was too consecutive, a failure in any subsystem caused all the build to fail. And if you even tried CMake, CUDA, and even cross-platform C++, you know how fragile these things are. You can’t build a reliable consecutive system out of unreliable subsystems. It’s simple math.
 	</p>
 	<p>
-But in fact, the build process had plenty of multiplication within. It’s just <b>I was a quadruplicator for this process</b>.
+But in fact, the build process had plenty of redundancy within. It’s just <b>I was a quadruplicator for this process</b>.
 	</p>
 	<p>
 When CMake 17 didn’t work, I tried 16. When clang 10 wasn’t enough, I installed clang 11. When CUDA 11 requested an std=c++17 option, I added this option. This variability made the build possible both mathematically and practically.
 	</p>
 	<p>
 Come to think about it, this is just insane. You don’t need a person to switch connectors in a nuclear core. In fact, you don’t want this person there. And the person doesn’t want to be there. So electrical engineers found a way to automate this. But we, software engineers, who should be ahead in any possible automation, are still switching subsystems manually.
+	</p>
+	<p>
+We can, of course, automate redundancy in our systems as well. But this will require a shift in perception. We would have to admit that software is just as fault prone as hardware. Albeit due to different reasons.
 	</p>
 </span>
 
@@ -439,10 +451,10 @@ Programs are just as faulty as resistors and capacitors. It’s just a matter of
 So why we keep building our systems like they aren’t?
 	</p>
 	<p>
-In safety critical applications, every component is considered faulty. And it you have acknowledge faulty components, you have no other option but to think a way to juggle them for the best possible outcome. And multiplying unrelyable but interchangeable components is a sure way to improve your system.
+In safety critical applications, every component is considered faulty. And if you acknowledge faulty components, you have no other option but to think a way to juggle them for the best possible outcome. Redundacy is waht makes building a reliable sustem out of unrelyable components possible.
 	</p>
 	<p>
-If we want to build reliable systems, first we have to acknowledge that our components are faulty. Then we can think out the way how to put them together.
+If we want to build reliable systems, first we have to acknowledge that our components aren't infallible.
 	</p>
 
 </span>
