@@ -7,6 +7,9 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 
 ## Pages
 
+- [What can we learn from sexaplication on nuclear power plants](https://wordsandbuttons.online/what_can_we_learn_from_sexaplication_on_nuclear_power_plants.html) Component redundancy is used heavily in safety-critical and mission-critical systems for reliability improvement. But outside this niche, it's surprisingly little known in the world of software. Which is a shame since it's a simple but economical idea. It costs nothing to keep in mind, and it saves you a lot on hotfixes and emergency repairs.
+<sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> 
+
 - [Challenge your performance intuition with C++ sine](https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_sine.html) One more interactive quiz. This time, it's all about the sine function. Which one is faster and when?
 <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#quizzes](https://wordsandbuttons.online/all_quizzes.html)</sup> 
 
