@@ -4,10 +4,10 @@
 #include <cuda_runtime.h>
 
 
-__global__ void add(const float *A, const float *B, float *C, int numElements) {
+__global__ void add(const float *xs1, const float *xs2, float *ys, int size) {
 	int i = blockDim.x * blockIdx.x + threadIdx.x;
-	if (i < numElements) {
-		C[i] = A[i] + B[i];
+	if (i < size) {
+		ys[i] = xs1[i] + xs2[i];
 	}
 }
 
@@ -17,7 +17,7 @@ int main(void)
 {
 	// prepare the data
 	using TheType = float;
-	constexpr auto TheSize = 65536;
+	constexpr auto TheSize = 65536u;
 	constexpr auto TheSizeInBytes = TheSize*sizeof(TheType);
 	std::mt19937 rng(0);
 	std::uniform_real_distribution<TheType> distribution(0.f, 1.f);
@@ -30,15 +30,15 @@ int main(void)
 
 	// do the allocations
 	float *d_xs = nullptr;
-	float *d_ys =  nullptr;
-	float *d_zs =  nullptr;
+	float *d_ys = nullptr;
+	float *d_zs = nullptr;
 	attempt(cudaMalloc((void **)&d_xs, TheSizeInBytes));
 	attempt(cudaMalloc((void **)&d_ys, TheSizeInBytes));
 	attempt(cudaMalloc((void **)&d_zs, TheSizeInBytes));
 
 	// and copying
 	attempt(cudaMemcpy(d_xs, xs.data(), TheSizeInBytes, cudaMemcpyHostToDevice));
-	attempt(cudaMemcpy(d_zs, zs.data(), TheSizeInBytes, cudaMemcpyHostToDevice));
+	attempt(cudaMemcpy(d_ys, ys.data(), TheSizeInBytes, cudaMemcpyHostToDevice));
 
 	// timestamp start
 	cudaEvent_t start;
@@ -52,6 +52,7 @@ int main(void)
 	int blocksPerGrid = (TheSize + threadsPerBlock - 1) / threadsPerBlock;
 	add<<<blocksPerGrid, threadsPerBlock>>>(d_xs, d_ys, d_zs, TheSize);
 	attempt(cudaGetLastError());
+	attempt(cudaDeviceSynchronize());
 
 	// timestamp stop
 	cudaEventRecord(stop, 0); 
@@ -66,7 +67,7 @@ int main(void)
 	// verification
 	for (auto i = 0u; i < TheSize; ++i) {
 		if (std::fabs(xs[i] + ys[i] - zs[i]) > 1.e-5) {
-			std::cout << "Not verified\n";
+			std::cout << "Not verified. i = " << i << " xs[i] = " << xs[i] << " ys[i] = " << ys[i] << " zs[i] = " << zs[i] << "\n";
 			return -1;
 		}
 	}
