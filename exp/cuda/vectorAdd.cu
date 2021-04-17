@@ -17,7 +17,7 @@ int main(void)
 {
 	// prepare the data
 	using TheType = float;
-	constexpr auto TheSize = 65536u;
+	constexpr auto TheSize = 65536u*128u;
 	constexpr auto TheSizeInBytes = TheSize*sizeof(TheType);
 	std::mt19937 rng(0);
 	std::uniform_real_distribution<TheType> distribution(0.f, 1.f);
