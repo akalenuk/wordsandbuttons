@@ -9,6 +9,8 @@ __global__ void add(const float *A, const float *B, float *C, int numElements) {
 	}
 }
 
+#define attempt(smth) {auto s=(smth);if(s!=cudaSuccess){std::cout << cudaGetErrorString() << "\n"; return -1;}}
+
 int main(void)
 {
 	// prepare the data
@@ -24,17 +26,16 @@ int main(void)
 
 
 	// do the allocations
-	cudaError_t status = cudaSuccess;
 	float *d_xs = nullptr;
-	float *d_yx =  nullptr;
-	float *d_zx =  nullptr;
-	status = cudaMalloc((void **)&d_xs, size);
-	status = cudaMalloc((void **)&d_ys, size);
-	status = cudaMalloc((void **)&d_zs, size);
+	float *d_ys =  nullptr;
+	float *d_zs =  nullptr;
+	attempt(cudaMalloc((void **)&d_xs, size));
+	attempt(cudaMalloc((void **)&d_ys, size));
+	attempt(cudaMalloc((void **)&d_zs, size));
 
 	// and copying
-	err = cudaMemcpy(d_xs, xs, theSize*sizeof(float), cudaMemcpyHostToDevice);
-	err = cudaMemcpy(d_zs, zs, theSize*sizeof(float), cudaMemcpyHostToDevice);
+	attempt(cudaMemcpy(d_xs, xs, theSize*sizeof(float), cudaMemcpyHostToDevice));
+	attempt(cudaMemcpy(d_zs, zs, theSize*sizeof(float), cudaMemcpyHostToDevice));
 
 	// timestamp start
 	cudaEvent_t start;
@@ -46,7 +47,7 @@ int main(void)
 	int threadsPerBlock = 256;
 	int blocksPerGrid = (numElements + threadsPerBlock - 1) / threadsPerBlock;
 	add<<<blocksPerGrid, threadsPerBlock>>>(d_xs, d_ys, d_zx, theSize);
-	err = cudaGetLastError();
+	attempt(cudaGetLastError());
 
 	// timestamp stop
 	cudaEventRecord(stop, 0); 
@@ -56,7 +57,7 @@ int main(void)
 	std::cout << "Time: " << elapsedTime << "\n";
 
 	// back
-	err = cudaMemcpy(zs, d_zs, theSize*sizeof(float), cudaMemcpyDeviceToHost);
+	attempt(cudaMemcpy(zs, d_zs, theSize*sizeof(float), cudaMemcpyDeviceToHost));
 
 	// verification
 	for (auto i = 0u; i < the_size; ++i)
@@ -66,9 +67,9 @@ int main(void)
 		}
 	}
 
-	err = cudaFree(d_xs);
-	err = cudaFree(d_ys);
-	err = cudaFree(d_zs);
+	attempt(cudaFree(d_xs));
+	attempt(cudaFree(d_ys));
+	attempt(cudaFree(d_zs));
 	return 0;
 }
 
