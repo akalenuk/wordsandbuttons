@@ -36,11 +36,24 @@ int main(void)
 	err = cudaMemcpy(d_xs, xs, theSize*sizeof(float), cudaMemcpyHostToDevice);
 	err = cudaMemcpy(d_zs, zs, theSize*sizeof(float), cudaMemcpyHostToDevice);
 
+	// timestamp start
+	cudaEvent_t start;
+	cudaEventCreate(&start);
+	cudaEventRecord(start, 0);
+	cudaEventCreate(&stop); // here so it wouldn't interfere with the measurement
+
 	// run it
 	int threadsPerBlock = 256;
 	int blocksPerGrid = (numElements + threadsPerBlock - 1) / threadsPerBlock;
 	add<<<blocksPerGrid, threadsPerBlock>>>(d_xs, d_ys, d_zx, theSize);
 	err = cudaGetLastError();
+
+	// timestamp stop
+	cudaEventRecord(stop, 0); 
+	cudaEventSynchronize(stop);
+	float elapsedTime;
+	cudaEventElapsedTime(&elapsedTime, start, stop);
+	std::cout << "Time: " << elapsedTime << "\n";
 
 	// back
 	err = cudaMemcpy(zs, d_zs, theSize*sizeof(float), cudaMemcpyDeviceToHost);
