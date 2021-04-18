@@ -13,6 +13,29 @@ __global__ void add(const float *xs1, const float *xs2, float *ys, int size) {
 
 #define attempt(smth) {auto s=(smth);if(s!=cudaSuccess){std::cout << cudaGetErrorString(s) << "\n"; return -1;}}
 
+#define measure(smth) {\
+	/*timestamp start*/\
+	cudaEvent_t start;\
+	cudaEventCreate(&start);\
+	cudaEventRecord(start, 0);\
+	cudaEvent_t stop;\
+	cudaEventCreate(&stop); /*here so it wouldn't interfere with the measurement*/\
+\
+	/* run it*/\
+	int threadsPerBlock = 256;\
+	int blocksPerGrid = (TheSize + threadsPerBlock - 1) / threadsPerBlock;\
+	smth<<<blocksPerGrid, threadsPerBlock>>>(d_xs, d_ys, d_zs, TheSize);\
+	attempt(cudaGetLastError());\
+	attempt(cudaDeviceSynchronize());\
+\
+	/* timestamp stop*/\
+	cudaEventRecord(stop, 0); \
+	cudaEventSynchronize(stop);\
+	float elapsedTime;\
+	cudaEventElapsedTime(&elapsedTime, start, stop);\
+	std::cout << "Time of " << #smth << ": " << elapsedTime << "\n";}\
+
+
 int main(void)
 {
 	// prepare the data
@@ -40,37 +63,10 @@ int main(void)
 	attempt(cudaMemcpy(d_xs, xs.data(), TheSizeInBytes, cudaMemcpyHostToDevice));
 	attempt(cudaMemcpy(d_ys, ys.data(), TheSizeInBytes, cudaMemcpyHostToDevice));
 
-	// timestamp start
-	cudaEvent_t start;
-	cudaEventCreate(&start);
-	cudaEventRecord(start, 0);
-	cudaEvent_t stop;
-	cudaEventCreate(&stop); // here so it wouldn't interfere with the measurement
+	measure(add);
 
-	// run it
-	int threadsPerBlock = 256;
-	int blocksPerGrid = (TheSize + threadsPerBlock - 1) / threadsPerBlock;
-	add<<<blocksPerGrid, threadsPerBlock>>>(d_xs, d_ys, d_zs, TheSize);
-	attempt(cudaGetLastError());
-	attempt(cudaDeviceSynchronize());
-
-	// timestamp stop
-	cudaEventRecord(stop, 0); 
-	cudaEventSynchronize(stop);
-	float elapsedTime;
-	cudaEventElapsedTime(&elapsedTime, start, stop);
-	std::cout << "Time: " << elapsedTime << "\n";
-
-	// back
+	// back (for debug, don't really want it)
 	attempt(cudaMemcpy(zs.data(), d_zs, TheSizeInBytes, cudaMemcpyDeviceToHost));
-
-	// verification
-	for (auto i = 0u; i < TheSize; ++i) {
-		if (std::fabs(xs[i] + ys[i] - zs[i]) > 1.e-5) {
-			std::cout << "Not verified. i = " << i << " xs[i] = " << xs[i] << " ys[i] = " << ys[i] << " zs[i] = " << zs[i] << "\n";
-			return -1;
-		}
-	}
 
 	attempt(cudaFree(d_xs));
 	attempt(cudaFree(d_ys));
