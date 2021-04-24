@@ -11,6 +11,14 @@ __global__ void add(const float *xs1, const float *xs2, float *ys, int size) {
 	}
 }
 
+__global__ void div(const float *xs1, const float *xs2, float *ys, int size) {
+	int i = blockDim.x * blockIdx.x + threadIdx.x;
+	if (i < size) {
+		ys[i] = 1. / (xs2[i] + xs1[i] / (xs2[i] + xs1[i] / (xs2[i] + xs1[i])));
+	}
+}
+
+
 #define attempt(smth) {auto s=(smth);if(s!=cudaSuccess){std::cout << cudaGetErrorString(s) << "\n"; return -1;}}
 
 #define measure(smth) {\
@@ -64,6 +72,7 @@ int main(void)
 	attempt(cudaMemcpy(d_ys, ys.data(), TheSizeInBytes, cudaMemcpyHostToDevice));
 
 	measure(add);
+	measure(div);
 
 	// back (for debug, don't really want it)
 	attempt(cudaMemcpy(zs.data(), d_zs, TheSizeInBytes, cudaMemcpyDeviceToHost));
