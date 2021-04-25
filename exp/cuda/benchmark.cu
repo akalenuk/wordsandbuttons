@@ -19,7 +19,7 @@ __global__ void div(const float *xs1, const float *xs2, float *ys, int size) {
 }
 
 
-#define attempt(smth) {auto s=(smth);if(s!=cudaSuccess){std::cout << cudaGetErrorString(s) << "\n"; return -1;}}
+#define attempt(smth) {auto s=(smth);if(s!=cudaSuccess){std::cout << cudaGetErrorString(s) << " at " << __LINE__ << "\n"; return -1;}}
 
 #define measure(smth) {\
 	/*timestamp start*/\
