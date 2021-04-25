@@ -4,17 +4,22 @@
 #include <cuda_runtime.h>
 
 
+using TheType = float;
+constexpr auto TheSize = 65536u*128u;
+constexpr auto TheSizeInBytes = TheSize*sizeof(TheType);
+constexpr auto TheMultiplier = 256u;
+	
 __global__ void add(const float *xs1, const float *xs2, float *ys, int size) {
-	int i = blockDim.x * blockIdx.x + threadIdx.x;
+	int i = (blockDim.x * blockIdx.x + threadIdx.x) % TheMultiplier;
 	if (i < size) {
 		ys[i] = xs1[i] + xs2[i];
 	}
 }
 
 __global__ void div(const float *xs1, const float *xs2, float *ys, int size) {
-	int i = blockDim.x * blockIdx.x + threadIdx.x;
+	int i = (blockDim.x * blockIdx.x + threadIdx.x) % TheMultiplier;
 	if (i < size) {
-		ys[i] = 1. / (xs2[i] + xs1[i] / (xs2[i] + xs1[i] / (xs2[i] + xs1[i])));
+		ys[i] = xs1[i] / xs2[i];
 	}
 }
 
@@ -31,7 +36,7 @@ __global__ void div(const float *xs1, const float *xs2, float *ys, int size) {
 \
 	/* run it*/\
 	int threadsPerBlock = 256;\
-	int blocksPerGrid = (TheSize + threadsPerBlock - 1) / threadsPerBlock;\
+	int blocksPerGrid = (TheSize*TheMultiplier + threadsPerBlock - 1) / threadsPerBlock;\
 	smth<<<blocksPerGrid, threadsPerBlock>>>(d_xs, d_ys, d_zs, TheSize);\
 	attempt(cudaGetLastError());\
 	attempt(cudaDeviceSynchronize());\
@@ -47,9 +52,6 @@ __global__ void div(const float *xs1, const float *xs2, float *ys, int size) {
 int main(void)
 {
 	// prepare the data
-	using TheType = float;
-	constexpr auto TheSize = 65536u*128u;
-	constexpr auto TheSizeInBytes = TheSize*sizeof(TheType);
 	std::mt19937 rng(0);
 	std::uniform_real_distribution<TheType> distribution(0.f, 1.f);
 	std::vector<TheType> xs(TheSize);
