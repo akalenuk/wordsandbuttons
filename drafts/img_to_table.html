@@ -114,10 +114,10 @@ function load_pixels_from(url) {
 	</h1>
 	<canvas id="the_img" width=640 height=480></canvas>
 	<script language="JavaScript">
-var c = document.getElementById("the_img");
-var context = c.getContext("2d");
+var the_canvas = document.getElementById("the_img");
+var the_context = the_canvas.getContext("2d");
 
-window.addEventListener('paste', function(e){
+window.addEventListener('paste', function(e) {
 	if(e.clipboardData == false) return false;
 	var imgs = e.clipboardData.items;
 	if(imgs == undefined) return false;
@@ -126,7 +126,7 @@ window.addEventListener('paste', function(e){
 		var imgObj = imgs[i].getAsFile();
 		var url = window.URL || window.webkitURL;
 		var src = url.createObjectURL(imgObj);
-		context.clearRect(0,0,c.width,c.height);
+		the_context.clearRect(0,0,the_canvas.width,the_canvas.height);
 		loadImage(src);
 	}
 });
@@ -134,7 +134,9 @@ window.addEventListener('paste', function(e){
 function loadImage(src){
 	var img = new Image();
 	img.onload = function(e) {
-		context.drawImage(img, 0, 0);
+		the_canvas.width = img.width;
+		the_canvas.height = img.height;
+		the_context.drawImage(img, 0, 0);
 	};
 	img.src = src;
 }
