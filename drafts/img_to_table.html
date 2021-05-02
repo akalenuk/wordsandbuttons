@@ -99,10 +99,23 @@ function load_pixels_from(url) {
 
 
 function canvas_to_textarea() {
-	//...
-	//curves_background = context.getImageData(0, 0, 640, 640);
-	//context.putImageData(rotation_background, 0, 0);
-	//
+	const the_canvas = document.getElementById("the_img");
+	var the_context = the_canvas.getContext("2d");
+	const w = the_canvas.width;
+	const h = the_canvas.height;
+	var img = the_context.getImageData(0, 0, w, h);
+	var opt_bitmap = [];
+	for(var i = 0; i < h; ++i) {
+		var row = [];
+		for(var j = 0; j < w; ++j) {
+			var cell = [img.data[(i*w+j)*4], img.data[(i*w+j)*4+1], img.data[(i*w+j)*4+2], 1, 1]; // r,g,b,dw,dh
+			row.push(cell)
+		}
+		opt_bitmap.push(row);
+	}
+	
+	
+	
 	//var pixel_field = context.createImageData(w, h);
 	//for (var i = 0; i < pixel_field.data.length; i += 4) {
 	//	if(z_field[Math.floor(i/4)] == Z_NOT_APLICABLE || z_field[Math.floor(i/4)] == Z_NOT_DETERMINED) {
