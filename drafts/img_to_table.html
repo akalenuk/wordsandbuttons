@@ -97,6 +97,9 @@ function load_pixels_from(url) {
 	});
 }
 
+function hex(x) {
+	return "0123456789ABCDEF"[Math.floor(x)];
+}
 
 function canvas_to_textarea() {
 	const the_canvas = document.getElementById("the_img");
@@ -108,30 +111,17 @@ function canvas_to_textarea() {
 	for(var i = 0; i < h; ++i) {
 		var row = [];
 		for(var j = 0; j < w; ++j) {
-			var cell = [img.data[(i*w+j)*4], img.data[(i*w+j)*4+1], img.data[(i*w+j)*4+2], 1, 1]; // r,g,b,dw,dh
+			// posterise to web
+			const color = hex(img.data[(i*w+j)*4] / 16) + hex(img.data[(i*w+j)*4+1] / 16) + hex(img.data[(i*w+j)*4+2] / 16)
+			var cell = [color, 1, 1]; // rgb, dw, dh
 			row.push(cell)
 		}
 		opt_bitmap.push(row);
 	}
-	
-	
-	
-	//var pixel_field = context.createImageData(w, h);
-	//for (var i = 0; i < pixel_field.data.length; i += 4) {
-	//	if(z_field[Math.floor(i/4)] == Z_NOT_APLICABLE || z_field[Math.floor(i/4)] == Z_NOT_DETERMINED) {
-	//		pixel_field.data[i + 0] = 0x00;
-	//		pixel_field.data[i + 1] = 0x00;
-	//		pixel_field.data[i + 2] = 0x00;
-	//		pixel_field.data[i + 3] = 0x00;
-	//	} else {
-	//		const color = Math.trunc(z_field[Math.floor(i/4)] / 8) * 8;
-	//		pixel_field.data[i + 0] = color;
-	//		pixel_field.data[i + 1] = color;
-	//		pixel_field.data[i + 2] = color;
-	//		pixel_field.data[i + 3] = 0xFF;
-	//	}
-	//}
-	//context.putImageData(pixel_field, -0.5, -0.5);
+
+	/*for(var i = 0; i < h; ++i)
+		for(var j = 0; j < w; ++j) {
+		}*/
 }
 /*
 def to_html(bitmap):
