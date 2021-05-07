@@ -166,39 +166,29 @@ function canvas_to_textarea() {
 		ret += "<td width=1></td>"
 	ret += "</tr>\n"
 
-}
-/*
-	ret = "<table border=0 cellspacing=0 cellpadding=0 width=" + str(W) + ">\n"
-	ret += "<tr height=0>"
-	for c in bitmap[0]:
-		ret += "<td width=1></td>"
-	ret += "</tr>\n"
-
-	for cline in opt_bitmap:
+	for(var i = 0; i < h; ++i) {
 		ret += "<tr height=1>"
-		for (c, w, h) in cline:
-			if c == "":
-				bg = ""
-			else:
-				bg = " bgcolor=" + c
-
-			if w < 0 or h < 0:
-				continue
-			elif w > 1 and h > 1:
-				ret += "<td" + bg + " colspan=" + str(w) + " rowspan=" + str(h) + "></td>"
-			elif w > 1:
-				ret += "<td" + bg + " colspan=" + str(w) + "></td>"
-			elif h > 1:
-				ret += "<td" + bg + " rowspan=" + str(h) + "></td>"
-			else:
-				ret += "<td" + bg + "></td>"
-		ret += "</tr>\n"
-
-
-	ret += "</table>"
-	
-	return ret
-*/
+		for(var j = 0; j < w; ++j) {
+			const c = opt_bitmap[i][j][0];
+			const w = opt_bitmap[i][j][1];
+			const h = opt_bitmap[i][j][2];
+			if(w < 0 || h < 0)
+				continue;
+			const bg = " bgcolor=" + c;
+			if(w > 1 && h > 1)
+				ret += "<td" + bg + " colspan=" + str(w) + " rowspan=" + str(h) + "></td>";
+			else if(w > 1)
+				ret += "<td" + bg + " colspan=" + str(w) + "></td>";
+			else if(h > 1)
+				ret += "<td" + bg + " rowspan=" + str(h) + "></td>";
+			else
+				ret += "<td" + bg + "></td>";
+		}
+		ret += "</tr>\n";
+	}
+	ret += "</table>";
+	return ret;
+}
 	</script>
 </head>
 <body>
