@@ -123,18 +123,18 @@ function canvas_to_textarea() {
 	// optimize to rectangles
 	for(var i = 0; i < h; ++i)
 		for(var j = 0; j < w; ++j) {
-			const c = opt_bitmap[i][j][0];
-			const w = opt_bitmap[i][j][1];
-			const h = opt_bitmap[i][j][2];
-			if(w < 0 || h < 0)
+			const cij = opt_bitmap[i][j][0];
+			const wij = opt_bitmap[i][j][1];
+			const hij = opt_bitmap[i][j][2];
+			if(wij < 0 || hij < 0)
 				continue;
 			var dj = w - j
 			for(var jj = j+1; jj < w; ++jj) {
 				const cjj = opt_bitmap[i][jj][0];
 				const wjj = opt_bitmap[i][jj][1];
 				const hjj = opt_bitmap[i][jj][2];
-				if(wjj < 0 || hjj < 0 || cjj != c) {
-					dj == jj - j;
+				if(wjj < 0 || hjj < 0 || cjj != cij) {
+					dj = jj - j;
 					break;
 				}
 			}
@@ -144,20 +144,20 @@ function canvas_to_textarea() {
 					const ciijj = opt_bitmap[ii][jj][0];
 					const wiijj = opt_bitmap[ii][jj][1];
 					const hiijj = opt_bitmap[ii][jj][2];
-					if(wiijj < 0 || hiijj < 0 || ciijj != c) {
+					if(wiijj < 0 || hiijj < 0 || ciijj != cij) {
 						di = ii - i;
 						break;
 					}
 				}
-				if(di != H - i)
+				if(di != h - i)
 					break
 			}
 			// mark the rectangle with [c, -1, -1] everywhere but the top right corner which is [c, dj, di]
 			if(di != 1 || dj != 1)
 				for(var ii = i; ii < i+di; ++ii)
 					for(var jj = j; jj < j+dj; ++jj)
-						opt_bitmap[ii][jj] = [c, -1, -1]
-			opt_bitmap[i][j] = [c, dj, di]
+						opt_bitmap[ii][jj] = [cij, -1, -1]
+			opt_bitmap[i][j] = [cij, dj, di]
 		}
 
 	// form a table
@@ -175,13 +175,13 @@ function canvas_to_textarea() {
 			const h = opt_bitmap[i][j][2];
 			if(w < 0 || h < 0)
 				continue;
-			const bg = " bgcolor=" + c;
+			const bg = " bgcolor=#" + c;
 			if(w > 1 && h > 1)
-				ret += "<td" + bg + " colspan=" + str(w) + " rowspan=" + str(h) + "></td>";
+				ret += "<td" + bg + " colspan=" + String(w) + " rowspan=" + String(h) + "></td>";
 			else if(w > 1)
-				ret += "<td" + bg + " colspan=" + str(w) + "></td>";
+				ret += "<td" + bg + " colspan=" + String(w) + "></td>";
 			else if(h > 1)
-				ret += "<td" + bg + " rowspan=" + str(h) + "></td>";
+				ret += "<td" + bg + " rowspan=" + String(h) + "></td>";
 			else
 				ret += "<td" + bg + "></td>";
 		}
@@ -190,6 +190,7 @@ function canvas_to_textarea() {
 	ret += "</table>";
 
 	// putting on the textarea
+	console.log(opt_bitmap);
 	document.getElementById("the_html").innerHTML = ret;
 	document.getElementById("the_table").innerHTML = ret;
 }
