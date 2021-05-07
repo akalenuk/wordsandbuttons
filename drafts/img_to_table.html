@@ -108,6 +108,7 @@ function canvas_to_textarea() {
 	const h = the_canvas.height;
 	var img = the_context.getImageData(0, 0, w, h);
 	var opt_bitmap = [];
+	// collect colors
 	for(var i = 0; i < h; ++i) {
 		var row = [];
 		for(var j = 0; j < w; ++j) {
@@ -119,44 +120,54 @@ function canvas_to_textarea() {
 		opt_bitmap.push(row);
 	}
 
-	/*for(var i = 0; i < h; ++i)
+	// optimize to rectangles
+	for(var i = 0; i < h; ++i)
 		for(var j = 0; j < w; ++j) {
-		}*/
+			const c = opt_bitmap[i][j][0];
+			const w = opt_bitmap[i][j][1];
+			const h = opt_bitmap[i][j][2];
+			if(w < 0 || h < 0)
+				continue;
+			var dj = w - j
+			for(var jj = j+1; jj < w; ++jj) {
+				const cjj = opt_bitmap[i][jj][0];
+				const wjj = opt_bitmap[i][jj][1];
+				const hjj = opt_bitmap[i][jj][2];
+				if(wjj < 0 || hjj < 0 || cjj != c) {
+					dj == jj - j;
+					break;
+				}
+			var di = h - i;
+			for(var ii = i+1; ii < h; ++ii) {
+				for(var jj = j; jj < j + dj; ++jj) {
+					const ciijj = opt_bitmap[ii][jj][0];
+					const wiijj = opt_bitmap[ii][jj][1];
+					const hiijj = opt_bitmap[ii][jj][2];
+					if(wiijj < 0 || hiijj < 0 || ciijj != c) {
+						di = ii - i;
+						break;
+					}
+				}
+				if(di != H - i)
+					break
+			}
+			// mark the rectangle with [c, -1, -1] everywhere but the top right corner which is [c, dj, di]
+			if(di != 1 || dj != 1)
+				for(var ii = i; ii < i+di; ++ii)
+					for(var jj = j; jj < j+dj; ++jj)
+						opt_bitmap[ii][jj] = [c, -1, -1]
+			opt_bitmap[i][j] = [c, dj, di]
+		}
+
+	// form a table
+	var ret = "<table border=0 cellspacing=0 cellpadding=0 width=" + String(w) + ">\n";
+	ret += "<tr height=0>";
+	for(var i = 0; i < w; ++i)
+		ret += "<td width=1></td>"
+	ret += "</tr>\n"
+
 }
 /*
-def to_html(bitmap):
-	opt_bitmap = [[(c, 1, 1) for c in cline] for cline in bitmap]
-	W = len(opt_bitmap[0])
-	H = len(opt_bitmap)
-	for i in range( H ):
-		for j in range( W ):
-			(c, w, h) = opt_bitmap[i][j]
-			if w < 0 or h < 0:
-				continue
-			dj = W - j
-			for jj in range(j+1, W):
-				(cj, wj, hj) = opt_bitmap[i][jj]
-				if wj < 0 or hj < 0 or cj != c:
-					dj = jj - j
-					break
-			
-			di = H - i
-			for ii in range(i+1, H):
-				for jj in range(j, j + dj):
-					(cij, wij, hij) = opt_bitmap[ii][jj]
-					if wij < 0 or hij < 0 or cij != c:
-						di = ii - i
-						break
-				if di != H - i:
-					break
-
-			if di != 1 or dj != 1:
-				for ii in range(i, i+di):
-					for jj in range(j, j+dj):
-						opt_bitmap[ii][jj] = (c, -1, -1)
-			opt_bitmap[i][j] = (c, dj, di)
- 
-
 	ret = "<table border=0 cellspacing=0 cellpadding=0 width=" + str(W) + ">\n"
 	ret += "<tr height=0>"
 	for c in bitmap[0]:
