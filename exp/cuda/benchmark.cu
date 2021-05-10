@@ -10,17 +10,25 @@ constexpr auto TheSizeInBytes = TheSize*sizeof(TheType);
 constexpr auto TheMultiplier = 256u;
 	
 __global__ void add(const float *xs1, const float *xs2, float *ys, int size) {
-	int i = (blockDim.x * blockIdx.x + threadIdx.x) % TheMultiplier;
-	if (i < size) {
-		ys[i] = xs1[i] + xs2[i];
+	int i = (blockDim.x * blockIdx.x + threadIdx.x);
+	auto res = 0.f;
+	for(auto j = 0u; j < TheMultiplier; ++j) {
+		if (i < size) {
+			res += xs1[i+j] + xs2[i+j];
+		}
 	}
+	ys[i] = res;
 }
 
 __global__ void div(const float *xs1, const float *xs2, float *ys, int size) {
-	int i = (blockDim.x * blockIdx.x + threadIdx.x) % TheMultiplier;
-	if (i < size) {
-		ys[i] = xs1[i] / xs2[i];
+	int i = (blockDim.x * blockIdx.x + threadIdx.x);
+	auto res = 0.f;
+	for(auto j = 0u; j < TheMultiplier; ++j) {
+		if (i < size) {
+			res += xs1[i+j] / xs2[i+j];
+		}
 	}
+	ys[i] = res;
 }
 
 
@@ -36,7 +44,7 @@ __global__ void div(const float *xs1, const float *xs2, float *ys, int size) {
 \
 	/* run it*/\
 	int threadsPerBlock = 256;\
-	int blocksPerGrid = (TheSize*TheMultiplier + threadsPerBlock - 1) / threadsPerBlock;\
+	int blocksPerGrid = (TheSize + threadsPerBlock - 1) / threadsPerBlock;\
 	smth<<<blocksPerGrid, threadsPerBlock>>>(d_xs, d_ys, d_zs, TheSize);\
 	attempt(cudaGetLastError());\
 	attempt(cudaDeviceSynchronize());\
