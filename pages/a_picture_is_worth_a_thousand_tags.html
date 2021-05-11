@@ -78,6 +78,13 @@ textarea {
 	padding-bottom: 24pt;
 }
 
+td {
+	font-size: 12px;
+	font-family: sans-serif;
+	text-align: center;
+	vertical-align: middle;
+}
+
 canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
@@ -207,10 +214,21 @@ function canvas_to_textarea() {
 	ret += "</table>";
 
 	// putting on the textarea
-	console.log(opt_bitmap);
-	document.getElementById("the_html").innerHTML = ret;
+	document.getElementById("the_html").value = ret;
 	document.getElementById("the_table").innerHTML = ret;
 	document.getElementById("the_size").innerHTML = "<p class='comment'>&uarr; This table is " + ret.length + " bytes.</p>";
+}
+
+function add_text_to_the_test_card() {
+	var text = document.getElementById("the_html").value;
+	text = text.replace("<td bgcolor=#BB0 colspan=53 rowspan=71>", "<td bgcolor=#BB0 colspan=53 rowspan=71>yellow");
+	text = text.replace("<td bgcolor=#0BB colspan=71 rowspan=71>", "<td bgcolor=#0BB colspan=71 rowspan=71>cyan");
+	text = text.replace("<td bgcolor=#0B0 colspan=71 rowspan=34>", "<td bgcolor=#0B0 colspan=71 rowspan=34>green");
+	text = text.replace("<td bgcolor=#B0B colspan=71 rowspan=34>", "<td bgcolor=#B0B colspan=71 rowspan=34>magenta");
+	text = text.replace("<td bgcolor=#B00 colspan=71 rowspan=71>", "<td bgcolor=#B00 colspan=71 rowspan=71>red");
+	text = text.replace("<td bgcolor=#00B colspan=53 rowspan=71>", "<td bgcolor=#00B colspan=53 rowspan=71>blue");
+
+	document.getElementById("the_table").innerHTML = text;
 }
 	</script>
 </head>
@@ -238,7 +256,10 @@ Here is a canvas. You can load your own picture, or use Ctrl+V to copy one from 
 	<button type="button" style="width: 256pt;" onclick="canvas_to_textarea()">&uarr; canvas to textarea &darr;</button>
 	<br />
 	<textarea id="the_html" rows=24 style="margin: 12pt 0 12pt 0;"></textarea>
-	<div id="the_table"></div>
+	<br />
+	<button type="button" style="width: 256pt;" onclick="add_text_to_the_test_card()">&uarr; add text to the test card &darr;</button>
+	<br />
+	<div id="the_table" style="margin: 12pt 0 12pt 0;"></div>
 	<div id="the_size"></div>
 	</center>
 	</form>
