@@ -42,6 +42,28 @@ __global__ void div(const float *xs1, const float *xs2, float *ys, int size) {
 	ys[i] = res;
 }
 
+__global__ void std_sin(const float *xs1, const float *xs2, float *ys, int size) {
+	int i = (blockDim.x * blockIdx.x + threadIdx.x);
+	auto res = 0.f;
+	for(auto j = 0u; j < TheInnerLoop; ++j) {
+		if (i < size) {
+			res += std::sin(xs1[i+j]);
+		}
+	}
+	ys[i] = res;
+}
+
+__global__ void poly_sin(const float *xs1, const float *xs2, float *ys, int size) {
+	int i = (blockDim.x * blockIdx.x + threadIdx.x);
+	auto res = 0.f;
+	for(auto j = 0u; j < TheInnerLoop; ++j) {
+		if (i < size) {
+			const auto x = xs1[i+j];
+			res += -0.000182690409228785*x*x*x*x*x*x*x+0.00830460224186793*x*x*x*x*x+-0.166651012143690*x*x*x+x;
+		}
+	}
+	ys[i] = res;
+}
 
 
 #define attempt(smth) {auto s=(smth);if(s!=cudaSuccess){std::cout << cudaGetErrorString(s) << " at " << __LINE__ << "\n"; return -1;}}
@@ -96,6 +118,8 @@ int main(void)
 	measure(add);
 	measure(mul);
 	measure(div);
+	measure(std_sin);
+	measure(poly_sin);
 
 	// back (for debug, don't really want it)
 	attempt(cudaMemcpy(zs.data(), d_zs, TheSizeInBytes, cudaMemcpyDeviceToHost));
