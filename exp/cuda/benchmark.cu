@@ -65,6 +65,16 @@ __global__ void poly_sin(const float *xs1, const float *xs2, float *ys, int size
 	ys[i] = res;
 }
 
+__global__ void std_sqrt(const float *xs1, const float *xs2, float *ys, int size) {
+	int i = (blockDim.x * blockIdx.x + threadIdx.x);
+	auto res = 0.f;
+	for(auto j = 0u; j < TheInnerLoop; ++j) {
+		if (i < size) {
+			res += std::sqrt(xs1[i+j]);
+		}
+	}
+	ys[i] = res;
+}
 
 #define attempt(smth) {auto s=(smth);if(s!=cudaSuccess){std::cout << cudaGetErrorString(s) << " at " << __LINE__ << "\n"; return -1;}}
 
@@ -118,6 +128,7 @@ int main(void)
 	measure(add);
 	measure(mul);
 	measure(div);
+	measure(std_sqrt);
 	measure(std_sin);
 	measure(poly_sin);
 
