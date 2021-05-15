@@ -74,8 +74,32 @@ __global__ void poly_sin2(const float *xs1, const float *xs2, float *ys, int siz
 	ys[i] = res;
 }
 
+__global__ void logical_and(const float *xs1, const float *xs2, float *ys, int size) {
+	int i = (blockDim.x * blockIdx.x + threadIdx.x);
+	bool all_gt = true;
+	for(auto j = 0u; j < TheInnerLoop; ++j) {
+		all_gt &&= xs1[i+j] > xs1[i+j];
+	}
+	ys[i] = all_gt ? 1.f : 0.f;
+}
 
+__global__ void bit_and(const float *xs1, const float *xs2, float *ys, int size) {
+	int i = (blockDim.x * blockIdx.x + threadIdx.x);
+	bool all_gt = true;
+	for(auto j = 0u; j < TheInnerLoop; ++j) {
+		all_gt &= xs1[i+j] > xs1[i+j];
+	}
+	ys[i] = all_gt ? 1.f : 0.f;
+}
 
+__global__ void mul_and(const float *xs1, const float *xs2, float *ys, int size) {
+	int i = (blockDim.x * blockIdx.x + threadIdx.x);
+	bool all_gt = true;
+	for(auto j = 0u; j < TheInnerLoop; ++j) {
+		all_gt *= xs1[i+j] > xs1[i+j];
+	}
+	ys[i] = all_gt ? 1.f : 0.f;
+}
 
 #define attempt(smth) {auto s=(smth);if(s!=cudaSuccess){std::cout << cudaGetErrorString(s) << " at " << __LINE__ << "\n"; return -1;}}
 
