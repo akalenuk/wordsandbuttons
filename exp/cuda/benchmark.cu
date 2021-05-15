@@ -65,6 +65,18 @@ __global__ void poly_sin(const float *xs1, const float *xs2, float *ys, int size
 	ys[i] = res;
 }
 
+__global__ void poly_sin2(const float *xs1, const float *xs2, float *ys, int size) {
+	int i = (blockDim.x * blockIdx.x + threadIdx.x);
+	auto res = 0.f;
+	for(auto j = 0u; j < TheInnerLoop; ++j) {
+		if (i < size) {
+			const auto x = xs1[i+j];
+			res += x*x*x*(x*x*(-0.000182690409228785*x*x+0.00830460224186793)-0.166651012143690)+x;
+		}
+	}
+	ys[i] = res;
+}
+
 __global__ void std_sqrt(const float *xs1, const float *xs2, float *ys, int size) {
 	int i = (blockDim.x * blockIdx.x + threadIdx.x);
 	auto res = 0.f;
@@ -131,6 +143,7 @@ int main(void)
 	measure(std_sqrt);
 	measure(std_sin);
 	measure(poly_sin);
+	measure(poly_sin2);
 
 	// back (for debug, don't really want it)
 	attempt(cudaMemcpy(zs.data(), d_zs, TheSizeInBytes, cudaMemcpyDeviceToHost));
