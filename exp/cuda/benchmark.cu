@@ -13,9 +13,7 @@ __global__ void add(const float *xs1, const float *xs2, float *ys, int size) {
 	int i = (blockDim.x * blockIdx.x + threadIdx.x);
 	auto res = 0.f;
 	for(auto j = 0u; j < TheInnerLoop; ++j) {
-		if (i < size) {
-			res += xs1[i+j] + xs2[i+j];
-		}
+		res += xs1[i+j] + xs2[i+j];
 	}
 	ys[i] = res;
 }
@@ -24,9 +22,7 @@ __global__ void mul(const float *xs1, const float *xs2, float *ys, int size) {
 	int i = (blockDim.x * blockIdx.x + threadIdx.x);
 	auto res = 0.f;
 	for(auto j = 0u; j < TheInnerLoop; ++j) {
-		if (i < size) {
-			res += xs1[i+j] * xs2[i+j];
-		}
+		res += xs1[i+j] * xs2[i+j];
 	}
 	ys[i] = res;
 }
@@ -35,44 +31,7 @@ __global__ void div(const float *xs1, const float *xs2, float *ys, int size) {
 	int i = (blockDim.x * blockIdx.x + threadIdx.x);
 	auto res = 0.f;
 	for(auto j = 0u; j < TheInnerLoop; ++j) {
-		if (i < size) {
-			res += xs1[i+j] / xs2[i+j];
-		}
-	}
-	ys[i] = res;
-}
-
-__global__ void std_sin(const float *xs1, const float *xs2, float *ys, int size) {
-	int i = (blockDim.x * blockIdx.x + threadIdx.x);
-	auto res = 0.f;
-	for(auto j = 0u; j < TheInnerLoop; ++j) {
-		if (i < size) {
-			res += std::sin(xs1[i+j]);
-		}
-	}
-	ys[i] = res;
-}
-
-__global__ void poly_sin(const float *xs1, const float *xs2, float *ys, int size) {
-	int i = (blockDim.x * blockIdx.x + threadIdx.x);
-	auto res = 0.f;
-	for(auto j = 0u; j < TheInnerLoop; ++j) {
-		if (i < size) {
-			const auto x = xs1[i+j];
-			res += -0.000182690409228785*x*x*x*x*x*x*x+0.00830460224186793*x*x*x*x*x+-0.166651012143690*x*x*x+x;
-		}
-	}
-	ys[i] = res;
-}
-
-__global__ void poly_sin2(const float *xs1, const float *xs2, float *ys, int size) {
-	int i = (blockDim.x * blockIdx.x + threadIdx.x);
-	auto res = 0.f;
-	for(auto j = 0u; j < TheInnerLoop; ++j) {
-		if (i < size) {
-			const auto x = xs1[i+j];
-			res += x*x*x*(x*x*(-0.000182690409228785*x*x+0.00830460224186793)-0.166651012143690)+x;
-		}
+		res += xs1[i+j] / xs2[i+j];
 	}
 	ys[i] = res;
 }
@@ -81,12 +40,42 @@ __global__ void std_sqrt(const float *xs1, const float *xs2, float *ys, int size
 	int i = (blockDim.x * blockIdx.x + threadIdx.x);
 	auto res = 0.f;
 	for(auto j = 0u; j < TheInnerLoop; ++j) {
-		if (i < size) {
-			res += std::sqrt(xs1[i+j]);
-		}
+		res += std::sqrt(xs1[i+j]);
 	}
 	ys[i] = res;
 }
+
+__global__ void std_sin(const float *xs1, const float *xs2, float *ys, int size) {
+	int i = (blockDim.x * blockIdx.x + threadIdx.x);
+	auto res = 0.f;
+	for(auto j = 0u; j < TheInnerLoop; ++j) {
+		res += std::sin(xs1[i+j]);
+	}
+	ys[i] = res;
+}
+
+__global__ void poly_sin(const float *xs1, const float *xs2, float *ys, int size) {
+	int i = (blockDim.x * blockIdx.x + threadIdx.x);
+	auto res = 0.f;
+	for(auto j = 0u; j < TheInnerLoop; ++j) {
+		const auto x = xs1[i+j];
+		res += -0.000182690409228785*x*x*x*x*x*x*x+0.00830460224186793*x*x*x*x*x+-0.166651012143690*x*x*x+x;
+	}
+	ys[i] = res;
+}
+
+__global__ void poly_sin2(const float *xs1, const float *xs2, float *ys, int size) {
+	int i = (blockDim.x * blockIdx.x + threadIdx.x);
+	auto res = 0.f;
+	for(auto j = 0u; j < TheInnerLoop; ++j) {
+		const auto x = xs1[i+j];
+		res += x*x*x*(x*x*(-0.000182690409228785*x*x+0.00830460224186793)-0.166651012143690)+x;
+	}
+	ys[i] = res;
+}
+
+
+
 
 #define attempt(smth) {auto s=(smth);if(s!=cudaSuccess){std::cout << cudaGetErrorString(s) << " at " << __LINE__ << "\n"; return -1;}}
 
