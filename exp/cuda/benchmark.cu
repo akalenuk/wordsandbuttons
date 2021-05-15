@@ -78,7 +78,7 @@ __global__ void logical_and(const float *xs1, const float *xs2, float *ys, int s
 	int i = (blockDim.x * blockIdx.x + threadIdx.x);
 	bool all_gt = true;
 	for(auto j = 0u; j < TheInnerLoop; ++j) {
-		all_gt &&= xs1[i+j] > xs1[i+j];
+		all_gt = all_gt && (xs1[i+j] > xs1[i+j]);
 	}
 	ys[i] = all_gt ? 1.f : 0.f;
 }
@@ -157,6 +157,9 @@ int main(void)
 	measure(std_sin);
 	measure(poly_sin);
 	measure(poly_sin2);
+	measure(logical_and);
+	measure(bit_and);
+	measure(mul_and);
 
 	// back (for debug, don't really want it)
 	attempt(cudaMemcpy(zs.data(), d_zs, TheSizeInBytes, cudaMemcpyDeviceToHost));
