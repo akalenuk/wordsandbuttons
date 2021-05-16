@@ -74,6 +74,16 @@ __global__ void poly_sin2(const float *xs1, const float *xs2, float *ys, int siz
 	ys[i] = res;
 }
 
+__global__ void poly_sin3(const float *xs1, const float *xs2, float *ys, int size) {
+	int i = (blockDim.x * blockIdx.x + threadIdx.x);
+	auto res = 0.f;
+	for(auto j = 0u; j < TheInnerLoop; ++j) {
+		const auto x = xs1[i+j];
+		res += x*x*x*(x*x*(-0.000182690409228785f*x*x+0.00830460224186793f)-0.166651012143690f)+x;
+	}
+	ys[i] = res;
+}
+
 __global__ void logical_and(const float *xs1, const float *xs2, float *ys, int size) {
 	int i = (blockDim.x * blockIdx.x + threadIdx.x);
 	bool all_gt = true;
@@ -157,6 +167,7 @@ int main(void)
 	measure(std_sin);
 	measure(poly_sin);
 	measure(poly_sin2);
+	measure(poly_sin3);
 	measure(logical_and);
 	measure(bit_and);
 	measure(mul_and);
