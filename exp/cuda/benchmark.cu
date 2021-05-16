@@ -77,8 +77,8 @@ __global__ void poly_sin2(const float *xs1, const float *xs2, float *ys, int siz
 __global__ void logical_and(const float *xs1, const float *xs2, float *ys, int size) {
 	int i = (blockDim.x * blockIdx.x + threadIdx.x);
 	bool all_gt = true;
-	for(auto j = 0u; j < TheInnerLoop; ++j) {
-		all_gt = all_gt && (xs1[i+j] > xs1[i+j]);
+	for(auto j = 0u; j < TheInnerLoop - 3; ++j) {
+		all_gt = all_gt && (xs1[i+j] > xs1[i+j]) && (xs1[i+j+1] > xs1[i+j+1]) && (xs1[i+j+2] > xs1[i+j]+2) && (xs1[i+j+3] > xs1[i+j+3]);
 	}
 	ys[i] = all_gt ? 1.f : 0.f;
 }
@@ -86,8 +86,8 @@ __global__ void logical_and(const float *xs1, const float *xs2, float *ys, int s
 __global__ void bit_and(const float *xs1, const float *xs2, float *ys, int size) {
 	int i = (blockDim.x * blockIdx.x + threadIdx.x);
 	bool all_gt = true;
-	for(auto j = 0u; j < TheInnerLoop; ++j) {
-		all_gt &= xs1[i+j] > xs1[i+j];
+	for(auto j = 0u; j < TheInnerLoop - 3; ++j) {
+		all_gt = all_gt & (xs1[i+j] > xs1[i+j]) & (xs1[i+j+1] > xs1[i+j+1]) & (xs1[i+j+2] > xs1[i+j]+2) & (xs1[i+j+3] > xs1[i+j+3]);
 	}
 	ys[i] = all_gt ? 1.f : 0.f;
 }
@@ -95,8 +95,8 @@ __global__ void bit_and(const float *xs1, const float *xs2, float *ys, int size)
 __global__ void mul_and(const float *xs1, const float *xs2, float *ys, int size) {
 	int i = (blockDim.x * blockIdx.x + threadIdx.x);
 	bool all_gt = true;
-	for(auto j = 0u; j < TheInnerLoop; ++j) {
-		all_gt *= xs1[i+j] > xs1[i+j];
+	for(auto j = 0u; j < TheInnerLoop - 3; ++j) {
+		all_gt = all_gt * (xs1[i+j] > xs1[i+j]) * (xs1[i+j+1] > xs1[i+j+1]) * (xs1[i+j+2] > xs1[i+j]+2) * (xs1[i+j+3] > xs1[i+j+3]);
 	}
 	ys[i] = all_gt ? 1.f : 0.f;
 }
