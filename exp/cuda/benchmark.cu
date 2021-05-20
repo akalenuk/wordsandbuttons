@@ -111,13 +111,20 @@ __global__ void mul_and(const float *xs1, const float *xs2, float *ys, int size)
 	ys[i] = all_gt ? 1.f : 0.f;
 }
 
+#define swap(a, b) {auto c = a; a = b; b = c;}
+
 __global__ void sort(const float *xs1, const float *xs2, float *ys, int size) {
 	int i = (blockDim.x * blockIdx.x + threadIdx.x);
 	float checksum = 0.;
 	for(auto j = 0u; j < TheInnerLoop - 2; ++j) {
-		std::array<float, 3> sortable {xs1[i+j], xs1[i+j+1], xs1[i+j+2]};
-		std::sort(sortable.begin(), sortable.end());
-		checksum += sortable[0] + 2*sortable[1] + 3*sortable[3];
+		double s[3] = {xs1[i+j], xs1[i+j+1], xs1[i+j+2]};
+		if(s[0] > s[1])
+			swap(s[0], s[1]);
+		if(s[1] > s[2])
+			swap(s[1], s[2]);
+		if(s[0] > s[1])
+			swap(s[0], s[1]);
+		checksum += s[0] + 2*s[1] + 3*s[3];
 	}
 	ys[i] = checksum;
 }
@@ -126,7 +133,7 @@ __global__ void nano_sort(const float *xs1, const float *xs2, float *ys, int siz
 	int i = (blockDim.x * blockIdx.x + threadIdx.x);
 	float checksum = 0.;
 	for(auto j = 0u; j < TheInnerLoop - 2; ++j) {
-		std::array<float, 3> sortable {xs1[i+j], xs1[i+j+1], xs1[i+j+2]};
+		double sortable[3] = {xs1[i+j], xs1[i+j+1], xs1[i+j+2]};
 		const auto a = sortable[0];
 		const auto b = sortable[1];
 		const auto c = sortable[2];
