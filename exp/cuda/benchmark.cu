@@ -59,7 +59,7 @@ __global__ void poly_sin(const float *xs1, const float *xs2, float *ys, int size
 	auto res = 0.f;
 	for(auto j = 0u; j < TheInnerLoop; ++j) {
 		const auto x = xs1[i+j];
-		res += -0.000182690409228785*x*x*x*x*x*x*x+0.00830460224186793*x*x*x*x*x+-0.166651012143690*x*x*x+x;
+		res += -0.000182690409228785*x*x*x*x*x*x*x+0.00830460224186793*x*x*x*x*x-0.166651012143690*x*x*x+x;
 	}
 	ys[i] = res;
 }
@@ -75,6 +75,16 @@ __global__ void poly_sin2(const float *xs1, const float *xs2, float *ys, int siz
 }
 
 __global__ void poly_sin3(const float *xs1, const float *xs2, float *ys, int size) {
+	int i = (blockDim.x * blockIdx.x + threadIdx.x);
+	auto res = 0.f;
+	for(auto j = 0u; j < TheInnerLoop; ++j) {
+		const auto x = xs1[i+j];
+		res += -0.000182690409228785f*x*x*x*x*x*x*x+0.00830460224186793f*x*x*x*x*x-0.166651012143690f*x*x*x+x;
+	}
+	ys[i] = res;
+}
+
+__global__ void poly_sin4(const float *xs1, const float *xs2, float *ys, int size) {
 	int i = (blockDim.x * blockIdx.x + threadIdx.x);
 	auto res = 0.f;
 	for(auto j = 0u; j < TheInnerLoop; ++j) {
@@ -202,6 +212,7 @@ int main(void)
 	measure(poly_sin);
 	measure(poly_sin2);
 	measure(poly_sin3);
+	measure(poly_sin4);
 	measure(logical_and);
 	measure(bit_and);
 	measure(mul_and);
