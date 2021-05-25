@@ -347,16 +347,16 @@ So let's see what works and what not.
 But before we start. I have done a whole series of quizzes about microoptimizations. It's called “Challenge your performance intuition...” with something-something.
 	</p>
 	<p>
-<a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_magic_squares.html">1) with C++ magic squares</a>
+1) <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_magic_squares.html">...with C++ magic squares</a>;
 	</p>
 	<p>
-<a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_nanosecond_sorting.html">2) with nanosecond sorting</a>
+2) <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_nanosecond_sorting.html">...with nanosecond sorting</a>;
 	</p>
 	<p>
-<a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_operators.html">3) with C++ operators</a>
+3) <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_operators.html">...with C++ operators</a>;
 	</p>
 	<p>
-<a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_sine.html">4) with C++ sine</a>
+4) <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_sine.html">...with C++ sine</a>.
 	</p>
 	<p>
 The code for these quizzes was only ran on CPU. So what I want to do now, I want to take a few microoptimizations from these quizzes, rerun them on GPU and see whether they still work or not. And, of course, the whole exercise is going to be a quiz too.
@@ -368,11 +368,96 @@ This is my benchmark.
 	<table><tr>
 	<td>
 	<pre style="width: 505pt;">
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;random&gt;
+#include &lt;cuda_runtime.h&gt;
+
+
+using TheType = float;
+constexpr auto TheSize = 65536u*128u;
+constexpr auto TheSizeInBytes = TheSize*sizeof(TheType);
+constexpr auto TheInnerLoop = 256u;
+
+
+#define attempt(smth) { \
+    auto s=(smth); \
+    if(s!=cudaSuccess) { \
+        std::cout &lt;&lt; cudaGetErrorString(s) &lt;&lt; \
+        " at " &lt;&lt; __LINE__ &lt;&lt; "\n"; return -1; \
+    } \
+}
+
+#define measure(smth) {\
+    /*timestamp start*/\
+    cudaEvent_t start;\
+    cudaEventCreate(&start);\
+    cudaEventRecord(start, 0);\
+    cudaEvent_t stop;\
+    cudaEventCreate(&stop); \
+\
+    /* run it*/\
+    int threadsPerBlock = 256;\
+    int blocksPerGrid = \
+        (TheSize - TheInnerLoop + threadsPerBlock - 1) \
+        / threadsPerBlock;\
+    smth&lt;&lt;&lt;blocksPerGrid, threadsPerBlock&gt;&gt;&gt; \
+        (d_xs, d_ys, d_zs, TheSize);\
+    attempt(cudaGetLastError());\
+    attempt(cudaDeviceSynchronize());\
+\
+    /* timestamp stop*/\
+    cudaEventRecord(stop, 0); \
+    cudaEventSynchronize(stop);\
+    float elapsedTime;\
+    cudaEventElapsedTime(&elapsedTime, start, stop);\
+    std::cout &lt;&lt; "Time of " &lt;&lt; #smth &lt;&lt; \
+        ": " &lt;&lt; elapsedTime &lt;&lt; "\n";}\
+
+
+int main(void)
+{
+    // prepare the data
+    std::mt19937 rng(0);
+    std::uniform_real_distribution&lt;TheType&gt; distribution(0.f, 1.f);
+    std::vector&lt;TheType&gt; xs(TheSize);
+    std::vector&lt;TheType&gt; ys(TheSize);
+    std::vector&lt;TheType&gt; zs(TheSize);
+    for (TheType &number : xs) number = distribution(rng);
+    for (TheType &number : ys) number = distribution(rng);
+
+
+    // do the allocations
+    float *d_xs = nullptr;
+    float *d_ys = nullptr;
+    float *d_zs = nullptr;
+    attempt(cudaMalloc((void **)&d_xs, TheSizeInBytes));
+    attempt(cudaMalloc((void **)&d_ys, TheSizeInBytes));
+    attempt(cudaMalloc((void **)&d_zs, TheSizeInBytes));
+
+    // and copying
+    attempt(cudaMemcpy(d_xs, xs.data(), TheSizeInBytes,
+        cudaMemcpyHostToDevice));
+    attempt(cudaMemcpy(d_ys, ys.data(), TheSizeInBytes,
+        cudaMemcpyHostToDevice));
+
+    measure(<b>some kernel function</b>);
+
+
+    // back (for debug, don't really want it)
+    attempt(cudaMemcpy(zs.data(), d_zs, TheSizeInBytes,
+        cudaMemcpyDeviceToHost));
+
+    attempt(cudaFree(d_xs));
+    attempt(cudaFree(d_ys));
+    attempt(cudaFree(d_zs));
+    return 0;
+}
 
 </pre>
 	</td></tr></table>
 	<p class="comment">
-All the measurements are performed on <i>NVIDIA Corporation GP107M [GeForce GTX 1050 Ti Mobile]</i>.
+All the measurements are performed on <i>GeForce GTX 1050 Ti Mobile</i>.
 	</p>
 	<p>
 Now I'm going to propose some snippets of codes in pairs. Using the slider below the code (yes, it's a slider), please estimate their relative performance, and press “Reveal the truth” button. There is not going to be points, but if you miss with your estimate, you will get some pixels of error. It's how far is the slider from the real number.
