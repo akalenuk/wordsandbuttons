@@ -463,7 +463,6 @@ int main(void)
     attempt(cudaFree(d_zs));
     return 0;
 }
-
 </pre>
 	</td></tr></table>
 	<p class="comment">
@@ -480,10 +479,13 @@ The one with the fewest pixels of error in the end wins the game.
 Round 1. mul vs. div
 	</h2>
 	<p>
-
+There is a well known optimization quoted among others in <a href="https://www.amazon.com/Explained-Numerical-Mathematics-Scientific-Computation/dp/0199601429">Modern Fortran Explained</a>.
 	</p>
 	<p>
-
+<i>For example, if <b>a</b>, <b>b</b>, and <b>c</b> are real variables, the expression <b>a / b / c</b> might be evaluated as <b>a / (b * c)</b> on a processor that can multiply much faster than it can divide.</i>
+	</p>
+	<p>
+So... there are processors that are not like that? Let's see if my GPU can divide as fast as multiply.
 	</p>
 	<table><tr>
 	<td id="left_1">
@@ -516,6 +518,9 @@ __global__ void div(const float *xs1,
 }
 </pre>
 	</td></tr></table>
+	<p class="comment">
+Set your estimate with a slider and press the button below.
+	</p>
 	<canvas id="slider_1" width=608 height=128></canvas>
 	<p class="comment" id="comment_1">
 They are almost the same.
@@ -523,10 +528,10 @@ They are almost the same.
 	<button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
 	<div id="the_truth_1" style="display:none;">
 	<p>
-
+Ok, so the division is predictably slower than the multiplication. Not to the great extend but still noticeably.
 	</p>
 	<p>
-
+By the way, I did the measurement multiplication runs almost as fast as addition, but for quite a while this hasn't been news even for Intel.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -537,7 +542,10 @@ They are almost the same.
 Round 2. mul vs. div --use_fast_math
 	</h2>
 	<p>
-
+CUDA has a magic compiler flag that promises to make math faster. It's called <b>--use_fast_math</b>, and what it does, it relaxes precision expectations for the division <b>--prec-div=false</b>, and the square root function <b>--prec-sqrt=false</b>, allows processor to ignore <a href="https://wordsandbuttons.online/yet_another_floating_point_tutorial.html#index_denormalized_numbers">denormalized floating-point</a> numbers <b>--ftz=true</b>, and allows the instruction that makes multiplication and addition in one go <b>--fmad=true</b>.
+	</p>
+	<p>
+For the previous experiment, the <b>--prec-div=false</b> would be the most relevant. Let's see how fast the division would be with its precision constraints lifted.
 	</p>
 	<table><tr>
 	<td id="left_2">
@@ -579,10 +587,10 @@ They are almost the same.
 	<button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
 	<div id="the_truth_2" style="display:none;">
 	<p>
-
+With the fast math, the division is almost as fast as the multiplication. The optimization from above don't make much sense anymore.
 	</p>
 	<p>
-
+Also, if you're asking yourself, didn't <b>--ftz=true</b> also speed up the multiplication? It didn't. Not to the measurable extend.
 	</p>
 	</div>
 	<script language="JavaScript">
