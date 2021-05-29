@@ -279,45 +279,6 @@ function reveal(no){
 	document.getElementById("score").innerHTML = "<b>" + score.toFixed(0) + "</b>";
 	document.getElementById("default_score").innerHTML = "<b>" + default_score.toFixed(0) + "</b>";
 }
-
-function colorized(text) {
-	const separators = ['\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')'];
-	const comments = [['/*', '*/'], ['#', '\n']];
-
-	function painted_in(line, color) {
-		return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
-	}
-
-	function colorized(token) {
-		var code_sum = 0;
-		for(var i = 0; i < token.length; ++i)
-			code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
-		var zero_channel = code_sum % 3;
-		var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
-			+ (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
-			+ (zero_channel == 2 ? '0' : '');
-		return painted_in(token, color);
-	}
-
-	function separated(line, i) {
-		if(i == separators.length)
-			return colorized(line);
-		return line.split(separators[i]).map(function(subline) {
-			return separated(subline, i + 1);}).join(separators[i]);
-	}
-
-	function uncommented(line, i) {
-		if(i == comments.length)
-			return separated(line, 0);
-		var chunks = line.split(comments[i][0]);
-		return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
-			var in_out_comment = chunk.split(comments[i][1]);
-			return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "777")
-				+ uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
-	}
-
-	return uncommented(text, 0);
-}
 	</script>
 </head>
 <body>
