@@ -1014,7 +1014,32 @@ They are almost the same.
 But it doesn't work either.
 	</p>
 	<p>
+The thing is, CUDA compiler doesn't do short circuiting at all.
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_1">
+Function : _Z11logical_andPKfS0_Pfi
 
+  /*0008*/    MOV R1, c[0x0][0x20] ;
+  /*0010*/    S2R R2, SR_CTAID.X ;
+  /*0018*/    S2R R0, SR_TID.X ;
+
+  /*0028*/    XMAD.MRG R3, R2, c[0x0] [0x8].H1, RZ ;
+  /*0030*/    XMAD R0, R2, c[0x0] [0x8], R0 ;
+  /*0038*/    XMAD.PSL.CBCC R2, R2.H1, R3.H1, R0 ;
+
+  /*0048*/    SHR R0, R2.reuse, 0x1e ;
+  /*0050*/    ISCADD R2.CC, R2, c[0x0][0x150], 0x2 ;
+  /*0058*/    IADD.X R3, R0, c[0x0][0x154] ;
+
+  /*0068*/    STG.E [R2], RZ ;
+  /*0070*/    EXIT ;
+  /*0078*/    BRA 0x78 ;
+</pre>
+	</td></tr></table>
+	<p>
+Apparently, there is no much sens in it on GPU at all so even the && version simply computes the logical expression as it is.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -1025,7 +1050,7 @@ But it doesn't work either.
 Round 10. swap sort vs. index sort
 	</h2>
 	<p>
-
+In <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_nanosecond_sorting.html">Challenge your performance intuition with nanosecond sorting</a> an index sort is compared with standard sort. CUDA doesn't allow a standard sort but we can use a swap sort instead.
 	</p>
 	<table><tr>
 	<td id="left_10">
@@ -1081,7 +1106,7 @@ They are almost the same.
 	<button type="button" onclick="reveal(9)" id="button_10">Reveal the truth</button>
 	<div id="the_truth_10" style="display:none;">
 	<p>
-
+And the index sort is much slower on CUDA. It works on x86 because it's avoids branching, and branching is not very efficient on x86.
 	</p>
 	<p>
 
@@ -1132,6 +1157,12 @@ More like this:
 	<p>
 Also, there's Github with <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/cuda">all the experiments</a>.
 	</p>
+
+	<script language="JavaScript">
+	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
+	</script>
+
+
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
