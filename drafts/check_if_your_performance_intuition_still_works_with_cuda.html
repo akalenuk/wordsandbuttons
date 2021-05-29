@@ -89,6 +89,14 @@ button{
 	font-size: 18pt;
 }
 
+.formula {
+	font-family: sans-serif;
+	font-size: 14pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
 
 canvas { touch-action: none; }
 	</style>
@@ -770,13 +778,13 @@ We don't pay a lot of attention for type length on CPU since apart from better s
 Round 6. Polynomial vs. Horner's scheme
 	</h2>
 	<p>
-
+There is a way to evaluate an n-polynomial with only n-1 multiplications and additions. It's called Horner's scheme.
+	</p>
+	<p class="formula">
+ax<sup>3</sup> + bx<sup>2</sup> + cx + d = x&mult;(x&mult;(x&mult;a + b) + c) + d
 	</p>
 	<p>
-
-	</p>
-	<p>
-
+Normally, this is something a compiler can figure out by itself. But would it?
 	</p>
 	<table><tr>
 	<td id="left_6">
@@ -825,7 +833,7 @@ They are almost the same.
 	<button type="button" onclick="reveal(5)" id="button_6">Reveal the truth</button>
 	<div id="the_truth_6" style="display:none;">
 	<p>
-
+Surprisingly, it wouldn't. This is one example where a hand-made microoptimization still counts.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -836,7 +844,7 @@ They are almost the same.
 Round 7. sine --use_fast_math vs. Horner's sine
 	</h2>
 	<p>
-
+Ok, but we haven't tried running the standard sine with fast math enabled. Let's compared it to our Horner's single-precision polynomial.
 	</p>
 	<table><tr>
 	<td id="left_7">
@@ -882,10 +890,7 @@ They are almost the same.
 	<button type="button" onclick="reveal(6)" id="button_7">Reveal the truth</button>
 	<div id="the_truth_7" style="display:none;">
 	<p>
-
-	</p>
-	<p>
-
+And it's essentially the same. Which is odd since normally polynomials are super fast to compute but apparently with relaxed math sine is even faster.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -896,7 +901,10 @@ They are almost the same.
 Round 8. Logical && vs. bitwise &
 	</h2>
 	<p>
-
+In <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_operators.html">Challenge your performance intuition with C++ operators</a>, a few alternatives to the logical operations are examined. Apparently, on x86, short circuiting on logical operaions is not neceesary beneficial. Sometimes we want it off. In C++, You don't have a legitimate control over it so he have to use tricks to hint a compiler of our intentions.
+	</p>
+	<p>
+Sometimes, using bitwitse operations instead of logical ones does the trick.
 	</p>
 	<table><tr>
 	<td id="left_8">
@@ -944,10 +952,7 @@ They are almost the same.
 	<button type="button" onclick="reveal(7)" id="button_8">Reveal the truth</button>
 	<div id="the_truth_8" style="display:none;">
 	<p>
-
-	</p>
-	<p>
-
+But not this time. There is virtually no difference.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -958,7 +963,7 @@ They are almost the same.
 Round 9. Logical && vs. mul trick
 	</h2>
 	<p>
-
+The other trick to make a compiler skip the short circuiting is turning logic into arithmetics.
 	</p>
 	<table><tr>
 	<td id="left_9">
@@ -1006,7 +1011,7 @@ They are almost the same.
 	<button type="button" onclick="reveal(8)" id="button_9">Reveal the truth</button>
 	<div id="the_truth_9" style="display:none;">
 	<p>
-
+But it doesn't work either.
 	</p>
 	<p>
 
