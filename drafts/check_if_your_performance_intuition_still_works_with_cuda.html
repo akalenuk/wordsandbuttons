@@ -358,16 +358,16 @@ And so they start producing planes with foldable wings, and they do carry a lot 
 Now replace “cars” with “personal computers”, and “planes” with “GPUs” — and that's CUDA for you.
 	</p>
 	<p>
-CUDA stangs for Compute Unified Device Architecture and it is meant to revolutionize computing by making drastically different computational devices work together. It's just that we don't have a lot of those devices on our hands. Or in production. Or even in development. Maybe in future. Meanwhile, everyone has a GPU, so for now, CUDA is a technology that turns your GPU into a micro-super-computer.
+CUDA stands for Compute Unified Device Architecture and it is meant to revolutionize computing by making drastically different computational devices work together. It's just that we don't have a lot of those devices on our hands. Or in production. Or even in development. Maybe in the future. Meanwhile, everyone has a GPU, so for now, CUDA is a technology that turns your GPU into a micro-super-computer.
 	</p>
 	<p>
-With CUDA, you can write code in C, Fortran, or C++, and make your graphic card run it using its own resources. Memory, cache, processors. It has a lot of computing units working in parallel so if your task is easily parallelizeable, you can make it run on GPU much faster than on CPU. Of course, these units differ vastly from general purpose processors we all used to, and our performance intuition may not appear transferable.
+With CUDA, you can write code in C, Fortran, or C++, and make your graphic card run it using its own resources. Memory, cache, processors. It has a lot of computing units working in parallel so if your task is easily parallelizable, you can make it run on GPU much faster than on CPU. Of course, these units differ vastly from general-purpose processors we all used to, and our performance intuition may not appear transferable.
 	</p>
 	<p>
 So let's see what optimizations work on GPU and what not.
 	</p>
 	<p>
-But before we start. I have done a whole series of quizzes about microoptimizations. It's called “Challenge your performance intuition...” with something-something.
+But before we start. I have done a whole series of quizzes about micro-optimizations. It's called “Challenge your performance intuition...” with something-something.
 	</p>
 	<p>
 1) <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_magic_squares.html">...with C++ magic squares</a>;
@@ -382,7 +382,7 @@ But before we start. I have done a whole series of quizzes about microoptimizati
 4) <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_sine.html">...with C++ sine</a>.
 	</p>
 	<p>
-The code for these quizzes was only measured on CPU and mostly on Intel. So what I want to do now, I want to take a few microoptimizations from these quizzes, rerun them on GPU and see whether they still work or not. And, of course, the whole exercise is going to be a quiz too.
+The code for these quizzes was only measured on the CPU and mostly on Intel. So what I want to do now, I want to take a few micro-optimizations from these quizzes, rerun them on GPU and see whether they still work or not. And, of course, the whole exercise is going to be a quiz too.
 	</p>
 	<p>
 This is my benchmark.
@@ -482,17 +482,17 @@ int main(void)
 All the measurements are performed on <i>GeForce GTX 1050 Ti Mobile</i>.
 	</p>
 	<p>
-Now I'm going to propose some snippets of codes in pairs. For each pair, please set what you think is the relative performance of it with the slider below the code (yes, it's a slider), and press “Reveal the truth” button. Instead of points, you'll get pixels of error. It's how far is the slider set from the real number.
+Now I'm going to propose some snippets of codes in pairs. For each pair, please set what you think is the relative performance of it with the slider below the code (yes, it's a slider), and press the “Reveal the truth” button. Instead of points, you'll get pixels of error. It's how far is the slider set from the real number.
 	</p>
 	<p>
-The goal of the quiz is to score as little pixels of error as possible.
+The goal of the quiz is to score as few pixels of error as possible.
 	</p>
 
 	<h2>
 Round 1. mul vs. div
 	</h2>
 	<p>
-There is a well known optimization quoted among others in <a href="https://www.amazon.com/Explained-Numerical-Mathematics-Scientific-Computation/dp/0199601429">Modern Fortran Explained</a>.
+There is a well-known optimization quoted among others in <a href="https://www.amazon.com/Explained-Numerical-Mathematics-Scientific-Computation/dp/0199601429">Modern Fortran Explained</a>.
 	</p>
 	<p>
 <i>For example, if <b>a</b>, <b>b</b>, and <b>c</b> are real variables, the expression <b>a / b / c</b> might be evaluated as <b>a / (b * c)</b> on a processor that can multiply much faster than it can divide.</i>
@@ -541,10 +541,10 @@ They are almost the same.
 	<button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
 	<div id="the_truth_1" style="display:none;">
 	<p>
-Ok, so the division is predictably slower than the multiplication. Not to the great extend but still noticeably.
+Ok, so the division is predictably slower than the multiplication. Not to a great extent but still noticeably.
 	</p>
 	<p>
-By the way, I did the measurement: multiplication runs almost as fast as addition.
+By the way, I did the measurement: multiplication runs almost as fast as an addition.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -555,7 +555,7 @@ By the way, I did the measurement: multiplication runs almost as fast as additio
 Round 2. mul vs. div --use_fast_math
 	</h2>
 	<p>
-CUDA has a magic compiler flag that promises to make math faster. It's called <b>--use_fast_math</b>, and what it does, it relaxes precision expectations for the division (<b>--prec-div=false</b>), and the square root function (<b>--prec-sqrt=false</b>), allows processor to ignore <a href="https://wordsandbuttons.online/yet_another_floating_point_tutorial.html#index_denormalized_numbers">denormalized floating-point</a> numbers (<b>--ftz=true</b>), and allows the instruction that makes multiplication and addition in one go (<b>--fmad=true</b>).
+CUDA has a magic compiler flag that promises to make math faster. It's called <b>--use_fast_math</b>, and what it does, it relaxes precision expectations for the division (<b>--prec-div=false</b>), and the square root function (<b>--prec-sqrt=false</b>), allows processors to ignore <a href="https://wordsandbuttons.online/yet_another_floating_point_tutorial.html#index_denormalized_numbers">denormalized floating-point</a> numbers (<b>--ftz=true</b>), and allows the instruction that makes multiplication and addition in one go (<b>--fmad=true</b>).
 	</p>
 	<p>
 For the previous experiment, the <b>--prec-div=false</b> would be the most relevant. Let's see how fast the division would be with its precision constraints lifted.
@@ -600,7 +600,7 @@ They are almost the same.
 	<button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
 	<div id="the_truth_2" style="display:none;">
 	<p>
-With the fast math, the division is almost as fast as the multiplication. The optimization from above don't make much sense anymore.
+With fast math, the division is almost as fast as multiplication. The optimization from above doesn't make much sense anymore.
 	</p>
 	<p>
 Also, if you're asking yourself, didn't <b>--ftz=true</b> also speed up the multiplication? It didn't. Not to the measurable extend.
@@ -838,7 +838,7 @@ They are almost the same.
 	<button type="button" onclick="reveal(5)" id="button_6">Reveal the truth</button>
 	<div id="the_truth_6" style="display:none;">
 	<p>
-Surprisingly, it wouldn't. This is one example where a hand-made microoptimization still counts.
+Surprisingly, it wouldn't. This is one example where a hand-made micro-optimization still counts.
 	</p>
 	</div>
 	<script language="JavaScript">
@@ -906,7 +906,7 @@ And it's essentially the same. Which is odd since normally polynomials are super
 Round 8. Logical && vs. bitwise &
 	</h2>
 	<p>
-In <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_operators.html">Challenge your performance intuition with C++ operators</a>, a few alternatives to the logical operations are examined. Apparently, on x86, short circuiting on logical operaions is not neceesary beneficial. Sometimes we want it off. In C++ you don't have legitimate control over it so he have to use tricks to hint a compiler of our intentions.
+In <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_operators.html">Challenge your performance intuition with C++ operators</a>, a few alternatives to the logical operations are examined. Apparently, on x86, short-circuiting on logical operations is not necessarily beneficial. Sometimes we want it off. In C++ you don't have legitimate control over it so we have to use tricks to hint a compiler of our intentions.
 	</p>
 	<p>
 Sometimes, using bitwitse operations instead of logical ones work.
@@ -1019,7 +1019,7 @@ They are almost the same.
 But it doesn't work either.
 	</p>
 	<p>
-The thing is, CUDA compiler doesn't do short circuiting at all.
+The thing is, the CUDA compiler doesn't do short-circuiting at all.
 	</p>
 	<table><tr>
 	<td>
@@ -1148,16 +1148,16 @@ It's not immodest, you're just doing me a favor by sharing a quiz ;-)
 Conclusion
 	</h2>
 	<p>
-GPU is different from CPU and this shows. You can't rely solely on your experience, you have to measure your optimisations, you have to read the code to see it the compiler understands you. But that's business as usual.
+GPU is different from CPU and this shows. You can't rely solely on your experience, you have to measure your optimizations, you have to read the code to see if the compiler understands you. But that's business as usual.
 	</p>
 	<p>
-What's different now is that even NVidia doesn't support full backward compatibility for their own hardware. This means that you can't even start to buld up your experience. Because by the time you're fairly good at predicting what works and what not, NVidia will launch a new product, uppen the top <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capability">compute capacity</a>, and launch a new version of CUDA with upgraded compiler, too.
+What's different now is that even NVidia doesn't support full backward compatibility for their own hardware. This means that you can't even start to build up your experience. Because by the time you're fairly good at predicting what works and what not, NVidia will launch a new product, uppen the top <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capability">compute capacity</a>, and launch a new version of CUDA with an upgraded compiler too.
 	</p>
 	<p>
-And it's getting worse. Or better. Google now has its own hardware product — a <a href="https://en.wikipedia.org/wiki/Tensor_Processing_Unit">TPU</a> which stands for Tensor Processor Unit, and is basically a special processor for machine learning. There will be more to come. Task-specific hardware is simply more efficient hence more economical than general-purpose. It's not even about engineering, it's economics.
+And it's getting worse. For the programmer, of course; for the consumer, it only gets better. Google now has its own hardware product — a <a href="https://en.wikipedia.org/wiki/Tensor_Processing_Unit">TPU</a> which stands for Tensor Processor Unit, and is basically a special processor for machine learning. There will be more to come. Task-specific hardware is simply more efficient hence more economical than general-purpose. It's not even about engineering, it's economics.
 	</p>
 	<p>
-Heterogeneous computing is here. It started from number crunching on GPUs, but it's already spilling out of this niche. Coming back to the metaphor from before, we might have started with wingless planes, but we're heading towards the whole range of cost-effective mass-transit.
+Heterogeneous computing is here. It started from number-crunching on GPUs, but it's already spilling out of this niche. Coming back to the metaphor from before, we might have started with wingless planes, but we're heading towards the whole range of cost-effective mass transit.
 	</p>
 	</div>
 	<h2>
