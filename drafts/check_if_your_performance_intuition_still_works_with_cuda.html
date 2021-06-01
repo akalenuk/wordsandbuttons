@@ -62,12 +62,10 @@ td.footer {
 pre {
 	margin: 0 0 0 0;
 	padding-top: 12pt;
-	padding-left: 12pt;
-	padding-right: 12pt;
 	padding-bottom: 12pt;
 	font-size: 12pt;
 	text-align: left;
-	width: 360pt;
+	width: 384pt;
 }
 
 table {
@@ -1069,7 +1067,7 @@ __global__ void sort(const float *xs1,
   int i = (blockDim.x * blockIdx.x + threadIdx.x);
   float checksum = 0.;
   for(auto j = 0u; j &lt; TheInnerLoop - 2; ++j) {
-    double s[3] = {xs1[i+j], xs1[i+j+1], xs1[i+j+2]};
+    double s[3] = {xs1[i+j],xs1[i+j+1],xs1[i+j+2]};
     if(s[0] &gt; s[1])
       swap(s[0], s[1]);
     if(s[1] &gt; s[2])
@@ -1091,14 +1089,14 @@ __global__ void index_sort(const float *xs1,
   int i = (blockDim.x * blockIdx.x + threadIdx.x);
   float checksum = 0.;
   for(auto j = 0u; j &lt; TheInnerLoop - 2; ++j) {
-    double sortable[3] = {xs1[i+j], xs1[i+j+1], xs1[i+j+2]};
-    const auto a = sortable[0];
-    const auto b = sortable[1];
-    const auto c = sortable[2];
-    sortable[int(a &gt; b) + int(a &gt; c)] = a;
-    sortable[int(b &gt;= a) + int(b &gt; c)] = b;
-    sortable[int(c &gt;= a) + int(c &gt;= b)] = c;
-    checksum += sortable[0] + 2*sortable[1] + 3*sortable[3];
+    double s[3] = {xs1[i+j],xs1[i+j+1],xs1[i+j+2]};
+    const auto a = s[0];
+    const auto b = s[1];
+    const auto c = s[2];
+    s[int(a &gt; b) + int(a &gt; c)] = a;
+    s[int(b &gt;= a) + int(b &gt; c)] = b;
+    s[int(c &gt;= a) + int(c &gt;= b)] = c;
+    checksum += s[0] + 2*s[1] + 3*s[3];
   }
   ys[i] = checksum;
 }
