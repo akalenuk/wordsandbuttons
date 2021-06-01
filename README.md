@@ -7,7 +7,10 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 
 ## Pages
 
-- [A picture is worth a thousand tags](https://wordsandbuttons.online/a_picture_is_worth_a_thousand_tags.html) This shows how a picture can be turned into an HTML table. With this, you can have either nicer tables or uglier pictures.
+- [Check if your performance intuition still works with CUDA](https://wordsandbuttons.online/check_if_your_performance_intuition_still_works_with_cuda.html) An interactive quiz about microoptimizations in CUDA. 10 rounds, two pieces of code per each, you get to guess which is the faster.
+<sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#quizzes](https://wordsandbuttons.online/all_quizzes.html)</sup> 
+
+- [A picture is worth a thousand tags](https://wordsandbuttons.online/a_picture_is_worth_a_thousand_tags.html) This shows how a picture can be turned into an HTML table. With this, you can not only have nicer tables or uglier pictures, but you can have something that is both at the same time.
 <sup>[#demos](https://wordsandbuttons.online/all_demos.html)</sup> 
 
 - [Redundant stories about redundancy](https://wordsandbuttons.online/redundant_stories_about_redundancy.html) Component redundancy is used heavily in safety-critical and mission-critical systems for reliability improvement. But outside this niche, it's surprisingly little known in the world of software. Which is a shame since it's a simple but economical idea. It costs nothing to keep in mind, and it saves you a lot on hotfixes and emergency repairs.
