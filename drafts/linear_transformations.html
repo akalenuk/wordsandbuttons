@@ -161,6 +161,7 @@ function sharp(x) {
 
 // linear
 var formula = 'x';
+var t = 0.;
 function draw_linear(){
 	var linear = document.getElementById("linear");
 	var context = linear.getContext("2d");
@@ -222,20 +223,23 @@ function draw_linear(){
 }
 
 
+function number_or_a(noa) {
+	if (noa[0] == 'a') {
+		const dt = (Number(noa[1])-1)*2+(Number(noa[2])-1); // 0..3
+		return Math.sin(t * (1. + dt/10.) + 2 * 3.14 * (dt / 4.));
+	} else {
+		return Number(noa);
+	}
+}
+
 function calc(expr, x) {
 	const rows = expr.split('\n');
-	const a11 = Number(rows[0].split(' ')[0]);
-	const a12 = Number(rows[0].split(' ')[1]);
-	const a21 = Number(rows[1].split(' ')[0]);
-	const a22 = Number(rows[1].split(' ')[1]);
+	const a11 = number_or_a(rows[0].split(' ')[0]);
+	const a12 = number_or_a(rows[0].split(' ')[1]);
+	const a21 = number_or_a(rows[1].split(' ')[0]);
+	const a22 = number_or_a(rows[1].split(' ')[1]);
 	return [a11 * x[0] + a21 * x[1], a12 * x[0] + a22 * x[1]];
 }
-
-function reset_formula() {
-	formula = document.getElementById("transforamtion").value;
-	draw_linear()
-}
-
 	</script>
 </head>
 <body>
@@ -246,9 +250,9 @@ Linear transformations
 
 	<span id="plot"></span>
 	<table style="width:505pt"><tr><td>
-		<textarea id="transforamtion" oninput="document.getElementById('button_1').disabled = false;" onchange="reset_formula();">
-1 0
-0 1
+		<textarea id="transform" oninput="document.getElementById('button_1').disabled = false;" onchange="reset_formula();">
+a11 a12
+a21 a22
 		</textarea>
 	</td><td>
 		<button type="button" onclick="reset_formula();" id="button_1" disabled><nobr>&darr; reload</nobr></button>
@@ -257,7 +261,19 @@ Linear transformations
 	<canvas id="linear" width=640 height=640></canvas>
 
 	<script language="JavaScript"> // init
-reset_formula()
+function reset_formula() {
+	formula = document.getElementById("transform").value;
+	draw_linear()
+}
+
+reset_formula();
+function redraw() {
+	draw_linear();
+	const lag = 1000/24;
+	setTimeout(redraw, lag);
+	t += 1 / lag;
+}
+redraw();
 	</script>
 
 	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
