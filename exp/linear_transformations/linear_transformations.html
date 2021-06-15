@@ -218,6 +218,37 @@ function draw_linear(){
 	context.stroke();
 	context.closePath();
 
+	//
+	// eigenvalues [(a/2 + d/2 - sqrt(a**2 - 2*a*d + 4*b*c + d**2)/2,), (a/2 + d/2 + sqrt(a**2 - 2*a*d + 4*b*c + d**2)/2,)]
+	// eigenvectors c != 0 [a/2 - d/2 - sqrt(a**2 - 2*a*d + 4*b*c + d**2)/2, c]
+	//                     [a/2 - d/2 + sqrt(a**2 - 2*a*d + 4*b*c + d**2)/2, c]
+	// eigenvectors b != 0 [b, -a/2 + d/2 - sqrt(a**2 - 2*a*d + 4*b*c + d**2)/2]
+	//                     [b, -a/2 + d/2 + sqrt(a**2 - 2*a*d + 4*b*c + d**2)/2]
+	const rows = formula.split('\n');
+	const a = number_or_a(rows[0].split(' ')[0]);
+	const b = number_or_a(rows[0].split(' ')[1]);
+	const c = number_or_a(rows[1].split(' ')[0]);
+	const d = number_or_a(rows[1].split(' ')[1]);
+	const disc = a**2 - 2*a*d + 4*b*c + d**2;
+	if(disc >= 0) {
+		if(c != 0) {
+			const x1 = a/2 - d/2 - Math.sqrt(disc)/2;
+			const y1 = c;
+			const x2 = a/2 - d/2 + Math.sqrt(disc)/2;
+			const y2 = c;
+			draw_arrow(context, x_to_client(0.), y_to_client(0.), x_to_client(x1), y_to_client(y1), "#444")
+			draw_arrow(context, x_to_client(0.), y_to_client(0.), x_to_client(x2), y_to_client(y2), "#444")
+		} else if(b != 0) {
+			const x1 = b;
+			const y1 = -a/2 + d/2 - Math.sqrt(disc)/2;
+			const x2 = b;
+			const y2 = -a/2 + d/2 + Math.sqrt(disc)/2;
+			draw_arrow(context, x_to_client(0.), y_to_client(0.), x_to_client(x1), y_to_client(y1), "#444")
+			draw_arrow(context, x_to_client(0.), y_to_client(0.), x_to_client(x2), y_to_client(y2), "#444")
+		}
+
+	}
+
 	// grid
 	draw_grid_on(context, false);
 }
