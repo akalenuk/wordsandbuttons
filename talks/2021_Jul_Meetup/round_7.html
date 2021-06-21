@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.84">
+	<title>Check if your performance intuition still works with CUDA</title>
+	<meta name="description" content="An interactive quiz about microoptimizations in CUDA. 10 rounds, two pieces of code per each, you get to guess which is the faster.">
+	<meta name="keywords" content="programming, quizzes">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body{
+	margin: 0 0 0 0;
+}
+
+a{
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 64pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+.comment {
+	font-size: 14pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
+}
+
+table.footer {
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
+}
+
+td.footer {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+pre {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 384pt;
+}
+
+b {
+	color: #910;
+}
+
+table {
+	text-align: center;
+	border-width: 0pt;
+}
+
+td {
+	padding: 6pt 12pt 6pt 12pt;
+	font-size: 16pt;
+	border: 1px solid black;
+}
+
+button{
+	width: 304pt;
+	height: 42pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 18pt;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 14pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+canvas { touch-action: none; }
+	</style>
+	<script language="JavaScript">
+var slider_set = [false, false, false, false,  false, false, false, false,  false, false];
+var slider_true_xs = [
+	34.4227 / (34.4227 + 53.9312) * 512,
+	40.8901 / (40.8901 + 39.6505) * 512,
+	50.4071 / (50.4071 + 24.6855) * 512,
+	85.6206 / (85.6206 + 1059.44) * 512,
+
+	1059.44 / (1059.44 + 36.1089) * 512,
+	36.1089 / (36.1089 + 19.4985) * 512,
+	20.5978 / (20.5978 + 19.4132) * 512,
+	0.466944 / (0.466944 + 0.466944) * 512,
+
+	0.466944 / (0.466944 + 0.468096) * 512,
+	434.997 / (434.997 + 1488.74) * 512
+	];
+var slider_user_xs = [256, 256, 256, 256,  256, 256, 256, 256,  256, 256];
+var slider_xs = [256, 256, 256, 256,  256, 256, 256, 256,  256, 256];
+const sliders = 10;
+
+console.assert(slider_set.length == sliders);
+console.assert(slider_true_xs.length == sliders);
+console.assert(slider_user_xs.length == sliders);
+console.assert(slider_xs.length == sliders);
+
+var slider_down = false;
+
+function comment_on_slider(no){
+	var left = document.getElementById("left_" + (no + 1));
+	var right = document.getElementById("right_" + (no + 1));
+	var x = slider_xs[no]
+	var xl = x;
+	var xr = 511 - x;
+	if(x < 255){
+		left.style.backgroundColor = "#" + (Math.round(xl)).toString(16) + "ff" + (Math.round(xl)).toString(16);
+		right.style.backgroundColor = "#ff" + (Math.round(xl)).toString(16) + (Math.round(xl)).toString(16);
+	}else{
+		right.style.backgroundColor = "#" + (Math.round(xr)).toString(16) + "ff" + (Math.round(xr)).toString(16);
+		left.style.backgroundColor = "#ff" + (Math.round(xr)).toString(16) + (Math.round(xr)).toString(16);
+	}
+
+	var comment = document.getElementById("comment_" + (no + 1));
+	if(Math.abs(xl - xr) < 3){
+		comment.innerHTML = "They are almost the same.";
+	}else if(xl > xr){
+		if(xl > 20*xr){
+			comment.innerHTML = "The one on the right is more than 20 times faster!";
+		}else if(xl > 10*xr){
+			comment.innerHTML = "The one on the right is more than 10 times faster!";
+		}else if(xl > 5*xr){
+			comment.innerHTML = "The one on the right is more than 5 times faster!";
+		}else if(xl > 3*xr){
+			comment.innerHTML = "The one on the right is more than 3 times faster!";
+		}else if(xl > 2*xr){
+			comment.innerHTML = "The one on the right is more than 2 times faster!";
+		}else if(xl > 1.5*xr){
+			comment.innerHTML = "The one on the right is more than 50% faster.";
+		}else if(xl > 1.25*xr){
+			comment.innerHTML = "The one on the right is more than 25% faster.";
+		}else if(xl > 1.1*xr){
+			comment.innerHTML = "The one on the right is more than 10% faster.";
+		}else{
+			comment.innerHTML = "The one on the right is only a tiny bit faster.";
+		}
+	}else if(xr > xl){
+		if(xr > 20*xl){
+			comment.innerHTML = "The one on the left is more than 20 times faster!";
+		}else if(xr > 10*xl){
+			comment.innerHTML = "The one on the left is more than 10 times faster!";
+		}else if(xr > 5*xl){
+			comment.innerHTML = "The one on the left is more than 5 times faster!";
+		}else if(xr > 3*xl){
+			comment.innerHTML = "The one on the left is more than 3 times faster!";
+		}else if(xr > 2*xl){
+			comment.innerHTML = "The one on the left is more than 2 times faster!";
+		}else if(xr > 1.5*xl){
+			comment.innerHTML = "The one on the left is more than 50% faster.";
+		}else if(xr > 1.25*xl){
+			comment.innerHTML = "The one on the left is more than 25% faster.";
+		}else if(xr > 1.1*xl){
+			comment.innerHTML = "The one on the left is more than 10% faster.";
+		}else{
+			comment.innerHTML = "The one on the left is only a tiny bit faster.";
+		}
+	}
+}
+
+function position_slider(no, client_x){
+	if(!slider_set[no]){
+		var slider = document.getElementById("slider_" + (no + 1));
+		var canvas_rect = slider.getBoundingClientRect();
+		var x = client_x - canvas_rect.left - 48;
+		if(x < 16)
+			x = 16;
+		if(x > 511 - 16)
+			x = 511 - 16;
+		slider_xs[no] = x;
+
+		comment_on_slider(no);
+	}
+}
+
+function init_slider(no){
+	draw_slider(no);
+	var slider = document.getElementById("slider_" + (no + 1));
+
+	slider.addEventListener('pointerleave', function(e){
+		slider_down = false;
+	}, false);
+
+	slider.addEventListener('pointerup', function(e){
+		slider_down = false;
+	}, false);
+
+	slider.addEventListener('pointerdown', function(e){
+		slider_down = true;
+		position_slider(no, e.clientX);
+		draw_slider(no);
+		slider.releasePointerCapture(e.pointerId);
+	}, false);
+
+	slider.addEventListener('pointermove', function(e){
+		if(slider_down){
+			position_slider(no, e.clientX);
+			draw_slider(no);
+		}
+	}, false);
+}
+
+function draw_slider(no){
+	ctx = document.getElementById("slider_" + (no + 1)).getContext("2d");
+	x = slider_xs[no] + 48 + 0.5;
+
+	ctx.clearRect(0, 0, 608, 128);
+	ctx.beginPath();
+	ctx.moveTo(64.5-16, 32.5);
+	ctx.lineTo(0.5 + 16, 127.5 - 32);
+	ctx.lineTo(607.5 - 16, 127.5 - 32);
+	ctx.lineTo(607.5 - 64 + 16, 32.5);
+	ctx.lineTo(64.5-16, 32.5);
+	ctx.strokeStyle="#000000";
+	ctx.stroke();
+	ctx.closePath();
+	ctx.fillStyle="#999999";
+	ctx.fill();
+
+	if(slider_set[no]){
+		x_red = slider_user_xs[no] + 48 + 0.5;
+		ctx.beginPath();
+		ctx.moveTo(x_red, 0);
+		ctx.lineTo(x_red - 64, 127);
+		ctx.lineTo(x_red + 64, 127);
+		ctx.lineTo(x_red, 0);
+		ctx.strokeStyle="#660000";
+		ctx.stroke();
+		ctx.closePath();
+		ctx.fillStyle="#ffcccc";
+		ctx.fill();
+	}
+
+	ctx.beginPath();
+	ctx.moveTo(x, 0);
+	ctx.lineTo(x - 64, 127);
+	ctx.lineTo(x + 64, 127);
+	ctx.lineTo(x, 0);
+	ctx.strokeStyle="#000000";
+	ctx.stroke();
+	ctx.closePath();
+	ctx.fillStyle="#cccccc";
+	ctx.fill();
+}
+
+function reveal(no){
+	slider_set[no] = true;
+	slider_user_xs[no] = slider_xs[no];
+	slider_xs[no] = slider_true_xs[no];
+	draw_slider(no);
+	comment_on_slider(no);
+	document.getElementById("the_truth_" + (no + 1)).style.display = "block";
+	document.getElementById("button_" + (no + 1)).style.display = "none";
+
+	for(var i = 0; i < sliders; i++){
+		if(slider_set[i] == false)
+			return;
+	}
+
+	document.getElementById("show_in_the_end").style.display = "block";
+	var score = 0;
+	var default_score = 0;
+	for(var i = 0; i < sliders; i++){
+		score += Math.abs(slider_user_xs[i] - slider_xs[i]);
+		default_score += Math.abs(256 - slider_xs[i]);
+	}
+
+	document.getElementById("score").innerHTML = "<b>" + score.toFixed(0) + "</b>";
+	document.getElementById("default_score").innerHTML = "<b>" + default_score.toFixed(0) + "</b>";
+
+	if(score < default_score*0.25)
+		document.getElementById("superb_bragging_rights").style.display = "block";
+	else if(score < default_score)
+		document.getElementById("bragging_rights").style.display = "block";
+}
+
+function colorized(text) {
+	const separators = ['\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')'];
+	const comments = [['/*', '*/'], ['#', '\n']];
+
+	function painted_in(line, color) {
+		return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+	}
+
+	function colorized(token) {
+		var code_sum = 0;
+		for(var i = 0; i < token.length; ++i)
+			code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+		var zero_channel = code_sum % 3;
+		var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
+			+ (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
+			+ (zero_channel == 2 ? '0' : '');
+		return painted_in(token, color);
+	}
+
+	function separated(line, i) {
+		if(i == separators.length)
+			return colorized(line);
+		return line.split(separators[i]).map(function(subline) {
+			return separated(subline, i + 1);}).join(separators[i]);
+	}
+
+	function uncommented(line, i) {
+		if(i == comments.length)
+			return separated(line, 0);
+		var chunks = line.split(comments[i][0]);
+		return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+			var in_out_comment = chunk.split(comments[i][1]);
+			return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "777")
+				+ uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+	}
+
+	return uncommented(text, 0);
+}
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
+Round 7
+	</h1>
+	<p>
+Ok, but we haven't tried running the standard sine with fast math enabled. Let's compared it to our Horner's single-precision polynomial.
+	</p>
+	<table><tr>
+	<td id="left_7">
+	<pre>
+// nvcc --use_fast_math
+__global__ void std_sin(const float *xs1,
+                        const float *xs2,
+                        float *ys,
+                        int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    <b>res += std::sin(xs1[i+j]);</b>
+  }
+  ys[i] = res;
+}
+</pre>
+	</td>
+	<td id="right_7">
+	<pre>
+__global__ void poly_sin4(const float *xs1,
+                          const float *xs2,
+                          float *ys,
+                          int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    const auto x = xs1[i+j];
+    <b>res += x*(x*x*(x*x*(x*x*
+           -0.000182690409228785f
+           +0.00830460224186793f)
+           -0.166651012143690f)
+           +1.f);</b>
+  }
+  ys[i] = res;
+}
+</pre>
+	</td></tr></table>
+	<canvas id="slider_7" width=608 height=128></canvas>
+	<p class="comment" id="comment_7">
+They are almost the same.
+	</p>
+	<button type="button" onclick="reveal(6)" id="button_7">Reveal the truth</button>
+	<div id="the_truth_7" style="display:none;">
+	<p>
+And it's essentially the same. Which is odd since normally polynomials are super fast to compute but apparently with relaxed math sine is even faster.
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(6);
+	</script>
+
+
+
+	<script language="JavaScript">
+	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
+	</script>
+
+	</center>
+</body>
+</html>

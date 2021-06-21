@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.84">
+	<title>Check if your performance intuition still works with CUDA</title>
+	<meta name="description" content="An interactive quiz about microoptimizations in CUDA. 10 rounds, two pieces of code per each, you get to guess which is the faster.">
+	<meta name="keywords" content="programming, quizzes">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body{
+	margin: 0 0 0 0;
+}
+
+a{
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 64pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+.comment {
+	font-size: 14pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
+}
+
+table.footer {
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
+}
+
+td.footer {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+pre {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 384pt;
+}
+
+b {
+	color: #910;
+}
+
+table {
+	text-align: center;
+	border-width: 0pt;
+}
+
+td {
+	padding: 6pt 12pt 6pt 12pt;
+	font-size: 16pt;
+	border: 1px solid black;
+}
+
+button{
+	width: 304pt;
+	height: 42pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 18pt;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 14pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+canvas { touch-action: none; }
+	</style>
+	<script language="JavaScript">
+var slider_set = [false, false, false, false,  false, false, false, false,  false, false];
+var slider_true_xs = [
+	34.4227 / (34.4227 + 53.9312) * 512,
+	40.8901 / (40.8901 + 39.6505) * 512,
+	50.4071 / (50.4071 + 24.6855) * 512,
+	85.6206 / (85.6206 + 1059.44) * 512,
+
+	1059.44 / (1059.44 + 36.1089) * 512,
+	36.1089 / (36.1089 + 19.4985) * 512,
+	20.5978 / (20.5978 + 19.4132) * 512,
+	0.466944 / (0.466944 + 0.466944) * 512,
+
+	0.466944 / (0.466944 + 0.468096) * 512,
+	434.997 / (434.997 + 1488.74) * 512
+	];
+var slider_user_xs = [256, 256, 256, 256,  256, 256, 256, 256,  256, 256];
+var slider_xs = [256, 256, 256, 256,  256, 256, 256, 256,  256, 256];
+const sliders = 10;
+
+console.assert(slider_set.length == sliders);
+console.assert(slider_true_xs.length == sliders);
+console.assert(slider_user_xs.length == sliders);
+console.assert(slider_xs.length == sliders);
+
+var slider_down = false;
+
+function comment_on_slider(no){
+	var left = document.getElementById("left_" + (no + 1));
+	var right = document.getElementById("right_" + (no + 1));
+	var x = slider_xs[no]
+	var xl = x;
+	var xr = 511 - x;
+	if(x < 255){
+		left.style.backgroundColor = "#" + (Math.round(xl)).toString(16) + "ff" + (Math.round(xl)).toString(16);
+		right.style.backgroundColor = "#ff" + (Math.round(xl)).toString(16) + (Math.round(xl)).toString(16);
+	}else{
+		right.style.backgroundColor = "#" + (Math.round(xr)).toString(16) + "ff" + (Math.round(xr)).toString(16);
+		left.style.backgroundColor = "#ff" + (Math.round(xr)).toString(16) + (Math.round(xr)).toString(16);
+	}
+
+	var comment = document.getElementById("comment_" + (no + 1));
+	if(Math.abs(xl - xr) < 3){
+		comment.innerHTML = "They are almost the same.";
+	}else if(xl > xr){
+		if(xl > 20*xr){
+			comment.innerHTML = "The one on the right is more than 20 times faster!";
+		}else if(xl > 10*xr){
+			comment.innerHTML = "The one on the right is more than 10 times faster!";
+		}else if(xl > 5*xr){
+			comment.innerHTML = "The one on the right is more than 5 times faster!";
+		}else if(xl > 3*xr){
+			comment.innerHTML = "The one on the right is more than 3 times faster!";
+		}else if(xl > 2*xr){
+			comment.innerHTML = "The one on the right is more than 2 times faster!";
+		}else if(xl > 1.5*xr){
+			comment.innerHTML = "The one on the right is more than 50% faster.";
+		}else if(xl > 1.25*xr){
+			comment.innerHTML = "The one on the right is more than 25% faster.";
+		}else if(xl > 1.1*xr){
+			comment.innerHTML = "The one on the right is more than 10% faster.";
+		}else{
+			comment.innerHTML = "The one on the right is only a tiny bit faster.";
+		}
+	}else if(xr > xl){
+		if(xr > 20*xl){
+			comment.innerHTML = "The one on the left is more than 20 times faster!";
+		}else if(xr > 10*xl){
+			comment.innerHTML = "The one on the left is more than 10 times faster!";
+		}else if(xr > 5*xl){
+			comment.innerHTML = "The one on the left is more than 5 times faster!";
+		}else if(xr > 3*xl){
+			comment.innerHTML = "The one on the left is more than 3 times faster!";
+		}else if(xr > 2*xl){
+			comment.innerHTML = "The one on the left is more than 2 times faster!";
+		}else if(xr > 1.5*xl){
+			comment.innerHTML = "The one on the left is more than 50% faster.";
+		}else if(xr > 1.25*xl){
+			comment.innerHTML = "The one on the left is more than 25% faster.";
+		}else if(xr > 1.1*xl){
+			comment.innerHTML = "The one on the left is more than 10% faster.";
+		}else{
+			comment.innerHTML = "The one on the left is only a tiny bit faster.";
+		}
+	}
+}
+
+function position_slider(no, client_x){
+	if(!slider_set[no]){
+		var slider = document.getElementById("slider_" + (no + 1));
+		var canvas_rect = slider.getBoundingClientRect();
+		var x = client_x - canvas_rect.left - 48;
+		if(x < 16)
+			x = 16;
+		if(x > 511 - 16)
+			x = 511 - 16;
+		slider_xs[no] = x;
+
+		comment_on_slider(no);
+	}
+}
+
+function init_slider(no){
+	draw_slider(no);
+	var slider = document.getElementById("slider_" + (no + 1));
+
+	slider.addEventListener('pointerleave', function(e){
+		slider_down = false;
+	}, false);
+
+	slider.addEventListener('pointerup', function(e){
+		slider_down = false;
+	}, false);
+
+	slider.addEventListener('pointerdown', function(e){
+		slider_down = true;
+		position_slider(no, e.clientX);
+		draw_slider(no);
+		slider.releasePointerCapture(e.pointerId);
+	}, false);
+
+	slider.addEventListener('pointermove', function(e){
+		if(slider_down){
+			position_slider(no, e.clientX);
+			draw_slider(no);
+		}
+	}, false);
+}
+
+function draw_slider(no){
+	ctx = document.getElementById("slider_" + (no + 1)).getContext("2d");
+	x = slider_xs[no] + 48 + 0.5;
+
+	ctx.clearRect(0, 0, 608, 128);
+	ctx.beginPath();
+	ctx.moveTo(64.5-16, 32.5);
+	ctx.lineTo(0.5 + 16, 127.5 - 32);
+	ctx.lineTo(607.5 - 16, 127.5 - 32);
+	ctx.lineTo(607.5 - 64 + 16, 32.5);
+	ctx.lineTo(64.5-16, 32.5);
+	ctx.strokeStyle="#000000";
+	ctx.stroke();
+	ctx.closePath();
+	ctx.fillStyle="#999999";
+	ctx.fill();
+
+	if(slider_set[no]){
+		x_red = slider_user_xs[no] + 48 + 0.5;
+		ctx.beginPath();
+		ctx.moveTo(x_red, 0);
+		ctx.lineTo(x_red - 64, 127);
+		ctx.lineTo(x_red + 64, 127);
+		ctx.lineTo(x_red, 0);
+		ctx.strokeStyle="#660000";
+		ctx.stroke();
+		ctx.closePath();
+		ctx.fillStyle="#ffcccc";
+		ctx.fill();
+	}
+
+	ctx.beginPath();
+	ctx.moveTo(x, 0);
+	ctx.lineTo(x - 64, 127);
+	ctx.lineTo(x + 64, 127);
+	ctx.lineTo(x, 0);
+	ctx.strokeStyle="#000000";
+	ctx.stroke();
+	ctx.closePath();
+	ctx.fillStyle="#cccccc";
+	ctx.fill();
+}
+
+function reveal(no){
+	slider_set[no] = true;
+	slider_user_xs[no] = slider_xs[no];
+	slider_xs[no] = slider_true_xs[no];
+	draw_slider(no);
+	comment_on_slider(no);
+	document.getElementById("the_truth_" + (no + 1)).style.display = "block";
+	document.getElementById("button_" + (no + 1)).style.display = "none";
+
+	for(var i = 0; i < sliders; i++){
+		if(slider_set[i] == false)
+			return;
+	}
+
+	document.getElementById("show_in_the_end").style.display = "block";
+	var score = 0;
+	var default_score = 0;
+	for(var i = 0; i < sliders; i++){
+		score += Math.abs(slider_user_xs[i] - slider_xs[i]);
+		default_score += Math.abs(256 - slider_xs[i]);
+	}
+
+	document.getElementById("score").innerHTML = "<b>" + score.toFixed(0) + "</b>";
+	document.getElementById("default_score").innerHTML = "<b>" + default_score.toFixed(0) + "</b>";
+
+	if(score < default_score*0.25)
+		document.getElementById("superb_bragging_rights").style.display = "block";
+	else if(score < default_score)
+		document.getElementById("bragging_rights").style.display = "block";
+}
+
+function colorized(text) {
+	const separators = ['\n', ' ', '\t', '.', ',', ':', '=', '[', ']', '(', ')'];
+	const comments = [['/*', '*/'], ['#', '\n']];
+
+	function painted_in(line, color) {
+		return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+	}
+
+	function colorized(token) {
+		var code_sum = 0;
+		for(var i = 0; i < token.length; ++i)
+			code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+		var zero_channel = code_sum % 3;
+		var color = '' + (zero_channel == 0 ? '0' : '') + (1 + (code_sum % 5) * 2)
+			+ (zero_channel == 1 ? '0' : '') + (4 + (code_sum % 2) * 5)
+			+ (zero_channel == 2 ? '0' : '');
+		return painted_in(token, color);
+	}
+
+	function separated(line, i) {
+		if(i == separators.length)
+			return colorized(line);
+		return line.split(separators[i]).map(function(subline) {
+			return separated(subline, i + 1);}).join(separators[i]);
+	}
+
+	function uncommented(line, i) {
+		if(i == comments.length)
+			return separated(line, 0);
+		var chunks = line.split(comments[i][0]);
+		return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+			var in_out_comment = chunk.split(comments[i][1]);
+			return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "777")
+				+ uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+	}
+
+	return uncommented(text, 0);
+}
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
+Check if your performance intuition still works with CUDA
+	</h1>
+	<p>
+For those of you who don't know what CUDA is, let me explain. Imagine, buses were never invented. There are cars, trains, planes, and motorcycles, just not buses. And one day someone smart asks himself: “wouldn't it be splendid to have cars that would fit a lot of people? One guy could be driving, and all the rest will enjoy the ride.” “Right, like trucks but for people!” “No-no-no, who on earth would ever want to travel by truck? Like airplanes, but without wings!”
+	</p>
+	<p>
+And so they start producing planes with foldable wings, and they do carry a lot of people, and they do go on public roads, and they are a huge success! Especially when it comes to commuting cryptominers to their cryptomines and back.
+	</p>
+	<p>
+Now replace “cars” with “personal computers”, and “planes” with “GPUs” — and that's CUDA for you.
+	</p>
+	<p>
+CUDA stands for Compute Unified Device Architecture and it is meant to revolutionize computing by making drastically different computational devices work together. It's just that we don't have a lot of those devices on our hands. Or in production. Or even in development. Maybe in the future. Meanwhile, everyone has a GPU, so for now, CUDA is a technology that turns your GPU into a micro-super-computer.
+	</p>
+	<p>
+With CUDA, you can write code in C, Fortran, or C++, and make your graphic card run it using its own resources. Memory, cache, processors. It has a lot of computing units working in parallel so if your task is easily parallelizable, you can make it run on GPU much faster than on CPU. Of course, these units differ vastly from general-purpose processors we all used to, and our performance intuition may not appear transferable.
+	</p>
+	<p>
+So let's see what optimizations work on GPU and what not.
+	</p>
+	<p>
+But before we start. I have done a whole series of quizzes about micro-optimizations. It's called “Challenge your performance intuition...” with something-something.
+	</p>
+	<p>
+1) <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_magic_squares.html">...with C++ magic squares</a>;
+	</p>
+	<p>
+2) <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_nanosecond_sorting.html">...with nanosecond sorting</a>;
+	</p>
+	<p>
+3) <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_operators.html">...with C++ operators</a>;
+	</p>
+	<p>
+4) <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_sine.html">...with C++ sine</a>.
+	</p>
+	<p>
+The code for these quizzes was only measured on the CPU and mostly on Intel. So what I want to do now, I want to take a few micro-optimizations from these quizzes, rerun them on GPU and see whether they still work or not. And, of course, the whole exercise is going to be a quiz too.
+	</p>
+	<p>
+This is my benchmark.
+	</p>
+
+	<table><tr>
+	<td>
+	<pre style="width: 505pt;">
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;random&gt;
+#include &lt;cuda_runtime.h&gt;
+
+
+using TheType = float;
+constexpr auto TheSize = 65536u*128u;
+constexpr auto TheSizeInBytes = TheSize*sizeof(TheType);
+constexpr auto TheInnerLoop = 256u;
+
+
+#define attempt(smth) { \
+    auto s=(smth); \
+    if(s!=cudaSuccess) { \
+        std::cout &lt;&lt; cudaGetErrorString(s) &lt;&lt; \
+        " at " &lt;&lt; __LINE__ &lt;&lt; "\n"; return -1; \
+    } \
+}
+
+#define measure(smth) {\
+    /*timestamp start*/\
+    cudaEvent_t start;\
+    cudaEventCreate(&start);\
+    cudaEventRecord(start, 0);\
+    cudaEvent_t stop;\
+    cudaEventCreate(&stop); \
+\
+    /* run it*/\
+    int threadsPerBlock = 256;\
+    int blocksPerGrid = \
+        (TheSize - TheInnerLoop + threadsPerBlock - 1) \
+        / threadsPerBlock;\
+    smth&lt;&lt;&lt;blocksPerGrid, threadsPerBlock&gt;&gt;&gt; \
+        (d_xs, d_ys, d_zs, TheSize);\
+    attempt(cudaGetLastError());\
+    attempt(cudaDeviceSynchronize());\
+\
+    /* timestamp stop*/\
+    cudaEventRecord(stop, 0); \
+    cudaEventSynchronize(stop);\
+    float elapsedTime;\
+    cudaEventElapsedTime(&elapsedTime, start, stop);\
+    std::cout &lt;&lt; "Time of " &lt;&lt; #smth &lt;&lt; \
+        ": " &lt;&lt; elapsedTime &lt;&lt; "\n";}\
+
+
+int main(void)
+{
+    // prepare the data
+    std::mt19937 rng(0);
+    std::uniform_real_distribution&lt;TheType&gt; distribution(0.f, 1.f);
+    std::vector&lt;TheType&gt; xs(TheSize);
+    std::vector&lt;TheType&gt; ys(TheSize);
+    std::vector&lt;TheType&gt; zs(TheSize);
+    for (TheType &number : xs) number = distribution(rng);
+    for (TheType &number : ys) number = distribution(rng);
+
+
+    // do the allocations
+    float *d_xs = nullptr;
+    float *d_ys = nullptr;
+    float *d_zs = nullptr;
+    attempt(cudaMalloc((void **)&d_xs, TheSizeInBytes));
+    attempt(cudaMalloc((void **)&d_ys, TheSizeInBytes));
+    attempt(cudaMalloc((void **)&d_zs, TheSizeInBytes));
+
+    // and copying
+    attempt(cudaMemcpy(d_xs, xs.data(), TheSizeInBytes,
+        cudaMemcpyHostToDevice));
+    attempt(cudaMemcpy(d_ys, ys.data(), TheSizeInBytes,
+        cudaMemcpyHostToDevice));
+
+    measure(<b>some kernel function</b>);
+
+
+    // back (for debug, don't really want it)
+    attempt(cudaMemcpy(zs.data(), d_zs, TheSizeInBytes,
+        cudaMemcpyDeviceToHost));
+
+    attempt(cudaFree(d_xs));
+    attempt(cudaFree(d_ys));
+    attempt(cudaFree(d_zs));
+    return 0;
+}
+</pre>
+	</td></tr></table>
+	<p class="comment">
+All the measurements are performed on <i>GeForce GTX 1050 Ti Mobile</i>.
+	</p>
+	<p>
+Now I'm going to propose some snippets of codes in pairs. For each pair, please set what you think is the relative performance of it with the slider below the code (yes, it's a slider), and press the “Reveal the truth” button. Instead of points, you'll get pixels of error. It's how far is the slider set from the real number.
+	</p>
+	<p>
+The goal of the quiz is to score as few pixels of error as possible.
+	</p>
+
+	<h2>
+Round 1. mul vs. div
+	</h2>
+	<p>
+There is a well-known optimization quoted among others in <a href="https://www.amazon.com/Explained-Numerical-Mathematics-Scientific-Computation/dp/0199601429">Modern Fortran Explained</a>.
+	</p>
+	<p>
+<i>For example, if <b>a</b>, <b>b</b>, and <b>c</b> are real variables, the expression <b>a / b / c</b> might be evaluated as <b>a / (b * c)</b> on a processor that can multiply much faster than it can divide.</i>
+	</p>
+	<p>
+So... there are processors that are not like that? Let's see if my GPU can divide as fast as multiply.
+	</p>
+	<table><tr>
+	<td id="left_1">
+	<pre>
+__global__ void mul(const float *xs1,
+                    const float *xs2,
+                    float *ys,
+                    int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    res += xs1[i+j] <b>*</b> xs2[i+j];
+  }
+  ys[i] = res;
+}
+</pre>
+	</td>
+	<td id="right_1">
+	<pre>
+__global__ void div(const float *xs1,
+                    const float *xs2,
+                    float *ys,
+                    int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    res += xs1[i+j] <b>/</b> xs2[i+j];
+  }
+  ys[i] = res;
+}
+</pre>
+	</td></tr></table>
+	<p class="comment">
+Set your estimate with a slider and press the button below.
+	</p>
+	<canvas id="slider_1" width=608 height=128></canvas>
+	<p class="comment" id="comment_1">
+They are almost the same.
+	</p>
+	<button type="button" onclick="reveal(0)" id="button_1">Reveal the truth</button>
+	<div id="the_truth_1" style="display:none;">
+	<p>
+Ok, so the division is predictably slower than the multiplication. Not to a great extent but still noticeably.
+	</p>
+	<p>
+By the way, I did the measurement: multiplication runs almost as fast as an addition.
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(0);
+	</script>
+
+	<h2>
+Round 2. mul vs. div --use_fast_math
+	</h2>
+	<p>
+CUDA has a magic compiler flag that promises to make math faster. It's called <i>--use_fast_math</i>, and what it does, it relaxes precision expectations for the division (<i>--prec-div=false</i>), and the square root function (<i>--prec-sqrt=false</i>), allows processors to ignore <a href="https://wordsandbuttons.online/yet_another_floating_point_tutorial.html#index_denormalized_numbers">denormalized floating-point</a> numbers (<i>--ftz=true</i>), and allows the instruction that makes multiplication and addition in one go (<i>--fmad=true</i>).
+	</p>
+	<p>
+For the previous experiment, the <i>--prec-div=false</i> would be the most relevant. Let's see how fast the division would be with its precision constraints lifted.
+	</p>
+	<table><tr>
+	<td id="left_2">
+	<pre>
+// nvcc --use_fast_math
+__global__ void mul(const float *xs1,
+                    const float *xs2,
+                    float *ys,
+                    int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    res += xs1[i+j] <b>*</b> xs2[i+j];
+  }
+  ys[i] = res;
+}
+</pre>
+	</td>
+	<td id="right_2">
+	<pre>
+// nvcc --use_fast_math
+__global__ void div(const float *xs1,
+                    const float *xs2,
+                    float *ys,
+                    int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    res += xs1[i+j] <b>/</b> xs2[i+j];
+  }
+  ys[i] = res;
+}
+</pre>
+	</td></tr></table>
+	<canvas id="slider_2" width=608 height=128></canvas>
+	<p class="comment" id="comment_2">
+They are almost the same.
+	</p>
+	<button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
+	<div id="the_truth_2" style="display:none;">
+	<p>
+With fast math, the division is almost as fast as multiplication. The optimization from above doesn't make much sense anymore.
+	</p>
+	<p>
+Also, if you're asking yourself, didn't <i>--ftz=true</i> also speed up the multiplication? It didn't. Not to the measurable extend.
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(1);
+	</script>
+
+	<h2>
+Round 3. sqrt vs. sqrt --prec-sqrt=false
+	</h2>
+	<p>
+How well this fast math works for square roots?
+	</p>
+	<table><tr>
+	<td id="left_3">
+	<pre>
+__global__ void std_sqrt(const float *xs1,
+                         const float *xs2,
+                         float *ys,
+                         int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    res += std::sqrt(xs1[i+j]);
+  }
+  ys[i] = res;
+}
+</pre>
+	</td>
+	<td id="right_3">
+	<pre>
+<b>// nvcc --prec-sqrt=false</b>
+__global__ void std_sqrt(const float *xs1,
+                         const float *xs2,
+                         float *ys,
+                         int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    res += std::sqrt(xs1[i+j]);
+  }
+  ys[i] = res;
+}
+</pre>
+	</td></tr></table>
+	<canvas id="slider_3" width=608 height=128></canvas>
+	<p class="comment" id="comment_3">
+They are almost the same.
+	</p>
+	<button type="button" onclick="reveal(2)" id="button_3">Reveal the truth</button>
+	<div id="the_truth_3" style="display:none;">
+	<p>
+Well, it works.
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(2);
+	</script>
+
+	<h2>
+Round 4. sine vs. polynomial sine
+	</h2>
+	<p>
+There was a way to emullate the sine function with a fast but inaccurate polynomial described in <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_sine.html">Challenge your performance intuition with C++ sine</a>. Let's check if it works for CUDA.
+	</p>
+	<table><tr>
+	<td id="left_4">
+	<pre>
+__global__ void std_sin(const float *xs1,
+                        const float *xs2,
+                        float *ys,
+                        int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    <b>res += std::sin(xs1[i+j]);</b>
+  }
+  ys[i] = res;
+}
+</pre>
+	</td>
+	<td id="right_4">
+	<pre>
+__global__ void poly_sin(const float *xs1,
+                         const float *xs2,
+                         float *ys,
+                         int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    const auto x = xs1[i+j];
+    <b>res += -0.000182690409228785*x*x*x*x*x*x*x
+           +0.00830460224186793*x*x*x*x*x
+           -0.166651012143690*x*x*x
+           +x;</b>
+  }
+  ys[i] = res;
+}
+</pre>
+	</td></tr></table>
+	<canvas id="slider_4" width=608 height=128></canvas>
+	<p class="comment" id="comment_4">
+They are almost the same.
+	</p>
+	<button type="button" onclick="reveal(3)" id="button_4">Reveal the truth</button>
+	<div id="the_truth_4" style="display:none;">
+	<p>
+Ok, here is a catch. The polynomial is computed in doubles, and if a GPU doesn't support double-precision computations natively, the compiler has to emulate them somehow, and this makes all the computations very expensive.
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(3);
+	</script>
+
+	<h2>
+Round 5. sine: double vs. float
+	</h2>
+	<p>
+How much faster would it be to compute the polynomial in native single-precision floats instead of double-precision ones we requested?
+	</p>
+	<table><tr>
+	<td id="left_5">
+	<pre>
+__global__ void poly_sin(const float *xs1,
+                         const float *xs2,
+                         float *ys,
+                         int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    const auto x = xs1[i+j];
+    res += -0.000182690409228785*x*x*x*x*x*x*x
+           +0.00830460224186793*x*x*x*x*x
+           -0.166651012143690*x*x*x
+           +x;
+  }
+  ys[i] = res;
+}
+</pre>
+	</td>
+	<td id="right_5">
+	<pre>
+__global__ void poly_sin3(const float *xs1,
+                          const float *xs2,
+                          float *ys,
+                          int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    const auto x = xs1[i+j];
+    res += -0.000182690409228785<b>f</b>*x*x*x*x*x*x*x
+           +0.00830460224186793<b>f</b>*x*x*x*x*x
+           -0.166651012143690<b>f</b>*x*x*x
+           +x;
+  }
+  ys[i] = res;
+}
+</pre>
+	</td></tr></table>
+	<canvas id="slider_5" width=608 height=128></canvas>
+	<p class="comment" id="comment_5">
+They are almost the same.
+	</p>
+	<button type="button" onclick="reveal(4)" id="button_5">Reveal the truth</button>
+	<div id="the_truth_5" style="display:none;">
+	<p>
+My card doesn't support native double-precision computations, so the difference is huge!
+	</p>
+	<p>
+We don't pay a lot of attention to the type's sizes on CPU since apart from better storing and caching, floats provide little benefit over doubles performance-wise, but on GPU, careful type selection might suddenly become critical.
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(4);
+	</script>
+
+	<h2>
+Round 6. Polynomial vs. <Span id="index_horners_scheme">Horner's scheme</Span>
+	</h2>
+	<p>
+There is a way to evaluate an n-polynomial with only n-1 multiplications and additions. It's called Horner's scheme.
+	</p>
+	<p class="formula">
+ax<sup>3</sup> + bx<sup>2</sup> + cx + d = x(x(xa + b) + c) + d
+	</p>
+	<p>
+Normally, this is something a compiler can figure out by itself. But would it?
+	</p>
+	<table><tr>
+	<td id="left_6">
+	<pre>
+__global__ void poly_sin3(const float *xs1,
+                          const float *xs2,
+                          float *ys,
+                          int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    const auto x = xs1[i+j];
+    <b>res += -0.000182690409228785f*x*x*x*x*x*x*x
+           +0.00830460224186793f*x*x*x*x*x
+           -0.166651012143690f*x*x*x
+           +x;</b>
+  }
+  ys[i] = res;
+}
+</pre>
+	</td>
+	<td id="right_6">
+	<pre>
+__global__ void poly_sin4(const float *xs1,
+                          const float *xs2,
+                          float *ys,
+                          int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    const auto x = xs1[i+j];
+    <b>res += x*(x*x*(x*x*(x*x*
+           -0.000182690409228785f
+           +0.00830460224186793f)
+           -0.166651012143690f)
+           +1.f);</b>
+  }
+  ys[i] = res;
+}
+</pre>
+	</td></tr></table>
+	<canvas id="slider_6" width=608 height=128></canvas>
+	<p class="comment" id="comment_6">
+They are almost the same.
+	</p>
+	<button type="button" onclick="reveal(5)" id="button_6">Reveal the truth</button>
+	<div id="the_truth_6" style="display:none;">
+	<p>
+Surprisingly, it wouldn't. This is one example where a hand-made micro-optimization still counts.
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(5);
+	</script>
+
+	<h2>
+Round 7. sine --use_fast_math vs. Horner's sine
+	</h2>
+	<p>
+Ok, but we haven't tried running the standard sine with fast math enabled. Let's compared it to our Horner's single-precision polynomial.
+	</p>
+	<table><tr>
+	<td id="left_7">
+	<pre>
+// nvcc --use_fast_math
+__global__ void std_sin(const float *xs1,
+                        const float *xs2,
+                        float *ys,
+                        int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    <b>res += std::sin(xs1[i+j]);</b>
+  }
+  ys[i] = res;
+}
+</pre>
+	</td>
+	<td id="right_7">
+	<pre>
+__global__ void poly_sin4(const float *xs1,
+                          const float *xs2,
+                          float *ys,
+                          int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  auto res = 0.f;
+  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
+    const auto x = xs1[i+j];
+    <b>res += x*(x*x*(x*x*(x*x*
+           -0.000182690409228785f
+           +0.00830460224186793f)
+           -0.166651012143690f)
+           +1.f);</b>
+  }
+  ys[i] = res;
+}
+</pre>
+	</td></tr></table>
+	<canvas id="slider_7" width=608 height=128></canvas>
+	<p class="comment" id="comment_7">
+They are almost the same.
+	</p>
+	<button type="button" onclick="reveal(6)" id="button_7">Reveal the truth</button>
+	<div id="the_truth_7" style="display:none;">
+	<p>
+And it's essentially the same. Which is odd since normally polynomials are super fast to compute but apparently with relaxed math sine is even faster.
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(6);
+	</script>
+
+	<h2>
+Round 8. Logical && vs. bitwise &
+	</h2>
+	<p>
+In <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_operators.html">Challenge your performance intuition with C++ operators</a>, a few alternatives to the logical operations are examined. Apparently, on x86, short-circuiting on logical operations is not necessarily beneficial. Sometimes we want it off. In C++ you don't have legitimate control over it so we have to use tricks to hint a compiler of our intentions.
+	</p>
+	<p>
+Sometimes, using bitwitse operations instead of logical ones work.
+	</p>
+	<table><tr>
+	<td id="left_8">
+	<pre>
+__global__ void logical_and(const float *xs1,
+                            const float *xs2,
+                            float *ys,
+                            int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  bool all_gt = true;
+  for(auto j = 0u; j &lt; TheInnerLoop - 3; ++j) {
+    all_gt = all_gt 
+           <b>&amp;&amp;</b> (xs1[i+j] &gt; xs1[i+j]) 
+           <b>&amp;&amp;</b> (xs1[i+j+1] &gt; xs1[i+j+1]) 
+           <b>&amp;&amp;</b> (xs1[i+j+2] &gt; xs1[i+j]+2) 
+           <b>&amp;&amp;</b> (xs1[i+j+3] &gt; xs1[i+j+3]);
+  }
+  ys[i] = all_gt ? 1.f : 0.f;
+}
+</pre>
+	</td>
+	<td id="right_8">
+	<pre>
+__global__ void bit_and(const float *xs1,
+                        const float *xs2,
+                        float *ys,
+                        int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  bool all_gt = true;
+  for(auto j = 0u; j &lt; TheInnerLoop - 3; ++j) {
+    all_gt = all_gt
+           <b>&amp;</b> (xs1[i+j] &gt; xs1[i+j]) 
+           <b>&amp;</b> (xs1[i+j+1] &gt; xs1[i+j+1]) 
+           <b>&amp;</b> (xs1[i+j+2] &gt; xs1[i+j]+2) 
+           <b>&amp;</b> (xs1[i+j+3] &gt; xs1[i+j+3]);
+  }
+  ys[i] = all_gt ? 1.f : 0.f;
+}
+</pre>
+	</td></tr></table>
+	<canvas id="slider_8" width=608 height=128></canvas>
+	<p class="comment" id="comment_8">
+They are almost the same.
+	</p>
+	<button type="button" onclick="reveal(7)" id="button_8">Reveal the truth</button>
+	<div id="the_truth_8" style="display:none;">
+	<p>
+But not this time. There is virtually no difference.
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(7);
+	</script>
+
+	<h2>
+Round 9. Logical && vs. mul trick
+	</h2>
+	<p>
+The other trick to make a compiler skip the short circuiting is turning logic into arithmetics.
+	</p>
+	<table><tr>
+	<td id="left_9">
+	<pre>
+__global__ void logical_and(const float *xs1,
+                            const float *xs2,
+                            float *ys,
+                            int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  bool all_gt = true;
+  for(auto j = 0u; j &lt; TheInnerLoop - 3; ++j) {
+    all_gt = all_gt 
+           <b>&amp;&amp;</b> (xs1[i+j] &gt; xs1[i+j]) 
+           <b>&amp;&amp;</b> (xs1[i+j+1] &gt; xs1[i+j+1]) 
+           <b>&amp;&amp;</b> (xs1[i+j+2] &gt; xs1[i+j]+2) 
+           <b>&amp;&amp;</b> (xs1[i+j+3] &gt; xs1[i+j+3]);
+  }
+  ys[i] = all_gt ? 1.f : 0.f;
+}
+</pre>
+	</td>
+	<td id="right_9">
+	<pre>
+__global__ void mul_and(const float *xs1,
+                        const float *xs2,
+                        float *ys,
+                        int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  bool all_gt = true;
+  for(auto j = 0u; j &lt; TheInnerLoop - 3; ++j) {
+    all_gt = all_gt 
+           <b>*</b> (xs1[i+j] &gt; xs1[i+j]) 
+           <b>*</b> (xs1[i+j+1] &gt; xs1[i+j+1]) 
+           <b>*</b> (xs1[i+j+2] &gt; xs1[i+j]+2) 
+           <b>*</b> (xs1[i+j+3] &gt; xs1[i+j+3]);
+  }
+  ys[i] = all_gt ? 1.f : 0.f;
+}
+</pre>
+	</td></tr></table>
+	<canvas id="slider_9" width=608 height=128></canvas>
+	<p class="comment" id="comment_9">
+They are almost the same.
+	</p>
+	<button type="button" onclick="reveal(8)" id="button_9">Reveal the truth</button>
+	<div id="the_truth_9" style="display:none;">
+	<p>
+But it doesn't work either.
+	</p>
+	<p>
+The thing is, the CUDA compiler doesn't do short-circuiting at all.
+	</p>
+	<table><tr>
+	<td>
+	<pre id="code_1">
+Function : _Z11logical_andPKfS0_Pfi
+
+  /*0008*/    MOV R1, c[0x0][0x20] ;
+  /*0010*/    S2R R2, SR_CTAID.X ;
+  /*0018*/    S2R R0, SR_TID.X ;
+
+  /*0028*/    XMAD.MRG R3, R2, c[0x0] [0x8].H1, RZ ;
+  /*0030*/    XMAD R0, R2, c[0x0] [0x8], R0 ;
+  /*0038*/    XMAD.PSL.CBCC R2, R2.H1, R3.H1, R0 ;
+
+  /*0048*/    SHR R0, R2.reuse, 0x1e ;
+  /*0050*/    ISCADD R2.CC, R2, c[0x0][0x150], 0x2 ;
+  /*0058*/    IADD.X R3, R0, c[0x0][0x154] ;
+
+  /*0068*/    STG.E [R2], RZ ;
+  /*0070*/    EXIT ;
+  /*0078*/    BRA 0x78 ;
+</pre>
+	</td></tr></table>
+	<p>
+Apparently, there is no much sense in it on GPU so even the && version simply computes the logical expression as it is.
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(8);
+	</script>
+
+	<h2>
+Round 10. swap sort vs. index sort
+	</h2>
+	<p>
+In <a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_nanosecond_sorting.html">Challenge your performance intuition with nanosecond sorting</a> an index sort is compared with standard sort. CUDA doesn't allow the standard sort but we can use a swap sort instead.
+	</p>
+	<table><tr>
+	<td id="left_10">
+	<pre>
+#define swap(a, b) {auto c = a; a = b; b = c;}
+
+__global__ void sort(const float *xs1,
+                     const float *xs2,
+                     float *ys,
+                     int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  float checksum = 0.;
+  for(auto j = 0u; j &lt; TheInnerLoop - 2; ++j) {
+    double s[3] = {xs1[i+j],xs1[i+j+1],xs1[i+j+2]};
+    <b>if(s[0] &gt; s[1])
+      swap(s[0], s[1]);
+    if(s[1] &gt; s[2])
+      swap(s[1], s[2]);
+    if(s[0] &gt; s[1])
+      swap(s[0], s[1]);</b>
+    checksum += s[0] + 2*s[1] + 3*s[3];
+  }
+  ys[i] = checksum;
+}
+</pre>
+	</td>
+	<td id="right_10">
+	<pre>
+__global__ void index_sort(const float *xs1,
+                           const float *xs2,
+                           float *ys,
+                           int size) {
+  int i = (blockDim.x * blockIdx.x + threadIdx.x);
+  float checksum = 0.;
+  for(auto j = 0u; j &lt; TheInnerLoop - 2; ++j) {
+    double s[3] = {xs1[i+j],xs1[i+j+1],xs1[i+j+2]};
+    const auto a = s[0];
+    const auto b = s[1];
+    const auto c = s[2];
+    <b>s[int(a &gt; b) + int(a &gt; c)] = a;
+    s[int(b &gt;= a) + int(b &gt; c)] = b;
+    s[int(c &gt;= a) + int(c &gt;= b)] = c;</b>
+    checksum += s[0] + 2*s[1] + 3*s[3];
+  }
+  ys[i] = checksum;
+}
+</pre>
+	</td></tr></table>
+	<canvas id="slider_10" width=608 height=128></canvas>
+	<p class="comment" id="comment_10">
+They are almost the same.
+	</p>
+	<button type="button" onclick="reveal(9)" id="button_10">Reveal the truth</button>
+	<div id="the_truth_10" style="display:none;">
+	<p>
+And the index sort is much slower on CUDA. It works fast on x86 because it avoids branching, and branching is not very efficient on x86. But it's a very machine-specific hack. It just doesn't translate to other architectures.
+	</p>
+	</div>
+	<script language="JavaScript">
+	init_slider(9);
+	</script>
+
+
+
+	<div id="show_in_the_end" style="display:none;">
+	<h2>
+Congratulations!
+	</h2>
+	<p>
+You scored <span id="score"></span> pixels of error. As a reference, if you leave every slider untouched there would be exactly <span id="default_score"></span> pixels of error.
+	</p>
+	<div id="bragging_rights" style="display:none;">
+	<p>
+This shows that your performance intuition still works! Can you please tell other people about this? Here's a convenient Twitter link: <a href="https://twitter.com/intent/tweet?text=My+performance+intuition+still+works+fine+on+CUDA+according+to+the+Challenge+your+performance+intuition+with+nanosecond+sorting+quiz.+https%3A%2F%2Fwordsandbuttons.online%2Fcheck_if_your_performance_intuition_still_works_with_cuda.html">My performance intuition still works fine on CUDA according to the Challenge your performance intuition with nanosecond sorting quiz. https://wordsandbuttons.online/check_if_your_performance_intuition_still_works_with_cuda.html</a>.
+	</p>
+	<p>
+It's not immodest, you're just doing me a favor by sharing a quiz ;-)
+	</p>
+	</div>
+	<div id="superb_bragging_rights" style="display:none;">
+	<p>
+This shows that your performance intuition works excellently! Can you please tell other people about this? Here's a convenient Twitter link: <a href="https://twitter.com/intent/tweet?text=My+performance+intuition+works+excellently+on+CUDA+according+to+the+Challenge+your+performance+intuition+with+nanosecond+sorting+quiz.+https%3A%2F%2Fwordsandbuttons.online%2Fcheck_if_your_performance_intuition_still_works_with_cuda.html">My performance intuition works excellently on CUDA according to the Challenge your performance intuition with nanosecond sorting quiz. https://wordsandbuttons.online/check_if_your_performance_intuition_still_works_with_cuda.html</a>.
+	</p>
+	<p>
+It's not immodest, you're just doing me a favor by sharing a quiz ;-)
+	</p>
+	</div>
+
+	<h2>
+Conclusion
+	</h2>
+	<p>
+GPU is different from CPU and this shows. You can't rely solely on your experience, you have to measure your optimizations, you have to read the code to see if the compiler understands you. But that's business as usual.
+	</p>
+	<p>
+What's different now is that even NVidia doesn't support full backward compatibility for their own hardware. This means that you can't even start to build up your experience. Because by the time you're fairly good at predicting what works and what not, NVidia will launch a new product, uppen the top <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capability">compute capacity</a>, and launch a new version of CUDA with an upgraded compiler too.
+	</p>
+	<p>
+And it's getting worse. For the programmer, of course; for the consumer, it only gets better. Google now has its own hardware product — a <a href="https://en.wikipedia.org/wiki/Tensor_Processing_Unit">TPU</a> which stands for Tensor Processor Unit, and is basically a special processor for machine learning. There will be more to come. Task-specific hardware is simply more efficient hence more economical than general-purpose. It's not even about engineering, it's economics.
+	</p>
+	<p>
+Heterogeneous computing is here. It started from number-crunching on GPUs, but it's already spilling out of this niche. Coming back to the metaphor from before, we might have started with wingless planes, but we're heading towards the whole range of cost-effective mass transit.
+	</p>
+	</div>
+	<h2>
+More like this:
+	</h2>
+	<p>
+<a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_magic_squares.html">Challenge your performance intuition with C++ magic squares</a>
+	</p>
+	<p>
+<a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_nanosecond_sorting.html">Challenge your performance intuition with nanosecond sorting</a>
+	</p>
+	<p>
+<a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_operators.html">Challenge your performance intuition with C++ operators</a>
+	</p>
+	<p>
+<a href="https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_sine.html">Challenge your performance intuition with C++ sine</a>
+	</p>
+	<p>
+Also, there's Github with <a href="https://github.com/akalenuk/wordsandbuttons/tree/master/exp/cuda">all the experiments</a>.
+	</p>
+
+	<script language="JavaScript">
+	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
+	</script>
+
+
+
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html">Index</a>
+		<a href="all_programming.html">#programming</a> <a href="all_quizzes.html">#quizzes</a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+		+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+		<a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+</body>
+</html>
