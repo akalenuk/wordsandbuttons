@@ -350,83 +350,120 @@ function colorized(text) {
 
 	<table style="width: 505pt;" class="footer">
 	<tr>
-	<td class="footer" style="text-align: left;"><a href="round_1.html">&larr; </a></td>
+	<td class="footer" style="text-align: left; color:#AAA;">&larr; </td>
 	<td class="footer" style="text-align: center"><a href="index.html">- Contents -</a></td>
-	<td class="footer" style="text-align: right;"><a href="round_3.html">&rarr;</a></td>
+	<td class="footer" style="text-align: right;"><a href="round_1.html">&rarr;</a></td>
 	</tr>
 	</table>
 
 	<h1>
-Round 2
+Benchmark
 	</h1>
 	<p>
-CUDA has a magic compiler flag that promises to make math faster. It's called <i>--use_fast_math</i>, and what it does, it relaxes precision expectations for the division (<i>--prec-div=false</i>), and the square root function (<i>--prec-sqrt=false</i>), allows processors to ignore <a href="https://wordsandbuttons.online/yet_another_floating_point_tutorial.html#index_denormalized_numbers">denormalized floating-point</a> numbers (<i>--ftz=true</i>), and allows the instruction that makes multiplication and addition in one go (<i>--fmad=true</i>).
+This is my benchmark.
 	</p>
-	<p>
-For the previous experiment, the <i>--prec-div=false</i> would be the most relevant. Let's see how fast the division would be with its precision constraints lifted.
-	</p>
+
 	<table><tr>
-	<td id="left_2">
-	<pre>
-// nvcc --use_fast_math
-__global__ void mul(const float *xs1,
-                    const float *xs2,
-                    float *ys,
-                    int size) {
-  int i = (blockDim.x * blockIdx.x + threadIdx.x);
-  auto res = 0.f;
-  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
-    res += xs1[i+j] <b>*</b> xs2[i+j];
-  }
-  ys[i] = res;
+	<td>
+	<pre style="width: 505pt;">
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;random&gt;
+#include &lt;cuda_runtime.h&gt;
+
+
+using TheType = float;
+constexpr auto TheSize = 65536u*128u;
+constexpr auto TheSizeInBytes = TheSize*sizeof(TheType);
+constexpr auto TheInnerLoop = 256u;
+
+
+#define attempt(smth) { \
+    auto s=(smth); \
+    if(s!=cudaSuccess) { \
+        std::cout &lt;&lt; cudaGetErrorString(s) &lt;&lt; \
+        " at " &lt;&lt; __LINE__ &lt;&lt; "\n"; return -1; \
+    } \
 }
-</pre>
-	</td>
-	<td id="right_2">
-	<pre>
-// nvcc --use_fast_math
-__global__ void div(const float *xs1,
-                    const float *xs2,
-                    float *ys,
-                    int size) {
-  int i = (blockDim.x * blockIdx.x + threadIdx.x);
-  auto res = 0.f;
-  for(auto j = 0u; j &lt; TheInnerLoop; ++j) {
-    res += xs1[i+j] <b>/</b> xs2[i+j];
-  }
-  ys[i] = res;
+
+#define measure(smth) {\
+    /*timestamp start*/\
+    cudaEvent_t start;\
+    cudaEventCreate(&start);\
+    cudaEventRecord(start, 0);\
+    cudaEvent_t stop;\
+    cudaEventCreate(&stop); \
+\
+    /* run it*/\
+    int threadsPerBlock = 256;\
+    int blocksPerGrid = \
+        (TheSize - TheInnerLoop + threadsPerBlock - 1) \
+        / threadsPerBlock;\
+    smth&lt;&lt;&lt;blocksPerGrid, threadsPerBlock&gt;&gt;&gt; \
+        (d_xs, d_ys, d_zs, TheSize);\
+    attempt(cudaGetLastError());\
+    attempt(cudaDeviceSynchronize());\
+\
+    /* timestamp stop*/\
+    cudaEventRecord(stop, 0); \
+    cudaEventSynchronize(stop);\
+    float elapsedTime;\
+    cudaEventElapsedTime(&elapsedTime, start, stop);\
+    std::cout &lt;&lt; "Time of " &lt;&lt; #smth &lt;&lt; \
+        ": " &lt;&lt; elapsedTime &lt;&lt; "\n";}\
+
+
+int main(void)
+{
+    // prepare the data
+    std::mt19937 rng(0);
+    std::uniform_real_distribution&lt;TheType&gt; distribution(0.f, 1.f);
+    std::vector&lt;TheType&gt; xs(TheSize);
+    std::vector&lt;TheType&gt; ys(TheSize);
+    std::vector&lt;TheType&gt; zs(TheSize);
+    for (TheType &number : xs) number = distribution(rng);
+    for (TheType &number : ys) number = distribution(rng);
+
+
+    // do the allocations
+    float *d_xs = nullptr;
+    float *d_ys = nullptr;
+    float *d_zs = nullptr;
+    attempt(cudaMalloc((void **)&d_xs, TheSizeInBytes));
+    attempt(cudaMalloc((void **)&d_ys, TheSizeInBytes));
+    attempt(cudaMalloc((void **)&d_zs, TheSizeInBytes));
+
+    // and copying
+    attempt(cudaMemcpy(d_xs, xs.data(), TheSizeInBytes,
+        cudaMemcpyHostToDevice));
+    attempt(cudaMemcpy(d_ys, ys.data(), TheSizeInBytes,
+        cudaMemcpyHostToDevice));
+
+    measure(<b>some kernel function</b>);
+
+
+    // back (for debug, don't really want it)
+    attempt(cudaMemcpy(zs.data(), d_zs, TheSizeInBytes,
+        cudaMemcpyDeviceToHost));
+
+    attempt(cudaFree(d_xs));
+    attempt(cudaFree(d_ys));
+    attempt(cudaFree(d_zs));
+    return 0;
 }
 </pre>
 	</td></tr></table>
-	<canvas id="slider_2" width=608 height=128></canvas>
-	<p class="comment" id="comment_2">
-They are almost the same.
+	<p class="comment">
+All the measurements are performed on <i>GeForce GTX 1050 Ti Mobile</i>.
 	</p>
-	<button type="button" onclick="reveal(1)" id="button_2">Reveal the truth</button>
-	<div id="the_truth_2" style="display:none;">
-	<p>
-With fast math, the division is almost as fast as multiplication. The optimization from above doesn't make much sense anymore.
-	</p>
-	<p>
-Also, if you're asking yourself, didn't <i>--ftz=true</i> also speed up the multiplication? It didn't. Not to the measurable extend.
-	</p>
-	</div>
-	<script language="JavaScript">
-	init_slider(1);
-	</script>
 
 	<table style="width: 505pt;" class="footer">
 	<tr>
-	<td class="footer" style="text-align: left;"><a href="round_1.html">&larr; </a></td>
+	<td class="footer" style="text-align: left; color:#AAA;">&larr; </td>
 	<td class="footer" style="text-align: center"><a href="index.html">- Contents -</a></td>
-	<td class="footer" style="text-align: right;"><a href="round_3.html">&rarr;</a></td>
+	<td class="footer" style="text-align: right;"><a href="round_1.html">&rarr;</a></td>
 	</tr>
 	</table>
-
-
-	<script language="JavaScript">
-	document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
-	</script>
 
 	</center>
 </body>
