@@ -2,7 +2,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=0.84">
-	<title>Triangles 3D</title>
+	<title>Vectors</title>
 	<meta name="description" content="A simple image processing algorithm that cleans up dirt stains from old newspapers. I called it “darning” because of how it works.">
 	<meta name="keywords" content="mathematics, algorithms, demos">
 	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
@@ -106,9 +106,42 @@ canvas { touch-action: none; }
 	</style>
 
 	<script language="JavaScript">
-// triangle points
-const points = [[200, 340], [440, 200], [319.99, 540]];
-const letter = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+// client
+const w = 640.0;
+const h = 640.0;
+
+// visible region
+var x_min = -0.5;
+var y_min = -0.5;
+var x_max = 2.5;
+var y_max = 2.5;
+
+var client_x_center = w*(0-x_min)/(x_max-x_min);
+var client_x_step = (w/(x_max-x_min));
+
+var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+var client_y_step = (h/(y_max-y_min));
+
+function client_to_x(client_x){
+	return (client_x - client_x_center) / client_x_step;
+}
+
+function client_to_y(client_y){
+	return (client_y_center - client_y) / client_y_step;
+}
+
+function x_to_client(x){
+	return x * client_x_step + client_x_center;
+}
+
+function y_to_client(y){
+	return client_y_center - y * client_y_step;
+}
+
+
+// vector
+const points = [[200, 340], [440, 200], [200, 340], [500, 340]];
+const letter = ['a', 'b', 'c'];
 
 function draw_arrow(context, x1, y1, x2, y2, color) {
 	const size1 = 8.1;
@@ -122,6 +155,46 @@ function draw_arrow(context, x1, y1, x2, y2, color) {
 	context.moveTo(x2 + (y2 - y1) * size1 / d - (x2 - x1) * size2 / d, y2 - (y2 - y1) * size2 / d - (x2 - x1) * size1 / d);
 	context.lineTo(x2, y2);
 	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
+}
+
+function draw_grid_on(context){
+	context.font = "36px sans-serif";
+	// axes
+	const size1 = 8.1;
+	const size2 = 25.3;
+	context.beginPath();
+	context.moveTo(0, client_y_center);
+	context.lineTo(w-1.5, client_y_center);
+	context.moveTo(w-1.5, client_y_center);
+	context.lineTo(w-1.5 - size2, client_y_center - size1);
+	context.moveTo(w-1.5, client_y_center);
+	context.lineTo(w-1.5 - size2, client_y_center + size1);
+	context.moveTo(client_x_center, h);
+	context.lineTo(client_x_center, 1.5);
+	context.moveTo(client_x_center, 1.5);
+	context.lineTo(client_x_center - size1, size2);
+	context.moveTo(client_x_center, 1.5);
+	context.lineTo(client_x_center + size1, size2);
+	context.fillStyle="#000000";
+	// numbers
+	for(var i = Math.floor(x_min) + 1; i <= x_max - 1; i++){
+		context.moveTo(client_x_center + i*client_x_step, client_y_center);
+		context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+		if(i != 0)
+			context.fillText(i, client_x_center + i*client_x_step + 8, client_y_center + 22);
+	}
+	for(var i = Math.floor(y_min) + 1; i <= y_max - 1; i++){
+		context.moveTo(client_x_center, client_y_center - i*client_y_step);
+		context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+		context.fillText(i, client_x_center + 15, client_y_center - i*client_y_step + 22);
+	}
+	// letters
+	context.fillText("x", client_x_center + x_max*client_x_step - 26, client_y_center + 22);
+	context.fillText("y", client_x_center - 22, client_y_center - y_max*client_y_step + 22);
+
+	context.strokeStyle="#000000";
 	context.stroke();
 	context.closePath();
 }
@@ -203,49 +276,33 @@ function draw_canvas(){
 	context.fillRect(0, 0, w, h);
 
 	// frame
-	context.beginPath();
-	context.moveTo(points[0][0], points[0][1]);
-	context.lineTo(points[1][0], points[1][1]);
-	context.moveTo(points[1][0], points[1][1]);
-	context.lineTo(points[2][0], points[2][1]);
-	context.moveTo(points[2][0], points[2][1]);
-	context.lineTo(points[0][0], points[0][1]);
-	context.strokeStyle = "#000";
-	context.lineWidth = 3;
-	context.stroke();
-	context.closePath();
-
-	draw_arrow(context, 200, 440, 200, 40, "#000");
-	draw_arrow(context, 200, 440, 600, 440, "#000");
-	draw_arrow(context, 200, 440, 40, 600, "#000");
-
 	context.font = "40px sans-serif";
 	context.textAlign = "center";
 	context.textBaseline = "middle";
 	context.fillStyle="#000";
-
-	context.fillText("x", 590, 460);
-	context.fillText("y", 223, 45);
-	context.fillText("z", 77, 590);
+	context.lineWidth = 3;
+	draw_grid_on(context);
 
 	context.font = "42px sans-serif";
-	context.lineWidth = 1;
-	for(var i = 0; i < points.length; ++i) {
+	context.lineWidth = 3;
+	for(var i = 0; i < points.length / 2; ++i) {
+		const i1 = 2*i;
+		const i2 = 2*i+1;
+		context.lineWidth = 3;
 		context.fillStyle="#000";
-		const x = points[i][0];
-		const y = points[i][1];
-		context.beginPath();
-		context.arc(x, y, 3.5, 0, 2*Math.PI);
-		context.stroke();
-		context.fill();
-		context.closePath();
+		const x1 = points[i1][0];
+		const y1 = points[i1][1];
+		const x2 = points[i2][0];
+		const y2 = points[i2][1];
+		draw_arrow(context, x1, y1, x2, y2, "#000");
 
-		const dx = points[i][0] - 320;
-		const dy = points[i][1] - 320;
+		context.lineWidth = 1;
+		const dx = points[i1][0] - points[i2][0];
+		const dy = points[i1][1] - points[i2][1];
 		const normalizer = Math.sqrt(dx*dx + dy*dy);
-		const ddx = (d(points[i], points[(i + 1) % 3]) < 48) ? -32 : 0;
-		          + (d(points[i], points[(i + 2) % 3]) < 48) ? +32 : 0;
-		context.fillText(letter[i], points[i][0] + dx * 24 / normalizer + ddx, points[i][1] + dy * 24 / normalizer);
+		const x = (x1+x2)/2 - dy / normalizer * 26;
+		const y = (y1+y2)/2 + dx / normalizer * 26;
+		context.fillText(letter[i], x, y );
 	}
 
 }
@@ -255,7 +312,7 @@ function draw_canvas(){
 <body>
 	<center>
 	<h1>
-<span id="index_image_darning">Triangles 3D</span>
+<span id="index_image_darning">Vectors</span>
 	</h1>
 	</p>
 	<canvas id="canvas" width=662 height=451></canvas>
