@@ -1,0 +1,350 @@
+﻿<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.84">
+	<title>Triangle's quality</title>
+	<meta name="description" content="A simple image processing algorithm that cleans up dirt stains from old newspapers. I called it “darning” because of how it works.">
+	<meta name="keywords" content="mathematics, algorithms, demos">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body {
+	margin: 0 0 0 0;
+	background-color: #aaa;
+}
+
+a {
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 14pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+table.footer {
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
+}
+
+td.footer {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+li {
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+	padding-bottom: 6pt;
+}
+
+input[type="text"] {
+	width: 505pt;
+	height: 22pt;
+	font-size: 12pt;
+	text-align: left;
+}
+
+input[type="radio"] {
+	height: 16pt;
+	width: 16pt;
+	font-size: 16pt;
+}
+
+button {
+	width: 148pt;
+	height: 26pt;
+	font-size: 16pt;
+	text-align: center;
+	margin: 3pt 0pt 3pt 0pt;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
+}
+
+canvas { touch-action: none; }
+	</style>
+
+	<script language="JavaScript">
+// triangle points
+const cos30 = Math.sqrt(3) / 2;
+const points = [[320, 320 - 240], [320 + 240 * cos30, 320 + 240/2], [320 - 240 * cos30, 320 + 240/2 ]];
+const letter = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+// distance between points
+function d(xy1, xy2) {
+	return Math.sqrt((xy1[0] - xy2[0])*(xy1[0] - xy2[0]) + (xy1[1] - xy2[1])*(xy1[1] - xy2[1]));
+}
+
+// distance between point and line
+function dl(xy, line_xy1, line_xy2) {
+	const x = xy[0];
+	const y = xy[1];
+	const x1 = line_xy1[0];
+	const y1 = line_xy1[1];
+	const x2 = line_xy2[0];
+	const y2 = line_xy2[1];
+	const a = (-x*x1 + x*x2 + Math.pow(x1, 2) - x1*x2 - y*y1 + y*y2 + Math.pow(y1, 2) - y1*y2)/(Math.pow(x1, 2) - 2*x1*x2 + Math.pow(x2, 2) + Math.pow(y1, 2) - 2*y1*y2 + Math.pow(y2, 2));
+	const xp = x1 + (x2 -x1)*a;
+	const yp = y1 + (y2 -y1)*a;
+	return d(xy, [xp, yp]);
+}
+
+function nearest_point(xy) {
+	var nearest_i = 0;
+	var nearest_d = d(xy, points[0]);
+	for(var i = 1; i < points.length; ++i) {
+		const di = d(xy, points[i]);
+		if(di < nearest_d) {
+			nearest_d = di;
+			nearest_i = i;
+		}
+	}
+	return nearest_i;
+}
+
+function set_points(xy) {
+	const x = Math.max(Math.min(xy[0], 640 - 1), 0);
+	const y = Math.max(Math.min(xy[1], 640 -1), 0);
+
+	const i = nearest_point(xy);
+	points[i][0] = x;
+	points[i][1] = y;
+}
+
+function init_canvas(){
+	var canvas = document.getElementById("canvas");
+	canvas.width = 640;
+	canvas.height = 640;
+	const canvas_rect = canvas.getBoundingClientRect();
+
+	canvas.addEventListener('pointermove', function(e){
+		var canvas_rect = canvas.getBoundingClientRect();
+		if(e.buttons == 1){
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_points([x, y]);
+			draw_canvas();
+		}
+	}, false);
+
+	canvas.addEventListener('pointerdown', function(e){
+		if(e.buttons == 1){
+			var canvas_rect = canvas.getBoundingClientRect();
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_points([x, y]);
+			draw_canvas();
+			canvas.releasePointerCapture(e.pointerId);
+		}
+	}, false);
+
+	canvas.addEventListener('pointerleave', function(e){
+		if(e.buttons == 1){
+			var canvas_rect = canvas.getBoundingClientRect();
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_points([x, y]);
+		}
+		draw_canvas();
+	}, false);
+
+	draw_canvas();
+}
+
+function draw_canvas(){
+	var canvas = document.getElementById("canvas");
+	var context = canvas.getContext("2d");
+	const w = 640;
+	const h = 640;
+
+	// background
+	context.fillStyle="#ffffff";
+	context.fillRect(0, 0, w, h);
+
+	// frame
+	context.beginPath();
+	context.moveTo(points[0][0], points[0][1]);
+	context.lineTo(points[1][0], points[1][1]);
+	context.moveTo(points[1][0], points[1][1]);
+	context.lineTo(points[2][0], points[2][1]);
+	context.moveTo(points[2][0], points[2][1]);
+	context.lineTo(points[0][0], points[0][1]);
+	context.strokeStyle = "#000";
+	context.lineWidth = 3;
+	context.stroke();
+	context.closePath();
+
+	context.lineWidth = 1;
+	context.font = "42px sans-serif";
+	context.textAlign = "center";
+	context.textBaseline = "middle";
+	for(var i = 0; i < points.length; ++i) {
+		context.fillStyle="#000";
+		const x = points[i][0];
+		const y = points[i][1];
+		context.beginPath();
+		context.arc(x, y, 3.5, 0, 2*Math.PI);
+		context.stroke();
+		context.fill();
+		context.closePath();
+
+		context.fillStyle="#000";
+		const dx = points[i][0] - 320;
+		const dy = points[i][1] - 320;
+		const normalizer = Math.sqrt(dx*dx + dy*dy);
+		const ddx = (d(points[i], points[(i + 1) % 3]) < 48) ? -32 : 0;
+		          + (d(points[i], points[(i + 2) % 3]) < 48) ? +32 : 0;
+		context.fillText(letter[i], points[i][0] + dx * 24 / normalizer + ddx, points[i][1] + dy * 24 / normalizer);
+	}
+
+
+	context.lineWidth = 1.8;
+
+	// find circumcircle
+	function best_cc_in_range(x0, x1, dx, y0, y1, dy){
+		var best_dr = 10e+25;
+		var best_r = 0;
+		var best_x = 0;
+		var best_y = 0;
+		for(var x = x0; x < x1; x += dx)
+			for(var y = y0; y < y1; y += dy) {
+				const r1 = d([x, y], [points[0][0], points[0][1]]);
+				const r2 = d([x, y], [points[1][0], points[1][1]]);
+				const r3 = d([x, y], [points[2][0], points[2][1]]);
+				const dr = Math.pow(r1-r2, 2) + Math.pow(r2-r3, 2) + Math.pow(r3-r1, 2);
+				if(dr < best_dr) {
+					best_dr = dr;
+					best_r = (r1 + r2 + r3)/3.;
+					best_x = x;
+					best_y = y;
+				}
+			}
+		return [best_dr, best_r, best_x, best_y];
+	}
+
+	const iteration11 = best_cc_in_range(0, 640, 64, 0, 640, 64);
+	const iteration12 = best_cc_in_range(iteration11[2] - 64, iteration11[2] + 64, 8, iteration11[3] - 64, iteration11[3] + 64, 8);
+	const iteration13 = best_cc_in_range(iteration12[2] - 8, iteration12[2] + 8, 1, iteration12[3] - 8, iteration12[3] + 8, 1);
+	const iteration14 = best_cc_in_range(iteration13[2] - 1, iteration13[2] + 1, 0.25, iteration13[3] - 1, iteration13[3] + 1, 0.25);
+	context.beginPath();
+	const ccr = iteration14[1];
+	const ccx = iteration14[2];
+	const ccy = iteration14[3];
+	context.arc(ccx, ccy, ccr, 0, 2*Math.PI);
+	context.stroke();
+	context.closePath();
+
+	// find incircle
+	function best_ic_in_range(x0, x1, dx, y0, y1, dy){
+		var best_dr = 10e+25;
+		var best_r = 0;
+		var best_x = 0;
+		var best_y = 0;
+		for(var x = x0; x < x1; x += dx)
+			for(var y = y0; y < y1; y += dy) {
+				const r1 = dl([x, y], points[0], points[1]);
+				const r2 = dl([x, y], points[1], points[2]);
+				const r3 = dl([x, y], points[2], points[0]);
+				const dr = Math.pow(r1-r2, 2) + Math.pow(r2-r3, 2) + Math.pow(r3-r1, 2);
+				if(dr < best_dr) {
+					best_dr = dr;
+					best_r = (r1 + r2 + r3)/3.;
+					best_x = x;
+					best_y = y;
+				}
+			}
+		return [best_dr, best_r, best_x, best_y];
+	}
+
+	const iteration21 = best_ic_in_range(0, 640, 64, 0, 640, 64);
+	const iteration22 = best_ic_in_range(iteration21[2] - 64, iteration21[2] + 64, 8, iteration21[3] - 64, iteration21[3] + 64, 8);
+	const iteration23 = best_ic_in_range(iteration22[2] - 8, iteration22[2] + 8, 1, iteration22[3] - 8, iteration22[3] + 8, 1);
+	const iteration24 = best_ic_in_range(iteration23[2] - 1, iteration23[2] + 1, 0.25, iteration23[3] - 1, iteration23[3] + 1, 0.25);
+	context.beginPath();
+	const icr = iteration24[1];
+	const icx = iteration24[2];
+	const icy = iteration24[3];
+	context.arc(icx, icy, icr, 0, 2*Math.PI);
+	context.stroke();
+	context.closePath();
+}
+
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
+<span id="index_image_darning">Triangles</span>
+	</h1>
+	</p>
+	<canvas id="canvas" width=662 height=451></canvas>
+	<h2>
+How it works
+	</h2>
+
+	<script language="JavaScript">
+	init_canvas();
+	</script>
+
+
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html">Index</a>
+		<a href="all_mathematics.html">#mathematics</a> <a href="all_algorithms.html">#algorithms</a> <a href="all_demos.html">#demos</a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+		+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+		<a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+</body>
+</html>
