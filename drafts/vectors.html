@@ -140,8 +140,12 @@ function y_to_client(y){
 
 
 // vector
-const points = [[200, 340], [440, 200], [200, 340], [500, 340]];
-const letter = ['a', 'b', 'c'];
+const points = [[x_to_client(0), y_to_client(0)], [x_to_client(0.5), y_to_client(1.5)]
+,[x_to_client(0), y_to_client(0)], [x_to_client(1), y_to_client(0.5)]
+,[x_to_client(0), y_to_client(0)], [x_to_client(1.5), y_to_client(2.0)]
+,[x_to_client(0.5), y_to_client(1.5)], [x_to_client(1.5), y_to_client(2.0)]
+,[x_to_client(1.0), y_to_client(0.5)], [x_to_client(1.5), y_to_client(2.0)]];
+const letter = ['a', 'b', 'c', 'b', 'a'];
 
 function draw_arrow(context, x1, y1, x2, y2, color) {
 	const size1 = 8.1;
@@ -182,13 +186,13 @@ function draw_grid_on(context){
 	for(var i = Math.floor(x_min) + 1; i <= x_max - 1; i++){
 		context.moveTo(client_x_center + i*client_x_step, client_y_center);
 		context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
-		if(i != 0)
-			context.fillText(i, client_x_center + i*client_x_step + 8, client_y_center + 22);
+		context.fillText(i, client_x_center + i*client_x_step + 15, client_y_center + 22);
 	}
 	for(var i = Math.floor(y_min) + 1; i <= y_max - 1; i++){
 		context.moveTo(client_x_center, client_y_center - i*client_y_step);
 		context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
-		context.fillText(i, client_x_center + 15, client_y_center - i*client_y_step + 22);
+		if(i != 0)
+			context.fillText(i, client_x_center - 15, client_y_center - i*client_y_step + 22);
 	}
 	// letters
 	context.fillText("x", client_x_center + x_max*client_x_step - 26, client_y_center + 22);
@@ -288,7 +292,13 @@ function draw_canvas(){
 	for(var i = 0; i < points.length / 2; ++i) {
 		const i1 = 2*i;
 		const i2 = 2*i+1;
-		context.lineWidth = 3;
+		if(i < 3) {
+			context.lineWidth = 3;
+			context.setLineDash([]);
+		} else {
+			context.lineWidth = 2;
+			context.setLineDash([4, 4]);
+		}
 		context.fillStyle="#000";
 		const x1 = points[i1][0];
 		const y1 = points[i1][1];
@@ -304,7 +314,7 @@ function draw_canvas(){
 		const y = (y1+y2)/2 + dx / normalizer * 26;
 		context.fillText(letter[i], x, y );
 	}
-
+	context.setLineDash([]);
 }
 
 	</script>
