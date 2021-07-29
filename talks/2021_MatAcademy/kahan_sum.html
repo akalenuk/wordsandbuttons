@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Error estimation</title>
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body{
+	margin: 0 0 0 0;
+}
+
+a{
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+.comment {
+	font-size: 12pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
+}
+
+.footer {
+	margin-top: 64pt;
+	padding-bottom: 32pt;
+	font-family: sans-serif;
+	font-size: 16pt;
+	text-align: left;
+}
+
+table {
+	font-family: sans-serif;
+	font-size: 13pt;
+	width: 505pt;
+	text-align: center;
+}
+
+li {
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+	padding-bottom: 6pt;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
+}
+
+input[type="text"] {
+	width: 32pt;
+	height: 22pt;
+	font-size: 16pt;
+	text-align: center;
+}
+
+button {
+	width: 32pt;
+	height: 26pt;
+	font-size: 16pt;
+	text-align: center;
+}
+
+pre {
+	margin: 0 0 0 0;
+	padding: 12pt 12pt 12pt 12pt;
+	font-size: 12pt;
+	text-align: left;
+	border: none;
+	width: 505pt;
+}
+
+u {
+	border-bottom: 1px dotted #000;
+	text-decoration: none;
+	cursor: pointer;
+}
+	</style>
+	<script language="JavaScript">
+function colorized(text) {
+	const separators = [' if(', 'return ', ' for(', ' for ',
+		'\n', ' ', '\t', ',', ':', ';', '+', '-', '/', '*', '&amp', '(', ')', '<', '>', '[', ']', '{', '}', '.',
+		'==', '!=', '<=', '>=', '=', '-=', '+=', '*=', '/='];
+	const quotes = ['"'];
+	const comments = [['//', '\n'], ['/*', '*/']];
+
+	function painted_in(line, color) {
+		return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+	}
+
+	function colorized(token) {
+		var code_sum = 0;
+		for(var i = 0; i < token.length; ++i)
+			code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+		var zero_channel = code_sum % 3;
+		var color = '' + (zero_channel == 0 ? '3' : '') + (1 + (code_sum % 5) * 2)
+			+ (zero_channel == 1 ? '3' : '') + (4 + (code_sum % 2) * 5)
+			+ (zero_channel == 2 ? '3' : '');
+		return painted_in(token, color);
+	}
+
+	function separated(line, i) {
+		if(i == separators.length)
+			return colorized(line);
+		return line.split(separators[i]).map(function(subline) {
+			return separated(subline, i + 1);}).join(separators[i]);
+	}
+
+	function unquoted(line, i) {
+		if(i == quotes.length)
+			return separated(line, 0);
+		var chunk_no = 0;
+		return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {
+			return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {
+				return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "777");}).join('');
+	}
+
+	function uncommented(line, i) {
+		if(i == comments.length)
+			return unquoted(line, 0);
+		const chunks = line.split(comments[i][0]);
+		return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+			var in_out_comment = chunk.split(comments[i][1]);
+			return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "777")
+				+ uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+	}
+
+	return uncommented(text.split('&lt;').join('<').split('&gt;').join('>'), 0);
+}
+	</script>
+</head>
+<body>
+	<center>
+	<table style="width: 505pt;" class="footer">
+	<tr>
+	<td class="footer" style="text-align: left;"><a href="floating_point_sum.html">&larr; </a></td>
+	<td class="footer" style="text-align: center"><a href="index.html">- Contents -</a></td>
+	<td class="footer" style="text-align: right"><a href="cubic_solver_quiz.html">&rarr;</a></td>
+	</tr>
+	</table>
+
+	<pre id="code_1">
+#include &lt;algorithm&gt;
+#include &lt;vector&gt;
+#include &lt;iostream&gt;
+#include &lt;random&gt;
+
+double sum(const std::vector&lt;double&gt;& xs) {
+    return std::accumulate(xs.begin(), xs.end(), 0.);
+}
+
+double sorted_sum(const std::vector&lt;double&gt;& xs) {
+    std::vector&lt;double&gt; sorted_xs(xs);
+    std::sort(sorted_xs.begin(), sorted_xs.end());
+    return std::accumulate(sorted_xs.begin(), sorted_xs.end(), 0.);
+}
+
+double kahan_sum(const std::vector&lt;double&gt;& xs) {
+    double sum = 0.;
+    double c = 0.;
+    for (auto x : xs) {
+        double y = x - c;
+        double t = sum + y;
+        c = (t - sum) - y;
+        sum = t;
+    }
+    return sum;
+}
+
+int main() {
+    constexpr auto TheSize = 1'000'000;
+    using TheType = double;
+
+    std::mt19937 rng(0);
+    std::uniform_real_distribution&lt;TheType&gt; distribution(0, 1'000'000);
+    std::vector&lt;TheType&gt; xs(TheSize);
+    for (TheType &x : xs) {
+        x = distribution(rng);
+    }
+    // compare kahan sum with simple sum and sorted sum
+    const auto ks = kahan_sum(xs);
+    const auto s = sum(xs);
+    const auto ss = sorted_sum(xs);
+    std::cout &lt;&lt; "Kahan sum: " &lt;&lt; ks &lt;&lt; "\n";
+    std::cout &lt;&lt; "accumulated sum: " &lt;&lt; s &lt;&lt; "\n";
+    std::cout &lt;&lt; "accumulated sorted sum: " &lt;&lt; s &lt;&lt; "\n\n";
+    std::cout &lt;&lt; "difference between Kahan and sum: " &lt;&lt; std::abs(s - ks) &lt;&lt; "\n";
+    std::cout &lt;&lt; "difference between Kahan and sorted sum: " &lt;&lt; std::abs(ss - ks) &lt;&lt; "\n";
+    std::cout &lt;&lt; "difference between sum and sorted sum: " &lt;&lt; std::abs(s - ss) &lt;&lt; "\n";
+}
+
+	</pre>
+	<br>
+	<pre>
+Kahan sum: 5.0021e+11
+accumulated sum: 5.0021e+11
+accumulated sorted sum: 5.0021e+11
+
+difference between Kahan and sum: 0.00915527
+difference between Kahan and sorted sum: 0.00671387
+difference between sum and sorted sum: 0.00244141
+	</pre>
+
+	<script language="JavaScript">
+		document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
+	</script>
+
+	<table style="width: 505pt;" class="footer">
+	<tr>
+	<td class="footer" style="text-align: left;"><a href="floating_point_sum.html">&larr; </a></td>
+	<td class="footer" style="text-align: center"><a href="index.html">- Contents -</a></td>
+	<td class="footer" style="text-align: right"><a href="cubic_solver_quiz.html">&rarr;</a></td>
+	</tr>
+	</table>
+	</center>
+</body>
+</html>
