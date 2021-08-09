@@ -1,0 +1,361 @@
+﻿<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.84">
+	<title>Vectors</title>
+	<meta name="description" content="A simple image processing algorithm that cleans up dirt stains from old newspapers. I called it “darning” because of how it works.">
+	<meta name="keywords" content="mathematics, algorithms, demos">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body {
+	margin: 0 0 0 0;
+	background-color: #aaa;
+}
+
+a {
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 14pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+table.footer {
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
+}
+
+td.footer {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+li {
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+	padding-bottom: 6pt;
+}
+
+input[type="text"] {
+	width: 505pt;
+	height: 22pt;
+	font-size: 12pt;
+	text-align: left;
+}
+
+input[type="radio"] {
+	height: 16pt;
+	width: 16pt;
+	font-size: 16pt;
+}
+
+button {
+	width: 148pt;
+	height: 26pt;
+	font-size: 16pt;
+	text-align: center;
+	margin: 3pt 0pt 3pt 0pt;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
+}
+
+canvas { touch-action: none; }
+	</style>
+
+	<script language="JavaScript">
+// client
+const w = 640.0;
+const h = 640.0;
+
+// visible region
+var x_min = -0.5;
+var y_min = -0.5;
+var x_max = 2.5;
+var y_max = 2.5;
+
+var client_x_center = w*(0-x_min)/(x_max-x_min);
+var client_x_step = (w/(x_max-x_min));
+
+var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+var client_y_step = (h/(y_max-y_min));
+
+function client_to_x(client_x){
+	return (client_x - client_x_center) / client_x_step;
+}
+
+function client_to_y(client_y){
+	return (client_y_center - client_y) / client_y_step;
+}
+
+function x_to_client(x){
+	return x * client_x_step + client_x_center;
+}
+
+function y_to_client(y){
+	return client_y_center - y * client_y_step;
+}
+
+
+// vector
+var jx = 0.5 / Math.sqrt(0.5*0.5 + 1.5*1.5);
+var jy = 1.5 / Math.sqrt(0.5*0.5 + 1.5*1.5);
+console.log(0.5*0.5 + 1.5*1.5, Math.sqrt(0.5*0.5 + 1.5*1.5));
+const points = [
+[x_to_client(0), y_to_client(0)], [x_to_client(jy), y_to_client(-jx)],
+[x_to_client(0), y_to_client(0)], [x_to_client(jx), y_to_client(jy)],
+[x_to_client(0), y_to_client(0)], [x_to_client(0.5), y_to_client(1.5)]
+];
+const letter = ['i', 'j', 'a', 'b', 'a'];
+
+function draw_arrow(context, x1, y1, x2, y2, color) {
+	const size1 = 8.1;
+	const size2 = 25.3;
+	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - (y2 - y1) * size1 / d - (x2 - x1) * size2 / d, y2 - (y2 - y1) * size2 / d + (x2 - x1) * size1 / d);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + (y2 - y1) * size1 / d - (x2 - x1) * size2 / d, y2 - (y2 - y1) * size2 / d - (x2 - x1) * size1 / d);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
+}
+
+function draw_grid_on(context){
+	context.font = "36px sans-serif";
+	// axes
+	const size1 = 8.1;
+	const size2 = 25.3;
+	context.beginPath();
+	context.moveTo(0, client_y_center);
+	context.lineTo(w-1.5, client_y_center);
+	context.moveTo(w-1.5, client_y_center);
+	context.lineTo(w-1.5 - size2, client_y_center - size1);
+	context.moveTo(w-1.5, client_y_center);
+	context.lineTo(w-1.5 - size2, client_y_center + size1);
+	context.moveTo(client_x_center, h);
+	context.lineTo(client_x_center, 1.5);
+	context.moveTo(client_x_center, 1.5);
+	context.lineTo(client_x_center - size1, size2);
+	context.moveTo(client_x_center, 1.5);
+	context.lineTo(client_x_center + size1, size2);
+	context.fillStyle="#000000";
+	// numbers
+	for(var i = Math.floor(x_min) + 1; i <= x_max - 1; i++){
+		context.moveTo(client_x_center + i*client_x_step, client_y_center);
+		context.lineTo(client_x_center + i*client_x_step, client_y_center - 5);
+		context.fillText(i, client_x_center + i*client_x_step + 15, client_y_center + 22);
+	}
+	for(var i = Math.floor(y_min) + 1; i <= y_max - 1; i++){
+		context.moveTo(client_x_center, client_y_center - i*client_y_step);
+		context.lineTo(client_x_center + 5, client_y_center - i*client_y_step);
+		if(i != 0)
+			context.fillText(i, client_x_center - 26, client_y_center - i*client_y_step + 22);
+	}
+	// letters
+	context.fillText("x", client_x_center + x_max*client_x_step - 26, client_y_center + 22);
+	context.fillText("y", client_x_center - 22, client_y_center - y_max*client_y_step + 22);
+
+	context.strokeStyle="#000000";
+	context.stroke();
+	context.closePath();
+}
+
+function d(xy1, xy2) {
+	return (xy1[0] - xy2[0])*(xy1[0] - xy2[0]) + (xy1[1] - xy2[1])*(xy1[1] - xy2[1]);
+}
+
+function nearest_point(xy) {
+	var nearest_i = 0;
+	var nearest_d = d(xy, points[0]);
+	for(var i = 1; i < points.length; ++i) {
+		const di = d(xy, points[i]);
+		if(di < nearest_d) {
+			nearest_d = di;
+			nearest_i = i;
+		}
+	}
+	return nearest_i;
+}
+
+function set_points(xy) {
+	const x = Math.max(Math.min(xy[0], 640 - 1), 0);
+	const y = Math.max(Math.min(xy[1], 640 -1), 0);
+
+	const i = nearest_point(xy);
+	points[i][0] = x;
+	points[i][1] = y;
+}
+
+function init_canvas(){
+	var canvas = document.getElementById("canvas");
+	canvas.width = 640;
+	canvas.height = 640;
+	const canvas_rect = canvas.getBoundingClientRect();
+
+	canvas.addEventListener('pointermove', function(e){
+		var canvas_rect = canvas.getBoundingClientRect();
+		if(e.buttons == 1){
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_points([x, y]);
+			draw_canvas();
+		}
+	}, false);
+
+	canvas.addEventListener('pointerdown', function(e){
+		if(e.buttons == 1){
+			var canvas_rect = canvas.getBoundingClientRect();
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_points([x, y]);
+			draw_canvas();
+			canvas.releasePointerCapture(e.pointerId);
+		}
+	}, false);
+
+	canvas.addEventListener('pointerleave', function(e){
+		if(e.buttons == 1){
+			var canvas_rect = canvas.getBoundingClientRect();
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_points([x, y]);
+		}
+		draw_canvas();
+	}, false);
+
+	draw_canvas();
+}
+
+function draw_canvas(){
+	var canvas = document.getElementById("canvas");
+	var context = canvas.getContext("2d");
+	const w = 640;
+	const h = 640;
+
+	// background
+	context.fillStyle="#ffffff";
+	context.fillRect(0, 0, w, h);
+
+	// frame
+	context.font = "40px sans-serif";
+	context.textAlign = "center";
+	context.textBaseline = "middle";
+	context.fillStyle="#000";
+	context.lineWidth = 3;
+	draw_grid_on(context);
+
+	context.font = "42px sans-serif";
+	context.lineWidth = 3;
+	for(var i = points.length / 2 - 1; i >= 0 ; --i) {
+		const color = i == 0 ? "#d64562" : i == 1 ? "#457fd6" : "#000";
+		const i1 = 2*i;
+		const i2 = 2*i+1;
+		if(i < 3) {
+			context.lineWidth = 3;
+			context.setLineDash([]);
+		} else {
+			context.lineWidth = 2;
+			context.setLineDash([4, 4]);
+		}
+		context.fillStyle= color;
+		const x1 = points[i1][0];
+		const y1 = points[i1][1];
+		const x2 = points[i2][0];
+		const y2 = points[i2][1];
+		draw_arrow(context, x1, y1, x2, y2, color);
+
+		context.lineWidth = 1;
+		const dx = points[i1][0] - points[i2][0];
+		const dy = points[i1][1] - points[i2][1];
+		const normalizer = Math.sqrt(dx*dx + dy*dy);
+		const x = (x1+x2)/2 + dy / normalizer * 26;
+		const y = (y1+y2)/2 - dx / normalizer * 26;
+		context.fillText(letter[i], x, y );
+	}
+	context.setLineDash([]);
+}
+
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
+<span id="index_image_darning">Vectors</span>
+	</h1>
+	</p>
+	<canvas id="canvas" width=662 height=451></canvas>
+	<h2>
+How it works
+	</h2>
+
+	<script language="JavaScript">
+	init_canvas();
+	</script>
+
+
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html">Index</a>
+		<a href="all_mathematics.html">#mathematics</a> <a href="all_algorithms.html">#algorithms</a> <a href="all_demos.html">#demos</a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+		+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+		<a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+</body>
+</html>
