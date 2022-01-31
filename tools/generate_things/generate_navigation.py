@@ -7,13 +7,13 @@ keyword_note = {
 'tutorials': '',
 'demos': '',
 'quizzes': '',
-'mathematics': '',
+'mathematics': 'Also, I\'m currently writing a book called <a href="https://www.manning.com/books/geometry-for-programmers">Geometry for Programmers</a> for Manning. Not an advertisement, I\'m just bragging.',
 'algorithms': '',
 'programming': 'By the way, if you prefer books to blogs, <a href="https://wordsandbuttons.online/SYTYKC.pdf">there is a free book</a> that was originally made from this section.'
 }
 
 index_title = 'Hello, world!'
-index_description = 'This is <i>Words and Buttons Online</i> — a growing collection of&nbsp;interactive tutorials, demos, and quizzes about maths, algorithms, and programming.'
+index_description = 'This is <i>Words and Buttons Online</i> — a collection of&nbsp;interactive pages about maths and programming.'
 
 all_span_ids = []
 def read_index_spans(path):
