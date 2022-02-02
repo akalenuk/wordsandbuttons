@@ -178,3 +178,44 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 ---
 
 All the code is licensed under [The Unlicense](http://unlicense.org/).
+
+## See also
+
+- Interactive visual explanations of math and algorithms, with motivating examples from computer games.
+[https://www.redblobgames.com/](https://www.redblobgames.com/)
+- The world's first linear algebra book with fully interactive figures.
+[http://immersivemath.com/ila/index.html](http://immersivemath.com/ila/index.html)
+- The Textbook of the Future. Interactive. Personalised. Free.
+[https://mathigon.org/](https://mathigon.org/)
+- Structure and Interpretation of Computer Programs. Interactive Version
+[https://xuanji.appspot.com/isicp/](https://xuanji.appspot.com/isicp/)
+- An Interactive Introduction to Fourier Transforms
+[http://www.jezzamon.com/fourier/index.html](http://www.jezzamon.com/fourier/index.html)
+- Clear, intuitive lessons about imaginary numbers, exponents, and more.
+[https://betterexplained.com/](https://betterexplained.com/)
+- An Interactive Introduction To Quantum Computing
+[http://davidbkemp.github.io/QuantumComputingArticle/](http://davidbkemp.github.io/QuantumComputingArticle/)
+- The website of Martin O'Leary artist, designer, teacher, researcher.
+[http://mewo2.com/](http://mewo2.com/)
+- A Visual and Interactive Guide to the Basics of Neural Networks
+[https://jalammar.github.io/visual-interactive-guide-basics-neural-networks/](https://jalammar.github.io/visual-interactive-guide-basics-neural-networks/)
+- Interactive demos on network theory, game theory, trust etc.
+[https://ncase.me/](https://ncase.me/)
+- An interactive explanation of curves and surfaces
+[https://ciechanow.ski/curves-and-surfaces/](https://ciechanow.ski/curves-and-surfaces/)
+- Introduction to geometric algebra &mdash; an invertible vector product and the implication of having one.
+[https://mattferraro.dev/posts/geometric-algebra](https://mattferraro.dev/posts/geometric-algebra)
+- Interactive visualizations for different topics from physics and mathematics. Includes trigonometry, polynomial regression, and Bézier splines
+[https://visualize-it.github.io/](https://visualize-it.github.io/)
+- Assorted tutorials on computer graphics, size coding, and maths. Includes&nbsp;a mini-library of signed distance functions.
+[https://www.iquilezles.org/www/index.htm](https://www.iquilezles.org/www/index.htm)
+- A free, online book for when you really need to know how to do Bézier things.
+[https://pomax.github.io/bezierinfo/#explanation](https://pomax.github.io/bezierinfo/#explanation)
+- A visual overview of commonly used creative coding related techniques and algorithms.
+[https://www.notion.so/Creative-coding-algorithms-techniques-c5550ef2f7574126bdc77b09ed76651b](https://www.notion.so/Creative-coding-algorithms-techniques-c5550ef2f7574126bdc77b09ed76651b)
+- A Visual and Interactive Introduction to Complex Analysis.
+[https://complex-analysis.com/](https://complex-analysis.com/)
+- A collection of visualisation on linear algebra and geometry.
+[https://intuitive-math.club/](https://intuitive-math.club/)
+- Sublucid Geometry &mdash;&nbsp;a place for uncommon knowledge.
+[https://zalo.github.io/](https://zalo.github.io/)

@@ -55,6 +55,22 @@ markdown += """---
 
 All the code is licensed under [The Unlicense](http://unlicense.org/)."""
 
+markdown += '\n\n## See also\n\n'
+f = open('links.txt')
+links = f.readlines()
+f.close()
+for link in links:
+	if link.strip().find(' ') != -1:
+		url = link.split(' ')[0]
+		title_chunks = link.split(' ')[1:]
+		title = title_chunks[0]
+		for chunk in title_chunks[1:]: # no hanging short words
+			if len(chunk) < 2:
+				title += '&nbsp;' + chunk
+			else:
+				title += ' ' + chunk
+		markdown += '- ' +title+'['+url+']('+url+')\n'
+
 f = open('../../README.md', 'w')
 f.write(markdown)
 f.close()
