@@ -1,9 +1,9 @@
 # Words and Buttons Online
-This is the source code for [Words and Buttons Online](https://wordsandbuttons.online/) — a collection of&nbsp;interactive tutorials, guides, and quizzes about maths, algorithms, and programming.---
+This is the source code for [Words and Buttons Online](https://wordsandbuttons.online/) — a collection of&nbsp;interactive tutorials, guides, and quizzes about maths, algorithms, and programming.
 
-All the code is licensed under [The Unlicense](http://unlicense.org/).
+_All the code is licensed under [The Unlicense](http://unlicense.org/)._
 
----
+
 
 ## Tags
 

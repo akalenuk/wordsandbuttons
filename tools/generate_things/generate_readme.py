@@ -40,11 +40,11 @@ date_link_title_description_keywords.sort()
 # markdown
 markdown = '# ' + the_title + '\n'
 markdown += the_description
-markdown += """---
+markdown += """
 
-All the code is licensed under [The Unlicense](http://unlicense.org/).
+_All the code is licensed under [The Unlicense](http://unlicense.org/)._
 
----"""
+"""
 markdown += '\n\n## Tags\n\n'
 for kw in sorted(list(all_keywords)):
 	markdown += '[#' + kw + '](https://wordsandbuttons.online/all_' + kw + '.html) '
