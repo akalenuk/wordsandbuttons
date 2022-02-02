@@ -1,5 +1,9 @@
 # Words and Buttons Online
-This is the source code for [Words and Buttons Online](https://wordsandbuttons.online/) — a growing collection of&nbsp;interactive tutorials, guides, and quizzes about maths, algorithms, and programming.
+This is the source code for [Words and Buttons Online](https://wordsandbuttons.online/) — a collection of&nbsp;interactive tutorials, guides, and quizzes about maths, algorithms, and programming.---
+
+All the code is licensed under [The Unlicense](http://unlicense.org/).
+
+---
 
 ## Tags
 
@@ -175,9 +179,7 @@ This is the source code for [Words and Buttons Online](https://wordsandbuttons.o
 - [Learn you a Lisp in 0 minutes](https://wordsandbuttons.online/learn_you_a_lisp_in_0_minutes.html) A short quiz to reveal your hidden knowledge of Lisp.
 <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#quizzes](https://wordsandbuttons.online/all_quizzes.html)</sup> 
 
----
 
-All the code is licensed under [The Unlicense](http://unlicense.org/).
 
 ## See also
 

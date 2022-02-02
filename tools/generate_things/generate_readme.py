@@ -4,7 +4,7 @@ import subprocess
 PAGES_DIR = "../../pages"
 
 the_title = 'Words and Buttons Online'
-the_description = 'This is the source code for [Words and Buttons Online](https://wordsandbuttons.online/) — a growing collection of&nbsp;interactive tutorials, guides, and quizzes about maths, algorithms, and programming.'
+the_description = 'This is the source code for [Words and Buttons Online](https://wordsandbuttons.online/) — a collection of&nbsp;interactive tutorials, guides, and quizzes about maths, algorithms, and programming.'
 
 
 date_link_title_description_keywords = []
@@ -40,6 +40,11 @@ date_link_title_description_keywords.sort()
 # markdown
 markdown = '# ' + the_title + '\n'
 markdown += the_description
+markdown += """---
+
+All the code is licensed under [The Unlicense](http://unlicense.org/).
+
+---"""
 markdown += '\n\n## Tags\n\n'
 for kw in sorted(list(all_keywords)):
 	markdown += '[#' + kw + '](https://wordsandbuttons.online/all_' + kw + '.html) '
@@ -50,10 +55,6 @@ for (_, l, t, desc, kwds) in date_link_title_description_keywords[::-1]:
 	for kw in sorted(list(kwds)):
 		markdown += '<sup>[#' + kw + '](https://wordsandbuttons.online/all_' + kw + '.html)</sup> '
 	markdown += '\n\n'
-
-markdown += """---
-
-All the code is licensed under [The Unlicense](http://unlicense.org/)."""
 
 markdown += '\n\n## See also\n\n'
 f = open('links.txt')
