@@ -13,7 +13,16 @@ keyword_note = {
 }
 
 index_title = 'Hello, world!'
-index_description = 'This is <i>Words and Buttons Online</i> — a collection of&nbsp;interactive pages about maths and programming.'
+index_description = 'This is <i>Words and Buttons Online</i> — a collection of&nbsp;interactive <a href="all_tutorials.html">#tutorials</a>, <a href="all_demos.html">#demos<a/>, and <a href="all_quizzes.html">#quizzes</a> about <a href="all_mathematics.html">#mathematics</a>, <a href="all_algorithms.html">#algorithms</a> and <a href="all_programming.html">#programming</a>.'
+
+keyword_description = {
+'tutorials':   'This is <a href="index.html">Words and Buttons Online</a> — a collection of&nbsp;interactive <i>#tutorials</i>, <a href="all_demos.html">#demos<a/>, and <a href="all_quizzes.html">#quizzes</a> about <a href="all_mathematics.html">#mathematics</a>, <a href="all_algorithms.html">#algorithms</a> and <a href="all_programming.html">#programming</a>.',
+'demos':       'This is <a href="index.html">Words and Buttons Online</a> — a collection of&nbsp;interactive <a href="all_tutorials.html">#tutorials</a>, <i>#demos</i>, and <a href="all_quizzes.html">#quizzes</a> about <a href="all_mathematics.html">#mathematics</a>, <a href="all_algorithms.html">#algorithms</a> and <a href="all_programming.html">#programming</a>.',
+'quizzes':     'This is <a href="index.html">Words and Buttons Online</a> — a collection of&nbsp;interactive <a href="all_tutorials.html">#tutorials</a>, <a href="all_demos.html">#demos<a/>, and <i>#quizzes</i> about <a href="all_mathematics.html">#mathematics</a>, <a href="all_algorithms.html">#algorithms</a> and <a href="all_programming.html">#programming</a>.',
+'mathematics': 'This is <a href="index.html">Words and Buttons Online</a> — a collection of&nbsp;interactive <a href="all_tutorials.html">#tutorials</a>, <a href="all_demos.html">#demos<a/>, and <a href="all_quizzes.html">#quizzes</a> about <i>#mathematics</i>, <a href="all_algorithms.html">#algorithms</a> and <a href="all_programming.html">#programming</a>.',
+'algorithms':  'This is <a href="index.html">Words and Buttons Online</a> — a collection of&nbsp;interactive <a href="all_tutorials.html">#tutorials</a>, <a href="all_demos.html">#demos<a/>, and <a href="all_quizzes.html">#quizzes</a> about <a href="all_mathematics.html">#mathematics</a>, <i>#algorithms</i> and <a href="all_programming.html">#programming</a>.',
+'programming': 'This is <a href="index.html">Words and Buttons Online</a> — a collection of&nbsp;interactive <a href="all_tutorials.html">#tutorials</a>, <a href="all_demos.html">#demos<a/>, and <a href="all_quizzes.html">#quizzes</a> about <a href="all_mathematics.html">#mathematics</a>, <a href="all_algorithms.html">#algorithms</a> and <i>#programming</i>.'
+}
 
 all_span_ids = []
 def read_index_spans(path):
@@ -96,10 +105,6 @@ for link in links:
 				title += ' ' + chunk
 		links_html += '<p style="margin-bottom: 12pt;">'+title+'<br><a href="'+url+'">'+url+'</a></p>\n'
 
-menu = '<p class="links" style="width: 555pt;">'
-for (kw, _) in keyword_note.items():
-	menu += '<nobr><a style="padding-right: 4pt;" href="all_' + kw + '.html">#' + kw + '</a></nobr> '
-menu += '</p>'
 
 # index is now real index not a timeline
 the_index = '<h1 title="A real index on index.html! How cool is that!">Index</h1>'
@@ -119,7 +124,6 @@ the_index += '</p>\n'
 
 index = index.replace('<h1>Title</h1>', '<h1>' + index_title + '</h1>')
 index = index.replace('<p>Description</p>', '<p style="width: 555pt;">' + index_description + '</p>')
-index = index.replace('<div id="menu"></div>', '\n' + menu + '\n')
 index = index.replace('<p>Note</p>', '')
 index = index.replace('<div id="timeline"></div>', '\n' + the_index + '\n')
 index = index.replace('<div id="links"></div>', '\n' + links_html + '\n')
@@ -134,14 +138,6 @@ for title in list(all_keywords):
 	page = '%s' % template
 	timeline = ''
 
-	menu = '<p class="links" style="width: 555pt;">'
-	for (kw, _) in keyword_note.items():
-		if kw == title:
-			menu += '<nobr><span style="padding-right: 4pt; color: #999;">#' + kw + '</span></nobr> '
-		else:
-			menu += '<nobr><a style="padding-right: 4pt;" href="all_' + kw + '.html">#' + kw + '</a></nobr> '
-	menu += '</p>'
-
 	for (d, l, t, desc, kwds) in date_link_title_description_keywords[::-1]:
 		if not title in kwds:
 			continue
@@ -154,9 +150,9 @@ for title in list(all_keywords):
 			else:
 				timeline += '<a style="padding-right: 8pt;" href="all_' + kw + '.html">#' + kw + '</a> '
 		timeline += '</p>\n'
-	page = page.replace('<h1>Title</h1>', '<h1><a href="index.html">Words and Buttons</a>: ' + title + '</h1>')
-	page = page.replace('<p>Description</p>', '')
-	page = page.replace('<div id="menu"></div>', '\n' + menu + '\n')
+	page = page.replace('<h1>Title</h1>', '<h1>'+title[0].upper()+title[1:]+'</h1>')
+	page = page.replace('<p>Description</p>', '<p style="width: 555pt;">'+keyword_description[title])+'</p>'
+	page = page.replace('<div id="menu"></div>', '')
 	page = page.replace('<p>Note</p>', '<p style="width: 555pt;">' + keyword_note[title] + '</p>')
 	page = page.replace('<div id="timeline"></div>', '\n' + timeline + '\n')
 	page = page.replace('<div id="links"></div>', '')
