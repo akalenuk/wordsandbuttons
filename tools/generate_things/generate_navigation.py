@@ -7,9 +7,9 @@ keyword_note = {
 'tutorials': '',
 'demos': '',
 'quizzes': '',
-'mathematics': 'Also, I\'m currently writing a book called <a href="https://www.manning.com/books/geometry-for-programmers">Geometry for Programmers</a> for Manning. Not an advertisement, I\'m just bragging.',
+'mathematics': 'Also, I\'m currently writing a book called <a href="https://www.manning.com/books/geometry-for-programmers">Geometry for&nbsp;Programmers</a> for Manning. Not an&nbsp;advertisement, I\'m&nbsp;just bragging.',
 'algorithms': '',
-'programming': 'By the way, if you prefer books to blogs, <a href="https://wordsandbuttons.online/SYTYKC.pdf">there is a free book</a> that was originally made from this section.'
+'programming': 'By the way, if you prefer books to blogs, <a href="https://wordsandbuttons.online/SYTYKC.pdf">there is a&nbsp;free book</a> that was originally made from this section.'
 }
 
 index_title = 'Hello, world!'
@@ -123,7 +123,7 @@ the_index += '</p>\n'
 
 
 index = index.replace('<h1>Title</h1>', '<h1>' + index_title + '</h1>')
-index = index.replace('<p>Description</p>', '<p style="width: 555pt;">' + index_description + '</p>')
+index = index.replace('<p>Description</p>', '<p style="width: 600pt;">' + index_description + '</p>')
 index = index.replace('<p>Note</p>', '')
 index = index.replace('<div id="timeline"></div>', '\n' + the_index + '\n')
 index = index.replace('<div id="links"></div>', '\n' + links_html + '\n')
@@ -151,9 +151,9 @@ for title in list(all_keywords):
 				timeline += '<a style="padding-right: 8pt;" href="all_' + kw + '.html">#' + kw + '</a> '
 		timeline += '</p>\n'
 	page = page.replace('<h1>Title</h1>', '<h1>'+title[0].upper()+title[1:]+'</h1>')
-	page = page.replace('<p>Description</p>', '<p style="width: 555pt;">'+keyword_description[title])+'</p>'
+	page = page.replace('<p>Description</p>', '<p style="width: 600pt;">'+keyword_description[title])+'</p>'
 	page = page.replace('<div id="menu"></div>', '')
-	page = page.replace('<p>Note</p>', '<p style="width: 555pt;">' + keyword_note[title] + '</p>')
+	page = page.replace('<p>Note</p>', '<p style="width: 600pt;">' + keyword_note[title] + '</p>')
 	page = page.replace('<div id="timeline"></div>', '\n' + timeline + '\n')
 	page = page.replace('<div id="links"></div>', '')
 
