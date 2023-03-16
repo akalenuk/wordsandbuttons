@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.84">
+	<title>Linear transformations</title>
+	<meta name="description" content="">
+	<meta name="keywords" content="mathematics, tutorials">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body {
+	margin: 0 0 0 0;
+}
+
+a {
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: italic;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+.comment {
+	font-size: 12pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
+}
+
+input[type="text"] {
+	height: 16pt;
+	width: 430pt;
+	font-size: 16pt;
+}
+
+button{
+	width: 108pt;
+	font-size: 14pt;
+}
+
+canvas { touch-action: none; }
+	</style>
+	<script language="JavaScript">
+// client
+var w = 640.0;
+var h = 640.0;
+
+// colors
+var colors = ["#d64562", "#457fd6", "#339428"];
+
+// visible region
+var x_min = -1.8;
+var y_min = -1.8;
+var x_max = 1.8;
+var y_max = 1.8;
+
+var client_x_center = w*(0-x_min)/(x_max-x_min) - 0.5;
+var client_x_step = (w/(x_max-x_min));
+
+var client_y_center = h - h*(0-y_min)/(y_max-y_min) - 0.5;
+var client_y_step = (h/(y_max-y_min));
+
+
+function client_to_x(client_x){
+	return (client_x - client_x_center) / client_x_step;
+}
+
+function client_to_y(client_y){
+	return (client_y_center - client_y) / client_y_step;
+}
+
+function x_to_client(x){
+	return x * client_x_step + client_x_center;
+}
+
+function y_to_client(y){
+	return client_y_center - y * client_y_step;
+}
+
+function draw_arrow(context, x1, y1, x2, y2, color) {
+	const size1 = 8.1;
+	const size2 = 25.3;
+	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - (y2 - y1) * size1 / d - (x2 - x1) * size2 / d, y2 - (y2 - y1) * size2 / d + (x2 - x1) * size1 / d);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + (y2 - y1) * size1 / d - (x2 - x1) * size2 / d, y2 - (y2 - y1) * size2 / d - (x2 - x1) * size1 / d);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
+}
+
+function draw_grid_on(context){
+	context.textAlign = "center";
+	context.textBaseline = "middle";
+	context.fillStyle="#000";
+	context.lineWidth = 3;
+	context.font = "36px sans-serif";
+	// axes
+	const size1 = 8.1;
+	const size2 = 25.3;
+	context.beginPath();
+	context.moveTo(0, client_y_center);
+	context.lineTo(w-1.5, client_y_center);
+	context.moveTo(w-1.5, client_y_center);
+	context.lineTo(w-1.5 - size2, client_y_center - size1);
+	context.moveTo(w-1.5, client_y_center);
+	context.lineTo(w-1.5 - size2, client_y_center + size1);
+	context.moveTo(client_x_center, h);
+	context.lineTo(client_x_center, 1.5);
+	context.moveTo(client_x_center, 1.5);
+	context.lineTo(client_x_center - size1, size2);
+	context.moveTo(client_x_center, 1.5);
+	context.lineTo(client_x_center + size1, size2);
+	context.fillStyle="#000000";
+	// numbers
+	for(var i = Math.floor(x_min) + 2; i <= x_max - 0; i++){
+		context.moveTo(client_x_center + i*client_x_step, client_y_center);
+		context.lineTo(client_x_center + i*client_x_step, client_y_center + 5);
+		if(i != 0)
+			context.fillText(i, client_x_center + i*client_x_step + 8, client_y_center + 22);
+	}
+	for(var i = Math.floor(y_min) + 2; i <= y_max - 0; i++){
+		context.moveTo(client_x_center, client_y_center - i*client_y_step);
+		context.lineTo(client_x_center - 5, client_y_center - i*client_y_step);
+		context.textAlign = "right";
+		context.fillText(i, client_x_center - 5, client_y_center - i*client_y_step + 22);
+		context.textAlign = "center";
+	}
+	// letters
+	context.fillText("x", client_x_center + x_max*client_x_step - 26, client_y_center + 22);
+	context.fillText("y", client_x_center - 22, client_y_center - y_max*client_y_step + 22);
+
+	context.strokeStyle="#000000";
+	context.stroke();
+	context.closePath();
+}
+
+
+function draw_original_cube_on(context){
+	// original cube
+	context.beginPath();
+	context.moveTo(x_to_client(0 - 1), y_to_client(0 - 1));
+	context.lineTo(x_to_client(0 + 1), y_to_client(0 - 1));
+	context.lineTo(x_to_client(0 + 1), y_to_client(0 + 1));
+	context.lineTo(x_to_client(0 - 1), y_to_client(0 + 1));
+	context.lineTo(x_to_client(0 - 1), y_to_client(0 - 1));
+	context.strokeStyle="#999999";
+	context.stroke();
+	context.closePath();
+}
+
+function sharp(x) {
+	return Math.floor(x + 0.5) - 0.5;
+}
+
+// linear
+var formula = 'x';
+var t = 0.;
+function draw_linear(){
+	var linear = document.getElementById("linear");
+	var context = linear.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#fff";
+	context.fillRect(0, 0, w, h);
+
+	draw_original_cube_on(context)
+
+	const f = formula;
+/*	context.beginPath();
+	const grid_n = 4;
+	for(var i = -1; i <= 1; i+=1/grid_n) {
+		for(var j = -1; j <= 1; j+=1/grid_n) {
+			if(i < 1.) {
+				context.moveTo(sharp(x_to_client(j)), sharp(y_to_client(i)));
+				context.lineTo(sharp(x_to_client(j)), sharp(y_to_client(i + 1/grid_n)));
+			}
+			if(j < 1.) {
+				context.moveTo(sharp(x_to_client(j)), sharp(y_to_client(i)));
+				context.lineTo(sharp(x_to_client(j + 1/grid_n)), sharp(y_to_client(i)));
+			}
+		}
+	}
+	context.strokeStyle = "#bbb";
+	context.stroke();
+	context.closePath();*/
+
+
+	const xs = [-1., 1., 1., -1.];
+	const ys = [-1., -1., 1., 1.];
+	const transformed1 = calc(f, [xs[3], ys[3]]);
+	context.beginPath();
+	context.moveTo(x_to_client(transformed1[0]), y_to_client(transformed1[1]));
+	for(var i = 0; i < 4; ++i) {
+		const transformedi = calc(f, [xs[i], ys[i]]);
+		context.lineTo(x_to_client(transformedi[0]), y_to_client(transformedi[1]));
+	}
+
+/*	const grid_detail = 4.;
+	for(var i = -1; i <= 1; i+=1/grid_n) {
+		for(var j = -1; j <= 1; j+=1/grid_n) {
+			const transformed = calc(f, [j, i]);
+			if(i < 1.) {
+				for(var k = 0; k <= grid_detail; ++k) {
+					const transformed = calc(f, [j, i + 1/grid_n * (k / grid_detail)]);
+					if(k == 0)
+						context.moveTo(x_to_client(transformed[0]), y_to_client(transformed[1]));
+					else
+						context.lineTo(x_to_client(transformed[0]), y_to_client(transformed[1]));
+				}
+			}
+			if(j < 1.) {
+				for(var k = 0; k <= grid_detail; ++k) {
+					const transformed = calc(f, [j + 1/grid_n * (k / grid_detail), i]);
+					if(k == 0)
+						context.moveTo(x_to_client(transformed[0]), y_to_client(transformed[1]));
+					else
+						context.lineTo(x_to_client(transformed[0]), y_to_client(transformed[1]));
+				}
+			}
+		}
+	}*/
+	context.fillStyle = "#d6456299";
+	context.strokeStyle = "#8c2c3e";
+	context.stroke();
+	context.fill();
+	context.closePath();
+
+	//
+	// eigenvalues [(a/2 + d/2 - sqrt(a**2 - 2*a*d + 4*b*c + d**2)/2,), (a/2 + d/2 + sqrt(a**2 - 2*a*d + 4*b*c + d**2)/2,)]
+	// eigenvectors c != 0 [a/2 - d/2 - sqrt(a**2 - 2*a*d + 4*b*c + d**2)/2, c]
+	//                     [a/2 - d/2 + sqrt(a**2 - 2*a*d + 4*b*c + d**2)/2, c]
+	// eigenvectors b != 0 [b, -a/2 + d/2 - sqrt(a**2 - 2*a*d + 4*b*c + d**2)/2]
+	//                     [b, -a/2 + d/2 + sqrt(a**2 - 2*a*d + 4*b*c + d**2)/2]
+/*	const rows = formula.split('\n');
+	const a = number_or_a(rows[0].split(' ')[0]);
+	const b = number_or_a(rows[0].split(' ')[1]);
+	const c = number_or_a(rows[1].split(' ')[0]);
+	const d = number_or_a(rows[1].split(' ')[1]);
+	const disc = a**2 - 2*a*d + 4*b*c + d**2;
+	if(disc >= 0) {
+		const e1 = a/2 + d/2 - Math.sqrt(a**2 - 2*a*d + 4*b*c + d**2)/2;
+		const e2 = a/2 + d/2 + Math.sqrt(a**2 - 2*a*d + 4*b*c + d**2)/2;
+		if(c != 0) {
+			const y1 = e1 - d;
+			const x1 = c;
+			const y2 = e2 - d;
+			const x2 = c;
+			console.log('v1: vector, then product 1')
+			console.log([x1, y1, x1/y1]);
+			console.log([a * x1 + c * y1, b * x1 + d * y1, (a * x1 + c * y1) / (b * x1 + d * y1)]);
+			console.log('v1: vector, then product 2')
+			console.log([x2, y2, x1/y1]);
+			console.log([a * x2 + c * y2, b * x2 + d * y2, (a * x2 + c * y2) / (b * x2 + d * y2)]);
+			draw_arrow(context, x_to_client(0.), y_to_client(0.), x_to_client(x1), y_to_client(y1), "#004")
+			draw_arrow(context, x_to_client(0.), y_to_client(0.), x_to_client(x2), y_to_client(y2), "#004")
+		} if(b != 0) {
+			const y1 = b;
+			const x1 = e1 - a;
+			const y2 = b;
+			const x2 = e2 - a;
+			console.log('v2: vector, then product 1')
+			console.log([x1, y1, x1/y1]);
+			console.log([a * x1 + c * y1, b * x1 + d * y1, (a * x1 + c * y1) / (b * x1 + d * y1)]);
+			console.log('v2: vector, then product 2')
+			console.log([x2, y2, x1/y1]);
+			console.log([a * x2 + c * y2, b * x2 + d * y2, (a * x2 + c * y2) / (b * x2 + d * y2)]);
+			draw_arrow(context, x_to_client(0.), y_to_client(0.), x_to_client(x1), y_to_client(y1), "#400")
+			draw_arrow(context, x_to_client(0.), y_to_client(0.), x_to_client(x2), y_to_client(y2), "#400")
+		}
+	}*/
+
+
+	// the matrix
+/*	const rows = formula.split('\n');
+	const a11 = number_or_a(rows[0].split(' ')[0]);
+	const a12 = number_or_a(rows[0].split(' ')[1]);
+	const a21 = number_or_a(rows[1].split(' ')[0]);
+	const a22 = number_or_a(rows[1].split(' ')[1]);
+	context.fillStyle="#d64562";
+	context.font = "42px sans-serif";
+	context.textAlign = "left";
+	context.textBaseline = "middle";
+	context.fillText((a11).toFixed(2), 350, 540);
+	context.fillText((a12).toFixed(2), 350, 594);
+	context.fillText((a21).toFixed(2), 490, 540);
+	context.fillText((a22).toFixed(2), 490, 594);
+
+	context.beginPath();
+	context.strokeStyle = "#d64562";
+	context.moveTo(340, 508)
+	context.lineTo(330, 508)
+	context.lineTo(330, 624)
+	context.lineTo(340, 624)
+
+	context.moveTo(600, 508)
+	context.lineTo(610, 508)
+	context.lineTo(610, 624)
+	context.lineTo(600, 624)
+
+	context.stroke();
+	context.closePath();*/
+
+	// grid
+	draw_grid_on(context, false);
+}
+
+
+function number_or_a(noa) {
+	if (noa[0] == 'a') {
+		const dt = (Number(noa[1])-1)*2+(Number(noa[2])-1); // 0..3
+		return Math.sin(t * (1. + dt/10.) + 2 * 3.14 * (dt / 4.));
+	} else {
+		return Number(noa);
+	}
+}
+
+function calc(expr, x) {
+	const rows = expr.split('\n');
+	const a11 = number_or_a(rows[0].split(' ')[0]);
+	const a12 = number_or_a(rows[0].split(' ')[1]);
+	const a21 = number_or_a(rows[1].split(' ')[0]);
+	const a22 = number_or_a(rows[1].split(' ')[1]);
+	return [a11 * x[0] + a21 * x[1], a12 * x[0] + a22 * x[1]];
+}
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
+Linear transformations
+	</h1>
+
+	<span id="plot"></span>
+	<table style="width:505pt"><tr><td>
+		<textarea id="transform" oninput="document.getElementById('button_1').disabled = false;" onchange="reset_formula();">
+a11 a12
+a21 a22
+		</textarea>
+	</td><td>
+		<button type="button" onclick="reset_formula();" id="button_1" disabled><nobr>&darr; reload</nobr></button>
+	</td></tr></table>
+	<br />
+	<canvas id="linear" width=640 height=640></canvas>
+
+	<script language="JavaScript"> // init
+function reset_formula() {
+	formula = document.getElementById("transform").value;
+	draw_linear()
+}
+
+reset_formula();
+function redraw() {
+	draw_linear();
+	const lag = 1000/24;
+	setTimeout(redraw, lag);
+	t += 1 / lag;
+}
+redraw();
+	</script>
+
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html">Index</a>
+		<a href="all_mathematics.html">#mathematics</a> <a href="all_tutorials.html">#tutorials</a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+		+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+		<a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+</body>
+</html>

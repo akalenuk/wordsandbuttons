@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.84">
+	<title>Functions</title>
+	<meta name="description" content="A brief introduction to mathematical analysis with a little SymPy on the side. The page explains how to disassemble a function, and how to assemble it back from the derivatives.">
+	<meta name="keywords" content="mathematics, tutorials">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body{
+	margin: 0 0 0 0;
+}
+
+a{
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+.comment {
+	font-size: 12pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+table.footer {
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
+}
+
+td.footer {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+pre {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 505pt;
+}
+
+.code_piece {
+	font-family: monospace;
+	padding-left: 4pt;
+	padding-right: 4pt;
+}
+
+u {
+	border-bottom: 1px dotted #000;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
+}
+
+input[type="number"] {
+	width: 100pt;
+	height: 22pt;
+	margin: 8pt 8pt 8pt 8pt;
+	padding-left: 3pt;
+	font-size: 16pt;
+}
+
+button {
+	width: 108pt;
+	height: 28pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 14pt;
+}
+
+input[type="text"] {
+	width: 32pt;
+	height: 22pt;
+	font-size: 16pt;
+	text-align: center;
+}
+
+.incdec{
+	width: 32pt;
+	height: 26pt;
+	margin: 0 0 0 0;
+	font-size: 15pt;
+	text-align: center;
+}
+
+i {
+	font-family: sans-serif;
+	font-size: 15pt;
+	font-style: italic;
+}
+
+li {
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+	padding-bottom: 6pt;
+}
+
+canvas { touch-action: none; }
+	</style>
+	<script language="JavaScript">
+
+// client
+const w = 640.0;
+const h = 640.0;
+
+// visible region
+const x_min = -3.0;
+const y_min = -3.0;
+const x_max = 3.0;
+const y_max = 3.0;
+
+var client_x_center = w*(0-x_min)/(x_max-x_min);
+var client_x_step = (w/(x_max-x_min));
+
+var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+var client_y_step = (h/(y_max-y_min));
+
+function client_to_x(client_x){
+	return (client_x - client_x_center) / client_x_step;
+}
+
+function x_to_client(x){
+	return x * client_x_step + client_x_center;
+}
+
+function y_to_client(y){
+	return client_y_center - y * client_y_step;
+}
+
+function draw_arrow(context, x1, y1, x2, y2, color) {
+	const size1 = 8.1;
+	const size2 = 25.3;
+	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - (y2 - y1) * size1 / d - (x2 - x1) * size2 / d, y2 - (y2 - y1) * size2 / d + (x2 - x1) * size1 / d);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + (y2 - y1) * size1 / d - (x2 - x1) * size2 / d, y2 - (y2 - y1) * size2 / d - (x2 - x1) * size1 / d);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
+}
+
+function draw_grid_on(context){
+	context.textAlign = "center";
+	context.textBaseline = "middle";
+	context.fillStyle="#000";
+	context.lineWidth = 3;
+	context.font = "36px sans-serif";
+	// axes
+	const size1 = 8.1;
+	const size2 = 25.3;
+	context.beginPath();
+	context.moveTo(0, client_y_center);
+	context.lineTo(w-1.5, client_y_center);
+	context.moveTo(w-1.5, client_y_center);
+	context.lineTo(w-1.5 - size2, client_y_center - size1);
+	context.moveTo(w-1.5, client_y_center);
+	context.lineTo(w-1.5 - size2, client_y_center + size1);
+	context.moveTo(client_x_center, h);
+	context.lineTo(client_x_center, 1.5);
+	context.moveTo(client_x_center, 1.5);
+	context.lineTo(client_x_center - size1, size2);
+	context.moveTo(client_x_center, 1.5);
+	context.lineTo(client_x_center + size1, size2);
+	context.fillStyle="#000000";
+	// numbers
+	for(var i = Math.floor(x_min) + 1; i <= x_max - 1; i++){
+		context.moveTo(client_x_center + i*client_x_step, client_y_center);
+		context.lineTo(client_x_center + i*client_x_step, client_y_center + 5);
+		if(i != 0)
+			context.fillText(i, client_x_center + i*client_x_step + 8, client_y_center + 22);
+	}
+	for(var i = Math.floor(y_min) + 1; i <= y_max - 1; i++){
+		context.moveTo(client_x_center, client_y_center - i*client_y_step);
+		context.lineTo(client_x_center - 5, client_y_center - i*client_y_step);
+		context.textAlign = "right";
+		context.fillText(i, client_x_center - 5, client_y_center - i*client_y_step + 22);
+		context.textAlign = "center";
+	}
+	// letters
+	context.fillText("x", client_x_center + x_max*client_x_step - 26, client_y_center + 22);
+	context.fillText("y", client_x_center - 22, client_y_center - y_max*client_y_step + 22);
+
+	context.strokeStyle="#000000";
+	context.stroke();
+	context.closePath();
+}
+
+function demo_f(x){
+	return 2.5 - (x - 2.5)*(x - 2.5) * 0.105;
+}
+
+var derivative_x = 2.0;
+
+function init_derivative(){
+	var d = document.getElementById("derivative");
+	var canvas_rect = d.getBoundingClientRect();
+	draw_derivative();
+
+	d.addEventListener('pointermove', function(e){
+		if(e.buttons == 1) {
+			var canvas_rect = d.getBoundingClientRect();
+			derivative_x = client_to_x(e.clientX - canvas_rect.left);
+			   draw_derivative();
+		  }
+	}, false);
+
+	d.addEventListener('pointerdown', function(e){
+		var canvas_rect = d.getBoundingClientRect();
+		derivative_x = client_to_x(e.clientX - canvas_rect.left);
+		draw_derivative();
+		d.releasePointerCapture(e.pointerId);
+	}, false);
+
+	d.addEventListener('pointerleave', function(e){
+		draw_derivative();
+	}, false);
+}
+
+function draw_derivative(){
+	var d = document.getElementById("derivative");
+	var context = d.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, 640, 448);
+	// function
+	context.beginPath();
+	for(var wi = 0; wi < 640 - 1; ++wi){
+		x1 = client_to_x(wi);
+		x2 = client_to_x(wi + 1);
+		y1 = demo_f(x1);
+		y2 = demo_f(x2);
+		context.moveTo(x_to_client(x1), y_to_client(y1));
+		context.lineTo(x_to_client(x2), y_to_client(y2));
+	}
+	context.strokeStyle="#d64562";
+	context.lineWidth = 2;
+	context.stroke();
+	context.closePath();
+
+	var x1 = client_to_x(100);
+	var y1 = demo_f(x1);
+
+	var x2 = derivative_x;
+	var y2 = demo_f(x2);
+
+	var x3 = -1;
+	var y3 = y1 + (y2-y1) * (x3-x1) / (x2-x1);
+
+	context.beginPath();
+	context.setLineDash([6, 6]);
+	context.moveTo(x_to_client(x2), y_to_client(y2));
+	context.lineTo(x_to_client(x2), y_to_client(y1));
+	context.lineTo(x_to_client(x1), y_to_client(y1));
+	context.strokeStyle="#3c7033";
+	context.lineWidth = 1;
+	context.stroke();
+	context.closePath();
+
+	context.beginPath();
+	var dx = x_to_client(x2) - x_to_client(x1);
+	var dy = y_to_client(y2) - y_to_client(y1);
+	context.moveTo(x_to_client(x1) - 1000*dx, y_to_client(y1) - 1000*dy);
+	context.lineTo(x_to_client(x2) + 1000*dx, y_to_client(y2) + 1000*dy);
+	context.strokeStyle="#3c7033";
+	context.setLineDash([]);
+	context.stroke();
+	context.closePath();
+
+	// common font things
+	context.textAlign = "left";
+	context.fillStyle="#162414";
+
+	context.fillText("dx", x_to_client((x1+x2)/2), y_to_client(y1) - 10);
+	if(x_to_client(x2) < 0.84 * w) {
+		context.textAlign = "left";
+		context.fillText("f(x+dx)-f(x)", x_to_client(x2) + 10, y_to_client((y1+y2)/2) + 10);
+	} else {
+		context.textAlign = "right";
+		context.fillText("f(x+dx)-f(x)", x_to_client(x2) - 10, y_to_client((y1+y2)/2) + 10);
+	}
+
+/*	var d = (demo_f(x1+0.0001) - demo_f(x1))/0.0001;
+	var x3 = -1;
+	var y3 = y1 + d*2;
+	context.beginPath();
+	context.moveTo(x_to_client(x1), y_to_client(y1));
+	context.lineTo(x_to_client(x3), y_to_client(y3));
+	context.setLineDash([]);
+	context.strokeStyle="#3c7033";
+	context.stroke();
+	context.closePath();*/
+}
+
+function init_plot(){
+	plot = document.getElementById("plot");
+	var canvas_rect = plot.getBoundingClientRect();
+	plot_draw(0, 0, false, false);
+
+	plot.addEventListener('pointermove', function(e){
+		var canvas_rect = plot.getBoundingClientRect();
+		plot_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true, e.buttons == 1);
+	}, false);
+
+	plot.addEventListener('pointerdown', function(e){
+		var canvas_rect = plot.getBoundingClientRect();
+		plot_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true, true);
+		plot.releasePointerCapture(e.pointerId);
+	}, false);
+
+	plot.addEventListener('pointerleave', function(e){
+		plot_draw(0, 0, false, false);
+	}, false);
+}
+
+var MAX_PTS = 4096;
+var pt_x = [];
+var pt_y = [];
+var pt_n = 0;
+
+
+function plot_draw(client_x, client_y, do_guides, add_points){
+	plot = document.getElementById("plot");
+	var context = plot.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#fff";
+	context.fillRect(0, 0, w, h);
+
+	// grid
+	draw_grid_on(context);
+
+	// function
+	context.beginPath();
+	function x(t) {
+		return t;
+	}
+	function y(t) {
+		return Math.sin(t);
+	}
+
+	function dx(t) {
+		return 1;
+	}
+	function dy(t) {
+		return Math.cos(t);
+	}
+
+	function ddx(t) {
+		return 0;
+	}
+	function ddy(t) {
+		return -Math.sin(t);
+	}
+
+	for(var t = -Math.PI; t < Math.PI; t += 0.001) {
+		if(t == 0)
+			context.moveTo(x_to_client(x(t)), y_to_client(y(t)));
+		else
+			context.lineTo(x_to_client(x(t)), y_to_client(y(t)));
+	}
+
+	context.strokeStyle="#d64562";
+	context.lineWidth = 3;
+	context.stroke();
+	context.closePath();
+
+	// derivative
+	context.lineWidth = 2;
+	context.beginPath();
+	context.setLineDash([4, 4]);
+
+	const t1 = Math.PI/2.;
+	const k = (ddx(t1) * dy(t1) + dx(t1) * ddy(t1) / Math.pow(Math.pow(dx(t1), 2) + Math.pow(dy(t1), 2), 1.5));
+	const r = 1 / k;
+	const x1 = x(t1);
+	const y1 = y(t1);
+	const d_norm = Math.sqrt(dx(t1)*dx(t1) + dy(t1)*dy(t1));
+	const dx_norm = dx(t1) / d_norm;
+	const dy_norm = dy(t1) / d_norm;
+	const x2 = x(t1) - dy_norm * r;
+	const y2 = y(t1) + dx_norm * r;
+/*	context.moveTo(x_to_client(x1), y_to_client(y1));
+	context.lineTo(x_to_client(x2), y_to_client(y2));*/
+
+	context.strokeStyle="#566454";
+	context.stroke();
+	context.setLineDash([]);
+	context.closePath();
+
+	// curvature
+	const client_r = x_to_client(Math.abs(r)) - x_to_client(0);
+	context.beginPath();
+	context.arc(x_to_client(x2), y_to_client(y2), client_r, 0, 2*Math.PI);
+	context.stroke();
+	context.closePath();
+
+	// points
+	context.fillStyle="#3c7033";
+	points_to_show = (pt_n > MAX_PTS) ? MAX_PTS : pt_n;
+	for(var i = 0; i < points_to_show; i++){
+		context.beginPath();
+		context.arc(x_to_client(pt_x[i]), y_to_client(pt_y[i]), 2.5, 0, 2*Math.PI);
+		context.fill();
+		context.closePath();
+	}
+}
+
+
+function init_series(){
+	series = document.getElementById("series");
+	draw_series();
+}
+
+function draw_series(){
+	series = document.getElementById("series");
+	var context = series.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#fff";
+	context.fillRect(0, 0, w, h);
+
+	// original function
+	context.beginPath();
+	var n = button2_n();
+	for(var wi = 0; wi < w - 1; ++wi){
+		x1 = client_to_x(wi);
+		x2 = client_to_x(wi + 1);
+		y1 = the_function(n, x1);
+		y2 = the_function(n, x2);
+		context.moveTo(x_to_client(x1), y_to_client(y1));
+		context.lineTo(x_to_client(x2), y_to_client(y2));
+	}
+	context.strokeStyle="#d64562";
+	context.lineWidth = 2;
+	context.stroke();
+	context.closePath();
+
+	// series
+	// original function
+	context.beginPath();
+	var dn = document.getElementById("derivatives_n").value;
+	if(dn < 0){
+		dn = 0;
+		document.getElementById("derivatives_n").value = 0;
+	}else if(dn > 99){
+		dn = 99;
+		document.getElementById("derivatives_n").value = 99;
+	}
+
+	for(var wi = 0; wi < w - 1; ++wi){
+		x1 = client_to_x(wi);
+		x2 = client_to_x(wi + 1);
+		y1 = the_series(n, x1, dn);
+		y2 = the_series(n, x2, dn);
+		context.moveTo(x_to_client(x1), y_to_client(y1));
+		context.lineTo(x_to_client(x2), y_to_client(y2));
+	}
+	context.strokeStyle="#162414";
+	context.lineWidth = 1;
+	context.stroke();
+	context.closePath();
+
+	// grid
+	draw_grid_on(context);
+}
+
+function radio2(n){
+	for(var i = 5; i <= 8; i++){
+		radio_i = document.getElementById("button2_" + i);
+		radio_i.disabled = false;
+	}
+	radio_n = document.getElementById("button2_" + n);
+	radio_n.disabled = true;
+	draw_series();
+}
+
+function button2_n(){
+	for(var i = 5; i <= 8; i++)
+		if(document.getElementById("button2_" + i).disabled)
+			return i;
+}
+
+function factorial(n){
+	if (n <= 1) return 1;
+	return n*factorial(n-1);
+}
+
+function the_series(n, x, dn){
+	if(n == 5){
+		var exp = 0;
+		for(var i = 0; i <= dn; i++){
+			exp += Math.pow(x, i) / factorial(i);
+		}
+		return exp;
+	}
+	if(n == 6){
+		if(dn == 0)
+			return Math.log(0);
+		var one_minus_x = 1-x;
+		var log = 0.0;
+		for(var i = 1; i <= dn; i++){
+			log -= Math.pow(one_minus_x, i) / i;
+		}
+		return log;
+	}
+	if(n == 7){
+		var sin = 0.0;
+		for(var i = 0; i <= (dn-1)/2; i++){
+			sin += Math.pow(-1.0, i) * Math.pow(x, 2.0*i+1) / factorial(2*i+1);
+		}
+		return sin;
+	}
+	if(n == 8){
+		var cos = 1.0;
+		for(var i = 1; i <= dn/2; i++){
+			cos += Math.pow(-1.0, i) * Math.pow(x, 2.0*i) / factorial(2*i);
+		}
+		return cos;
+	}
+}
+
+function inc(counter_name) {
+	var counter = document.getElementById(counter_name);
+	counter.value = Number(counter.value) + 1;
+	draw_series();
+}
+
+function dec(counter_name) {
+	var counter = document.getElementById(counter_name);
+	counter.value = Number(counter.value) - 1;
+	draw_series();
+}
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
+Functions
+	</h1>
+
+	<canvas id="plot" width=640 height=640></canvas>
+	<script language="JavaScript">
+	init_plot();
+	</script>
+
+
+
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html">Index</a>
+		<a href="all_mathematics.html">#mathematics</a> <a href="all_tutorials.html">#tutorials</a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+		+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+		<a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+  </body>
+</html>
