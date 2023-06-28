@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.84">
+	<title>Static typing isn’t free. Where do you think the C++ angry mob comes from?</title>
+	<meta name="description" content="Type inference works like logic deduction so any program in a statically typed language is two programs. The first one is the thing you sell, and the second – is a model that undergoes some sort of verification every time you run a compiler. This second program, although, often being written unknowingly, is not a free bonus, it’s something you have to pay for in several ways.">
+	<meta name="keywords" content="programming, tutorials">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body{
+	margin: 0 0 0 0;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:link, a:visited {
+	color: blue;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 600pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 600pt;
+	text-align: left;
+}
+
+.comment {
+	font-size: 12pt;
+	text-align:center;
+	font-family: sans-serif;
+	padding-bottom: 24pt;
+}
+
+pre {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 12pt;
+	text-align: left;
+	width: 300pt;
+}
+
+table {
+	border-width: 0pt;
+	width: 600pt;
+}
+
+td {
+	vertical-align: top;
+	padding: 6pt 12pt 6pt 12pt;
+	font-size: 16pt;
+	border: 1px solid black;
+}
+
+button{
+	width: 248pt;
+	height: 42pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 16pt;
+}
+
+u {
+	border-bottom: 1px dotted #000;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+ul {
+	padding-left: 0pt;
+	list-style-type: circle;
+}
+
+li {
+	font-size: 16pt;
+	width: 600pt;
+	text-align: left;
+	padding-bottom: 12pt;
+}
+	</style>
+	<script language="JavaScript">
+function show(n){
+	document.getElementById("shown_" + n).style.display = "none";
+	document.getElementById("hidden_" + n).style.display = "inline";
+}
+
+function colorized(text) {
+	const separators = ['abstract ', 'sig ', ' extends ', 'one ', 'fact ', ' in ', 'pred ', 'assert ', 'class ', 'void ', 'template ', 'int ', 'typename ',
+		'\n', ' ', '\t', ',', ':', ';', '+', '-', '/', '*', '&amp', '(', ')', '<', '>', '[', ']', '{', '}', '.',
+		'==', '!=', '<=', '>=', '=', '-=', '+=', '*=', '/='];
+	const quotes = ['\'', '"'];
+	const comments = [['//', '\n'], ['/*', '*/']];
+
+	function painted_in(line, color) {
+		return line.length == 0 ? "" : "<span style=\"color:#" + color + "\">" + line + "</span>";
+	}
+
+	function colorized(token) {
+		var code_sum = 0;
+		for(var i = 0; i < token.length; ++i)
+			code_sum += ([1, 7, 11, 13][i % 4] * token.charCodeAt(i));
+		var zero_channel = code_sum % 3;
+		var color = '' + (zero_channel == 0 ? '3' : '') + (1 + (code_sum % 5) * 2)
+			+ (zero_channel == 1 ? '3' : '') + (4 + (code_sum % 2) * 5)
+			+ (zero_channel == 2 ? '3' : '');
+		return painted_in(token, color);
+	}
+
+	function separated(line, i) {
+		if(i == separators.length)
+			return colorized(line);
+		return line.split(separators[i]).map(function(subline) {
+			return separated(subline, i + 1);}).join(separators[i]);
+	}
+
+	function unquoted(line, i) {
+		if(i == quotes.length)
+			return separated(line, 0);
+		var chunk_no = 0;
+		return line.split('\\' + quotes[i]).join('\0').split(quotes[i]).map(function (chunk) {
+			return chunk.split('\0').join('\\' + quotes[i]);}).map(function (chunk) {
+				return ++chunk_no % 2  == 1 ? unquoted(chunk, i + 1) : painted_in(quotes[i] + chunk + quotes[i], "777");}).join('');
+	}
+
+	function uncommented(line, i) {
+		if(i == comments.length)
+			return unquoted(line, 0);
+		const chunks = line.split(comments[i][0]);
+		return uncommented(chunks[0], i + 1) + chunks.slice(1).map( function(chunk) {
+			var in_out_comment = chunk.split(comments[i][1]);
+			return painted_in(comments[i][0] + in_out_comment[0] + (in_out_comment.length > 1 ? comments[i][1] : ''), "777")
+				+ uncommented(in_out_comment.slice(1).join(comments[i][1]), i + 1);}).join('');
+	}
+
+	return uncommented(text.split('&lt;').join('<').split('&gt;').join('>'), 0);
+}
+	</script>
+</head>
+<body>
+	<center>
+	<p style="width: 600pt; padding: 36pt 0pt 64pt 0pt;">This is <a href="index.html">Words and Buttons Online</a> — a collection of&nbsp;interactive <a href="all_tutorials.html">#tutorials</a>, <a href="all_demos.html">#demos<a/>, and <a href="all_quizzes.html">#quizzes</a> about <a href="all_mathematics.html">#mathematics</a>, <a href="all_algorithms.html">#algorithms</a> and <a href="all_programming.html">#programming</a>.</p>
+	<h1>
+Static typing isn’t free. Where do you think the C++ angry mob comes from?
+	</h1>
+	<p>
+<span style="color:#922"><b>TL&amp;DR</b></span> Type inference works like logic deduction so any program in a statically typed language is two programs. The first one is the thing you sell, and the second – is a model that undergoes some sort of verification every time you run a compiler. This second program, although, often being written unknowingly, is not a free bonus, it’s something you have to pay for in several ways.
+	</p>
+
+	<h2>
+What does the real <span id="index_model_checking">model checking</span> look like?
+	</h2>
+	<p>
+There are dedicated tools for formal verification model checking languages and environments. One of these tools is <a href="http://alloytools.org/">Alloy</a> – an environment and a language you can model your data structures, services, or processes in, and the Alloy then will verify that your model has no contradictions.
+	</p>
+	<p>
+The language of Alloy is based on relational logic so why don’t we model something about relationships too? Let’s do an “Alice likes Bob” exercise. 
+	</p>
+	<p>
+But what makes people like other people? Well, the personality traits of course! So let’s define some traits.
+	</p>
+	<table><tr>
+	<td>
+	<pre id="c1">
+// Character traits
+abstract sig Traits {}
+one sig Kind extends Traits{}
+one sig Intelligent extends Traits {}
+	</pre>
+	</td>
+	</td></tr></table>	
+	<p>
+Here `sig` is the short for `signature` and that’s how we define things in Alloy. In our case, we first define the concept of Traits, and not specific traits so we define them as `abstract`. Alloy speaks in sets, so `Traits` is the set that can include other sets but, being abstract, can’t participate in relationships by itself. The ones that can are declared below: `Kind` and `Intelligent` both pronounced subsets of `Traits` by `extends`. They are also declared as `one` meaning that they are both sets of one and only one element each. 
+	</p>
+	<p>
+These `abstract` or `one` thingies are not necessarily important for our model, but they help us form it closer to the way we describe people in our language. We don’t say “Bob is traits”, we say “Bob is kind”, that’s why `Traits` is made abstract. We don’t say “Bob is kind, intelligent, and kind again”, that’s why `Kind` is made a set of one and only one element.
+	</p>
+	<p>
+Next, since we’re programmers and we consider programming languages as part of our identity, let’s presume that what we write in affects the way other people see us (in reality, it doesn’t). 
+	</p>
+	<p>
+So we need to declare some languages. We can borrow the same structure from the `Traits`.
+	</p>
+	<table><tr>
+	<td>
+	<pre id="c2">
+// Languages to write
+abstract sig Languages {}
+one sig Asm extends Languages {}
+one sig Cpp extends Languages {}
+one sig Alloy extends Languages {}
+	</pre>
+	</td>
+	</td></tr></table>
+	<p>
+Once again, `Languages` is an abstract concept, and `Asm`, `Cpp`, and `Alloy` exist one and only one each. That’s where the model diverges from reality. There are 6 versions of Alloy and this moment, 5 major standards of C++, and countless versions of the assembly. But a model doesn’t have to be exact to be pragmatic, so we’ll let this slide.
+	</p>
+	<p>
+Now let’s model some people.
+	</p>
+	<table><tr>
+	<td>
+	<pre id="c3">
+// People
+abstract sig People {
+    character: Traits,
+    writes: Languages
+}
+one sig Alice extends People {}
+one sig Bob extends People {}
+one sig George extends People {}
+one sig Steve extends People {}
+	</pre>
+	</td>
+	</td></tr></table>
+	<p>
+Once again, `People` is an abstract concept but now it has something new. It has named relations. The `character` relation connects a person with a set of personality traits, and the `writes` relation connects the very same person to the set of languages.
+	</p>
+	<p>
+`Alice`, `Bob`, `George`, and `Steve` are specific, not abstract people, and each exists in “one and only one” exemplar.
+	</p>
+	<p>
+Now let’s program office rumors. In Alloy, since it works in relational logic, and not relational gossip, rumors are called `fact`s.
+	</p>
+	<table><tr>
+	<td>
+	<pre id="c4">
+fact {Kind in Bob.*character}
+fact {Intelligent in Bob.*character}
+fact {Asm in Bob.*writes}
+fact {Cpp in Bob.*writes}
+fact {Kind in George.*character}
+fact {Asm in George.*writes}
+fact {Alloy in George.*writes}
+fact {Intelligent in Steve.*character}
+fact {Cpp in Steve.*writes}
+	</pre>
+	</td>
+	</td></tr></table>
+	<p>
+So what do the rumors tell us? Bob is kind and intelligent. Bob writes in C++ and assembly. George is kind and writes in assembly and alloy. And Steve is intelligent and writes in C++. So far so good.
+	</p>
+	<p>
+Now let’s say Alice likes people who are kind, intelligent, and write in C++. In Alloy, we write these things as boolean functions or predicates using the `pred` word.
+	</p>
+	<table><tr>
+	<td>
+	<pre id="c5">
+pred likes [a: People, b: People] {
+    a = Alice
+    Kind + Intelligent in b.*character
+    Cpp in b.*writes
+}
+	</pre>
+	</td>
+	</td></tr></table>
+	<p>
+Here `likes` is the name of the predicate. `a` and `b` are variables, each belonging to a set of People. `a = Alice` is the first condition. `Kind + Intelligent in b.*character` is the second, and `Cpp in b.*writes` is the third. When we write conditions each in its own line, we don’t even add the `and` word, we presume that all the conditions meet at the same time.
+	</p>
+	<p>
+The third condition looks like the fact we declared before, but the second has something new, it has a `+` sign that combines two sets into one. So Alice likes people who are both kind and intelligent. We could have written this as two separate expectations, but why bother if we have the set algebra tools onboard?
+	</p>
+	<p>
+Anyway, now that we have our model, we can add assertions and see if they hold. Does Alice like Bob?
+	</p>
+	<table><tr>
+	<td>
+	<pre id="c6">
+assert {likes [Alice, Bob]}
+	</pre>
+	</td>
+	</td></tr></table>	
+	<div id="shown_alloy1">
+		<button type="button" onclick="show('alloy1')">Yes</button>
+		<button type="button" onclick="show('alloy1')">No</button>
+	</div>
+	<div id="hidden_alloy1" style="display:none;">
+		<p>
+Yes, she does. Bob fits the likeability definition with a slight overreach. He writes assembly along with C++ but it doesn’t make him unlikeable according to the `likes` predicate.
+		</p>
+		<p>
+Does Alice like Steve or George?
+		</p>
+		<table><tr>
+		<td>
+		<pre id="c7">
+assert {not likes [Alice, George]}
+assert {not likes [Alice, Steve]}
+		</pre>
+		</td>
+		</td></tr></table>
+		<p>
+No, she doesn’t. Steve isn’t kind, and George doesn’t even write C++.
+		</p>
+	</div>
+
+	<p>
+So in Alloy, we can write down our model, and impose our assertions over it. Alloy will make sure that the model is sound. Now let’s see what elements of model checking C++ has to offer.
+	</p>
+	
+	<h2>
+Model checking in C++
+	</h2>
+	<p>
+Technically, there are no sets in C++, but there are types. And types can be subtypes of each other so this is close enough to sets. E.g. we can define people like this.
+	</p>
+	<table><tr>
+	<td>
+	<pre id="c8">
+// people
+class People{};
+class Alice : People{};
+class Bob : People{};
+class George : People{};
+class Steven : People{};
+	</pre>
+	</td>
+	</td></tr></table>
+	<p>
+Note that abstract class in C++ is not the same as abstract set in Alloy. In C++ abstractness concerns instantiation, and we’re not even planning to instantiate anything. All we need is to program relations between types that will be automatically checked during compilation. 
+	</p>
+	<p>
+In fact, we don’t even have to create the parent classes at all. C++ templates deduce from any declared type there is. So let’s declare languages without `Languages`.
+	</p>
+	<table><tr>
+	<td>
+	<pre id="c9">
+// languages
+class Cpp{};
+class Alloy{};
+class Asm{};
+	</pre>
+	</td>
+	</td></tr></table>
+	<p>
+Now we need to program our “facts”. A fact is something that sets a named relation between sets, and you know what sets a relation between types in C++? Basically everything. One thing would be a function declaration. So when we want to state that Bob writes in C++, we can do that by declaring a function `writes`, and giving it a specific overload for specific types.
+	</p>
+	<table><tr>
+	<td>
+	<pre id="c10">
+void writes(Bob, Cpp);
+	</pre>
+	</td>
+	</td></tr></table>
+	<p>
+But we can also take a shortcut and make a function into a fact itself. We don’t have to bind types (and we represent sets with types remember?) with functions, we can turn an overloaded function into a set itself. Like this.
+	</p>
+	<table><tr>
+	<td>
+	<pre id="c11">
+void kind(Bob);
+	</pre>
+	</td>
+	</td></tr></table>
+	<p>
+Now the same array of facts as in Alloy could be written like this:
+	</p>
+	<table><tr>
+	<td>
+	<pre id="c12">
+void kind(Bob);
+void intelligent(Bob);
+void writes(Bob, Cpp);
+void writes(Bob, Assembly);
+void kind(George);
+void writes(George, Asm);
+void writes(George, Alloy);
+void intelligent(Steven);
+void writes(Steven, Cpp);
+	</pre>
+	</td>
+	</td></tr></table>
+	<p>
+As for the predicates, or conditional functions, a template function will do. Template functions accept parametric types and deduce them to concrete ones so... close enough.
+	</p>
+	<table><tr>
+	<td>
+	<pre id="c13">
+template &lt; typename Person&gt; void likes(Alice, Person person) {
+    kind(person);
+    intelligent(person);
+    writes(person, Cpp());
+}
+	</pre>
+	</td>
+	</td></tr></table>
+	<p>
+The downside is that the type deduction only occurs on instantiation, so if we live it all like this, we’ll never run the check, and we’ll never know if Alice likes Bob. So let’s make an assertion, let’s instantiate the `likes` predicate.
+	</p>
+	<table><tr>
+	<td>
+	<pre id="c14">
+int main()
+{
+    likes(Alice(), Bob());
+}
+	</pre>
+	</td>
+	</td></tr></table>
+	<p>
+Now if a program compiles, then Alice does like Bob. If not – not. Does it?
+	</p>
+<div id="shown_alloy2">
+		<button type="button" onclick="show('alloy2')">Yes</button>
+		<button type="button" onclick="show('alloy2')">No</button>
+	</div>
+	<div id="hidden_alloy2" style="display:none;">
+		<p>
+Yes, it does. And she does too.
+		</p>
+	</div>	
+	<p>
+Looks like we can use C++ compile time type deduction to validate models. Yey!
+	</p>
+
+	<h2>
+So now what?
+	</h2>
+	<p>
+Some say that writing one program and having written two in the end is great! Write one, get one free! As someone who maintains other’s people code for a living, I disagree. Imagine that you have to maintain a C++ piece of code that has been written as its types relations have been. With no debugger, no coherent error messages, no profiler, and by someone who wasn’t even aware that he writes the program to begin with. That’s how 99% of all type-systems/relational models in the world have been written like. And it’s hell.
+	</p>
+	<p>
+No, the second program doesn’t come for free. It doesn’t automatically model what you want, to make it so, you have to put conscious effort into composing it properly. You have to be aware that it exists, that it requires attention, and it requires understanding. You have to realize that with static typing, you are writing both in a run-time imperative language, and in a compile-time declarative one, and you have to pay with your effort to develop both programs.
+	</p>
+	<p>
+But that’s not it. Speaking of “free”, some people think that everything that happens in compile time is “free” because it doesn’t have to happen in run-time then. Well, you can’t cheat reality, time is time, you have to make the computation somewhere. With static typing, you are effectively running a model checker every time you compile your program whether you want it or not, and it puts a toll on your build times. 
+	</p>
+	<p>
+I have been writing about languages for a while now, and I couldn’t help noticing, that the posts on C++ drag the most attention. C++ is not the most popular language, it’s not the most hyped, it’s not the most interesting. So how come, every time I write something about C++, there are thousands of C++ programmers on standby waiting to start arguing with each other?
+	</p>
+	<p>
+Rust has type traits. You have to declare everything you write in terms of traits and you have to make sure that the types you expose fit the declared traits or otherwise the program wouldn’t even compile. This localizes type deduction to a single module. If a module compiles, it is automatically stackable with other modules. 
+	</p>
+	<p>
+Haskell has typeclasses that work in a similar manner. If a type belongs to a typeclass, it exposes all the methods the typeclass requires or it doesn’t compile. That also narrows down type deduction.
+	</p>
+	<p>
+C++ has both type traits and typeclasses (well, concepts anyway). It also has unscoped templates though. This means that any parametric code can be potentially compiled with any type there is. And... the compiler has to check if it can on any instantiation.
+	</p>
+	<p>
+This means that if you include a `vector` in several translation units, the compiler has to build the contents of `vector` with each translation unit and it types separately. This leads to enormous build times. I once measured the compile time for a moderately large, moderately templated SDK, and 45% of all the time went to template type deduction. Well, that doesn’t seem too bad, does it? For comparison, 50% of the time went to parsing. But it was mostly parsing the headers with those templates. Because a header includes several headers, and each includes several more, and each translation unit parses the whole tree anew trying to build it with its local types, and sometimes, not all the time, but nobody knows when there is a teeny-tiny inconsistency in the model these types are meant to represent, and the build fails after half an hour of struggling.
+	</p>
+	<p>
+And that’s where all the angry C++ programmers on the internet come from. They are waiting nervously for their builds to finish.
+	</p>
+
+	<h2>
+Links
+	</h2>
+	<p>
+<a href="https://www.quantamagazine.org/univalent-foundations-redefines-mathematics-20150519/">Will Computers Redefine the Roots of Math?</a>
+	</p>
+	<p>
+<a href="https://humanreadablemag.com/issues/2/articles/theres-a-mathematician-in-your-compiler">There's a Mathematician In Your Compiler</a>
+	</p>
+	<p>
+<a href="https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence">Curry–Howard correspondence</a>
+	</p>
+
+	<script>
+	document.getElementById("c1").innerHTML = colorized(document.getElementById("c1").innerHTML);
+	document.getElementById("c2").innerHTML = colorized(document.getElementById("c2").innerHTML);
+	document.getElementById("c3").innerHTML = colorized(document.getElementById("c3").innerHTML);
+	document.getElementById("c4").innerHTML = colorized(document.getElementById("c4").innerHTML);
+	document.getElementById("c5").innerHTML = colorized(document.getElementById("c5").innerHTML);
+	document.getElementById("c6").innerHTML = colorized(document.getElementById("c6").innerHTML);
+	document.getElementById("c7").innerHTML = colorized(document.getElementById("c7").innerHTML);
+	document.getElementById("c8").innerHTML = colorized(document.getElementById("c8").innerHTML);
+	document.getElementById("c9").innerHTML = colorized(document.getElementById("c9").innerHTML);
+	document.getElementById("c10").innerHTML = colorized(document.getElementById("c10").innerHTML);
+	document.getElementById("c11").innerHTML = colorized(document.getElementById("c11").innerHTML);
+	document.getElementById("c12").innerHTML = colorized(document.getElementById("c12").innerHTML);
+	document.getElementById("c13").innerHTML = colorized(document.getElementById("c13").innerHTML);
+	document.getElementById("c14").innerHTML = colorized(document.getElementById("c14").innerHTML);
+	</script>
+
+
+	<table class="footer" style="width: 600pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html">Index</a>
+		<a href="all_programming.html">#programming</a> <a href="all_tutorials.html">#tutorials</a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+			+
+		<a href="https://wordsandbuttons.online/SYTYKC.pdf">Free book</a><br>
+			+
+		<a href="https://www.manning.com/books/geometry-for-programmers">Paid book</a><br>
+			+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+</body>
+</html>
