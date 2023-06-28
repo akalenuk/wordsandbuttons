@@ -490,6 +490,36 @@ Links
 	document.getElementById("c12").innerHTML = colorized(document.getElementById("c12").innerHTML);
 	document.getElementById("c13").innerHTML = colorized(document.getElementById("c13").innerHTML);
 	document.getElementById("c14").innerHTML = colorized(document.getElementById("c14").innerHTML);
+	
+	var all_code = "";
+	var snippets = document.getElementsByTagName("pre");
+	for(var i = 0; i < snippets.length; i++){
+		all_code += snippets[i].innerHTML;
+	}
+	
+	var chunk_to_color = {};
+	
+	var paragraphs = document.getElementsByTagName("p");
+	for(var i = 0; i < paragraphs.length; i++){
+		var chunks = paragraphs[i].innerHTML.split('`');
+		for(var j = 1; j < chunks.length; j += 2){
+			var chunk = chunks[j];
+			var color_and_chunk = all_code.split("\">" + chunk + "</span>");
+			if(color_and_chunk.length > 1) {
+				var color = color_and_chunk[0].substring(color_and_chunk[0].length - 3, color_and_chunk[0].length);
+				chunk_to_color[chunk] = color;
+			}
+		}
+	}
+
+	for(var i = 0; i < paragraphs.length; i++){
+		contents = paragraphs[i].innerHTML;
+		for (var chunk in chunk_to_color) {
+			color = chunk_to_color[chunk];
+			contents = contents.replaceAll('`' + chunk + '`', '<span style="color:#' + color + '">' + chunk + '</span>');
+		}
+		paragraphs[i].innerHTML = contents;
+	}
 	</script>
 
 
