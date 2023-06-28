@@ -11,6 +11,9 @@ _All the code is licensed under [The Unlicense](http://unlicense.org/)._
 
 ## Pages
 
+- [Static typing isn’t free. Where do you think the C++ angry mob comes from?](https://wordsandbuttons.online/static_typing_isnt_free.html) Type inference works like logic deduction so any program in a statically typed language is two programs. The first one is the thing you sell, and the second – is a model that undergoes some sort of verification every time you run a compiler. This second program, although, often being written unknowingly, is not a free bonus, it’s something you have to pay for in several ways.
+<sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
+
 - [Check if your performance intuition still works with CUDA](https://wordsandbuttons.online/check_if_your_performance_intuition_still_works_with_cuda.html) An interactive quiz about microoptimizations in CUDA. 10 rounds, two pieces of code per each, you get to guess which is the faster.
 <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#quizzes](https://wordsandbuttons.online/all_quizzes.html)</sup> 
 
