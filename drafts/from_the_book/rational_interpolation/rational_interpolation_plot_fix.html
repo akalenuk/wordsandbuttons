@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.84">
+	<title>Polynomial approximation and interpolation</title>
+	<meta name="description" content="This explains approximation and interpolation, how to use polynomials for that, and how to make both concepts work together.">
+	<meta name="keywords" content="mathematics, tutorials">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body{
+	margin: 0 0 0 0;
+	background-color: #eeeeee;
+}
+
+a{
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: italic;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+.open_matrix {
+	width: 2pt;
+	border-bottom: 2px solid black;
+	border-top: 2px solid black;
+	border-left: 2px solid black;
+}
+
+.close_matrix {
+	width:2pt;
+	border-bottom: 2px solid black;
+	border-top: 2px solid black;
+	border-right: 2px solid black;
+}
+
+table.footer {
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
+}
+
+td.footer {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+li {
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+	padding-bottom: 6pt;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
+}
+
+input[type="text"] {
+	width: 32pt;
+	height: 22pt;
+	font-size: 16pt;
+	text-align: center;
+}
+
+input[type="radio"] {
+	height: 16pt;
+	width: 16pt;
+	margin-top: 12pt;
+}
+
+label {
+	font-size: 16pt;
+}
+
+button {
+	width: 32pt;
+	height: 26pt;
+	font-size: 16pt;
+	text-align: center;
+}
+
+canvas { touch-action: none; }
+	</style>
+	<script language="JavaScript">
+// client
+var w = 640.0;
+var h = 640.0;
+
+var points_for_approximation = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315], [587, 172]];
+var points_for_interpolation = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315], [587, 172]];
+var points_for_both = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315], [587, 172]];
+
+
+function nearest_i(xy, points) {
+	var best_i = 0;
+	var best_d = Math.pow((xy[0]-points[0][0]), 2) + Math.pow((xy[1]-points[0][1]), 2);
+	for(var i = 1; i < points.length; ++i) {
+		const d = Math.pow((xy[0]-points[i][0]), 2) + Math.pow((xy[1]-points[i][1]), 2);
+		if(d < best_d) {
+			best_d = d;
+			best_i = i;
+		}
+	}
+	return best_i;
+}
+
+function inc(counter_name) {
+	var counter = document.getElementById(counter_name+"_input");
+	counter.value = Number(counter.value) + 1;
+	eval('change_' + counter_name + '()');
+}
+
+function dec(counter_name) {
+	var counter = document.getElementById(counter_name+"_input");
+	counter.value = Number(counter.value) - 1;
+	eval('change_' + counter_name + '()');
+}
+
+// alrorithms
+function sign_0_positive(x){ // Math.sign like with no 0 option
+	if(x >= 0)
+		return 1.0;
+	return -1.0;
+}
+
+function underflow_padded(x){
+	if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
+		return 1.e-5 * sign_0_positive(x);
+	return x;
+}
+
+function solved_linear(A, B, n){
+	var X = [];
+	for (var i = 0; i < n; ++i)
+		X.push(0.0);
+
+	// triangulize
+	for (var i = 0; i < n-1; ++i)
+		for (var j = 0; j < i+1; ++j) {
+			r = A[i+1][j] / underflow_padded(A[j][j]);
+			A[i+1][j] = 0.;
+			for (var b_j = j+1; b_j < n; ++b_j){
+				A[i+1][b_j] -= A[j][b_j]*r;
+			}
+			B[i+1] -= B[j]*r;
+		}
+
+	// calculate xs
+	X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
+	for (var i = n-2; i >= 0; --i){
+		var s = 0.0;
+		for (var j = i; j < n; ++j){
+			s = s + A[i][j]*X[j];
+		}
+		X[i] = (B[i] - s) / underflow_padded(A[i][i]);
+	}
+	return X;
+}
+
+
+function interpolation_of(points) {
+	const N = points.length;
+	const M1 = Math.floor(N/2) + 1;
+	const M2 = N - M1;
+	var A = [];
+	var B = [];
+
+	for (var i = 0; i < N; ++i){
+		var Ai = []
+		for (var j = 0; j < M1; ++j){
+			Ai.push(Math.pow(points[i][0], j));
+		}
+		for (var j = 0; j < M2; ++j){
+			Ai.push(-Math.pow(points[i][0], j+1) * points[i][1]);
+		}
+		A.push(Ai);
+		B.push(points[i][1]);
+	}
+	var P = solved_linear(A, B, N);
+	return function(x) {
+		var n = 0;
+		for(var i = 0; i < M1; ++i) {
+			n += P[i] * Math.pow(x, i);
+		}
+		var d = 1;
+		for(var i = 0; i < M2; ++i) {
+			d += P[i+M1] * Math.pow(x, i+1);
+		}
+		return n/d;
+	};
+}
+
+
+
+// the canvases
+var approximation_i = 0;
+function init_approximation_canvas(){
+	var canvas = document.getElementById("approximation_canvas");
+	canvas.addEventListener('pointerdown', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		const xy = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		if(document.getElementById("a_1").checked) { // add
+			points_for_approximation.push(xy);
+			approximation_i = points_for_approximation.length-1;
+		} else { // move
+			approximation_i = nearest_i(xy, points_for_approximation);
+			points_for_approximation[approximation_i] = xy;
+		}
+		draw_canvas("approximation_canvas");
+		canvas.releasePointerCapture(e.pointerId);
+	}, false);
+
+	canvas.addEventListener('pointermove', function(e){
+		if(e.buttons == 1){
+			canvas_rect = canvas.getBoundingClientRect();
+			points_for_approximation[approximation_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+			draw_canvas("approximation_canvas");
+		}
+	}, false);
+
+	canvas.addEventListener('pointerup', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		points_for_approximation[approximation_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		draw_canvas("approximation_canvas");
+	}, false);
+
+	draw_canvas("approximation_canvas");
+}
+
+var interpolation_i = 0;
+function init_interpolation_canvas(){
+	var canvas = document.getElementById("interpolation_canvas");
+	canvas.addEventListener('pointerdown', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		const xy = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		if(document.getElementById("i_1").checked) { // add
+			points_for_interpolation.push(xy);
+			interpolation_i = points_for_interpolation.length-1;
+		} else { // move
+			interpolation_i = nearest_i(xy, points_for_interpolation);
+			points_for_interpolation[interpolation_i] = xy;
+		}
+		draw_canvas("interpolation_canvas");
+		canvas.releasePointerCapture(e.pointerId);
+	}, false);
+
+	canvas.addEventListener('pointermove', function(e){
+		if(e.buttons == 1){
+			canvas_rect = canvas.getBoundingClientRect();
+			points_for_interpolation[interpolation_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+			draw_canvas("interpolation_canvas");
+		}
+	}, false);
+
+	canvas.addEventListener('pointerup', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		points_for_interpolation[interpolation_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		draw_canvas("interpolation_canvas");
+	}, false);
+
+	draw_canvas("interpolation_canvas");
+}
+
+var both_i = 0;
+function init_both_canvas(){
+	var canvas = document.getElementById("both_canvas");
+	canvas.addEventListener('pointerdown', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		const xy = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		if(document.getElementById("b_1").checked) { // add
+			points_for_both.push(xy);
+			both_i = points_for_both.length-1;
+		} else { // move
+			both_i = nearest_i(xy, points_for_both);
+			points_for_both[both_i] = xy;
+		}
+		draw_canvas("both_canvas");
+		canvas.releasePointerCapture(e.pointerId);
+	}, false);
+
+	canvas.addEventListener('pointermove', function(e){
+		if(e.buttons == 1){
+			canvas_rect = canvas.getBoundingClientRect();
+			points_for_both[both_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+			draw_canvas("both_canvas");
+		}
+	}, false);
+
+	canvas.addEventListener('pointerup', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		points_for_both[both_i] = [e.clientX - canvas_rect.left, e.clientY - canvas_rect.top];
+		draw_canvas("both_canvas");
+	}, false);
+
+	draw_canvas("both_canvas");
+}
+
+function draw_canvas(canvas_name){
+	var canvas = document.getElementById(canvas_name);
+	var context = canvas.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#fff";
+	context.fillRect(0, 0, w, h);
+
+
+	var points = [];
+	if(canvas_name == "approximation_canvas") {
+		points = points_for_approximation;
+	} else if(canvas_name == "interpolation_canvas") {
+		points = points_for_interpolation;
+	} else if(canvas_name == "both_canvas") {
+		points = points_for_both;
+	}
+
+	context.lineWidth = 2;
+
+	// draw interpolation
+	if(canvas_name == "interpolation_canvas") {
+		const eps = 1e-5;
+		if(points.length > 0) {
+			var polynomial = interpolation_of(points);
+
+			context.beginPath();
+			for(var j = 0; j < w; ++j){
+				x = j;
+				y = polynomial(x);
+				dy = (polynomial(x+eps) - polynomial(x)) / eps;
+				yn = polynomial(x + 1);
+				if(j == 0)
+					context.moveTo(x, y);
+				else
+					if(Math.abs(dy) > 1 && dy > 0 && yn < y) {
+						context.lineTo(x, 640);
+						context.moveTo(x, 0);
+					} else if(Math.abs(dy) > 1 && dy < 0 && yn > y) {
+						context.lineTo(x, 0);
+						context.moveTo(x, 640);
+					} else
+						context.lineTo(x, y);
+			}
+			context.strokeStyle="#457fd6";
+			context.stroke();
+			context.closePath();
+		}
+	}
+
+
+	context.lineWidth = 1;
+
+	// points
+	for (var i = 0; i < points.length; ++i) {
+		if(canvas_name == "approximation_canvas") {
+			context.fillStyle="#d64562";
+		} else if(canvas_name == "interpolation_canvas") {
+			context.fillStyle="#457fd6";
+		} else if(canvas_name == "both_canvas") {
+			if(i < ips)
+				context.fillStyle="#457fd6";
+			else
+				context.fillStyle="#d64562";
+		}
+		context.beginPath();
+		context.arc(points[i][0], points[i][1], 4, 0, 2*Math.PI);
+		context.fill();
+		context.closePath();
+	}
+}
+
+// under
+function reset_all_for_interpolation() {
+	points_for_interpolation = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315], [587, 172]];
+	interpolation_i = 0;
+	draw_canvas("interpolation_canvas");
+}
+
+function undo_last_for_interpolation() {
+	points_for_interpolation.splice(-1,1);
+	draw_canvas("interpolation_canvas");
+}
+
+// facts
+function show(n){
+	document.getElementById("hidden_" + n).style.display = "inline";
+}
+
+function is_shown(n){
+	return document.getElementById("hidden_" + n).style.display == "inline";
+}
+
+function show_approximation_facts() {
+	document.getElementById("approximation_facts_button").style.display = "none";
+	document.getElementById("approximation_facts_note").style.display = "none";
+	show("fact_1");
+	show("fact_2");
+	show("fact_3");
+}
+
+function check_approximation_facts() {
+	if(points_for_approximation.length == app_degree + 1)
+		show("fact_1");
+
+	if(app_degree == 0)
+		show("fact_2");
+
+	for(var i = 0; i < points_for_approximation.length; ++i) {
+		for(var j = 0; j < i; ++j)
+			if(Math.abs(points_for_approximation[i][0] - points_for_approximation[j][0]) < 2.0
+			&& Math.abs(points_for_approximation[i][1] - points_for_approximation[j][1]) < 2.0)
+				show("fact_3");
+	}
+	if(is_shown("fact_1") && is_shown("fact_2") && is_shown("fact_3"))
+		show_approximation_facts();
+}
+</script>
+</head>
+<body>
+	<center>
+	<h1>
+Rational interpolation
+	</h1>
+
+	<canvas id="interpolation_canvas" width=640 height=640></canvas>
+	<div style="text-align:center; padding-bottom:12pt;">
+		<input type="radio" name="ipol" id="i_1" value="Add" /><label for="i_1">Add a point;</label> &nbsp;
+		<input type="radio" name="ipol" id="i_2" checked value="Move"><label for="i_2">move a point.</label> &nbsp;
+		<button type="button" style="width: 120pt;" onclick="undo_last_for_interpolation()">Undo last</button>
+		<button type="button" style="width: 120pt;" onclick="reset_all_for_interpolation()">Reset all</button>
+	</div>
+	<div id="interpolation_formula" class="formula">
+	</div>
+
+	<script language="JavaScript">
+	init_interpolation_canvas();
+	</script>
+
+
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html">Index</a>
+		<a href="all_mathematics.html">#mathematics</a> <a href="all_tutorials.html">#tutorials</a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+		+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+		<a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+</body>
+</html>
