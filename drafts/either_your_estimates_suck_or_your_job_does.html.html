@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.84">
+	<title>Either your estimates suck or your job does</title>
+	<meta name="description" content="">
+	<meta name="keywords" content="mathematics, programming">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body{
+	margin: 0 0 0 0;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:link, a:visited {
+	color: blue;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 600pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 600pt;
+	text-align: left;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 15pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+table.footer {
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 600pt;
+}
+
+td.footer {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+table {
+	font-family: sans-serif;
+	font-size: 13pt;
+	font-style: italic;
+	width: 600pt;
+	text-align: center;
+}
+
+td {
+	vertical-align: text-top;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+li {
+	font-size: 16pt;
+	width: 600pt;
+	text-align: left;
+	padding-bottom: 6pt;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 600pt;
+	background-color: #eeee99;
+	color: #000;
+}
+
+input[type="text"] {
+	width: 100pt;
+	height: 22pt;
+	margin: 8pt 8pt 8pt 8pt;
+	padding-left: 3pt;
+	font-size: 16pt;
+}
+
+button {
+	width: 108pt;
+	height: 28pt;
+	margin-left:4pt;
+	margin-right:4pt;
+	font-size: 16pt;
+}
+
+i {
+	font-family: sans-serif;
+	font-size: 15pt;
+	font-style: italic;
+}
+
+u {
+	border-bottom: 1px dotted #000;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+canvas { touch-action: none; }
+	</style>
+	<script language="JavaScript">
+
+// client
+var w = 640.0;
+var h = 640.0;
+
+// visible region
+var x_min = -1.0;
+var y_min = -1.0;
+var x_max = 9.0;
+var y_max = 9.0;
+
+var client_x_center = w*(0-x_min)/(x_max-x_min);
+var client_x_step = (w/(x_max-x_min));
+
+var client_y_center = h - h*(0-y_min)/(y_max-y_min);
+var client_y_step = (h/(y_max-y_min));
+
+function client_to_x(client_x){
+	return (client_x - client_x_center) / client_x_step;
+}
+
+function client_to_y(client_y){
+	return (client_y_center - client_y) / client_y_step;
+}
+
+function x_to_client(x){
+	return x * client_x_step + client_x_center;
+}
+
+function y_to_client(y){
+	return client_y_center - y * client_y_step;
+}
+
+function sign_0_positive(x){ // Math.sign like with no 0 option
+	if(x >= 0)
+		return 1.0;
+	return -1.0;
+}
+
+function underflow_padded(x){
+	if(Math.abs(x) < 1.e-5) // pixel-size input error is ok, so we don't want much precision anyway
+		return 1.e-5 * sign_0_positive(x);
+	return x;
+}
+
+function solved_linear(A, B, n){
+	var X = [];
+	for (var i = 0; i < n; ++i)
+		X[i] = 0.0;
+
+	// triangulize
+	for (var i = 0; i < n-1; ++i)
+		for (var j = 0; j < i+1; ++j) {
+			r = A[i+1][j] / underflow_padded(A[j][j]);
+			A[i+1][j] = 0.;
+			for (var b_j = j+1; b_j < n; ++b_j){
+				A[i+1][b_j] -= A[j][b_j]*r;
+			}
+			B[i+1] -= B[j]*r;
+		}
+
+	// calculate xs
+	X[n-1] = B[n-1] / underflow_padded(A[n-1][n-1]);
+	for (var i = n-2; i >= 0; --i){
+		var s = 0.0;
+		for (var j = i; j < n; ++j){
+			s = s + A[i][j]*X[j];
+		}
+		X[i] = (B[i] - s) / underflow_padded(A[i][i]);
+	}
+	return X;
+}
+
+function polynomial_in_x(A, x, n){
+	var y = 0.0;
+	for(var i = 0; i < n; ++i){
+		y += A[i] * Math.pow(x, i);
+	}
+	return y;
+}
+
+function draw_grid_on(context){
+	// grid
+	context.beginPath();
+	for(var i = x_min + 1; i <= x_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x_center + i*client_x_step + 0.5, 0);
+			context.lineTo(client_x_center + i*client_x_step + 0.5, h+1);
+		}
+	}
+	for(var i = y_min + 1; i <= y_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(0, client_y_center - i*client_y_step + 0.5);
+			context.lineTo(w+1, client_y_center - i*client_y_step + 0.5);
+		}
+	}
+	context.strokeStyle="#999999";
+	context.stroke();
+	context.closePath();
+
+	context.beginPath();
+	context.moveTo(0, client_y_center + 0.5);
+	context.lineTo(w, client_y_center + 0.5);
+	context.lineTo(w - 12, client_y_center - 5 + 0.5);
+	context.moveTo(w, client_y_center + 0.5);
+	context.lineTo(w - 12, client_y_center + 5 + 0.5);
+	context.moveTo(client_x_center + 0.5, h);
+	context.lineTo(client_x_center + 0.5, 0);
+	context.lineTo(client_x_center - 5 + 0.5, 12);
+	context.moveTo(client_x_center + 0.5, 0);
+	context.lineTo(client_x_center + 5 + 0.5, 12);
+	context.fillStyle="#000000";
+	for(var i = x_min + 1; i <= x_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x_center + i*client_x_step + 0.5, client_y_center);
+			context.lineTo(client_x_center + i*client_x_step + 0.5, client_y_center - 5);
+			context.fillText(i, client_x_center + i*client_x_step + 4, client_y_center + 16);
+		}
+	}
+	for(var i = y_min + 1; i <= y_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x_center, client_y_center - i*client_y_step + 0.5);
+			context.lineTo(client_x_center + 5, client_y_center - i*client_y_step + 0.5);
+		}
+		context.fillText(i, client_x_center + 5, client_y_center - i*client_y_step + 16);
+	}
+	context.strokeStyle="#000000";
+	context.stroke();
+	context.closePath();
+}
+
+// polynomial2
+var polynomial2_xs = [0.0, 1.0];
+var polynomial2_ys = [0.0, 1.0];
+var polynomial2_n = 2;
+var polynomial2_i = 0;
+
+function init_polynomial2(){
+	polynomial = document.getElementById("polynomial2");
+	var canvas_rect = polynomial.getBoundingClientRect();
+	polynomial2_draw(0, 0, false);
+
+	polynomial.addEventListener('pointermove', function(e){
+		var canvas_rect = polynomial.getBoundingClientRect();
+		polynomial2_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			polynomial2_xs[polynomial2_i] = client_to_x(e.clientX - canvas_rect.left);
+			polynomial2_ys[polynomial2_i] = client_to_y(e.clientY - canvas_rect.top);
+			polynomial2_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+		}
+	}, false);
+
+	polynomial.addEventListener('pointerdown', function(e){
+		var canvas_rect = polynomial.getBoundingClientRect();
+		polynomial2_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		polynomial2_xs[polynomial2_i] = client_to_x(e.clientX - canvas_rect.left);
+		polynomial2_ys[polynomial2_i] = client_to_y(e.clientY - canvas_rect.top);
+		polynomial2_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		polynomial.releasePointerCapture(e.pointerId);
+	}, false);
+
+	polynomial.addEventListener('pointerleave', function(e){
+		polynomial2_draw(0, 0, false);
+	}, false);
+}
+
+function polynomial2_draw(client_x, client_y, do_guides){
+	polynomial = document.getElementById("polynomial2");
+	var context = polynomial.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// grid
+	draw_grid_on(context);
+
+	// polynomial
+	var A = [];
+	var B = [];
+	for(var i = 0; i < polynomial2_n; ++i){
+		A[i] = [];
+		for(var j = 0; j < polynomial2_n; ++j){
+			A[i][j] = Math.pow(polynomial2_xs[i], j);
+		}
+		B[i] = polynomial2_ys[i];
+	}
+
+	X = solved_linear(A, B, polynomial2_n);
+
+	context.beginPath();
+	context.lineWidth = 2;
+	context.strokeStyle="#d64562";
+	for(var j = 0; j < w; ++j){
+		const x = client_to_x(j);
+		const y = polynomial_in_x(X, x, polynomial2_n);
+		if(j == 0) {
+			context.moveTo(x_to_client(x), y_to_client(y));
+		} else {
+			context.lineTo(x_to_client(x), y_to_client(y));
+		}
+	}
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
+
+	// dots
+	context.fillStyle="#d64562";
+	for(var i = 0; i < polynomial2_n; ++i){
+		const xi = x_to_client(polynomial2_xs[i]) + 0.5;
+		const yi = y_to_client(polynomial2_ys[i]) + 0.5;
+		context.beginPath();
+		context.arc(xi, yi, 4, 0, 2*Math.PI);
+		context.stroke();
+		context.fill();
+		context.closePath();
+	}
+
+	// guides
+	if(do_guides){
+		min_d = Math.pow(polynomial2_xs[0] - client_to_x(client_x), 2) + Math.pow(polynomial2_ys[0] - client_to_y(client_y), 2);
+		min_i = 0;
+		for(var i = 1; i < polynomial2_n; ++i){
+			var di = Math.pow(polynomial2_xs[i] - client_to_x(client_x), 2) + Math.pow(polynomial2_ys[i] - client_to_y(client_y), 2);
+			if(di < min_d){
+				min_d = di;
+				min_i = i;
+			}
+		}
+		polynomial2_i = min_i;
+		context.setLineDash([4, 4]);
+		context.beginPath();
+		context.moveTo(x_to_client(polynomial2_xs[min_i]), y_to_client(polynomial2_ys[min_i]));
+		context.lineTo(client_x, client_y);
+		context.strokeStyle="#d64562";
+		context.stroke();
+		context.closePath();
+		context.setLineDash([]);
+	}
+}
+
+// polynomial3
+var polynomial3_xs = [0.0, 1.0, 4.0];
+var polynomial3_ys = [0.0, 1.0, 3.0];
+var polynomial3_n = 3;
+var polynomial3_i = 0;
+
+function init_polynomial3(){
+	polynomial = document.getElementById("polynomial3");
+	var canvas_rect = polynomial.getBoundingClientRect();
+	polynomial3_draw(0, 0, false);
+
+	polynomial.addEventListener('pointermove', function(e){
+		var canvas_rect = polynomial.getBoundingClientRect();
+		polynomial3_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			polynomial3_xs[polynomial3_i] = client_to_x(e.clientX - canvas_rect.left);
+			polynomial3_ys[polynomial3_i] = client_to_y(e.clientY - canvas_rect.top);
+			polynomial3_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+		}
+	}, false);
+
+	polynomial.addEventListener('pointerdown', function(e){
+		var canvas_rect = polynomial.getBoundingClientRect();
+		polynomial3_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		polynomial3_xs[polynomial3_i] = client_to_x(e.clientX - canvas_rect.left);
+		polynomial3_ys[polynomial3_i] = client_to_y(e.clientY - canvas_rect.top);
+		polynomial3_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		polynomial.releasePointerCapture(e.pointerId);
+	}, false);
+
+	polynomial.addEventListener('pointerleave', function(e){
+		polynomial3_draw(0, 0, false);
+	}, false);
+}
+
+function polynomial3_draw(client_x, client_y, do_guides){
+	polynomial = document.getElementById("polynomial3");
+	var context = polynomial.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// grid
+	draw_grid_on(context);
+
+	// polynomial
+	var A = [];
+	var B = [];
+	for(var i = 0; i < polynomial3_n; ++i){
+		A[i] = [];
+		for(var j = 0; j < polynomial3_n; ++j){
+			A[i][j] = Math.pow(polynomial3_xs[i], j);
+		}
+		B[i] = polynomial3_ys[i];
+	}
+
+	X = solved_linear(A, B, polynomial3_n);
+
+	context.beginPath();
+	context.lineWidth = 2;
+	context.strokeStyle="#d64562";
+	for(var j = 0; j < w; ++j){
+		const x = client_to_x(j);
+		const y = polynomial_in_x(X, x, polynomial3_n);
+		if(j == 0) {
+			context.moveTo(x_to_client(x), y_to_client(y));
+		} else {
+			context.lineTo(x_to_client(x), y_to_client(y));
+		}
+	}
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
+
+	// dots
+	context.fillStyle="#d64562";
+	for(var i = 0; i < polynomial3_n; ++i){
+		const xi = x_to_client(polynomial3_xs[i]) + 0.5;
+		const yi = y_to_client(polynomial3_ys[i]) + 0.5;
+		context.beginPath();
+		context.arc(xi, yi, 4, 0, 2*Math.PI);
+		context.stroke();
+		context.fill();
+		context.closePath();
+	}
+
+	// guides
+	if(do_guides){
+		min_d = Math.pow(polynomial3_xs[0] - client_to_x(client_x), 2) + Math.pow(polynomial3_ys[0] - client_to_y(client_y), 2);
+		min_i = 0;
+		for(var i = 1; i < polynomial3_n; ++i){
+			var di = Math.pow(polynomial3_xs[i] - client_to_x(client_x), 2) + Math.pow(polynomial3_ys[i] - client_to_y(client_y), 2);
+			if(di < min_d){
+				min_d = di;
+				min_i = i;
+			}
+		}
+		polynomial3_i = min_i;
+		context.setLineDash([4, 4]);
+		context.beginPath();
+		context.moveTo(x_to_client(polynomial3_xs[min_i]), y_to_client(polynomial3_ys[min_i]));
+		context.lineTo(client_x, client_y);
+		context.strokeStyle="#d64562";
+		context.stroke();
+		context.closePath();
+		context.setLineDash([]);
+	}
+}
+
+// polynomial4
+var polynomial4_xs = [0.0, 1.0, 4.0, 3.0];
+var polynomial4_ys = [0.0, 1.0, 3.0, 2.48];
+var polynomial4_n = 4;
+var polynomial4_i = 0;
+
+function init_polynomial4(){
+	polynomial = document.getElementById("polynomial4");
+	var canvas_rect = polynomial.getBoundingClientRect();
+	polynomial4_draw(0, 0, false);
+
+	polynomial.addEventListener('pointermove', function(e){
+		var canvas_rect = polynomial.getBoundingClientRect();
+		polynomial4_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			polynomial4_xs[polynomial4_i] = client_to_x(e.clientX - canvas_rect.left);
+			polynomial4_ys[polynomial4_i] = client_to_y(e.clientY - canvas_rect.top);
+			polynomial4_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+		}
+	}, false);
+
+	polynomial.addEventListener('pointerdown', function(e){
+		var canvas_rect = polynomial.getBoundingClientRect();
+		polynomial4_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		polynomial4_xs[polynomial4_i] = client_to_x(e.clientX - canvas_rect.left);
+		polynomial4_ys[polynomial4_i] = client_to_y(e.clientY - canvas_rect.top);
+		polynomial4_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		polynomial.releasePointerCapture(e.pointerId);
+	}, false);
+
+	polynomial.addEventListener('pointerleave', function(e){
+		polynomial4_draw(0, 0, false);
+	}, false);
+}
+
+function polynomial4_draw(client_x, client_y, do_guides){
+	polynomial = document.getElementById("polynomial4");
+	var context = polynomial.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// grid
+	draw_grid_on(context);
+
+	// polynomial
+	var A = [];
+	var B = [];
+	for(var i = 0; i < polynomial4_n; ++i){
+		A[i] = [];
+		for(var j = 0; j < polynomial4_n; ++j){
+			A[i][j] = Math.pow(polynomial4_xs[i], j);
+		}
+		B[i] = polynomial4_ys[i];
+	}
+
+	X = solved_linear(A, B, polynomial4_n);
+
+	context.beginPath();
+	context.lineWidth = 2;
+	context.strokeStyle="#d64562";
+	for(var j = 0; j < w; ++j){
+		const x = client_to_x(j);
+		const y = polynomial_in_x(X, x, polynomial4_n);
+		if(j == 0) {
+			context.moveTo(x_to_client(x), y_to_client(y));
+		} else {
+			context.lineTo(x_to_client(x), y_to_client(y));
+		}
+	}
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
+
+	// dots
+	context.fillStyle="#d64562";
+	for(var i = 0; i < polynomial4_n; ++i){
+		const xi = x_to_client(polynomial4_xs[i]) + 0.5;
+		const yi = y_to_client(polynomial4_ys[i]) + 0.5;
+		context.beginPath();
+		context.arc(xi, yi, 4, 0, 2*Math.PI);
+		context.stroke();
+		context.fill();
+		context.closePath();
+	}
+
+	// guides
+	if(do_guides){
+		min_d = Math.pow(polynomial4_xs[0] - client_to_x(client_x), 2) + Math.pow(polynomial4_ys[0] - client_to_y(client_y), 2);
+		min_i = 0;
+		for(var i = 1; i < polynomial4_n; ++i){
+			var di = Math.pow(polynomial4_xs[i] - client_to_x(client_x), 2) + Math.pow(polynomial4_ys[i] - client_to_y(client_y), 2);
+			if(di < min_d){
+				min_d = di;
+				min_i = i;
+			}
+		}
+		polynomial4_i = min_i;
+		context.setLineDash([4, 4]);
+		context.beginPath();
+		context.moveTo(x_to_client(polynomial4_xs[min_i]), y_to_client(polynomial4_ys[min_i]));
+		context.lineTo(client_x, client_y);
+		context.strokeStyle="#d64562";
+		context.stroke();
+		context.closePath();
+		context.setLineDash([]);
+	}
+}
+
+function show(n){
+	document.getElementById("shown_" + n).style.display = "none";
+	document.getElementById("hidden_" + n).style.display = "inline";
+}
+
+function hide(n){
+	document.getElementById("shown_" + n).style.display = "inline";
+	document.getElementById("hidden_" + n).style.display = "none";
+}
+
+	</script>
+</head>
+<body>
+	<center>
+	<p style="width: 600pt; padding: 36pt 0pt 64pt 0pt;">This is <a href="index.html">Words and Buttons Online</a> — a collection of&nbsp;interactive <a href="all_tutorials.html">#tutorials</a>, <a href="all_demos.html">#demos<a/>, and <a href="all_quizzes.html">#quizzes</a> about <a href="all_mathematics.html">#mathematics</a>, <a href="all_algorithms.html">#algorithms</a> and <a href="all_programming.html">#programming</a>.</p>
+	<h1>
+Either your estimates suck or your job does
+	</h1>
+	<p>
+
+	</p>
+	<p>
+
+	</p>
+	<p>
+
+	</p>
+	<canvas id="polynomial2" width=640 height=640></canvas>
+	<script language="JavaScript">
+	init_polynomial2();
+	</script>	
+	<p>
+
+	</p>
+	<canvas id="polynomial3" width=640 height=640></canvas>
+	<script language="JavaScript">
+	init_polynomial3();
+	</script>
+	<p>
+
+	</p>
+	<canvas id="polynomial4" width=640 height=640></canvas>
+	<script language="JavaScript">
+	init_polynomial4();
+	</script>
+	
+	<h2>
+Conclusion
+	</h2>
+	<p>
+
+	</p>
+
+	<table class="footer" style="width: 600pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html">Index</a>
+		<a href="all_mathematics.html">#mathematics</a> <a href="all_tutorials.html">#tutorials</a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+			+
+		<a href="https://wordsandbuttons.online/SYTYKC.pdf">Free book</a><br>
+			+
+		<a href="https://www.manning.com/books/geometry-for-programmers">Paid book</a><br>
+			+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+</body>
+</html>
