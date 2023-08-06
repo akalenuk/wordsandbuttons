@@ -591,6 +591,164 @@ function polynomial4_draw(client_x, client_y, do_guides){
 	}
 }
 
+// uncertain2
+var uncertain2_xs = [0.0, 1.0];
+var uncertain2_ys = [0.0, 1.0];
+var uncertain2_ds = [1e-5, 0.1];
+var uncertain2_n = 2;
+var uncertain2_i = 0;
+
+function init_uncertain2(){
+	polynomial = document.getElementById("uncertain2");
+	var canvas_rect = polynomial.getBoundingClientRect();
+	uncertain2_draw(0, 0, false);
+
+	polynomial.addEventListener('pointermove', function(e){
+		var canvas_rect = polynomial.getBoundingClientRect();
+		uncertain2_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		if(e.buttons == 1){
+			uncertain2_xs[uncertain2_i] = client_to_x(e.clientX - canvas_rect.left);
+			uncertain2_ys[uncertain2_i] = client_to_y(e.clientY - canvas_rect.top);
+			uncertain2_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false); // double work
+		}
+	}, false);
+
+	polynomial.addEventListener('pointerdown', function(e){
+		var canvas_rect = polynomial.getBoundingClientRect();
+		uncertain2_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		uncertain2_xs[uncertain2_i] = client_to_x(e.clientX - canvas_rect.left);
+		uncertain2_ys[uncertain2_i] = client_to_y(e.clientY - canvas_rect.top);
+		uncertain2_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, false);
+		polynomial.releasePointerCapture(e.pointerId);
+	}, false);
+
+	polynomial.addEventListener('pointerleave', function(e){
+		uncertain2_draw(0, 0, false);
+	}, false);
+}
+
+function uncertain2_draw(client_x, client_y, do_guides){
+	polynomial = document.getElementById("uncertain2");
+	var context = polynomial.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// grid
+	draw_grid_on(context);
+
+
+
+	// uncertain polynomials
+	for(var d1 = -uncertain2_ds[0]; d1 <= uncertain2_ds[0]; d1 += uncertain2_ds[0]) {
+		for(var d2 = -uncertain2_ds[1]; d2 <= uncertain2_ds[1]; d2 += uncertain2_ds[1]) {
+			var ds = [d1, d2];
+			var A = [];
+			var B = [];
+			for(var i = 0; i < uncertain2_n; ++i){
+				A[i] = [];
+				for(var j = 0; j < uncertain2_n; ++j){
+					A[i][j] = Math.pow(uncertain2_xs[i] + ds[i], j);
+				}
+				B[i] = uncertain2_ys[i];
+			}
+			X = solved_linear(A, B, uncertain2_n);
+
+			context.beginPath();
+			context.lineWidth = 1;
+			context.strokeStyle="#EDACB9";
+			for(var j = 0; j < w; ++j){
+				const x = client_to_x(j);
+				const y = polynomial_in_x(X, x, uncertain2_n);
+				if(j == 0) {
+					context.moveTo(x_to_client(x), y_to_client(y));
+				} else {
+					context.lineTo(x_to_client(x), y_to_client(y));
+				}
+			}
+			context.stroke();
+			context.closePath();
+			context.lineWidth = 1;
+		}
+	}
+
+	// the certain polynomial
+	var A = [];
+	var B = [];
+	for(var i = 0; i < uncertain2_n; ++i){
+		A[i] = [];
+		for(var j = 0; j < uncertain2_n; ++j){
+			A[i][j] = Math.pow(uncertain2_xs[i], j);
+		}
+		B[i] = uncertain2_ys[i];
+	}
+	X = solved_linear(A, B, uncertain2_n);
+
+	context.beginPath();
+	context.lineWidth = 2;
+	context.strokeStyle="#d64562";
+	for(var j = 0; j < w; ++j){
+		const x = client_to_x(j);
+		const y = polynomial_in_x(X, x, uncertain2_n);
+		if(j == 0) {
+			context.moveTo(x_to_client(x), y_to_client(y));
+		} else {
+			context.lineTo(x_to_client(x), y_to_client(y));
+		}
+	}
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
+
+	// dots
+	context.fillStyle="#d64562";
+	for(var i = 0; i < uncertain2_n; ++i){
+		const xi = x_to_client(uncertain2_xs[i]) + 0.5;
+		const yi = y_to_client(uncertain2_ys[i]) + 0.5;
+		context.beginPath();
+		context.lineWidth = 1;
+		context.arc(xi, yi, 4, 0, 2*Math.PI);
+		context.stroke();
+		context.fill();
+		context.closePath();
+		context.beginPath();
+		context.lineWidth = 4;
+		const x1 = x_to_client(uncertain2_xs[i]) + 0.5;
+		const y1 = y_to_client(uncertain2_ys[i] - uncertain2_ds[i]) + 0.5;
+		const x2 = x_to_client(uncertain2_xs[i]) + 0.5;
+		const y2 = y_to_client(uncertain2_ys[i] + uncertain2_ds[i]) + 0.5;
+		context.moveTo(x1, y1);
+		context.lineTo(x2, y2);
+		context.stroke();
+		context.lineWidth = 1;
+		context.closePath();
+	}
+
+	// guides
+	if(do_guides){
+		min_d = Math.pow(uncertain2_xs[0] - client_to_x(client_x), 2) + Math.pow(uncertain2_ys[0] - client_to_y(client_y), 2);
+		min_i = 0;
+		for(var i = 1; i < uncertain2_n; ++i){
+			var di = Math.pow(uncertain2_xs[i] - client_to_x(client_x), 2) + Math.pow(uncertain2_ys[i] - client_to_y(client_y), 2);
+			if(di < min_d){
+				min_d = di;
+				min_i = i;
+			}
+		}
+		uncertain2_i = min_i;
+		context.setLineDash([4, 4]);
+		context.beginPath();
+		context.moveTo(x_to_client(uncertain2_xs[min_i]), y_to_client(uncertain2_ys[min_i]));
+		context.lineTo(client_x, client_y);
+		context.strokeStyle="#d64562";
+		context.stroke();
+		context.closePath();
+		context.setLineDash([]);
+	}
+}
+
+
 function show(n){
 	document.getElementById("shown_" + n).style.display = "none";
 	document.getElementById("hidden_" + n).style.display = "inline";
@@ -635,6 +793,13 @@ Either your estimates suck or your job does
 	<canvas id="polynomial4" width=640 height=640></canvas>
 	<script language="JavaScript">
 	init_polynomial4();
+	</script>
+	<p>
+
+	</p>
+	<canvas id="uncertain2" width=640 height=640></canvas>
+	<script language="JavaScript">
+	init_uncertain2();
 	</script>
 	
 	<h2>
