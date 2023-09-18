@@ -42,3 +42,7 @@ rss = rss.replace('</channel>', item + '</channel>')
 f = open('../../pages/rss', 'w')
 f.write(rss)
 f.close()
+
+f = open('../../pages/rss.rss', 'w')
+f.write(rss)
+f.close()
