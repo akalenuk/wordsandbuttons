@@ -11,6 +11,9 @@ _All the code is licensed under [The Unlicense](http://unlicense.org/)._
 
 ## Pages
 
+- [Either your estimates suck or your job does](https://wordsandbuttons.online/either_your_estimates_suck_or_your_job_does.html) This page uses polynomial modeling to show why software engineering tasks are often impossible to estimate.
+<sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> 
+
 - [Static typing isn’t free. Where do you think the C++ angry mob comes from?](https://wordsandbuttons.online/static_typing_isnt_free.html) Type inference works like logic deduction so any program in a statically typed language is two programs. The first one is the thing you sell, and the second – is a model that undergoes some sort of verification every time you run a compiler. This second program, although, often being written unknowingly, is not a free bonus, it’s something you have to pay for in several ways.
 <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
