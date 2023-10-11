@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.84">
+	<title>An interactive guide to homogeneous coordinates</title>
+	<meta name="description" content="This interactive guide shows how homogeneous coordinates actually make geometry simpler and not more complicated. It explains the extra coordinate, the matrices, the generalized transformations. Most of what you need to know about projective geometry as a practicing programmer is here.">
+	<meta name="keywords" content="mathematics, tutorials">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body{
+	margin: 0 0 0 0;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:link, a:visited {
+	color: blue;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 600pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 600pt;
+	text-align: left;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 15pt;
+	font-style: italic;
+	text-align: center;
+	line-height: 1.8;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+.plot {
+	font-family: sans-serif;
+	font-size: 12pt;
+	text-align: center;
+}
+
+i {
+	font-family: sans-serif;
+	font-size: 15pt;
+	font-style: italic;
+}
+
+table.footer {
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 600pt;
+}
+
+td.footer {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+pre {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 600pt;
+}
+
+table {
+	border-width: 0pt;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	font-family: monospace;
+	text-align: center;
+}
+
+table td {
+	padding: 0pt 4pt 0pt 4pt;
+	margin: 0 0 0 0;
+	border-width: 0pt;
+}
+
+.open_matrix {
+	width: 2pt;
+	border-bottom: 2px solid black;
+	border-top: 2px solid black;
+	border-left: 2px solid black;
+}
+
+.close_matrix {
+	width:2pt;
+	border-bottom: 2px solid black;
+	border-top: 2px solid black;
+	border-right: 2px solid black;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: center;
+	font-family: sans-serif;
+	width: 600pt;
+	background-color: #eeee99;
+	color: #000;
+}
+
+input[type="text"] {
+	width: 100pt;
+	height: 22pt;
+	margin: 8pt 8pt 8pt 8pt;
+	padding-left: 3pt;
+	font-size: 16pt;
+}
+
+.incdec{
+	width: 32pt;
+	height: 26pt;
+	margin: 0 0 0 0;
+	font-size: 16pt;
+	text-align: center;
+}
+
+button {
+	width: 150pt;
+	height: 26pt;
+	margin-left:8pt;
+	margin-right:8pt;
+	font-size: 16pt;
+}
+
+input[type="radio"]{
+	margin: 4pt 4pt 4pt 4pt;
+}
+
+canvas { touch-action: none; }
+	</style>
+	<script language="JavaScript">
+var w = 640;
+var h = 640;
+var d = 128.0;
+
+function client_to_x(client_x){
+	return (client_x - w / 2.0) / d;
+}
+
+function client_to_y(client_y){
+	return (h / 2.0 - client_y) / d;
+}
+
+function x_to_client(x){
+	return x * d + w / 2.0;
+}
+
+function y_to_client(y){
+	return h / 2.0 - y * d;
+}
+
+function svg_to_x(client_x){
+	return (client_x - 600 / 2.0) / d;
+}
+
+function svg_to_y(client_y){
+	return (600 / 2.0 - client_y) / d;
+}
+
+function x_to_svg(x){
+	return x * d + 600 / 2.0;
+}
+
+function y_to_svg(y){
+	return 600 / 2.0 - y * d;
+}
+
+var point_x = 1.5;
+var point_y = 2;
+
+var pick_a_point = null;
+var slide_a_w = null;
+var translation = null;
+
+function draw_arrow(context, x1, y1, x2, y2, color) {
+	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	const t = d < 16 ? (d / 16.) : 1.;
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - ((y2 - y1) * 4.5 / d + (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d - (x2 - x1) * 4.5 / d) * t);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + ((y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d + (x2 - x1) * 4.5 / d) * t);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
+}
+
+function draw_grid_on(context){
+	// grid
+	context.beginPath();
+	context.moveTo(-0.5,			h / 2.0-0.5);
+	context.lineTo(w-0.5,			h / 2.0-0.5);
+	context.lineTo(w-12-0.5,		h / 2.0 - 5-0.5);
+	context.moveTo(w-0.5,			h / 2.0-0.5);
+	context.lineTo(w-12-0.5,		h / 2.0 + 5-0.5);
+	context.moveTo(w / 2.0-0.5,		h-0.5);
+	context.lineTo(w / 2.0-0.5,		0-0.5);
+	context.lineTo(w / 2.0 - 5-0.5, 12-0.5);
+	context.moveTo(w / 2.0-0.5,		0-0.5);
+	context.lineTo(w / 2.0 + 5-0.5, 12-0.5);
+	context.fillStyle="#000000";
+	for(var i = -3; i <= 3; i++){
+		if(i != 0) {
+			context.moveTo(	 w / 2.0 + i*d-0.5,			h / 2.0-0.5);
+			context.lineTo(	 w / 2.0 + i*d-0.5,			h / 2.0 - 5-0.5);
+			context.fillText(i, w / 2.0 + i*d + 4-0.5,  h / 2.0 + 16-0.5);
+			context.moveTo(	 w / 2.0-0.5,				h / 2.0 - i*d-0.5);
+			context.lineTo(	 w / 2.0 + 5-0.5,			h / 2.0 - i*d-0.5);
+		}
+		context.fillText(i, w / 2.0 + 5-0.5,			h / 2.0 - i*d + 16-0.5);
+	}
+	context.strokeStyle="#000000";
+	context.stroke();
+	context.closePath();
+	// letters
+	context.fillStyle="#000000";
+	context.fillText("x", 640 - 16, 320 - 8);
+	context.fillText("y", 320 + 8, +16);
+}
+
+function svg_grid() {
+	grid = '';
+	grid += '<line x1="0" y1="300" x2="600" y2="300" stroke="black" />';
+	grid += '<line x1="586" y1="296" x2="600" y2="300" stroke="black" />';
+	grid += '<line x1="586" y1="304" x2="600" y2="300" stroke="black" />';
+	grid += '<line x1="300" y1="0" x2="300" y2="600" stroke="black" />';
+	grid += '<line x1="300" y1="0" x2="296" y2="14" stroke="black" />';
+	grid += '<line x1="300" y1="0" x2="304" y2="14" stroke="black" />';
+	for(var x = -2.; x <= 2.; x += 1.) {
+		const sx = x_to_svg(x).toString();
+		const tx = (x_to_svg(x)+4).toString();
+		if(x != 0)
+			grid += '<line x1="' + sx + '" y1="296" x2="' + sx + '" y2="304" stroke="black" />';
+		grid += '<text x="' + tx +'" y="293" class="plot">'+ x.toString() + '</text>';
+	}
+	for(var y = -2.; y <= 2.; y += 1.) {
+		const sy = y_to_svg(y).toString();
+		const ty = (y_to_svg(y)-6).toString();
+		if(y != 0) {
+			grid += '<line x1="296" y1="' + sy + '" x2="304" y2="' + sy + '" stroke="black" />';
+			grid += '<text x="304" y="' + ty + '" class="plot">'+ y.toString() + '</text>';
+		}
+	}
+	return grid;
+}
+
+function write_the_point_value(){
+	document.getElementById("to_fill_with_numbers").innerHTML =
+	"The point <i>(" + point_x.toFixed(1) + ", " + point_y.toFixed(1) + ")</i> is the same as " +
+	"<i>(" + point_x.toFixed(1) + ", " + point_y.toFixed(1) + ", 1)</i>. <br>" +
+	"Or <i>(" + point_x.toFixed(1)*2 + ", " + point_y.toFixed(1)*2 + ", 2)</i>.<br>" +
+	"Or <i>(" + point_x.toFixed(1)*0.5 + ", " + point_y.toFixed(1)*0.5 + ", 0.5)</i>. <br>" +
+	"Or even <i>(" + point_x.toFixed(1)*1000 + ", " + point_y.toFixed(1)*1000 + ", 1000)</i>. <br>";
+}
+
+function init_w(){
+	document.getElementById("w").addEventListener('submit', function(e) {
+		transform();
+		e.preventDefault();
+	}, false);
+}
+
+function round00(x) {
+	return Math.round(100.*x) / 100.;
+}
+
+function init_pick_a_point(){
+	pick_a_point = document.getElementById("pick_a_point");
+	var canvas_rect = pick_a_point.getBoundingClientRect();
+	pick_a_point_draw(0, 0, false);
+
+	pick_a_point.addEventListener('pointermove', function(e){
+		var canvas_rect = pick_a_point.getBoundingClientRect();
+		if(e.buttons == 1){ // drag
+			point_x = svg_to_x((e.clientX - canvas_rect.left) * 3/4);
+			point_y = svg_to_y((e.clientY - canvas_rect.top) * 3/4);
+			pick_a_point_draw(0, 0, false);
+			write_the_point_value();
+			transform();
+			slide_a_w_draw(e.clientX);
+		}else{  // move
+			pick_a_point_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		}
+	}, false);
+
+	pick_a_point.addEventListener('pointerdown', function(e){
+		var canvas_rect = pick_a_point.getBoundingClientRect();
+		point_x = svg_to_x((e.clientX - canvas_rect.left) * 3/4);
+		point_y = svg_to_y((e.clientY - canvas_rect.top) * 3/4);
+		pick_a_point_draw(0, 0, false);
+		write_the_point_value();
+		transform();
+		slide_a_w_draw(e.clientX);
+		pick_a_point.releasePointerCapture(e.pointerId);
+	}, false);
+
+	pick_a_point.addEventListener('pointerleave', function(e){
+		pick_a_point_draw(0, 0, false);
+	}, false);
+}
+
+function pick_a_point_draw(client_x, client_y, do_guides){
+	svg = document.getElementById("pick_a_point");
+	svg.innerHTML = '';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	svg.innerHTML += svg_grid();
+	svg.innerHTML += '<line stroke="#d64562" stroke-dasharray="10,10" x1="'+x_to_svg(point_x)+'" y1="300" x2="'+x_to_svg(point_x)+'" y2="'+y_to_svg(point_y)+'" />';
+	svg.innerHTML += '<line stroke="#d64562" stroke-dasharray="10,10" x1="300" y1="'+y_to_svg(point_y)+'" x2="'+x_to_svg(point_x)+'" y2="'+y_to_svg(point_y)+'" />';
+	svg.innerHTML += '<circle stroke="#d64562" fill="#d64562" cx="'+x_to_svg(point_x)+'" cy="'+y_to_svg(point_y)+'" r="2" />';
+	const px = (x_to_svg(point_x)+4).toString();
+	const py = (y_to_svg(point_y)+19).toString();
+	const p_text = point_x.toFixed(1).toString() + ", " + point_y.toFixed(1).toString();
+	svg.innerHTML += '<text fill="#d64562" x="'+px+'" y="'+py+'" class="plot">'+ p_text + '</text>';
+}
+
+function transform(){
+	var w = Number(document.getElementById("proposed_w").value);
+	if(w == NaN)
+		w = 1;
+	if(w == 0){
+		document.getElementById("after_the_w_proposed").style.display = "block";
+		document.getElementById("transformed").innerHTML = "<br>No transformation available!"
+		document.getElementById("to_hide_on_transform").style.display = "none";
+	}else{
+		document.getElementById("transformed").innerHTML =
+			"<br>(" + point_x.toFixed(1) + ", " + point_y.toFixed(1) + ") = " +
+			"(" + (point_x.toFixed(1) * w) + ", " + (point_y.toFixed(1) * w) + ", " + parseFloat(w) + ")";
+	}
+}
+
+var slide_w = 1.0;
+
+function init_slide_a_w(){
+	var slide_a_w = document.getElementById("slide_a_w");
+	var canvas_rect = slide_a_w.getBoundingClientRect();
+	slide_a_w_draw();
+
+	slide_a_w.addEventListener('pointermove', function(e){
+		const canvas_rect = slide_a_w.getBoundingClientRect();
+		if(e.buttons == 1){
+			const mouse_x = svg_to_x((e.clientX - canvas_rect.left) * 3/4);
+			const mouse_y = svg_to_y((e.clientY - canvas_rect.top) * 3/4);
+			const t = (point_x * mouse_x + point_y * mouse_y) / (point_x * point_x + point_y * point_y);
+			slide_w = 1.0 / t;
+			slide_a_w_draw();
+		}
+	}, false);
+
+	slide_a_w.addEventListener('pointerdown', function(e){
+		const canvas_rect = slide_a_w.getBoundingClientRect();
+		const mouse_x = svg_to_x((e.clientX - canvas_rect.left) * 3/4);
+		const mouse_y = svg_to_y((e.clientY - canvas_rect.top) * 3/4);
+		const t = (point_x * mouse_x + point_y * mouse_y) / (point_x * point_x + point_y * point_y);
+		slide_w = 1.0 / t;
+		slide_a_w_draw();
+		slide_a_w.releasePointerCapture(e.pointerId);
+	}, false);
+
+	slide_a_w.addEventListener('pointerleave', function(e){
+		slide_a_w_draw();
+	}, false);
+}
+
+function slide_a_w_draw(){
+	svg = document.getElementById("slide_a_w");
+	svg.innerHTML = '';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	const d = Math.sqrt(point_y*point_y + point_x*point_x);
+	const point_outside_x = point_x / d * 4;
+	const point_outside_y = point_y / d * 4;
+	svg.innerHTML += '<line stroke-dasharray="10,10" stroke="#d64562" x1="'+x_to_svg(-point_outside_x)+'" y1="'+y_to_svg(-point_outside_y)
+		+'" x2="'+x_to_svg(point_outside_x)+'" y2="'+y_to_svg(point_outside_y)+'"/>';
+	svg.innerHTML += svg_grid();		
+	svg.innerHTML += '<circle stroke="#d64562" fill="#d64562" cx="'+x_to_svg(point_x/slide_w)+'" cy="'+y_to_svg(point_y/slide_w)+'" r="2" />';
+	const px = (x_to_svg(point_x/slide_w)+4).toString();
+	const py = (y_to_svg(point_y/slide_w)+19).toString();
+	const p_text = point_x.toFixed(1) + ", " + point_y.toFixed(1) + ", " + slide_w.toFixed(2);
+	svg.innerHTML += '<text fill="#d64562" x="'+px+'" y="'+py+'" class="plot">'+ p_text + '</text>';
+}
+
+
+function draw_original_cube_on(context){
+	// original cube
+	context.beginPath();
+	context.moveTo(x_to_client(1), y_to_client(1));
+	context.lineTo(x_to_client(1 + 1), y_to_client(1));
+	context.lineTo(x_to_client(1 + 1), y_to_client(1 + 1));
+	context.lineTo(x_to_client(1), y_to_client(1 + 1));
+	context.lineTo(x_to_client(1), y_to_client(1));
+	context.strokeStyle="#999999";
+	context.stroke();
+	context.closePath();
+}
+
+var dx = 0.5;
+var dy = 0.3;
+var drag_x = 0.;
+var drag_y = 0.;
+function init_translation(){
+	translation = document.getElementById("translation");
+	translation_draw(0, 0, false);
+
+	translation.addEventListener('pointerdown', function(e){
+		var canvas_rect = translation.getBoundingClientRect();
+		drag_x = client_to_x(e.clientX - canvas_rect.left);
+		drag_y = client_to_y(e.clientY - canvas_rect.top);
+		translation_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		translation.releasePointerCapture(e.pointerId);
+	}, false);
+
+	translation.addEventListener('pointermove', function(e){
+		var canvas_rect = translation.getBoundingClientRect();
+		if(e.buttons == 1){
+			x = client_to_x(e.clientX - canvas_rect.left);
+			y = client_to_y(e.clientY - canvas_rect.top);
+			dx = dx + x - drag_x;
+			dy = dy + y - drag_y;
+			drag_x = x;
+			drag_y = y;
+			translation_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
+		}
+	}, false);
+
+	translation.addEventListener('pointerup', function(e){
+		translation_draw(0, 0, false);
+	}, false);
+
+	translation.addEventListener('pointerleave', function(e){
+		translation_draw(0, 0, false);
+	}, false);
+}
+
+function translation_draw(client_x, client_y, do_new){
+	var x = dx;
+	var y = dy;
+
+	var context = translation.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// original cube
+	draw_original_cube_on(context);
+
+	context.lineWidth = 2;
+	if(do_new){
+		// the connection
+		context.beginPath();
+		context.setLineDash([4, 4]);
+		context.moveTo(x_to_client(1), y_to_client(1));
+		context.lineTo(x_to_client(x), y_to_client(y));
+		context.moveTo(x_to_client(1 + 1), y_to_client(1));
+		context.lineTo(x_to_client(x + 1), y_to_client(y));
+		context.moveTo(x_to_client(1 + 1), y_to_client(1 + 1));
+		context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
+		context.moveTo(x_to_client(1), y_to_client(1 + 1));
+		context.lineTo(x_to_client(x), y_to_client(y + 1));
+		context.strokeStyle="#d64562";
+		context.stroke();
+		context.setLineDash([]);
+		context.closePath();
+	}
+	// dx-dy cube
+	context.beginPath();
+	context.moveTo(x_to_client(dx), y_to_client(dy));
+	context.lineTo(x_to_client(dx + 1), y_to_client(dy));
+	context.lineTo(x_to_client(dx + 1), y_to_client(dy + 1));
+	context.lineTo(x_to_client(dx), y_to_client(dy + 1));
+	context.lineTo(x_to_client(dx), y_to_client(dy));
+	context.strokeStyle="#8c2c3e";
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
+
+	// translation text
+	context.fillStyle="#8c2c3e";
+	context.fillText("x' = x + a, where a = " + (x-1).toFixed(1), 32, 560);
+	context.fillText("y' = y + b, where b = " + (y-1).toFixed(1), 32, 580);
+
+	// grid
+	draw_grid_on(context);
+}
+
+function rotated_y(a, x, y){
+	return Math.sin(a) * x + Math.cos(a) * y;
+}
+
+function rotated_x(a, x, y){
+	return Math.cos(a) * x - Math.sin(a) * y;
+}
+
+var rotation_a = -0.2;
+
+function in_2_pi(x) {
+	while(x < -Math.PI)
+		x += 2*Math.PI;
+	while(x >= Math.PI)
+		x -= 2*Math.PI;
+	return x;
+}
+
+function rotation_for(x, y) {
+	return in_2_pi(Math.atan(y / x)
+		+ ((x < 0) ? Math.PI : 0.)
+		- Math.PI / 4.);
+}
+
+function init_rotation(){
+	rotation_draw(rotation_a, false);
+
+	var rotation = document.getElementById("rotation");
+
+	rotation.addEventListener('pointermove', function(e){
+		if(e.buttons == 1) {
+			var canvas_rect = rotation.getBoundingClientRect();
+			var client_x = e.clientX - canvas_rect.left;
+			var client_y = e.clientY - canvas_rect.top;
+			rotation_a = rotation_for(client_to_x(client_x), client_to_y(client_y))
+			rotation_draw(rotation_a, true);
+		}
+	}, false);
+
+	rotation.addEventListener('pointerdown', function(e){
+		var canvas_rect = rotation.getBoundingClientRect();
+		var client_x = e.clientX - canvas_rect.left;
+		var client_y = e.clientY - canvas_rect.top;
+		rotation_a = rotation_for(client_to_x(client_x), client_to_y(client_y));
+		rotation_draw(rotation_a, true);
+		rotation.releasePointerCapture(e.pointerId);
+	}, false);
+
+	rotation.addEventListener('pointerup', function(e){
+		rotation_draw(rotation_a, false);
+	}, false);
+
+	rotation.addEventListener('pointerleave', function(e){
+		rotation_draw(rotation_a, false);
+	}, false);
+}
+
+function rotation_draw(a, do_new){
+	var context = rotation.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	var xs = [1., 2., 2., 1.];
+	var ys = [1., 1., 2., 2.];
+	var new_xs = [0, 0, 0, 0];
+	var new_ys = [0, 0, 0, 0];
+	for(var i = 0; i < 4; i++){
+		new_xs[i] = rotated_x(a, xs[i], ys[i]);
+		new_ys[i] = rotated_y(a, xs[i], ys[i]);
+	}
+
+	// original cube
+	draw_original_cube_on(context);
+
+	context.lineWidth = 2;
+	if(do_new){
+		// the connection
+		context.beginPath();
+		context.setLineDash([4, 4]);
+		var r = x_to_client(Math.sqrt(2.)) - x_to_client(0.);
+		const a1 = - Math.PI / 4.;
+		const a2 = - Math.PI / 4. - a;
+		if(a < 0.) {
+			context.arc(x_to_client(0), y_to_client(0), r, a1, a2);
+			context.lineTo(320, 320);
+		} else {
+			context.moveTo(320, 320);
+			context.arc(x_to_client(0), y_to_client(0), r, a2, a1);
+		}
+		context.strokeStyle="#d64562";
+		context.stroke();
+		context.setLineDash([]);
+		context.closePath();
+	}
+
+	// rotation
+	context.beginPath();
+	context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
+	for(var i = 0; i < 4; i++){
+		context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+	}
+	context.strokeStyle="#8c2c3e";
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
+
+	context.fillStyle="#8c2c3e";
+	context.fillText("x' = cos(a) * x + sin(a) * y", 32, 540);
+	context.fillText("y' = -sin(a) * x + cos(a) * y", 32, 560);
+	context.fillText("where a = " + a.toFixed(2), 32, 580);
+
+	// grid
+	draw_grid_on(context);
+}
+
+var scale_x = 0.8;
+var scale_y = 1.2;
+
+function init_scale(){
+	scale = document.getElementById("scale");
+	scale_draw(scale_x, scale_y, false);
+
+	scale.addEventListener('pointermove', function(e){
+		if(e.buttons == 1){
+			var canvas_rect = scale.getBoundingClientRect();
+			var new_scale_x = client_to_x(e.clientX - canvas_rect.left);
+			var new_scale_y = client_to_y(e.clientY - canvas_rect.top);
+			scale_x = new_scale_x;
+			scale_y = new_scale_y;
+			scale_draw(scale_x, scale_y, true);
+		}
+	}, false);
+
+	scale.addEventListener('pointerdown', function(e){
+		var canvas_rect = scale.getBoundingClientRect();
+		scale_x = client_to_x(e.clientX - canvas_rect.left);
+		scale_y = client_to_y(e.clientY - canvas_rect.top);
+		scale_draw(scale_x, scale_y, true);
+		scale.releasePointerCapture(e.pointerId);
+	}, false);
+
+	scale.addEventListener('pointerup', function(e){
+		scale_draw(scale_x, scale_y, false);
+	}, false);
+
+	scale.addEventListener('pointerleave', function(e){
+		scale_draw(scale_x, scale_y, false);
+	}, false);
+}
+
+function scale_draw(a, b, do_new){
+	var context = scale.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	var xs = [1., 2., 2., 1.];
+	var ys = [1., 1., 2., 2.];
+	var new_xs = [0, 0, 0, 0];
+	var new_ys = [0, 0, 0, 0];
+	for(var i = 0; i < 4; i++){
+		new_xs[i] = a * xs[i];
+		new_ys[i] = b * ys[i];
+	}
+
+	var new_saved_xs = [0, 0, 0, 0];
+	var new_saved_ys = [0, 0, 0, 0];
+	for(var i = 0; i < 4; i++){
+		new_saved_xs[i] = scale_x * xs[i];
+		new_saved_ys[i] = scale_y * ys[i];
+	}
+
+	// original cube
+	draw_original_cube_on(context);
+
+	// draw a scaled cube
+	context.lineWidth = 2;
+	context.beginPath();
+	context.moveTo(x_to_client(new_saved_xs[3]), y_to_client(new_saved_ys[3]));
+	for(var i = 0; i < 4; i++){
+		context.lineTo(x_to_client(new_saved_xs[i]), y_to_client(new_saved_ys[i]));
+	}
+	context.strokeStyle="#8c2c3e";
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
+
+	// and write the scales
+	context.fillStyle="#8c2c3e";
+	context.fillText("x' = a * x, where a = " + a.toFixed(2), 32, 560);
+	context.fillText("y' = b * y, where b = " + b.toFixed(2), 32, 580);
+
+	// grid
+	draw_grid_on(context);
+
+	// scale vector
+	if(do_new) {
+		context.lineWidth = 2;
+		draw_arrow(context, 320, 320, x_to_client(new_xs[0]), y_to_client(new_ys[0]), "#d64562");
+		context.lineWidth = 1;
+	}
+}
+
+function nearest_i(x, y, xs, ys) {
+	var best_i = 0;
+	var best_d = (x-xs[0])*(x-xs[0]) + (y-ys[0])*(y-ys[0]);
+	for(var i = 1; i < xs.length; ++i) {
+		const d = (x-xs[i])*(x-xs[i]) + (y-ys[i])*(y-ys[i]);
+		if(d < best_d) {
+			best_d = d;
+			best_i = i;
+		}
+	}
+	return best_i;
+}
+
+function is_convex(xs, ys) {
+	// split the quadrilateral into 2 triangles in 2 ways.
+	// If the sum of triangle's areas are equal both ways, it looks convex
+	function area_but_not_really(x1, y1, x2, y2, x3, y3) { // cross of triangle's sides
+		return Math.abs((x2-x1) * (y3-y1) - (x3-x1) * (y2-y1));
+	}
+	return Math.abs(
+		area_but_not_really(xs[0], ys[0], xs[1], ys[1], xs[2], ys[2])
+		+ area_but_not_really(xs[0], ys[0], xs[2], ys[2], xs[3], ys[3])
+		- area_but_not_really(xs[1], ys[1], xs[2], ys[2], xs[3], ys[3])
+		- area_but_not_really(xs[1], ys[1], xs[3], ys[3], xs[0], ys[0])) < 1e-5;
+}
+
+var affine_xs = [-1.0, 1.5, 1.0, -1.5];
+var affine_ys = [1.0, 1.5, -1.0, -1.5];
+var affine_i = 0;
+
+function init_affine(){
+	const affine = document.getElementById("affine");
+	affine_draw(0, 0, false);
+
+	affine.addEventListener('pointerdown', function(e){
+		const canvas_rect = affine.getBoundingClientRect();
+		const x = client_to_x( e.clientX - canvas_rect.left );
+		const y = client_to_y( e.clientY - canvas_rect.top );
+		affine_i = nearest_i(x, y, affine_xs, affine_ys);
+		affine_xs[affine_i] = x;
+		affine_ys[affine_i] = y;
+		affine_xs[(affine_i + 3) % 4] = affine_xs[(affine_i + 2) % 4] + affine_xs[(affine_i + 0) % 4] - affine_xs[(affine_i + 1) % 4];
+		affine_ys[(affine_i + 3) % 4] = affine_ys[(affine_i + 2) % 4] + affine_ys[(affine_i + 0) % 4] - affine_ys[(affine_i + 1) % 4];
+		affine_draw(e.clientX, e.clientY, true);
+		affine.releasePointerCapture(e.pointerId);
+	}, false);
+
+	affine.addEventListener('pointermove', function(e){
+		const canvas_rect = affine.getBoundingClientRect();
+		const x = client_to_x( e.clientX - canvas_rect.left );
+		const y = client_to_y( e.clientY - canvas_rect.top );
+		if(e.buttons == 1){
+			affine_xs[affine_i] = x;
+			affine_ys[affine_i] = y;
+			affine_xs[(affine_i + 3) % 4] = affine_xs[(affine_i + 2) % 4] + affine_xs[(affine_i + 0) % 4] - affine_xs[(affine_i + 1) % 4];
+			affine_ys[(affine_i + 3) % 4] = affine_ys[(affine_i + 2) % 4] + affine_ys[(affine_i + 0) % 4] - affine_ys[(affine_i + 1) % 4];
+			affine_draw(0, 0, false);
+		}else{
+			affine_i = nearest_i(x, y, affine_xs, affine_ys);
+			affine_draw(e.clientX, e.clientY, true);
+		}
+	}, false);
+
+	affine.addEventListener('pointerup', function(e){
+		var canvas_rect = affine.getBoundingClientRect();
+		const x = client_to_x( e.clientX - canvas_rect.left );
+		const y = client_to_y( e.clientY - canvas_rect.top );
+		affine_xs[affine_i] = x;
+		affine_ys[affine_i] = y;
+		affine_xs[(affine_i + 3) % 4] = affine_xs[(affine_i + 2) % 4] + affine_xs[(affine_i + 0) % 4] - affine_xs[(affine_i + 1) % 4];
+		affine_ys[(affine_i + 3) % 4] = affine_ys[(affine_i + 2) % 4] + affine_ys[(affine_i + 0) % 4] - affine_ys[(affine_i + 1) % 4];
+		affine_draw(e.clientX, e.clientY, true);
+	}, false);
+
+	affine.addEventListener('pointerleave', function(e){
+		affine_draw(0, 0, false);
+	}, false);
+}
+
+function affine_draw(client_x, client_y, do_new){
+	// coordiantes correction
+	var canvas_rect = affine.getBoundingClientRect();
+	client_x -= canvas_rect.left;
+	client_y -= canvas_rect.top;
+	var x = client_to_x(client_x);
+	var y = client_to_y(client_y);
+
+	var context = affine.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// affine
+	context.lineWidth = 2;
+	context.beginPath();
+	context.moveTo(x_to_client(affine_xs[3]), y_to_client(affine_ys[3]));
+	for(var i = 0; i < 4; i++){
+		context.lineTo(x_to_client(affine_xs[i]), y_to_client(affine_ys[i]));
+	}
+	context.strokeStyle="#8c2c3e";
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
+
+	if(do_new){
+		// link
+		context.lineWidth = 2;
+		draw_arrow(context, x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]), x_to_client(x), y_to_client(y), "#d64562");
+		context.lineWidth = 1;
+	}
+
+	// x
+	context.beginPath();
+	context.fillStyle="#8c2c3e";
+	context.arc(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]), 3, 0, 2*Math.PI);
+	context.fill();
+	context.closePath();
+
+	// grid
+	draw_grid_on(context);
+}
+
+function init_projective(){
+	const projective = document.getElementById("projective");
+	projective_draw(0, 0, false);
+
+	projective.addEventListener('pointerdown', function(e){
+		const canvas_rect = projective.getBoundingClientRect();
+		const x = client_to_x( e.clientX - canvas_rect.left );
+		const y = client_to_y( e.clientY - canvas_rect.top );
+		projective_i = nearest_i(x, y, projective_xs, projective_ys);
+		const dx = x - projective_xs[projective_i];
+		const dy = y - projective_ys[projective_i];
+		projective_xs[projective_i] = x;
+		projective_ys[projective_i] = y;
+		if(!is_convex(projective_xs, projective_ys)) {
+			for(var i = 0; i < 4; ++i) {
+				if(i != projective_i) {
+					projective_xs[i] += dx;
+					projective_ys[i] += dy;
+				}
+			}
+		}
+		projective_draw(e.clientX, e.clientY, true);
+		projective.releasePointerCapture(e.pointerId);
+	}, false);
+
+	projective.addEventListener('pointermove', function(e){
+		const canvas_rect = projective.getBoundingClientRect();
+		const x = client_to_x( e.clientX - canvas_rect.left );
+		const y = client_to_y( e.clientY - canvas_rect.top );
+		if(e.buttons == 1){
+			const dx = x - projective_xs[projective_i];
+			const dy = y - projective_ys[projective_i];
+			projective_xs[projective_i] = x;
+			projective_ys[projective_i] = y;
+			if(!is_convex(projective_xs, projective_ys)) {
+				for(var i = 0; i < 4; ++i) {
+					if(i != projective_i) {
+						projective_xs[i] += dx;
+						projective_ys[i] += dy;
+					}
+				}
+			}
+			projective_draw(0, 0, false);
+		}else{
+			projective_i = nearest_i(x, y, projective_xs, projective_ys);
+			projective_draw(e.clientX, e.clientY, true);
+		}
+	}, false);
+
+	projective.addEventListener('pointerup', function(e){
+		var canvas_rect = projective.getBoundingClientRect();
+		const x = client_to_x( e.clientX - canvas_rect.left );
+		const y = client_to_y( e.clientY - canvas_rect.top );
+		const dx = x - projective_xs[projective_i];
+		const dy = y - projective_ys[projective_i];
+		projective_xs[projective_i] = x;
+		projective_ys[projective_i] = y;
+		if(!is_convex(projective_xs, projective_ys)) {
+			for(var i = 0; i < 4; ++i) {
+				if(i != projective_i) {
+					projective_xs[i] += dx;
+					projective_ys[i] += dy;
+				}
+			}
+		}
+		projective_draw(e.clientX, e.clientY, true);
+	}, false);
+
+	projective.addEventListener('pointerleave', function(e){
+		projective_draw(0, 0, false);
+	}, false);
+}
+
+var projective_xs = [-0.5, 0.5, 2.0, -2.0];
+var projective_ys = [2.0, 2.0, -1.5, -1.5];
+var projective_i = 0;
+
+function projective_draw(client_x, client_y, do_new){
+	// coordiantes correction
+	var canvas_rect = projective.getBoundingClientRect();
+	client_x -= canvas_rect.left;
+	client_y -= canvas_rect.top;
+		var x = client_to_x(client_x);
+		var y = client_to_y(client_y);
+
+	var context = projective.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// projective
+	context.lineWidth = 2;
+	context.beginPath();
+	context.moveTo(x_to_client(projective_xs[3]), y_to_client(projective_ys[3]));
+	for(var i = 0; i < 4; i++){
+		context.lineTo(x_to_client(projective_xs[i]), y_to_client(projective_ys[i]));
+	}
+	context.strokeStyle="#8c2c3e";
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
+
+	if(do_new){
+		// link
+		context.lineWidth = 2;
+		draw_arrow(context, x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]), x_to_client(x), y_to_client(y), "#d64562");
+		context.lineWidth = 1;
+	}
+
+	// x
+	context.beginPath();
+	context.fillStyle="#8c2c3e";
+	context.arc(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]), 3, 0, 2*Math.PI);
+	context.fill();
+	context.closePath();
+
+	// grid
+	draw_grid_on(context);
+}
+
+var composable_mousedown_x = 0;
+var composable_mousedown_y = 0;
+
+var composable_transformation = function(x, y) {	// just a placeholder to be filled below
+	return [x, y];
+}
+
+function recalculate_composable(client_x, client_y){
+	const x = client_to_x(client_x);
+	const y = client_to_y(client_y);
+
+	// new cube
+	var new_xs = [1., 2., 2., 1.];
+	var new_ys = [1., 1., 2., 2.];
+	if(document.getElementById("radio_p").checked){
+		for(var i = 0; i < 4; i++){
+			new_xs[i] = composable_xs[i];
+			new_ys[i] = composable_ys[i];
+		}
+		new_xs[composable_i] = x;
+		new_ys[composable_i] = y;
+		if(!is_convex(new_xs, new_ys)) {
+			for(var i = 0; i < 4; i++) {
+				if(i != composable_i) {
+					new_xs[i] += x - composable_xs[composable_i];
+					new_ys[i] += y - composable_ys[composable_i];
+				}
+			}
+		}
+	}else if(document.getElementById("radio_t").checked){
+		for(var i = 0; i < 4; i++){
+			new_xs[i] = composable_xs[i] + x - client_to_x(composable_mousedown_x);
+			new_ys[i] = composable_ys[i] + y - client_to_y(composable_mousedown_y);
+		}
+	}else if(document.getElementById("radio_r").checked){
+		const a_new = rotation_for(x, y);
+		const a_increment = a_new - rotation_for(client_to_x(composable_mousedown_x), client_to_y(composable_mousedown_y));
+		for(var i = 0; i < 4; i++){
+			new_xs[i] = rotated_x(a_increment, composable_xs[i], composable_ys[i]);
+			new_ys[i] = rotated_y(a_increment, composable_xs[i], composable_ys[i]);
+		}
+	}else if(document.getElementById("radio_s").checked){
+		const cx = (composable_xs[0] + composable_xs[1] + composable_xs[2] + composable_xs[3]) / 4.;
+		const cy = (composable_ys[0] + composable_ys[1] + composable_ys[2] + composable_ys[3]) / 4.;
+		const sx = (cx + x - client_to_x(composable_mousedown_x)) / cx;
+		const sy = (cy + y - client_to_y(composable_mousedown_y)) / cy;
+		for(var i = 0; i < 4; i++){
+			new_xs[i] = composable_xs[i] * sx;
+			new_ys[i] = composable_ys[i] * sy;
+		}
+	}
+
+	for(var i = 0; i < 4; i++){
+		composable_xs[i] = new_xs[i];
+		composable_ys[i] = new_ys[i];
+	}
+
+	recalculate_composable_matrix();
+	}
+
+function recalculate_composable_matrix() {
+	// calculate a matrix
+	x0 = composable_xs[0];	y0 = composable_ys[0];
+	x1 = composable_xs[1];	y1 = composable_ys[1];
+	x2 = composable_xs[2];	y2 = composable_ys[2];
+	x3 = composable_xs[3];	y3 = composable_ys[3];
+	var A = (-x0*x2*y1 + x0*x2*y3 + x0*x3*y1 - x0*x3*y2 + x1*x2*y0 - x1*x2*y3 - x1*x3*y0 + x1*x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+	var D = (x0*x1*y2 - x0*x1*y3 - x0*x2*y1 + x0*x2*y3 + x1*x3*y0 - x1*x3*y2 - x2*x3*y0 + x2*x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+	var a = (-2*x0*x1*y2 + 2*x0*x1*y3 + 3*x0*x2*y1 - 3*x0*x2*y3 - 2*x0*x3*y1 + 2*x0*x3*y2 - x1*x2*y0 + x1*x2*y3 + x2*x3*y0 - x2*x3*y1)/
+		(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+	var B = (-x0*y1*y2 + x0*y1*y3 + x1*y0*y2 - x1*y0*y3 + x2*y0*y3 - x2*y1*y3 - x3*y0*y2 + x3*y1*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+	var E = (-x0*y1*y3 + x0*y2*y3 + x1*y0*y2 - x1*y2*y3 - x2*y0*y1 + x2*y1*y3 + x3*y0*y1 - x3*y0*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+	var b = (x0*y1*y2 - x0*y2*y3 - 3*x1*y0*y2 + 2*x1*y0*y3 + x1*y2*y3 + 2*x2*y0*y1 - 2*x2*y0*y3 - 2*x3*y0*y1 + 3*x3*y0*y2 - x3*y1*y2)/
+		(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+	var C = (-x0*y2 + x0*y3 + x1*y2 - x1*y3 + x2*y0 - x2*y1 - x3*y0 + x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+	var F = (-x0*y1 + x0*y2 + x1*y0 - x1*y3 - x2*y0 + x2*y3 + x3*y1 - x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
+	var c = 1.;
+
+	composable_transformation = function(x, y) {
+		const x_ = A*x + D*y + a;
+		const y_ = B*x + E*y + b;
+		const w_ = C*x + F*y + c;
+		return [x_/w_, y_/w_];
+	};
+
+	document.getElementById("matrix_col1").innerHTML = parseFloat(A.toFixed(3)) + "<br>" + parseFloat(B.toFixed(3)) + "<br>" + parseFloat(C.toFixed(3));
+	document.getElementById("matrix_col2").innerHTML = parseFloat(D.toFixed(3)) + "<br>" + parseFloat(E.toFixed(3)) + "<br>" + parseFloat(F.toFixed(3));
+	document.getElementById("matrix_col3").innerHTML = parseFloat(a.toFixed(3)) + "<br>" + parseFloat(b.toFixed(3)) + "<br>" + parseFloat(c.toFixed(3));
+}
+
+function init_composable(){
+	composable = document.getElementById("composable");
+	composable_draw(0, 0, false);
+
+	composable.addEventListener('pointerdown', function(e){
+		const canvas_rect = composable.getBoundingClientRect();
+		composable_mousedown_x = e.clientX - canvas_rect.left;
+		composable_mousedown_y = e.clientY - canvas_rect.top;
+		const x = client_to_x( composable_mousedown_x );
+		const y = client_to_y( composable_mousedown_y );
+		composable_i = nearest_i(x, y, composable_xs, composable_ys);
+		recalculate_composable(composable_mousedown_x, composable_mousedown_y);
+		composable_draw(0, 0, false);
+		composable.releasePointerCapture(e.pointerId);
+	}, false);
+
+	composable.addEventListener('pointermove', function(e){
+		var canvas_rect = composable.getBoundingClientRect();
+		const client_x = e.clientX - canvas_rect.left;
+		const client_y = e.clientY - canvas_rect.top;
+		if(e.buttons == 1){
+			recalculate_composable(client_x, client_y);
+			composable_mousedown_x = client_x;
+			composable_mousedown_y = client_y;
+			composable_draw(client_x, client_y, true);
+		}else{
+			if(document.getElementById("radio_p").checked){
+				const x = client_to_x( client_x );
+				const y = client_to_y( client_y );
+				composable_i = nearest_i(x, y, composable_xs, composable_ys);
+				composable_draw(client_x, client_y, true);
+			}
+		}
+	}, false);
+
+	composable.addEventListener('pointerup', function(e){
+		var canvas_rect = composable.getBoundingClientRect();
+		client_x = e.clientX - canvas_rect.left;
+		client_y = e.clientY - canvas_rect.top;
+		recalculate_composable(client_x, client_y);
+		composable_draw(client_x, client_y, false);
+	}, false);
+
+	composable.addEventListener('pointerleave', function(e){
+		composable_draw(0, 0, false);
+	}, false);
+}
+
+var composable_xs = [1., 2., 2., 1.];
+var composable_ys = [1., 1., 2., 2.];
+var composable_i = 0;
+
+function composable_draw(client_x, client_y, do_new){
+	var x = client_to_x(client_x);
+	var y = client_to_y(client_y);
+
+	var context = composable.getContext("2d");
+	context.font = "16px sans-serif";
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// original cube
+	draw_original_cube_on(context);
+
+	// composable
+	context.lineWidth = 2;
+	context.beginPath();
+	context.moveTo(x_to_client(composable_xs[3]), y_to_client(composable_ys[3]));
+	for(var i = 0; i < 4; i++){
+		context.lineTo(x_to_client(composable_xs[i]), y_to_client(composable_ys[i]));
+	}
+	context.strokeStyle="#8c2c3e";
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
+
+	context.beginPath();
+	for(var t = 1.; t <= 2.; t += 0.125) {
+		const xy1 = composable_transformation(t, 1.);
+		const xy2 = composable_transformation(t, 2.);
+		context.moveTo(x_to_client(xy1[0]), y_to_client(xy1[1]));
+		context.lineTo(x_to_client(xy2[0]), y_to_client(xy2[1]));
+		const xy3 = composable_transformation(1., t);
+		const xy4 = composable_transformation(2., t);
+		context.moveTo(x_to_client(xy3[0]), y_to_client(xy3[1]));
+		context.lineTo(x_to_client(xy4[0]), y_to_client(xy4[1]));
+	}
+	context.stroke();
+	context.closePath();
+
+	// grid
+	draw_grid_on(context);
+
+	// x
+	if(document.getElementById("radio_p").checked){
+		context.beginPath();
+		context.fillStyle="#8c2c3e";
+		context.arc(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]), 3, 0, 2*Math.PI);
+		context.fill();
+		context.closePath();
+
+		// guide
+		if(do_new){
+			context.lineWidth = 2;
+			draw_arrow(context, x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]), x_to_client(x), y_to_client(y), "#d64562");
+			context.lineWidth = 1;
+		}
+	}
+}
+
+function revert_composable(){
+	composable_xs = [1., 2., 2., 1.];
+	composable_ys = [1., 1., 2., 2.];
+	recalculate_composable_matrix();
+	composable_draw(0, 0, false);
+}
+
+function inc(counter_name) {
+	var counter = document.getElementById(counter_name);
+	counter.value = Number(counter.value) + 1;
+}
+
+function dec(counter_name) {
+	var counter = document.getElementById(counter_name);
+	counter.value = Number(counter.value) - 1;
+}
+	</script>
+</head>
+<body>
+	<center>
+	<p style="width: 600pt; padding: 36pt 0pt 64pt 0pt;">This is <a href="index.html">Words and Buttons Online</a> — a collection of&nbsp;interactive <a href="all_tutorials.html">#tutorials</a>, <a href="all_demos.html">#demos<a/>, and <a href="all_quizzes.html">#quizzes</a> about <a href="all_mathematics.html">#mathematics</a>, <a href="all_algorithms.html">#algorithms</a> and <a href="all_programming.html">#programming</a>.</p>
+	<h1>
+An interactive guide to homogeneous coordinates
+	</h1>
+	<p>
+Why would you care about homogeneous coordinates, whatever they are? Well, if you work with geometry: <nobr>3D-graphics</nobr>, image processing, physical simulation, — the answer is obvious. Knowing the mathematics behind your framework enables you to write more efficient code.
+	</p>
+	<p>
+But even if you don’t work with geometry at all, you still might enjoy learning about projective space and its link to linear algebra. It is a great example of mathematical alchemy: you pay with a small complication, you gain an enormous simplification in return.
+	</p>
+	<p>
+I think, learning this particular piece of mathematics is a valuable experience in its own right. And you know how it works. More experience, higher level, better loot.
+	</p>
+	<h2>
+The complication
+	</h2>
+	<p>
+In a <span id="index_cartesian_coordinate_system">Cartesian coordinate system</span>, a point on a plane is set by a pair of numbers <i>(x<sub>c</sub>, y<sub>c</sub>)</i>. Here is a plot you can choose a point on. Just click or tap anywhere you want.
+	</p>
+	<svg id="pick_a_point" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	</svg>
+	<br>
+	<script language="JavaScript">
+	init_pick_a_point();
+	</script>
+	<p>
+In <span id="index_homogeneous_coordinates">homogeneous coordinates</span>, a point on a plane is set by a tuple of 3 numbers <i>(x<sub>h</sub>, y<sub>h</sub>, w<sub>h</sub>)</i>.
+	</p>
+	<p>
+This is a bit unusual and it seems excessive since every Cartesian point can be obtained from the homogeneous tuple just like this:
+	</p>
+	<table class="formula"><tr><td rowspan=2>
+x<sub>c</sub> =
+	</td><td style="border-bottom: 1px solid black">
+x<sub>h</sub>
+	</td></tr><tr><td>
+w<sub>h</sub>
+	</td></tr></table>
+	<table class="formula"><tr><td rowspan=2>
+y<sub>c</sub> =
+	</td><td style="border-bottom: 1px solid black">
+y<sub>h</sub>
+	</td></tr><tr><td>
+w<sub>h</sub>
+	</td></tr></table>
+	<p>
+To translate a point from Cartesian to homogeneous coordinates, you can simply say:
+	</p>
+	<p class="formula">
+x<sub>h</sub> = x<sub>c</sub>, y<sub>h</sub> = y<sub>c</sub>, w<sub>h</sub> = 1
+	</p>
+	<p>Or, if you're feeling adventurous, you can pick (almost) any value for <i>w<sub>h</sub></i>. Then you just multiply your <i>x</i> and <i>y</i> by <i>w</i> and here you go!
+	</p>
+	<p>
+	<span id="to_fill_with_numbers">
+	</span>
+	<script language="JavaScript">
+	write_the_point_value();
+	</script>
+	</p>
+	<p>
+Here is a coordinate translater. It will translate your point into homogeneous coordinates for (almost) every <i>w<sub>h</sub></i> you propose.
+	</p>
+	<form id="w">
+Please enter <i>w<sub>h</sub></i>:
+	<button type="button" class="incdec" onclick="dec('proposed_w')">-</button>
+	<input type="text" class="incdec" id="proposed_w" value="1" style="width: 36pt;">
+	<button type="button" class="incdec" onclick="inc('proposed_w')">+</button>
+	<button type="button" onclick="transform()">Transform</button>
+	<span id="transformed">
+	</span>
+	<script language="JavaScript">
+	init_w();
+	transform();
+	</script>
+	</form>
+	<p id="to_hide_on_transform">
+But it wouldn't work for all the possible numbers. There is one and only one exception.
+	</p>
+	<div id="after_the_w_proposed" style="display:none;">
+		<p>
+Exactly! There is no transformation between homogeneous and Cartesian coordinates when <i>w<sub>h</sub></i> is 0. Kudos for finding this by yourself!
+		</p>
+	 </div>
+	<p>
+Usually, Cartesian coordinates are just the first two of homogeneous coordinates divided by the third. So when the third one is 1, homogeneous coordinates are the same as Cartesian.
+	</p>
+	<p>
+The smaller <i>w<sub>h</sub></i> gets, the further the point in Cartesian coordinates “travels” from the null. You can slide the point along its axis on the plot. Note that the first two coordinates remain intact all the time, you make the point slide only by altering the <i>w<sub>h</sub></i>.
+	</p>
+	<svg id="slide_a_w" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	<script language="JavaScript">
+	init_slide_a_w();
+	</script>
+	<p>
+That’s all rather simple until one moment. What if the third coordinate is <i>0</i> after all?
+	</p>
+	<p>
+Intuition tells that the point with its <i>w<sub>h</sub> = 0</i> should be further from the beginning of the coordinates than every other point with <i>w<sub>h</sub> &ne; 0</i>. All the points in the Euclidean space have <i>w<sub>h</sub> &ne; 0</i>, so this point should be somewhere other than in Euclidean space.
+	</p>
+	<p>
+And that's when it gets fascinating. Homogeneous coordinates denote points not only in Euclidean (or, more generally, <i><span id="index_affine_space">affine space</span></i>) but in the <i><span id="index_projective_space">projective space</span></i> that includes and expands the affine one. There is more geometry that fits in our cozy Cartesian system. There is the Euclidean space, and there is also an infinite number of points that are infinitely far from it.
+	</p>
+	<p>
+You can imagine a point from this projective extension as a direction and not a specific point in space. A ray that starts at null and has no length, no end, only the direction.
+	</p>
+	<p>
+This representation is often used in 3D graphics. With homogeneous coordinates, we can compose a 3D-scene so that every object that can be possibly reached, like a house, a tree, or a cat, remains in the affine space with the coordinates like <i>(x, y, z, 1)</i>. All the objects that can not be reached by design, like the moon in a racing simulator, go to the projective extension with the coordinates like <i>(x, y, z, 0)</i>. Both types of objects share the same space.
+	</p>
+	<p>
+Living in a projective space gives you the benefit of being unreachable if you desire so. But that’s not all it is good for. In fact, we are only starting to get into the benefits.
+	</p>
+	<h2>
+1. Central and parallel projections are the same
+	</h2>
+	<p>
+There are two kinds of projections in Euclidean space: central and parallel. The <span id="index_central_projection">central projection</span> is what makes the perspective view, so things closer to a viewer seem bigger. That’s what we use in video games to render a 3D scene into a flat picture on a screen. The <span id="index_parallel_projection">parallel projection</span> preserves proportions. That’s what we usually use in CAD systems to show bolts and nuts on technical drawings so the engineers would see that the equally large details are indeed equally large regardless of the point of view.
+	</p>
+	<p>
+In projective space, these two projections are the same.
+	</p>
+	<p>
+In affine space, you can set a center for a central projection very-very far away from the scene you want to render. This will make disproportion very small. But in projective space, you can hurl a center infinitely far — further away than any point in affine space at all, and the disproportion will disappear completely.
+	</p>
+	<p>
+So bear in mind, if you want to make a game about zombies who happen to be CAD engineers, you don’t have to implement both kinds of projections. The central projection should be enough. Just set the central point to <i>(x, y, z, 0)</i>, and this will automatically turn it into the parallel projection with no additional programming.
+	</p>
+	<h2>
+2. All the quadric surfaces are the same
+	</h2>
+	<p>
+I remember my first year in college. We were studying quadric surfaces and one of the exercises was to make an album with all of them. 17 sheets of paper with different graphics and formulas all drawn by hand. The main purpose of this album was to be briefly examined by the professor and thrown away a day after. What a waste!
+	</p>
+	<p>
+Now in projective space, this exercise would have been much more environmentally friendly. In homogeneous coordinates, all the algebraic surfaces are homogeneous too. This means that every piece of a polynomial that defines the surface has the same degree. It may contain different variables with different degrees of their own, but they all magically add up to the very same degree for every element in the sum.
+	</p>
+	<p>
+And this means only one drawing with one formula to be drawn and thrown away instead of 17. That should sum up to a couple of dead trees over the years.
+	</p>
+	<h2>
+3. All projective transformations are matrices
+	</h2>
+	<p>
+Geometric transformations are something that happens to points. They are functions <i>(x', y') = f(x, y)</i>. If you want to apply a transformation to some object, most of the time you would have to represent it with points and then apply a transformation to each and every one of them.
+	</p>
+	<p>
+This may get computationally heavy. For instance, transforming a picture <nobr>3&thinsp;000&thinsp;&times;&thinsp;4&thinsp;000</nobr> pixels requires <nobr>12&thinsp;000&thinsp;000</nobr> transformations. And transforming a <nobr>512&thinsp;&times;&thinsp;512&thinsp;&times;&thinsp;1024</nobr> 3D-image requires <nobr>268&thinsp;435&thinsp;456</nobr> transformations. If we want to see holographic television anytime soon, we should learn to do these transformations really-really fast.
+	</p>
+	<p>
+Some of the most common transformations are called <span id="index_translation">translation</span>;
+	</p>
+	<canvas id="translation" width=640 height=640></canvas>
+	<script language="JavaScript">
+	init_translation();
+	</script>
+	<p>
+<span id="index_rotation">rotation</span>;
+	</p>
+	<canvas id="rotation" width=640 height=640></canvas>
+	<script language="JavaScript">
+	init_rotation();
+	</script>
+	<p>
+and <span id="index_scale">scale</span>.
+	</p>
+	<canvas id="scale" width=640 height=640></canvas>
+	<script language="JavaScript">
+	init_scale();
+	</script>
+	<p>
+They are generalized by the <span id="index_affine_transformation">affine transformation</span> that can do translations, and rotations, and scales simultaneously:
+	</p>
+	<canvas id="affine" width=640 height=640></canvas>
+	<script language="JavaScript">
+	init_affine();
+	</script>
+	<p>
+The affine transformation is quite powerful but it has its noticeable constraint. It preserves parallelism, which is in a way limiting. If, for instance, you want to show some perspective, you should do a <span id="index_projective_transformation">projective transformation</span> that looks like this:
+	</p>
+	<canvas id="projective" width=640 height=640></canvas>
+	<script language="JavaScript">
+	init_projective();
+	</script>
+	<h2>
+Formulas in Cartesian coordinates
+	</h2>
+	<p>
+The formula for projective transformations in Cartesian coordinates is:
+	</p>
+	<table class="formula"><tr><td rowspan=2>
+x' =
+	</td><td style="border-bottom: 1px solid black">
+A&hairsp;x + B&hairsp;y + C
+	</td></tr><tr><td>
+a&hairsp;x + b&hairsp;y + c
+	</td></tr></table>
+	<table class="formula"><tr><td rowspan=2>
+y' =
+	</td><td style="border-bottom: 1px solid black">
+D&hairsp;x + E&hairsp;y + F
+	</td></tr><tr><td>
+a&hairsp;x + b&hairsp;y + c
+	</td></tr></table>
+	<p>
+It is a simple geometric transformation just like all the others we have seen before. It preserves the degree of curves and surfaces so every straight line gets transformed into a straight line and in 3D, each plane into a plane. Since all the second-degree surfaces are the same surface, and it also preserves the degree but not the classification from the affine space. An ellipsoid may become a paraboloid or a hyperboloid.
+	</p>
+	<p>
+It also generalizes the affine transformations that have a simpler formula:
+	</p>
+	<p class="formula">
+x' = A&hairsp;x + B&hairsp;y + C
+		<br>
+y' = D&hairsp;x + E&hairsp;y + F
+	</p>
+	<p>
+It's a special case of projective transformation for <i>a = 0</i>, <i>b = 0</i>, and <i>c = 1</i>.
+	</p>
+	<p>
+And the affine transformations, in its turn, generalize translations, rotations, and scales. A translation is:
+	</p>
+	<p class="formula">
+x' = x + C <span style="font-size: 12pt; color: #777; padding-left: 2pt;">(A = 1, B = 0)</span>
+		<br>
+y' = y + F <span style="font-size: 12pt; color: #777; padding-left: 2pt;">(D = 0, E = 1)</span>
+	</p>
+	<p>
+A rotation is:
+	</p>
+	<p class="formula">
+x' = sin(r)&hairsp;x + cos(r)&hairsp;y <span style="font-size: 12pt; color: #777; padding-left: 2pt;">(A = sin(r), B = cos(r), C = 0)</span>
+		<br>
+y' = cos(r)&hairsp;x - sin(r)&hairsp;y <span style="font-size: 12pt; color: #777; padding-left: 2pt;">(D = cos(r), E = -sin(r), F = 0)</span>
+	</p>
+	<p>
+And a scale is:
+	</p>
+	<p class="formula">
+x' = A&hairsp;x <span style="font-size: 12pt; color: #777; padding-left: 2pt;">(B = 0, C = 0)</span>
+		<br>
+y' = E&hairsp;y <span style="font-size: 12pt; color: #777; padding-left: 2pt;">(D = 0, F = 0)</span>
+	</p>
+	<p>
+They are all special cases of projective transformations.
+	</p>
+	<h2>
+The matrix multiplication in homogeneous coordinates
+	</h2>
+	<p>
+Let's multiply a square matrix by a point in homogeneous coordinates.
+	</p>
+	<table class="formula">
+	<tr>
+	<td class="open_matrix">
+	</td>
+	<td style="width:24pt;">A<br>D<br>a</td>
+	<td style="width:24pt;">B<br>E<br>b</td>
+	<td style="width:24pt;">C<br>F<br>c</td>
+	<td class="close_matrix"></td>
+	<td></td>
+	<td class="open_matrix"></td>
+	<td>x<br>y<br>w</td>
+	<td class="close_matrix"></td>
+	<td> = </td>
+	<td class="open_matrix"></td>
+	<td>Ax + By + Cw<br>Dx + Ey + Fw<br>ax + by + cw</td>
+	<td class="close_matrix"></td>
+	</tr>
+	</table>
+	<p>
+If our point comes from the Cartesian coordinates then <i>w<sub>h</sub> = 1</i>. Now we see that:
+	</p>
+	<p class="formula">
+x' = A&hairsp;x + B&hairsp;y + C
+		<br>
+y' = D&hairsp;x + E&hairsp;y + F
+		<br>
+w' = a&hairsp;x + b&hairsp;y + c
+	</p>
+	<p>
+To get back to the Cartesian coordinates, let's make our <i>w' = 1</i>. We can do this by dividing everything by <i>w'</i>.
+	</p>
+	<p class="formula">
+x' = (A&hairsp;x + B&hairsp;y + C) / (a&hairsp;x + b&hairsp;y + c)
+		<br>
+y' = (D&hairsp;x + E&hairsp;y + F) / (a&hairsp;x + b&hairsp;y + c)
+		<br>
+w' = 1
+	</p>
+	<p>
+Doesn't it look familiar? Well, of course, it does! It's a projective transformation. Or, with the specific coefficients, it could even be an affine one. Or it could be a translation, or a rotation, or a scale. Every one of these transformations can be conducted by mere matrix multiplication.
+	</p>
+	<p>
+It gets better. Matrices are composable. You can compose your own transformation like: translation, and then rotation, and another translation, and then scale, and projection, — and it will still be a single matrix multiplication!
+	</p>
+	<form style="margin-bottom: 6pt;">
+	<input type="radio" name="transformation_type" id="radio_t"><label for="radio_t">Translation</label>&nbsp;&nbsp;
+	<input type="radio" name="transformation_type" id="radio_r"><label for="radio_r">Rotation</label>&nbsp;&nbsp;
+	<input type="radio" name="transformation_type" id="radio_s"><label for="radio_s">Scale</label>&nbsp;&nbsp;
+	<input type="radio" name="transformation_type" id="radio_p" checked="true"><label for="radio_p">Projection</label><br>
+	</form>
+	<canvas id="composable" width=640 height=640></canvas>
+	<table class="formula">
+	<tr>
+	<td class="open_matrix"></td>
+	<td id="matrix_col1" style="width:64pt;">
+1<br>0<br>0
+	</td><td id="matrix_col2" style="width:64pt;">
+0<br>1<br>0
+	</td><td id="matrix_col3" style="width:64pt;">
+0<br>0<br>1
+	</td>
+	<td class="close_matrix"></td>
+	</tr>
+	</table>
+
+	<button class="button" id="revert_composable" onclick="revert_composable()"><nobr>Revert to E</nobr></button>
+	<script language="JavaScript">
+	init_composable();
+	</script>
+	<p>
+This is particularly important because whatever you do: animation, image processing, physics simulation, you always want to do as little computation as possible. Composability allows you to squeeze a series of transformations into a single matrix multiplication which is in turn very super-scalar friendly. With matrices, not only you do fewer calculations, you also benefit from vectorization both on CPU and GPU so you do them faster. Ultra-fast transformations everywhere!
+	</p>
+	<h2>
+Conclusion
+	</h2>
+	<p>
+Pragmatically, you can save a lot of processor time transforming points with one single matrix multiplication instead of applying all the transformations separately. And you can also write fewer lines of code by exploiting the common nature of all the transformations. But this is not the whole point yet.
+	</p>
+	<p>
+Usually, we lose performance not because of some small computational inefficiencies but because of all the code that shouldn't be there in the first place. One time I made a piece of code run 200 times faster by simply replacing a transformation provided by the framework with a simple matrix multiplication on the spot. The original transformation was designed like this:
+	</p>
+	<pre>
+Drawing.Drawing2D.Matrix.TransformPoints:
+  Drawing.SafeNativeMethods.Gdip.ConvertPointToMemory,
+  Drawing.SafeNativeMethods.Gdip.ConvertGPPOINTFArrayF:
+    Drawing.UnsafeNativeMethods.PtrToStructure:
+      Drawing.Internal.GPPOINTF..ctor,
+      RuntimeType.CreateInstanceSlow:
+        Runtime.InteropServices.Marshal.PtrToStructure.</pre>
+	<p>
+Conversions between identical structures, copying data with no good reason, constructors that do no essential work, — all this needless pseudo-computation costs time but gives nothing of value in return. The good news is, it's avoidable. It can only occur when programmers don’t understand and don’t trust the beauty of plain mathematics.
+	</p>
+	<p>
+I hope this page reveals some of it. I hope this page makes plain mathematics a little more trustworthy.
+	</p>
+
+
+	<table class="footer" style="width: 600pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html">Index</a>
+		<a href="all_mathematics.html">#mathematics</a> <a href="all_tutorials.html">#tutorials</a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+			+
+		<a href="https://wordsandbuttons.online/SYTYKC.pdf">So You Think You Know C</a> <span style="color:#888; font-size: 12pt;">(free book)</span><br>
+			+
+		<a href="https://www.amazon.com/Geometry-Programmers-Oleksandr-Kaleniuk/dp/1633439607">Geometry for Programmers</a> <span style="color:#888; font-size: 12pt;">(paid book)</span><br>
+			+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+
+		<a href="https://wordsandbuttons.online/rss.rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+</body>
+</html>
