@@ -262,7 +262,7 @@ function draw_grid_on(context){
 }
 
 function svg_grid() {
-	grid = '';
+	var grid = '';
 	grid += '<line x1="0" y1="300" x2="600" y2="300" stroke="black" />';
 	grid += '<line x1="586" y1="296" x2="600" y2="300" stroke="black" />';
 	grid += '<line x1="586" y1="304" x2="600" y2="300" stroke="black" />';
@@ -343,7 +343,7 @@ function init_pick_a_point(){
 }
 
 function pick_a_point_draw(client_x, client_y, do_guides){
-	svg = document.getElementById("pick_a_point");
+	var svg = document.getElementById("pick_a_point");
 	svg.innerHTML = '';
 	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
 	svg.innerHTML += svg_grid();
@@ -405,7 +405,7 @@ function init_slide_a_w(){
 }
 
 function slide_a_w_draw(){
-	svg = document.getElementById("slide_a_w");
+	var svg = document.getElementById("slide_a_w");
 	svg.innerHTML = '';
 	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
 	const d = Math.sqrt(point_y*point_y + point_x*point_x);
@@ -440,13 +440,13 @@ var dy = 0.3;
 var drag_x = 0.;
 var drag_y = 0.;
 function init_translation(){
-	translation = document.getElementById("translation");
+	var translation = document.getElementById("translation");
 	translation_draw(0, 0, false);
 
 	translation.addEventListener('pointerdown', function(e){
 		var canvas_rect = translation.getBoundingClientRect();
-		drag_x = client_to_x(e.clientX - canvas_rect.left);
-		drag_y = client_to_y(e.clientY - canvas_rect.top);
+		drag_x = svg_to_x((e.clientX - canvas_rect.left) * 3/4);
+		drag_y = svg_to_y((e.clientY - canvas_rect.top) * 3/4);
 		translation_draw(e.clientX - canvas_rect.left, e.clientY - canvas_rect.top, true);
 		translation.releasePointerCapture(e.pointerId);
 	}, false);
@@ -454,8 +454,8 @@ function init_translation(){
 	translation.addEventListener('pointermove', function(e){
 		var canvas_rect = translation.getBoundingClientRect();
 		if(e.buttons == 1){
-			x = client_to_x(e.clientX - canvas_rect.left);
-			y = client_to_y(e.clientY - canvas_rect.top);
+			x = svg_to_x((e.clientX - canvas_rect.left) * 3/4);
+			y = svg_to_y((e.clientY - canvas_rect.top) * 3/4);
 			dx = dx + x - drag_x;
 			dy = dy + y - drag_y;
 			drag_x = x;
@@ -477,52 +477,27 @@ function translation_draw(client_x, client_y, do_new){
 	var x = dx;
 	var y = dy;
 
-	var context = translation.getContext("2d");
-	context.font = "16px sans-serif";
-	// background
-	context.fillStyle="#eeeeee";
-	context.fillRect(0, 0, w, h);
-
-	// original cube
-	draw_original_cube_on(context);
-
-	context.lineWidth = 2;
+	var svg = document.getElementById("translation");
+	svg.innerHTML = '';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	svg.innerHTML += svg_grid();
+	svg.innerHTML += '<line stroke="#999999" x1="'+x_to_svg(1)+'" y1="'+y_to_svg(1) +'" x2="'+x_to_svg(2)+'" y2="'+y_to_svg(1)+'"/>';
+	svg.innerHTML += '<line stroke="#999999" x1="'+x_to_svg(2)+'" y1="'+y_to_svg(1) +'" x2="'+x_to_svg(2)+'" y2="'+y_to_svg(2)+'"/>';
+	svg.innerHTML += '<line stroke="#999999" x1="'+x_to_svg(2)+'" y1="'+y_to_svg(2) +'" x2="'+x_to_svg(1)+'" y2="'+y_to_svg(2)+'"/>';
+	svg.innerHTML += '<line stroke="#999999" x1="'+x_to_svg(1)+'" y1="'+y_to_svg(2) +'" x2="'+x_to_svg(1)+'" y2="'+y_to_svg(1)+'"/>';
 	if(do_new){
 		// the connection
-		context.beginPath();
-		context.setLineDash([4, 4]);
-		context.moveTo(x_to_client(1), y_to_client(1));
-		context.lineTo(x_to_client(x), y_to_client(y));
-		context.moveTo(x_to_client(1 + 1), y_to_client(1));
-		context.lineTo(x_to_client(x + 1), y_to_client(y));
-		context.moveTo(x_to_client(1 + 1), y_to_client(1 + 1));
-		context.lineTo(x_to_client(x + 1), y_to_client(y + 1));
-		context.moveTo(x_to_client(1), y_to_client(1 + 1));
-		context.lineTo(x_to_client(x), y_to_client(y + 1));
-		context.strokeStyle="#d64562";
-		context.stroke();
-		context.setLineDash([]);
-		context.closePath();
+		svg.innerHTML += '<line stroke="#d64562" stroke-dasharray="10,10" x1="'+x_to_svg(1)+'" y1="'+y_to_svg(1) +'" x2="'+x_to_svg(x)+'" y2="'+y_to_svg(y)+'"/>';
+		svg.innerHTML += '<line stroke="#d64562" stroke-dasharray="10,10" x1="'+x_to_svg(1+1)+'" y1="'+y_to_svg(1) +'" x2="'+x_to_svg(x+1)+'" y2="'+y_to_svg(y)+'"/>';
+		svg.innerHTML += '<line stroke="#d64562" stroke-dasharray="10,10" x1="'+x_to_svg(1+1)+'" y1="'+y_to_svg(1+1) +'" x2="'+x_to_svg(x+1)+'" y2="'+y_to_svg(y+1)+'"/>';
+		svg.innerHTML += '<line stroke="#d64562" stroke-dasharray="10,10" x1="'+x_to_svg(1)+'" y1="'+y_to_svg(1+1) +'" x2="'+x_to_svg(x)+'" y2="'+y_to_svg(y+1)+'"/>';
 	}
-	// dx-dy cube
-	context.beginPath();
-	context.moveTo(x_to_client(dx), y_to_client(dy));
-	context.lineTo(x_to_client(dx + 1), y_to_client(dy));
-	context.lineTo(x_to_client(dx + 1), y_to_client(dy + 1));
-	context.lineTo(x_to_client(dx), y_to_client(dy + 1));
-	context.lineTo(x_to_client(dx), y_to_client(dy));
-	context.strokeStyle="#8c2c3e";
-	context.stroke();
-	context.closePath();
-	context.lineWidth = 1;
-
-	// translation text
-	context.fillStyle="#8c2c3e";
-	context.fillText("x' = x + a, where a = " + (x-1).toFixed(1), 32, 560);
-	context.fillText("y' = y + b, where b = " + (y-1).toFixed(1), 32, 580);
-
-	// grid
-	draw_grid_on(context);
+	svg.innerHTML += '<line stroke="#d64562" x1="'+x_to_svg(x)+'" y1="'+y_to_svg(y) +'" x2="'+x_to_svg(x+1)+'" y2="'+y_to_svg(y)+'"/>';
+	svg.innerHTML += '<line stroke="#d64562" x1="'+x_to_svg(x+1)+'" y1="'+y_to_svg(y) +'" x2="'+x_to_svg(x+1)+'" y2="'+y_to_svg(y+1)+'"/>';
+	svg.innerHTML += '<line stroke="#d64562" x1="'+x_to_svg(x+1)+'" y1="'+y_to_svg(y+1) +'" x2="'+x_to_svg(x)+'" y2="'+y_to_svg(y+1)+'"/>';
+	svg.innerHTML += '<line stroke="#d64562" x1="'+x_to_svg(x)+'" y1="'+y_to_svg(y+1) +'" x2="'+x_to_svg(x)+'" y2="'+y_to_svg(y)+'"/>';
+	svg.innerHTML += '<text fill="#d64562" x="32" y="560" class="plot">'+ "x' = x + a, where a = " + (x-1).toFixed(1) + '</text>';
+	svg.innerHTML += '<text fill="#d64562" x="32" y="580" class="plot">'+ "y' = y + b, where b = " + (y-1).toFixed(1) + '</text>';
 }
 
 function rotated_y(a, x, y){
@@ -1352,7 +1327,8 @@ This may get computationally heavy. For instance, transforming a picture <nobr>3
 	<p>
 Some of the most common transformations are called <span id="index_translation">translation</span>;
 	</p>
-	<canvas id="translation" width=640 height=640></canvas>
+	<svg id="translation" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	</svg>	
 	<script language="JavaScript">
 	init_translation();
 	</script>
