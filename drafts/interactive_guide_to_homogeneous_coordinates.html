@@ -595,7 +595,7 @@ function rotation_draw(a, do_new){
 }
 
 var scale_x = 0.8;
-var scale_y = 1.2;
+var scale_y = 1.1;
 
 function init_scale(){
 	scale = document.getElementById("scale");
@@ -604,8 +604,8 @@ function init_scale(){
 	scale.addEventListener('pointermove', function(e){
 		if(e.buttons == 1){
 			var canvas_rect = scale.getBoundingClientRect();
-			var new_scale_x = client_to_x(e.clientX - canvas_rect.left);
-			var new_scale_y = client_to_y(e.clientY - canvas_rect.top);
+			var new_scale_x = svg_to_x((e.clientX - canvas_rect.left)*3/4);
+			var new_scale_y = svg_to_y((e.clientY - canvas_rect.top)*3/4);
 			scale_x = new_scale_x;
 			scale_y = new_scale_y;
 			scale_draw(scale_x, scale_y, true);
@@ -614,8 +614,8 @@ function init_scale(){
 
 	scale.addEventListener('pointerdown', function(e){
 		var canvas_rect = scale.getBoundingClientRect();
-		scale_x = client_to_x(e.clientX - canvas_rect.left);
-		scale_y = client_to_y(e.clientY - canvas_rect.top);
+		scale_x = svg_to_x((e.clientX - canvas_rect.left)*3/4);
+		scale_y = svg_to_y((e.clientY - canvas_rect.top)*3/4);
 		scale_draw(scale_x, scale_y, true);
 		scale.releasePointerCapture(e.pointerId);
 	}, false);
@@ -630,12 +630,6 @@ function init_scale(){
 }
 
 function scale_draw(a, b, do_new){
-	var context = scale.getContext("2d");
-	context.font = "16px sans-serif";
-	// background
-	context.fillStyle="#eeeeee";
-	context.fillRect(0, 0, w, h);
-
 	var xs = [1., 2., 2., 1.];
 	var ys = [1., 1., 2., 2.];
 	var new_xs = [0, 0, 0, 0];
@@ -652,35 +646,26 @@ function scale_draw(a, b, do_new){
 		new_saved_ys[i] = scale_y * ys[i];
 	}
 
-	// original cube
-	draw_original_cube_on(context);
-
-	// draw a scaled cube
-	context.lineWidth = 2;
-	context.beginPath();
-	context.moveTo(x_to_client(new_saved_xs[3]), y_to_client(new_saved_ys[3]));
-	for(var i = 0; i < 4; i++){
-		context.lineTo(x_to_client(new_saved_xs[i]), y_to_client(new_saved_ys[i]));
+	var svg = document.getElementById("scale");
+	svg.innerHTML = '';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	svg.innerHTML += source_square();
+	if(do_new){
+		svg.innerHTML += '<line stroke="#d64562" stroke-dasharray="10,10" x1="'
+			+x_to_svg(new_saved_xs[0])+'" y1="'+y_to_svg(new_saved_ys[0]) +'" x2="'
+			+x_to_svg(new_saved_xs[0])+'" y2="'+y_to_svg(0)+'"/>';
+		svg.innerHTML += '<line stroke="#d64562" stroke-dasharray="10,10" x1="'
+			+x_to_svg(new_saved_xs[0])+'" y1="'+y_to_svg(new_saved_ys[0]) +'" x2="'
+			+x_to_svg(0)+'" y2="'+y_to_svg(new_saved_ys[0])+'"/>';
 	}
-	context.strokeStyle="#8c2c3e";
-	context.stroke();
-	context.closePath();
-	context.lineWidth = 1;
-
-	// and write the scales
-	context.fillStyle="#8c2c3e";
-	context.fillText("x' = a * x, where a = " + a.toFixed(2), 32, 560);
-	context.fillText("y' = b * y, where b = " + b.toFixed(2), 32, 580);
-
-	// grid
-	draw_grid_on(context);
-
-	// scale vector
-	if(do_new) {
-		context.lineWidth = 2;
-		draw_arrow(context, 320, 320, x_to_client(new_xs[0]), y_to_client(new_ys[0]), "#d64562");
-		context.lineWidth = 1;
+	svg.innerHTML += svg_grid();
+	for(var i = 0; i < 4; ++i) {
+		const j = (i+1)%4;
+		svg.innerHTML += '<line stroke="#d64562" x1="'+x_to_svg(new_xs[i])+'" y1="'+y_to_svg(new_ys[i]) 
+			+'" x2="'+x_to_svg(new_xs[j])+'" y2="'+y_to_svg(new_ys[j])+'"/>';
 	}
+	svg.innerHTML += '<text fill="#d64562" x="32" y="560" class="plot">'+"x' = a * x, where a = " + a.toFixed(2)+'</text>';
+	svg.innerHTML += '<text fill="#d64562" x="32" y="580" class="plot">'+"y' = b * y, where b = " + b.toFixed(2)+'</text>';
 }
 
 function nearest_i(x, y, xs, ys) {
@@ -1324,7 +1309,8 @@ Some of the most common transformations are:
 	<p>
 3. <span id="index_scaling">scaling</span>.
 	</p>
-	<canvas id="scale" width=640 height=640></canvas>
+	<svg id="scale" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	</svg>
 	<script language="JavaScript">
 	init_scale();
 	</script>
