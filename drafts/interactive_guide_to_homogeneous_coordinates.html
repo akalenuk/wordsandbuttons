@@ -140,26 +140,10 @@ form {
 }
 
 input[type="text"] {
-	width: 100pt;
-	height: 22pt;
-	margin: 8pt 8pt 8pt 8pt;
-	padding-left: 3pt;
 	font-size: 16pt;
-}
-
-.incdec{
-	width: 32pt;
-	height: 26pt;
-	margin: 0 0 0 0;
-	font-size: 16pt;
-	text-align: center;
 }
 
 button {
-	width: 150pt;
-	height: 26pt;
-	margin-left:8pt;
-	margin-right:8pt;
 	font-size: 16pt;
 }
 
@@ -473,6 +457,15 @@ function init_translation(){
 	}, false);
 }
 
+function source_square() {
+	var square = '';
+	square += '<line stroke="#999999" x1="'+x_to_svg(1)+'" y1="'+y_to_svg(1) +'" x2="'+x_to_svg(2)+'" y2="'+y_to_svg(1)+'"/>';
+	square += '<line stroke="#999999" x1="'+x_to_svg(2)+'" y1="'+y_to_svg(1) +'" x2="'+x_to_svg(2)+'" y2="'+y_to_svg(2)+'"/>';
+	square += '<line stroke="#999999" x1="'+x_to_svg(2)+'" y1="'+y_to_svg(2) +'" x2="'+x_to_svg(1)+'" y2="'+y_to_svg(2)+'"/>';
+	square += '<line stroke="#999999" x1="'+x_to_svg(1)+'" y1="'+y_to_svg(2) +'" x2="'+x_to_svg(1)+'" y2="'+y_to_svg(1)+'"/>';
+	return square;
+}
+
 function translation_draw(client_x, client_y, do_new){
 	var x = dx;
 	var y = dy;
@@ -481,10 +474,7 @@ function translation_draw(client_x, client_y, do_new){
 	svg.innerHTML = '';
 	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
 	svg.innerHTML += svg_grid();
-	svg.innerHTML += '<line stroke="#999999" x1="'+x_to_svg(1)+'" y1="'+y_to_svg(1) +'" x2="'+x_to_svg(2)+'" y2="'+y_to_svg(1)+'"/>';
-	svg.innerHTML += '<line stroke="#999999" x1="'+x_to_svg(2)+'" y1="'+y_to_svg(1) +'" x2="'+x_to_svg(2)+'" y2="'+y_to_svg(2)+'"/>';
-	svg.innerHTML += '<line stroke="#999999" x1="'+x_to_svg(2)+'" y1="'+y_to_svg(2) +'" x2="'+x_to_svg(1)+'" y2="'+y_to_svg(2)+'"/>';
-	svg.innerHTML += '<line stroke="#999999" x1="'+x_to_svg(1)+'" y1="'+y_to_svg(2) +'" x2="'+x_to_svg(1)+'" y2="'+y_to_svg(1)+'"/>';
+	svg.innerHTML += source_square();
 	if(do_new){
 		// the connection
 		svg.innerHTML += '<line stroke="#d64562" stroke-dasharray="10,10" x1="'+x_to_svg(1)+'" y1="'+y_to_svg(1) +'" x2="'+x_to_svg(x)+'" y2="'+y_to_svg(y)+'"/>';
@@ -508,7 +498,7 @@ function rotated_x(a, x, y){
 	return Math.cos(a) * x - Math.sin(a) * y;
 }
 
-var rotation_a = -0.2;
+var rotation_a = -0.1;
 
 function in_2_pi(x) {
 	while(x < -Math.PI)
@@ -532,18 +522,18 @@ function init_rotation(){
 	rotation.addEventListener('pointermove', function(e){
 		if(e.buttons == 1) {
 			var canvas_rect = rotation.getBoundingClientRect();
-			var client_x = e.clientX - canvas_rect.left;
-			var client_y = e.clientY - canvas_rect.top;
-			rotation_a = rotation_for(client_to_x(client_x), client_to_y(client_y))
+			var client_x = (e.clientX - canvas_rect.left) * 3/4;
+			var client_y = (e.clientY - canvas_rect.top) * 3/4;
+			rotation_a = rotation_for(svg_to_x(client_x), svg_to_y(client_y))
 			rotation_draw(rotation_a, true);
 		}
 	}, false);
 
 	rotation.addEventListener('pointerdown', function(e){
 		var canvas_rect = rotation.getBoundingClientRect();
-		var client_x = e.clientX - canvas_rect.left;
-		var client_y = e.clientY - canvas_rect.top;
-		rotation_a = rotation_for(client_to_x(client_x), client_to_y(client_y));
+		var client_x = (e.clientX - canvas_rect.left) * 3/4;
+		var client_y = (e.clientY - canvas_rect.top) * 3/4;
+		rotation_a = rotation_for(svg_to_x(client_x), svg_to_y(client_y));
 		rotation_draw(rotation_a, true);
 		rotation.releasePointerCapture(e.pointerId);
 	}, false);
@@ -558,12 +548,6 @@ function init_rotation(){
 }
 
 function rotation_draw(a, do_new){
-	var context = rotation.getContext("2d");
-	context.font = "16px sans-serif";
-	// background
-	context.fillStyle="#eeeeee";
-	context.fillRect(0, 0, w, h);
-
 	var xs = [1., 2., 2., 1.];
 	var ys = [1., 1., 2., 2.];
 	var new_xs = [0, 0, 0, 0];
@@ -573,48 +557,41 @@ function rotation_draw(a, do_new){
 		new_ys[i] = rotated_y(a, xs[i], ys[i]);
 	}
 
-	// original cube
-	draw_original_cube_on(context);
-
-	context.lineWidth = 2;
+	var svg = document.getElementById("rotation");
+	svg.innerHTML = '';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	svg.innerHTML += source_square();
 	if(do_new){
 		// the connection
-		context.beginPath();
-		context.setLineDash([4, 4]);
 		var r = x_to_client(Math.sqrt(2.)) - x_to_client(0.);
 		const a1 = - Math.PI / 4.;
 		const a2 = - Math.PI / 4. - a;
 		if(a < 0.) {
-			context.arc(x_to_client(0), y_to_client(0), r, a1, a2);
-			context.lineTo(320, 320);
+		var r = x_to_svg(Math.sqrt(2.)) - x_to_svg(0.);
+			svg.innerHTML += '<path stroke-dasharray="10,10" d="M 300 300 L '
+				+x_to_svg(new_xs[0])+' '+y_to_svg(new_ys[0])+'" stroke="#d64562" fill="none">';
+			svg.innerHTML += '<path stroke-dasharray="10,10" d="M '
+				+x_to_svg(new_xs[0])+' '+y_to_svg(new_ys[0])+' A '+r+' '+r+' 0 0 0 '
+				+x_to_svg(1)+' '+y_to_svg(1)+'" stroke="#d64562" fill="none">';
 		} else {
-			context.moveTo(320, 320);
-			context.arc(x_to_client(0), y_to_client(0), r, a2, a1);
+			var r = x_to_svg(Math.sqrt(2.)) - x_to_svg(0.);
+			svg.innerHTML += '<path stroke-dasharray="10,10" d="M 300 300 L '
+				+x_to_svg(new_xs[0])+' '+y_to_svg(new_ys[0])+'" stroke="#d64562" fill="none">';
+			svg.innerHTML += '<path stroke-dasharray="10,10" d="M '
+				+x_to_svg(new_xs[0])+' '+y_to_svg(new_ys[0])+' A '+r+' '+r+' 0 0 1 '
+				+x_to_svg(1)+' '+y_to_svg(1)+'" stroke="#d64562" fill="none">';
 		}
-		context.strokeStyle="#d64562";
-		context.stroke();
-		context.setLineDash([]);
-		context.closePath();
+		svg.innerHTML += '<path d="A '+r+' '+r+' 0 0 0 '+x_to_svg(0)+' '+y_to_svg(0)+'"/>';
 	}
-
-	// rotation
-	context.beginPath();
-	context.moveTo(x_to_client(new_xs[3]), y_to_client(new_ys[3]));
-	for(var i = 0; i < 4; i++){
-		context.lineTo(x_to_client(new_xs[i]), y_to_client(new_ys[i]));
+	svg.innerHTML += svg_grid();
+	for(var i = 0; i < 4; ++i) {
+		const j = (i+1)%4;
+		svg.innerHTML += '<line stroke="#d64562" x1="'+x_to_svg(new_xs[i])+'" y1="'+y_to_svg(new_ys[i]) 
+			+'" x2="'+x_to_svg(new_xs[j])+'" y2="'+y_to_svg(new_ys[j])+'"/>';
 	}
-	context.strokeStyle="#8c2c3e";
-	context.stroke();
-	context.closePath();
-	context.lineWidth = 1;
-
-	context.fillStyle="#8c2c3e";
-	context.fillText("x' = cos(a) * x + sin(a) * y", 32, 540);
-	context.fillText("y' = -sin(a) * x + cos(a) * y", 32, 560);
-	context.fillText("where a = " + a.toFixed(2), 32, 580);
-
-	// grid
-	draw_grid_on(context);
+	svg.innerHTML += '<text fill="#d64562" x="32" y="540" class="plot">'+"x' = cos(a) * x + sin(a) * y"+'</text>';
+	svg.innerHTML += '<text fill="#d64562" x="32" y="560" class="plot">'+"y' = -sin(a) * x + cos(a) * y" + '</text>';
+	svg.innerHTML += '<text fill="#d64562" x="32" y="580" class="plot">'+"where a = " + a.toFixed(2) + '</text>';
 }
 
 var scale_x = 0.8;
@@ -1238,10 +1215,11 @@ Here is a coordinate translator. It will translate the point you chose on a plot
 	</p>
 	<form id="w">
 Please enter <i>w<sub>h</sub></i>:
-	<button type="button" class="incdec" onclick="dec('proposed_w')">-</button>
-	<input type="text" class="incdec" id="proposed_w" value="1" style="width: 36pt;">
-	<button type="button" class="incdec" onclick="inc('proposed_w')">+</button>
+	<button type="button" onclick="dec('proposed_w')">-</button>
+	<input type="text" id="proposed_w" value="1" style="width: 36pt;">
+	<button type="button" onclick="inc('proposed_w')">+</button>
 	<button type="button" onclick="transform()">Transform</button>
+	<br>
 	<span id="transformed">
 	</span>
 	<script language="JavaScript">
@@ -1325,22 +1303,26 @@ Geometric transformations are something that happens to points. They are functio
 This may get computationally heavy. For instance, transforming a picture <nobr>3&thinsp;000&thinsp;&times;&thinsp;4&thinsp;000</nobr> pixels requires <nobr>12,000,000</nobr> transformations. And transforming a <nobr>1024&thinsp;&times;&thinsp;1024&thinsp;&times;&thinsp;1024</nobr> <nobr>3D image</nobr> requires exactly <nobr>1,073,741,824</nobr>. That's a billion with a &ldquo;B&rdquo;. If we want to see holographic television anytime soon, we should learn to do these transformations really-really fast.
 	</p>
 	<p>
-Some of the most common transformations are called <span id="index_translation">translation</span>;
+Some of the most common transformations are:
+	</p>
+	<p>
+1. <span id="index_translation">translation</span>;
 	</p>
 	<svg id="translation" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
-	</svg>	
+	</svg>
 	<script language="JavaScript">
 	init_translation();
 	</script>
 	<p>
-<span id="index_rotation">rotation</span>;
+2. <span id="index_rotation">rotation</span>;
 	</p>
-	<canvas id="rotation" width=640 height=640></canvas>
+	<svg id="rotation" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	</svg>
 	<script language="JavaScript">
 	init_rotation();
 	</script>
 	<p>
-and <span id="index_scale">scale</span>.
+3. <span id="index_scaling">scaling</span>.
 	</p>
 	<canvas id="scale" width=640 height=640></canvas>
 	<script language="JavaScript">
