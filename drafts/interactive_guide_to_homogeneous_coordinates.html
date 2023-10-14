@@ -859,8 +859,8 @@ var composable_transformation = function(x, y) {	// just a placeholder to be fil
 }
 
 function recalculate_composable(client_x, client_y){
-	const x = client_to_x(client_x);
-	const y = client_to_y(client_y);
+	const x = svg_to_x(client_x);
+	const y = svg_to_y(client_y);
 
 	// new cube
 	var new_xs = [1., 2., 2., 1.];
@@ -882,21 +882,19 @@ function recalculate_composable(client_x, client_y){
 		}
 	}else if(document.getElementById("radio_t").checked){
 		for(var i = 0; i < 4; i++){
-			new_xs[i] = composable_xs[i] + x - client_to_x(composable_mousedown_x);
-			new_ys[i] = composable_ys[i] + y - client_to_y(composable_mousedown_y);
+			new_xs[i] = composable_xs[i] + x - svg_to_x(composable_mousedown_x);
+			new_ys[i] = composable_ys[i] + y - svg_to_y(composable_mousedown_y);
 		}
 	}else if(document.getElementById("radio_r").checked){
 		const a_new = rotation_for(x, y);
-		const a_increment = a_new - rotation_for(client_to_x(composable_mousedown_x), client_to_y(composable_mousedown_y));
+		const a_increment = a_new - rotation_for(svg_to_x(composable_mousedown_x), svg_to_y(composable_mousedown_y));
 		for(var i = 0; i < 4; i++){
 			new_xs[i] = rotated_x(a_increment, composable_xs[i], composable_ys[i]);
 			new_ys[i] = rotated_y(a_increment, composable_xs[i], composable_ys[i]);
 		}
 	}else if(document.getElementById("radio_s").checked){
-		const cx = (composable_xs[0] + composable_xs[1] + composable_xs[2] + composable_xs[3]) / 4.;
-		const cy = (composable_ys[0] + composable_ys[1] + composable_ys[2] + composable_ys[3]) / 4.;
-		const sx = (cx + x - client_to_x(composable_mousedown_x)) / cx;
-		const sy = (cy + y - client_to_y(composable_mousedown_y)) / cy;
+		const sx = x / svg_to_x(composable_mousedown_x);
+		const sy = y / svg_to_y(composable_mousedown_y);
 		for(var i = 0; i < 4; i++){
 			new_xs[i] = composable_xs[i] * sx;
 			new_ys[i] = composable_ys[i] * sy;
@@ -947,10 +945,10 @@ function init_composable(){
 
 	composable.addEventListener('pointerdown', function(e){
 		const canvas_rect = composable.getBoundingClientRect();
-		composable_mousedown_x = e.clientX - canvas_rect.left;
-		composable_mousedown_y = e.clientY - canvas_rect.top;
-		const x = client_to_x( composable_mousedown_x );
-		const y = client_to_y( composable_mousedown_y );
+		composable_mousedown_x = (e.clientX - canvas_rect.left)*3/4;
+		composable_mousedown_y = (e.clientY - canvas_rect.top)*3/4;
+		const x = svg_to_x( composable_mousedown_x);
+		const y = svg_to_y( composable_mousedown_y);
 		composable_i = nearest_i(x, y, composable_xs, composable_ys);
 		recalculate_composable(composable_mousedown_x, composable_mousedown_y);
 		composable_draw(0, 0, false);
@@ -959,8 +957,8 @@ function init_composable(){
 
 	composable.addEventListener('pointermove', function(e){
 		var canvas_rect = composable.getBoundingClientRect();
-		const client_x = e.clientX - canvas_rect.left;
-		const client_y = e.clientY - canvas_rect.top;
+		const client_x = (e.clientX - canvas_rect.left)*3/4;
+		const client_y = (e.clientY - canvas_rect.top)*3/4;
 		if(e.buttons == 1){
 			recalculate_composable(client_x, client_y);
 			composable_mousedown_x = client_x;
@@ -968,8 +966,8 @@ function init_composable(){
 			composable_draw(client_x, client_y, true);
 		}else{
 			if(document.getElementById("radio_p").checked){
-				const x = client_to_x( client_x );
-				const y = client_to_y( client_y );
+				const x = svg_to_x( client_x );
+				const y = svg_to_y( client_y );
 				composable_i = nearest_i(x, y, composable_xs, composable_ys);
 				composable_draw(client_x, client_y, true);
 			}
@@ -978,8 +976,8 @@ function init_composable(){
 
 	composable.addEventListener('pointerup', function(e){
 		var canvas_rect = composable.getBoundingClientRect();
-		client_x = e.clientX - canvas_rect.left;
-		client_y = e.clientY - canvas_rect.top;
+		client_x = (e.clientX - canvas_rect.left)*3/4;
+		client_y = (e.clientY - canvas_rect.top)*3/4;
 		recalculate_composable(client_x, client_y);
 		composable_draw(client_x, client_y, false);
 	}, false);
@@ -994,61 +992,27 @@ var composable_ys = [1., 1., 2., 2.];
 var composable_i = 0;
 
 function composable_draw(client_x, client_y, do_new){
-	var x = client_to_x(client_x);
-	var y = client_to_y(client_y);
-
-	var context = composable.getContext("2d");
-	context.font = "16px sans-serif";
-	// background
-	context.fillStyle="#eeeeee";
-	context.fillRect(0, 0, w, h);
-
-	// original cube
-	draw_original_cube_on(context);
-
-	// composable
-	context.lineWidth = 2;
-	context.beginPath();
-	context.moveTo(x_to_client(composable_xs[3]), y_to_client(composable_ys[3]));
-	for(var i = 0; i < 4; i++){
-		context.lineTo(x_to_client(composable_xs[i]), y_to_client(composable_ys[i]));
-	}
-	context.strokeStyle="#8c2c3e";
-	context.stroke();
-	context.closePath();
-	context.lineWidth = 1;
-
-	context.beginPath();
-	for(var t = 1.; t <= 2.; t += 0.125) {
+	var svg = document.getElementById("composable");
+	svg.innerHTML = '';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	svg.innerHTML += svg_grid();
+	svg.innerHTML += source_square();
+	for(var t = 1.125; t < 2.; t += 0.125) {
 		const xy1 = composable_transformation(t, 1.);
 		const xy2 = composable_transformation(t, 2.);
-		context.moveTo(x_to_client(xy1[0]), y_to_client(xy1[1]));
-		context.lineTo(x_to_client(xy2[0]), y_to_client(xy2[1]));
+		svg.innerHTML += '<line stroke="#d64562" stroke-width="0.5" x1="'+x_to_svg(xy1[0])+'" y1="'+y_to_svg(xy1[1])
+			+'" x2="'+x_to_svg(xy2[0])+'" y2="'+y_to_svg(xy2[1])+'"/>';
 		const xy3 = composable_transformation(1., t);
 		const xy4 = composable_transformation(2., t);
-		context.moveTo(x_to_client(xy3[0]), y_to_client(xy3[1]));
-		context.lineTo(x_to_client(xy4[0]), y_to_client(xy4[1]));
+		svg.innerHTML += '<line stroke="#d64562" stroke-width="0.5" x1="'+x_to_svg(xy3[0])+'" y1="'+y_to_svg(xy3[1])
+			+'" x2="'+x_to_svg(xy4[0])+'" y2="'+y_to_svg(xy4[1])+'"/>';
 	}
-	context.stroke();
-	context.closePath();
-
-	// grid
-	draw_grid_on(context);
-
-	// x
-	if(document.getElementById("radio_p").checked){
-		context.beginPath();
-		context.fillStyle="#8c2c3e";
-		context.arc(x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]), 3, 0, 2*Math.PI);
-		context.fill();
-		context.closePath();
-
-		// guide
-		if(do_new){
-			context.lineWidth = 2;
-			draw_arrow(context, x_to_client(composable_xs[composable_i]), y_to_client(composable_ys[composable_i]), x_to_client(x), y_to_client(y), "#d64562");
-			context.lineWidth = 1;
-		}
+	for(var i = 0; i < 4; ++i) {
+		const j = (i+1)%4;
+		svg.innerHTML += '<line stroke="#d64562" x1="'+x_to_svg(composable_xs[i])+'" y1="'+y_to_svg(composable_ys[i]) 
+			+'" x2="'+x_to_svg(composable_xs[j])+'" y2="'+y_to_svg(composable_ys[j])+'"/>';
+		svg.innerHTML += '<circle stroke="#d64562" fill="#d64562" cx="'
+			+x_to_svg(composable_xs[i])+'" cy="'+y_to_svg(composable_ys[i])+'" r="2" />';
 	}
 }
 
@@ -1392,7 +1356,8 @@ It gets better. Matrices are composable. You can compose your own transformation
 	<input type="radio" name="transformation_type" id="radio_s"><label for="radio_s">Scale</label>&nbsp;&nbsp;
 	<input type="radio" name="transformation_type" id="radio_p" checked="true"><label for="radio_p">Projection</label><br>
 	</form>
-	<canvas id="composable" width=640 height=640></canvas>
+	<svg id="composable" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	</svg>
 	<table class="formula">
 	<tr>
 	<td class="open_matrix"></td>
