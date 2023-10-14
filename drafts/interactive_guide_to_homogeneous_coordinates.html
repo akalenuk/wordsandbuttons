@@ -704,8 +704,8 @@ function init_affine(){
 
 	affine.addEventListener('pointerdown', function(e){
 		const canvas_rect = affine.getBoundingClientRect();
-		const x = client_to_x( e.clientX - canvas_rect.left );
-		const y = client_to_y( e.clientY - canvas_rect.top );
+		const x = svg_to_x((e.clientX - canvas_rect.left)*3/4);
+		const y = svg_to_y((e.clientY - canvas_rect.top)*3/4);
 		affine_i = nearest_i(x, y, affine_xs, affine_ys);
 		affine_xs[affine_i] = x;
 		affine_ys[affine_i] = y;
@@ -717,8 +717,8 @@ function init_affine(){
 
 	affine.addEventListener('pointermove', function(e){
 		const canvas_rect = affine.getBoundingClientRect();
-		const x = client_to_x( e.clientX - canvas_rect.left );
-		const y = client_to_y( e.clientY - canvas_rect.top );
+		const x = svg_to_x((e.clientX - canvas_rect.left)*3/4);
+		const y = svg_to_y((e.clientY - canvas_rect.top)*3/4);
 		if(e.buttons == 1){
 			affine_xs[affine_i] = x;
 			affine_ys[affine_i] = y;
@@ -733,8 +733,8 @@ function init_affine(){
 
 	affine.addEventListener('pointerup', function(e){
 		var canvas_rect = affine.getBoundingClientRect();
-		const x = client_to_x( e.clientX - canvas_rect.left );
-		const y = client_to_y( e.clientY - canvas_rect.top );
+		const x = svg_to_x((e.clientX - canvas_rect.left)*3/4);
+		const y = svg_to_y((e.clientY - canvas_rect.top)*3/4);
 		affine_xs[affine_i] = x;
 		affine_ys[affine_i] = y;
 		affine_xs[(affine_i + 3) % 4] = affine_xs[(affine_i + 2) % 4] + affine_xs[(affine_i + 0) % 4] - affine_xs[(affine_i + 1) % 4];
@@ -748,47 +748,16 @@ function init_affine(){
 }
 
 function affine_draw(client_x, client_y, do_new){
-	// coordiantes correction
-	var canvas_rect = affine.getBoundingClientRect();
-	client_x -= canvas_rect.left;
-	client_y -= canvas_rect.top;
-	var x = client_to_x(client_x);
-	var y = client_to_y(client_y);
-
-	var context = affine.getContext("2d");
-	context.font = "16px sans-serif";
-	// background
-	context.fillStyle="#eeeeee";
-	context.fillRect(0, 0, w, h);
-
-	// affine
-	context.lineWidth = 2;
-	context.beginPath();
-	context.moveTo(x_to_client(affine_xs[3]), y_to_client(affine_ys[3]));
-	for(var i = 0; i < 4; i++){
-		context.lineTo(x_to_client(affine_xs[i]), y_to_client(affine_ys[i]));
+	var svg = document.getElementById("affine");
+	svg.innerHTML = '';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	svg.innerHTML += svg_grid();
+	for(var i = 0; i < 4; ++i) {
+		const j = (i+1)%4;
+		svg.innerHTML += '<line stroke="#d64562" x1="'+x_to_svg(affine_xs[i])+'" y1="'+y_to_svg(affine_ys[i]) 
+			+'" x2="'+x_to_svg(affine_xs[j])+'" y2="'+y_to_svg(affine_ys[j])+'"/>';
+		svg.innerHTML += '<circle stroke="#d64562" fill="#d64562" cx="'+x_to_svg(affine_xs[i])+'" cy="'+y_to_svg(affine_ys[i])+'" r="2" />';
 	}
-	context.strokeStyle="#8c2c3e";
-	context.stroke();
-	context.closePath();
-	context.lineWidth = 1;
-
-	if(do_new){
-		// link
-		context.lineWidth = 2;
-		draw_arrow(context, x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]), x_to_client(x), y_to_client(y), "#d64562");
-		context.lineWidth = 1;
-	}
-
-	// x
-	context.beginPath();
-	context.fillStyle="#8c2c3e";
-	context.arc(x_to_client(affine_xs[affine_i]), y_to_client(affine_ys[affine_i]), 3, 0, 2*Math.PI);
-	context.fill();
-	context.closePath();
-
-	// grid
-	draw_grid_on(context);
 }
 
 function init_projective(){
@@ -797,8 +766,8 @@ function init_projective(){
 
 	projective.addEventListener('pointerdown', function(e){
 		const canvas_rect = projective.getBoundingClientRect();
-		const x = client_to_x( e.clientX - canvas_rect.left );
-		const y = client_to_y( e.clientY - canvas_rect.top );
+		const x = svg_to_x((e.clientX - canvas_rect.left)*3/4);
+		const y = svg_to_y((e.clientY - canvas_rect.top)*3/4);
 		projective_i = nearest_i(x, y, projective_xs, projective_ys);
 		const dx = x - projective_xs[projective_i];
 		const dy = y - projective_ys[projective_i];
@@ -818,8 +787,8 @@ function init_projective(){
 
 	projective.addEventListener('pointermove', function(e){
 		const canvas_rect = projective.getBoundingClientRect();
-		const x = client_to_x( e.clientX - canvas_rect.left );
-		const y = client_to_y( e.clientY - canvas_rect.top );
+		const x = svg_to_x((e.clientX - canvas_rect.left)*3/4);
+		const y = svg_to_y((e.clientY - canvas_rect.top)*3/4);
 		if(e.buttons == 1){
 			const dx = x - projective_xs[projective_i];
 			const dy = y - projective_ys[projective_i];
@@ -842,8 +811,8 @@ function init_projective(){
 
 	projective.addEventListener('pointerup', function(e){
 		var canvas_rect = projective.getBoundingClientRect();
-		const x = client_to_x( e.clientX - canvas_rect.left );
-		const y = client_to_y( e.clientY - canvas_rect.top );
+		const x = svg_to_x((e.clientX - canvas_rect.left)*3/4);
+		const y = svg_to_y((e.clientY - canvas_rect.top)*3/4);
 		const dx = x - projective_xs[projective_i];
 		const dy = y - projective_ys[projective_i];
 		projective_xs[projective_i] = x;
@@ -869,47 +838,17 @@ var projective_ys = [2.0, 2.0, -1.5, -1.5];
 var projective_i = 0;
 
 function projective_draw(client_x, client_y, do_new){
-	// coordiantes correction
-	var canvas_rect = projective.getBoundingClientRect();
-	client_x -= canvas_rect.left;
-	client_y -= canvas_rect.top;
-		var x = client_to_x(client_x);
-		var y = client_to_y(client_y);
-
-	var context = projective.getContext("2d");
-	context.font = "16px sans-serif";
-	// background
-	context.fillStyle="#eeeeee";
-	context.fillRect(0, 0, w, h);
-
-	// projective
-	context.lineWidth = 2;
-	context.beginPath();
-	context.moveTo(x_to_client(projective_xs[3]), y_to_client(projective_ys[3]));
-	for(var i = 0; i < 4; i++){
-		context.lineTo(x_to_client(projective_xs[i]), y_to_client(projective_ys[i]));
+	var svg = document.getElementById("projective");
+	svg.innerHTML = '';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	svg.innerHTML += svg_grid();
+	for(var i = 0; i < 4; ++i) {
+		const j = (i+1)%4;
+		svg.innerHTML += '<line stroke="#d64562" x1="'+x_to_svg(projective_xs[i])+'" y1="'+y_to_svg(projective_ys[i]) 
+			+'" x2="'+x_to_svg(projective_xs[j])+'" y2="'+y_to_svg(projective_ys[j])+'"/>';
+		svg.innerHTML += '<circle stroke="#d64562" fill="#d64562" cx="'
+			+x_to_svg(projective_xs[i])+'" cy="'+y_to_svg(projective_ys[i])+'" r="2" />';
 	}
-	context.strokeStyle="#8c2c3e";
-	context.stroke();
-	context.closePath();
-	context.lineWidth = 1;
-
-	if(do_new){
-		// link
-		context.lineWidth = 2;
-		draw_arrow(context, x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]), x_to_client(x), y_to_client(y), "#d64562");
-		context.lineWidth = 1;
-	}
-
-	// x
-	context.beginPath();
-	context.fillStyle="#8c2c3e";
-	context.arc(x_to_client(projective_xs[projective_i]), y_to_client(projective_ys[projective_i]), 3, 0, 2*Math.PI);
-	context.fill();
-	context.closePath();
-
-	// grid
-	draw_grid_on(context);
 }
 
 var composable_mousedown_x = 0;
@@ -1317,14 +1256,22 @@ Some of the most common transformations are:
 	<p>
 They are generalized by the <span id="index_affine_transformation">affine transformation</span> that can do translations, and rotations, and scales simultaneously:
 	</p>
-	<canvas id="affine" width=640 height=640></canvas>
+	<svg id="affine" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	</svg>
+	<p class="comment">
+&uarr; Just a reminder, you can drag the points. Try it, feel the affine limitaion.
+	</p>
 	<script language="JavaScript">
 	init_affine();
 	</script>
 	<p>
 The affine transformation is quite powerful but it has its noticeable constraint. It preserves parallelism, which is in a way limiting. If, for instance, you want to show some perspective, you should do a <span id="index_projective_transformation">projective transformation</span> that looks like this:
 	</p>
-	<canvas id="projective" width=640 height=640></canvas>
+	<svg id="projective" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	</svg>
+	<p class="comment">
+This is a 4-point transformation. All 4 points are independent now.
+	</p>
 	<script language="JavaScript">
 	init_projective();
 	</script>
