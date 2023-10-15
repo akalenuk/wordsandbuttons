@@ -141,10 +141,12 @@ form {
 
 input[type="text"] {
 	font-size: 16pt;
+	font-family: sans-serif;
 }
 
 button {
 	font-size: 16pt;
+	font-family: monospace;
 }
 
 input[type="radio"]{
@@ -774,6 +776,7 @@ function init_projective(){
 		projective_xs[projective_i] = x;
 		projective_ys[projective_i] = y;
 		if(!is_convex(projective_xs, projective_ys)) {
+			document.getElementById("after_the_concave").style.display = "block";
 			for(var i = 0; i < 4; ++i) {
 				if(i != projective_i) {
 					projective_xs[i] += dx;
@@ -795,6 +798,7 @@ function init_projective(){
 			projective_xs[projective_i] = x;
 			projective_ys[projective_i] = y;
 			if(!is_convex(projective_xs, projective_ys)) {
+				document.getElementById("after_the_concave").style.display = "block";
 				for(var i = 0; i < 4; ++i) {
 					if(i != projective_i) {
 						projective_xs[i] += dx;
@@ -818,6 +822,7 @@ function init_projective(){
 		projective_xs[projective_i] = x;
 		projective_ys[projective_i] = y;
 		if(!is_convex(projective_xs, projective_ys)) {
+			document.getElementById("after_the_concave").style.display = "block";
 			for(var i = 0; i < 4; ++i) {
 				if(i != projective_i) {
 					projective_xs[i] += dx;
@@ -893,8 +898,20 @@ function recalculate_composable(client_x, client_y){
 			new_ys[i] = rotated_y(a_increment, composable_xs[i], composable_ys[i]);
 		}
 	}else if(document.getElementById("radio_s").checked){
-		const sx = x / svg_to_x(composable_mousedown_x);
-		const sy = y / svg_to_y(composable_mousedown_y);
+		var x_div = svg_to_x(composable_mousedown_x);
+		var y_div = svg_to_y(composable_mousedown_y);
+		if(Math.abs(x_div) < 1e-4) x_div = 1e-4;
+		if(Math.abs(y_div) < 1e-4) y_div = 1e-4;
+		var sx = x / x_div;
+		var sy = y / y_div;
+		if(Math.abs(sx) < 1e-2) {
+			sx = 1e-6;
+			document.getElementById("after_the_scale0").style.display = "block";
+		}
+		if(Math.abs(sy) < 1e-2) {
+			sy = 1e-6;
+			document.getElementById("after_the_scale0").style.display = "block";
+		}
 		for(var i = 0; i < 4; i++){
 			new_xs[i] = composable_xs[i] * sx;
 			new_ys[i] = composable_ys[i] * sy;
@@ -1103,22 +1120,24 @@ Here is a coordinate translator. It will translate the point you chose on a plot
 	</p>
 	<form id="w">
 Please enter <i>w<sub>h</sub></i>:
-	<button type="button" onclick="dec('proposed_w')">-</button>
+	<button type="button" onclick="dec('proposed_w')">&nbsp;-&nbsp;</button>
 	<input type="text" id="proposed_w" value="1" style="width: 36pt;">
-	<button type="button" onclick="inc('proposed_w')">+</button>
-	<button type="button" onclick="transform()">Transform</button>
+	<button type="button" onclick="inc('proposed_w')">&nbsp;+&nbsp;</button>
+	<button type="button" onclick="transform()">&nbsp;Transform&nbsp;</button>
 	<br>
 	<span id="transformed">
 	</span>
 	<script language="JavaScript">
 	init_w();
-	transform();
 	</script>
 	</form>
 	<p id="to_hide_on_transform">
 But it wouldn't work for all the possible numbers. There is one and only one exception.
 	</p>
 	<div id="after_the_w_proposed" style="display:none;">
+	<script language="JavaScript">
+	transform();
+	</script>	
 		<p>
 Exactly! There is no transformation between homogeneous and Cartesian coordinates when <i>w<sub>h</sub></i> is 0. Kudos for finding this by yourself!
 		</p>
@@ -1234,11 +1253,16 @@ The affine transformation is quite powerful but it has its noticeable constraint
 	<svg id="projective" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
 	</svg>
 	<p class="comment">
-This is a 4-point transformation. All 4 points are independent now.
+This is a 4-point transformation. All 4 points are (almost) independent now.
 	</p>
 	<script language="JavaScript">
 	init_projective();
 	</script>
+	<div id="after_the_concave" style="display:none;">
+		<p>
+Ah, yes! This transformation is also limited. For instance, you can't transform a square into a concave quadrilateral. Kudos for finding this out by yourself!
+		</p>
+	 </div>
 	<h2>
 Formulas in Cartesian coordinates
 	</h2>
@@ -1358,6 +1382,14 @@ It gets better. Matrices are composable. You can compose your own transformation
 	</form>
 	<svg id="composable" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
 	</svg>
+	<div id="after_the_scale0" style="display:none;">
+		<p>
+Forgot to tell you! These transformations are not necessarily revertable. For instance, when you scale your square into a segment by making one of the scales 0, you can't &ldquo;unscale&rdquo; it back anymore. Please use the revert button &darr;
+		</p>
+		<p>
+Also, kudos for finding this out by yourself!
+		</p>
+	 </div>
 	<table class="formula">
 	<tr>
 	<td class="open_matrix"></td>
@@ -1372,7 +1404,7 @@ It gets better. Matrices are composable. You can compose your own transformation
 	</tr>
 	</table>
 
-	<button class="button" id="revert_composable" onclick="revert_composable()"><nobr>Revert to E</nobr></button>
+	<button class="button" id="revert_composable" onclick="revert_composable()"><nobr>&nbsp;Revert to E&nbsp;</nobr></button>
 	<script language="JavaScript">
 	init_composable();
 	</script>
