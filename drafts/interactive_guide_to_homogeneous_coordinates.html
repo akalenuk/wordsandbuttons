@@ -180,6 +180,8 @@ input[type="radio"]{
 canvas { touch-action: none; }
 	</style>
 	<script language="JavaScript">
+var w = 600;
+var h = 480;
 var cx = 220;
 var cy = 380;
 var d = 128.0;
@@ -210,10 +212,10 @@ var translation = null;
 
 function svg_grid() {
 	var grid = '';
-	grid += '<line x1="0" y1="'+cy+'" x2="600" y2="'+cy+'" stroke="black" />';
-	grid += '<line x1="586" y1="'+(cy-4)+'" x2="600" y2="'+cy+'" stroke="black" />';
-	grid += '<line x1="586" y1="'+(cy+4)+'" x2="600" y2="'+cy+'" stroke="black" />';
-	grid += '<line x1="'+cx+'" y1="0" x2="'+cx+'" y2="600" stroke="black" />';
+	grid += '<line x1="0" y1="'+cy+'" x2="'+w+'" y2="'+cy+'" stroke="black" />';
+	grid += '<line x1="'+(w-4)+'" y1="'+(cy-4)+'" x2="'+w+'" y2="'+cy+'" stroke="black" />';
+	grid += '<line x1="'+(w-4)+'" y1="'+(cy+4)+'" x2="'+w+'" y2="'+cy+'" stroke="black" />';
+	grid += '<line x1="'+cx+'" y1="0" x2="'+cx+'" y2="'+h+'" stroke="black" />';
 	grid += '<line x1="'+cx+'" y1="0" x2="'+(cx-4)+'" y2="14" stroke="black" />';
 	grid += '<line x1="'+cx+'" y1="0" x2="'+(cx+4)+'" y2="14" stroke="black" />';
 	for(var x = -1.; x <= 2.; x += 1.) {
@@ -223,7 +225,7 @@ function svg_grid() {
 			grid += '<line x1="' + sx + '" y1="'+(cy-4)+'" x2="' + sx + '" y2="'+(cy+4)+'" stroke="black" />';
 		grid += '<text x="' + tx +'" y="'+(cy-7)+'" class="plot">'+ x.toString() + '</text>';
 	}
-	for(var y = -1.; y <= 2.; y += 1.) {
+	for(var y = 0.; y <= 2.; y += 1.) {
 		const sy = y_to_svg(y).toString();
 		const ty = (y_to_svg(y)-6).toString();
 		if(y != 0) {
@@ -292,7 +294,7 @@ function init_pick_a_point(){
 function pick_a_point_draw(client_x, client_y, do_guides){
 	var svg = document.getElementById("pick_a_point");
 	svg.innerHTML = '';
-	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="'+w+'" height="'+h+'" rx="12"/>';
 	svg.innerHTML += svg_grid();
 	svg.innerHTML += '<line stroke="#d64562" stroke-dasharray="10,10" x1="'+x_to_svg(point_x)+'" y1="'+cy+'" x2="'+x_to_svg(point_x)+'" y2="'+y_to_svg(point_y)+'" />';
 	svg.innerHTML += '<line stroke="#d64562" stroke-dasharray="10,10" x1="'+cx+'" y1="'+y_to_svg(point_y)+'" x2="'+x_to_svg(point_x)+'" y2="'+y_to_svg(point_y)+'" />';
@@ -354,7 +356,7 @@ function init_slide_a_w(){
 function slide_a_w_draw(){
 	var svg = document.getElementById("slide_a_w");
 	svg.innerHTML = '';
-	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="'+w+'" height="'+h+'" rx="12"/>';
 	const d = Math.sqrt(point_y*point_y + point_x*point_x);
 	const point_outside_x = point_x / d * 7;
 	const point_outside_y = point_y / d * 7;
@@ -422,7 +424,7 @@ function translation_draw(client_x, client_y, do_new){
 
 	var svg = document.getElementById("translation");
 	svg.innerHTML = '';
-	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="'+w+'" height="'+h+'" rx="12"/>';
 	svg.innerHTML += svg_grid();
 	svg.innerHTML += source_square();
 	if(do_new){
@@ -436,8 +438,8 @@ function translation_draw(client_x, client_y, do_new){
 	svg.innerHTML += '<line stroke="#d64562" x1="'+x_to_svg(x+1)+'" y1="'+y_to_svg(y) +'" x2="'+x_to_svg(x+1)+'" y2="'+y_to_svg(y+1)+'"/>';
 	svg.innerHTML += '<line stroke="#d64562" x1="'+x_to_svg(x+1)+'" y1="'+y_to_svg(y+1) +'" x2="'+x_to_svg(x)+'" y2="'+y_to_svg(y+1)+'"/>';
 	svg.innerHTML += '<line stroke="#d64562" x1="'+x_to_svg(x)+'" y1="'+y_to_svg(y+1) +'" x2="'+x_to_svg(x)+'" y2="'+y_to_svg(y)+'"/>';
-	svg.innerHTML += '<text fill="#d64562" x="300" y="560" class="plot">'+ "x' = x + a, where a = " + (x-1).toFixed(1) + '</text>';
-	svg.innerHTML += '<text fill="#d64562" x="300" y="580" class="plot">'+ "y' = y + b, where b = " + (y-1).toFixed(1) + '</text>';
+	svg.innerHTML += '<text fill="#d64562" x="280" y="440" class="plot">'+ "x' = x + a, where a = " + (x-1).toFixed(1) + '</text>';
+	svg.innerHTML += '<text fill="#d64562" x="280" y="460" class="plot">'+ "y' = y + b, where b = " + (y-1).toFixed(1) + '</text>';
 }
 
 function rotated_y(a, x, y){
@@ -509,7 +511,7 @@ function rotation_draw(a, do_new){
 
 	var svg = document.getElementById("rotation");
 	svg.innerHTML = '';
-	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="'+w+'" height="'+h+'" rx="12"/>';
 	svg.innerHTML += source_square();
 	if(do_new){
 		// the connection
@@ -539,9 +541,9 @@ function rotation_draw(a, do_new){
 		svg.innerHTML += '<line stroke="#d64562" x1="'+x_to_svg(new_xs[i])+'" y1="'+y_to_svg(new_ys[i]) 
 			+'" x2="'+x_to_svg(new_xs[j])+'" y2="'+y_to_svg(new_ys[j])+'"/>';
 	}
-	svg.innerHTML += '<text fill="#d64562" x="300" y="540" class="plot">'+"x' = cos(a) * x + sin(a) * y"+'</text>';
-	svg.innerHTML += '<text fill="#d64562" x="300" y="560" class="plot">'+"y' = -sin(a) * x + cos(a) * y" + '</text>';
-	svg.innerHTML += '<text fill="#d64562" x="300" y="580" class="plot">'+"where a = " + a.toFixed(2) + '</text>';
+	svg.innerHTML += '<text fill="#d64562" x="280" y="420" class="plot">'+"x' = cos(a) * x + sin(a) * y"+'</text>';
+	svg.innerHTML += '<text fill="#d64562" x="280" y="440" class="plot">'+"y' = -sin(a) * x + cos(a) * y" + '</text>';
+	svg.innerHTML += '<text fill="#d64562" x="280" y="460" class="plot">'+"where a = " + a.toFixed(2) + '</text>';
 }
 
 var scale_x = 0.8;
@@ -598,7 +600,7 @@ function scale_draw(a, b, do_new){
 
 	var svg = document.getElementById("scale");
 	svg.innerHTML = '';
-	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="'+w+'" height="'+h+'" rx="12"/>';
 	svg.innerHTML += source_square();
 	if(do_new){
 		svg.innerHTML += '<line stroke="#d64562" stroke-dasharray="10,10" x1="'
@@ -614,8 +616,8 @@ function scale_draw(a, b, do_new){
 		svg.innerHTML += '<line stroke="#d64562" x1="'+x_to_svg(new_xs[i])+'" y1="'+y_to_svg(new_ys[i]) 
 			+'" x2="'+x_to_svg(new_xs[j])+'" y2="'+y_to_svg(new_ys[j])+'"/>';
 	}
-	svg.innerHTML += '<text fill="#d64562" x="300" y="560" class="plot">'+"x' = a * x, where a = " + a.toFixed(2)+'</text>';
-	svg.innerHTML += '<text fill="#d64562" x="300" y="580" class="plot">'+"y' = b * y, where b = " + b.toFixed(2)+'</text>';
+	svg.innerHTML += '<text fill="#d64562" x="280" y="440" class="plot">'+"x' = a * x, where a = " + a.toFixed(2)+'</text>';
+	svg.innerHTML += '<text fill="#d64562" x="280" y="460" class="plot">'+"y' = b * y, where b = " + b.toFixed(2)+'</text>';
 }
 
 function nearest_i(x, y, xs, ys) {
@@ -700,7 +702,7 @@ function init_affine(){
 function affine_draw(client_x, client_y, do_new){
 	var svg = document.getElementById("affine");
 	svg.innerHTML = '';
-	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="'+w+'" height="'+h+'" rx="12"/>';
 	svg.innerHTML += svg_grid();
 	svg.innerHTML += source_square();
 	for(var i = 0; i < 4; ++i) {
@@ -794,7 +796,7 @@ var projective_i = 0;
 function projective_draw(client_x, client_y, do_new){
 	var svg = document.getElementById("projective");
 	svg.innerHTML = '';
-	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="'+w+'" height="'+h+'" rx="12"/>';
 	svg.innerHTML += svg_grid();
 	svg.innerHTML += source_square();
 	for(var i = 0; i < 4; ++i) {
@@ -989,7 +991,7 @@ var composable_i = 0;
 function composable_draw(client_x, client_y, do_new){
 	var svg = document.getElementById("composable");
 	svg.innerHTML = '';
-	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="600" height="600" rx="12"/>';
+	svg.innerHTML += '<rect stroke="#eeeeee" fill="#eeeeee" width="'+w+'" height="'+h+'" rx="12"/>';
 	svg.innerHTML += svg_grid();
 	svg.innerHTML += source_square();
 	for(var t = 1.125; t < 2.; t += 0.125) {
@@ -1050,7 +1052,7 @@ The investment
 	<p>
 In a <span id="index_cartesian_coordinate_system">Cartesian coordinate system</span>, a point on a plane is set by a pair of numbers <i>(x<sub>c</sub>, y<sub>c</sub>)</i>. Here is a plot you can choose a point on. Just click or tap anywhere you want. 
 	</p>
-	<svg id="pick_a_point" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	<svg id="pick_a_point" width="600pt" height="480pt" viewBox="0 0 600 480" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
 	</svg>
 	<p class="comment">
 &uarr; You can also drag the point. All the plots on this page are interactive.
@@ -1130,7 +1132,7 @@ Usually, Cartesian coordinates are just the first two homogeneous coordinates di
 	<p>
 The smaller <i>w<sub>h</sub></i> gets, the further the point in Cartesian coordinates “travels” from the null. To see this effect, you can slide the point along its personal axis on the plot. Note that the first two coordinates remain intact all the time, you make the point slide by only altering the <i>w<sub>h</sub></i>.
 	</p>
-	<svg id="slide_a_w" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	<svg id="slide_a_w" width="600pt" height="480pt" viewBox="0 0 600 480" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
 	<script language="JavaScript">
 	init_slide_a_w();
 	</script>
@@ -1197,7 +1199,7 @@ Some of the most common transformations are:
 	<p>
 1. <span id="index_translation">translation</span>;
 	</p>
-	<svg id="translation" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	<svg id="translation" width="600pt" height="480pt" viewBox="0 0 600 480" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
 	</svg>
 	<script language="JavaScript">
 	init_translation();
@@ -1205,7 +1207,7 @@ Some of the most common transformations are:
 	<p>
 2. <span id="index_rotation">rotation</span>;
 	</p>
-	<svg id="rotation" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	<svg id="rotation" width="600pt" height="480pt" viewBox="0 0 600 480" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
 	</svg>
 	<script language="JavaScript">
 	init_rotation();
@@ -1213,7 +1215,7 @@ Some of the most common transformations are:
 	<p>
 3. <span id="index_scaling">scaling</span>.
 	</p>
-	<svg id="scale" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	<svg id="scale" width="600pt" height="480pt" viewBox="0 0 600 480" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
 	</svg>
 	<script language="JavaScript">
 	init_scale();
@@ -1221,7 +1223,7 @@ Some of the most common transformations are:
 	<p>
 They are generalized by the <span id="index_affine_transformation">affine transformation</span> that can do translations, and rotations, and scales simultaneously:
 	</p>
-	<svg id="affine" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	<svg id="affine" width="600pt" height="480pt" viewBox="0 0 600 480" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
 	</svg>
 	<p class="comment">
 &uarr; Just a reminder, you can drag the points. Try it, feel the affine limitaion.
@@ -1232,7 +1234,7 @@ They are generalized by the <span id="index_affine_transformation">affine transf
 	<p>
 The affine transformation is quite powerful but it has its noticeable constraint. It preserves parallelism, which is in a way limiting. If you want to go beyond this limitation, you should do a <span id="index_projective_transformation">projective transformation</span> that, for example, may look like this:
 	</p>
-	<svg id="projective" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	<svg id="projective" width="600pt" height="480pt" viewBox="0 0 600 480" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
 	</svg>
 	<p class="comment">
 This is a 4-point transformation. All 4 points are (almost) independent now.
@@ -1366,7 +1368,7 @@ It gets better. Matrices are composable. You can compose your own transformation
 	<input type="radio" name="transformation_type" id="radio_s"><label for="radio_s">Scale</label>&nbsp;&nbsp;
 	<input type="radio" name="transformation_type" id="radio_p" checked="true"><label for="radio_p">Projection</label><br>
 	</form>
-	<svg id="composable" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
+	<svg id="composable" width="600pt" height="480pt" viewBox="0 0 600 480" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
 	</svg>
 	<div id="after_the_scale0" style="display:none;" class="fact">
 		<h3>Hidden fact #4</h3>
