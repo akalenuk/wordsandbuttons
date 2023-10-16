@@ -133,7 +133,7 @@ table td {
 	border-right: 2px solid black;
 }
 
-.quest {
+.fact {
 	background-color: #f7cbd3;
 	width: 600pt;
 	padding-top: 3pt;
@@ -876,12 +876,40 @@ function recalculate_composable(client_x, client_y){
 	recalculate_composable_matrix();
 	}
 
+// Hidden fact #3.
+//
+// Yes, there is a hidden fact #3 but it's not even on the page, it's right here in the code.
+// The fact is, the matrix can be indeed composed as a series of transformations,
+// but sometimes it's easier to compute it from the 4-points translations instead.
+//
+// We form equations from the projective transformation formula like this:
+// For i in 1..4:
+// (Ax_i + By_i + C) / (ax_i + bx_i + c) = x_i'
+// (Dx_i + Ey_i + F) / (ax_i + bx_i + c) = y_i'
+// Then we multiply both sides by (ax_i + bx_i + c), and subtract the right side from the left:
+// Ax_i + By_i + C) - (ax_i + bx_i + c)x_i' = 0
+// Dx_i + Ey_i + F) - (ax_i + bx_i + c)y_i' = 0
+// This forms a system of 8 linear equations. We can solve it and get 8 coefficients.
+// But not 9. And we need nine. So for the last one, the little 'c', we just pick a number.
+// 1 is the most convenient number, but remember, we're in homogeneous coordinates where
+// (1,2,3) and (2,4,6) is the exact same point. So with any c != 0, the system will give us all
+// the coefficients we need.
+//
+// The ready made solution for this system is proposed in the function below.
+//
+// For more info on linear systems, look here:
+// https://wordsandbuttons.online/programmers_introduction_to_linear_equations.html
+// And to learn how to solve them symbolically but not manually:
+// https://wordsandbuttons.online/sympy_makes_math_fun_again.html
+//
+// Kudos for looking into the code!
+//
 function recalculate_composable_matrix() {
-	// calculate a matrix
 	x0 = composable_xs[0];	y0 = composable_ys[0];
 	x1 = composable_xs[1];	y1 = composable_ys[1];
 	x2 = composable_xs[2];	y2 = composable_ys[2];
 	x3 = composable_xs[3];	y3 = composable_ys[3];
+	// calculate the matrix	
 	var A = (-x0*x2*y1 + x0*x2*y3 + x0*x3*y1 - x0*x3*y2 + x1*x2*y0 - x1*x2*y3 - x1*x3*y0 + x1*x3*y2)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
 	var D = (x0*x1*y2 - x0*x1*y3 - x0*x2*y1 + x0*x2*y3 + x1*x3*y0 - x1*x3*y2 - x2*x3*y0 + x2*x3*y1)/(x0*y1 - x0*y3 - x1*y0 - 2*x1*y2 + 3*x1*y3 + 2*x2*y1 - 2*x2*y3 + x3*y0 - 3*x3*y1 + 2*x3*y2);
 	var a = (-2*x0*x1*y2 + 2*x0*x1*y3 + 3*x0*x2*y1 - 3*x0*x2*y3 - 2*x0*x3*y1 + 2*x0*x3*y2 - x1*x2*y0 + x1*x2*y3 + x2*x3*y0 - x2*x3*y1)/
@@ -1084,16 +1112,16 @@ Please enter <i>w<sub>h</sub></i>:
 	<p id="to_hide_on_transform">
 But it wouldn't work for all the possible numbers. There is one and only one exception.
 	</p>
-	<div id="after_the_w_proposed" style="display:none;" class="quest">
+	<div id="after_the_w_proposed" style="display:none;" class="fact">
 	<script language="JavaScript">
 	transform();
 	</script>	
-		<h3>Hidden quest #1</h3>
+		<h3>Hidden fact #1</h3>
 		<p>
-Exactly! There is no transformation between homogeneous and Cartesian coordinates <nobr>when <i>w<sub>h</sub></i> is 0.</nobr> Kudos for finding this by yourself!
+There is no transformation between homogeneous and Cartesian coordinates <nobr>when <i>w<sub>h</sub></i> is 0.</nobr> Kudos for finding this by yourself!
 		</p>
 		<p style="text-align: right;">
-<span onclick="document.getElementById('after_the_w_proposed').style.display = 'none';" class="u">Hide the hidden quest</span>.
+<span onclick="document.getElementById('after_the_w_proposed').style.display = 'none';" class="u">Hide the hidden fact</span>.
 		</p>
 	 </div>
 	<p>
@@ -1212,13 +1240,13 @@ This is a 4-point transformation. All 4 points are (almost) independent now.
 	<script language="JavaScript">
 	init_projective();
 	</script>
-	<div id="after_the_concave" style="display:none;" class="quest">
-		<h3>Hidden quest #2</h3>
+	<div id="after_the_concave" style="display:none;" class="fact">
+		<h3>Hidden fact #2</h3>
 		<p>
 Ah, yes! This transformation is also limited. For instance, you can't transform a square into a concave quadrilateral. Kudos for finding this out by yourself!
 		</p>
 		<p style="text-align: right;">
-<span onclick="document.getElementById('after_the_concave').style.display = 'none';" class="u">Hide the hidden quest</span>.
+<span onclick="document.getElementById('after_the_concave').style.display = 'none';" class="u">Hide the hidden fact</span>.
 		</p>
 	 </div>
 	<h2>
@@ -1340,16 +1368,16 @@ It gets better. Matrices are composable. You can compose your own transformation
 	</form>
 	<svg id="composable" width="600pt" height="600pt" viewBox="0 0 600 600" cursor="pointer" xmlns="http://www.w3.org/2000/svg">
 	</svg>
-	<div id="after_the_scale0" style="display:none;" class="quest">
-		<h3>Hidden quest #4</h3>
+	<div id="after_the_scale0" style="display:none;" class="fact">
+		<h3>Hidden fact #4</h3>
 		<p>
-Forgot to tell you! These transformations are not necessarily revertable. For instance, when you scale your square into a segment by making one of the scales 0, you can't &ldquo;unscale&rdquo; it back anymore. Please use the revert button &darr;
+Forgot to tell you! These transformations are not necessarily revertable. For instance, when you scale your square into a segment by making one of the scales 0, you can't &ldquo;unscale&rdquo; it back anymore. Please use the revert button instead &darr;
 		</p>
 		<p>
 Also, kudos for finding this out by yourself!
 		</p>
 		<p style="text-align: right;">
-<span onclick="document.getElementById('after_the_scale0').style.display = 'none';" class="u">Hide the hidden quest</span>.
+<span onclick="document.getElementById('after_the_scale0').style.display = 'none';" class="u">Hide the hidden fact</span>.
 		</p>
 	 </div>
 	<table class="formula">
