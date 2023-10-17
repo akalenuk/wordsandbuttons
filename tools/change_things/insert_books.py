@@ -19,10 +19,10 @@ for file_name in os.listdir(path):
 			last_part = first_good + text.split(first_good)[1]
 
 			new_text = first_part + """
-			+
-		<a href="https://wordsandbuttons.online/SYTYKC.pdf">Free book</a><br>
-			+
-		<a href="https://www.manning.com/books/geometry-for-programmers">Paid book</a><br>
+			<nobr>+
+		<a href="https://wordsandbuttons.online/SYTYKC.pdf">Free book</a></nobr><br>
+			<nobr>+
+		<a href="https://www.manning.com/books/geometry-for-programmers">Paid book</a></nobr><br>
 			+
 		""" + last_part;
 
