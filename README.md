@@ -176,7 +176,7 @@ _All the code is licensed under [The Unlicense](http://unlicense.org/)._
 - [Challenge your performance intuition with C++ magic squares](https://wordsandbuttons.online/challenge_your_performance_intuition_with_cpp_magic_squares.html) An interactive quiz where you get to estimate the performance difference between several variants of the same code.
 <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> <sup>[#quizzes](https://wordsandbuttons.online/all_quizzes.html)</sup> 
 
-- [An interactive guide to homogeneous coordinates](https://wordsandbuttons.online/interactive_guide_to_homogeneous_coordinates.html) This interactive guide shows how homogeneous coordinates actually make geometry simpler and not more complicated. It explains the extra coordinate, the matrices, the generalized transformations. Most of what you need to know about projective geometry as a practicing programmer is here.
+- [Homogeneous coordinates as a mathematical investment in programming](https://wordsandbuttons.online/interactive_guide_to_homogeneous_coordinates.html) This interactive guide shows how homogeneous coordinates actually make geometry simpler and not more complicated. It explains the extra coordinate, the matrices, the generalized transformations. Most of what you need to know about projective geometry as a practicing programmer is here.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
 - [So you think you know C?](https://wordsandbuttons.online/so_you_think_you_know_c.html) It's a C test. If you think you know C, take this test. It only has 5 questions.
