@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=0.84">
+	<title>Keyboard</title>
+	<meta name="description" content="">
+	<meta name="keywords" content="mathematics, demos">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body {
+	margin: 0 0 0 0;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:link, a:visited {
+	color: blue;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 600pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 600pt;
+	text-align: left;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding: 12pt 12pt 12pt 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 600pt;
+	background-color: #eeee99;
+}
+
+textarea {
+	width: 100%;
+	font-size: 12pt;
+	font-family: monospace;
+	padding: 0pt 0pt 0pt 0pt;
+	margin: 0pt 0pt 0pt 0pt;
+}
+
+
+.comment {
+	font-size: 12pt;
+	text-align: center;
+	font-family: sans-serif;
+	padding-bottom: 12pt;
+}
+
+	</style>
+	<script language="JavaScript">
+var from_to = {};
+
+function update_replacers() {
+	const from = document.getElementById("from").value.replaceAll('\n', '');
+	const to = document.getElementById("to").value.replaceAll('\n', '');
+	from_to = {};
+	for(var i = 0; i < from.length; ++i) {
+		from_to[from[i]] = to[i];
+	}
+	var link = "keyboard.html?from=" + btoa(from) + "&to=" + to;
+	document.getElementById("link").innerHTML = "<a href='" + link + "'>your 'from' and 'to'</a>";
+}
+
+function replace_all() {
+	var text = document.getElementById("text").value;
+	var new_text = "";
+	for(var i = 0; i < text.length; ++i) {
+		if(from_to[text[i]] === undefined) {
+			new_text += text[i];
+		} else {
+			new_text += from_to[text[i]];
+		}
+	}
+	document.getElementById("text").value = new_text;
+}
+	</script>
+</head>
+<body>
+	<center>
+	<form>
+	Text: <textarea id="text" rows=12 onInput="replace_all()" style="font-family: serif;"></textarea>
+
+	From: <textarea id="from" rows=1 onInput="update_replacers()">
+qwertyuiop[]asdfghjkl;'zxcvbnm,.QWERTYUIOP{}ASDFGHJKL:"ZXCVBNM<>
+</textarea>
+	To:<textarea id="to" rows=1 onInput="update_replacers()">
+йцукенгшщзхїфівапролджєячсмитьбюЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄЯЧСМИТЬБЮ
+</textarea>
+	The link with <span id="link"></span>.
+	<script language="JavaScript">
+const params = new URLSearchParams(window.location.search);
+if(params.has('from'))
+	document.getElementById("from").value = atob(params.get('from'));
+if(params.has('to'))
+	document.getElementById("to").value = params.get('to');
+update_replacers();
+	</script>
+	</form>
+
+	<p>
+	</p>
+
+
+	<table class="footer" style="width: 600pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html">Index</a>
+		<a href="all_mathematics.html">#mathematics</a> <a href="all_demos.html">#demos</a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+			+
+		<a href="https://wordsandbuttons.online/SYTYKC.pdf">Free book</a><br>
+			+
+		<a href="https://www.manning.com/books/geometry-for-programmers">Paid book</a><br>
+			+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+</body>
+</html>
