@@ -619,9 +619,7 @@ function init_atan_plot(i_canvas, i_fs, i_colors, i_verticals, i_x, i_y, i_scale
 var w = 640.0;
 var h = 640.0;
 
-var points_for_approximation = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315], [587, 172]];
-var points_for_interpolation = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315], [587, 172]];
-var points_for_both = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315], [587, 172]];
+var points_for_interpolation = [];
 
 
 function nearest_i(xy, points) {
@@ -815,17 +813,45 @@ function draw_canvas(canvas_name){
 		context.fill();
 		context.closePath();
 	}
+
+	const N = Math.floor(points.length/2) + 1;
+	const D = points.length - N;
+	var numerator = 'a<sub>0</sub>';
+	for(var i = 1; i < N; ++i) {
+		if(i == 1)
+			numerator = 'a<sub>1</sub>x + '+ numerator;
+		else
+			numerator = 'a<sub>' + i + '</sub>x<sup>' + i + '</sup> + ' + numerator;
+	}
+	var denominator = '';
+	for(var i = 1; i < D+1; ++i) {
+		if(i == 1)
+			denominator = 'b<sub>1</sub>x'+ denominator;
+		else
+			denominator = 'b<sub>' + i + '</sub>x<sup>' + i + '</sup> + ' + denominator;
+	}
+	var table = "<table class='formula'><tr><td rowspan=2>R(x) = &nbsp;</td>";
+	if(D > 0) {
+		table += "<td style='border-bottom: 1px solid black'>" + numerator;
+		table += "</td></tr><tr><td>" + denominator;
+	} else {
+		table += "<td rowspan=2>" + numerator;
+	}
+	table += "</td></tr></table>";
+	document.getElementById("interpolation_formula").innerHTML = table;
 }
 
 // under
 function reset_all_for_interpolation() {
-	points_for_interpolation = [[37, 195], [66, 345], [197, 473], [420, 465], [560, 315], [587, 172]];
+	points_for_interpolation =
+	[[37,195],[135.5,489.8666687011719],[325.5,400.8666687011719],[354.5,538.8666687011719],[465.5,391.8666687011719],[582.5,167.86666870117188]];
 	interpolation_i = 0;
 	draw_canvas("interpolation_canvas");
 }
 
 function undo_last_for_interpolation() {
-	points_for_interpolation.splice(-1,1);
+	if(points_for_interpolation.length > 1)
+		points_for_interpolation.splice(-1,1);
 	draw_canvas("interpolation_canvas");
 }
 
@@ -891,13 +917,14 @@ Rational interpolation
 	<div style="text-align:center; padding-bottom:12pt;">
 		<input type="radio" name="ipol" id="i_1" value="Add" /><label for="i_1">Add a point;</label> &nbsp;
 		<input type="radio" name="ipol" id="i_2" checked value="Move"><label for="i_2">move a point.</label> &nbsp;
-		<button type="button" style="width: 120pt;" onclick="undo_last_for_interpolation()">Undo last</button>
+		<button type="button" style="width: 180pt;" onclick="undo_last_for_interpolation()">Remove last point</button>
 		<button type="button" style="width: 120pt;" onclick="reset_all_for_interpolation()">Reset all</button>
 	</div>
-	<div id="interpolation_formula" class="formula">
+	<div id="interpolation_formula">
 	</div>
 
 	<script language="JavaScript">
+	reset_all_for_interpolation();
 	init_interpolation_canvas();
 	</script>
 	<p>
