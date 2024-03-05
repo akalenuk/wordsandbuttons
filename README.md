@@ -11,6 +11,9 @@ _All the code is licensed under [The Unlicense](http://unlicense.org/)._
 
 ## Pages
 
+- [Rational interpolation](https://wordsandbuttons.online/rational_interpolation.html) Rational interpolation is a step forward from polynomial interpolation towards rational splines. With rational interpolation, you can build functions that run through a set of points and also have vertical asymptotes whenever you want. With this capability, you can now model functions like logarithms better.
+<sup>[#demos](https://wordsandbuttons.online/all_demos.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> 
+
 - [Either your estimates suck or your job does](https://wordsandbuttons.online/either_your_estimates_suck_or_your_job_does.html) This page uses polynomial modeling to show why software engineering tasks are often impossible to estimate.
 <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> 
 
