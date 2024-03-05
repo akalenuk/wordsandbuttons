@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=0.84">
 	<title>Rational interpolation</title>
-	<meta name="description" content="Rational interpolation is a step forward from polynomial interpolation towards rational splines. With rational interpolation, you can build functions that run through a set of points and also has vertical asymptotes whenever you want. With this capability, you can now model functions like logarithm better.">
+	<meta name="description" content="Rational interpolation is a step forward from polynomial interpolation towards rational splines. With rational interpolation, you can build functions that run through a set of points and also have vertical asymptotes whenever you want. With this capability, you can now model functions like logarithms better.">
 	<meta name="keywords" content="mathematics, demos">
 	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
 	<style>
@@ -910,9 +910,120 @@ function colorized(text) {
 	<center>
 	<p style="width: 600pt; padding: 36pt 0pt 64pt 0pt;">This is <a href="index.html">Words and Buttons Online</a> — a collection of&nbsp;interactive <a href="all_tutorials.html">#tutorials</a>, <a href="all_demos.html">#demos<a/>, and <a href="all_quizzes.html">#quizzes</a> about <a href="all_mathematics.html">#mathematics</a>, <a href="all_algorithms.html">#algorithms</a> and <a href="all_programming.html">#programming</a>.</p>
 	<h1>
-Rational interpolation
+<span id="index_rational_interpolation">Rational interpolation</span>
 	</h1>
-
+	<p>
+Let’s presume you already know how polynomial interpolation works and how polynomials behave globally. If not, please see <a href="https://wordsandbuttons.online/polynomial_approximation_and_interpolation.html">Polynomial approximation and interpolation</a> and <a href="https://wordsandbuttons.online/trippy_polynomials_in_arctangent_scale.html">Trippy polynomials in arctangent scale</a>.
+	</p>
+	<p>
+In “trippy polynomials”, there was an argument that while you can model continuous functions with polynomials locally, so on some specific interval with no discontinuities, modeling some functions globally, so on the whole numeric range is simply impossible due to the limited nature of polynomials themselves.
+	</p>
+	<p>
+For instance, in computing, we normally model the sine function with a polynomial but only in the <span class="formula">[0, &pi;/2]</span> range. Then we use special formulas to replicate the model and make it periodic. Why do we have to do that? Because polynomials are not periodic. Sine is infinitely differentiable, it can have therefore afford infinite extremums, and polynomials are finite, they can not.
+	</p>
+	<p>
+Another example is a logarithm function. We can build an approximation for a logarithm on any interval in <span class="formula">(0, &infin;]</span>. But not in 0. Logarithm has a vertical asymptote in 0, polynomials, by their nature, don’t have any.
+	</p>
+	<p>
+We can’t do much about the first problem, besides, it’s not that much of a problem to begin with, but we can still model functions with asymptotes by going just one step away from polynomial interpolation and adopting a rational one.
+	</p>
+	<p>
+The name “rational” comes from ratio. The formula we’re going to use to model things is a ratio of two polynomials.
+	</p>
+	<table class='formula'><tr><td rowspan=2>R(x) = &nbsp;</td><td style='border-bottom: 1px solid black'>P<sub>1</sub>(x)</td></tr><tr><td>P<sub>2</sub>(x)</td></tr></table>
+	<p>
+We already know how to build a <href="https://wordsandbuttons.online/polynomial_approximation_and_interpolation.html#index_polynomial_interpolation">polynomial that goes through N points</a>, but how do we do that with rational functions?
+	</p>
+	<p>
+Well, ambiguously. Normally, there is only one polynomial of N-1 degree that goes through N points, but with rational interpolation, there are N-1 configurations too. E. g. for a set of four points, there could only be one cubic polynomial of 3rd degree:
+	</p>
+	<p class="formula">
+P(x) = ax<sup>3</sup> + bx<sup>2</sup> +cx + d
+	</p>
+	<p>
+But for the same four point rational interpolation, there are already 4 diffrent minimal degree configurations with of rational functions:
+	</p>
+	<table class='formula'><tr><td rowspan=2>R(x) = &nbsp;</td><td style='border-bottom: 1px solid black'>ax<sup>2</sup> + bx + c</td></tr><tr><td>d</td></tr></table>
+	<table class='formula'><tr><td rowspan=2>R(x) = &nbsp;</td><td style='border-bottom: 1px solid black'>ax + b</td></tr><tr><td>cx + d</td></tr></table>
+	<table class='formula'><tr><td rowspan=2>R(x) = &nbsp;</td><td style='border-bottom: 1px solid black'>a</td></tr><tr><td>bx<sup>2</sup> + cx + d</td></tr></table>
+	<table class='formula'><tr><td rowspan=2>R(x) = &nbsp;</td><td style='border-bottom: 1px solid black'>1</td></tr><tr><td>ax<sup>3</sup> + bx<sup>2</sup> +cx + d</td></tr></table>
+	</p>
+	<p>
+I’m saying “minimal degree configurations” because technically, this is a rational function too:
+	</p>
+	<table class='formula'><tr><td rowspan=2>R(x) = &nbsp;</td>
+	<td style='border-bottom: 1px solid black'>ax<sup>234</sup> + b<sup>123</sup></td></tr><tr><td>cx<sup>456</sup> + d<sup>345</sup></td></tr></table>
+	<p>
+And it’s obviously different from:
+	</p>
+	<table class='formula'><tr><td rowspan=2>R(x) = &nbsp;</td><td style='border-bottom: 1px solid black'>ax + b</td></tr><tr><td>cx + d</td></tr></table>
+	<p>
+Althoguh they can both interpolate 4 points.
+	</p>
+	<p>
+For all the configurations, the method of obtaining coefficients is essentially the same. Remember what we did to get an interpolating polynomial? We put input points into the polynomial creating a system of equations, and then used a linear solver on it. We can do the same here.
+	</p>
+	<p>
+For instance, for a four-point set <span class="formula">(x<sub>i</sub>, y<sub>i</sub>)</span> and the 2-by-2 minimal degree configuration, the equations would be:
+	</p>
+	<table class='formula'><tr><td style='border-bottom: 1px solid black'>ax<sub>1</sub> + b</td><td rowspan=2>&nbsp;= y<sub>1</sub></td></tr><tr><td>cx<sub>1</sub> + d</td></tr></table>
+	<table class='formula'><tr><td style='border-bottom: 1px solid black'>ax<sub>2</sub> + b</td><td rowspan=2>&nbsp;= y<sub>2</sub></td></tr><tr><td>cx<sub>2</sub> + d</td></tr></table>
+	<table class='formula'><tr><td style='border-bottom: 1px solid black'>ax<sub>3</sub> + b</td><td rowspan=2>&nbsp;= y<sub>3</sub></td></tr><tr><td>cx<sub>3</sub> + d</td></tr></table>
+	<table class='formula'><tr><td style='border-bottom: 1px solid black'>ax<sub>4</sub> + b</td><td rowspan=2>&nbsp;= y<sub>4</sub></td></tr><tr><td>cx<sub>4</sub> + d</td></tr></table>
+	<p>
+But wait, you can say, these are not linear. Ah! Yes, not yet. But wait until we multiply both sides of every equation by <span class="formula">(cx<sub>i</sub> + d)</span> where <span class="formula">(cx<sub>i</sub> + d) &ne; 0</span>.
+	</p>
+	<p class="formula">
+ax<sub>1</sub> + b = y<sub>1</sub> (cx<sub>1</sub> + d)
+	</p>
+	<p class="formula">
+ax<sub>2</sub> + b = y<sub>2</sub> (cx<sub>2</sub> + d)
+	</p>
+	<p class="formula">
+ax<sub>3</sub> + b = y<sub>3</sub> (cx<sub>3</sub> + d)
+	</p>
+	<p class="formula">
+ax<sub>4</sub> + b = y<sub>4</sub> (cx<sub>4</sub> + d)
+	</p>
+	<p>
+Then we expand and move the expressions to a single side of the equations so, for instance,
+	</p>
+	<p class="formula">
+ax<sub>1</sub> + b = y<sub>1</sub> (cx<sub>1</sub> + d)
+	</p>
+	<p>
+becomes
+	</p>
+	<p class="formula">
+ax<sub>1</sub> + b = y<sub>1</sub>cx<sub>1</sub> + y<sub>1</sub>d
+	</p>
+	<p>
+and then
+	</p>
+	<p class="formula">
+ax<sub>1</sub> + b - y<sub>1</sub>cx<sub>1</sub> - y<sub>1</sub>d = 0
+	</p>
+	<p>
+This doesn’t look like a linear equation at first sight still, but remember, we’re hunting <span class="formula">a</span>, <span class="formula">b</span>, <span class="formula">c</span>, and <span class="formula">d</span> here. The <span class="formula">x<sub>i</sub></span> and <span class="formula">y<sub>i</sub></span> are our input data. So when we put our equations together, we'll get a system of linear equations after all:
+	</p>
+	<p class="formula">
+ax<sub>1</sub> + b - y<sub>1</sub>cx<sub>1</sub> - y<sub>1</sub>d = 0
+	</p>
+	<p class="formula">
+ax<sub>2</sub> + b - y<sub>2</sub>cx<sub>2</sub> - y<sub>2</sub>d = 0
+	</p>
+	<p class="formula">
+ax<sub>3</sub> + b - y<sub>3</sub>cx<sub>3</sub> - y<sub>3</sub>d = 0
+	</p>
+	<p class="formula">
+ax<sub>4</sub> + b - y<sub>4</sub>cx<sub>4</sub> - y<sub>4</sub>d = 0
+	</p>
+	<p>
+We can totally solve that with a linear solver.
+	</p>
+	<p>
+On the interactive plot below, you can add or move points to familiarize yourself with how rational interpolation feels like:
+	</p>
 	<canvas id="interpolation_canvas" width=640 height=640></canvas>
 	<div style="text-align:center; padding-bottom:12pt;">
 		<input type="radio" name="ipol" id="i_1" value="Add" /><label for="i_1">Add a point;</label> &nbsp;
@@ -928,7 +1039,65 @@ Rational interpolation
 	init_interpolation_canvas();
 	</script>
 	<p>
-	
+Now for a more practical task. Or the one that looks practical anyway. Let’s model a <span class="formula">log<sub>2</sub>(x)</span> function.
+	</p>
+	<p>
+Logarithm base 2 is a function that for every positive argument y, returns x so <span class="formula">2<sup>x</sup> = y</span>.
+	</p>
+	<p class="formula">
+log<sub>2</sub>(1) = 0
+	</p>
+	<p class="formula">
+log<sub>2</sub>(2) = 1
+	</p>
+	<p class="formula">
+log<sub>2</sub>(4) = 2
+	</p>
+	<p class="formula">
+log<sub>2</sub>(8) = 3
+	</p>
+	<p class="formula">
+.&nbsp;&nbsp;.&nbsp;&nbsp;.
+	</p>
+	<p class="formula">
+log<sub>2</sub>(65536) = 16
+	</p>
+	<p class="formula">
+.&nbsp;&nbsp;.&nbsp;&nbsp;.
+	</p>
+	<p>
+We can, of course, use the Taylor series to model this function in some range with a polynomial, but <span class="formula">log<sub>2</sub>(x)</span> isn’t defined for <span class="formula">x &le; 0</span>. Moreover, it has an asymptote in 0 meaning that the function falls indefinitely into minus infinity as we come closer and closer to 0. We can’t possibly model this effect with a polynomial.
+	</p>
+	<p>
+However, with rational interpolation, this would be easy. A vertical asymptote occurs when the denominator of the fraction is 0. And the denominator is zero when the polynomial representing the denominator has a root. 
+	</p>
+	<p>
+For a simple <span class="formula">log<sub>2</sub>(x)</span> model, we can use this ratio:
+	</p>
+	<table class='formula'><tr><td rowspan=2>R(x) = &nbsp;</td><td style='border-bottom: 1px solid black'>ax<sup>2</sup> + bx + c</td></tr><tr><td>dx</td></tr></table>
+	<p>
+Note that this is not a minimal degree configuration, we need <span class="formula">x</span> in the denominator so we could have a root in it.
+	</p>
+	<p>
+There are 4 coefficients, so to compute all the coefficients, we need to put 4 facts about the <span class="formula">log<sub>2</sub>(x)</span> into the equation soup. Let them be these:
+	</p>
+	<p style="text-align: center;">
+<span class="formula">log<sub>2</sub>(x)</span> has an asymptote in <span class="formula">0</span>. So <span class="formula">dx(0) = 0</span>.
+	</p>
+	<p class="formula">
+log<sub>2</sub>(1) = 0.
+</p>
+	<p class="formula">
+log<sub>2</sub>(2) = 1.
+</p>
+	<p class="formula">
+log<sub>2</sub>(4) = 2.
+	</p>
+	<p>
+Also, this system does not have a single solution but a whole family of solutions since the ratio itself introduces ambiguity. E.g. <span class="formula">1 / 2</span> is the same as <span class="formula">2 / 4</span> or <span class="formula">5 / 10</span> or <span class="formula">k / 2k</span> in general.
+	</p>
+	<p>
+To avoid having a parametric solution, let’s just take one of the coefficients and pin it down as a specific number. Any non-zero number will do, and any coefficient too. My personal preference would be <span class="formula">d = 1</span>. So with my preference in mind, the <a href="https://wordsandbuttons.online/sympy_makes_math_fun_again.html">code that solves the system symbolically</a> looks like this:
 	</p>
 	<pre id="code_1" class="code">
 from sympy import *
@@ -957,19 +1126,35 @@ sol = solve(eqs, (a, b, c, d))
 print(sol)
 </pre>
 	<p>
-
+Here is the solution:
 	</p>
 	<pre id="code_1" class="code">
 {a: 1/3, b: 1, c: -4/3, d: 1}
 </pre>
+	<p>
+And here is the solution visualized:
+	</p>
 	<canvas id="log_model"></canvas>
-	
+	<p class="comment">
+The red line is the real log<sub>2</sub>(x). The blue line is the model. The plot is navigable.
+	</p>
 	<script language="JavaScript">
 init_atan_plot(document.getElementById("log_model"), [function(x){return Math.log2(x);}, function(x){return (1/3*x*x + x -4/3) / x;}], ["#d64562", "#457fd6"], [],
 		2.0, 2.0, 4.0, false, 640, 640, false, false, false);
 document.getElementById("code_1").innerHTML = colorized(document.getElementById("code_1").innerHTML);
 	</script>
-
+	<p>
+This is not a terribly precise model, and it has an extra bit for <span class="formula">x &lt; 0</span> that we don’t want. But it is simple and for its simplicity, it is good enough. Better than the polynomial one.
+	</p>
+	<h2>
+Summary
+	</h2>
+	<p>
+Polynomial interpolation is fine, and for most intents and purposes, we can stick to that. But for some problems, you need to extend your modeling capabilities a bit, and then rational interpolation comes to help.
+	</p>
+	<p>
+Rational interpolation is also a gateway term to rational Bezier functions and non-uniform rational basis splines also known as NURBS. If you want to understand NURBS well, you should start with simple rational functions first. They were a missing link in my curriculum, and I struggled with NURBS for years after college. Luckily, now you don’t have to.
+	</p>
 
 	<table class="footer" style="width: 600pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
