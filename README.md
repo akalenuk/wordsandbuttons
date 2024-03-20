@@ -11,6 +11,9 @@ _All the code is licensed under [The Unlicense](http://unlicense.org/)._
 
 ## Pages
 
+- [The Real C++ Killers (Not You, Rust)](https://wordsandbuttons.online/the_real_cpp_killers.html) All the “C++ killers”, even these which I wholeheartedly love and respect like Rust, Julia, and D, help you write more features with fewer bugs, but they don't much help when you need to squeeze the very last FLOPS from the hardware you rent. As such, they don’t have a competitive advantage over C++. Or, for that matter, even over each other. Most of them, for instance, Rust, Julia, and Clang even share the same backend. You can’t win a car race if you all share the same car. So, which technologies do hold a cometitive advantage over C++ or, speaking generally, all the traditional ahead-of-time compilers?
+<sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> 
+
 - [Rational interpolation](https://wordsandbuttons.online/rational_interpolation.html) Rational interpolation is a step forward from polynomial interpolation towards rational splines. With rational interpolation, you can build functions that run through a set of points and also have vertical asymptotes whenever you want. With this capability, you can now model functions like logarithms better.
 <sup>[#demos](https://wordsandbuttons.online/all_demos.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> 
 
