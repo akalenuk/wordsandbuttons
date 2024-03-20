@@ -76,7 +76,7 @@ td {
 	vertical-align: top;
 	padding: 6pt 12pt 6pt 12pt;
 	font-size: 16pt;
-	border: 1px solid black;
+	border: 0px;
 	width: 600pt;
 }
 
@@ -180,10 +180,10 @@ But before we go with Spiral itself, let’s check how well your intuition works
 	<table><tr>
 	<td>
 	<pre>
+<span style="color: #d64562;">// version 1</span>
 auto y = std::sin(x);
  
-// vs.
- 
+<span style="color: #457fd6;">// version 2</span>
 y = -0.000182690409228785*x*x*x*x*x*x*x
     +0.00830460224186793*x*x*x*x*x
     -0.166651012143690*x*x*x
@@ -193,8 +193,8 @@ y = -0.000182690409228785*x*x*x*x*x*x*x
 	</td></tr></table>
 	<p>
 	<div id="shown_1">
-		<button type="button" onclick="show(1)"><nobr>The former</nobr></button>
-		<button type="button" onclick="show(1)"><nobr>The latter</nobr></button>
+		<button type="button" onclick="show(1)" style="color: #d64562;"><nobr>Version 1</nobr></button>
+		<button type="button" onclick="show(1)" style="color: #457fd6;"><nobr>Version 2</nobr></button>
 	</div>
 	<div id="hidden_1" style="display:none;">
 		<p>
@@ -209,13 +209,13 @@ Next question. What works faster, using logical operations with short-circuiting
 	<table><tr>
 	<td>
 	<pre>
+<span style="color: #d64562;">// version 1</span>	
   if (xs[i] == 1 
    && xs[i+1] == 1 
    && xs[i+2] == 1 
    && xs[i+3] == 1) // xs are bools stored as ints
  
-// vs.
- 
+<span style="color: #457fd6;">// version 2</span>
   inline int sq(int x) {
       return x*x;
   }
@@ -229,8 +229,8 @@ Next question. What works faster, using logical operations with short-circuiting
 	</td></tr></table>
 	<p>
 	<div id="shown_2">
-		<button type="button" onclick="show(2)"><nobr>The former</nobr></button>
-		<button type="button" onclick="show(2)"><nobr>The latter</nobr></button>
+		<button type="button" onclick="show(2)" style="color: #d64562;"><nobr>Version 1</nobr></button>
+		<button type="button" onclick="show(2)" style="color: #457fd6;"><nobr>Version 2</nobr></button>
 	</div>
 	<div id="hidden_2" style="display:none;">
 		<p>
@@ -245,6 +245,7 @@ And one more. What sorts triplets faster: a swap-sort with branching or a branch
 	<table><tr>
 	<td>
 	<pre>
+<span style="color: #d64562;">// version 1</span>
     if(s[0] > s[1])
         swap(s[0], s[1]);
     if(s[1] > s[2])
@@ -252,8 +253,7 @@ And one more. What sorts triplets faster: a swap-sort with branching or a branch
     if(s[0] > s[1])
         swap(s[0], s[1]);
  
-// vs.
- 
+<span style="color: #457fd6;">// version 2</span>
     const auto a = s[0];
     const auto b = s[1];
     const auto c = s[2];
@@ -265,8 +265,8 @@ And one more. What sorts triplets faster: a swap-sort with branching or a branch
 	</td></tr></table>
 	<p>
 	<div id="shown_3">
-		<button type="button" onclick="show(3)"><nobr>The former</nobr></button>
-		<button type="button" onclick="show(3)"><nobr>The latter</nobr></button>
+		<button type="button" onclick="show(3)" style="color: #d64562;"><nobr>Version 1</nobr></button>
+		<button type="button" onclick="show(3)" style="color: #457fd6;"><nobr>Version 2</nobr></button>
 	</div>
 	<div id="hidden_3" style="display:none;">
 		<p>
@@ -352,9 +352,9 @@ No sorcery. Python decorators turn every piece of code into its abstract syntax 
 	<pre>
 @cuda.jit
 def matmul(A, B, C):
-        """Perform square matrix multiplication of C = A * B."""
-        i, j = cuda.grid(2)
-        if i &lt; C.shape[0] and j &lt; C.shape[1]:
+    <span style="color: #777;">"""Perform square matrix multiplication of C = A * B."""</span>
+    i, j = cuda.grid(2)
+    if i &lt; C.shape[0] and j &lt; C.shape[1]:
         tmp = 0.
         for k in range(A.shape[1]):
                 tmp += A[i, k] * B[k, j]
@@ -380,7 +380,7 @@ Let’s play another game. I’ll give you three pieces of code, and you’ll gu
 	<table><tr>
 	<td>
 	<pre>
-invoke RegisterClassEx, addr wc         ; register our window class
+    invoke RegisterClassEx, addr wc     <span style="color: #777;">; register our window class</span>
     invoke CreateWindowEx,NULL,
         ADDR ClassName, ADDR AppName,\
         WS_OVERLAPPEDWINDOW,\
@@ -388,22 +388,22 @@ invoke RegisterClassEx, addr wc         ; register our window class
         CW_USEDEFAULT, CW_USEDEFAULT,\
         NULL, NULL, hInst, NULL
         mov   hwnd,eax
-        invoke ShowWindow, hwnd,CmdShow         ; display our window on desktop
-    invoke UpdateWindow, hwnd           ; refresh the client area
+    invoke ShowWindow, hwnd,CmdShow     <span style="color: #777;">; display our window on desktop</span>
+    invoke UpdateWindow, hwnd           <span style="color: #777;">; refresh the client area</span>
  
-        .while TRUE                             ; Enter message loop
-                invoke GetMessage, ADDR msg,NULL,0,0
-                .break .if (!eax)
-                invoke TranslateMessage, ADDR msg
-                invoke DispatchMessage, ADDR msg
+    .while TRUE                         <span style="color: #777;">; Enter message loop</span>
+        invoke GetMessage, ADDR msg,NULL,0,0
+        .break .if (!eax)
+        invoke TranslateMessage, ADDR msg
+        invoke DispatchMessage, ADDR msg
    .endw
 </pre>
 	</td>
 	</td></tr></table>
 	<p>
 	<div id="shown_4">
-		<button type="button" onclick="show(4)"><nobr>This is assembly</nobr></button>
-		<button type="button" onclick="show(4)"><nobr>This is something else</nobr></button>
+		<button type="button" onclick="show(4)" style="color: #339428;"><nobr>This is assembly</nobr></button>
+		<button type="button" onclick="show(4)" style="color: #d64562;"><nobr>This is something else</nobr></button>
 	</div>
 	<div id="hidden_4" style="display:none;">
 <p>Answer accepted!</p>
@@ -425,8 +425,8 @@ invoke RegisterClassEx, addr wc         ; register our window class
 	</td></tr></table>
 	<p>
 	<div id="shown_5">
-		<button type="button" onclick="show(5)"><nobr>This is assembly</nobr></button>
-		<button type="button" onclick="show(5)"><nobr>This is something else</nobr></button>
+		<button type="button" onclick="show(5)" style="color: #339428;"><nobr>This is assembly</nobr></button>
+		<button type="button" onclick="show(5)" style="color: #d64562;"><nobr>This is something else</nobr></button>
 	</div>
 	<div id="hidden_5" style="display:none;">
 <p>Answer accepted!</p>
@@ -438,7 +438,7 @@ invoke RegisterClassEx, addr wc         ; register our window class
 	<table><tr>
 	<td>
 	<pre>
-v0 = my_vector  // we want the horizontal sum of this
+v0 = my_vector  <span style="color: #777;">// we want the horizontal sum of this</span>
 int64 r0 = get_len ( v0 )
 int64 r0 = round_u2 ( r0 )
 float v0 = set_len ( r0 , v0 )
@@ -452,8 +452,8 @@ while ( uint64 r0 > 4) {
 	</td></tr></table>
 	<p>
 	<div id="shown_6">
-		<button type="button" onclick="show(6)"><nobr>This is assembly</nobr></button>
-		<button type="button" onclick="show(6)"><nobr>This is something else</nobr></button>
+		<button type="button" onclick="show(6)" style="color: #339428;"><nobr>This is assembly</nobr></button>
+		<button type="button" onclick="show(6)" style="color: #d64562;"><nobr>This is something else</nobr></button>
 	</div>
 	<div id="hidden_6" style="display:none;">
 <p>Answer accepted!</p>
