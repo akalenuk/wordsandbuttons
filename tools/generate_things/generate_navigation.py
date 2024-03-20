@@ -92,7 +92,7 @@ index = '%s' % template
 f = open('links.txt')
 links = f.readlines()
 f.close()
-links_html = '<h1>More interactive learning</h1>'
+links_html = '<span id="links"><h1>More interactive learning</h1></span>'
 for link in links:
 	if link.strip().find(' ') != -1:
 		url = link.split(' ')[0]
@@ -107,7 +107,7 @@ for link in links:
 
 
 # index is now real index not a timeline
-the_index = '<h1 title="A real index on index.html! How cool is that!">Index</h1>'
+the_index = '<span id="index"><h1 title="A real index on index.html! How cool is that!">Index</h1></span>'
 spans = read_index_spans(PAGES_DIR)
 cur_letter = ''
 for (f, i, t) in sorted(spans, key = lambda fit: fit[2].upper()):
@@ -122,10 +122,26 @@ for (f, i, t) in sorted(spans, key = lambda fit: fit[2].upper()):
 the_index += '</p>\n'
 
 
+# here is the timeline too
+timeline = '<span id="timeline"><h1>All the pages</h1></span>'
+n = 0
+total = len(date_link_title_description_keywords)
+for (d, l, t, desc, kwds) in date_link_title_description_keywords[::-1]:
+    timeline += '<p class="date">#' + str(total - n) + ': '+ d + '</sup>'
+    timeline += '<p class="title">' + '<a href="' + l + '">' + t + '</a></p>\n'
+    timeline += '<p class="description">' + desc + '</p>\n'
+    timeline += '<p class="links">'
+    for kw in sorted(list(kwds)):
+        timeline += '<a style="padding-right: 8pt;" href="all_' + kw + '.html">#' + kw + '</a> '
+    timeline += '</p>\n'
+    n += 1
+
+
 index = index.replace('<h1>Title</h1>', '<h1>' + index_title + '</h1>')
 index = index.replace('<p>Description</p>', '<p style="width: 600pt;">' + index_description + '</p>')
 index = index.replace('<p>Note</p>', '')
-index = index.replace('<div id="timeline"></div>', '\n' + the_index + '\n')
+index = index.replace('<div id="index"></div>', '\n' + the_index + '\n')
+index = index.replace('<div id="timeline"></div>', '\n' + timeline + '\n')
 index = index.replace('<div id="links"></div>', '\n' + links_html + '\n')
 
 f = open('../../pages/' + 'index.html', 'w')
@@ -154,6 +170,7 @@ for title in list(all_keywords):
 	page = page.replace('<p>Description</p>', '<p style="width: 600pt;">'+keyword_description[title])+'</p>'
 	page = page.replace('<div id="menu"></div>', '')
 	page = page.replace('<p>Note</p>', '<p style="width: 600pt;">' + keyword_note[title] + '</p>')
+	page = page.replace('<div id="index"></div>', '')
 	page = page.replace('<div id="timeline"></div>', '\n' + timeline + '\n')
 	page = page.replace('<div id="links"></div>', '')
 
