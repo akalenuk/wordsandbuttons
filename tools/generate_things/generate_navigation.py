@@ -127,8 +127,7 @@ timeline = '<span id="timeline"><h1>All the pages</h1></span>'
 n = 0
 total = len(date_link_title_description_keywords)
 for (d, l, t, desc, kwds) in date_link_title_description_keywords[::-1]:
-    timeline += '<p class="date">#' + str(total - n) + ': '+ d + '</sup>'
-    timeline += '<p class="title">' + '<a href="' + l + '">' + t + '</a></p>\n'
+    timeline += '<p class="title" title="' + d + ' (#' + str(total - n) + ')">' + '<a href="' + l + '">' + t + '</a></p>\n'
     timeline += '<p class="description">' + desc + '</p>\n'
     timeline += '<p class="links">'
     for kw in sorted(list(kwds)):
