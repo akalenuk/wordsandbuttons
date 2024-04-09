@@ -1,0 +1,521 @@
+﻿<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Image interpolation method you haven't heard of</title>
+	<meta name="description" content="">
+	<meta name="keywords" content="mathematics, algorithms, demos">
+	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
+	<style>
+body {
+	margin: 2em;
+}
+
+a {
+	text-decoration: none;
+}
+
+h1 {
+	padding-top: 36pt;
+	font-size: 24pt;
+	width: 600pt;
+	text-align: left;
+}
+
+h2 {
+	padding-top: 20pt;
+	font-size: 20pt;
+	width: 555pt;
+	text-align: left;
+}
+
+p {
+	line-height: 1.42;
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+}
+
+.formula {
+	font-family: sans-serif;
+	font-size: 14pt;
+	font-style: italic;
+	text-align: center;
+	padding-top: 6pt;
+	padding-bottom: 6pt;
+}
+
+table.footer {
+	padding: 64pt 0pt 32pt 0pt;
+	background-color: transparent;
+	width: 505pt;
+}
+
+td.footer {
+	font-family: sans-serif;
+	font-size: 16pt;
+	font-style: normal;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+li {
+	font-size: 16pt;
+	width: 505pt;
+	text-align: left;
+	padding-bottom: 6pt;
+}
+
+input[type="text"] {
+	width: 505pt;
+	height: 22pt;
+	font-size: 12pt;
+	text-align: left;
+}
+
+input[type="radio"] {
+	height: 16pt;
+	width: 16pt;
+	font-size: 16pt;
+}
+
+button {
+	width: 148pt;
+	height: 26pt;
+	font-size: 16pt;
+	text-align: center;
+	margin: 3pt 0pt 3pt 0pt;
+}
+
+form {
+	margin: 0 0 0 0;
+	padding-top: 12pt;
+	padding-left: 12pt;
+	padding-right: 12pt;
+	padding-bottom: 12pt;
+	font-size: 16pt;
+	text-align: left;
+	width: 505pt;
+	background-color: #eeee99;
+	color: #000;
+}
+
+canvas { touch-action: none; }
+	</style>
+
+	<script language="JavaScript">
+
+// pixels
+function white(w, h) {
+	var pixels = [];
+	for(var i = 0; i < h; ++i) {
+		row = [];
+		for(var j = 0; j < w; ++j)
+			row.push([256, 256, 256]);
+	pixels.push(row);
+	}
+	return pixels;
+}
+
+function copy_of_matrix(m) {
+	const h = m.length;
+	const w = m[0].length;
+	var copy_of_m = [];
+	for(var i = 0; i < h; i++){
+		row = [];
+		for(var j = 0; j < w; ++j)
+			row.push(m[i][j]);
+		copy_of_m.push(row);
+	}
+	return copy_of_m;
+}
+
+var initial_pixels = white(640, 512);
+
+var pixels = copy_of_matrix(initial_pixels);
+var pixels_i0 = copy_of_matrix(initial_pixels);
+var pixels_i1 = copy_of_matrix(initial_pixels);
+
+
+// frame points
+const ix = 48;
+const iy = 106;
+const dxy = 32;
+var points = [[ix, iy], [ix+dxy, iy], [ix+dxy, iy+dxy], [ix, iy+dxy]];
+
+function nearest_point(xy) {
+	function d(xy1, xy2) {
+		return (xy1[0] - xy2[0])*(xy1[0] - xy2[0]) + (xy1[1] - xy2[1])*(xy1[1] - xy2[1]);
+	}
+	var nearest_i = 0;
+	var nearest_d = d(xy, points[0]);
+	for(var i = 1; i < 4; ++i) {
+		const di = d(xy, points[i]);
+		if(di < nearest_d) {
+			nearest_d = di;
+			nearest_i = i;
+		}
+	}
+	return nearest_i;
+}
+
+function set_points(xy) {
+	const x = Math.max(Math.min(xy[0], pixels[0].length - 1), 0);
+	const y = Math.max(Math.min(xy[1], pixels.length -1), 0);
+
+	const i = nearest_point(xy);
+	points[i][0] = x;
+	points[i][1] = y;
+	if(i == 0) {
+		points[1][1] = y;
+		points[3][0] = x;
+	} else if(i == 1) {
+		points[0][1] = y;
+		points[2][0] = x;
+	} else if(i == 2) {
+		points[3][1] = y;
+		points[1][0] = x;
+	} else if(i == 3) {
+		points[2][1] = y;
+		points[0][0] = x;
+	}
+}
+
+function interpolate0(pixels, i0, j0, i1, j1) {
+	var canvas_i0 = document.getElementById("canvas_i0");
+	const w = canvas_i0.width;
+	const h = Math.floor(w * (i1 - i0) / (j1 - j0));
+	canvas_i0.height = h;
+	
+	pixels_i0 = white(w, h);
+	for(var i = 0; i < h; ++i) {
+		for(var j = 0; j < w; ++j) {
+			const ix = j0 + (j1-j0)*j / w;
+			const iy = i0 + (i1-i0)*i / h;
+			var color = [0, 0, 0];
+			for(var k = 0; k < 3; ++k) {
+				color[k] = pixels[Math.floor(iy)][Math.floor(ix)][k];
+			}
+			pixels_i0[i][j] = color;
+		}
+	}
+}
+
+function interpolate1(pixels, i0, j0, i1, j1) {
+	var canvas_i1 = document.getElementById("canvas_i1");
+	const w = canvas_i1.width;
+	const h = Math.floor(w * (i1 - i0) / (j1 - j0));
+	canvas_i1.height = h;
+	
+	pixels_i1 = white(w, h);
+	
+	for(var i = 0; i < h; ++i) {
+		for(var j = 0; j < w; ++j) {
+			const ix = j0 + (j1-j0)*j / w + 0.0001;
+			const iy = i0 + (i1-i0)*i / h + 0.0001;
+			const ix0 = Math.floor(ix);
+			const ix1 = Math.ceil(ix);
+			const iy0 = Math.floor(iy);
+			const iy1 = Math.ceil(iy);
+			const kx0 = 1.0/(ix-ix0);
+			const kx1 = 1.0/(ix1-ix);
+			const ky0 = 1.0/(iy-iy0);
+			const ky1 = 1.0/(iy1-iy);
+			var color = [0, 0, 0];
+			for(var k = 0; k < 3; ++k) {
+				color[k] = ( pixels[iy0][ix0][k] * ky0*kx0
+						   + pixels[iy0][ix1][k] * ky0*kx1
+						   + pixels[iy1][ix1][k] * ky1*kx1
+						   + pixels[iy1][ix0][k] * ky1*kx0)
+						 / (ky0*kx0 + ky0*kx1 + ky1*kx1 + ky1*kx0);
+			}
+			pixels_i1[i][j] = color;
+		}
+	}
+}
+
+function interpolate2(pixels, i0, j0, i1, j1) {
+	const w = canvas.width;
+	const h = canvas.height;
+	/*const w = pixels[0].length;
+	const h = pixels.length;*/
+	const old_pixels = copy_of_matrix(pixels);
+	for(var i = 0; i < h; ++i) {
+		for(var j = 0; j < w; ++j) {
+			const ix = j0 + (j1-j0)*j / w + 0.0001;
+			const iy = i0 + (i1-i0)*i / h + 0.0001;
+			const ix0 = Math.floor(ix);
+			const ix1 = Math.ceil(ix);
+			const iy0 = Math.floor(iy);
+			const iy1 = Math.ceil(iy);
+			const kx0 = 1/Math.pow((ix-ix0),2);
+			const kx1 = 1/Math.pow((ix1-ix),2);
+			const ky0 = 1/Math.pow((iy-iy0),2);
+			const ky1 = 1/Math.pow((iy1-iy),2);
+			var color = [0, 0, 0];
+			for(var k = 0; k < 3; ++k) {
+				color[k] = ( old_pixels[iy0][ix0][k] * ky0*kx0
+						   + old_pixels[iy0][ix1][k] * ky0*kx1
+						   + old_pixels[iy1][ix1][k] * ky1*kx1
+						   + old_pixels[iy1][ix0][k] * ky1*kx0)
+						 / (ky0*kx0 + ky0*kx1 + ky1*kx1 + ky1*kx0);
+			}
+			pixels[i][j] = color;
+		}
+	}
+}
+
+function interpolte0_by_points() {
+	interpolate0(pixels, Math.round(points[0][1]), Math.round(points[0][0]), Math.round(points[2][1]), Math.round(points[2][0]));
+	draw_canvas_i0();
+}
+
+function interpolte1_by_points() {
+	interpolate1(pixels, Math.round(points[0][1]), Math.round(points[0][0]), Math.round(points[2][1]), Math.round(points[2][0]));
+	draw_canvas_i1();
+}
+
+
+function init_canvas(){
+	var canvas = document.getElementById("canvas");
+	canvas.width = pixels[0].length;
+	canvas.height = pixels.length;
+	const canvas_rect = canvas.getBoundingClientRect();
+
+	canvas.addEventListener('pointermove', function(e){
+		var canvas_rect = canvas.getBoundingClientRect();
+		if(e.buttons == 1){
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_points([x, y]);
+			interpolte0_by_points();
+			interpolte1_by_points();
+			draw_canvas();
+		}
+	}, false);
+
+	canvas.addEventListener('pointerdown', function(e){
+		if(e.buttons == 1){
+			var canvas_rect = canvas.getBoundingClientRect();
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			set_points([x, y]);
+			interpolte0_by_points();
+			interpolte1_by_points();
+			draw_canvas();
+			canvas.releasePointerCapture(e.pointerId);
+		}
+	}, false);
+
+	canvas.addEventListener('pointerleave', function(e){
+		if(e.buttons == 1){
+			var canvas_rect = canvas.getBoundingClientRect();
+			const x = e.clientX - canvas_rect.left;
+			const y = e.clientY - canvas_rect.top;
+			interpolte0_by_points();
+			interpolte1_by_points();
+			set_points([x, y]);
+		}
+		draw_canvas();
+	}, false);
+
+	draw_canvas();
+}
+
+var draw_the_frame = 1;
+function draw_canvas(){
+	var canvas = document.getElementById("canvas");
+	var context = canvas.getContext("2d");
+	if(pixels.length == 0)
+		return
+	const w = pixels[0].length;
+	const h = pixels.length;
+
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// pixels
+	var pixel_field = context.createImageData(w, h);
+	for (var i = 0; i < h; ++i) {
+		for (var j = 0; j < w; ++j) {
+			pixel_field.data[(i*w + j)*4 + 0] = pixels[i][j][0];
+			pixel_field.data[(i*w + j)*4 + 1] = pixels[i][j][1];
+			pixel_field.data[(i*w + j)*4 + 2] = pixels[i][j][2];
+			pixel_field.data[(i*w + j)*4 + 3] = 0xFF;
+		}
+	}
+	context.putImageData(pixel_field, -0.5, -0.5);
+
+	// frame
+	if(draw_the_frame == 1) {
+		context.beginPath();
+		context.moveTo(points[0][0] + 0.5, points[0][1] + 0.5);
+		context.lineTo(points[1][0] + 0.5, points[1][1] + 0.5);
+		context.lineTo(points[2][0] + 0.5, points[2][1] + 0.5);
+		context.lineTo(points[3][0] + 0.5, points[3][1] + 0.5);
+		context.lineTo(points[0][0] + 0.5, points[0][1] + 0.5);
+		context.strokeStyle = "#000";
+		context.setLineDash([4, 4]);
+		context.lineWidth = 3;
+		context.stroke();
+		context.closePath();
+		
+		context.beginPath();
+		context.lineDashOffset = 4;
+		context.moveTo(points[0][0] + 0.5, points[0][1] + 0.5);
+		context.lineTo(points[1][0] + 0.5, points[1][1] + 0.5);
+		context.lineTo(points[2][0] + 0.5, points[2][1] + 0.5);
+		context.lineTo(points[3][0] + 0.5, points[3][1] + 0.5);
+		context.lineTo(points[0][0] + 0.5, points[0][1] + 0.5);
+		context.strokeStyle = "#FF9";
+		context.setLineDash([4, 4]);
+		context.lineWidth = 3;
+		context.stroke();
+		context.closePath();		
+		context.setLineDash([]);
+		document.getElementById("frame_size").innerHTML = "x: " + String(points[0][0]) + " y: " + String(points[0][1]) + " w: " + String(points[2][0]-points[0][0]) + "  h: " + String(points[2][1]-points[0][1]);
+	} else {
+		document.getElementById("frame_size").innerHTML = "";
+	}
+}
+
+function draw_canvas_i0(){
+	var canvas = document.getElementById("canvas_i0");
+	var context = canvas.getContext("2d");
+	if(pixels.length == 0)
+		return
+	const w = pixels_i0[0].length;
+	const h = pixels_i0.length;
+
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// pixels
+	var pixel_field = context.createImageData(w, h);
+	for (var i = 0; i < h; ++i) {
+		for (var j = 0; j < w; ++j) {
+			pixel_field.data[(i*w + j)*4 + 0] = pixels_i0[i][j][0];
+			pixel_field.data[(i*w + j)*4 + 1] = pixels_i0[i][j][1];
+			pixel_field.data[(i*w + j)*4 + 2] = pixels_i0[i][j][2];
+			pixel_field.data[(i*w + j)*4 + 3] = 0xFF;
+		}
+	}
+	context.putImageData(pixel_field, -0.5, -0.5);
+}
+
+function draw_canvas_i1(){
+	var canvas = document.getElementById("canvas_i1");
+	var context = canvas.getContext("2d");
+	if(pixels.length == 0)
+		return
+	const w = pixels_i1[0].length;
+	const h = pixels_i1.length;
+
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	// pixels
+	var pixel_field = context.createImageData(w, h);
+	for (var i = 0; i < h; ++i) {
+		for (var j = 0; j < w; ++j) {
+			pixel_field.data[(i*w + j)*4 + 0] = pixels_i1[i][j][0];
+			pixel_field.data[(i*w + j)*4 + 1] = pixels_i1[i][j][1];
+			pixel_field.data[(i*w + j)*4 + 2] = pixels_i1[i][j][2];
+			pixel_field.data[(i*w + j)*4 + 3] = 0xFF;
+		}
+	}
+	context.putImageData(pixel_field, -0.5, -0.5);
+}
+
+function load_pixels_from(url) {
+	fetch(url).then(function(response) {
+		response.blob().then(function(blob) {
+			createImageBitmap(blob).then(function(img) {
+				const w = img.width;
+				const h = img.height;
+				var canvas = document.getElementById("canvas");
+				var context = canvas.getContext('2d');
+				canvas.width = w;
+				canvas.height = h;
+				context.drawImage(img, 0, 0 );
+				var image_data = context.getImageData(0, 0, w, h);
+				initial_pixels = [];
+				for (var i = 0; i < h; ++i) {
+					pixelsi = []
+					for (var j = 0; j < w; ++j) {
+						pixel = [
+							image_data.data[(i*w + j)*4 + 0],
+							image_data.data[(i*w + j)*4 + 1],
+							image_data.data[(i*w + j)*4 + 2]];
+						pixelsi.push(pixel);
+					}
+					initial_pixels.push(pixelsi);
+				}
+				pixels = copy_of_matrix(initial_pixels);
+				interpolte0_by_points();
+				interpolte1_by_points();
+				draw_canvas();
+			});
+		});
+	});
+	
+}
+
+function load() {
+	const url = document.getElementById("url").value;
+	load_pixels_from(url);
+}
+
+	</script>
+</head>
+<body>
+	<center>
+	<h1>
+<span id="index_image_darning">Image darning</span>
+	</h1>
+
+	<form>
+	<div style="text-align: center">
+	<br>
+	<canvas id="canvas" width=640 height=512></canvas>
+	<button type="button" onclick="draw_the_frame = 1 - draw_the_frame; draw_canvas();"><nobr>Toggle the frame</nobr></button>
+	<br>
+	<div id="frame_size"></div>
+	</div>
+	</form>
+	
+	<canvas id="canvas_i0" width=640 height=512></canvas>
+	<br>
+	<canvas id="canvas_i1" width=640 height=512></canvas>
+
+
+	<script language="JavaScript">
+	load_pixels_from("https://raw.githubusercontent.com/akalenuk/wordsandbuttons/master/pages/img/cat.png");
+	init_canvas();
+	</script>
+
+
+	<table class="footer" style="width: 555pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
+	<tr>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
+		<a href="index.html">Index</a>
+		<a href="all_mathematics.html">#mathematics</a> <a href="all_algorithms.html">#algorithms</a> <a href="all_demos.html">#demos</a>
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: left; width: 200pt; padding: 0; margin: 0; border: 0;">
+		&nbsp;&larr; there's more.
+	</td>
+	<td class="footer" style="vertical-align: middle; text-align: right; width: 300pt; padding: 0; margin: 0; border: 0;">
+		+
+		<a href="https://github.com/akalenuk/wordsandbuttons">Github</a> &
+		<a href="https://twitter.com/wordsandbuttons">Twitter</a> &
+		<a href="https://wordsandbuttons.online/rss"><span style="letter-spacing: 1pt;">RSS</span></a>
+	</td>
+	</tr>
+	</table>
+	</center>
+</body>
+</html>
