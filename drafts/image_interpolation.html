@@ -1,4 +1,5 @@
-﻿<html lang="en">
+﻿<!DOCTYPE html>
+<html lang="en">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
@@ -210,6 +211,8 @@ function interpolate1(pixels, i0, j0, i1, j1) {
 	
 	pixels_i1 = white(w, h);
 	
+	const n = 1.;
+	
 	for(var i = 0; i < h; ++i) {
 		for(var j = 0; j < w; ++j) {
 			const ix = j0 + (j1-j0)*j / w + 0.0001;
@@ -218,10 +221,10 @@ function interpolate1(pixels, i0, j0, i1, j1) {
 			const ix1 = Math.ceil(ix);
 			const iy0 = Math.floor(iy);
 			const iy1 = Math.ceil(iy);
-			const kx0 = 1.0/(ix-ix0);
-			const kx1 = 1.0/(ix1-ix);
-			const ky0 = 1.0/(iy-iy0);
-			const ky1 = 1.0/(iy1-iy);
+			const kx0 = 1.0/Math.pow(ix-ix0, n);
+			const kx1 = 1.0/Math.pow(ix1-ix, n);
+			const ky0 = 1.0/Math.pow(iy-iy0, n);
+			const ky1 = 1.0/Math.pow(iy1-iy, n);
 			var color = [0, 0, 0];
 			for(var k = 0; k < 3; ++k) {
 				color[k] = ( pixels[iy0][ix0][k] * ky0*kx0
@@ -231,37 +234,6 @@ function interpolate1(pixels, i0, j0, i1, j1) {
 						 / (ky0*kx0 + ky0*kx1 + ky1*kx1 + ky1*kx0);
 			}
 			pixels_i1[i][j] = color;
-		}
-	}
-}
-
-function interpolate2(pixels, i0, j0, i1, j1) {
-	const w = canvas.width;
-	const h = canvas.height;
-	/*const w = pixels[0].length;
-	const h = pixels.length;*/
-	const old_pixels = copy_of_matrix(pixels);
-	for(var i = 0; i < h; ++i) {
-		for(var j = 0; j < w; ++j) {
-			const ix = j0 + (j1-j0)*j / w + 0.0001;
-			const iy = i0 + (i1-i0)*i / h + 0.0001;
-			const ix0 = Math.floor(ix);
-			const ix1 = Math.ceil(ix);
-			const iy0 = Math.floor(iy);
-			const iy1 = Math.ceil(iy);
-			const kx0 = 1/Math.pow((ix-ix0),2);
-			const kx1 = 1/Math.pow((ix1-ix),2);
-			const ky0 = 1/Math.pow((iy-iy0),2);
-			const ky1 = 1/Math.pow((iy1-iy),2);
-			var color = [0, 0, 0];
-			for(var k = 0; k < 3; ++k) {
-				color[k] = ( old_pixels[iy0][ix0][k] * ky0*kx0
-						   + old_pixels[iy0][ix1][k] * ky0*kx1
-						   + old_pixels[iy1][ix1][k] * ky1*kx1
-						   + old_pixels[iy1][ix0][k] * ky1*kx0)
-						 / (ky0*kx0 + ky0*kx1 + ky1*kx1 + ky1*kx0);
-			}
-			pixels[i][j] = color;
 		}
 	}
 }
@@ -375,9 +347,6 @@ function draw_canvas(){
 		context.stroke();
 		context.closePath();		
 		context.setLineDash([]);
-		document.getElementById("frame_size").innerHTML = "x: " + String(points[0][0]) + " y: " + String(points[0][1]) + " w: " + String(points[2][0]-points[0][0]) + "  h: " + String(points[2][1]-points[0][1]);
-	} else {
-		document.getElementById("frame_size").innerHTML = "";
 	}
 }
 
@@ -470,6 +439,211 @@ function load() {
 	load_pixels_from(url);
 }
 
+
+// client
+const w = 640.0;
+const h = 640.0;
+
+function draw_arrow(context, x1, y1, x2, y2, color) {
+	const d = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+	const t = d < 16 ? (d / 16.) : 1.;
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 - ((y2 - y1) * 4.5 / d + (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d - (x2 - x1) * 4.5 / d) * t);
+	context.lineTo(x2, y2);
+	context.moveTo(x2 + ((y2 - y1) * 4.5 / d - (x2 - x1) * 16.5 / d) * t, y2 - ((y2 - y1) * 16.5 / d + (x2 - x1) * 4.5 / d) * t);
+	context.lineTo(x2, y2);
+	context.strokeStyle = color;
+	context.stroke();
+	context.closePath();
+}
+
+//// 2d
+// visible region (these are purely cosmetic, the real numbers are client)
+var x2d_min = -1.0;
+var y2d_min = -1.0;
+var x2d_max = 4.0;
+var y2d_max = 4.0;
+
+var client_x2d_center = w*(0-x2d_min)/(x2d_max-x2d_min);
+var client_x2d_step = (w/(x2d_max-x2d_min));
+
+var client_y2d_center = h - h*(0-y2d_min)/(y2d_max-y2d_min);
+var client_y2d_step = (h/(y2d_max-y2d_min));
+
+var x2s1 = [128*2, 128*4];
+var y2s1 = [128*3, 128*1];
+
+// distance squared from (x1, y1) to (x2, y2)
+function d2(x1, y1, x2, y2) {
+	return (x2-x1)*(x2-x1)+(y2-y1)*(y2-y1);
+}
+
+function closest_point_starting_from(x, y, xs, ys, i) {
+	for(var j = i + 1; j < xs.length; ++j)
+		if(d2(x, y, xs[j], ys[j]) < d2(x, y, xs[i], ys[i]))
+			return closest_point_starting_from(x, y, xs, ys, j);
+	return i;
+}
+
+// finds a closest point from xs, ys to x, y
+function closest_point(x, y, xs, ys){
+	return closest_point_starting_from(x, y, xs, ys, 0);
+}
+
+function order_points_s1() {
+	if(x2s1[0] > x2s1[1]) {
+		x = x2s1[0];
+		y = y2s1[0];
+		x2s1[0] = x2s1[1];
+		y2s1[0] = y2s1[1];
+		x2s1[1] = x;
+		y2s1[1] = y;
+	}
+}
+
+function draw_grid_on(context){
+	// grid
+	context.font = "16px sans-serif";
+	context.beginPath();
+	context.moveTo(0, client_y2d_center);
+	context.lineTo(w, client_y2d_center);
+	context.lineTo(w - 12, client_y2d_center - 5);
+	context.moveTo(w, client_y2d_center);
+	context.lineTo(w - 12, client_y2d_center + 5);
+	context.moveTo(client_x2d_center, h);
+	context.lineTo(client_x2d_center, 0);
+	context.lineTo(client_x2d_center - 5, 12);
+	context.moveTo(client_x2d_center, 0);
+	context.lineTo(client_x2d_center + 5, 12);
+	context.fillStyle="#000000";
+	for(var i = x2d_min + 1; i <= x2d_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x2d_center + i*client_x2d_step, client_y2d_center);
+			context.lineTo(client_x2d_center + i*client_x2d_step, client_y2d_center - 5);
+			context.fillText(i, client_x2d_center + i*client_x2d_step + 4, client_y2d_center + 16);
+		}
+	}
+	for(var i = y2d_min + 1; i <= y2d_max - 1; i++){
+		if(i != 0) {
+			context.moveTo(client_x2d_center, client_y2d_center - i*client_y2d_step);
+			context.lineTo(client_x2d_center + 5, client_y2d_center - i*client_y2d_step);
+		}
+		context.fillText(i, client_x2d_center + 5, client_y2d_center - i*client_y2d_step + 16);
+	}
+	context.strokeStyle = "#000000";
+	context.stroke();
+	context.closePath();
+}
+
+// interpolation/extrapolation with no basis functions
+var weight2d1 = 2;
+const wf2d1 = function(x) {return 1./Math.pow(x, weight2d1);}
+
+function ie_no_basis(x, xs, ys) {
+	if(x < xs[0])
+		return ys[0];
+	if(x > xs[xs.length- 1])
+		return ys[xs.length - 1];
+
+	var i = 0;
+	for(var j = 0; j < xs.length; ++j)
+		if(x > xs[j])
+			i = j;
+	return (ys[i] * wf2d1(x - xs[i]) + ys[i+1] * wf2d1(xs[i+1] - x))
+		/ (wf2d1(x - xs[i]) + wf2d1(xs[i+1] - x));
+}
+
+function init_canvas2d1() {
+	var canvas = document.getElementById("canvas2d1");
+	canvas.addEventListener('pointerdown', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		const x = e.clientX - canvas_rect.left;
+		const y = e.clientY - canvas_rect.top;
+		const point_i = closest_point(x, y, x2s1, y2s1);
+		x2s1[point_i] = x;
+		y2s1[point_i] = y;
+		order_points_s1();
+		draw_canvas2d1(0, 0, false);
+		canvas.releasePointerCapture(e.pointerId);
+	}, false);
+
+	canvas.addEventListener('pointermove', function(e){
+		canvas_rect = canvas.getBoundingClientRect();
+		const x = e.clientX - canvas_rect.left;
+		const y = e.clientY - canvas_rect.top;
+		if(e.buttons == 1){
+			const point_i = closest_point(x, y, x2s1, y2s1);
+			x2s1[point_i] = x;
+			y2s1[point_i] = y;
+			order_points_s1();
+			draw_canvas2d1(0, 0, false);
+		} else {
+			draw_canvas2d1(x, y, true);
+		}
+	}, false);
+
+	canvas.addEventListener('pointerup', function(e){
+		order_points_s1();
+		draw_canvas2d1(0, 0, false);
+	}, false);
+
+	canvas.addEventListener('pointerleave', function(e){
+		draw_canvas2d1(0, 0, false);
+	}, false);
+
+	draw_canvas2d1();
+}
+
+function draw_canvas2d1(client_x, client_y, do_guides){
+	var canvas = document.getElementById("canvas2d1");
+	var context = canvas.getContext("2d");
+
+	// background
+	context.fillStyle="#eeeeee";
+	context.fillRect(0, 0, w, h);
+
+	const do_interpolation = true;
+	const do_extrapolation = true;
+	// interpolation/extrapolation
+	context.strokeStyle="#888888";
+	context.lineWidth = 3;
+	context.beginPath()
+	for(var i = 0; i < w; ++i) {
+		var do_segment =  ((i < x2s1[0]-1 || i > x2s1[x2s1.length - 1]) && do_extrapolation)
+					   || ((i >= x2s1[0]-1 && i <= x2s1[x2s1.length - 1]) && do_interpolation);
+		if(do_segment) {
+			const y1 = ie_no_basis(i, x2s1, y2s1);
+			const y2 = ie_no_basis(i+1, x2s1, y2s1);
+			if((Math.abs(i + 1 - x2s1[0]) <= 0.5 || Math.abs(i - x2s1[1]) <= 0.5) && weight2d1 <= 0.)
+				continue; // ironic, since this is the function's discontinuity
+			context.moveTo(i, y1);
+			context.lineTo(i+1, y2);
+		}
+	}
+	context.stroke();
+	context.closePath();
+	context.lineWidth = 1;
+
+	// grid
+	draw_grid_on(context);
+
+	// dots
+	context.strokeStyle="#f71134";
+	for(var i = 0; i <= x2s1.length; ++i){
+		context.beginPath();
+		context.arc(x2s1[i], y2s1[i], 4, 0, 2*Math.PI);
+		context.stroke();
+		context.closePath();
+	}
+
+	// guides
+	if(do_guides){
+		const point_i = closest_point(client_x, client_y, x2s1, y2s1);
+		draw_arrow(context, x2s1[point_i], y2s1[point_i], client_x, client_y);
+	}
+}
 	</script>
 </head>
 <body>
@@ -484,18 +658,104 @@ function load() {
 	<canvas id="canvas" width=640 height=512></canvas>
 	<button type="button" onclick="draw_the_frame = 1 - draw_the_frame; draw_canvas();"><nobr>Toggle the frame</nobr></button>
 	<br>
-	<div id="frame_size"></div>
 	</div>
 	</form>
-	
+	<p>
+	...
+	</p>	
 	<canvas id="canvas_i0" width=640 height=512></canvas>
-	<br>
+	<p>
+	...
+	</p>
 	<canvas id="canvas_i1" width=640 height=512></canvas>
+	<p>
+	...
+	</p>
+
+	<p class="formula">
+F(x<sub>1</sub>) = y<sub>1</sub>
+<br>
+F(x<sub>2</sub>) = y<sub>2</sub>
+	</p>
+
+	<table class="formula">
+	<tr>
+	<td rowspan=2>
+	&forall; x, x<sub>i</sub> &lt; x &lt; x<sub>i+1</sub> &nbsp; F(x) = &nbsp;
+	</td>
+	<td style="border-bottom: 1px solid black">
+	y<sub>i</sub> * k(x - x<sub>i</sub>) + y<sub>i+1</sub> * k(x<sub>i+1</sub> - x)
+	</td>
+	</tr>
+	<tr>
+	<td>
+	k(x - x<sub>i</sub>) + k(x<sub>i+1</sub> - x)
+	</td>
+	</tr>
+	</table>
+	<table class="formula">
+	<tr>
+	<td rowspan=2>
+	k(x) = &nbsp;
+	</td>
+	<td style="border-bottom: 1px solid black">
+	1
+	</td>
+	</tr>
+	<tr>
+	<td>
+	x<sup>n</sup>
+	</td>
+	</tr>
+	</table>
+	
+	<p class="formula">
+F(x<sub>i</sub>) = y<sub>i</sub>
+	</p>
+	<canvas id="canvas2d1" width=640 height=640></canvas>
+
+	<p class="formula">
+F(x<sub>j</sub>, y<sub>i</sub>) = z<sub>ij</sub>
+	</p>
+
+	<table class="formula">
+	<tr>
+	<td rowspan=2>
+	F(x) = &nbsp;
+	</td>
+	<td style="border-bottom: 1px solid black">
+	z<sub>ij</sub>&#8239;k(x - x<sub>j</sub>)&#8239;k(y - y<sub>i</sub>) + z<sub>i(j+1)</sub>&#8239;k(x<sub>j+1</sub> - x)&#8239;k(y - y<sub>i</sub>) +
+	z<sub>(i+1)j</sub>&#8239;k(x - x<sub>j</sub>)&#8239;k(y<sub>i+1</sub> - y) + z<sub>(i+1)(j+1)</sub>&#8239;k(x<sub>j+1</sub> - x)&#8239;k(y<sub>i+1</sub> - y)
+	</td>
+	</tr>
+	<tr>
+	<td>
+	k(x - x<sub>j</sub>)&#8239;k(y - y<sub>i</sub>) + k(x<sub>j+1</sub> - x)&#8239;k(y - y<sub>i</sub>) +
+	k(x - x<sub>j</sub>)&#8239;k(y<sub>i+1</sub> - y) + k(x<sub>j+1</sub> - x)&#8239;k(y<sub>i+1</sub> - y)
+	</td>
+	</tr>
+	</table>
+	<table class="formula">
+	<tr>
+	<td rowspan=2>
+	k(x) = &nbsp;
+	</td>
+	<td style="border-bottom: 1px solid black">
+	1
+	</td>
+	</tr>
+	<tr>
+	<td>
+	x
+	</td>
+	</tr>
+	</table>
 
 
 	<script language="JavaScript">
 	load_pixels_from("https://raw.githubusercontent.com/akalenuk/wordsandbuttons/master/pages/img/cat.png");
 	init_canvas();
+	init_canvas2d1();
 	</script>
 
 
