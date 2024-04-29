@@ -3,8 +3,8 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Image interpolation method you haven't heard of</title>
-	<meta name="description" content="">
+	<title>A smooth and sharp image interpolation you probably haven't heard of</title>
+	<meta name="description" content="An image interpolation that gives us a continuous and smooth image, where every interpolated value only depends on the four neighboring pixel values. The image becomes smooth, but sharp features remain sharp.">
 	<meta name="keywords" content="mathematics, algorithms, demos">
 	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
 	<style>
@@ -649,9 +649,14 @@ function draw_canvas2d1(client_x, client_y, do_guides){
 <body>
 	<center>
 	<h1>
-<span id="index_image_darning">Image darning</span>
+A smooth and sharp <span id="index_image_interpolation">image interpolation</span> you probably haven't heard of
 	</h1>
-
+	<p>
+Image interpolation is guessing pixels between pixels. You can go without, but then when you upscale your image or do any other image transformation, you'll see square pixels.
+	</p>
+	<p>
+Here is the image to play with. The thing is interactive, you can control the frame with your mouse or your fingers.
+	</p>
 	<form>
 	<div style="text-align: center">
 	<br>
@@ -661,23 +666,33 @@ function draw_canvas2d1(client_x, client_y, do_guides){
 	</div>
 	</form>
 	<p>
-	...
-	</p>	
+And here are the square pixels.
+	</p>
 	<canvas id="canvas_i0" width=640 height=512></canvas>
 	<p>
-	...
+You can make the picture nice and smooth by employing an image interpolation. 
 	</p>
+	<p>
+Common interpolations for that are bilinear and bicubic. (see <a href="https://wordsandbuttons.online/biwhatever_transformations.html">Bi-whatever transformations</a>) The downside of the bilinear one is that it makes your image continuous, so no squares, but not smooth, so the upscale still looks unnatural. The downside of bicubic interpolation is that, while it does give you a nice and smooth picture, it smudges the thing a little so sharp features 1 pixel wide appear to be 3 pixels wide after the interpolation.
+	</p>
+	<p>
+Here is another interpolation you probably haven't heard about before.
+	<p>
 	<canvas id="canvas_i1" width=640 height=512></canvas>
 	<p>
-	...
+This is an inverse weight interpolation, a close relative of a <a href="https://wordsandbuttons.online/swine_simplicial_weight_interpolation_and_extrapolation.html">SWInE</a>, not to be confused with "<a href="https://wordsandbuttons.online/programmers_guide_to_polynomials_and_splines.html">spline</a>". The whole inverse weight family is not highly popular partially due to its computational issues, and partially, because their localization for spatial applications is tricky. But here, for the image interpolation, the localization is not tricky at all. 
 	</p>
-
+	<p>
+Let's start with a simple 1D case. We have a pair of values and we want to interpolate between them.
+	</p>
 	<p class="formula">
 F(x<sub>1</sub>) = y<sub>1</sub>
 <br>
 F(x<sub>2</sub>) = y<sub>2</sub>
 	</p>
-
+	<p>
+Let's define the interpolating function as a weighted sum of values divided by the sum of weights, where each weight is the inverse x-axis distance between the data point we have and the interpolating function argument.
+	</p>
 	<table class="formula">
 	<tr>
 	<td rowspan=2>
@@ -704,20 +719,30 @@ F(x<sub>2</sub>) = y<sub>2</sub>
 	</tr>
 	<tr>
 	<td>
-	x<sup>n</sup>
+	x
 	</td>
 	</tr>
 	</table>
-	
+	<p>
+You probably noticed that when the argument coincides with one of the data points, we have a division by zero, so the formula doesn't work. Well, in the ideal world, it's okay, we do have a value for every data point anyway. We can join or values outside or on the data points with the interpolation function from within.
+	</p>
 	<p class="formula">
 F(x<sub>i</sub>) = y<sub>i</sub>
 	</p>
+	<p>
+In the real world, there are computationally problematic areas near the data points. Which would have been bad, but image interpolation is an inherently inaccurate problem to begin with. You have to guess color values in the 0..255 discrete range, so any computational error below 1/512 doesn't bother you at all.
+	</p>
 	<canvas id="canvas2d1" width=640 height=640></canvas>
 
+	<p>
+Now, for the image interpolation, the data points are, of course, 2-dimensional.
+	</p>
 	<p class="formula">
 F(x<sub>j</sub>, y<sub>i</sub>) = z<sub>ij</sub>
 	</p>
-
+	<p>
+And the formula is larger.
+	</p>
 	<table class="formula">
 	<tr>
 	<td rowspan=2>
@@ -750,7 +775,12 @@ F(x<sub>j</sub>, y<sub>i</sub>) = z<sub>ij</sub>
 	</td>
 	</tr>
 	</table>
-
+	<p>
+But, generally, it's the same formula. The sum of weighted values divided by the sum of weights. The only non-obvious generalization here is that the weights for each axis contribute via a product and not a sum or anything else.
+	</p>
+	<p>
+This interpolation gives us a continuous and smooth image, where every interpolated value only depends on the four neighboring pixel values. The image becomes smooth, but sharp features remain sharp.
+	</p>
 
 	<script language="JavaScript">
 	load_pixels_from("https://raw.githubusercontent.com/akalenuk/wordsandbuttons/master/pages/img/cat.png");
