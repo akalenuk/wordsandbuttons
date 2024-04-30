@@ -11,7 +11,10 @@ _All the code is licensed under [The Unlicense](http://unlicense.org/)._
 
 ## Pages
 
-- [The Real C++ Killers (Not You, Rust)](https://wordsandbuttons.online/the_real_cpp_killers.html) All the “C++ killers”, even these which I wholeheartedly love and respect like Rust, Julia, and D, help you write more features with fewer bugs, but they don't much help when you need to squeeze the very last FLOPS from the hardware you rent. As such, they don’t have a competitive advantage over C++. Or, for that matter, even over each other. Most of them, for instance, Rust, Julia, and Clang even share the same backend. You can’t win a car race if you all share the same car. So, which technologies do hold a cometitive advantage over C++ or, speaking generally, all the traditional ahead-of-time compilers?
+- [A smooth and sharp image interpolation you probably haven't heard of](https://wordsandbuttons.online/a_smooth_and_sharp_image_interpolation.html) An image interpolation that gives us a continuous and smooth image, where every interpolated value only depends on the four neighboring pixel values. The image becomes smooth, but sharp features remain sharp.
+<sup>[#algorithms](https://wordsandbuttons.online/all_algorithms.html)</sup> <sup>[#demos](https://wordsandbuttons.online/all_demos.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> 
+
+- [The Real C++ Killers (Not You, Rust)](https://wordsandbuttons.online/the_real_cpp_killers.html) All the “C++ killers”, even these which I wholeheartedly love and respect like Rust, Julia, and D, help you write more features with fewer bugs, but they don't much help when you need to squeeze the very last FLOPS from the hardware you rent. As such, they don’t have a competitive advantage over C++. Or, for that matter, even over each other. Most of them, for instance, Rust, Julia, and Clang even share the same backend. You can’t win a car race if you all share the same car. So, which technologies do hold a competitive advantage over C++ or, speaking generally, all the traditional ahead-of-time compilers?
 <sup>[#programming](https://wordsandbuttons.online/all_programming.html)</sup> 
 
 - [Rational interpolation](https://wordsandbuttons.online/rational_interpolation.html) Rational interpolation is a step forward from polynomial interpolation towards rational splines. With rational interpolation, you can build functions that run through a set of points and also have vertical asymptotes whenever you want. With this capability, you can now model functions like logarithms better.
@@ -233,3 +236,16 @@ _All the code is licensed under [The Unlicense](http://unlicense.org/)._
 [https://intuitive-math.club/](https://intuitive-math.club/)
 - Sublucid Geometry &mdash;&nbsp;a place for uncommon knowledge.
 [https://zalo.github.io/](https://zalo.github.io/)
+- An interactive introduction to splines by Evgeny Demidov.
+[https://www.ibiblio.org/e-notes/Splines/Intro.htm](https://www.ibiblio.org/e-notes/Splines/Intro.htm)
+- An Interactive Introduction to Rotors from Geometric Algebra by Marc ten Bosch.
+[https://marctenbosch.com/quaternions/](https://marctenbosch.com/quaternions/)
+- Interactive Linear Algebra by Dan Margalit and Joseph Rabinoff from Georgia Institute of Technology.
+[https://textbooks.math.gatech.edu/ila/index.html](https://textbooks.math.gatech.edu/ila/index.html)
+- An interactive explanation of half-edge data structures by Jerry Yin and Jeffrey Goh.
+[https://jerryyin.info/geometry-processing-algorithms/half-edge/](https://jerryyin.info/geometry-processing-algorithms/half-edge/)
+- Hypermedia Image Processing Reference is&nbsp;a great free online resource if you want to learn more about image processing.
+[https://homepages.inf.ed.ac.uk/rbf/HIPR2/hipr_top.htm](https://homepages.inf.ed.ac.uk/rbf/HIPR2/hipr_top.htm)
+- A comprehensive interactive explanation of JPEG by Omar Shehata.&nbsp;
+[https://parametric.press/issue-01/unraveling-the-jpeg/](https://parametric.press/issue-01/unraveling-the-jpeg/)
+- Andrei Ciobanu explores some aspects of Fourier Mathematics in order to “approximate” real-world shapes using complex sinusoids.[https://www.andreinc.net/2024/04/24/from-the-circle-to-epicycles](https://www.andreinc.net/2024/04/24/from-the-circle-to-epicycles)
