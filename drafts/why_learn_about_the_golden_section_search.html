@@ -449,9 +449,58 @@ function do_one_iteration() {
 	<h1>
 Why learn about the golden-section search
 	</h1>
+
 	<p>
-Golden-section
+I learned about the golden-section search algorithm at university and immediately dismissed it as impractical. It's a little more complex to implement than a simple bisection and it has a little worse convergence too. So what's the point?
 	</p>
+	<p>
+20 years later I came back to the <a href="https://dte.kpi.ua/">same university</a> to teach and didn't even want to add the golden-section algorithm to the syllabus. But then I relearned the algorithm reluctantly and noticed one implementation detail that immediately made it learning-worthy. You see, while the golden-section search converges worse than the bisection search indeed, it also has a cheaper iteration, so computation-wise it is still more effective! The very paradox, which is not at all paradoxical if you know both algorithms, makes learning both algorithms well worth your time.
+	</p>
+	<h2>
+Bisection
+	</h2>
+	<p>
+Let's start with the bisection search. The idea is — have a function, an interval <nobr><i>[a, b]</i></nobr>, and the function has one and only one minimum somewhere on that interval. You want to compute this minimum up to some predefined margin of error.
+	</p>
+	<p>
+So what do you do with the bisection? You split the interval in half, determine where the minimum is now, and start over with the reduced interval. If the minimum is in the left half — you restart the algorithm on the interval <nobr><i>[a, (a+b)/2]</i></nobr>. If it's in the right half — the <nobr><i>[(a+b)/2, b]</i></nobr>. Pretty simple!
+	</p>
+	<p>
+But how do you decide in which half the minimum lies? You do a kind of numeric differentiation. You take a point <nobr><i>(a+b)/2 + &sigma;</i></nobr>, where <i>&sigma;</i> is some small value less than your target precision, and compute the function there. Now if this value is lower than the value of the function in <nobr><i>(a+b)/2</i></nobr> (with no <i>&sigma;</i>), then the function is decreasing, and the minimum should be in the right half-interval. If the value with the <i>&sigma;</i> is greater — then the function is increasing and the minimum should be somewhere in the left half-interval.
+	</p>
+	<p>
+Of course, there is a third variant. If the values are strictly equal, then the minimum is somewhere in between the values. You can stop the algorithm then. Since the <i>&sigma;</i> is less than the target precision by design, any value in between <nobr><i>(a+b)/2</i></nobr> and <nobr><i>(a+b)/2 + &sigma;</i></nobr> lies within the margin of precision from both <nobr><i>(a+b)/2</i></nobr>, <nobr><i>(a+b)/2 + &sigma;</i></nobr>, and even <nobr><i>(a + b + &sigma;)/2</i></nobr>.
+	</p>
+	<p>
+But normally, you stop the algorithm when the length of the <nobr><i>[a, b]</i></nobr> interval becomes smaller than the requested precision times two. You know that no matter in which half, the minimum is always in between <i>a</i> and <i>b</i>, so if <nobr><i>(b-a)</i></nobr> is lower than the <nobr><i>precision * 2</i></nobr>, then <nobr><i>(a+b)/2 &plusmn; precision</i></nobr> is your answer.
+	</p>
+	<p>
+You can play with the algorithm using the form below.
+	</p>
+	<form>
+<i>F(x)</i>:
+	<input type="text" id="f" oninput="reset_to_1_iteration();" value="(x-5)**2/5" style="width:172pt" />
+<i>a<sub>0</sub></i>:<input type="text" id="a" oninput="reset_to_1_iteration();" value="-0.5" style="width:36pt" />
+<i>b<sub>0</sub></i>:<input type="text" id="b" oninput="reset_to_1_iteration();" value="8.25" style="width:36pt" />
+<i>&sigma;<sub>x</sub></i>:<input type="text" id="sigma" oninput="reset_to_1_iteration();" value="0.0001" style="width:48pt" />
+	<br>
+	current iteration: 
+	<span id="i">0</span>
+	<br>
+	<button type="button" id="reset" onclick="reset_to_1_iteration();">Reset to the 1st iteration</button>
+	<button type="button" id="iplus" onclick="do_one_iteration();">Do 1 iteration</button>
+	</form>
+	<canvas id="plot" width=640 height=512></canvas>
+	<br>
+	<span id="log" class="formula"></span>
+	<script language="JavaScript">
+	reset_to_1_iteration();
+	draw();
+	</script>
+
+	<h2>
+Golden-section
+	</h2>
 	<form>
 <i>F(x)</i>:
 	<input type="text" id="f_gs" oninput="reset_to_1_iteration_gs();" value="(x-5)**2/5" style="width:150pt" />
@@ -461,8 +510,8 @@ Golden-section
 	current iteration: 
 	<span id="i_gs">0</span>
 	<br>
-	<button type="button" id="reset_gs" onclick="reset_to_1_iteration_gs();">Reset to start</button>
-	<button type="button" id="iplus_gs" onclick="do_one_iteration_gs();">Do the next iteration</button>
+	<button type="button" id="reset_gs" onclick="reset_to_1_iteration_gs();">Reset to the 1st iteration</button>
+	<button type="button" id="iplus_gs" onclick="do_one_iteration_gs();">Do 1 iteration</button>
 	</form>
 	
 	<canvas id="plot_gs" width=640 height=512></canvas>
@@ -471,32 +520,9 @@ Golden-section
 	<script language="JavaScript">
 	reset_to_1_iteration_gs();
 	draw_gs();
-	</script>	
-
-	<p>
-Bisection
-	</p>
-	<form>
-<i>F(x)</i>:
-	<input type="text" id="f" oninput="reset_to_1_iteration();" value="(x-5)**2/5" style="width:172pt" />
-<i>a<sub>0</sub></i>:<input type="text" id="a" oninput="reset_to_0_iteration();" value="-0.5" style="width:36pt" />
-<i>b<sub>0</sub></i>:<input type="text" id="b" oninput="reset_to_0_iteration();" value="8.25" style="width:36pt" />
-<i>&sigma;<sub>x</sub></i>:<input type="text" id="sigma" oninput="reset_to_1_iteration();" value="0.0001" style="width:48pt" />
-	<br>
-	current iteration: 
-	<span id="i">0</span>
-	<br>
-	<button type="button" id="iplus" onclick="do_one_iteration();">Зробити одну ітерацію</button>
-	</form>
-	<canvas id="plot" width=640 height=512></canvas>
-	<br>
-	<span id="log" class="formula"></span>
-	<script language="JavaScript">
-	reset_to_1_iteration();
-	draw();
 	</script>
-	
-	
+
+
 	<table class="footer" style="width: 600pt; padding: 64pt 0pt 32pt 0pt; background-color: transparent; font-family: sans-serif; font-size: 16pt; font-style: normal;">
 	<tr>
 	<td class="footer" style="vertical-align: middle; text-align: left; width: 64px; padding: 0; margin: 0; border: 0;">
