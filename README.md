@@ -11,6 +11,9 @@ _All the code is licensed under [The Unlicense](http://unlicense.org/)._
 
 ## Pages
 
+- [Why learn about the golden-section search](https://wordsandbuttons.online/why_learn_about_the_golden_section_search.html) An interactive demo of bisection search and golden ratio search algorithms. There is also a motivation to learn them both. Spoiler alert! One converges better, and the other has a better computational cost.
+<sup>[#algorithms](https://wordsandbuttons.online/all_algorithms.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
+
 - [A smooth and sharp image interpolation you probably haven't heard of](https://wordsandbuttons.online/a_smooth_and_sharp_image_interpolation.html) An image interpolation that gives us a continuous and smooth image, where every interpolated value only depends on the four neighboring pixel values. The image becomes smooth, but sharp features remain sharp.
 <sup>[#algorithms](https://wordsandbuttons.online/all_algorithms.html)</sup> <sup>[#demos](https://wordsandbuttons.online/all_demos.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> 
 
