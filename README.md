@@ -11,6 +11,9 @@ _All the code is licensed under [The Unlicense](http://unlicense.org/)._
 
 ## Pages
 
+- [Gauss–Seidel visually explained](https://wordsandbuttons.online/gauss_seidel_visually_explained.html) An interactive demo of the Gauss-Seidel method for solving linear equation systems. When and why does it work? And why, when you flip the equations, it suddenly stop working? You can now play and see.
+<sup>[#algorithms](https://wordsandbuttons.online/all_algorithms.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
+
 - [Why learn about the golden-section search](https://wordsandbuttons.online/why_learn_about_the_golden_section_search.html) An interactive demo of bisection search and golden ratio search algorithms. There is also a motivation to learn them both. Spoiler alert! One converges better, and the other has a better computational cost.
 <sup>[#algorithms](https://wordsandbuttons.online/all_algorithms.html)</sup> <sup>[#mathematics](https://wordsandbuttons.online/all_mathematics.html)</sup> <sup>[#tutorials](https://wordsandbuttons.online/all_tutorials.html)</sup> 
 
