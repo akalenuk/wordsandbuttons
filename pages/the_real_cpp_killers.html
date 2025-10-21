@@ -3,12 +3,13 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
+	<meta name="color-scheme" content="light dark">
 	<title>The Real C++ Killers (Not You, Rust)</title>
 	<meta name="description" content="All the “C++ killers”, even these which I wholeheartedly love and respect like Rust, Julia, and D, help you write more features with fewer bugs, but they don't much help when you need to squeeze the very last FLOPS from the hardware you rent. As such, they don’t have a competitive advantage over C++. Or, for that matter, even over each other. Most of them, for instance, Rust, Julia, and Clang even share the same backend. You can’t win a car race if you all share the same car. So, which technologies do hold a competitive advantage over C++ or, speaking generally, all the traditional ahead-of-time compilers?">
 	<meta name="keywords" content="programming">
 	<link rel="shortcut icon" type="image/x-icon" href="favicon.svg" />
 	<style>
-	 
+
 body {
 	margin: 2em;
 }
@@ -161,7 +162,7 @@ And suddenly it turns out that all the “C++ killers”, even those which I who
 As such, they just have a competitive advantage over C++. Or, for that matter, even over each other. Most of them, for instance, Rust, Julia, and Cland even share the same backend. No one wins a car race if all the racers sit in the same car.
 	</p>
 	<p>
-So, which technologies do give you a competitive advantage over C++ or, speaking generally, all the traditional ahead-of-time compilers? 
+So, which technologies do give you a competitive advantage over C++ or, speaking generally, all the traditional ahead-of-time compilers?
 	</p>
 	<p>
 Good question!
@@ -169,7 +170,7 @@ Good question!
 	<p>
 Glad you asked.
 	</p>
-	
+
 	<h2>
 C++ killer number 1. SPIRAL
 	</h2>
@@ -182,7 +183,7 @@ But before we go with SPIRAL itself, let’s check how well your intuition works
 	<pre>
 <span style="color: #d64562;">// version 1</span>
 auto y = std::sin(x);
- 
+
 <span style="color: #457fd6;">// version 2</span>
 y = -0.000182690409228785*x*x*x*x*x*x*x
     +0.00830460224186793*x*x*x*x*x
@@ -209,20 +210,20 @@ Next question. What works faster, using logical operations with short-circuiting
 	<table><tr>
 	<td>
 	<pre>
-<span style="color: #d64562;">// version 1</span>	
-  if (xs[i] == 1 
-   && xs[i+1] == 1 
-   && xs[i+2] == 1 
+<span style="color: #d64562;">// version 1</span>
+  if (xs[i] == 1
+   && xs[i+1] == 1
+   && xs[i+2] == 1
    && xs[i+3] == 1) // xs are bools stored as ints
- 
+
 <span style="color: #457fd6;">// version 2</span>
   inline int sq(int x) {
       return x*x;
   }
- 
-  if(sq(xs[i] - 1) 
-   + sq(xs[i+1] - 1) 
-   + sq(xs[i+2] - 1) 
+
+  if(sq(xs[i] - 1)
+   + sq(xs[i+1] - 1)
+   + sq(xs[i+2] - 1)
    + sq(xs[i+3] - 1) == 0)
 </pre>
 	</td>
@@ -252,7 +253,7 @@ And one more. What sorts triplets faster: a swap-sort with branching or a branch
         swap(s[1], s[2]);
     if(s[0] > s[1])
         swap(s[0], s[1]);
- 
+
 <span style="color: #457fd6;">// version 2</span>
     const auto a = s[0];
     const auto b = s[1];
@@ -364,7 +365,7 @@ def matmul(A, B, C):
         C[i, j] = tmp
 </pre>
 	</td>
-	</tr></table>	
+	</tr></table>
 
 	<p>
 Numba is one of the Python compilers that makes C++ obsolete. In theory, however, it’s not any better than C++ since it uses the same backends. It uses CUDA for GPU programming and LLVM for CPU. In practice, since it doesn’t require an ahead-of-time rebuild for every new architecture, Numba solutions adapt better to every new hardware and its available optimizations.
@@ -393,7 +394,7 @@ Let’s play another game. I’ll give you three pieces of code, and you’ll gu
         mov   hwnd,eax
     invoke ShowWindow, hwnd,CmdShow     <span style="color: #777;">; display our window on desktop</span>
     invoke UpdateWindow, hwnd           <span style="color: #777;">; refresh the client area</span>
- 
+
     .while TRUE                         <span style="color: #777;">; Enter message loop</span>
         invoke GetMessage, ADDR msg,NULL,0,0
         .break .if (!eax)
@@ -498,7 +499,7 @@ You just saw three assembly samples yourself. None of them looks like a “tradi
 	<p>
 So, ForwardCom is the assembly in which you can write optimal code that will never go obsolete, and which doesn’t make you learn a “traditional” assembly. For all practical considerations, it is the C of the future. Not C++.
 	</p>
-	
+
 	<h2>
 So when will С++ finally die?
 	</h2>

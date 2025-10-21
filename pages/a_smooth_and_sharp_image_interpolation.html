@@ -1,8 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
+	<meta name="color-scheme" content="light dark">
 	<title>A smooth and sharp image interpolation you probably haven't heard of</title>
 	<meta name="description" content="An image interpolation that gives us a continuous and smooth image, where every interpolated value only depends on the four neighboring pixel values. The image becomes smooth, but sharp features remain sharp.">
 	<meta name="keywords" content="mathematics, algorithms, demos">
@@ -192,7 +193,7 @@ function interpolate0(pixels, i0, j0, i1, j1) {
 	const w = canvas_i0.width;
 	const h = Math.floor(w * (i1 - i0) / (j1 - j0));
 	canvas_i0.height = h;
-	
+
 	pixels_i0 = white(w, h);
 	for(var i = 0; i < h; ++i) {
 		for(var j = 0; j < w; ++j) {
@@ -212,11 +213,11 @@ function interpolate1(pixels, i0, j0, i1, j1) {
 	const w = canvas_i1.width;
 	const h = Math.floor(w * (i1 - i0) / (j1 - j0));
 	canvas_i1.height = h;
-	
+
 	pixels_i1 = white(w, h);
-	
+
 	const n = 1.;
-	
+
 	for(var i = 0; i < h; ++i) {
 		for(var j = 0; j < w; ++j) {
 			const ix = j0 + (j1-j0)*j / w + 0.0001;
@@ -337,7 +338,7 @@ function draw_canvas(){
 		context.lineWidth = 3;
 		context.stroke();
 		context.closePath();
-		
+
 		context.beginPath();
 		context.lineDashOffset = 4;
 		context.moveTo(points[0][0] + 0.5, points[0][1] + 0.5);
@@ -349,7 +350,7 @@ function draw_canvas(){
 		context.setLineDash([4, 4]);
 		context.lineWidth = 3;
 		context.stroke();
-		context.closePath();		
+		context.closePath();
 		context.setLineDash([]);
 	}
 }
@@ -435,7 +436,7 @@ function load_pixels_from(url) {
 			});
 		});
 	});
-	
+
 }
 
 function load() {
@@ -675,7 +676,7 @@ And here are the square pixels.
 	</p>
 	<canvas id="canvas_i0" width=640 height=512></canvas>
 	<p>
-You can make the picture nice and smooth by employing an image interpolation. 
+You can make the picture nice and smooth by employing an image interpolation.
 	</p>
 	<p>
 Common interpolations for that are bilinear and bicubic. (see <a href="https://wordsandbuttons.online/biwhatever_transformations.html">Bi-whatever transformations</a>) The downside of the bilinear one is that it makes your image continuous, so no squares, but not smooth, so the upscale still looks unnatural. The downside of bicubic interpolation is that, while it does give you a nice and smooth picture, it smudges the thing a little so sharp features 1 pixel wide appear to be 3 pixels wide after the interpolation.
@@ -685,7 +686,7 @@ Here is another interpolation you probably haven't heard about before.
 	<p>
 	<canvas id="canvas_i1" width=640 height=512></canvas>
 	<p>
-This is an inverse weight interpolation, a close relative of a <a href="https://wordsandbuttons.online/swine_simplicial_weight_interpolation_and_extrapolation.html">SWInE</a>, not to be confused with "<a href="https://wordsandbuttons.online/programmers_guide_to_polynomials_and_splines.html">spline</a>". The whole inverse weight family is not highly popular partially due to its computational issues, and partially, because their localization for spatial applications is tricky. But here, for the image interpolation, the localization is not tricky at all. 
+This is an inverse weight interpolation, a close relative of a <a href="https://wordsandbuttons.online/swine_simplicial_weight_interpolation_and_extrapolation.html">SWInE</a>, not to be confused with "<a href="https://wordsandbuttons.online/programmers_guide_to_polynomials_and_splines.html">spline</a>". The whole inverse weight family is not highly popular partially due to its computational issues, and partially, because their localization for spatial applications is tricky. But here, for the image interpolation, the localization is not tricky at all.
 	</p>
 	<p>
 Let's start with a simple 1D case. We have a pair of values and we want to interpolate between them.
