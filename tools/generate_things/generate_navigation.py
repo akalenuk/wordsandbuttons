@@ -166,7 +166,7 @@ for title in list(all_keywords):
 				timeline += '<a style="padding-right: 8pt;" href="all_' + kw + '.html">#' + kw + '</a> '
 		timeline += '</p>\n'
 	page = page.replace('<h1>Title</h1>', '<h1>'+title[0].upper()+title[1:]+'</h1>')
-	page = page.replace('<p>Description</p>', '<p style="width: 600pt;">'+keyword_description[title])+'</p>'
+	page = page.replace('<p>Description</p>', '<p style="width: 600pt;">'+keyword_description[title] +'</p>')
 	page = page.replace('<div id="menu"></div>', '')
 	page = page.replace('<p>Note</p>', '<p style="width: 600pt;">' + keyword_note[title] + '</p>')
 	page = page.replace('<div id="index"></div>', '')
