@@ -3,6 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
+	<meta name="color-scheme" content="light dark">
 	<title>Why learn about the golden-section search</title>
 	<meta name="description" content="An interactive demo of bisection search and golden ratio search algorithms. There is also a motivation to learn them both. Spoiler alert! One converges better, and the other has a better computational cost.">
 	<meta name="keywords" content="mathematics, algorithms, tutorials">
@@ -235,7 +236,7 @@ function draw_gs(){
 	context.stroke();
 	context.fill();
 	context.closePath();
-	
+
 	const xb = x_to_client(b_gs) + 0.5;
 	const yb = y_to_client(f(b_gs)) + 0.5;
 	context.beginPath();
@@ -258,7 +259,7 @@ function draw_gs(){
 	const tau = 0.618;
 	const x1 = b_gs - (b_gs-a_gs)*tau;
 	const x2 = a_gs + (b_gs-a_gs)*tau;
-	
+
 	const xc1 = x_to_client(x1) + 0.5;
 	const yc1 = y_to_client(f(x1)) + 0.5;
 	context.fillStyle="#d64562";
@@ -274,7 +275,7 @@ function draw_gs(){
 	context.stroke();
 	context.closePath();
 	context.setLineDash([]);
-	
+
 	const xc2 = x_to_client(x2) + 0.5;
 	const yc2 = y_to_client(f(x2)) + 0.5;
 	context.fillStyle="#d64562";
@@ -305,7 +306,7 @@ function reset_to_1_iteration_gs() {
 function do_one_iteration_gs() {
 	const f_text = document.getElementById("f_gs").value;
 	eval('function f(x, y) { return ' + f_text + ';}');
-	
+
 	const tau = 0.618;
 	const x1 = b_gs - (b_gs-a_gs)*tau;
 	const x2 = a_gs + (b_gs-a_gs)*tau;
@@ -374,7 +375,7 @@ function draw(){
 	context.stroke();
 	context.fill();
 	context.closePath();
-	
+
 	const xb = x_to_client(b) + 0.5;
 	const yb = y_to_client(f(b)) + 0.5;
 	context.beginPath();
@@ -485,7 +486,7 @@ You can play with the algorithm using the form below.
 <i>b<sub>0</sub></i>:<input type="text" id="b" oninput="reset_to_1_iteration();" value="8.25" style="width:36pt" />
 <i>&sigma;<sub>x</sub></i>:<input type="text" id="sigma" oninput="reset_to_1_iteration();" value="0.0001" style="width:48pt" />
 	<br>
-	current iteration: 
+	current iteration:
 	<span id="i">0</span>
 	<br>
 	<button type="button" id="reset" onclick="reset_to_1_iteration();">Reset to the 1st iteration</button>
@@ -515,7 +516,7 @@ Now, if <nobr><i>a<sub>1</sub> &lt; b<sub>1</sub></i></nobr> then the minimum is
 There are some marginal cases like what if the function in <i>a<sub>1</sub></i> and <i>b<sub>1</sub></i> is exactly the same, or what if the function in <i>a</i> or <i>b</i> is less than in <i>a<sub>1</sub></i> or <i>b<sub>1</sub></i>. These cases are interesting but not important for the core idea of the algorithm.
 	</p>
 	<p>
-So let's say on each iteration, we narrow our interval to <nobr><i>[a<sub>1</sub>, b]</i></nobr> or <nobr><i>[a, b<sub>1</sub>]</i></nobr>. The proportion <nobr><i>(b-a<sub>1</sub>) / (b-a)</i></nobr> is exactly the same as <nobr><i>(b - a<sub>1</sub>) / (b - a)</i></nobr>, it's a constant number and it's roughly 0.62 by design. Which is more than 0.5. This means that the algorithm narrows down the interval pretty much like the bisection algorithm does but... slower. That's the only difference. 
+So let's say on each iteration, we narrow our interval to <nobr><i>[a<sub>1</sub>, b]</i></nobr> or <nobr><i>[a, b<sub>1</sub>]</i></nobr>. The proportion <nobr><i>(b-a<sub>1</sub>) / (b-a)</i></nobr> is exactly the same as <nobr><i>(b - a<sub>1</sub>) / (b - a)</i></nobr>, it's a constant number and it's roughly 0.62 by design. Which is more than 0.5. This means that the algorithm narrows down the interval pretty much like the bisection algorithm does but... slower. That's the only difference.
 	</p>
 	<p>
 Both bisection search and golden-section search are said to have linear convergence. This means that they both reduce interval linearly, the proportion between the interval length on <nobr><i>(i+1)</i>-th</nobr> iteration and on <nobr><i>i</i>-th</nobr> is always the same. But bisection has a better rate and therefore converges faster.
@@ -530,19 +531,19 @@ There is a trick. And the trick is almost magical. As in performance art magical
 In every iteration after that, one of the points you already have the target function computed for remains stationary regardless of the current iteration's result. This means, that you only have to compute your target function once per iteration, not twice. And this makes the golden-section search more computationally efficient in practice even if, mathematically speaking, it has an undeniably worse convergence ratio.
 	</p>
 	<p>
-But how come we get to keep one of the points? Glad you asked. That's exactly what we need the golden section for. 
+But how come we get to keep one of the points? Glad you asked. That's exactly what we need the golden section for.
 	</p>
 	<p>
 The golden ratio is by definition a number that connects the proportion of the part of an interval (<i>b</i>) to the whole interval (<i>a</i>) such as.
 	</p>
-	
+
 	<table class="formula">
 	<tr>
 	<td style="border-bottom: 1px solid black">
-a + b 
+a + b
 	</td>
 	<td rowspan=2>
- = 
+ =
 	</td>
 	<td style="border-bottom: 1px solid black">
 a
@@ -564,7 +565,7 @@ b
 There is one and only one such number and it's approximately: 1.618033.
 	</p>
 	<p>
-Well, you were probably expecting to see 0.62 from before. No problem: 
+Well, you were probably expecting to see 0.62 from before. No problem:
 	</p>
 <table class="formula">
 	<tr>
@@ -584,20 +585,20 @@ Well, you were probably expecting to see 0.62 from before. No problem:
 	<p>
 Here you go.
 	</p>
-	
+
 	<form>
 <i>F(x)</i>:
 	<input type="text" id="f_gs" oninput="reset_to_1_iteration_gs();" value="(x-5)**2/5" style="width:150pt" />
 <i>a<sub>0</sub></i>:<input type="text" id="a_gs" oninput="reset_to_1_iteration_gs();" value="-0.5" style="width:36pt" />
 <i>b<sub>0</sub></i>:<input type="text" id="b_gs" oninput="reset_to_1_iteration_gs();" value="8.25" style="width:36pt" />
 	<br>
-	current iteration: 
+	current iteration:
 	<span id="i_gs">0</span>
 	<br>
 	<button type="button" id="reset_gs" onclick="reset_to_1_iteration_gs();">Reset to the 1st iteration</button>
 	<button type="button" id="iplus_gs" onclick="do_one_iteration_gs();">Do 1 iteration</button>
 	</form>
-	
+
 	<canvas id="plot_gs" width=640 height=512></canvas>
 	<br>
 	<span id="log_gs" class="formula"></span>
