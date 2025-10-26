@@ -95,7 +95,57 @@ li {
 	line-height: 2.0;
 	margin-top: -10pt;
 }
+
+button{
+	width: 160pt;
+	height: 32pt;
+	margin-left:14pt;
+	margin-right:0pt;
+	font-size: 14pt;
+}
 	</style>
+	<script language="JavaScript">
+var pages = [];
+var index = [];
+var links = [];
+function save(what) {
+	lines = document.getElementById(what+"_rollable").innerHTML.split('\n');
+	eval(what + ' = lines;');
+	document.getElementById(what+"_rollable").innerHTML = "";
+}
+
+function unroll(what) {
+	eval('var lines = '+what+';');
+	var cur_lines = document.getElementById(what+"_rollable").innerHTML.split('\n');
+	if(cur_lines.length-1 < lines.length) {
+		document.getElementById(what+"_rollable").innerHTML += lines[cur_lines.length-1] + '\n';
+		const speed = 4*(8 - cur_lines.length);
+		if(speed > 0) {
+			setTimeout(() => {unroll(what)}, speed);
+		} else {
+			document.getElementById(what+"_rollable").innerHTML = lines.join('\n');
+			document.getElementById("unroll_"+what).style = "display:none;";
+			document.getElementById("roll_"+what).style = "display:normal;";
+		}
+	}
+}
+
+function roll(what) {
+	eval('var lines = '+what+';');
+	var cur_lines = document.getElementById(what+"_rollable").innerHTML.split('\n');
+	if(cur_lines.length > 8) {
+		document.getElementById(what+"_rollable").innerHTML = cur_lines.slice(0, 8).join('\n');
+		setTimeout(() => {roll(what)}, 4*8);
+	} else if(cur_lines.length > 1) {
+		document.getElementById(what+"_rollable").innerHTML = cur_lines.slice(0, cur_lines.length-1).join('\n');
+		const speed = 4*(8 - cur_lines.length);
+		setTimeout(() => {roll(what)}, speed);
+	} else {
+		document.getElementById("unroll_"+what).style = "display:normal;";
+		document.getElementById("roll_"+what).style = "display:none;";
+	}
+}
+	</script>
 </head>
 <body>
 	<center>
@@ -106,6 +156,13 @@ li {
 <div id="timeline"></div>
 <div id="index"></div>
 <div id="links"></div>
+
+<script language="JavaScript">
+	save('pages');
+	save('index');
+	save('links');
+</script>
+
 	<table class="footer">
 	<tr>
 	<td colspan=3 style="padding-bottom: 8pt;">
