@@ -93,7 +93,7 @@ f = open('links.txt')
 links = f.readlines()
 f.close()
 links_html = '<span id="links"><h1>More interactive learning\n'
-links_html += '<button id="unroll_links" type="button" onclick="unroll(\'links\')"><nobr>Unroll links</nobr></button>\n'
+links_html += '<button id="unroll_links" type="button" onclick="unroll(\'links\')"><nobr>Unroll '+str(len(links))+' links</nobr></button>\n'
 links_html += '<button id="roll_links" type="button" onclick="roll(\'links\')" style="display:none"><nobr>Roll links</nobr></button>\n'
 links_html += '</h1></span>\n'
 links_html += '<span id="links_rollable">\n'
@@ -111,12 +111,12 @@ for link in links:
 links_html += '</span>\n'
 
 # index is now real index not a timeline
+spans = read_index_spans(PAGES_DIR)
 the_index = '<span id="index"><h1 title="A real index on index.html! How cool is that!">Index\n'
-the_index += '<button id="unroll_index" type="button" onclick="unroll(\'index\')"><nobr>Unroll index</nobr></button>\n'
+the_index += '<button id="unroll_index" type="button" onclick="unroll(\'index\')"><nobr>Unroll '+str(len(spans))+' entries</nobr></button>\n'
 the_index += '<button id="roll_index" type="button" onclick="roll(\'index\')" style="display:none"><nobr>Roll index</nobr></button>\n'
 the_index += '</h1></span>\n'
 the_index += '<span id="index_rollable">\n'
-spans = read_index_spans(PAGES_DIR)
 cur_letter = ''
 for (f, i, t) in sorted(spans, key = lambda fit: fit[2].upper()):
 	letter = t[0].upper()
@@ -133,13 +133,13 @@ the_index += '</p>\n'
 the_index += '</span>\n'
 
 # here is the timeline too
+total = len(date_link_title_description_keywords)
 timeline = '<span id="timeline"><h1>All the pages\n'
-timeline += '<button id="unroll_pages" type="button" onclick="unroll(\'pages\')"><nobr>Unroll pages</nobr></button>\n'
+timeline += '<button id="unroll_pages" type="button" onclick="unroll(\'pages\')"><nobr>Unroll '+str(total)+' pages</nobr></button>\n'
 timeline += '<button id="roll_pages" type="button" onclick="roll(\'pages\')" style="display:none"><nobr>Roll pages</nobr></button>\n'
 timeline += '</h1></span>\n'
 timeline += '<span id="pages_rollable">\n'
 n = 0
-total = len(date_link_title_description_keywords)
 for (d, l, t, desc, kwds) in date_link_title_description_keywords[::-1]:
     timeline += '<p class="title" title="' + d + ' (#' + str(total - n) + ')">' + '<a href="' + l + '">' + t + '</a></p>\n'
     timeline += '<p class="description">' + desc + '</p>\n'
