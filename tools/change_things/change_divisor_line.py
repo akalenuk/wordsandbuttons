@@ -9,6 +9,7 @@ def change_recursively(path):
                 text = html.read()
                 html.close()
                 new_text = text.replace('border-bottom: 1px solid black', 'border-bottom: 1px solid')
+                new_text = new_text.replace('border-bottom:1px solid black', 'border-bottom: 1px solid')
                 html = open(path + '/' + file_name, 'w')
                 html.write(new_text)
                 html.close()
