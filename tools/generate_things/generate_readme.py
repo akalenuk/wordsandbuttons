@@ -25,7 +25,7 @@ for filename in os.listdir(PAGES_DIR):
 		date = full_date.split(' ')[0]
 		f = open(PAGES_DIR + "/" + filename, 'rt')
 		content = f.read()
-		f.close
+		f.close()
 		title = content.split("<title>")[1].split("</title>")[0]
 		description = content.split('<meta name="description" content="')[1].split('">')[0]
 		keywords = content.split('<meta name="keywords" content="')[1].split('">')[0].split(', ')
